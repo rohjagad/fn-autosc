@@ -92,7 +92,7 @@ public_ip=$(grep -m 1 -oE '^[0-9]{1,3}(\.[0-9]{1,3}){3}$' <<<"$(wget -T 10 -t 1 
 cd /etc/systemd/system
 cat > udp-request.service <<-SERV
 [Unit]
-Description=UDP Request By FN Project
+Description=UDP Request By RohFN AutoSC
 After=network.target
 
 [Service]

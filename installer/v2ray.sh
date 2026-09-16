@@ -203,7 +203,7 @@ systemctl daemon-reload
 systemctl restart ssh
 
 # Konfigurasi tambahan
-echo -e "PS1='\033[1;34m\]╭───\[\033[1;31m\]≼\[\033[1;33m\]FN PROJECT\[\033[1;34m\]•\[\033[1;30m\]\w\[\033[1;31m\]≽
+echo -e "PS1='\033[1;34m\]╭───\[\033[1;31m\]≼\[\033[1;33m\]RohFN AutoSC\[\033[1;34m\]•\[\033[1;30m\]\w\[\033[1;31m\]≽
 \[\033[1;34m\]╰──╼\[\033[1;31m\]✠\[\033[1;32m\] \033[0m'" >> /root/.bashrc
 source /root/.bashrc
 

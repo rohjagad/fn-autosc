@@ -89,7 +89,7 @@ chmod +x config.json
 cd /etc/systemd/system
 cat > udp-custom.service <<-SERV
 [Unit]
-Description=Udp Custom By FN Project
+Description=Udp Custom By RohFN AutoSC
 
 [Service]
 User=root

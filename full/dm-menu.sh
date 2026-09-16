@@ -304,7 +304,7 @@ clear
 country="ID"
 state="Central Kalimantan"
 locality="Kab. Kota Waringin Timur"
-organization="FN Project"
+organization="RohFN AutoSC"
 organizationalunit="99999"
 commonname="FN"
 email="rerechan0202@gmail.com"
@@ -333,7 +333,7 @@ echo -e "
 1. Use Your Domain
 2. Renew Certificate ( VPS IPv6 & IPv4 ) Acme
 3. Renew Certificate ( VPS IPv4 Only ) Let's encrypt
-4. Generare Direct Certificate ( VPS IPv4 Only ) Direct FN Project
+4. Generare Direct Certificate ( VPS IPv4 Only ) Direct RohFN AutoSC
 =================================
      Press CTRL + C to Exit
 "

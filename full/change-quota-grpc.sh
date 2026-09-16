@@ -94,7 +94,7 @@ function baris_panjang() {
 function FN_Banner() {
   clear
   baris_panjang
-  echo -e "${ungu}            FN PROJECT      ${Xark} "
+  echo -e "${ungu}            RohFN AutoSC      ${Xark} "
   baris_panjang
 }
 
@@ -104,7 +104,7 @@ function Sc_Credit(){
   baris_panjang
   echo -e "${ungu}    Terimakasih Telah Menggunakan ${Xark}"
   echo -e "${ungu}             Script  Credit ${Xark}"
-  echo -e "${ungu}               FN PROJECT ${Xark}"
+  echo -e "${ungu}               RohFN AutoSC ${Xark}"
   baris_panjang
   exit 1
 }

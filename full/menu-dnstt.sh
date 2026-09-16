@@ -102,7 +102,7 @@ white='\033[0;97m'
                 clear
                 
                 echo -e "[Unit]
-                Description=SlowDNS FN Project Autoscript Service
+                Description=SlowDNS RohFN AutoSC Autoscript Service
                 Documentation=https://t.me/fn_project
                 After=network.target nss-lookup.target
 

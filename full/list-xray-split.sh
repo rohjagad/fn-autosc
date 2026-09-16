@@ -97,7 +97,7 @@ do
         echo -e "\e[33;1mUser\e[32;1m: $user"
         echo -e "\e[33;1mStatus Account X-Ray\e[32;1m: $status"
         echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-        echo "@Rerechan02" >> /root/.system
+        echo "RohFN AutoSC" >> /root/.system
     fi
 
     # Menampilkan informasi untuk status unlocked (hanya jika status unlocked)
@@ -118,7 +118,7 @@ do
         echo -e "\e[33;1mProtocol Account\e[32;1m: $protokol"
         echo -e "\e[33;1mStatus Account X-Ray\e[32;1m: $status"
         echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-        echo "@Rerechan02" >> /root/.system
+        echo "RohFN AutoSC" >> /root/.system
     fi
     sleep 0.1
 done

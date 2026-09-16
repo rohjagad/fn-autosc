@@ -33,7 +33,7 @@ func barisPanjang() {
 func rerechanBanner() {
 	clearScreen()
 	barisPanjang()
-	fmt.Println(Yellow + "             FN PROJECT" + Xark)
+	fmt.Println(Yellow + "             RohFN AutoSC" + Xark)
 	barisPanjang()
 }
 
@@ -42,7 +42,7 @@ func Credit() {
 	barisPanjang()
 	fmt.Println(Yellow + "  Terimakasih Telah Menggunakan" + Xark)
 	fmt.Println(Yellow + "          Script Credit" + Xark)
-	fmt.Println(Yellow + "    FN PROJECT Autoscript AIO" + Xark)
+	fmt.Println(Yellow + "    RohFN AutoSC Autoscript AIO" + Xark)
 	barisPanjang()
 	os.Exit(1)
 }

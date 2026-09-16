@@ -161,7 +161,7 @@ chmod +x set-br.sh
 # Membuat Service Limit Quota
 cat> /etc/systemd/system/quota-ws.service << END
 [Unit]
-Description=Xray Quota Management Service By FN Project
+Description=Xray Quota Management Service By RohFN AutoSC
 After=network.target
 
 [Service]
@@ -176,7 +176,7 @@ END
 
 cat> /etc/systemd/system/quota-split.service << END
 [Unit]
-Description=Xray Quota Management Service By FN Project
+Description=Xray Quota Management Service By RohFN AutoSC
 After=network.target
 
 [Service]
@@ -191,7 +191,7 @@ END
 
 cat> /etc/systemd/system/quota-http.service << END
 [Unit]
-Description=Xray Quota Management Service By FN Project
+Description=Xray Quota Management Service By RohFN AutoSC
 After=network.target
 
 [Service]
@@ -206,7 +206,7 @@ END
 
 cat> /etc/systemd/system/quota-grpc.service << END
 [Unit]
-Description=Xray Quota Management Service By FN Project
+Description=Xray Quota Management Service By RohFN AutoSC
 After=network.target
 
 [Service]

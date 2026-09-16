@@ -53,7 +53,7 @@
     output
 clear
 # Informasi
-echo -e "\nAuto Install NoobzVPN'S by Rerechan02"
+echo -e "\nAuto Install NoobzVPN'S by RohFN AutoSC"
 sleep 2
 clear
 

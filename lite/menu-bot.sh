@@ -241,7 +241,7 @@ Report Bug To
 =====================
 Telegram:
 
-- @Rerechan02
+- RohFN AutoSC
 - @farell_aditya_ardian
 - @PR_Aiman
 =====================

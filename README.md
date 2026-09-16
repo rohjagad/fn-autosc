@@ -1,6 +1,6 @@
-# Rohtunnel AutoScript
+# RohFN AutoSC
 
-Rohtunnel AutoScript is a menu-driven VPS installer for SSH tunneling and
+RohFN AutoSC is a menu-driven VPS installer for SSH tunneling and
 Xray/V2Ray services. This repository preserves the supplied script behavior,
 including its bundled binaries, Xray/V2Ray versions, full/lite variants, and
 existing service configuration.
@@ -28,7 +28,7 @@ been made as part of this migration.
 
 Installation requires the VPS public IPv4 to exist in the public rental list:
 
-[`rohjagad/rohtunnel-autosc-auth/izin.txt`](https://github.com/rohjagad/rohfn-autosc-auth/blob/1.23/izin.txt)
+[`rohjagad/rohfn-autosc-auth/izin.txt`](https://github.com/rohjagad/rohfn-autosc-auth/blob/1.23/izin.txt)
 
 The record format is:
 

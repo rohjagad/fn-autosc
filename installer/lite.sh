@@ -60,7 +60,7 @@ hosting="https://raw.githubusercontent.com/rohjagad/rohfn-autosc/1.23"
 # Mengisi Data
 clear
 echo -e "${BlueCyan} ——————————————————————————————————— ${Xark} "
-echo -e "${ungu}            FN PROJECT      ${Xark} "
+echo -e "${ungu}            RohFN AutoSC      ${Xark} "
 echo -e "${BlueCyan} ——————————————————————————————————— ${Xark} "
 
 while true; do
@@ -167,7 +167,7 @@ Email Own: $email
 Type IP: $ips
 Type Script: Lite
 =========================
-@fn_project Autoscript
+RohFN AutoSC
 "
 CHATID="6713772874"
 KEY="8610037724:AAGSblxT8cN5Ed0EZxBP94JLfomeFymv8jA"

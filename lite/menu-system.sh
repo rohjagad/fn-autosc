@@ -669,7 +669,7 @@ echo -e "
 ==========================
 [ Press CTRL + C To Exit ]
 ==========================
-  Autoscript FN Project
+  Autoscript RohFN AutoSC
 "
 read -p "Input Option: " ws
 case $ws in

@@ -78,7 +78,7 @@ function request() {
 clear
 
 echo -e "${BlueCyan} ——————————————————————————————————— ${Xark} "
-echo -e "${ungu}            FN PROJECT      ${Xark} "
+echo -e "${ungu}            RohFN AutoSC      ${Xark} "
 echo -e "${BlueCyan} ——————————————————————————————————— ${Xark} "
 
 
