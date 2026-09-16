@@ -1,0 +1,173 @@
+{
+  "log" : {
+    "access": "/var/log/xray/split.log",
+    "loglevel": "info"
+  },
+  "inbounds": [
+    {
+      "listen": "127.0.0.1",
+      "port": 10082,
+      "protocol": "dokodemo-door",
+      "settings": {
+        "address": "127.0.0.1"
+      },
+      "tag": "api"
+    },
+    {
+      "listen": "127.0.0.1",
+      "port": 2019,
+      "protocol": "vmess",
+      "settings": {
+        "clients": [
+          {
+            "id": "019e0bf3-dd56-11e9-aa37-5600024c1d6a",
+            "email": "2019@gmail.com"
+#vmess
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "splithttp",
+        "splithttpSettings": {
+          "path": "/splitvm"
+        }
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls",
+          "quic"
+        ]
+      }
+    },
+      {
+      "listen": "127.0.0.1",
+      "port": 2023,
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "id": "af7d5cf8-442d-4bb3-8a76-eb367178781d",
+            "email": "2023@gmail.com"
+#vless
+          }
+        ],
+        "decryption": "none"
+      },
+      "streamSettings": {
+        "network": "splithttp",
+        "splithttpSettings": {
+          "path": "/splitvl"
+        }
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls",
+          "quic"
+        ]
+      }
+    },
+      {
+      "listen": "127.0.0.1",
+      "port": 2020,
+      "protocol": "trojan",
+      "settings": {
+        "clients": [
+          {
+            "password":"diy2020",
+            "email": "2020@gmail.com"
+#trojan
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "splithttp",
+        "splithttpSettings": {
+          "path": "/splittr"
+        }
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls",
+          "quic"
+        ]
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "freedom",
+      "settings": {}
+    },
+    {
+      "protocol": "blackhole",
+      "settings": {},
+      "tag": "blocked"
+    }
+  ],
+  "routing": {
+    "rules": [
+      {
+        "type": "field",
+        "ip": [
+          "0.0.0.0/8",
+          "10.0.0.0/8",
+          "100.64.0.0/10",
+          "169.254.0.0/16",
+          "172.16.0.0/12",
+          "192.0.0.0/24",
+          "192.0.2.0/24",
+          "192.168.0.0/16",
+          "198.18.0.0/15",
+          "198.51.100.0/24",
+          "203.0.113.0/24",
+          "::1/128",
+          "fc00::/7",
+          "fe80::/10"
+        ],
+        "outboundTag": "blocked"
+      },
+      {
+        "inboundTag": [
+          "api"
+        ],
+        "outboundTag": "api",
+        "type": "field"
+      },
+      {
+        "type": "field",
+        "outboundTag": "blocked",
+        "protocol": [
+          "bittorrent"
+        ]
+      }
+    ]
+  },
+  "stats": {},
+  "api": {
+    "services": [
+      "StatsService"
+    ],
+    "tag": "api"
+  },
+  "policy": {
+    "levels": {
+      "0": {
+        "statsUserDownlink": true,
+        "statsUserUplink": true,
+        "statsUserOnline": true
+      }
+    },
+    "system": {
+      "statsInboundUplink": true,
+      "statsInboundDownlink": true,
+      "statsOutboundUplink" : true,
+      "statsOutboundDownlink" : true
+    }
+  }
+}

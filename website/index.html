@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload - Restore Database VPS</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Restore Database VPS</h1>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <label for="file" class="file-label">
+                <span class="file-icon">📁</span> Upload your File Backup
+            </label>
+            <input type="file" id="file" name="backup" accept=".zip" required class="file-input">
+            <button type="submit" class="upload-btn">
+                <span class="upload-icon">⬆️</span> Upload and Restore
+            </button>
+        </form>
+        <div id="message"></div>
+        <footer class="footer">
+            <p>Credit by <strong>FN Project</strong></p>
+        </footer>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
