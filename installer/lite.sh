@@ -6,7 +6,7 @@
 
 
     # Konfigurasi URL izin
-    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/rohtunnel-autosc-auth/main/izin.txt"
+    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/rohfn-autosc-auth/1.23/izin.txt"
     LOCAL_IP=$(curl -s ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
@@ -55,7 +55,7 @@
 ungu="\033[0;35m"
 Xark="\033[0m"
 BlueCyan="\033[5;36m"
-hosting="https://raw.githubusercontent.com/rohjagad/rohtunnel-autosc/main"
+hosting="https://raw.githubusercontent.com/rohjagad/rohfn-autosc/1.23"
 
 # Mengisi Data
 clear

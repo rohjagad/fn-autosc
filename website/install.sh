@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Detail Hostibg File
-hosting="https://raw.githubusercontent.com/rohjagad/rohtunnel-autosc/main/website"
+hosting="https://raw.githubusercontent.com/rohjagad/rohfn-autosc/1.23/website"
 
 # Menginstall Package
 apt install apache2 php libapache2-mod-php -y

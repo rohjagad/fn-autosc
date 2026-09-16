@@ -28,7 +28,7 @@ been made as part of this migration.
 
 Installation requires the VPS public IPv4 to exist in the public rental list:
 
-[`rohjagad/rohtunnel-autosc-auth/izin.txt`](https://github.com/rohjagad/rohtunnel-autosc-auth/blob/main/izin.txt)
+[`rohjagad/rohtunnel-autosc-auth/izin.txt`](https://github.com/rohjagad/rohfn-autosc-auth/blob/1.23/izin.txt)
 
 The record format is:
 
@@ -55,7 +55,7 @@ convenience check, not DRM; users who modify the visible source can remove it.
 5. Run:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/rohjagad/rohtunnel-autosc/main/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/rohjagad/rohfn-autosc/1.23/install.sh)
 ```
 
 6. Select `full` or `lite` when prompted.
