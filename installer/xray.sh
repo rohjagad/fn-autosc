@@ -57,7 +57,6 @@ hosting="https://raw.githubusercontent.com/rohjagad/rohfn-autosc/1.23"
 clear
 
 # Menginstall Core
-xver=$(curl -s https://api.github.com/repos/XTLS/Xray-core/releases/latest | grep "tag_name" | awk -F ': ' '{print $2}' | tr -d '",' | sed 's/^v//')
 xver="25.3.6"
 bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install -u www-data --version $xver
 rm -fr /etc/systemd/system/xray.service
