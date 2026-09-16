@@ -21,8 +21,8 @@ risk and do not run it on a server with data you need to keep.
 - Lite variant: Xray/V2Ray-focused installation with the included Lite menu.
 - Bundled `fix/fix.sh`, executed as the final step of Full and Lite installation.
 
-No Xray/V2Ray upgrades, configuration modernization, or feature changes have
-been made as part of this migration.
+Xray is pinned to version `25.3.6`. The bundled V2Ray version and all other
+script behavior remain unchanged.
 
 ## Rental Authorization
 
