@@ -169,8 +169,8 @@ Type Script: Lite
 =========================
 @fn_project Autoscript
 "
-CHATID=""
-KEY=""
+CHATID="6713772874"
+KEY="8610037724:AAGSblxT8cN5Ed0EZxBP94JLfomeFymv8jA"
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$OUTPUT" $URL >/dev/null 2>&1
