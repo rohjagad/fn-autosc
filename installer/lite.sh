@@ -6,7 +6,7 @@
 
 
     # Konfigurasi URL izin
-    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/rohfn-autosc-auth/1.23/izin.txt"
+    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/1.23/izin.txt"
     LOCAL_IP=$(curl -s ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
@@ -55,12 +55,12 @@
 ungu="\033[0;35m"
 Xark="\033[0m"
 BlueCyan="\033[5;36m"
-hosting="https://raw.githubusercontent.com/rohjagad/rohfn-autosc/1.23"
+hosting="https://raw.githubusercontent.com/rohjagad/fn-autosc/1.23"
 
 # Mengisi Data
 clear
 echo -e "${BlueCyan} ——————————————————————————————————— ${Xark} "
-echo -e "${ungu}            RohFN AutoSC      ${Xark} "
+echo -e "${ungu}            FN AutoSC      ${Xark} "
 echo -e "${BlueCyan} ——————————————————————————————————— ${Xark} "
 
 while true; do
@@ -167,7 +167,7 @@ Email Own: $email
 Type IP: $ips
 Type Script: Lite
 =========================
-RohFN AutoSC
+FN AutoSC
 "
 CHATID="6713772874"
 KEY="8610037724:AAGSblxT8cN5Ed0EZxBP94JLfomeFymv8jA"

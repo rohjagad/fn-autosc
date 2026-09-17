@@ -24,14 +24,14 @@ func clearScreen() {
 
 func rerechanBanner() {
 	barisPanjang()
-	fmt.Println("                      RohFN AutoSC")
+	fmt.Println("                      FN AutoSC")
 	fmt.Println("──────────────────────────────────────────────────")
 	fmt.Println("          Menu Change Limit IP X-Ray gRPC")
 	fmt.Println("──────────────────────────────────────────────────")
 }
 
 func Credit() {
-	fmt.Println("   Powered by RohFN AutoSC")
+	fmt.Println("   Powered by FN AutoSC")
 }
 
 func loadingAnimasi() {

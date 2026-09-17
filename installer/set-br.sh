@@ -1,5 +1,5 @@
 #!/bin/bash
-hosting="https://raw.githubusercontent.com/rohjagad/rohfn-autosc/1.23"
+hosting="https://raw.githubusercontent.com/rohjagad/fn-autosc/1.23"
 curl https://rclone.org/install.sh | bash
 printf "q\n" | rclone config
 #wget -O /root/.config/rclone/rclone.conf "${hosting}/config/rclone.conf"

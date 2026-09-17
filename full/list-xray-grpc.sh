@@ -5,7 +5,7 @@
 }
 
     # Konfigurasi URL izin
-    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/rohfn-autosc-auth/1.23/izin.txt"
+    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/1.23/izin.txt"
     LOCAL_IP=$(curl -s ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
@@ -97,7 +97,7 @@ do
         echo -e "\e[33;1mUser\e[32;1m: $user"
         echo -e "\e[33;1mStatus Account X-Ray\e[32;1m: $status"
         echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-        echo "RohFN AutoSC" >> /root/.system
+        echo "FN AutoSC" >> /root/.system
     fi
 
     # Menampilkan informasi untuk status unlocked (hanya jika status unlocked)
@@ -118,7 +118,7 @@ do
         echo -e "\e[33;1mProtocol Account\e[32;1m: $protokol"
         echo -e "\e[33;1mStatus Account X-Ray\e[32;1m: $status"
         echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-        echo "RohFN AutoSC" >> /root/.system
+        echo "FN AutoSC" >> /root/.system
     fi
     sleep 0.1
 done

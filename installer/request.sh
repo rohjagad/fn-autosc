@@ -6,7 +6,7 @@
 
 
     # Konfigurasi URL izin
-    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/rohfn-autosc-auth/1.23/izin.txt"
+    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/1.23/izin.txt"
     LOCAL_IP=$(curl -s ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
@@ -52,7 +52,7 @@
 
     output
 
-hosting="https://raw.githubusercontent.com/rohjagad/rohfn-autosc/1.23/udp"
+hosting="https://raw.githubusercontent.com/rohjagad/fn-autosc/1.23/udp"
 
 clear
 
@@ -92,7 +92,7 @@ public_ip=$(grep -m 1 -oE '^[0-9]{1,3}(\.[0-9]{1,3}){3}$' <<<"$(wget -T 10 -t 1 
 cd /etc/systemd/system
 cat > udp-request.service <<-SERV
 [Unit]
-Description=UDP Request By RohFN AutoSC
+Description=UDP Request By FN AutoSC
 After=network.target
 
 [Service]

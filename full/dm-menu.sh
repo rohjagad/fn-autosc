@@ -6,7 +6,7 @@
 
 
     # Konfigurasi URL izin
-    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/rohfn-autosc-auth/1.23/izin.txt"
+    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/1.23/izin.txt"
     LOCAL_IP=$(curl -s ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
@@ -304,7 +304,7 @@ clear
 country="ID"
 state="Central Kalimantan"
 locality="Kab. Kota Waringin Timur"
-organization="RohFN AutoSC"
+organization="FN AutoSC"
 organizationalunit="99999"
 commonname="FN"
 email="rerechan0202@gmail.com"
@@ -333,7 +333,7 @@ echo -e "
 1. Use Your Domain
 2. Renew Certificate ( VPS IPv6 & IPv4 ) Acme
 3. Renew Certificate ( VPS IPv4 Only ) Let's encrypt
-4. Generare Direct Certificate ( VPS IPv4 Only ) Direct RohFN AutoSC
+4. Generare Direct Certificate ( VPS IPv4 Only ) Direct FN AutoSC
 =================================
      Press CTRL + C to Exit
 "

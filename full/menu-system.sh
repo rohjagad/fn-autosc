@@ -5,7 +5,7 @@
 }
 
     # Konfigurasi URL izin
-    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/rohfn-autosc-auth/1.23/izin.txt"
+    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/1.23/izin.txt"
     LOCAL_IP=$(curl -s ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
@@ -669,7 +669,7 @@ echo -e "
 ==========================
 [ Press CTRL + C To Exit ]
 ==========================
-  Autoscript RohFN AutoSC
+  Autoscript FN AutoSC
 "
 read -p "Input Option: " ws
 case $ws in

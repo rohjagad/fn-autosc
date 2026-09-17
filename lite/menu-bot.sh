@@ -5,7 +5,7 @@
 }
 
     # Konfigurasi URL izin
-    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/rohfn-autosc-auth/1.23/izin.txt"
+    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/1.23/izin.txt"
     LOCAL_IP=$(curl -s ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
@@ -57,7 +57,7 @@ botmenu() {
 termbot() {
 install() {
 # [ Repository Bot Telegram ]
-link="https://raw.githubusercontent.com/rohjagad/rohfn-autosc-miscellaneous/1.23/bot.zip"
+link="https://raw.githubusercontent.com/rohjagad/fn-autosc-miscellaneous/1.23/bot.zip"
 
 # [ Membersihkan layar ]
 clear
@@ -241,7 +241,7 @@ Report Bug To
 =====================
 Telegram:
 
-- RohFN AutoSC
+- FN AutoSC
 - @farell_aditya_ardian
 - @PR_Aiman
 =====================

@@ -5,7 +5,7 @@
 }
 
     # Konfigurasi URL izin
-    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/rohfn-autosc-auth/1.23/izin.txt"
+    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/1.23/izin.txt"
     LOCAL_IP=$(curl -s ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
@@ -94,7 +94,7 @@ function baris_panjang() {
 function FN_Banner() {
   clear
   baris_panjang
-  echo -e "${ungu}            RohFN AutoSC      ${Xark} "
+  echo -e "${ungu}            FN AutoSC      ${Xark} "
   baris_panjang
 }
 
@@ -104,7 +104,7 @@ function Sc_Credit(){
   baris_panjang
   echo -e "${ungu}    Terimakasih Telah Menggunakan ${Xark}"
   echo -e "${ungu}             Script  Credit ${Xark}"
-  echo -e "${ungu}               RohFN AutoSC ${Xark}"
+  echo -e "${ungu}               FN AutoSC ${Xark}"
   baris_panjang
   exit 1
 }

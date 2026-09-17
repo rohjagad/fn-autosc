@@ -6,7 +6,7 @@
 
 
     # Konfigurasi URL izin
-    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/rohfn-autosc-auth/1.23/izin.txt"
+    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/1.23/izin.txt"
     LOCAL_IP=$(curl -s ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
@@ -52,7 +52,7 @@
 
     output
 
-hosting="https://raw.githubusercontent.com/rohjagad/rohfn-autosc/1.23"
+hosting="https://raw.githubusercontent.com/rohjagad/fn-autosc/1.23"
 
 clear
 
@@ -89,7 +89,7 @@ chmod +x config.json
 cd /etc/systemd/system
 cat > udp-custom.service <<-SERV
 [Unit]
-Description=Udp Custom By RohFN AutoSC
+Description=Udp Custom By FN AutoSC
 
 [Service]
 User=root

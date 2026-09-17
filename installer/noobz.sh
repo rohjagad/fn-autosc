@@ -6,7 +6,7 @@
 
 
     # Konfigurasi URL izin
-    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/rohfn-autosc-auth/1.23/izin.txt"
+    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/1.23/izin.txt"
     LOCAL_IP=$(curl -s ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
@@ -53,7 +53,7 @@
     output
 clear
 # Informasi
-echo -e "\nAuto Install NoobzVPN'S by RohFN AutoSC"
+echo -e "\nAuto Install NoobzVPN'S by FN AutoSC"
 sleep 2
 clear
 

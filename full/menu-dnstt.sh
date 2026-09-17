@@ -5,7 +5,7 @@
 }
 
     # Konfigurasi URL izin
-    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/rohfn-autosc-auth/1.23/izin.txt"
+    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/1.23/izin.txt"
     LOCAL_IP=$(curl -s ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
@@ -102,7 +102,7 @@ white='\033[0;97m'
                 clear
                 
                 echo -e "[Unit]
-                Description=SlowDNS RohFN AutoSC Autoscript Service
+                Description=SlowDNS FN AutoSC Autoscript Service
                 Documentation=https://t.me/fn_project
                 After=network.target nss-lookup.target
 

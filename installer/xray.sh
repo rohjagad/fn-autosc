@@ -6,7 +6,7 @@
 
 
     # Konfigurasi URL izin
-    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/rohfn-autosc-auth/1.23/izin.txt"
+    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/1.23/izin.txt"
     LOCAL_IP=$(curl -s ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
@@ -53,7 +53,7 @@
     output
 
 # Detail Hosting
-hosting="https://raw.githubusercontent.com/rohjagad/rohfn-autosc/1.23"
+hosting="https://raw.githubusercontent.com/rohjagad/fn-autosc/1.23"
 clear
 
 # Menginstall Core
@@ -161,7 +161,7 @@ chmod +x set-br.sh
 # Membuat Service Limit Quota
 cat> /etc/systemd/system/quota-ws.service << END
 [Unit]
-Description=Xray Quota Management Service By RohFN AutoSC
+Description=Xray Quota Management Service By FN AutoSC
 After=network.target
 
 [Service]
@@ -176,7 +176,7 @@ END
 
 cat> /etc/systemd/system/quota-split.service << END
 [Unit]
-Description=Xray Quota Management Service By RohFN AutoSC
+Description=Xray Quota Management Service By FN AutoSC
 After=network.target
 
 [Service]
@@ -191,7 +191,7 @@ END
 
 cat> /etc/systemd/system/quota-http.service << END
 [Unit]
-Description=Xray Quota Management Service By RohFN AutoSC
+Description=Xray Quota Management Service By FN AutoSC
 After=network.target
 
 [Service]
@@ -206,7 +206,7 @@ END
 
 cat> /etc/systemd/system/quota-grpc.service << END
 [Unit]
-Description=Xray Quota Management Service By RohFN AutoSC
+Description=Xray Quota Management Service By FN AutoSC
 After=network.target
 
 [Service]

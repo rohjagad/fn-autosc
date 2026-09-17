@@ -1,6 +1,6 @@
-# RohFN AutoSC
+# FN AutoSC
 
-RohFN AutoSC is a menu-driven VPS installer for SSH tunneling and
+FN AutoSC is a menu-driven VPS installer for SSH tunneling and
 Xray/V2Ray services. This repository preserves the supplied script behavior,
 including its bundled binaries, Xray/V2Ray versions, full/lite variants, and
 existing service configuration.
@@ -28,7 +28,7 @@ script behavior remain unchanged.
 
 Installation requires the VPS public IPv4 to exist in the public rental list:
 
-[`rohjagad/rohfn-autosc-auth/izin.txt`](https://github.com/rohjagad/rohfn-autosc-auth/blob/1.23/izin.txt)
+[`rohjagad/fn-autosc-auth/izin.txt`](https://github.com/rohjagad/fn-autosc-auth/blob/1.23/izin.txt)
 
 The record format is:
 
@@ -55,7 +55,7 @@ convenience check, not DRM; users who modify the visible source can remove it.
 5. Run:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/rohjagad/rohfn-autosc/1.23/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/rohjagad/fn-autosc/1.23/install.sh)
 ```
 
 6. Select `full` or `lite` when prompted.

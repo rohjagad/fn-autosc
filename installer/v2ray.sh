@@ -6,7 +6,7 @@
 
 
     # Konfigurasi URL izin
-    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/rohfn-autosc-auth/1.23/izin.txt"
+    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/1.23/izin.txt"
     LOCAL_IP=$(curl -s ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
@@ -53,7 +53,7 @@
     output
 
 # Detail Hosting
-hosting="https://raw.githubusercontent.com/rohjagad/rohfn-autosc/1.23"
+hosting="https://raw.githubusercontent.com/rohjagad/fn-autosc/1.23"
 clear
 
 # Mengkonfigurasi V2ray default
@@ -203,7 +203,7 @@ systemctl daemon-reload
 systemctl restart ssh
 
 # Konfigurasi tambahan
-echo -e "PS1='\033[1;34m\]╭───\[\033[1;31m\]≼\[\033[1;33m\]RohFN AutoSC\[\033[1;34m\]•\[\033[1;30m\]\w\[\033[1;31m\]≽
+echo -e "PS1='\033[1;34m\]╭───\[\033[1;31m\]≼\[\033[1;33m\]FN AutoSC\[\033[1;34m\]•\[\033[1;30m\]\w\[\033[1;31m\]≽
 \[\033[1;34m\]╰──╼\[\033[1;31m\]✠\[\033[1;32m\] \033[0m'" >> /root/.bashrc
 source /root/.bashrc
 
