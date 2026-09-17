@@ -81,6 +81,34 @@ cat > /etc/noobzvpns/config.json <<-JSON
 	"http_ok": "HTTP/1.1 101 Switching Protocols[crlf]Upgrade: websocket[crlf][crlf]"
 }
 JSON
+# [ Membuat TOML Config yang dibaca server, bind IPv4 saja agar tidak gagal di VPS tanpa IPv6 ]
+cat > /etc/noobzvpns/config.toml <<-TOML
+[tcp_plain]
+local_host = ["0.0.0.0:8080"]
+[tcp_ssl]
+local_host = ["0.0.0.0:8443"]
+tls_version = "AUTO"
+key_pem = "/etc/noobzvpns/key.pem"
+cert_pem = "/etc/noobzvpns/cert.pem"
+[client]
+ip_version = "AUTO"
+tcp_initial_timeout = 30
+resolv_conf = "/etc/resolv.conf"
+identifier = "noobz-id.github.io"
+banner = "You are connected to noobzvpn-server"
+tcp_http_response = "HTTP/1.1 101 Switching Protocols\\r\\nUpgrade: websocket\\r\\nConnection: Upgrade\\r\\n\\r\\n"
+[remote]
+tcp_connect_timeout = 30
+tcp_idle_timeout = 900
+udp_connect_timeout = 30
+udp_idle_timeout = 60
+udp_dns_timeout = 10
+[database]
+database_monitor_timer = 30
+device_timeout = 5
+[runtime]
+worker_threads = 0
+TOML
 # Port Dari tcp_std & tcp_ssl edit sesuai kemauan kalian agar tidak bentrok dengan service lain pada vps kalian
 
 

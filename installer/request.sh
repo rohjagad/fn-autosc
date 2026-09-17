@@ -100,6 +100,7 @@ Type=simple
 User=root
 WorkingDirectory=/root/udp-request/
 ExecStart=/root/udp-request/udp-request-linux-amd64 -ip=$public_ip -net=$interface -mode=system
+ExecStartPost=/bin/bash -c 'sleep 2; iptables -t nat -D POSTROUTING -s $ip_nat -j RETURN 2>/dev/null; iptables -t nat -I POSTROUTING 1 -s $ip_nat -j RETURN; exit 0'
 Restart=always
 RestartSec=3s
 
@@ -111,6 +112,30 @@ SERV
 systemctl daemon-reload
 systemctl enable udp-request
 systemctl start udp-request
+
+# Penjaga rule host agar tidak kena SNAT udp-request bila service restart berulang
+cat > /etc/systemd/system/udp-request-fixnet.service <<-FIXSVC
+[Unit]
+Description=Keep host IP out of udp-request SNAT
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c 'iptables -t nat -D POSTROUTING -s $ip_nat -j RETURN 2>/dev/null; iptables -t nat -I POSTROUTING 1 -s $ip_nat -j RETURN; exit 0'
+FIXSVC
+cat > /etc/systemd/system/udp-request-fixnet.timer <<-FIXTMR
+[Unit]
+Description=Re-assert host SNAT exclusion every 15 seconds
+
+[Timer]
+OnBootSec=30s
+OnUnitActiveSec=15s
+
+[Install]
+WantedBy=timers.target
+FIXTMR
+systemctl daemon-reload
+systemctl enable --now udp-request-fixnet.timer
 
 # Delete File Dump
 rm -f /root/request.sh
