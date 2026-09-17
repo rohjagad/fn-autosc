@@ -57,7 +57,7 @@ botmenu() {
 termbot() {
 install() {
 # [ Repository Bot Telegram ]
-link="https://raw.githubusercontent.com/rohjagad/fn-autosc-miscellaneous/1.23/bot.zip"
+link="https://raw.githubusercontent.com/rohjagad/FN-API/main/bot.zip"
 
 # [ Membersihkan layar ]
 clear
