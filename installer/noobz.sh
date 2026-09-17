@@ -85,7 +85,7 @@ JSON
 
 
 # [ wget ambil file ]
-wget -q -O /usr/bin/noobzvpns "https://github.com/noobz-id/noobzvpns/raw/master/noobzvpns.x86_64"
+wget -q -O /usr/bin/noobzvpns "https://raw.githubusercontent.com/noobz-id/noobzvpns/master/noobzvpns.x86-64"
 wget -q -O /etc/noobzvpns/cert.pem "https://github.com/noobz-id/noobzvpns/raw/master/cert.pem"
 wget -q -O /etc/noobzvpns/key.pem "https://github.com/noobz-id/noobzvpns/raw/master/key.pem"
 
