@@ -160,6 +160,30 @@ export GREEN='\033[0;32m'
 export NC='\033[0m'
 export BICyan='\033[0;36m'
 
+rainbow_sep() {
+  local text="${1:-===================================}"
+  local output=''
+  local i segment fraction r g b color
+  local -a red=(255 255 0 0 0 255 255)
+  local -a green=(0 255 255 255 0 0 0)
+  local -a blue=(0 0 0 255 255 255 0)
+  for ((i = 0; i < ${#text}; i++)); do
+    if ((i == ${#text} - 1)); then
+      segment=5
+      fraction=$((${#text} - 1))
+    else
+      segment=$((i * 6 / (${#text} - 1)))
+      fraction=$((i * 6 % (${#text} - 1)))
+    fi
+    r=$((red[segment] + (red[segment + 1] - red[segment]) * fraction / (${#text} - 1)))
+    g=$((green[segment] + (green[segment + 1] - green[segment]) * fraction / (${#text} - 1)))
+    b=$((blue[segment] + (blue[segment + 1] - blue[segment]) * fraction / (${#text} - 1)))
+    printf -v color '\033[38;2;%d;%d;%dm' "$r" "$g" "$b"
+    output+="${color}${text:i:1}"
+  done
+  printf '%b\n' "${output}${NC}"
+}
+
 ### Status SSH
 cek=$(service ssh status | grep active | cut -d ' ' -f5)
 if [ "$cek" = "active" ]; then
@@ -222,18 +246,19 @@ else
 loadbalance="${red}OFF${NC}"
 fi
 rechan=$(output)
+separator=$(rainbow_sep '===================================')
 clear
 echo -e "
 ${NC}
-===================================
+ ${separator}
 <=   MENU MANAGEMENT PANEL VPN   =>
-===================================
+ ${separator}
 VERSION XTLS : $xver
 DOMAIN SERVER: $domain
 IP SERVER    : $ip4 / $ip6
 Uptime       : $uptime
 ISP / REGION : $isp / $region
-===================================
+ ${separator}
          Total Account
 
 SSH SERVER   : $sshd
@@ -241,11 +266,11 @@ XTLS WS      : $ws
 XTLS HTTP UP : $http
 XTLS SPLIT   : $split
 XTLS gRPC    : $gpc
-===================================
+ ${separator}
 SSH: $resh | WS: $xws | HTTP: $xhttp
 SPLIT: $xsplit | gRPC: $xgcp | ePRO: $pro
 Loadbalance: $loadbalance
-===================================
+ ${separator}
 
 1. Menu SSH     4. Menu SlowDNS
 2. Menu XTLS    5. Menu Backup
@@ -254,13 +279,13 @@ Loadbalance: $loadbalance
 7. Menu L2TP    8. Menu Wireguard
        9.  Menu NoobzVPN
        10. Menu System
-===================================
+ ${separator}
 Today${NC}: ${red}$ttoday${NC} Yesterday${NC}: ${red}$tyest${NC} This month${NC}: ${red}$tmon${NC}
-===================================
+ ${separator}
 ${rechan}
-===================================
+ ${separator}
  [   PRESS CTRL  +  C TO EXIT    ]
-===================================
+ ${separator}
 "
 read -p "Input Option: " opw
 case $opw in

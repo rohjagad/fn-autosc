@@ -86,6 +86,30 @@ export GREEN='\033[0;32m'
 export NC='\033[0m'
 export BICyan='\033[0;36m'
 
+rainbow_sep() {
+  local text="${1:-============================}"
+  local output=''
+  local i segment fraction r g b color
+  local -a red=(255 255 0 0 0 255 255)
+  local -a green=(0 255 255 255 0 0 0)
+  local -a blue=(0 0 0 255 255 255 0)
+  for ((i = 0; i < ${#text}; i++)); do
+    if ((i == ${#text} - 1)); then
+      segment=5
+      fraction=$((${#text} - 1))
+    else
+      segment=$((i * 6 / (${#text} - 1)))
+      fraction=$((i * 6 % (${#text} - 1)))
+    fi
+    r=$((red[segment] + (red[segment + 1] - red[segment]) * fraction / (${#text} - 1)))
+    g=$((green[segment] + (green[segment + 1] - green[segment]) * fraction / (${#text} - 1)))
+    b=$((blue[segment] + (blue[segment + 1] - blue[segment]) * fraction / (${#text} - 1)))
+    printf -v color '\033[38;2;%d;%d;%dm' "$r" "$g" "$b"
+    output+="${color}${text:i:1}"
+  done
+  printf '%b\n' "${output}${NC}"
+}
+
 
     # Konfigurasi URL izin
     PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/1.23/izin.txt"
@@ -154,10 +178,11 @@ http=$(cat /etc/xray/json/upgrade.json | grep "###" | sort | uniq | wc -l)
 gpc=$(cat /etc/xray/json/grpc.json | grep "###" | sort | uniq | wc -l)
 split=$(cat /etc/xray/json/split.json | grep "###" | sort | uniq | wc -l)
 
+separator=$(rainbow_sep '============================')
 clear
 echo -e "
 ${NC}
-============================
+ ${separator}
 [ <= MENU XTLS $(status="$(systemctl show nginx.service --no-page)"
 status_text=$(echo "${status}" | grep 'ActiveState=' | cut -f2 -d=)
 if [ "${status_text}" == "active" ]
@@ -166,32 +191,32 @@ echo -e "${NC}: "${green}"running"$NC" ✓"
 else
 echo -e "${NC}: "$red"not running (Error)"$NC" "
 fi) => ]
-============================
+ ${separator}
 Total Account
 
 WS   : $ws
 HTTP : $http
 gRPC : $gpc
 Split: $split
-============================
+ ${separator}
 
 1. Menu WebSocket / WS
 2. Menu HTTP UPGRADE / HTTP
 3. Menu gRPC / XTLS gRPC
 4. Menu Split HTTP / Split
-============================
+ ${separator}
 
 5. Menu System
 6. Menu Domain
 7. Menu Backup
 8. Menu Bot Server
-============================
+ ${separator}
 Today${NC}: ${red}$ttoday$NC Yesterday${NC}: ${red}$tyest$NC This month${NC}: ${red}$tmon $NC
-============================
+ ${separator}
 $rerechan
-============================
+ ${separator}
    Press CTRL + C to Exit
-============================
+ ${separator}
 "
 read -p "Input Option: " opws
 case $opws in
