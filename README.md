@@ -19,7 +19,8 @@ risk and do not run it on a server with data you need to keep.
 - Full variant extras: OpenVPN, SlowDNS, L2TP, WireGuard, NoobzVPN, UDP
   Custom/Request, Argo, backup, bot, system, and domain-management menus.
 - Lite variant: Xray/V2Ray-focused installation with the included Lite menu.
-- Bundled `fix/fix.sh`, executed as the final step of Full and Lite installation.
+- Bundled `fix/fix.sh`, a sysctl tuning script executed as the final step of
+  Full and Lite installation (raises `fs.file-max`, adds conntrack limits).
 
 Xray is pinned to version `25.3.6`. The bundled V2Ray version and all other
 script behavior remain unchanged.
@@ -97,7 +98,8 @@ Each installed menu checks the same rental IP/expiry list before continuing.
 - `menu/`: generated Full/Lite archives installed into `/usr/bin`.
 - `config/`, `json/`, `website/`: supplied configuration and website files.
 - `other/`, `udp/`, `v2ray/`: supplied binaries and archives.
-- `fix/fix.sh`: supplied x86-64 Linux fix executable.
+- `fix/fix.sh`: sysctl tuning script (decrypted from original shc binary;
+    sets `fs.file-max`, `nf_conntrack_max`, `nf_conntrack_tcp_timeout_time_wait`).
 
 ## Important Notes
 
