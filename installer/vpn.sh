@@ -152,9 +152,9 @@ echo '</ca>' >> /etc/openvpn/client-tcp-1194.ovpn
 
 # Copy config OpenVPN client ke home directory root agar mudah didownload ( TCP 1194 )
 cp /etc/openvpn/client-tcp-1194.ovpn /var/www/html/client-tcp-1194.ovpn
-# Alias dengan nama yang dipakai menu (Config OVPN: /web/tcp.ovpn)
-mkdir -p /var/www/html/web
-cp /etc/openvpn/client-tcp-1194.ovpn /var/www/html/web/tcp.ovpn
+# Alias dengan nama yang dipakai menu (Config OVPN: /web/tcp.ovpn).
+# location /web/ di nginx memetakan ke /var/www/html/ langsung.
+cp /etc/openvpn/client-tcp-1194.ovpn /var/www/html/tcp.ovpn
 
 # masukkan certificatenya ke dalam config client UDP 2200
 echo '<ca>' >> /etc/openvpn/client-udp-2200.ovpn
@@ -163,6 +163,8 @@ echo '</ca>' >> /etc/openvpn/client-udp-2200.ovpn
 
 # Copy config OpenVPN client ke home directory root agar mudah didownload ( UDP 2200 )
 cp /etc/openvpn/client-udp-2200.ovpn /var/www/html/client-udp-2200.ovpn
+# Alias UDP dengan nama yang dipakai menu.
+cp /etc/openvpn/client-udp-2200.ovpn /var/www/html/udp.ovpn
 
 #firewall untuk memperbolehkan akses UDP dan akses jalur TCP
 

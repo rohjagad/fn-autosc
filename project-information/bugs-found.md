@@ -97,6 +97,9 @@ were exercised for real.
 - The installer copies the client profile to
   `/var/www/html/client-tcp-1194.ovpn` only; nothing publishes `tcp.ovpn`.
   (Also present in the original vendor zip, not a regression.)
+- Note: nginx `location /web/` maps straight onto the site root
+  (`/web/tcp.ovpn` -> `/var/www/html/tcp.ovpn`), so the alias must be written
+  to `/var/www/html/tcp.ovpn`, not `/var/www/html/web/tcp.ovpn`.
 
 ### SplitHTTP transport fails through nginx (CONFIRMED)
 
@@ -114,6 +117,20 @@ were exercised for real.
   connections and full traffic.
 - vmess-WS, vmess-HTTPUpgrade and vmess-gRPC all transferred real payloads
   (~220-280 KB/s) through the same guest.
+
+- After adding the proxy timeouts, SplitHTTP still did not carry traffic from a
+  real xray client. Debug output showed an HTTP-version mismatch rather than a
+  timeout:
+
+  ```text
+  failed to GET https://<domain>/splitvm/<id> ...
+  malformed HTTP response "\x00\x00\x12\x04\x00\x00\x00..."
+  ```
+
+  The client's SplitHTTP "packet-up" transport expects an HTTP/1.x reply, but
+  the server path is served over HTTP/2 (`listen ... ssl http2`). The nginx
+  timeout fix is necessary but not sufficient; the transport/h2 configuration
+  still needs correction for SplitHTTP to work end-to-end.
 
 ## Critical Runtime Bugs
 
