@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 [[ -e $(which curl) ]] && grep -q "1.1.1.1" /etc/resolv.conf || { 
     echo "nameserver 1.1.1.1" | cat - /etc/resolv.conf >> /etc/resolv.conf.tmp && mv /etc/resolv.conf.tmp /etc/resolv.conf
 }
@@ -49,10 +50,41 @@
         echo "Expired: $EXPIRED_DATE ( $REMAINING_DAYS Days )"
     }
 
-    output
-clear
+cls
 
-clear
+red='\033[0;31m'
+green='\033[0;32m'
+blue='\033[1;34m'
+purple='\033[1;35m'
+orange='\033[38;5;208m'
+NC='\033[0m'
+
+rainbow_sep() {
+  local text="${1:-===================================}"
+  local output=''
+  local i segment fraction r g b color
+  local -a red=(255 255 0 0 0 255 255)
+  local -a green=(0 255 255 255 0 0 0)
+  local -a blue=(0 0 0 255 255 255 0)
+  for ((i = 0; i < ${#text}; i++)); do
+    if ((i == ${#text} - 1)); then
+      segment=5
+      fraction=$((${#text} - 1))
+    else
+      segment=$((i * 6 / (${#text} - 1)))
+      fraction=$((i * 6 % (${#text} - 1)))
+    fi
+    r=$((red[segment] + (red[segment + 1] - red[segment]) * fraction / (${#text} - 1)))
+    g=$((green[segment] + (green[segment + 1] - green[segment]) * fraction / (${#text} - 1)))
+    b=$((blue[segment] + (blue[segment + 1] - blue[segment]) * fraction / (${#text} - 1)))
+    printf -v color '\033[38;2;%d;%d;%dm' "$r" "$g" "$b"
+    output+="${color}${text:i:1}"
+  done
+  printf '%b\n' "${output}${NC}"
+}
+
+separator=$(rainbow_sep '===================================')
+blue_sep="${blue}-----------------------------------${NC}"
 
 bnnr() {
 read -p "Input Your Banner" bns
@@ -684,28 +716,28 @@ tampilan
 
 systemd() {
 clear
-echo -e "\n
-===========================================
-       MENU SYSTEM / SERVICE SERVER
-===========================================
+echo -e "${NC}${separator}
+            MENU SYSTEM
+${separator}
+${green}1${NC}. Change Timezone
+${green}2${NC}. Restart All Service
+${green}3${NC}. Menu Warp Cloudflare [ Only VPS KVM ]
+${green}4${NC}. Uninstall / Rebuild Server
+${green}5${NC}. Cek Detail Port & Service
+${green}6${NC}. Cek Status Uptime, CPU, Ram & SSD USAGE
+${green}7${NC}. Setup Cloudflare Argo Tunnel Routing on your Server
+${green}8${NC}. Change Banner SSH
+${separator}
 
-1. Change Timezone
-2. Restart All Service
-3. Menu Warp Cloudflare [ Only VPS KVM ]
-4. Uninstall / Rebuild Server
-5. Cek Detail Port & Service
-6. Cek Status Uptime, CPU, Ram & SSD USAGE
-7. Setup Cloudflare Argo Tunnel Routing on your Server
-8. Change Banner SSH
-===========================================\n"
-read -p "Input Option: " asu
+${orange}Press [Ctrl + C] to exit${NC}"
+read -p "Input option: " asu
 case $asu in
-1) change_timezone ;;
-2) resall ;;
-3) menu-warp ;;
-4) uninstall ;;
-5) detail ;;
-6) htop ;;
+1) clear ; change_timezone ;;
+2) clear ; resall ;;
+3) clear ; menu-warp ;;
+4) clear ; uninstall ;;
+5) clear ; detail ;;
+6) clear ; htop ;;
 7) clear ; menu-argo ;;
 8) clear ; bnnr ;;
 *) systemd ;;

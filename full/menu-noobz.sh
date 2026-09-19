@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 [[ -e $(which curl) ]] && grep -q "1.1.1.1" /etc/resolv.conf || { 
     echo "nameserver 1.1.1.1" | cat - /etc/resolv.conf >> /etc/resolv.conf.tmp && mv /etc/resolv.conf.tmp /etc/resolv.conf
 }
@@ -49,8 +50,41 @@
         echo "Expired: $EXPIRED_DATE ( $REMAINING_DAYS Days )"
     }
 
-    output
-clear
+cls
+
+red='\033[0;31m'
+green='\033[0;32m'
+blue='\033[1;34m'
+purple='\033[1;35m'
+orange='\033[38;5;208m'
+NC='\033[0m'
+
+rainbow_sep() {
+  local text="${1:-===================================}"
+  local output=''
+  local i segment fraction r g b color
+  local -a red=(255 255 0 0 0 255 255)
+  local -a green=(0 255 255 255 0 0 0)
+  local -a blue=(0 0 0 255 255 255 0)
+  for ((i = 0; i < ${#text}; i++)); do
+    if ((i == ${#text} - 1)); then
+      segment=5
+      fraction=$((${#text} - 1))
+    else
+      segment=$((i * 6 / (${#text} - 1)))
+      fraction=$((i * 6 % (${#text} - 1)))
+    fi
+    r=$((red[segment] + (red[segment + 1] - red[segment]) * fraction / (${#text} - 1)))
+    g=$((green[segment] + (green[segment + 1] - green[segment]) * fraction / (${#text} - 1)))
+    b=$((blue[segment] + (blue[segment + 1] - blue[segment]) * fraction / (${#text} - 1)))
+    printf -v color '\033[38;2;%d;%d;%dm' "$r" "$g" "$b"
+    output+="${color}${text:i:1}"
+  done
+  printf '%b\n' "${output}${NC}"
+}
+
+separator=$(rainbow_sep '===================================')
+blue_sep="${blue}-----------------------------------${NC}"
 
 domain=$(cat /etc/xray/domain)
 
@@ -188,31 +222,24 @@ format_output "$output"
 }
 
 function main() {
-white='\e[037;1m'
-RED='\e[31m'
-GREEN='\e[32m'
-NC='\033[0;37m'
-domain=$(cat /etc/xray/domain)
-clear
-if [[ $(systemctl status noobzvpns | grep -w Active | awk '{print $2}' | sed 's/(//g' | sed 's/)//g' | sed 's/ //g') == 'active' ]]; then
-    status="${GREEN}ON${NC}";
+if [[ $(systemctl status noobzvpns 2>/dev/null | grep -w Active | awk '{print $2}' | sed 's/(//g' | sed 's/)//g' | sed 's/ //g') == 'active' ]]; then
+    status="${green}ON${NC}"
 else
-    status="${RED}OFF${NC}";
+    status="${red}OFF${NC}"
 fi
 clear
-echo -e "════════════════════════════════"
-echo -e "${GREEN}[ ${RED}<== ${white}NOOBZVPN STORE『EA』 ${RED}==> ${GREEN}]"
-echo "════════════════════════════════"
-echo -e "Noobz: $status
-${white}
+echo -e "${NC}${separator}
+            MENU NOOBZVPN
+${separator}
+Noobz        : $status
+${blue_sep}
+${green}1${NC}. Add Account
+${green}2${NC}. Delete Account
+${green}3${NC}. List Active Account
+${separator}
 
-1. Add Account
-2. Delete Account
-3. List Active Account"
-echo "════════════════════════════════"
-echo "Preess CTRL or X to exit"
-echo "════════════════════════════════"
-read -p "Input Option: " inrere
+${orange}Press [Ctrl + C] to exit${NC}"
+read -p "Input option: " inrere
 case $inrere in
 1|01) clear ; create ;;
 2|02) clear ; delete ;;

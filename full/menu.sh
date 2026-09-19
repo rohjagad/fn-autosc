@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 [[ -e $(which curl) ]] && grep -q "1.1.1.1" /etc/resolv.conf || { 
     echo "nameserver 1.1.1.1" | cat - /etc/resolv.conf >> /etc/resolv.conf.tmp && mv /etc/resolv.conf.tmp /etc/resolv.conf
 }
@@ -44,25 +45,46 @@
 
     # Output informasi izin
     output() {
-        echo "Username: $USERNAME"
-        echo "IPv4: $PERMISSION_IP"
-        echo "Expired: $EXPIRED_DATE ( $REMAINING_DAYS Days )"
+        echo "Username     : $USERNAME"
+        echo "IPv4         : $PERMISSION_IP"
+        echo "Expired      : $EXPIRED_DATE ( $REMAINING_DAYS Days )"
     }
 
 
 clear
 xver=$(xray version | awk '{print $2}' | head -n 1)
-domain=$(cat /etc/xray/domain)
-ip6=$(curl -sS ipv4.icanhazip.com)
-ip4=$(curl -sS ipv6.icanhazip.com)
+domain=$(cat /etc/xray/domain 2>/dev/null)
+ips_mode=$(cat /root/.ips 2>/dev/null | tr -d '[:space:]')
+if [[ "$ips_mode" == "4" ]]; then
+    ip_display=$(curl -sS -4 --max-time 3 ipv4.icanhazip.com 2>/dev/null || cat /etc/.ip 2>/dev/null)
+elif [[ "$ips_mode" == "6" ]]; then
+    ip_display=$(curl -sS -6 --max-time 3 ipv6.icanhazip.com 2>/dev/null)
+elif [[ "$ips_mode" == "dual" ]]; then
+    ip4=$(curl -sS -4 --max-time 3 ipv4.icanhazip.com 2>/dev/null || cat /etc/.ip 2>/dev/null)
+    ip6=$(curl -sS -6 --max-time 3 ipv6.icanhazip.com 2>/dev/null)
+    if [[ -n "$ip4" && -n "$ip6" ]]; then
+        ip_display="$ip4 / $ip6"
+    else
+        ip_display="${ip4:-$ip6}"
+    fi
+else
+    ip_display=$(cat /etc/.ip 2>/dev/null || curl -sS -4 --max-time 3 ifconfig.me 2>/dev/null)
+fi
+
 sshd="$(awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd | wc -l)"
-ws=$(cat /etc/v2ray/config.json | grep "###" | sort | uniq | wc -l)
-http=$(cat /etc/xray/json/upgrade.json | grep "###" | sort | uniq | wc -l)
-gpc=$(cat /etc/xray/json/grpc.json | grep "###" | sort | uniq | wc -l)
-split=$(cat /etc/xray/json/split.json | grep "###" | sort | uniq | wc -l)
-uptime=$(uptime | awk '{print $1, $2, $3, $4, $5}')
-isp=$(cat /root/.isp)
-region=$(cat /root/.region)
+ws=$(cat /etc/v2ray/config.json 2>/dev/null | grep "###" | sort | uniq | wc -l)
+http=$(cat /etc/xray/json/upgrade.json 2>/dev/null | grep "###" | sort | uniq | wc -l)
+gpc=$(cat /etc/xray/json/grpc.json 2>/dev/null | grep "###" | sort | uniq | wc -l)
+split=$(cat /etc/xray/json/split.json 2>/dev/null | grep "###" | sort | uniq | wc -l)
+
+total_sec=$(cut -d. -f1 /proc/uptime 2>/dev/null || echo 0)
+days=$((total_sec / 86400))
+hours=$(( (total_sec % 86400) / 3600 ))
+mins=$(( (total_sec % 3600) / 60 ))
+uptime=$(printf "%dd:%02dh:%02dm" $days $hours $mins)
+
+isp=$(cat /root/.isp 2>/dev/null)
+region=$(cat /root/.region 2>/dev/null)
 clear
 
 #Download/Upload today
@@ -116,9 +138,7 @@ total_yesterday=0
 total_month=0
 
 for iface in $all_interfaces; do
-  echo "Memproses interface: $iface"
   result=$(read_vnstat_usage "$iface")
-  echo "Hasil untuk $iface: $result"
   
   today=$(echo "$result" | awk -F';' '{print $1}')
   yesterday=$(echo "$result" | awk -F';' '{print $2}')
@@ -158,6 +178,9 @@ export green='\033[0;32m'
 export RED='\033[0;31m'
 export GREEN='\033[0;32m'
 export NC='\033[0m'
+export blue='\033[1;34m'
+export purple='\033[1;35m'
+export orange='\033[38;5;208m'
 export BICyan='\033[0;36m'
 
 rainbow_sep() {
@@ -247,47 +270,42 @@ loadbalance="${red}OFF${NC}"
 fi
 rechan=$(output)
 separator=$(rainbow_sep '===================================')
+blue_sep="${blue}-----------------------------------${NC}"
 clear
-echo -e "
-${NC}
- ${separator}
-<=   MENU MANAGEMENT PANEL VPN   =>
- ${separator}
+echo -e "${NC}${separator}
+     MENU MANAGEMENT PANEL VPN
+${separator}
 VERSION XTLS : $xver
 DOMAIN SERVER: $domain
-IP SERVER    : $ip4 / $ip6
+IP SERVER    : $ip_display
 Uptime       : $uptime
 ISP / REGION : $isp / $region
- ${separator}
-         Total Account
-
+${blue_sep}
+${purple}TOTAL ACCOUNT${NC}
 SSH SERVER   : $sshd
 XTLS WS      : $ws
 XTLS HTTP UP : $http
 XTLS SPLIT   : $split
 XTLS gRPC    : $gpc
- ${separator}
+${blue_sep}
 SSH: $resh | WS: $xws | HTTP: $xhttp
 SPLIT: $xsplit | gRPC: $xgcp | ePRO: $pro
 Loadbalance: $loadbalance
- ${separator}
-
-1. Menu SSH     4. Menu SlowDNS
-2. Menu XTLS    5. Menu Backup
-3. Menu Domain  6. Menu Bot Telegram
-
-7. Menu L2TP    8. Menu Wireguard
-       9.  Menu NoobzVPN
-       10. Menu System
- ${separator}
+${blue_sep}
+${purple}MENU${NC}
+${green}1${NC}. Menu SSH        ${green}6${NC}. Menu Bot Telegram
+${green}2${NC}. Menu XTLS       ${green}7${NC}. Menu L2TP
+${green}3${NC}. Menu Domain     ${green}8${NC}. Menu Wireguard
+${green}4${NC}. Menu SlowDNS    ${green}9${NC}. Menu NoobzVPN
+${green}5${NC}. Menu Backup    ${green}10${NC}. Menu System
+${blue_sep}
 Today${NC}: ${red}$ttoday${NC} Yesterday${NC}: ${red}$tyest${NC} This month${NC}: ${red}$tmon${NC}
- ${separator}
+${separator}
 ${rechan}
- ${separator}
- [   PRESS CTRL  +  C TO EXIT    ]
- ${separator}
-"
-read -p "Input Option: " opw
+${separator}
+
+${orange}Press [Ctrl + C] to exit${NC}"
+read -p "Input option: " opw
 case $opw in
 1) clear ; menu-ssh ;;
 2) clear ; menu-x ;;

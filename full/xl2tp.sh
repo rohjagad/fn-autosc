@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 [[ -e $(which curl) ]] && grep -q "1.1.1.1" /etc/resolv.conf || { 
     echo "nameserver 1.1.1.1" | cat - /etc/resolv.conf >> /etc/resolv.conf.tmp && mv /etc/resolv.conf.tmp /etc/resolv.conf
 }
@@ -50,10 +51,41 @@ domain=$(cat /etc/xray/domain)
         echo "Expired: $EXPIRED_DATE ( $REMAINING_DAYS Days )"
     }
 
-    output
-clear
+cls
 
-clear
+red='\033[0;31m'
+green='\033[0;32m'
+blue='\033[1;34m'
+purple='\033[1;35m'
+orange='\033[38;5;208m'
+NC='\033[0m'
+
+rainbow_sep() {
+  local text="${1:-===================================}"
+  local output=''
+  local i segment fraction r g b color
+  local -a red=(255 255 0 0 0 255 255)
+  local -a green=(0 255 255 255 0 0 0)
+  local -a blue=(0 0 0 255 255 255 0)
+  for ((i = 0; i < ${#text}; i++)); do
+    if ((i == ${#text} - 1)); then
+      segment=5
+      fraction=$((${#text} - 1))
+    else
+      segment=$((i * 6 / (${#text} - 1)))
+      fraction=$((i * 6 % (${#text} - 1)))
+    fi
+    r=$((red[segment] + (red[segment + 1] - red[segment]) * fraction / (${#text} - 1)))
+    g=$((green[segment] + (green[segment + 1] - green[segment]) * fraction / (${#text} - 1)))
+    b=$((blue[segment] + (blue[segment + 1] - blue[segment]) * fraction / (${#text} - 1)))
+    printf -v color '\033[38;2;%d;%d;%dm' "$r" "$g" "$b"
+    output+="${color}${text:i:1}"
+  done
+  printf '%b\n' "${output}${NC}"
+}
+
+separator=$(rainbow_sep '===================================')
+blue_sep="${blue}-----------------------------------${NC}"
 domain=$(cat /etc/xray/domain)
 
 
@@ -207,20 +239,18 @@ echo "=========================="
 
 function main() {
 clear
-m="\033[0;1;36m"
-y="\033[0;1;37m"
-yy="\033[0;1;32m"
-yl="\033[0;1;33m"
-wh="\033[0m"
-echo -e "$y                             L2TP $wh"
-echo -e "$y-------------------------------------------------------------$wh"
-echo -e "$yy 1$y. Create Account L2TP"
-echo -e "$yy 2$y. Delete Account L2TP"
-echo -e "$yy 3$y. Extending Account L2TP Active Life"
-echo -e "$yy 4$y. Menu"
-echo -e "$yy 5$y. Exit"
-echo -e "$y-------------------------------------------------------------$wh"
-read -p "Select From Options [ 1 - 7 ] : " menu
+echo -e "${NC}${separator}
+             MENU L2TP
+${separator}
+${green}1${NC}. Create Account L2TP
+${green}2${NC}. Delete Account L2TP
+${green}3${NC}. Extending Account L2TP Active Life
+${green}4${NC}. Menu
+${green}5${NC}. Exit
+${separator}
+
+${orange}Press [Ctrl + C] to exit${NC}"
+read -p "Input option: " menu
 echo -e ""
 case $menu in
 1)

@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 [[ -e $(which curl) ]] && grep -q "1.1.1.1" /etc/resolv.conf || { 
     echo "nameserver 1.1.1.1" | cat - /etc/resolv.conf >> /etc/resolv.conf.tmp && mv /etc/resolv.conf.tmp /etc/resolv.conf
 }
@@ -49,59 +50,90 @@
         echo "Expired: $EXPIRED_DATE ( $REMAINING_DAYS Days )"
     }
 
-    output
-clear
+# Color
+green='\033[0;32m'
+blue='\033[1;34m'
+purple='\033[1;35m'
+orange='\033[38;5;208m'
+NC='\033[0m'
+
+rainbow_sep() {
+  local text="${1:-===================================}"
+  local output=''
+  local i segment fraction r g b color
+  local -a red=(255 255 0 0 0 255 255)
+  local -a green=(0 255 255 255 0 0 0)
+  local -a blue=(0 0 0 255 255 255 0)
+  for ((i = 0; i < ${#text}; i++)); do
+    if ((i == ${#text} - 1)); then
+      segment=5
+      fraction=$((${#text} - 1))
+    else
+      segment=$((i * 6 / (${#text} - 1)))
+      fraction=$((i * 6 % (${#text} - 1)))
+    fi
+    r=$((red[segment] + (red[segment + 1] - red[segment]) * fraction / (${#text} - 1)))
+    g=$((green[segment] + (green[segment + 1] - green[segment]) * fraction / (${#text} - 1)))
+    b=$((blue[segment] + (blue[segment + 1] - blue[segment]) * fraction / (${#text} - 1)))
+    printf -v color '\033[38;2;%d;%d;%dm' "$r" "$g" "$b"
+    output+="${color}${text:i:1}"
+  done
+  printf '%b\n' "${output}${NC}"
+}
+
+separator=$(rainbow_sep '===================================')
+blue_sep="${blue}-----------------------------------${NC}"
 
 # Fungsi untuk menghitung jumlah akun di file http.json
 countAccounts() {
     filePath="$1"
-    count=$(grep "###" "$filePath" | sort | uniq | wc -l)  # Menghitung baris yang mengandung "###"
-    echo $count  # Mengembalikan jumlah akun
+    count=$(grep "###" "$filePath" 2>/dev/null | sort | uniq | wc -l)
+    echo $count
 }
 
 # Fungsi untuk membersihkan layar
 clearScreen() {
-    clear  # Perintah untuk membersihkan layar terminal
+    clear
 }
 
 # Fungsi utama untuk menampilkan menu dan menangani pilihan pengguna
 xhttp() {
-    http=$(countAccounts "/etc/xray/json/upgrade.json")  # Hitung jumlah akun
+    http=$(countAccounts "/etc/xray/json/upgrade.json")
 
-    clearScreen  # Bersihkan layar
-    echo "============================"
-    echo "[ <=  XTLS HTTP UPGRADE => ]"
-    echo "============================"
-    echo -e "\nhttp   : \033[1;32m$http\033[0m"  # Tampilkan jumlah akun
-    echo "============================"
-    echo "          Menu  Create      "
-    echo "01. Create Account Vmess"
-    echo "02. Create Account Vless"
-    echo "03. Create Account Trojan"
-    echo "============================"
-    echo "          Menu Trial        "
-    echo "04. Trial Account Vmess"
-    echo "05. Trial Account Vless"
-    echo "06. Trial Account Trojan"
-    echo "============================"
-    echo "          Other Service"
-    echo "07. Cek User Login"
-    echo "08. Delete Account"
-    echo "09. Extend Expired"
-    echo "10. Cek Log Database"
-    echo "11. List Database Account"
-    echo "12. Change UUID / Password"
-    echo "13. Unlock Account HTTP"
-    echo "14. Routing X-Ray HTTP UPGRADE"
-    echo "15. Change Limit IP HTTP UPGRADE"
-    echo "16. Change Quota HTTP Upgrade"
-    echo "17. Locked Account HTTP"
-    echo "============================"
-    echo "   Press CTRL + C to Exit"
-    echo "============================"
+    clearScreen
+    echo -e "${NC}${separator}
+        XTLS HTTP UPGRADE
+${separator}
+HTTP         : ${green}$http${NC}
+${blue_sep}
+${purple}MENU CREATE${NC}
+${green}01${NC}. Create Account Vmess
+${green}02${NC}. Create Account Vless
+${green}03${NC}. Create Account Trojan
+${blue_sep}
+${purple}MENU TRIAL${NC}
+${green}04${NC}. Trial Account Vmess
+${green}05${NC}. Trial Account Vless
+${green}06${NC}. Trial Account Trojan
+${blue_sep}
+${purple}OTHER SERVICE${NC}
+${green}07${NC}. Cek User Login
+${green}08${NC}. Delete Account
+${green}09${NC}. Extend Expired
+${green}10${NC}. Cek Log Database
+${green}11${NC}. List Database Account
+${green}12${NC}. Change UUID / Password
+${green}13${NC}. Unlock Account HTTP
+${green}14${NC}. Routing X-Ray HTTP UPGRADE
+${green}15${NC}. Change Limit IP HTTP UPGRADE
+${green}16${NC}. Change Quota HTTP Upgrade
+${green}17${NC}. Locked Account HTTP
+${separator}
+
+${orange}Press [Ctrl + C] to exit${NC}"
 
     # Input pilihan dari pengguna
-    read -p "Input Option: " ophttp
+    read -p "Input option: " ophttp
 
     # Menangani pilihan berdasarkan input pengguna
     case $ophttp in

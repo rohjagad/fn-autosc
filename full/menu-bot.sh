@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 [[ -e $(which curl) ]] && grep -q "1.1.1.1" /etc/resolv.conf || { 
     echo "nameserver 1.1.1.1" | cat - /etc/resolv.conf >> /etc/resolv.conf.tmp && mv /etc/resolv.conf.tmp /etc/resolv.conf
 }
@@ -49,10 +50,43 @@
         echo "Expired: $EXPIRED_DATE ( $REMAINING_DAYS Days )"
     }
 
-    output
-clear
+cls
 
 botmenu() {
+
+red='\033[0;31m'
+green='\033[0;32m'
+blue='\033[1;34m'
+purple='\033[1;35m'
+orange='\033[38;5;208m'
+NC='\033[0m'
+
+rainbow_sep() {
+  local text="${1:-===================================}"
+  local output=''
+  local i segment fraction r g b color
+  local -a red=(255 255 0 0 0 255 255)
+  local -a green=(0 255 255 255 0 0 0)
+  local -a blue=(0 0 0 255 255 255 0)
+  for ((i = 0; i < ${#text}; i++)); do
+    if ((i == ${#text} - 1)); then
+      segment=5
+      fraction=$((${#text} - 1))
+    else
+      segment=$((i * 6 / (${#text} - 1)))
+      fraction=$((i * 6 % (${#text} - 1)))
+    fi
+    r=$((red[segment] + (red[segment + 1] - red[segment]) * fraction / (${#text} - 1)))
+    g=$((green[segment] + (green[segment + 1] - green[segment]) * fraction / (${#text} - 1)))
+    b=$((blue[segment] + (blue[segment + 1] - blue[segment]) * fraction / (${#text} - 1)))
+    printf -v color '\033[38;2;%d;%d;%dm' "$r" "$g" "$b"
+    output+="${color}${text:i:1}"
+  done
+  printf '%b\n' "${output}${NC}"
+}
+
+separator=$(rainbow_sep '===================================')
+blue_sep="${blue}-----------------------------------${NC}"
 
 termbot() {
 install() {
@@ -160,27 +194,27 @@ Success Reboot Bot Terminal"
 }
 
 menubot() {
-clear
-edussh_service=$(systemctl status bot | grep Active | awk '{print $3}' | cut -d "(" -f2 | cut -d ")" -f1)
+cls
+edussh_service=$(systemctl status bot 2>/dev/null | grep Active | awk '{print $3}' | cut -d "(" -f2 | cut -d ")" -f1)
 if [[ $edussh_service == "running" ]]; then
-ws="\e[1;32m[ ON ]\033[0m"
+    ws="${green}ON${NC}"
 else
-ws="\e[1;31m[ OFF ]\033[0m"
+    ws="${red}OFF${NC}"
 fi
 clear
-echo -e "
-<= Menu Bot Terminal =>
-=======================
-Bot: $ws
+echo -e "${NC}${separator}
+          MENU BOT TERMINAL
+${separator}
+Bot          : $ws
+${blue_sep}
+${green}1${NC}. Install Bot Terminal
+${green}2${NC}. Uninstall Bot Terminal
+${green}3${NC}. Restart Service Bot Terminal
+${green}0${NC}. Back To Default Menu Panel
+${separator}
 
-1. Install Bot Terminal
-2. Uninstall Bot Terminal
-3. Restart Service Bot Terminal
-0. Back To Default Menu Panel
-=======================
-Press CTRL + C to Exit
-"
-read -p "Input Option: " opw
+${orange}Press [Ctrl + C] to exit${NC}"
+read -p "Input option: " opw
 case $opw in
 1) clear ; install ;;
 2) clear ; hapus ;;
@@ -255,22 +289,21 @@ Thanks For Use My Script
 }
 
 mna() {
-echo -e "
-======================
-[   菜单设置机器人   ]
-======================
+clear
+echo -e "${NC}${separator}
+         MENU BOT TELEGRAM
+${separator}
+${green}1${NC}. Setup Bot Notification
+${green}2${NC}. Setup Bot Panel All Menu
+${green}3${NC}. Setup Bot Terminal Server
+${green}4${NC}. Report Bug On Script
+${separator}
 
-1. Setup Bot Notification
-2. Setup Bot Panel All Menu
-3. Setup Bot Terminal Server
-4. Report Bug On Script
-======================
-Press CTRL + C to exit
-"
-read -p "Input Option: " apws
+${orange}Press [Ctrl + C] to exit${NC}"
+read -p "Input option: " apws
 case $apws in
 1) clear ; add ;;
-2) clear ; clear ; echo -e "\n Coming Soon On 1.19?" ;;
+2) clear ; echo -e "\n Coming Soon On 1.19?" ;;
 3) clear ; termbot ;;
 4) clear ; rpot ;;
 *) clear ; mna ;;

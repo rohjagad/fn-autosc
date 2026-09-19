@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 [[ -e $(which curl) ]] && grep -q "1.1.1.1" /etc/resolv.conf || { 
     echo "nameserver 1.1.1.1" | cat - /etc/resolv.conf >> /etc/resolv.conf.tmp && mv /etc/resolv.conf.tmp /etc/resolv.conf
 }
@@ -50,8 +51,41 @@
         echo "Expired: $EXPIRED_DATE ( $REMAINING_DAYS Days )"
     }
 
-    output
-clear
+cls
+
+red='\033[0;31m'
+green='\033[0;32m'
+blue='\033[1;34m'
+purple='\033[1;35m'
+orange='\033[38;5;208m'
+NC='\033[0m'
+
+rainbow_sep() {
+  local text="${1:-===================================}"
+  local output=''
+  local i segment fraction r g b color
+  local -a red=(255 255 0 0 0 255 255)
+  local -a green=(0 255 255 255 0 0 0)
+  local -a blue=(0 0 0 255 255 255 0)
+  for ((i = 0; i < ${#text}; i++)); do
+    if ((i == ${#text} - 1)); then
+      segment=5
+      fraction=$((${#text} - 1))
+    else
+      segment=$((i * 6 / (${#text} - 1)))
+      fraction=$((i * 6 % (${#text} - 1)))
+    fi
+    r=$((red[segment] + (red[segment + 1] - red[segment]) * fraction / (${#text} - 1)))
+    g=$((green[segment] + (green[segment + 1] - green[segment]) * fraction / (${#text} - 1)))
+    b=$((blue[segment] + (blue[segment + 1] - blue[segment]) * fraction / (${#text} - 1)))
+    printf -v color '\033[38;2;%d;%d;%dm' "$r" "$g" "$b"
+    output+="${color}${text:i:1}"
+  done
+  printf '%b\n' "${output}${NC}"
+}
+
+separator=$(rainbow_sep '===================================')
+blue_sep="${blue}-----------------------------------${NC}"
 
 acme() {
 clear
@@ -280,20 +314,19 @@ systemctl start nginx
 
 cert() {
 clear
-echo -e "
-========================
-[ Generate Certificate ]
-========================
+echo -e "${NC}${separator}
+        GENERATE CERTIFICATE
+${separator}
+${green}1${NC}. Use Acme
+${green}2${NC}. Use Certbot
+${separator}
 
-1. Use Acme
-2. Use Certbot
-========================
-"
-read -p "Input Option: " akz
+${orange}Press [Ctrl + C] to exit${NC}"
+read -p "Input option: " akz
 case $akz in
-1) acme ;;
-2) cert2 ;;
-*) cert ;;
+1) clear ; acme ;;
+2) clear ; cert2 ;;
+*) clear ; cert ;;
 esac
 }
 
@@ -325,25 +358,23 @@ echo -e "Done Generate New Certificate"
 
 dm1() {
 clear
-echo -e "
-=================================
-[ 菜单子域指向服务器 Cloudflare ]
-=================================
+echo -e "${NC}${separator}
+            MENU DOMAIN
+${separator}
+${green}1${NC}. Use Your Domain
+${green}2${NC}. Renew Certificate ( VPS IPv6 & IPv4 ) Acme
+${green}3${NC}. Renew Certificate ( VPS IPv4 Only ) Let's encrypt
+${green}4${NC}. Generate Direct Certificate ( VPS IPv4 Only ) Direct FN AutoSC
+${separator}
 
-1. Use Your Domain
-2. Renew Certificate ( VPS IPv6 & IPv4 ) Acme
-3. Renew Certificate ( VPS IPv4 Only ) Let's encrypt
-4. Generare Direct Certificate ( VPS IPv4 Only ) Direct FN AutoSC
-=================================
-     Press CTRL + C to Exit
-"
-read -p "Input Option: " apw
+${orange}Press [Ctrl + C] to exit${NC}"
+read -p "Input option: " apw
 case $apw in
 1) clear ; dm ;;
 2) clear ; cert ;;
 3) clear ; fn ;;
 4) clear ; dmsl ;;
-*) dm1 ;;
+*) clear ; dm1 ;;
 esac
 }
 

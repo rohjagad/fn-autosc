@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 [[ -e $(which curl) ]] && grep -q "1.1.1.1" /etc/resolv.conf || { 
     echo "nameserver 1.1.1.1" | cat - /etc/resolv.conf >> /etc/resolv.conf.tmp && mv /etc/resolv.conf.tmp /etc/resolv.conf
 }
@@ -49,26 +50,56 @@
         echo "Expired: $EXPIRED_DATE ( $REMAINING_DAYS Days )"
     }
 
-    output
-clear
+red='\033[0;31m'
+green='\033[0;32m'
+blue='\033[1;34m'
+orange='\033[38;5;208m'
+NC='\033[0m'
+
+rainbow_sep() {
+  local text="${1:-===================================}"
+  local output=''
+  local i segment fraction r g b color
+  local -a red=(255 255 0 0 0 255 255)
+  local -a green=(0 255 255 255 0 0 0)
+  local -a blue=(0 0 0 255 255 255 0)
+  for ((i = 0; i < ${#text}; i++)); do
+    if ((i == ${#text} - 1)); then
+      segment=5
+      fraction=$((${#text} - 1))
+    else
+      segment=$((i * 6 / (${#text} - 1)))
+      fraction=$((i * 6 % (${#text} - 1)))
+    fi
+    r=$((red[segment] + (red[segment + 1] - red[segment]) * fraction / (${#text} - 1)))
+    g=$((green[segment] + (green[segment + 1] - green[segment]) * fraction / (${#text} - 1)))
+    b=$((blue[segment] + (blue[segment + 1] - blue[segment]) * fraction / (${#text} - 1)))
+    printf -v color '\033[38;2;%d;%d;%dm' "$r" "$g" "$b"
+    output+="${color}${text:i:1}"
+  done
+  printf '%b\n' "${output}${NC}"
+}
+
+separator=$(rainbow_sep '===================================')
+blue_sep="${blue}-----------------------------------${NC}"
 
 clear
-    echo -e "\n======================================="
-    echo -e "          [ <= MENU SSH  => ]          "
-    echo -e "======================================="
-    echo -e "  1.  Create SSH Account               "
-    echo -e "  2.  Trial SSH Account                "
-    echo -e "  3.  Delete SSH Account               "
-    echo -e "  4.  Cek User Login SSH               "
-    echo -e "  5.  Cek Log SSH Account              "
-    echo -e "  6.  Extend Expired SSH               "
-    echo -e "  7.  List Total Account SSH           "
-    echo -e "  8.  Change Password Account SSH      "
-    echo -e "  9.  Change Limit IP Account SSH      "
-    echo -e "======================================="
-    echo -e "       CTRL + C To Exit                "
-    echo -e "======================================="
-    read -p "Input Option: " aws
+echo -e "${NC}${separator}
+             MENU SSH
+${separator}
+${green}1${NC}. Create SSH Account
+${green}2${NC}. Trial SSH Account
+${green}3${NC}. Delete SSH Account
+${green}4${NC}. Cek User Login SSH
+${green}5${NC}. Cek Log SSH Account
+${green}6${NC}. Extend Expired SSH
+${green}7${NC}. List Total Account SSH
+${green}8${NC}. Change Password Account SSH
+${green}9${NC}. Change Limit IP Account SSH
+${separator}
+
+${orange}Press [Ctrl + C] to exit${NC}"
+read -p "Input option: " aws
     case $aws in
     1) clear ; addssh ;;
     2) clear ; trial-ssh ;;

@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 [[ -e $(which curl) ]] && grep -q "1.1.1.1" /etc/resolv.conf || { 
     echo "nameserver 1.1.1.1" | cat - /etc/resolv.conf >> /etc/resolv.conf.tmp && mv /etc/resolv.conf.tmp /etc/resolv.conf
 }
@@ -49,62 +50,79 @@
         echo "Expired: $EXPIRED_DATE ( $REMAINING_DAYS Days )"
     }
 
-    output
-clear
-
 # Color
-red='\e[1;31m'
-green='\e[1;32m'
-#pink='\e[1;35m'
-NC='\e[0m'
+red='\033[0;31m'
+green='\033[0;32m'
+blue='\033[1;34m'
+purple='\033[1;35m'
+orange='\033[38;5;208m'
+NC='\033[0m'
+
+rainbow_sep() {
+  local text="${1:-===================================}"
+  local output=''
+  local i segment fraction r g b color
+  local -a red=(255 255 0 0 0 255 255)
+  local -a green=(0 255 255 255 0 0 0)
+  local -a blue=(0 0 0 255 255 255 0)
+  for ((i = 0; i < ${#text}; i++)); do
+    if ((i == ${#text} - 1)); then
+      segment=5
+      fraction=$((${#text} - 1))
+    else
+      segment=$((i * 6 / (${#text} - 1)))
+      fraction=$((i * 6 % (${#text} - 1)))
+    fi
+    r=$((red[segment] + (red[segment + 1] - red[segment]) * fraction / (${#text} - 1)))
+    g=$((green[segment] + (green[segment + 1] - green[segment]) * fraction / (${#text} - 1)))
+    b=$((blue[segment] + (blue[segment + 1] - blue[segment]) * fraction / (${#text} - 1)))
+    printf -v color '\033[38;2;%d;%d;%dm' "$r" "$g" "$b"
+    output+="${color}${text:i:1}"
+  done
+  printf '%b\n' "${output}${NC}"
+}
+
+separator=$(rainbow_sep '===================================')
+blue_sep="${blue}-----------------------------------${NC}"
 
 menu-x() {
 
 # Status Service
 status="$(systemctl show nginx.service --no-page)"
 status_text=$(echo "${status}" | grep 'ActiveState=' | cut -f2 -d=)
-if [ "${status_text}" == "active" ]
-then
-echo -e "${NC}: "${green}"running"$NC" ✓"
+if [ "${status_text}" == "active" ]; then
+    stat_msg="${green}ON${NC}"
 else
-echo -e "${NC}: "$red"not running (Error)"$NC" "
+    stat_msg="${red}OFF${NC}"
 fi
 
 # Total Akun
-ws=$(cat /etc/v2ray/config.json | grep "###" | sort | uniq | wc -l)
-http=$(cat /etc/xray/json/upgrade.json | grep "###" | sort | uniq | wc -l)
-gpc=$(cat /etc/xray/json/grpc.json | grep "###" | sort | uniq | wc -l)
-split=$(cat /etc/xray/json/split.json | grep "###" | sort | uniq | wc -l)
+ws=$(cat /etc/v2ray/config.json 2>/dev/null | grep "###" | sort | uniq | wc -l)
+http=$(cat /etc/xray/json/upgrade.json 2>/dev/null | grep "###" | sort | uniq | wc -l)
+gpc=$(cat /etc/xray/json/grpc.json 2>/dev/null | grep "###" | sort | uniq | wc -l)
+split=$(cat /etc/xray/json/split.json 2>/dev/null | grep "###" | sort | uniq | wc -l)
 
 clear
-echo -e "
-${NC}
-============================
-[ <= MENU XTLS $(status="$(systemctl show nginx.service --no-page)"
-status_text=$(echo "${status}" | grep 'ActiveState=' | cut -f2 -d=)
-if [ "${status_text}" == "active" ]
-then
-echo -e "${NC}: "${green}"running"$NC" ✓"
-else
-echo -e "${NC}: "$red"not running (Error)"$NC" "
-fi) => ]
-============================
-Total Account
+echo -e "${NC}${separator}
+             MENU XTLS
+${separator}
+Status       : $stat_msg
+${blue_sep}
+${purple}TOTAL ACCOUNT${NC}
+WS           : $ws
+HTTP         : $http
+Split        : $split
+gRPC         : $gpc
+${blue_sep}
+${purple}MENU${NC}
+${green}1${NC}. Menu WebSocket / WS
+${green}2${NC}. Menu HTTP UPGRADE / HTTP
+${green}3${NC}. Menu Split HTTP / Split
+${green}4${NC}. Menu gRPC / XTLS gRPC
+${separator}
 
-WS   : $ws
-HTTP : $http
-Split: $split
-gRPC : $gpc
-============================
-1. Menu WebSocket / WS
-2. Menu HTTP UPGRADE / HTTP
-3. Menu Split HTTP / Split
-4. Menu gRPC / XTLS gRPC
-============================
-   Press CTRL + C to Exit
-============================
-"
-read -p "Input Option: " opws
+${orange}Press [Ctrl + C] to exit${NC}"
+read -p "Input option: " opws
 case $opws in
 1) clear ; x-ws ;;
 2) clear ; x-http ;;
