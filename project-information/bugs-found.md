@@ -3,9 +3,122 @@
 This file records defects and operational issues found during source review and
 live testing on a fresh Debian 12 VPS.
 
+## KVM End-to-End Client Test Findings (verified with real traffic)
+
+These were verified by connecting a real Debian 12 KVM guest to the live VPS as
+a protocol client and measuring actual traffic. Unlike the container tests, the
+KVM could create `tun`/`wg` interfaces, so OpenVPN and WireGuard data planes
+were exercised for real.
+
+### `udp-request` broad SNAT hijacks VPN client subnets (CRITICAL, CONFIRMED)
+
+- Root cause is the same rule documented under "SNAT self-lockout", but the
+  earlier fix only protected the VPS management address.
+- The rule sits at the **top** of `nat POSTROUTING`:
+
+  ```text
+  1  RETURN     10.245.234.252
+  2  SNAT       10.0.0.0/8  !10.0.0.0/8  to:103.59.94.47   <-- runs before VPN MASQUERADE
+  ...
+  7  MASQUERADE 10.6.0.0/24                                <-- OpenVPN clients
+  8  MASQUERADE 10.7.0.0/24
+  ```
+
+- `udp-request -mode=system` re-inserts this rule at position 1 every time the
+  service restarts, and the `udp-request-fixnet.timer` only re-asserts the host
+  `RETURN` rule.
+- `103.59.94.47` is **not present on any local interface** (provider-side public
+  IP; `ens3` is `10.245.234.252`), so SNAT to it breaks the return path.
+- Result: OpenVPN (`10.6.0.0/24`) and WireGuard (`10.99.0.0/24`, `10.66.66.0/24`)
+  clients connect and authenticate, and the server forwards their packets out
+  `ens3`, but replies never return.
+- A/B verified on the live VPS:
+
+  ```text
+  Broad SNAT present : ping 8.8.8.8 over OpenVPN -> 100% packet loss
+  Broad SNAT removed : ping 8.8.8.8 over OpenVPN -> 0% loss, ~32 ms
+  ```
+
+- Fix direction: exclude the VPN client subnets from the broad SNAT, or place
+  the per-subnet MASQUERADE rules ahead of it in a rule the udp-request
+  restart cannot reorder above.
+
+### `menu-noobz` uses removed `noobzvpns` CLI flags (CONFIRMED)
+
+- Installed binary is `noobzvpns 3.3.1-b`, which uses subcommands:
+  `add`, `renew`, `remove`, `print`, `print-all`, etc.
+- `full/menu-noobz.sh` still calls the old flag form:
+
+  ```text
+  noobzvpns --add-user "$user" "$pass"
+  noobzvpns --expired-user "$user" "$masaaktif"
+  noobzvpns --remove-user "$name"
+  noobzvpns --info-all-user
+  ```
+
+- Live output:
+
+  ```text
+  error: unexpected argument '--add-user' found
+  ```
+
+- So Add / Delete / List in the NoobzVPN menu are all non-functional against the
+  binary the installer fetches today.
+- Also the delete function referenced `$user` (from `create`) instead of the
+  `$name` it just read, so the expiry line was never matched.
+
+### `cls` is not a valid command (CONFIRMED, introduced during TUI restyle)
+
+- Nine scripts call a bare `cls` where the original used `clear`:
+
+  ```text
+  full/bmenu.sh        full/dm-menu.sh   full/menu-argo.sh
+  full/menu-bot.sh     full/menu-dnstt.sh full/menu-noobz.sh
+  full/menu-system.sh  full/menu-wg.sh   full/xl2tp.sh
+  ```
+
+- `cls: command not found` on Debian; screen never clears on that line.
+
+### OpenVPN config URL advertised by the menu does not exist (CONFIRMED)
+
+- `addssh`/`trial-ssh` print:
+
+  ```text
+  Config OVPN : http://<domain>/web/tcp.ovpn
+  ```
+
+- Live checks:
+
+  ```text
+  /web/tcp.ovpn             -> 404
+  /web/client-tcp-1194.ovpn -> 200
+  ```
+
+- The installer copies the client profile to
+  `/var/www/html/client-tcp-1194.ovpn` only; nothing publishes `tcp.ovpn`.
+  (Also present in the original vendor zip, not a regression.)
+
+### SplitHTTP transport fails through nginx (CONFIRMED)
+
+- `location /splitvm` proxies to `127.0.0.1:2019` but sets no
+  `proxy_read_timeout`; global `client_body_timeout` is 12s.
+- Live xray client through a real KVM guest:
+
+  ```text
+  curl --socks5 ... http://ipv4.icanhazip.com
+  curl: (52) Empty reply from server
+  ```
+
+- nginx access log shows the corresponding upload as `408`, and the xray split
+  access log stays empty while WS / HTTPUpgrade / gRPC all log accepted
+  connections and full traffic.
+- vmess-WS, vmess-HTTPUpgrade and vmess-gRPC all transferred real payloads
+  (~220-280 KB/s) through the same guest.
+
 ## Critical Runtime Bugs
 
 ### `udp-request` SNAT self-lockout
+
 
 - `udp-request-linux-amd64 -mode=system` added this rule:
 
@@ -126,6 +239,8 @@ live testing on a fresh Debian 12 VPS.
   shell source.
 - Its behavior and source provenance could not be audited directly until the
   decrypted shell payload was captured.
+
+### Installer dependency and hosting findings beyond the above
 
 ### Public installer depends on many mutable downloads
 

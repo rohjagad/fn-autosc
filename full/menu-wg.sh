@@ -50,7 +50,7 @@
         echo "Expired: $EXPIRED_DATE ( $REMAINING_DAYS Days )"
     }
 
-cls
+clear
 
 # information
 domain=$(cat /etc/xray/domain)

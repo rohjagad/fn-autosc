@@ -2,7 +2,25 @@
 
 This file records fixes confirmed in source review or live testing.
 
+## TUI Restyle Regressions and Menu Bugs (fixed after KVM end-to-end testing)
+
+- `cls` -> `clear` in `bmenu`, `dm-menu`, `menu-argo`, `menu-bot`,
+  `menu-dnstt`, `menu-noobz`, `menu-system`, `menu-wg`, `xl2tp`.
+- `menu-noobz.sh` now wraps the user-management calls in helpers that detect the
+  modern subcommand CLI (`add`/`remove`/`print-all`) and fall back to the legacy
+  `--add-user`/`--remove-user`/`--info-all-user` flags.
+- `menu-noobz.sh` delete path now uses the `$name` it read instead of `$user`.
+- `addssh.sh` telegram helper defaults `TIME` (`local TIME="${TIME:-10}"`) so it
+  no longer errors with `curl: option --max-time: expected a proper numerical
+  parameter`.
+- `installer/vpn.sh` now also publishes `/var/www/html/web/tcp.ovpn` to match
+  the `Config OVPN` URL the menu prints.
+- `config/{4,6,dual}.conf` add `proxy_read_timeout`/`proxy_send_timeout`/
+  `client_body_timeout` to `location /splitvm` so SplitHTTP uploads no longer
+  hit the 12s body timeout.
+
 ## `udp-request` SNAT Self-Lockout
+
 
 - **Commit:** `9ee1bf8`
 - Added a higher-priority `RETURN` rule for the VPS management address before

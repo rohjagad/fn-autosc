@@ -50,7 +50,7 @@
         echo "Expired: $EXPIRED_DATE ( $REMAINING_DAYS Days )"
     }
 
-cls
+clear
 
 botmenu() {
 
@@ -194,7 +194,7 @@ Success Reboot Bot Terminal"
 }
 
 menubot() {
-cls
+clear
 edussh_service=$(systemctl status bot 2>/dev/null | grep Active | awk '{print $3}' | cut -d "(" -f2 | cut -d ")" -f1)
 if [[ $edussh_service == "running" ]]; then
     ws="${green}ON${NC}"

@@ -51,7 +51,7 @@ domain=$(cat /etc/xray/domain)
         echo "Expired: $EXPIRED_DATE ( $REMAINING_DAYS Days )"
     }
 
-cls
+clear
 
 red='\033[0;31m'
 green='\033[0;32m'

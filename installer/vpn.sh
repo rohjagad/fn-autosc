@@ -152,6 +152,9 @@ echo '</ca>' >> /etc/openvpn/client-tcp-1194.ovpn
 
 # Copy config OpenVPN client ke home directory root agar mudah didownload ( TCP 1194 )
 cp /etc/openvpn/client-tcp-1194.ovpn /var/www/html/client-tcp-1194.ovpn
+# Alias dengan nama yang dipakai menu (Config OVPN: /web/tcp.ovpn)
+mkdir -p /var/www/html/web
+cp /etc/openvpn/client-tcp-1194.ovpn /var/www/html/web/tcp.ovpn
 
 # masukkan certificatenya ke dalam config client UDP 2200
 echo '<ca>' >> /etc/openvpn/client-udp-2200.ovpn

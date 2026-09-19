@@ -75,6 +75,7 @@ send_telegram_notification() {
     local key="$2"
     local message="$3"
     local api_url="https://api.telegram.org/bot${key}/sendMessage"
+    local TIME="${TIME:-10}"
 
     curl -s --max-time $TIME --data-urlencode "chat_id=$chat_id" --data-urlencode "text=$message" $api_url
 }

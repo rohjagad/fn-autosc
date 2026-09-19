@@ -50,7 +50,7 @@
         echo "Expired: $EXPIRED_DATE ( $REMAINING_DAYS Days )"
     }
 
-cls
+clear
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -90,6 +90,33 @@ domain=$(cat /etc/xray/domain)
 
 clear
 
+noobz_add_user() {
+    local u="$1" p="$2" e="$3"
+    if noobzvpns add --help >/dev/null 2>&1; then
+        noobzvpns add --password "$p" --expired "$e" "$u"
+    else
+        noobzvpns --add-user "$u" "$p"
+        noobzvpns --expired-user "$u" "$e"
+    fi
+}
+
+noobz_remove_user() {
+    local u="$1"
+    if noobzvpns remove --help >/dev/null 2>&1; then
+        noobzvpns remove "$u"
+    else
+        noobzvpns --remove-user "$u"
+    fi
+}
+
+noobz_list_users() {
+    if noobzvpns print-all >/dev/null 2>&1; then
+        noobzvpns print-all
+    else
+        noobzvpns --info-all-user
+    fi
+}
+
 function create() {
 clear
 echo -e "
@@ -100,8 +127,7 @@ read -p "Username  : " user
 read -p "Password  : " pass
 read -p "Masa Aktif: " masaaktif
 clear
-noobzvpns --add-user "$user" "$pass"
-noobzvpns --expired-user "$user" "$masaaktif"
+noobz_add_user "$user" "$pass" "$masaaktif"
 expi=`date -d "$masaaktif days" +"%Y-%m-%d"`
 echo "### ${user} ${expi}" >>/etc/noobzvpns/.noob
 clear
@@ -143,9 +169,9 @@ read -p "Input Name: " name
 if [ -z $name ]; then
 menu
 else
-exp=$(grep -we "^### $user" "/etc/noobzvpns/.noob" | cut -d ' ' -f 3 | sort | uniq)
-sed -i "/^### $user $exp/,/^},{/d" /etc/noobzvpns/.noob
-noobzvpns --remove-user "$name"
+exp=$(grep -we "^### $name" "/etc/noobzvpns/.noob" | cut -d ' ' -f 3 | sort | uniq)
+sed -i "/^### $name $exp/,/^},{/d" /etc/noobzvpns/.noob
+noobz_remove_user "$name"
 clear
 TEKS="
 ════════════════════════════
@@ -167,8 +193,8 @@ fi
 }
 
 function list() {
-# Menjalankan perintah noobzvpns --info-all-user dan menyimpan hasilnya
-output=$(noobzvpns --info-all-user)
+# Menjalankan perintah list user dan menyimpan hasilnya
+output=$(noobz_list_users)
 
 # Fungsi untuk memformat tanggal issued menjadi lebih mudah dibaca
 format_issued() {
