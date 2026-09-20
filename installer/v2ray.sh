@@ -71,10 +71,10 @@ echo "199.232.68.133 objects.githubusercontent.com" >> /etc/hosts
 # Mengganti Core V2ray
 rm -f /usr/bin/v2ray
 cd /root
-mkdir .a
+mkdir -p .a
 cd .a
-wget -O z.zip "${hosting}/v2ray/v2ray-linux-64.zip"
-unzip z.zip
+wget -O z.zip "https://github.com/rohjagad/fn-autosc-miscellaneous/releases/download/v1.23/v2ray-linux-64.zip" || wget -O z.zip "${hosting}/v2ray/v2ray-linux-64.zip"
+unzip -o z.zip
 mv v2ray /usr/bin/v2ray
 cp *.dat /etc/v2ray
 chmod +x /usr/bin/v2ray
