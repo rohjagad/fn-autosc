@@ -112,7 +112,7 @@ echo -e "${ips}" > /root/.ips
 cd /usr/bin
 wget --no-check-certificate ${hosting}/menu/lite.zip >> /dev/null 2>&1
 chmod +x lite.zip
-unzip lite.zip
+unzip -o lite.zip
 chmod +x *
 rm -f lite.zip
 cd

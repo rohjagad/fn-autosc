@@ -113,7 +113,7 @@ rm -f /root/package.sh
 cd /usr/bin
 wget --no-check-certificate ${hosting}/menu/full.zip >> /dev/null 2>&1
 chmod +x full.zip
-unzip full.zip
+unzip -o full.zip
 chmod +x *
 rm -f full.zip
 cd
