@@ -77,6 +77,8 @@ apt install -y screen curl jq bzip2 gzip coreutils rsyslog iftop \
 curl -sSL https://deb.nodesource.com/setup_16.x | bash - 
  apt-get install nodejs -y
 
+NET=$(ip -4 route show default 2>/dev/null | awk '{print $5}')
+[[ -z "$NET" ]] && NET="eth0"
 /etc/init.d/vnstat restart
 wget -q https://raw.githubusercontent.com/rohjagad/fn-autosc-miscellaneous/1.23/vnstat-2.6.tar.gz
 tar zxvf vnstat-2.6.tar.gz
