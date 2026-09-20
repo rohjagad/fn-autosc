@@ -137,12 +137,13 @@ echo -e "ip=${ip}
 server_priv_key=${server_priv_key}
 server_pub_key=${server_pub_key}" > /etc/wireguard/params
 source /etc/wireguard/params
+systemctl stop wg-quick@wg0 2>/dev/null || true
 echo -e "[Interface]
 Address = 10.66.66.1/24
 ListenPort = 51820
 PrivateKey = ${server_priv_key}
 PostUp = sleep 1; iptables -A FORWARD -i ${netinfo} -o wg0 -j ACCEPT; iptables -A FORWARD -i wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o ${netinfo} -j MASQUERADE
-PostDown = iptables -D FORWARD -i ${netinfo} -o wg0 -j ACCEPT; iptables -D FORWARD -i wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o ${netinfo} -j MASQUERADE" >> /etc/wireguard/wg0.conf
+PostDown = iptables -D FORWARD -i ${netinfo} -o wg0 -j ACCEPT; iptables -D FORWARD -i wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o ${netinfo} -j MASQUERADE" > /etc/wireguard/wg0.conf
 systemctl start wg-quick@wg0
 systemctl enable wg-quick@wg0
 mkdir -p /metavpn/wireguard
