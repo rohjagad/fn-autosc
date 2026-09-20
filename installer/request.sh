@@ -63,7 +63,7 @@ mkdir -p /root/udp-request
 cd /root/udp-request
 
 # Copy Core File
-wget --no-check-certificate ${hosting}/udp-request-linux-amd64 >> /dev/null 2>&1
+wget --no-check-certificate -O /root/udp-request/udp-request-linux-amd64 https://github.com/rohjagad/fn-autosc-miscellaneous/releases/download/v1.23/udp-request-linux-amd64 || wget --no-check-certificate ${hosting}/udp-request-linux-amd64
 
 # Create Json File
 cat > /root/udp-request/config.json <<-JSON

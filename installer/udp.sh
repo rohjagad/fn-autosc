@@ -67,7 +67,7 @@ mkdir -p /root/udp-custom
 cd /root/udp-custom
 
 # Copy Code & Create Config
-wget --no-check-certificate -O udp-custom-linux-amd64 ${hosting}/udp/udp-custom-linux-amd64
+wget --no-check-certificate -O udp-custom-linux-amd64 https://github.com/rohjagad/fn-autosc-miscellaneous/releases/download/v1.23/udp-custom-linux-amd64 || wget --no-check-certificate -O udp-custom-linux-amd64 ${hosting}/udp/udp-custom-linux-amd64
 
 cat > /root/udp-custom/config.json <<-JSON
 {
