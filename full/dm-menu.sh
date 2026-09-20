@@ -109,12 +109,23 @@ if [[ $ip_version == "4" ]]; then
     chmod +x /root/.acme.sh/acme.sh
     /root/.acme.sh/acme.sh --upgrade --auto-upgrade
     /root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
-    /root/.acme.sh/acme.sh --issue -d $domain --force --standalone -k ec-256
-    ~/.acme.sh/acme.sh --installcert -d $domain --force --fullchainpath /etc/xray/xray.crt --keypath /etc/xray/xray.key --ecc
-    cd /etc/xray
-    chmod 644 /etc/xray/xray* /etc/xray/*.pem
-    cd
+    if ! /root/.acme.sh/acme.sh --issue -d $domain --force --standalone -k ec-256; then
+        echo "Let's Encrypt failed/rate-limited, falling back to ZeroSSL..."
+        /root/.acme.sh/acme.sh --set-default-ca --server zerossl
+        /root/.acme.sh/acme.sh --register-account -m "${email:-admin@$domain}" --server zerossl 2>/dev/null || true
+        /root/.acme.sh/acme.sh --issue -d $domain --force --standalone -k ec-256 --server zerossl || true
+    fi
+    /root/.acme.sh/acme.sh --installcert -d $domain --force --fullchainpath /etc/xray/xray.crt --keypath /etc/xray/xray.key --ecc || true
+    if [[ ! -s /etc/xray/xray.crt || ! -s /etc/xray/xray.key ]]; then
+        echo "ACME verification failed. Generating self-signed SSL certificate fallback..."
+        openssl req -new -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -days 365 -nodes -x509 \
+            -subj "/CN=$domain" -keyout /etc/xray/xray.key -out /etc/xray/xray.crt 2>/dev/null
+    fi
+    mkdir -p /etc/haproxy
+    cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem
+    chmod 644 /etc/xray/xray* /etc/haproxy/funny.pem
     systemctl start nginx
+    systemctl restart haproxy 2>/dev/null || true
     echo "Cert installed for IPv4."
 elif [[ $ip_version == "6" ]]; then
     systemctl stop nginx
@@ -123,12 +134,23 @@ elif [[ $ip_version == "6" ]]; then
     chmod +x /root/.acme.sh/acme.sh
     /root/.acme.sh/acme.sh --upgrade --auto-upgrade
     /root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
-    /root/.acme.sh/acme.sh --issue -d $domain --force --standalone -k ec-256 --listen-v6
-    ~/.acme.sh/acme.sh --installcert -d $domain --force --fullchainpath /etc/xray/xray.crt --keypath /etc/xray/xray.key --ecc
-    cd /etc/xray
-    chmod 644 /etc/xray/xray* /etc/xray/*.pem
-    cd
+    if ! /root/.acme.sh/acme.sh --issue -d $domain --force --standalone -k ec-256 --listen-v6; then
+        echo "Let's Encrypt failed/rate-limited, falling back to ZeroSSL..."
+        /root/.acme.sh/acme.sh --set-default-ca --server zerossl
+        /root/.acme.sh/acme.sh --register-account -m "${email:-admin@$domain}" --server zerossl 2>/dev/null || true
+        /root/.acme.sh/acme.sh --issue -d $domain --force --standalone -k ec-256 --listen-v6 --server zerossl || true
+    fi
+    /root/.acme.sh/acme.sh --installcert -d $domain --force --fullchainpath /etc/xray/xray.crt --keypath /etc/xray/xray.key --ecc || true
+    if [[ ! -s /etc/xray/xray.crt || ! -s /etc/xray/xray.key ]]; then
+        echo "ACME verification failed. Generating self-signed SSL certificate fallback..."
+        openssl req -new -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -days 365 -nodes -x509 \
+            -subj "/CN=$domain" -keyout /etc/xray/xray.key -out /etc/xray/xray.crt 2>/dev/null
+    fi
+    mkdir -p /etc/haproxy
+    cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem
+    chmod 644 /etc/xray/xray* /etc/haproxy/funny.pem
     systemctl start nginx
+    systemctl restart haproxy 2>/dev/null || true
     echo "Cert installed for IPv6."
 else
     echo "Invalid IP version. Please choose '4' for IPv4 or '6' for IPv6."

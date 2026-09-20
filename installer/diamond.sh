@@ -108,6 +108,36 @@ portd=$(lsof -i:80 | awk '{print $1}')
 [[ -n "$portd" ]] && pkill -f "${portd}" || true
 systemctl stop nginx
 
+issue_certificate() {
+    local extra_flag="$1"
+    local crt_path="$2"
+    local key_path="$3"
+
+    mkdir -p /root/.acme.sh
+    curl -fsSL https://raw.githubusercontent.com/rohjagad/fn-autosc-miscellaneous/1.23/acme.sh -o /root/.acme.sh/acme.sh
+    chmod +x /root/.acme.sh/acme.sh
+    /root/.acme.sh/acme.sh --upgrade --auto-upgrade
+
+    # 1. Try Let's Encrypt first
+    /root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
+    if ! /root/.acme.sh/acme.sh --issue -d "$domain" --force --standalone -k ec-256 $extra_flag; then
+        echo "Let's Encrypt failed/rate-limited, falling back to ZeroSSL..."
+        # 2. Fallback to ZeroSSL
+        /root/.acme.sh/acme.sh --set-default-ca --server zerossl
+        /root/.acme.sh/acme.sh --register-account -m "${email:-admin@$domain}" --server zerossl 2>/dev/null || true
+        /root/.acme.sh/acme.sh --issue -d "$domain" --force --standalone -k ec-256 $extra_flag --server zerossl || true
+    fi
+
+    /root/.acme.sh/acme.sh --installcert -d "$domain" --force --fullchainpath "$crt_path" --keypath "$key_path" --ecc || true
+
+    # 3. Emergency self-signed fallback so nginx/haproxy never fail to start
+    if [[ ! -s "$crt_path" || ! -s "$key_path" ]]; then
+        echo "ACME verification failed. Generating self-signed SSL certificate fallback..."
+        openssl req -new -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -days 365 -nodes -x509 \
+            -subj "/CN=$domain" -keyout "$key_path" -out "$crt_path" 2>/dev/null
+    fi
+}
+
 # Pemilihan Opsi Generate Certificate
 if [[ -z $ips || ! $ips =~ ^(4|6|dual)$ ]]; then
     echo "Invalid or empty IP version. Defaulting to IPv4."
@@ -116,43 +146,33 @@ fi
 
 if [[ $ips == "4" ]]; then
     systemctl stop nginx
-    mkdir -p /root/.acme.sh
-    curl -fsSL https://raw.githubusercontent.com/rohjagad/fn-autosc-miscellaneous/1.23/acme.sh -o /root/.acme.sh/acme.sh
-    chmod +x /root/.acme.sh/acme.sh
-    /root/.acme.sh/acme.sh --upgrade --auto-upgrade
-    /root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
-    /root/.acme.sh/acme.sh --issue -d $domain --force --standalone -k ec-256
-    ~/.acme.sh/acme.sh --installcert -d $domain --force --fullchainpath /etc/xray/xray.crt --keypath /etc/xray/xray.key --ecc
+    issue_certificate "" "/etc/xray/xray.crt" "/etc/xray/xray.key"
     chmod 644 /etc/xray/xray.*
+    mkdir -p /etc/haproxy
+    cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem
+    chmod 644 /etc/haproxy/funny.pem
     systemctl start nginx
     echo "Cert installed for IPv4."
 elif [[ $ips == "6" ]]; then
     systemctl stop nginx
-    mkdir -p /root/.acme.sh
-    curl -fsSL https://raw.githubusercontent.com/rohjagad/fn-autosc-miscellaneous/1.23/acme.sh -o /root/.acme.sh/acme.sh
-    chmod +x /root/.acme.sh/acme.sh
-    /root/.acme.sh/acme.sh --upgrade --auto-upgrade
-    /root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
-    /root/.acme.sh/acme.sh --issue -d $domain --force --standalone -k ec-256 --listen-v6
-    ~/.acme.sh/acme.sh --installcert -d $domain --force --fullchainpath /etc/xray/xray.crt --keypath /etc/xray/xray.key --ecc
+    issue_certificate "--listen-v6" "/etc/xray/xray.crt" "/etc/xray/xray.key"
     chmod 644 /etc/xray/xray.*
+    mkdir -p /etc/haproxy
+    cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem
+    chmod 644 /etc/haproxy/funny.pem
     systemctl start nginx
     echo "Cert installed for IPv6."
 elif [[ $ips == "dual" ]]; then
     systemctl stop nginx
-    mkdir -p /root/.acme.sh
-    curl -fsSL https://raw.githubusercontent.com/rohjagad/fn-autosc-miscellaneous/1.23/acme.sh -o /root/.acme.sh/acme.sh
-    chmod +x /root/.acme.sh/acme.sh
-    /root/.acme.sh/acme.sh --upgrade --auto-upgrade
-    /root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
-    /root/.acme.sh/acme.sh --issue -d $domain --force --standalone -k ec-256
-    ~/.acme.sh/acme.sh --installcert -d $domain --force --fullchainpath /etc/xray/xray4.crt --keypath /etc/xray/xray4.key --ecc
-    /root/.acme.sh/acme.sh --issue -d $domain --force --standalone -k ec-256 --listen-v6
-    ~/.acme.sh/acme.sh --installcert -d $domain --force --fullchainpath /etc/xray/xray6.crt --keypath /etc/xray/xray6.key --ecc
+    issue_certificate "" "/etc/xray/xray4.crt" "/etc/xray/xray4.key"
+    issue_certificate "--listen-v6" "/etc/xray/xray6.crt" "/etc/xray/xray6.key"
     cat /etc/xray/xray4.crt /etc/xray/xray6.crt > /etc/xray/xray.crt
     cat /etc/xray/xray4.key /etc/xray/xray6.key > /etc/xray/xray.key
     rm -f /etc/xray/xray4.crt /etc/xray/xray6.crt /etc/xray/xray4.key /etc/xray/xray6.key
     chmod 644 /etc/xray/xray.*
+    mkdir -p /etc/haproxy
+    cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem
+    chmod 644 /etc/haproxy/funny.pem
     systemctl start nginx
     echo "Success Install Certificate Dual Stack"
 fi
