@@ -128,6 +128,27 @@ This file records fixes confirmed in source review or live testing.
 - Nginx configuration test passed.
 - HAProxy configuration validation passed with warnings.
 
+## Libreswan 3.32 NSS Assertion Crash on Debian 11/12
+
+- **Commits:** `429cee1`
+- Libreswan 3.32 compilation from source failed at runtime with an assertion failure: `NSS: AEAD decryption using AES_GCM_16_128 and PK11_Decrypt() failed (SECERR: 2 (0x2))` due to modern libnss3 changes.
+- Switched Debian/Ubuntu to use distribution-packaged `strongswan` and `xl2tpd` instead of compiling legacy Libreswan 3.32.
+- Verified `strongswan-starter` / `ipsec.service` is active and running cleanly with 0 failed units.
+
+## Automated ACME Fallback (Let's Encrypt 429 Rate Limits) & HAProxy funny.pem Sync
+
+- **Commits:** `55a5032`
+- Reinstalls hitting Let's Encrypt weekly rate limits (HTTP 429 "too many certificates already issued") left `/etc/xray/xray.crt` empty, crashing Nginx and HAProxy.
+- Updated `installer/diamond.sh`, `full/dm-menu.sh`, and `lite/dm-menu.sh` to automatically fall back to ZeroSSL (`--server zerossl`) and generate a temporary self-signed certificate if all ACME CAs fail.
+- Automatically creates and synchronizes `/etc/haproxy/funny.pem` from `/etc/xray/xray.crt` and `/etc/xray/xray.key`.
+- Verified Nginx and HAProxy boot cleanly with zero SSL errors.
+
+## Fastly CDN Release URLs for Large Binary Dependencies
+
+- **Commits:** `fa21a0e`
+- Raw GitHub URLs (`raw.githubusercontent.com`) heavily throttle blobs larger than 50MB, causing Go (`go1.22.0.linux-amd64.tar.gz`, 66MB) to download at <35 KB/s (~15-20 min installer stalls).
+- Hosted large assets in `rohjagad/fn-autosc-miscellaneous` GitHub Release `v1.23` backed by Fastly CDN, restoring download speeds to 12+ MB/s (~4 seconds).
+
 ## Not Fixed Yet
 
 The following findings remain open and are documented rather than silently
@@ -136,7 +157,6 @@ changed:
 - Stale `199.232.68.133 raw.githubusercontent.com` entry.
 - SlowDNS failure until a nameserver/domain is configured.
 - Fail2ban failure caused by missing SSH log input.
-- Libreswan/IPsec crash.
 - Duplicate website installation in the Lite installer.
 - Reversed IPv4/IPv6 labels in the main menu.
 - Full interactive feature coverage for every account action and submenu.
