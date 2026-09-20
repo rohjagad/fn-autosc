@@ -78,7 +78,7 @@ curl -sSL https://deb.nodesource.com/setup_16.x | bash -
  apt-get install nodejs -y
 
 /etc/init.d/vnstat restart
-wget -q https://humdi.net/vnstat/vnstat-2.6.tar.gz
+wget -q https://raw.githubusercontent.com/rohjagad/fn-autosc-miscellaneous/1.23/vnstat-2.6.tar.gz
 tar zxvf vnstat-2.6.tar.gz
 cd vnstat-2.6
 ./configure --prefix=/usr --sysconfdir=/etc >/dev/null 2>&1 && make >/dev/null 2>&1 && make install >/dev/null 2>&1

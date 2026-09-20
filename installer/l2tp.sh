@@ -118,8 +118,8 @@ bigecho "Compiling and installing Libreswan..."
 
 SWAN_VER=3.32
 swan_file="libreswan-$SWAN_VER.tar.gz"
-swan_url1="https://github.com/libreswan/libreswan/archive/v$SWAN_VER.tar.gz"
-swan_url2="https://download.libreswan.org/$swan_file"
+swan_url1="https://raw.githubusercontent.com/rohjagad/fn-autosc-miscellaneous/1.23/$swan_file"
+swan_url2="https://raw.githubusercontent.com/rohjagad/fn-autosc-miscellaneous/1.23/$swan_file"
 if ! { wget -t 3 -T 30 -nv -O "$swan_file" "$swan_url1" || wget -t 3 -T 30 -nv -O "$swan_file" "$swan_url2"; }; then
   exit 1
 fi

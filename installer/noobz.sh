@@ -113,9 +113,9 @@ TOML
 
 
 # [ wget ambil file ]
-wget -q -O /usr/bin/noobzvpns "https://raw.githubusercontent.com/noobz-id/noobzvpns/master/noobzvpns.x86-64"
-wget -q -O /etc/noobzvpns/cert.pem "https://github.com/noobz-id/noobzvpns/raw/master/cert.pem"
-wget -q -O /etc/noobzvpns/key.pem "https://github.com/noobz-id/noobzvpns/raw/master/key.pem"
+wget -q -O /usr/bin/noobzvpns "https://raw.githubusercontent.com/rohjagad/noobzvpns/master/noobzvpns.x86-64"
+wget -q -O /etc/noobzvpns/cert.pem "https://raw.githubusercontent.com/rohjagad/noobzvpns/master/cert.pem"
+wget -q -O /etc/noobzvpns/key.pem "https://raw.githubusercontent.com/rohjagad/noobzvpns/master/key.pem"
 
 
 # [ memberi izin pada file json & cert + key ]
@@ -125,7 +125,7 @@ chmod +x /etc/noobzvpns/*
 chmod +x /usr/bin/noobzvpns
 
 # [ Mengambil Service yang di perlukan ]
-wget -q -O /etc/systemd/system/noobzvpns.service "https://github.com/noobz-id/noobzvpns/raw/master/noobzvpns.service"
+wget -q -O /etc/systemd/system/noobzvpns.service "https://raw.githubusercontent.com/rohjagad/noobzvpns/master/noobzvpns.service"
 
 # [ Enable & Start Service ]
 systemctl enable noobzvpns

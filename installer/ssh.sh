@@ -121,7 +121,7 @@ chmod +x config.yaml
 cat> /etc/systemd/system/ws.service << END
 [Unit]
 Description=WebSocket
-Documentation=https://github.com/DindaPutriFN
+Documentation=https://github.com/rohjagad/fn-autosc
 After=syslog.target network-online.target
 
 [Service]

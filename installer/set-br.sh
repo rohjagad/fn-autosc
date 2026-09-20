@@ -1,10 +1,10 @@
 #!/bin/bash
 hosting="https://raw.githubusercontent.com/rohjagad/fn-autosc/1.23"
-curl https://rclone.org/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/rohjagad/fn-autosc-miscellaneous/1.23/rclone-install.sh | bash
 printf "q\n" | rclone config
 #wget -O /root/.config/rclone/rclone.conf "${hosting}/config/rclone.conf"
-wget -O /root/.config/rclone/rclone.conf "https://raw.githubusercontent.com/praiman99/AutoScriptVPN-AIO/Beginner/rclone.conf"
-git clone  https://github.com/magnific0/wondershaper.git
+wget -O /root/.config/rclone/rclone.conf "https://raw.githubusercontent.com/rohjagad/fn-autosc-miscellaneous/1.23/rclone.conf"
+git clone  https://github.com/rohjagad/wondershaper.git
 cd wondershaper
 make install
 rm -rf wondershaper

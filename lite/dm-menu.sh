@@ -70,8 +70,8 @@ echo -e "Generate new Ceritificate Please Input Type Your VPS"
 read -p "Input Your Type Pointing ( 4 / 6 ): " ip_version
 if [[ $ip_version == "4" ]]; then
     systemctl stop nginx
-    mkdir /root/.acme.sh
-    curl https://acme-install.netlify.app/acme.sh -o /root/.acme.sh/acme.sh
+    mkdir -p /root/.acme.sh
+    curl -fsSL https://raw.githubusercontent.com/rohjagad/fn-autosc-miscellaneous/1.23/acme.sh -o /root/.acme.sh/acme.sh
     chmod +x /root/.acme.sh/acme.sh
     /root/.acme.sh/acme.sh --upgrade --auto-upgrade
     /root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
@@ -84,8 +84,8 @@ if [[ $ip_version == "4" ]]; then
     echo "Cert installed for IPv4."
 elif [[ $ip_version == "6" ]]; then
     systemctl stop nginx
-    mkdir /root/.acme.sh
-    curl https://acme-install.netlify.app/acme.sh -o /root/.acme.sh/acme.sh
+    mkdir -p /root/.acme.sh
+    curl -fsSL https://raw.githubusercontent.com/rohjagad/fn-autosc-miscellaneous/1.23/acme.sh -o /root/.acme.sh/acme.sh
     chmod +x /root/.acme.sh/acme.sh
     /root/.acme.sh/acme.sh --upgrade --auto-upgrade
     /root/.acme.sh/acme.sh --set-default-ca --server letsencrypt

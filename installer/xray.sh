@@ -58,7 +58,7 @@ clear
 
 # Menginstall Core
 xver="25.3.6"
-bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install -u www-data --version $xver
+bash -c "$(curl -L https://raw.githubusercontent.com/rohjagad/Xray-install/main/install-release.sh)" @ install -u www-data --version $xver
 rm -fr /etc/systemd/system/xray.service
 rm -fr /etc/systemd/system/xray.service.d
 rm -fr /etc/systemd/system/xray@.service

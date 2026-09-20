@@ -117,7 +117,7 @@ fi
 if [[ $ips == "4" ]]; then
     systemctl stop nginx
     mkdir -p /root/.acme.sh
-    curl https://acme-install.netlify.app/acme.sh -o /root/.acme.sh/acme.sh
+    curl -fsSL https://raw.githubusercontent.com/rohjagad/fn-autosc-miscellaneous/1.23/acme.sh -o /root/.acme.sh/acme.sh
     chmod +x /root/.acme.sh/acme.sh
     /root/.acme.sh/acme.sh --upgrade --auto-upgrade
     /root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
@@ -129,7 +129,7 @@ if [[ $ips == "4" ]]; then
 elif [[ $ips == "6" ]]; then
     systemctl stop nginx
     mkdir -p /root/.acme.sh
-    curl https://acme-install.netlify.app/acme.sh -o /root/.acme.sh/acme.sh
+    curl -fsSL https://raw.githubusercontent.com/rohjagad/fn-autosc-miscellaneous/1.23/acme.sh -o /root/.acme.sh/acme.sh
     chmod +x /root/.acme.sh/acme.sh
     /root/.acme.sh/acme.sh --upgrade --auto-upgrade
     /root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
@@ -141,7 +141,7 @@ elif [[ $ips == "6" ]]; then
 elif [[ $ips == "dual" ]]; then
     systemctl stop nginx
     mkdir -p /root/.acme.sh
-    curl https://acme-install.netlify.app/acme.sh -o /root/.acme.sh/acme.sh
+    curl -fsSL https://raw.githubusercontent.com/rohjagad/fn-autosc-miscellaneous/1.23/acme.sh -o /root/.acme.sh/acme.sh
     chmod +x /root/.acme.sh/acme.sh
     /root/.acme.sh/acme.sh --upgrade --auto-upgrade
     /root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
