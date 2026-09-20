@@ -64,7 +64,7 @@ for package in "${REQUIRED_PACKAGES[@]}"; do
   fi
 done
 clear
-rm -fr /usr/bin/go ; wget https://raw.githubusercontent.com/rohjagad/fn-autosc-miscellaneous/1.23/go1.22.0.linux-amd64.tar.gz ; sudo tar -C /usr/local -xzf go1.22.0.linux-amd64.tar.gz ; rm -fr /root/go1.22.0.linux-amd64.tar.gz ; echo "export PATH="/usr/local/go/bin:$PATH:/rere"" >> /root/.bashrc ; cd ; source .bashrc ; go version
+rm -fr /usr/bin/go ; wget https://github.com/rohjagad/fn-autosc-miscellaneous/releases/download/v1.23/go1.22.0.linux-amd64.tar.gz ; sudo tar -C /usr/local -xzf go1.22.0.linux-amd64.tar.gz ; rm -fr /root/go1.22.0.linux-amd64.tar.gz ; echo "export PATH="/usr/local/go/bin:$PATH:/rere"" >> /root/.bashrc ; cd ; source .bashrc ; go version
 
 install_slowdns() {
   export PATH="/usr/local/go/bin:$PATH"

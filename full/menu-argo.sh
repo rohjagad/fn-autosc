@@ -98,7 +98,7 @@ setup() {
 clear
 
 # Copy File Core
-wget https://raw.githubusercontent.com/rohjagad/fn-autosc-miscellaneous/1.23/cloudflared-linux-amd64.deb
+wget https://github.com/rohjagad/fn-autosc-miscellaneous/releases/download/v1.23/cloudflared-linux-amd64.deb
 sudo dpkg -i cloudflared-linux-amd64.deb
 rm -fr cloudflared-linux-amd64.deb
 
