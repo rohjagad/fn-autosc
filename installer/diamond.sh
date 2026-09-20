@@ -74,7 +74,7 @@ hosting="https://raw.githubusercontent.com/rohjagad/fn-autosc/1.23"
 
 # Install dan konfigurasi nginx
 apt update && apt install nginx -y
-syste   mctl stop nginx
+systemctl stop nginx
 rm -fr /etc/nginx/nginx.conf
 
 # Unduh file konfigurasi berdasarkan nilai ips
@@ -105,7 +105,7 @@ systemctl start nginx
 
 # Mematikan Port 80 / Disable HTTP PORT
 portd=$(lsof -i:80 | awk '{print $1}')
-pkill ${portd}
+[[ -n "$portd" ]] && pkill -f "${portd}" || true
 systemctl stop nginx
 
 # Pemilihan Opsi Generate Certificate

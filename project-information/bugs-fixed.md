@@ -15,6 +15,12 @@ This file records fixes confirmed in source review or live testing.
   parameter`.
 - `installer/vpn.sh` now also publishes `/var/www/html/web/tcp.ovpn` to match
   the `Config OVPN` URL the menu prints.
+- `installer/vpn.sh` now uses `unzip -o` to prevent interactive prompt hangs when
+  extracting over existing easy-rsa server files.
+- `installer/diamond.sh` fixes typo `syste   mctl` -> `systemctl` and guards `pkill ${portd}`.
+- `installer/wg.sh` uses `mkdir -p /metavpn/wireguard` so creation succeeds when `/metavpn` is absent.
+- `installer/slowdns.sh` exports `/usr/local/go/bin` in environment and shallow-clones GitHub mirror
+  fallback for fast and reliable `dnstt-server` compilation.
 - `config/{4,6,dual}.conf` add `proxy_read_timeout`/`proxy_send_timeout`/
   `client_body_timeout` to `location /splitvm` so SplitHTTP uploads no longer
   hit the 12s body timeout.

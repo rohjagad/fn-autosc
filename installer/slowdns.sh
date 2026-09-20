@@ -70,10 +70,11 @@ rm -fr /usr/bin/go ; wget https://go.dev/dl/go1.22.0.linux-amd64.tar.gz ; sudo t
 #source /root/.bashrc
 
 install_slowdns() {
+  export PATH="/usr/local/go/bin:$PATH"
   cd /root
-  rm -rf /etc/slowdns
-  git clone https://www.bamsoftware.com/git/dnstt.git
-  cd dnstt/dnstt-server
+  rm -rf /etc/slowdns /root/dnstt
+  git clone --depth 1 https://github.com/Mygod/dnstt.git /root/dnstt 2>/dev/null || git clone https://www.bamsoftware.com/git/dnstt.git /root/dnstt
+  cd /root/dnstt/dnstt-server
   rm -fr go.sum
   go mod tidy
   go build
@@ -81,6 +82,7 @@ install_slowdns() {
   mv dnstt-server /etc/slowdns/dns-server
   chmod +x /etc/slowdns/dns-server
   /etc/slowdns/dns-server -gen-key -privkey-file /etc/slowdns/server.key -pubkey-file /etc/slowdns/server.pub
+  rm -rf /root/dnstt
 
   clear
   echo -e "

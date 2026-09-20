@@ -145,7 +145,7 @@ PostUp = sleep 1; iptables -A FORWARD -i ${netinfo} -o wg0 -j ACCEPT; iptables -
 PostDown = iptables -D FORWARD -i ${netinfo} -o wg0 -j ACCEPT; iptables -D FORWARD -i wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o ${netinfo} -j MASQUERADE" >> /etc/wireguard/wg0.conf
 systemctl start wg-quick@wg0
 systemctl enable wg-quick@wg0
-mkdir /metavpn/wireguard
+mkdir -p /metavpn/wireguard
 touch /metavpn/wireguard/wireguard-clients.txt
 systemctl stop wg-quick@wg0
 iptables-save > /metavpn/iptables.rules
