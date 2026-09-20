@@ -114,6 +114,7 @@ apt-get -y install libnss3-dev libnspr4-dev pkg-config \
   libcurl4-nss-dev flex bison gcc make libnss3-tools \
   libevent-dev ppp xl2tpd pptpd
 fi
+if [[ ${OS} == "centos" ]]; then
 bigecho "Compiling and installing Libreswan..."
 
 SWAN_VER=3.32
@@ -138,15 +139,6 @@ EOF
 if ! grep -qs IFLA_XFRM_LINK /usr/include/linux/if_link.h; then
   echo "USE_XFRM_INTERFACE_IFLA_HEADER = true" >> Makefile.inc.local
 fi
-if [[ ${OS} == "debian" ]]; then
-if [ "$(packaging/utils/lswan_detect.sh init)" = "systemd" ]; then
-  apt-get -y install libsystemd-dev
-  fi
-elif [[ ${OS} == "ubuntu" ]]; then
-if [ "$(packaging/utils/lswan_detect.sh init)" = "systemd" ]; then
-  apt-get -y install libsystemd-dev
-fi
-fi
 NPROCS=$(grep -c ^processor /proc/cpuinfo)
 [ -z "$NPROCS" ] && NPROCS=1
 make "-j$((NPROCS+1))" -s base && make -s install-base
@@ -155,6 +147,7 @@ cd /opt/src || exit 1
 /bin/rm -rf "/opt/src/libreswan-$SWAN_VER"
 if ! /usr/local/sbin/ipsec --version 2>/dev/null | grep -qF "$SWAN_VER"; then
   exiterr "Libreswan $SWAN_VER failed to build."
+fi
 fi
 
 bigecho "Creating VPN configuration..."
