@@ -4,6 +4,14 @@
     echo "nameserver 1.1.1.1" | cat - /etc/resolv.conf >> /etc/resolv.conf.tmp && mv /etc/resolv.conf.tmp /etc/resolv.conf
 }
 
+if grep -q "bullseye" /etc/os-release 2>/dev/null; then
+    if ! grep -qs "deb.debian.org/debian.*bullseye" /etc/apt/sources.list /etc/apt/sources.list.d/* 2>/dev/null; then
+        echo "deb http://deb.debian.org/debian bullseye main contrib non-free" >> /etc/apt/sources.list
+        echo "deb http://deb.debian.org/debian bullseye-updates main contrib non-free" >> /etc/apt/sources.list
+        apt update -y >/dev/null 2>&1 || true
+    fi
+fi
+
 hosting="https://raw.githubusercontent.com/rohjagad/fn-autosc/1.23"
 ungu="\033[0;35m"
 Xark="\033[0m"
