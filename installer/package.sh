@@ -3,6 +3,12 @@
 clear
 
 # Install Package
+if grep -q "bullseye" /etc/os-release 2>/dev/null; then
+    if ! grep -qs "deb.debian.org/debian.*bullseye" /etc/apt/sources.list /etc/apt/sources.list.d/* 2>/dev/null; then
+        echo "deb http://deb.debian.org/debian bullseye main contrib non-free" >> /etc/apt/sources.list
+        echo "deb http://deb.debian.org/debian bullseye-updates main contrib non-free" >> /etc/apt/sources.list
+    fi
+fi
 apt update
 apt install -y curl jq wget socat certbot zip unzip dnsutils git screen whois pwgen python fail2ban gnutls-bin mlocate dh-make build-essential dos2unix debconf-utils iptables htop
 apt install at -y
