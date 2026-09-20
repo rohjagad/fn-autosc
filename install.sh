@@ -69,14 +69,14 @@ clear
 }
 
 function full() {
-wget -q ${hosting}/installer/full.sh
+curl -fsSL "${hosting}/installer/full.sh" -o full.sh || wget -q "${hosting}/installer/full.sh"
 chmod +x full.sh
 ./full.sh
 rm -fr full.sh
 }
 
 function lite() {
-wget -q ${hosting}/installer/lite.sh
+curl -fsSL "${hosting}/installer/lite.sh" -o lite.sh || wget -q "${hosting}/installer/lite.sh"
 chmod +x lite.sh
 ./lite.sh
 rm -fr lite.sh
