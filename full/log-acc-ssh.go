@@ -17,8 +17,9 @@ const (
 	colorGreen  = "\033[0;32m"
 	colorBlue   = "\033[1;34m"
 	colorPurple = "\033[1;35m"
-	colorOrange = "\033[38;5;208m"
-	colorRed    = "\033[0;31m"
+	colorOrange     = "\033[38;5;208m"
+	colorRed        = "\033[0;31m"
+	colorDeepPurple = "\033[38;5;141m"
 )
 
 func rainbowSep(text string) string {
@@ -89,7 +90,7 @@ func formatLogForTerminal(raw string) string {
 				result = append(result, colorPurple+cleanTitle+colorReset)
 			} else if strings.HasPrefix(trimmed, "Link ") && strings.Contains(line, ":") {
 				parts := strings.SplitN(line, ":", 2)
-				result = append(result, fmt.Sprintf("%s:%s%s", parts[0], colorPurple, parts[1])+colorReset)
+				result = append(result, fmt.Sprintf("%s:%s%s", parts[0], colorDeepPurple, parts[1])+colorReset)
 			} else if strings.Contains(line, ":") && !strings.HasPrefix(trimmed, "vmess://") && !strings.HasPrefix(trimmed, "vless://") && !strings.HasPrefix(trimmed, "trojan://") && !strings.HasPrefix(trimmed, "http://") && !strings.HasPrefix(trimmed, "https://") {
 				parts := strings.SplitN(line, ":", 2)
 				result = append(result, fmt.Sprintf("%s:%s%s", parts[0], colorGreen, parts[1])+colorReset)
