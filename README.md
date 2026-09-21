@@ -71,9 +71,11 @@ After installation completes, manage services via terminal commands:
 | **FN-OHP** | OpenVPN HTTP Proxy | `9088` | OHP bridge to OpenVPN |
 | **Xray VMess / VLESS / Trojan** | WebSocket (TLS) | `443`, `2053`, `2083`, `2087`, `2096` | Multiplexed over Nginx |
 | **Xray VMess / VLESS / Trojan** | WebSocket (NoneTLS) | `80`, `8880`, `2052`, `2082`, `2095` | Multiplexed over Nginx |
-| **Xray HTTP Upgrade** | HTTP Upgrade (TLS / NoneTLS) | `443` (TLS), `80` (NoneTLS) | Xray upgrade backend on port `2017` |
-| **Xray gRPC** | Gun / Multi-mode | `443` (TLS) | Xray gRPC backend on port `2018` |
-| **Xray SplitHTTP** | xhttp transport | `443` (TLS), `80` (NoneTLS) | Xray split backend on port `2019` |
+| **Xray HTTP Upgrade** | HTTP Upgrade (TLS) | `443`, `2053`, `2083`, `2087`, `2096` | Multiplexed over Nginx |
+| **Xray HTTP Upgrade** | HTTP Upgrade (NoneTLS) | `80`, `8880`, `2052`, `2082`, `2095` | Multiplexed over Nginx |
+| **Xray gRPC** | Gun / Multi-mode (TLS) | `443`, `2053`, `2083`, `2087`, `2096` | gRPC requires TLS |
+| **Xray SplitHTTP** | xhttp transport (TLS) | `443`, `2053`, `2083`, `2087`, `2096` | Multiplexed over Nginx |
+| **Xray SplitHTTP** | xhttp transport (NoneTLS) | `80`, `8880`, `2052`, `2082`, `2095` | Multiplexed over Nginx |
 | **OpenVPN TCP** | Direct TCP | `1194` | Profile: `/var/www/html/web/tcp.ovpn` |
 | **OpenVPN UDP** | Direct UDP | `2200` | High-performance UDP tunnel |
 | **OpenVPN WebSocket** | HTTP WebSocket | `2086` | OpenVPN payload over HTTP WS |
@@ -191,7 +193,12 @@ IP limit files: `{username}` (max concurrent IPs as integer).
 
 Each protocol uses specific URL paths for WebSocket, HTTP Upgrade, SplitHTTP, or gRPC service names. Client links must match server config paths exactly.
 
-Clients connect to **port 443** (TLS) or **port 80** (NoneTLS) — or [Cloudflare-compatible alternatives](#protocols-connections--ports). Nginx matches the path and forwards internally to the V2Ray/Xray backend.
+Clients connect on any port from the [Protocols & Ports table](#protocols-connections--ports). Nginx serves all transports on the same ports:
+
+- **TLS:** `443`, `2053`, `2083`, `2087`, `2096`
+- **NoneTLS:** `80`, `8880`, `2052`, `2082`, `2095`
+
+Nginx matches the URL path and forwards internally to the V2Ray/Xray backend.
 
 | Protocol | Transport | TLS Path | NoneTLS Path | Internal Backend | Config File |
 | :--- | :--- | :--- | :--- | :--- | :--- |
