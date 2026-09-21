@@ -207,3 +207,5 @@ Each protocol uses specific URL paths for WebSocket, HTTP Upgrade, SplitHTTP, or
 | Trojan gRPC | gRPC | `trojan-grpc` | — | 33456 | `/etc/xray/json/grpc.json` |
 
 Nginx reverse-proxies all paths to the corresponding backend ports. gRPC uses `grpc_pass`, WebSocket/SplitHTTP use `proxy_pass`, HTTP Upgrade uses exact `location =` matches.
+
+> **Note on arbitrary paths (`/anything`, `/whatever`, `/custom`):** Unmatched paths fall through to Nginx `location /`, which round-robins between **wsEpro (SSH WebSocket, port 2080)** and **VMess WS catch-all (port 977)**. This causes ~50% of VMess connections to hit the wrong backend and fail. Always use the dedicated paths listed above for stable connections.
