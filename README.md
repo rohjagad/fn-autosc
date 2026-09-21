@@ -191,21 +191,23 @@ IP limit files: `{username}` (max concurrent IPs as integer).
 
 Each protocol uses specific URL paths for WebSocket, HTTP Upgrade, SplitHTTP, or gRPC service names. Client links must match server config paths exactly.
 
-| Protocol | Transport | TLS Path | NoneTLS Path | Server Port | Config File |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| VMess WS | WebSocket | `/vmess` | `/worryfree` | 23456 / 95 | `/etc/v2ray/config.json` |
-| VLESS WS | WebSocket | `/vless` | `/vless` | 14016 | `/etc/v2ray/config.json` |
-| Trojan WS | WebSocket | `/trojanws` | `/trojanws` | 25432 | `/etc/v2ray/config.json` |
-| VMess HTTP Upgrade | HTTPUpgrade | `/rere` | `/rere` | 8001 | `/etc/xray/json/upgrade.json` |
-| VLESS HTTP Upgrade | HTTPUpgrade | `/imam` | `/imam` | 8003 | `/etc/xray/json/upgrade.json` |
-| Trojan HTTP Upgrade | HTTPUpgrade | `/luqito` | `/luqito` | 8002 | `/etc/xray/json/upgrade.json` |
-| VMess SplitHTTP | SplitHTTP | `/splitvm` | `/splitvm` | 2019 | `/etc/xray/json/split.json` |
-| VLESS SplitHTTP | SplitHTTP | `/splitvl` | `/splitvl` | 2023 | `/etc/xray/json/split.json` |
-| Trojan SplitHTTP | SplitHTTP | `/splittr` | `/splittr` | 2020 | `/etc/xray/json/split.json` |
-| VMess gRPC | gRPC | `vmess-grpc` | — | 31234 | `/etc/xray/json/grpc.json` |
-| VLESS gRPC | gRPC | `vless-grpc` | — | 24456 | `/etc/xray/json/grpc.json` |
-| Trojan gRPC | gRPC | `trojan-grpc` | — | 33456 | `/etc/xray/json/grpc.json` |
+Clients connect to **port 443** (TLS) or **port 80** (NoneTLS) — or [Cloudflare-compatible alternatives](#protocols-connections--ports). Nginx matches the path and forwards internally to the V2Ray/Xray backend.
 
-Nginx reverse-proxies all paths to the corresponding backend ports. gRPC uses `grpc_pass`, WebSocket/SplitHTTP use `proxy_pass`, HTTP Upgrade uses exact `location =` matches.
+| Protocol | Transport | TLS Path | NoneTLS Path | Internal Backend | Config File |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| VMess WS | WebSocket | `/vmess` | `/worryfree` | `127.0.0.1:23456` / `:95` | `/etc/v2ray/config.json` |
+| VLESS WS | WebSocket | `/vless` | `/vless` | `127.0.0.1:14016` | `/etc/v2ray/config.json` |
+| Trojan WS | WebSocket | `/trojanws` | `/trojanws` | `127.0.0.1:25432` | `/etc/v2ray/config.json` |
+| VMess HTTP Upgrade | HTTPUpgrade | `/rere` | `/rere` | `127.0.0.1:8001` | `/etc/xray/json/upgrade.json` |
+| VLESS HTTP Upgrade | HTTPUpgrade | `/imam` | `/imam` | `127.0.0.1:8003` | `/etc/xray/json/upgrade.json` |
+| Trojan HTTP Upgrade | HTTPUpgrade | `/luqito` | `/luqito` | `127.0.0.1:8002` | `/etc/xray/json/upgrade.json` |
+| VMess SplitHTTP | SplitHTTP | `/splitvm` | `/splitvm` | `127.0.0.1:2019` | `/etc/xray/json/split.json` |
+| VLESS SplitHTTP | SplitHTTP | `/splitvl` | `/splitvl` | `127.0.0.1:2023` | `/etc/xray/json/split.json` |
+| Trojan SplitHTTP | SplitHTTP | `/splittr` | `/splittr` | `127.0.0.1:2020` | `/etc/xray/json/split.json` |
+| VMess gRPC | gRPC | `vmess-grpc` | — | `127.0.0.1:31234` | `/etc/xray/json/grpc.json` |
+| VLESS gRPC | gRPC | `vless-grpc` | — | `127.0.0.1:24456` | `/etc/xray/json/grpc.json` |
+| Trojan gRPC | gRPC | `trojan-grpc` | — | `127.0.0.1:33456` | `/etc/xray/json/grpc.json` |
+
+Internal backends are localhost-only — never exposed to the internet. Nginx routes by path: `grpc_pass` for gRPC, `proxy_pass` for WebSocket/SplitHTTP, exact `location =` for HTTP Upgrade.
 
 > **Note on arbitrary paths (`/anything`, `/whatever`, `/custom`):** Unmatched paths fall through to Nginx `location /`, which round-robins between **wsEpro (SSH WebSocket, port 2080)** and **VMess WS catch-all (port 977)**. This causes ~50% of VMess connections to hit the wrong backend and fail. Always use the dedicated paths listed above for stable connections.
