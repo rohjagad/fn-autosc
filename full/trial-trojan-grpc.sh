@@ -94,7 +94,7 @@ systemctl restart xray@grpc
 systemctl restart quota-grpc
 
 # Konfigurasi Trojan gRPC TLS
-link1="trojan://${uuid}@${domain}:443?mode=gun&security=tls&authority=${domain}&type=grpc&serviceName=trojan-grpc&sni=${domain}#user"
+link1="trojan://${uuid}@${domain}:443?mode=gun&security=tls&authority=${domain}&type=grpc&serviceName=trojan-grpc&sni=${domain}#${user}"
 
 TEKS="
 =======================

@@ -94,10 +94,10 @@ systemctl restart v2ray
 systemctl restart quota-ws
 
 # Konfigurasi Vless WS TLS
-vlesslink1="vless://${uuid}@${domain}:443?path=/vlessws&security=tls&encryption=none&host=${domain}&type=ws&sni=${domain}#${user}"
+vlesslink1="vless://${uuid}@${domain}:443?path=/vless&security=tls&encryption=none&host=${domain}&type=ws&sni=${domain}#${user}"
 
 # Konfigurasi Vless WS NoneTLS
-vlesslink2="vless://${uuid}@${domain}:80?path=/vlessws&security=none&encryption=none&host=${domain}&type=ws#${user}"
+vlesslink2="vless://${uuid}@${domain}:80?path=/vless&security=none&encryption=none&host=${domain}&type=ws#${user}"
 
 TEKS="
 =======================
@@ -117,7 +117,7 @@ Quota   : $quota GB
 =======================
 
 TLS: 443, 2053, 2083, 2087, 2096
-Path: /vless, /vlessws
+Path: /vless
 NoneTLS: 80, 8880, 2052, 2082, 2095
 Network: WebSocket
 =======================

@@ -144,10 +144,10 @@ systemctl restart xray@split
 systemctl restart quota-split
 
 # Konfigurasi Trojan split TLS
-link1="trojan://${uuid}@${domain}:443?path=/splittr&security=tls&host=${domain}&type=xhttpsni=${domain}#${user}"
+link1="trojan://${uuid}@${domain}:443?path=/splittr&security=tls&host=${domain}&type=splithttp&sni=${domain}#${user}"
 
 # Konfigurasi Trojan split NonTLS
-link2="trojan://${uuid}@${domain}:80?path=/splittr&security=none&host=${domain}&type=xhttp#${user}"
+link2="trojan://${uuid}@${domain}:80?path=/splittr&security=none&host=${domain}&type=splithttp#${user}"
 
 TEKS="
 ======================

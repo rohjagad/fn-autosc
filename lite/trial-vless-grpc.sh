@@ -94,7 +94,7 @@ systemctl restart xray@grpc
 systemctl restart quota-grpc
 
 # Konfigurasi Vless gRPC
-vlesslink1="vless://$uuid@$domain:443?mode=gun&security=none&encryption=none&authority=$domain&type=grpc&serviceName=vless-grpc&sni=$domain#${user}"
+vlesslink1="vless://$uuid@$domain:443?mode=gun&security=tls&encryption=none&authority=$domain&type=grpc&serviceName=vless-grpc&sni=$domain#${user}"
 
 TEKS="
 ======================
