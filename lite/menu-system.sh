@@ -26,7 +26,7 @@
     # Mencocokkan data berdasarkan IP lokal
     MATCH=$(echo "$PERMISSION_DATA" | grep "###" | grep "$LOCAL_IP")
     if [ -z "$MATCH" ]; then
-        echo "Your IP doesn’t have on database"
+        echo "Your IP is not in the database"
         exit 1
     fi
 
@@ -38,7 +38,7 @@
     # Validasi masa aktif
     REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
     if [ "$REMAINING_DAYS" -lt 0 ]; then
-        echo "Izin telah kadaluwarsa."
+        echo "Authorization has expired."
         exit 1
     fi
 
@@ -46,7 +46,7 @@
     output() {
         echo "Username: $USERNAME"
         echo "IPv4: $PERMISSION_IP"
-        echo "Expired: $EXPIRED_DATE ( $REMAINING_DAYS Days )"
+        echo "Expired: $EXPIRED_DATE ($REMAINING_DAYS days)"
     }
 
     output
@@ -219,14 +219,14 @@ token() {
 add() {
     clear
     echo -e "
-    Create Account Warp Wireguard
-    =============================
+    Create Cloudflare WARP Account
+    ==============================
 
-    1. Create Account with IPv4
-    2. Create Account with IPv6
-    =============================
-    Press CTRL + C To exit menu"
-    read -p "Input Option: " aws
+    1. Create Account (IPv4)
+    2. Create Account (IPv6)
+    ==============================
+    Press [Ctrl + C] to exit"
+    read -p "Input option: " aws
     case $aws in
     1) akun4 ;;
     2) akun6 ;;
@@ -237,23 +237,23 @@ add() {
 menuwg() {
     clear
     echo -e "
-      Menu Warp Wireguard FN
+        Cloudflare WARP Menu
     ==========================
 
-    1. Install Warp Wireguard
-    2. Status Warp Wireguard
-    3. Restart Warp Wireguard
-    4. Enable Warp Wireguard
-    5. Disable Warp Wireguard
-    6. Input Token Warp Teams
+    1. Install Cloudflare WARP
+    2. WARP Service Status
+    3. Restart WARP Service
+    4. Enable WARP Service
+    5. Disable WARP Service
+    6. Enter WARP Teams Token
     ==========================
     
-    7. Create Account Wireguard
-    8. Enter to default menu
-    9. Exit this menu
+    7. Create WARP Account
+    8. Back to Main Menu
+    9. Exit
     ==========================
-    Press CTRL + C To Exit Menu"
-    read -p "Input Option: " opt
+    Press [Ctrl + C] to exit"
+    read -p "Input option: " opt
     case $opt in
     1) install ;;
     2) status ;;
@@ -287,7 +287,7 @@ echo -e " 8)  Japan (GMT +9:00)"
 echo -e " 9)  View Current Time Zone"
 echo -e ""
 echo -e "\e[1;32m══════════════════════════════════════════\e[m" | lolcat
-echo -e " x)   MENU UTAMA"
+echo -e " x)   MAIN MENU"
 echo -e "\e[1;32m══════════════════════════════════════════\e[m" | lolcat
 echo -e ""
 read -p " Select menu :  "  opt
@@ -661,17 +661,17 @@ tampilan() {
 clear
 echo -e "
 ==========================
-< = [ Menu Uninstall ] = >
+< = [ Reinstall OS ] = >
 ==========================
 
-1. Uninstall Script
-2. Back To Default Menu
+1. Reinstall OS
+2. Back to Main Menu
 ==========================
-[ Press CTRL + C To Exit ]
+[ Press Ctrl + C to Exit ]
 ==========================
   Autoscript FN AutoSC
 "
-read -p "Input Option: " ws
+read -p "Input option: " ws
 case $ws in
 1) clear ; os ;; #information ;; #os ;;
 2) menu ;;
@@ -686,19 +686,19 @@ systemd() {
 clear
 echo -e "\n
 ===========================================
-       MENU SYSTEM / SERVICE SERVER
+          SYSTEM & SERVICES MENU
 ===========================================
 
 1. Change Timezone
-2. Restart All Service
-3. Menu Warp Cloudflare [ Only VPS KVM ]
-4. Uninstall / Rebuild Server
-5. Cek Detail Port & Service
-6. Cek Status Uptime, CPU, Ram & SSD USAGE
-7. Setup Cloudflare Argo Tunnel Routing on your Server
-8. Change Banner SSH
+2. Restart All Services
+3. Cloudflare WARP (KVM Only)
+4. Reinstall OS / Rebuild Server
+5. View Service & Port Details
+6. System Resource Monitor (htop)
+7. Cloudflare Argo Tunnel Menu
+8. Change SSH Banner
 ===========================================\n"
-read -p "Input Option: " asu
+read -p "Input option: " asu
 case $asu in
 1) change_timezone ;;
 2) resall ;;

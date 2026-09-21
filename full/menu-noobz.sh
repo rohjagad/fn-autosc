@@ -27,7 +27,7 @@
     # Mencocokkan data berdasarkan IP lokal
     MATCH=$(echo "$PERMISSION_DATA" | grep "###" | grep "$LOCAL_IP")
     if [ -z "$MATCH" ]; then
-        echo "Your IP doesn’t have on database"
+        echo "Your IP is not in the database"
         exit 1
     fi
 
@@ -39,7 +39,7 @@
     # Validasi masa aktif
     REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
     if [ "$REMAINING_DAYS" -lt 0 ]; then
-        echo "Izin telah kadaluwarsa."
+        echo "Authorization has expired."
         exit 1
     fi
 
@@ -47,7 +47,7 @@
     output() {
         echo "Username: $USERNAME"
         echo "IPv4: $PERMISSION_IP"
-        echo "Expired: $EXPIRED_DATE ( $REMAINING_DAYS Days )"
+        echo "Expired: $EXPIRED_DATE ($REMAINING_DAYS days)"
     }
 
 clear
@@ -121,11 +121,11 @@ function create() {
 clear
 echo -e "
 ════════════════════════════
-Add Account NoobzVPN
+Create NoobzVPN Account
 ════════════════════════════"
 read -p "Username  : " user
 read -p "Password  : " pass
-read -p "Masa Aktif: " masaaktif
+read -p "Duration (Days): " masaaktif
 clear
 noobz_add_user "$user" "$pass" "$masaaktif"
 expi=`date -d "$masaaktif days" +"%Y-%m-%d"`
@@ -160,12 +160,12 @@ mna=$(grep -e "^### " "/etc/noobzvpns/.noob" | cut -d ' ' -f 2-3 | column -t | s
 clear
 echo -e "
 ════════════════════════════
-Delete Account
+Delete NoobzVPN Account
 ════════════════════════════
 $mna
 ════════════════════════════
 "
-read -p "Input Name: " name
+read -p "Username: " name
 if [ -z $name ]; then
 menu
 else
@@ -175,7 +175,7 @@ noobz_remove_user "$name"
 clear
 TEKS="
 ════════════════════════════
-Username Delete
+Account Deleted
 ════════════════════════════
 
 User: $name
@@ -212,12 +212,12 @@ format_issued() {
 # Fungsi untuk memformat output dengan lebih rapi
 format_output() {
   echo -e "\033[1;34m╭──────────────────────────────────────────╮\033[0m"
-  echo -e "\033[1;34m│       Informatiom Account NoobzVPN       │\033[0m"
+  echo -e "\033[1;34m│         NoobzVPN Account Details         │\033[0m"
   echo -e "\033[1;34m╰──────────────────────────────────────────╯\033[0m"  
 
   while IFS= read -r line; do
     if [[ $line == +* ]]; then
-      echo -e "\033[1;32mStatus : Aktif\033[0m" # Hijau untuk status aktif
+      echo -e "\033[1;32mStatus : Active\033[0m" # Hijau untuk status aktif
     elif [[ $line == *blocked:* ]]; then
       status=${line/*blocked:/}
       echo -e "  \033[1;33mBlocked :\033[0m \033[1;31m$status\033[0m" # Merah untuk blocked
@@ -233,12 +233,12 @@ format_output() {
       echo -e "  \033[1;34mExpired :\033[0m $expired_info" # Biru untuk expired
     elif [[ $line == Total* ]]; then
       total=${line/*Total User(s):/}
-      echo -e "\033[1;35m Total Pengguna : $total\033[0m" # Ungu untuk Total Users
+      echo -e "\033[1;35m Total Users : $total\033[0m" # Ungu untuk Total Users
     fi
   done <<< "$1"
 
   echo -e "\033[1;34m╭──────────────────────────────────────────╮\033[0m"
-  echo -e "\033[1;34m│           Akhir Informasi                │\033[0m"
+  echo -e "\033[1;34m│         End of Account Details           │\033[0m"
   echo -e "\033[1;34m╰──────────────────────────────────────────╯\033[0m"
 }
 
@@ -255,13 +255,13 @@ else
 fi
 clear
 echo -e "${NC}${separator}
-            MENU NOOBZVPN
+           NOOBZVPN MENU
 ${separator}
 Noobz        : $status
 ${blue_sep}
-${green}1${NC}. Add Account
+${green}1${NC}. Create Account
 ${green}2${NC}. Delete Account
-${green}3${NC}. List Active Account
+${green}3${NC}. List Active Accounts
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
@@ -271,7 +271,7 @@ case $inrere in
 2|02) clear ; delete ;;
 3|03) clear ; list ;;
 x|X) exit ;;
-*) echo "Wrong Number " ; main ;;
+*) echo "Invalid option" ; main ;;
 esac
 }
 

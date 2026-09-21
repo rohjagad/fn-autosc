@@ -27,7 +27,7 @@
     # Mencocokkan data berdasarkan IP lokal
     MATCH=$(echo "$PERMISSION_DATA" | grep "###" | grep "$LOCAL_IP")
     if [ -z "$MATCH" ]; then
-        echo "Your IP doesn’t have on database"
+        echo "Your IP is not in the database"
         exit 1
     fi
 
@@ -39,7 +39,7 @@
     # Validasi masa aktif
     REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
     if [ "$REMAINING_DAYS" -lt 0 ]; then
-        echo "Izin telah kadaluwarsa."
+        echo "Authorization has expired."
         exit 1
     fi
 
@@ -47,7 +47,7 @@
     output() {
         echo "Username: $USERNAME"
         echo "IPv4: $PERMISSION_IP"
-        echo "Expired: $EXPIRED_DATE ( $REMAINING_DAYS Days )"
+        echo "Expired: $EXPIRED_DATE ($REMAINING_DAYS days)"
     }
 
 clear
@@ -95,15 +95,15 @@ blue_sep="${blue}-----------------------------------${NC}"
         fi
         clear
         echo -e "${NC}${separator}
-            MENU SLOWDNS
+            SLOWDNS MENU
 ${separator}
 Status       : $stat_msg
 ${blue_sep}
 ${green}1${NC}. Change Nameserver
-${green}2${NC}. Renew Public Key & Server Key
-${green}3${NC}. Restart DNSTT Tunnel on server
-${green}4${NC}. Setup DNSTT Type
-${green}0${NC}. Exit to menu
+${green}2${NC}. Renew Server Keys
+${green}3${NC}. Restart SlowDNS Service
+${green}4${NC}. Configure SlowDNS Mode
+${green}0${NC}. Back to Main Menu
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
@@ -148,7 +148,7 @@ ${orange}Press [Ctrl + C] to exit${NC}"
                 systemctl start dnstt
                 clear
                 echo -e "
-                Success Change Nameserver DNSTT
+                Nameserver Updated Successfully
                 ===============================
                 New Nameserver: $nsdomen
                 ==============================="
@@ -165,8 +165,8 @@ ${orange}Press [Ctrl + C] to exit${NC}"
                 systemctl start dnstt.service
                 clear
                 echo -e "
-                Success Renew Public Key & Server Key Slowdns
-                ============================================="
+                Server Keys Renewed Successfully
+                ================================"
                 ;;
             3)
                 clear
@@ -174,8 +174,8 @@ ${orange}Press [Ctrl + C] to exit${NC}"
                 systemctl restart dnstt.service
                 clear
                 echo -e "
-                Success Restart SlowDNS
-                ========================"
+                SlowDNS Restarted Successfully
+                =============================="
                 ;;
 	    4)
  	        clear

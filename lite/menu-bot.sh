@@ -26,7 +26,7 @@
     # Mencocokkan data berdasarkan IP lokal
     MATCH=$(echo "$PERMISSION_DATA" | grep "###" | grep "$LOCAL_IP")
     if [ -z "$MATCH" ]; then
-        echo "Your IP doesn’t have on database"
+        echo "Your IP is not in the database"
         exit 1
     fi
 
@@ -38,7 +38,7 @@
     # Validasi masa aktif
     REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
     if [ "$REMAINING_DAYS" -lt 0 ]; then
-        echo "Izin telah kadaluwarsa."
+        echo "Authorization has expired."
         exit 1
     fi
 
@@ -46,7 +46,7 @@
     output() {
         echo "Username: $USERNAME"
         echo "IPv4: $PERMISSION_IP"
-        echo "Expired: $EXPIRED_DATE ( $REMAINING_DAYS Days )"
+        echo "Expired: $EXPIRED_DATE ($REMAINING_DAYS days)"
     }
 
     output
@@ -148,7 +148,7 @@ rm -fr /etc/systemd/system/bot.service
 rm -fr /usr/bin/bot
 clear
 echo "
-Success Deleted Bot Terminal"
+Terminal Bot Uninstalled Successfully"
 }
 
 restart() {
@@ -156,7 +156,7 @@ systemctl daemon-reload
 systemctl restart bot
 clear
 echo "
-Success Reboot Bot Terminal"
+Terminal Bot Restarted Successfully"
 }
 
 menubot() {
@@ -169,18 +169,18 @@ ws="\e[1;31m[ OFF ]\033[0m"
 fi
 clear
 echo -e "
-<= Menu Bot Terminal =>
-=======================
+<= [ Terminal Bot Menu ] =>
+===========================
 Bot: $ws
 
-1. Install Bot Terminal
-2. Uninstall Bot Terminal
-3. Restart Service Bot Terminal
-0. Back To Default Menu Panel
-=======================
-Press CTRL + C to Exit
+1. Install Terminal Bot
+2. Uninstall Terminal Bot
+3. Restart Terminal Bot
+0. Back to Main Menu
+===========================
+Press [Ctrl + C] to exit
 "
-read -p "Input Option: " opw
+read -p "Input option: " opw
 case $opw in
 1) clear ; install ;;
 2) clear ; hapus ;;
@@ -202,29 +202,29 @@ echo "$api" > /etc/funny/.keybot
 echo "$itd" > /etc/funny/.chatid
 clear
 echo -e "
-Your Data Bot Notirication
-===========================
-API Bot: $api
-Chatid Own: $itd
-===========================
+Telegram Bot Configuration
+==========================
+Bot API Key: $api
+Owner Chat ID: $itd
+==========================
 "
 }
 
 add() {
 clear
 echo -e "
-===================
-[ 设置机7器人通知 ]
-===================
+======================
+[ Telegram Bot Setup ]
+======================
 "
-read -p "API Key Bot: " api
-read -p "Your Chat ID: " itd
+read -p "Bot API Key: " api
+read -p "Telegram Chat ID: " itd
 clear
 echo -e "
 Information
 ==============================
-API Bot: $api
-Chatid : $itd
+Bot API Key: $api
+Chat ID    : $itd
 ==============================
 "
 read -p "Is the data above correct? (y/n): " opw
@@ -250,27 +250,27 @@ Email:
 - widyabakti02@gmail.com
 =====================
 
-Thanks For Use My Script
+Thanks for using this script
 "
 }
 
 mna() {
 echo -e "
 ======================
-[   菜单设置机器人   ]
+[ Telegram Bot Menu ]
 ======================
 
-1. Setup Bot Notification
-2. Setup Bot Panel All Menu
-3. Setup Bot Terminal Server
-4. Report Bug On Script
+1. Set Up Bot Notifications
+2. Set Up Bot Menu Panel
+3. Terminal Bot Menu
+4. Report Script Bug
 ======================
-Press CTRL + C to exit
+Press [Ctrl + C] to exit
 "
-read -p "Input Option: " apws
+read -p "Input option: " apws
 case $apws in
 1) clear ; add ;;
-2) clear ; clear ; echo -e "\n Coming Soon On 1.19?" ;;
+2) clear ; clear ; echo -e "\n Feature coming soon" ;;
 3) clear ; termbot ;;
 4) clear ; rpot ;;
 *) clear ; mna ;;

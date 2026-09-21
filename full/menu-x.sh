@@ -27,7 +27,7 @@
     # Mencocokkan data berdasarkan IP lokal
     MATCH=$(echo "$PERMISSION_DATA" | grep "###" | grep "$LOCAL_IP")
     if [ -z "$MATCH" ]; then
-        echo "Your IP doesn’t have on database"
+        echo "Your IP is not in the database"
         exit 1
     fi
 
@@ -39,7 +39,7 @@
     # Validasi masa aktif
     REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
     if [ "$REMAINING_DAYS" -lt 0 ]; then
-        echo "Izin telah kadaluwarsa."
+        echo "Authorization has expired."
         exit 1
     fi
 
@@ -47,7 +47,7 @@
     output() {
         echo "Username: $USERNAME"
         echo "IPv4: $PERMISSION_IP"
-        echo "Expired: $EXPIRED_DATE ( $REMAINING_DAYS Days )"
+        echo "Expired: $EXPIRED_DATE ($REMAINING_DAYS days)"
     }
 
 # Color
@@ -104,21 +104,21 @@ split=$(cat /etc/xray/json/split.json 2>/dev/null | grep "###" | sort | uniq | w
 
 clear
 echo -e "${NC}${separator}
-             MENU XTLS
+            XTLS MENU
 ${separator}
 Status       : $stat_msg
 ${blue_sep}
-${purple}TOTAL ACCOUNT${NC}
+${purple}TOTAL ACCOUNTS${NC}
 WS           : $ws
 HTTP         : $http
 Split        : $split
 gRPC         : $gpc
 ${blue_sep}
 ${purple}MENU${NC}
-${green}1${NC}. Menu WebSocket / WS
-${green}2${NC}. Menu HTTP UPGRADE / HTTP
-${green}3${NC}. Menu Split HTTP / Split
-${green}4${NC}. Menu gRPC / XTLS gRPC
+${green}1${NC}. WebSocket (WS)
+${green}2${NC}. HTTP Upgrade
+${green}3${NC}. Split HTTP
+${green}4${NC}. gRPC (XTLS)
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"

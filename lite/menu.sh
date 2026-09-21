@@ -133,7 +133,7 @@ rainbow_sep() {
     # Mencocokkan data berdasarkan IP lokal
     MATCH=$(echo "$PERMISSION_DATA" | grep "###" | grep "$LOCAL_IP")
     if [ -z "$MATCH" ]; then
-        echo "Your IP doesn’t have on database"
+        echo "Your IP is not in the database"
         exit 1
     fi
 
@@ -145,7 +145,7 @@ rainbow_sep() {
     # Validasi masa aktif
     REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
     if [ "$REMAINING_DAYS" -lt 0 ]; then
-        echo "Izin telah kadaluwarsa."
+        echo "Authorization has expired."
         exit 1
     fi
 
@@ -153,7 +153,7 @@ rainbow_sep() {
     output() {
         echo "Username: $USERNAME"
         echo "IPv4: $PERMISSION_IP"
-        echo "Expired: $EXPIRED_DATE ( $REMAINING_DAYS Days )"
+        echo "Expired: $EXPIRED_DATE ($REMAINING_DAYS days)"
     }
 
 clear
@@ -192,7 +192,7 @@ else
 echo -e "${NC}: "$red"not running (Error)"$NC" "
 fi) => ]
  ${separator}
-Total Account
+Total Accounts
 
 WS   : $ws
 HTTP : $http
@@ -200,25 +200,25 @@ gRPC : $gpc
 Split: $split
  ${separator}
 
-1. Menu WebSocket / WS
-2. Menu HTTP UPGRADE / HTTP
-3. Menu gRPC / XTLS gRPC
-4. Menu Split HTTP / Split
+1. WebSocket (WS)
+2. HTTP Upgrade (HTTP)
+3. gRPC (XTLS)
+4. Split HTTP (Split)
  ${separator}
 
-5. Menu System
-6. Menu Domain
-7. Menu Backup
-8. Menu Bot Server
+5. System Menu
+6. Domain Menu
+7. Backup Menu
+8. Telegram Bot
  ${separator}
 Today${NC}: ${red}$ttoday$NC Yesterday${NC}: ${red}$tyest$NC This month${NC}: ${red}$tmon $NC
  ${separator}
 $rerechan
  ${separator}
-   Press CTRL + C to Exit
+   Press [Ctrl + C] to exit
  ${separator}
 "
-read -p "Input Option: " opws
+read -p "Input option: " opws
 case $opws in
 1) clear ; x-ws ;;
 2) clear ; x-http ;;

@@ -26,7 +26,7 @@
     # Mencocokkan data berdasarkan IP lokal
     MATCH=$(echo "$PERMISSION_DATA" | grep "###" | grep "$LOCAL_IP")
     if [ -z "$MATCH" ]; then
-        echo "Your IP doesn’t have on database"
+        echo "Your IP is not in the database"
         exit 1
     fi
 
@@ -38,7 +38,7 @@
     # Validasi masa aktif
     REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
     if [ "$REMAINING_DAYS" -lt 0 ]; then
-        echo "Izin telah kadaluwarsa."
+        echo "Authorization has expired."
         exit 1
     fi
 
@@ -46,7 +46,7 @@
     output() {
         echo "Username: $USERNAME"
         echo "IPv4: $PERMISSION_IP"
-        echo "Expired: $EXPIRED_DATE ( $REMAINING_DAYS Days )"
+        echo "Expired: $EXPIRED_DATE ($REMAINING_DAYS days)"
     }
 
     output
@@ -61,14 +61,14 @@ ip="$ip4 / $ip6"
 date=$(date)
 domain=$(cat /etc/xray/domain)
 clear
-read -rp "Input Link Database: " url
+read -rp "Backup URL: " url
 
 cd /root
 wget -O backup.zip "$url"
 unzip backup.zip
 rm -f backup.zip
 sleep 1
-echo "Tengah Melakukan Backup Data"
+echo "Restoring backup data..."
 cd /root/backup
 cp passwd /etc/
 cp group /etc/
@@ -93,8 +93,8 @@ clear
 
 #echo "Telah Berjaya Melakukan Backup"
   echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo -e "SUCCESSFULL RESTORE YOUR VPS"
-    echo -e "Please Save The Following Data"
+    echo -e " VPS RESTORED SUCCESSFULLY "
+    echo -e "Please save the following data:"
     echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo -e "Your VPS IP : $ip"
     echo -e "DOMAIN      : $domain"
@@ -146,8 +146,8 @@ clear
 
 #echo "Telah Berjaya Melakukan Backup"
   echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo -e "SUCCESSFULL RESTORE YOUR VPS"
-    echo -e "Please Save The Following Data"
+    echo -e " VPS RESTORED SUCCESSFULLY "
+    echo -e "Please save the following data:"
     echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo -e "Your VPS IP : $ip"
     echo -e "DOMAIN      : $domain"
@@ -167,14 +167,14 @@ ip="$ip4 / $ip6"
 date=$(date)
 domain=$(cat /etc/xray/domain)
 clear
-read -rp "Input Link Database: " url
+read -rp "Backup URL: " url
 
 cd /root
 wget -O backup.zip "$url"
 unzip backup.zip
 rm -f backup.zip
 sleep 1
-echo "Tengah Melakukan Backup Data"
+echo "Restoring backup data..."
 cd /root/backup
 cp passwd /etc/
 cp group /etc/
@@ -288,8 +288,8 @@ clear
 
 #echo "Telah Berjaya Melakukan Backup"
   echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo -e "SUCCESSFULL RESTORE YOUR VPS"
-    echo -e "Please Save The Following Data"
+    echo -e " VPS RESTORED SUCCESSFULLY "
+    echo -e "Please save the following data:"
     echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo -e "Your VPS IP : $ip"
     echo -e "DOMAIN      : $domain"
@@ -302,18 +302,18 @@ bmenu() {
 clear
 echo -e "
 ============================
-<= Backup Database Server =>
+< =    Backup Server     = >
 ============================
 
-1. Backup Database 1
-2. Backup Database 2
-3. Restore Database Via Link
-4. Restore Database Via File
-5. Restore Old Database Script Version Under v23
+1. Backup to File.io (Telegram)
+2. Backup to Google Drive
+3. Restore Backup via URL
+4. Restore Backup via File
+5. Restore Legacy Backup (< v1.23)
 ============================
-   Press CTRL + C TO EXIT
+   Press [Ctrl + C] to exit
 ============================"
-read -p "Input Option: " opa
+read -p "Input option: " opa
 case $opa in
 1) clear ; backup ;;
 2) clear ; backup-gd ;;

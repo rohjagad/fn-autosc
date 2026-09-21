@@ -162,6 +162,13 @@ This file records fixes confirmed in source review or live testing.
 - `installer/wg.sh` appended configuration with `>> /etc/wireguard/wg0.conf` instead of overwriting, causing repeated runs to have duplicate `[Interface]` blocks. `wg-quick` failed with `RTNETLINK answers: File exists` when attempting to bind the same IP twice.
 - Changed to overwrite `> /etc/wireguard/wg0.conf` and stop existing `wg-quick@wg0` beforehand. Verified WireGuard starts cleanly.
 
+## Menu TUI English Phrasing and Grammar Fixes
+
+- Corrected awkward Indonesian-English translations, grammatical errors, and misspellings across all 16 TUI menus in both `full/` and `lite/` while keeping wording concise and punchy.
+- Replaced Indonesian loanwords and broken phrasing (e.g. `Cek User Login` -> `Check Online Users`, `Extend Expired SSH` -> `Extend SSH Account`, `Extending Account L2TP Active Life` -> `Extend L2TP Account`, `Locked Account WebSocket` -> `Lock WS Account`, `Your IP doesn’t have on database` -> `Your IP is not in the database`).
+- Standardized menu headers, alignment, and options across SSH, XTLS (WS, HTTP, Split, gRPC), WireGuard, L2TP, NoobzVPN, SlowDNS, Argo Tunnel, Telegram Bot, Backup, Domain, and System menus.
+- Rebuilt `menu/full.zip` and `menu/lite.zip` with updated menu executables.
+
 ## Not Fixed Yet
 
 The following findings remain open and are documented rather than silently
@@ -171,5 +178,4 @@ changed:
 - SlowDNS failure until a nameserver/domain is configured.
 - Fail2ban failure caused by missing SSH log input.
 - Duplicate website installation in the Lite installer.
-- Reversed IPv4/IPv6 labels in the main menu.
 - Full interactive feature coverage for every account action and submenu.

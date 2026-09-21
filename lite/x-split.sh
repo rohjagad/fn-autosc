@@ -26,7 +26,7 @@
     # Mencocokkan data berdasarkan IP lokal
     MATCH=$(echo "$PERMISSION_DATA" | grep "###" | grep "$LOCAL_IP")
     if [ -z "$MATCH" ]; then
-        echo "Your IP doesn’t have on database"
+        echo "Your IP is not in the database"
         exit 1
     fi
 
@@ -38,7 +38,7 @@
     # Validasi masa aktif
     REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
     if [ "$REMAINING_DAYS" -lt 0 ]; then
-        echo "Izin telah kadaluwarsa."
+        echo "Authorization has expired."
         exit 1
     fi
 
@@ -46,7 +46,7 @@
     output() {
         echo "Username: $USERNAME"
         echo "IPv4: $PERMISSION_IP"
-        echo "Expired: $EXPIRED_DATE ( $REMAINING_DAYS Days )"
+        echo "Expired: $EXPIRED_DATE ($REMAINING_DAYS days)"
     }
 
     output
@@ -75,34 +75,34 @@ xsplit() {
     echo "============================"
     echo -e "\nsplit   : \033[1;32m$split\033[0m"  # Tampilkan jumlah akun
     echo "============================"
-    echo "          Menu  Create      "
-    echo "01. Create Account Vmess"
-    echo "02. Create Account Vless"
-    echo "03. Create Account Trojan"
+    echo "          Create Account    "
+    echo "01. Create VMess Account"
+    echo "02. Create VLess Account"
+    echo "03. Create Trojan Account"
     echo "============================"
-    echo "          Menu Trial        "
-    echo "04. Trial Account Vmess"
-    echo "05. Trial Account Vless"
-    echo "06. Trial Account Trojan"
+    echo "          Trial Account     "
+    echo "04. Trial VMess Account"
+    echo "05. Trial VLess Account"
+    echo "06. Trial Trojan Account"
     echo "============================"
-    echo "          Other Service"
-    echo "07. Cek User Login"
+    echo "          Manage Account"
+    echo "07. Check Online Users"
     echo "08. Delete Account"
-    echo "09. Extend Expired"
-    echo "10. Cek Log Database"
-    echo "11. List Database Account"
+    echo "09. Extend Account"
+    echo "10. Check Database Logs"
+    echo "11. List All Accounts"
     echo "12. Change UUID / Password"
-    echo "13. Unlock Account SPLIT HTTP"
-    echo "14. Routing X-Ray Split HTTP"
-    echo "15. Change Limit IP X-Ray Split HTTP"
-    echo "16. Change Quota Split HTTP"
-    echo "17. Locked Account SPLIT HTTP"
+    echo "13. Unlock Split HTTP Account"
+    echo "14. Xray Routing Config"
+    echo "15. Change Split IP Limit"
+    echo "16. Change Split Quota Limit"
+    echo "17. Lock Split HTTP Account"
     echo "============================"
-    echo "   Press CTRL + C to Exit"
+    echo "   Press [Ctrl + C] to exit"
     echo "============================"
 
     # Input pilihan dari pengguna
-    read -p "Input Option: " opsplit
+    read -p "Input option: " opsplit
 
     # Menangani pilihan berdasarkan input pengguna
     case $opsplit in

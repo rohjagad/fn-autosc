@@ -27,7 +27,7 @@
     # Mencocokkan data berdasarkan IP lokal
     MATCH=$(echo "$PERMISSION_DATA" | grep "###" | grep "$LOCAL_IP")
     if [ -z "$MATCH" ]; then
-        echo "Your IP doesn’t have on database"
+        echo "Your IP is not in the database"
         exit 1
     fi
 
@@ -39,7 +39,7 @@
     # Validasi masa aktif
     REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
     if [ "$REMAINING_DAYS" -lt 0 ]; then
-        echo "Izin telah kadaluwarsa."
+        echo "Authorization has expired."
         exit 1
     fi
 
@@ -47,7 +47,7 @@
     output() {
         echo "Username: $USERNAME"
         echo "IPv4: $PERMISSION_IP"
-        echo "Expired: $EXPIRED_DATE ( $REMAINING_DAYS Days )"
+        echo "Expired: $EXPIRED_DATE ($REMAINING_DAYS days)"
     }
 
 clear
@@ -124,7 +124,7 @@ newline() {
 }
 
 goback() {
-  echo -e "Enter any keys to go back \c" 
+  echo -e "Press any key to return \c" 
 	read back
 	case $back in
 	  *)
@@ -138,17 +138,17 @@ function create() {
 
 	clear
 	newline
-	echo -e "Add WireGuard User"
-	echo -e "=================="
+	echo -e "Create WireGuard Account"
+	echo -e "========================"
 	echo -e " Username: \c"
 	read user
 	if grep -qw "^### Client ${user}\$" /etc/wireguard/wg0.conf; then
 		newline
-		error "$user already exist"
+		error "$user already exists"
 		newline
 		goback
 	fi
-	echo -e " Duration Day: \c"
+	echo -e " Duration (Days): \c"
 	read duration
 	exp=$(date -d +${duration}days +%Y-%m-%d)
 	expired=$(date -d "${exp}" +"%d %b %Y")
@@ -382,13 +382,13 @@ clear
 echo -e "${NC}${separator}
           WIREGUARD MENU
 ${separator}
-${green}1${NC}. Add WireGuard User
-${green}2${NC}. Delete WireGuard User
-${green}3${NC}. Extend WireGuard User
-${green}4${NC}. WireGuard User List
-${green}5${NC}. WireGuard Configuration
-${green}6${NC}. Add Wireguard Warp Cloudflare
-${green}7${NC}. Back To Menu
+${green}1${NC}. Create WireGuard Account
+${green}2${NC}. Delete WireGuard Account
+${green}3${NC}. Extend WireGuard Account
+${green}4${NC}. List WireGuard Accounts
+${green}5${NC}. Show WireGuard Config
+${green}6${NC}. Add Cloudflare WARP
+${green}7${NC}. Back to Main Menu
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"

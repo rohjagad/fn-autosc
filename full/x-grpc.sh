@@ -27,7 +27,7 @@
     # Mencocokkan data berdasarkan IP lokal
     MATCH=$(echo "$PERMISSION_DATA" | grep "###" | grep "$LOCAL_IP")
     if [ -z "$MATCH" ]; then
-        echo "Your IP doesn’t have on database"
+        echo "Your IP is not in the database"
         exit 1
     fi
 
@@ -39,7 +39,7 @@
     # Validasi masa aktif
     REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
     if [ "$REMAINING_DAYS" -lt 0 ]; then
-        echo "Izin telah kadaluwarsa."
+        echo "Authorization has expired."
         exit 1
     fi
 
@@ -47,7 +47,7 @@
     output() {
         echo "Username: $USERNAME"
         echo "IPv4: $PERMISSION_IP"
-        echo "Expired: $EXPIRED_DATE ( $REMAINING_DAYS Days )"
+        echo "Expired: $EXPIRED_DATE ($REMAINING_DAYS days)"
     }
 
 # Color
@@ -106,28 +106,28 @@ xgrpc() {
 ${separator}
 gRPC         : ${green}$grpc${NC}
 ${blue_sep}
-${purple}MENU CREATE${NC}
-${green}01${NC}. Create Account Vmess
-${green}02${NC}. Create Account Vless
-${green}03${NC}. Create Account Trojan
+${purple}CREATE ACCOUNT${NC}
+${green}01${NC}. Create VMess Account
+${green}02${NC}. Create VLess Account
+${green}03${NC}. Create Trojan Account
 ${blue_sep}
-${purple}MENU TRIAL${NC}
-${green}04${NC}. Trial Account Vmess
-${green}05${NC}. Trial Account Vless
-${green}06${NC}. Trial Account Trojan
+${purple}TRIAL ACCOUNT${NC}
+${green}04${NC}. Trial VMess Account
+${green}05${NC}. Trial VLess Account
+${green}06${NC}. Trial Trojan Account
 ${blue_sep}
-${purple}OTHER SERVICE${NC}
-${green}07${NC}. Cek User Login
+${purple}MANAGE ACCOUNT${NC}
+${green}07${NC}. Check Online Users
 ${green}08${NC}. Delete Account
-${green}09${NC}. Extend Expired
-${green}10${NC}. Cek Log Database
-${green}11${NC}. List Database Account
+${green}09${NC}. Extend Account
+${green}10${NC}. Check Database Logs
+${green}11${NC}. List All Accounts
 ${green}12${NC}. Change UUID / Password
-${green}13${NC}. Unlock Account gRPC
-${green}14${NC}. Routing X-Ray gRPC
-${green}15${NC}. Change Limit IP gRPC
-${green}16${NC}. Change Quota gRPC
-${green}17${NC}. Locked Account gRPC
+${green}13${NC}. Unlock gRPC Account
+${green}14${NC}. Xray Routing Config
+${green}15${NC}. Change gRPC IP Limit
+${green}16${NC}. Change gRPC Quota Limit
+${green}17${NC}. Lock gRPC Account
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"

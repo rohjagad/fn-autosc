@@ -27,7 +27,7 @@
     # Mencocokkan data berdasarkan IP lokal
     MATCH=$(echo "$PERMISSION_DATA" | grep "###" | grep "$LOCAL_IP")
     if [ -z "$MATCH" ]; then
-        echo "Your IP doesn’t have on database"
+        echo "Your IP is not in the database"
         exit 1
     fi
 
@@ -39,7 +39,7 @@
     # Validasi masa aktif
     REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
     if [ "$REMAINING_DAYS" -lt 0 ]; then
-        echo "Izin telah kadaluwarsa."
+        echo "Authorization has expired."
         exit 1
     fi
 
@@ -47,7 +47,7 @@
     output() {
         echo "Username: $USERNAME"
         echo "IPv4: $PERMISSION_IP"
-        echo "Expired: $EXPIRED_DATE ( $REMAINING_DAYS Days )"
+        echo "Expired: $EXPIRED_DATE ($REMAINING_DAYS days)"
     }
 
 red='\033[0;31m'
@@ -85,17 +85,17 @@ blue_sep="${blue}-----------------------------------${NC}"
 
 clear
 echo -e "${NC}${separator}
-             MENU SSH
+             SSH MENU
 ${separator}
 ${green}1${NC}. Create SSH Account
 ${green}2${NC}. Trial SSH Account
 ${green}3${NC}. Delete SSH Account
-${green}4${NC}. Cek User Login SSH
-${green}5${NC}. Cek Log SSH Account
-${green}6${NC}. Extend Expired SSH
-${green}7${NC}. List Total Account SSH
-${green}8${NC}. Change Password Account SSH
-${green}9${NC}. Change Limit IP Account SSH
+${green}4${NC}. Check Online SSH Users
+${green}5${NC}. Check SSH Account Logs
+${green}6${NC}. Extend SSH Account
+${green}7${NC}. List SSH Accounts
+${green}8${NC}. Change SSH Password
+${green}9${NC}. Change SSH IP Limit
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"

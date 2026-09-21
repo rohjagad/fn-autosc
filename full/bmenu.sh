@@ -27,7 +27,7 @@
     # Mencocokkan data berdasarkan IP lokal
     MATCH=$(echo "$PERMISSION_DATA" | grep "###" | grep "$LOCAL_IP")
     if [ -z "$MATCH" ]; then
-        echo "Your IP doesn’t have on database"
+        echo "Your IP is not in the database"
         exit 1
     fi
 
@@ -39,7 +39,7 @@
     # Validasi masa aktif
     REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
     if [ "$REMAINING_DAYS" -lt 0 ]; then
-        echo "Izin telah kadaluwarsa."
+        echo "Authorization has expired."
         exit 1
     fi
 
@@ -47,7 +47,7 @@
     output() {
         echo "Username: $USERNAME"
         echo "IPv4: $PERMISSION_IP"
-        echo "Expired: $EXPIRED_DATE ( $REMAINING_DAYS Days )"
+        echo "Expired: $EXPIRED_DATE ($REMAINING_DAYS days)"
     }
 
 clear
@@ -179,15 +179,15 @@ clear
 
 #echo "Telah Berjaya Melakukan Backup"
   echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo -e "SUCCESSFULL RESTORE YOUR VPS"
-    echo -e "Please Save The Following Data"
+    echo -e " VPS RESTORED SUCCESSFULLY "
+    echo -e "Please save the following data:"
     echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo -e "Your VPS IP : $ip"
     echo -e "DOMAIN      : $domain"
     echo -e "DATE        : $date"
     echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━"
 else
-    echo "Error: File $file Not Found"
+    echo "Error: File $file not found"
 fi
 rm -fr /root/backup*
 }
@@ -200,14 +200,14 @@ ip="$ip4 / $ip6"
 date=$(date)
 domain=$(cat /etc/xray/domain)
 clear
-read -rp "Input Link Database: " url
+read -rp "Backup URL: " url
 
 cd /root
 wget -O backup.zip "$url"
 unzip backup.zip
 rm -f backup.zip
 sleep 1
-echo "Tengah Melakukan Backup Data"
+echo "Restoring backup data..."
 cd /root/backup
 cp passwd /etc/
 cp group /etc/
@@ -321,8 +321,8 @@ clear
 
 #echo "Telah Berjaya Melakukan Backup"
   echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo -e "SUCCESSFULL RESTORE YOUR VPS"
-    echo -e "Please Save The Following Data"
+    echo -e " VPS RESTORED SUCCESSFULLY "
+    echo -e "Please save the following data:"
     echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo -e "Your VPS IP : $ip"
     echo -e "DOMAIN      : $domain"
@@ -334,13 +334,13 @@ rm -fr /root/backup*
 bmenu() {
 clear
 echo -e "${NC}${separator}
-            MENU BACKUP
+            BACKUP MENU
 ${separator}
-${green}1${NC}. Backup Database 1
-${green}2${NC}. Backup Database 2
-${green}3${NC}. Restore Database Via Link
-${green}4${NC}. Restore Database Via File
-${green}5${NC}. Restore Old Database Script Version Under v23
+${green}1${NC}. Backup to File.io (Telegram)
+${green}2${NC}. Backup to Google Drive
+${green}3${NC}. Restore Backup via URL
+${green}4${NC}. Restore Backup via File
+${green}5${NC}. Restore Legacy Backup (< v1.23)
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"

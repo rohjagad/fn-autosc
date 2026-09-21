@@ -26,7 +26,7 @@
     # Mencocokkan data berdasarkan IP lokal
     MATCH=$(echo "$PERMISSION_DATA" | grep "###" | grep "$LOCAL_IP")
     if [ -z "$MATCH" ]; then
-        echo "Your IP doesn’t have on database"
+        echo "Your IP is not in the database"
         exit 1
     fi
 
@@ -38,7 +38,7 @@
     # Validasi masa aktif
     REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
     if [ "$REMAINING_DAYS" -lt 0 ]; then
-        echo "Izin telah kadaluwarsa."
+        echo "Authorization has expired."
         exit 1
     fi
 
@@ -46,7 +46,7 @@
     output() {
         echo "Username: $USERNAME"
         echo "IPv4: $PERMISSION_IP"
-        echo "Expired: $EXPIRED_DATE ( $REMAINING_DAYS Days )"
+        echo "Expired: $EXPIRED_DATE ($REMAINING_DAYS days)"
     }
 
     output
@@ -72,31 +72,31 @@ rm -fr /etc/cloudflared/*
 mkdir -p /etc/cloudflared
 
 clear
-echo -e "Login to your cloudflare Account"
+echo -e "Log in to your Cloudflare account"
 cloudflared tunnel login
 
 clear
 random=$(openssl rand -base64 15 | tr -dc 'a-z' | head -c 8)
-echo " Create Node For Server Data "
+echo " Creating Argo Tunnel Node "
 echo "$random" > /root/.rcs
 rcs=$(cat /root/.rcs)
 cloudflared tunnel create $rcs
 clear
 id=$(basename ~/.cloudflared/*.json | sed 's/\.json$//')
-echo -e "Save Your ID"
+echo -e "Save Your Tunnel ID"
 echo -e "ID: $id"
 sleep 10
 clear
 echo -e "
-Setup Your Domain Argo Tunnel
-=============================
+Set Up Argo Tunnel Domain
+=========================
 
 Example: mysubdom.myvpn.com
 
-replace mysubdomain with your desired subdomain and replace myvpn.com with the domain you chose in cloudflare for argo tunnel after login
-=============================
+Replace mysubdom with your subdomain and myvpn.com with your Cloudflare domain.
+=========================
 "
-read -p "Input New Domain: " opws
+read -p "New Domain: " opws
 cloudflared tunnel route dns $rcs $opws
 echo "$opws" > /etc/xray/domargo
 domargo="$opws"
@@ -137,11 +137,11 @@ domargo=$(cat /etc/xray/domargo)
 doms=$(cat /etc/xray/domssh)
 clear
 echo -e "
-<= Detail Service Argo Tunnel =>
-════════════════════════════════
+<= Argo Tunnel Service Details =>
+═════════════════════════════════
 
 Port HTTP:
-- 80 ( Standar )
+- 80 ( Standard )
 - 8080
 - 8880
 - 2052
@@ -150,22 +150,22 @@ Port HTTP:
 - 2095
 
 Port HTTPS:
-- 443 ( Standar )
+- 443 ( Standard )
 - 8443
 - 2053
 - 2083
 - 2087
 - 2096
 
-#Detail
+# Detail
 - Status       : $ssws
 - Domain Nginx : $domargo
 - Domain SSH WS: $domargo
-════════════════════════════════
-Currently only supports connections on
+═════════════════════════════════
+Currently supported protocols:
 -> SSH WebSockets
--> All Connection With Nginx
--> X-Ray/V2ray/V2rayfly/SibgBox Server
+-> All Connections via Nginx
+-> Xray / V2Ray / Sing-box
 "
 }
 tamp() {
@@ -177,18 +177,18 @@ ssws="\e[1;31m[ OFF ]\033[0m"
 fi
 clear
 echo -e "
-<= Menu Argo Tunnel By FN =>
-════════════════════════════
+<= [ Argo Tunnel Menu ] =>
+══════════════════════════
 Status: $ssws
 
-1. Install Argo
+1. Install Argo Tunnel
 2. Restart Argo Tunnel
-3. Detail Service Argo
-0. Back To Menu Default
-════════════════════════════
-    Pres CTRL + C to Exit
+3. Argo Tunnel Details
+0. Back to Main Menu
+══════════════════════════
+   Press [Ctrl + C] to exit
 "
-read -p "Input Option: " opws
+read -p "Input option: " opws
 case $opws in
 1) setup ;;
 2) clear ; reres ;;

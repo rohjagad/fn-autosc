@@ -28,7 +28,7 @@ domain=$(cat /etc/xray/domain)
     # Mencocokkan data berdasarkan IP lokal
     MATCH=$(echo "$PERMISSION_DATA" | grep "###" | grep "$LOCAL_IP")
     if [ -z "$MATCH" ]; then
-        echo "Your IP doesn’t have on database"
+        echo "Your IP is not in the database"
         exit 1
     fi
 
@@ -40,7 +40,7 @@ domain=$(cat /etc/xray/domain)
     # Validasi masa aktif
     REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
     if [ "$REMAINING_DAYS" -lt 0 ]; then
-        echo "Izin telah kadaluwarsa."
+        echo "Authorization has expired."
         exit 1
     fi
 
@@ -48,7 +48,7 @@ domain=$(cat /etc/xray/domain)
     output() {
         echo "Username: $USERNAME"
         echo "IPv4: $PERMISSION_IP"
-        echo "Expired: $EXPIRED_DATE ( $REMAINING_DAYS Days )"
+        echo "Expired: $EXPIRED_DATE ($REMAINING_DAYS days)"
     }
 
 clear
@@ -99,12 +99,12 @@ until [[ $VPN_USER =~ ^[a-zA-Z0-9_]+$ && ${CLIENT_EXISTS} == '0' ]]; do
 
 		if [[ ${CLIENT_EXISTS} == '1' ]]; then
 			echo ""
-			echo -e "Username ${RED}${VPN_USER}${NC} Already On VPS Please Choose Another"
+			echo -e "Username ${RED}${VPN_USER}${NC} already exists, please choose another"
 			exit 1
 		fi
 	done
 read -p "Password : " VPN_PASSWORD
-read -p "Expired (Days) : " masaaktif
+read -p "Duration (Days) : " masaaktif
 hariini=`date -d "0 days" +"%Y-%m-%d"`
 exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
 clear
@@ -240,12 +240,12 @@ echo "=========================="
 function main() {
 clear
 echo -e "${NC}${separator}
-             MENU L2TP
+             L2TP MENU
 ${separator}
-${green}1${NC}. Create Account L2TP
-${green}2${NC}. Delete Account L2TP
-${green}3${NC}. Extending Account L2TP Active Life
-${green}4${NC}. Menu
+${green}1${NC}. Create L2TP Account
+${green}2${NC}. Delete L2TP Account
+${green}3${NC}. Extend L2TP Account
+${green}4${NC}. Back to Main Menu
 ${green}5${NC}. Exit
 ${separator}
 

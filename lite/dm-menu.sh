@@ -27,7 +27,7 @@
     # Mencocokkan data berdasarkan IP lokal
     MATCH=$(echo "$PERMISSION_DATA" | grep "###" | grep "$LOCAL_IP")
     if [ -z "$MATCH" ]; then
-        echo "Your IP doesn’t have on database"
+        echo "Your IP is not in the database"
         exit 1
     fi
 
@@ -39,7 +39,7 @@
     # Validasi masa aktif
     REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
     if [ "$REMAINING_DAYS" -lt 0 ]; then
-        echo "Izin telah kadaluwarsa."
+        echo "Authorization has expired."
         exit 1
     fi
 
@@ -47,7 +47,7 @@
     output() {
         echo "Username: $USERNAME"
         echo "IPv4: $PERMISSION_IP"
-        echo "Expired: $EXPIRED_DATE ( $REMAINING_DAYS Days )"
+        echo "Expired: $EXPIRED_DATE ($REMAINING_DAYS days)"
     }
 
     output
@@ -199,14 +199,14 @@ dm() {
     curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&text=$log_message&parse_mode=html" $URL >/dev/null
 
     echo -e "\e[33m===================================\033[0m"
-    echo -e "Domain Anda saat ini:"
+    echo -e "Current Domain:"
     echo -e "$(cat /etc/xray/domain)"
     echo ""
-    read -rp "Domain/Host baru: " -e host
+    read -rp "New Domain/Host: " -e host
     echo ""
 
     if [ -z "$host" ]; then
-        echo "Tidak ada perubahan domain."
+        echo "No domain changes made."
         # Log jika tidak ada perubahan domain
         log_message="<b>🚨 Perubahan Domain Xray</b>%0A"
         log_message+="<i>Tidak ada perubahan domain yang dilakukan.</i>%0A"
@@ -222,7 +222,7 @@ dm() {
         curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&text=$log_message&parse_mode=html" $URL >/dev/null
 
         echo -e "\e[33m===================================\033[0m"
-        read -n 1 -s -r -p "Tekan tombol apapun untuk kembali ke menu"
+        read -n 1 -s -r -p "Press any key to return to menu"
         menu
     else
         # Simpan domain lama dan ganti dengan domain baru
@@ -253,9 +253,9 @@ dm() {
         curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&text=$log_message&parse_mode=html" $URL >/dev/null
 
         # Konfirmasi untuk memperbarui sertifikat
-        read -rp "Perbarui sertifikat SSL? (y/n): " cert_choice
+        read -rp "Renew SSL certificate? (y/n): " cert_choice
         if [[ "$cert_choice" == "y" || "$cert_choice" == "Y" ]]; then
-            echo -e "\nMemperbarui sertifikat..."
+            echo -e "\nRenewing SSL certificate..."
             cert_status="Berhasil"
             cert
         else
@@ -276,9 +276,9 @@ dm() {
         curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&text=$log_message&parse_mode=html" $URL >/dev/null
 
         echo -e "\e[33m===================================\033[0m"
-        echo "Log telah dikirim ke Telegram."
+        echo "Notification sent to Telegram."
         echo -e "\e[33m===================================\033[0m"
-        read -n 1 -s -r -p "Tekan tombol apapun untuk kembali ke menu"
+        read -n 1 -s -r -p "Press any key to return to menu"
         menu
     fi
 }
@@ -290,7 +290,7 @@ domain=$(cat /etc/xray/domain)
 systemctl stop nginx
 cd /root/
 clear
-echo "starting...., Port 80 Akan di Hentikan Saat Proses install Cert"
+echo "Starting... Port 80 will be stopped during SSL certificate installation"
 certbot certonly --standalone --preferred-challenges http --agree-tos --email melon334456@gmail.com -d $domain 
 cp /etc/letsencrypt/live/$domain/fullchain.pem /etc/xray/xray.crt
 cp /etc/letsencrypt/live/$domain/privkey.pem /etc/xray/xray.key
@@ -307,11 +307,11 @@ echo -e "
 [ Generate Certificate ]
 ========================
 
-1. Use Acme
-2. Use Certbot
+1. Issue via acme.sh
+2. Issue via Certbot
 ========================
 "
-read -p "Input Option: " akz
+read -p "Input option: " akz
 case $akz in
 1) acme ;;
 2) cert2 ;;
@@ -342,24 +342,24 @@ openssl req -new -x509 -key /etc/xray/xray.key -out /etc/xray/xray.crt -days 109
 chmod 644 /etc/xray/*
 systemctl daemon-reload
 service nginx restart
-echo -e "Done Generate New Certificate"
+echo -e "Self-signed certificate generated successfully"
 }
 
 dm1() {
 clear
 echo -e "
 =================================
-[ 菜单子域指向服务器 Cloudflare ]
+[          Domain Menu          ]
 =================================
 
-1. Use Your Domain
-2. Renew Certificate ( VPS IPv6 & IPv4 ) Acme
-3. Renew Certificate ( VPS IPv4 Only ) Let's encrypt
-4. Generare Direct Certificate ( VPS IPv4 Only ) Direct FN AutoSC
+1. Change Server Domain
+2. Renew Certificate (Acme: IPv4/IPv6)
+3. Renew Certificate (Certbot: IPv4 Only)
+4. Generate Self-Signed Certificate
 =================================
-     Press CTRL + C to Exit
+      Press [Ctrl + C] to exit
 "
-read -p "Input Option: " apw
+read -p "Input option: " apw
 case $apw in
 1) clear ; dm ;;
 2) clear ; cert ;;

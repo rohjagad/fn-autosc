@@ -27,7 +27,7 @@
     # Mencocokkan data berdasarkan IP lokal
     MATCH=$(echo "$PERMISSION_DATA" | grep "###" | grep "$LOCAL_IP")
     if [ -z "$MATCH" ]; then
-        echo "Your IP doesn’t have on database"
+        echo "Your IP is not in the database"
         exit 1
     fi
 
@@ -39,7 +39,7 @@
     # Validasi masa aktif
     REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
     if [ "$REMAINING_DAYS" -lt 0 ]; then
-        echo "Izin telah kadaluwarsa."
+        echo "Authorization has expired."
         exit 1
     fi
 
@@ -47,7 +47,7 @@
     output() {
         echo "Username     : $USERNAME"
         echo "IPv4         : $PERMISSION_IP"
-        echo "Expired      : $EXPIRED_DATE ( $REMAINING_DAYS Days )"
+        echo "Expired      : $EXPIRED_DATE ($REMAINING_DAYS days)"
     }
 
 
@@ -273,15 +273,15 @@ separator=$(rainbow_sep '===================================')
 blue_sep="${blue}-----------------------------------${NC}"
 clear
 echo -e "${NC}${separator}
-     MENU MANAGEMENT PANEL VPN
+     VPN MANAGEMENT PANEL
 ${separator}
-VERSION XTLS : $xver
-DOMAIN SERVER: $domain
-IP SERVER    : $ip_display
+XTLS VERSION : $xver
+SERVER DOMAIN: $domain
+SERVER IP    : $ip_display
 Uptime       : $uptime
 ISP / REGION : $isp / $region
 ${blue_sep}
-${purple}TOTAL ACCOUNT${NC}
+${purple}TOTAL ACCOUNTS${NC}
 SSH SERVER   : $sshd
 XTLS WS      : $ws
 XTLS HTTP UP : $http
@@ -293,13 +293,13 @@ SPLIT: $xsplit | gRPC: $xgcp | ePRO: $pro
 Loadbalance: $loadbalance
 ${blue_sep}
 ${purple}MENU${NC}
-${green}1${NC}. Menu SSH        ${green}6${NC}. Menu Bot Telegram
-${green}2${NC}. Menu XTLS       ${green}7${NC}. Menu L2TP
-${green}3${NC}. Menu Domain     ${green}8${NC}. Menu Wireguard
-${green}4${NC}. Menu SlowDNS    ${green}9${NC}. Menu NoobzVPN
-${green}5${NC}. Menu Backup    ${green}10${NC}. Menu System
+${green}1${NC}. SSH Menu        ${green}6${NC}. Telegram Bot
+${green}2${NC}. XTLS Menu       ${green}7${NC}. L2TP Menu
+${green}3${NC}. Domain Menu     ${green}8${NC}. WireGuard Menu
+${green}4${NC}. SlowDNS Menu    ${green}9${NC}. NoobzVPN Menu
+${green}5${NC}. Backup Menu    ${green}10${NC}. System Menu
 ${blue_sep}
-Today${NC}: ${red}$ttoday${NC} Yesterday${NC}: ${red}$tyest${NC} This month${NC}: ${red}$tmon${NC}
+Today: ${red}$ttoday${NC} Yesterday: ${red}$tyest${NC} This month: ${red}$tmon${NC}
 ${separator}
 ${rechan}
 ${separator}
