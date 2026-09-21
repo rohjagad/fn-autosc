@@ -191,13 +191,47 @@ This file records fixes confirmed in source review or live testing.
 - Synchronized unstyled `lite/` menus (`x-*.sh`, `bmenu.sh`, `dm-menu.sh`, `menu-bot.sh`, `menu-argo.sh`, `menu-system.sh`) with their styled versions.
 - Recompiled all 5 Go binaries and rebuilt `menu/full.zip` and `menu/lite.zip`.
 
+## Comprehensive Bug Sweep (14 bugs fixed)
+
+Full codebase audit cross-referenced with original script archive, verified on
+clean Debian 11 reinstall pulling only from GitHub `origin/1.23`.
+
+### Critical / High
+
+1. **`apt insfall` typo** → `apt install` in `installer/v2ray.sh:62`. Unzip may not install on minimal images.
+2. **`systemctl resrart` typo** → `systemctl restart` in `full/restore-ftp.sh:89` and `lite/restore-ftp.sh:89`. xray@split never restarted after restore.
+3. **IPv4/IPv6 variable swap** — `ip6` fetched `ipv4.icanhazip.com` and vice versa. Fixed in `full/bmenu.sh` (×3), `lite/bmenu.sh` (×3), `full/restore-ftp.sh`, `lite/restore-ftp.sh`, `website/restore-ftp.sh`.
+4. **`strpos()` missing argument** — `website/upload.php:24` called `strpos("SUCCESSFULL...")` with one arg. Fixed to `strpos($output, "SUCCESSFULL...")`.
+5. **`cp -r creare` typo** → `cp -r create` in `website/restore-ftp.sh`. Log database not restored.
+6. **Duplicate restore block** — `website/restore-ftp.sh` ran the entire restore twice. Removed the dead second block.
+7. **`rm ws.json` before backup** — `full/backup.sh:66` and `lite/backup.sh:66` deleted `ws.json` before copying. Removed the premature delete.
+8. **OpenVPN UDP client port** — `installer/vpn.sh:130` used Squid port `3128` instead of OpenVPN UDP port `2200`.
+
+### Medium
+
+9. **Undefined `$ANU` variable** — `installer/vpn.sh:72` and `installer/wg.sh:135` used `$ANU` in command substitution before defining it. Removed the stale reference.
+10. **Duplicate website install (Lite)** — `installer/lite.sh` downloaded and ran `website/install.sh` twice consecutively. Removed the second copy.
+11. **Indonesian user-facing text** — Translated remaining strings (`Gagal mengunduh`, `Tanggal kadaluwarsa`, `Izin telah kadaluwarsa`, `Tengah Melakukan Backup Data`, `melanjutkan proses`, `Script Anda Berhasil Diperbaiki`) to English across all scripts.
+12. **`time.Sleep(1)` nanosecond** — `full/limit-ip.go:41` slept 1ns instead of 1s. Fixed to `time.Sleep(1 * time.Second)`.
+13. **Node.js 16 EOL** — `installer/package.sh` referenced `setup_16.x`. Updated to `setup_20.x` (Node 20 LTS).
+14. **Typos in user-facing strings** — `INSTALL SUCCES` → `INSTALL SUCCESS`, `Hostibg` → `Hosting`.
+
+### Verification
+
+- Fresh Debian 11 installed via `rohjagad/reinstall`.
+- Script installed from GitHub (`curl -fsSL .../install.sh`), not from local.
+- **0 failed systemd units** after installation (SlowDNS configured with `slowdns.rohcuan.dpdns.org`).
+- All 19 core services active: SSH, Nginx, V2Ray, Xray (×3), HAProxy, WireGuard, NoobzVPN, StrongSwan, xl2tpd, UDP Custom, UDP Request, SlowDNS, Cron, OpenVPN, WS, Squid, Apache2.
+- SSL certificate valid for `fntest.rohcuan.dpdns.org`.
+
 ## Not Fixed Yet
 
 The following findings remain open and are documented rather than silently
 changed:
 
-- Stale `199.232.68.133 raw.githubusercontent.com` entry.
-- SlowDNS failure until a nameserver/domain is configured.
-- Fail2ban failure caused by missing SSH log input.
-- Duplicate website installation in the Lite installer.
-- Full interactive feature coverage for every account action and submenu.
+- Stale `199.232.68.133 raw.githubusercontent.com` entry in `installer/v2ray.sh`.
+- Fail2ban failure caused by missing SSH log input on minimal Debian.
+- Hardcoded Telegram bot token in `installer/full.sh` and `installer/lite.sh`.
+- Hardcoded WhatsApp number in SSH issue banner (`installer/ssh.sh`).
+- `chmod +x *` in `/usr/bin` during menu install sets execute on all files.
+- BadVPN/UDPGW referenced in SSH account cards but never installed.
