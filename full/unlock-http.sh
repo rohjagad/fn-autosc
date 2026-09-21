@@ -53,6 +53,42 @@
     output
 clear
 
+# Colors
+green='\033[0;32m'
+blue='\033[1;34m'
+purple='\033[1;35m'
+orange='\033[38;5;208m'
+red='\033[0;31m'
+NC='\033[0m'
+
+rainbow_sep() {
+  local text="${1:-===================================}"
+  local output=''
+  local i segment fraction r g b color
+  local -a red=(255 255 0 0 0 255 255)
+  local -a green=(0 255 255 255 0 0 0)
+  local -a blue=(0 0 0 255 255 255 0)
+  for ((i = 0; i < ${#text}; i++)); do
+    if ((i == ${#text} - 1)); then
+      segment=5
+      fraction=$((${#text} - 1))
+    else
+      segment=$((i * 6 / (${#text} - 1)))
+      fraction=$((i * 6 % (${#text} - 1)))
+    fi
+    r=$((red[segment] + (red[segment + 1] - red[segment]) * fraction / (${#text} - 1)))
+    g=$((green[segment] + (green[segment + 1] - green[segment]) * fraction / (${#text} - 1)))
+    b=$((blue[segment] + (blue[segment + 1] - blue[segment]) * fraction / (${#text} - 1)))
+    printf -v color '\033[38;2;%d;%d;%dm' "$r" "$g" "$b"
+    output+="${color}${text:i:1}"
+  done
+  printf '%b\n' "${output}${NC}"
+}
+
+separator=$(rainbow_sep '===================================')
+blue_sep="${blue}-----------------------------------${NC}"
+
+
 
 # Function Send Log
 send_log() {
@@ -76,40 +112,38 @@ DATE=$(date +"%Y-%m-%d %H:%M:%S")
 }
 
 # Menampilkan daftar akun terkunci
-locked_files=$(ls /var/log/create/xray/http/*.locked)
+# Menampilkan daftar akun terkunci untuk di-unlock
+locked_files=$(ls /var/log/create/xray/http/*.locked 2>/dev/null)
 
-# Mengecek apakah ada file terkunci
-if [ $(echo "$locked_files" | wc -l) -gt 1 ]; then
+if [ -n "$locked_files" ]; then
     clear
-    echo -e "==========================\n  Unlock X-Ray HTTP Menu\n=========================="
+    echo -e "${NC}${separator}
+       UNLOCK X-RAY HTTP ACCOUNT
+${separator}"
 
-    # Loop untuk menampilkan semua akun terkunci
+    count=0
     for file in $locked_files; do
         username=$(basename "$file" .locked)
         uid=$(grep "UUID" "$file" | awk '{print $3}')
         exp=$(grep "Expired" "$file" | awk '{print $3}')
         protokol=$(grep "Protokol:" "$file" | awk '{print $2}')
-        
-        # Menampilkan informasi akun
-        echo -e "Username: $username"
-        echo -e "Status  : Locked"
-        echo -e "UUID    : $uid"
-        echo -e "Expired : $exp"
-        echo -e "Protokol: $protokol"
-        echo -e "=========================="
+        count=$((count+1))
+
+        echo -e "${green}$(printf '%02d' $count)${NC}. Username : ${green}$username${NC}"
+        echo -e "    Status   : ${red}Locked${NC}"
+        echo -e "    UUID     : $uid"
+        echo -e "    Expired  : $exp"
+        echo -e "    Protocol : $protokol"
+        echo -e "${blue_sep}"
     done
-    
-    echo -e "Press CTRL + C to Exit"
+    echo -e "${orange}Press [Ctrl + C] to exit${NC}"
+    echo -e "${separator}"
+
     read -p "Input Username to Unlock: " name
 else
-    # Jika hanya ada satu akun terkunci
-    if [ -n "$locked_files" ]; then
-        name=$(basename "$locked_files" .locked)
-    else
-        clear
-        echo "Tidak ada akun yang terkunci."
-        exit 1
-    fi
+    clear
+    echo "No locked accounts found to unlock."
+    exit 1
 fi
 
 # Menampilkan detail akun yang akan di-unlock
@@ -119,17 +153,16 @@ protokol2=$(grep "Protokol:" /var/log/create/xray/http/${name}.locked | awk '{pr
 
 clear
 
-echo -e "
-Detail Unlock X-Ray WS
-======================
-
-Date: $(date)
-Username: $name
-Expired on: $exp2
-UUID: $uuid
-Protokol: $protokol2
-Status: Unlock
-======================"
+echo -e "${NC}${separator}
+       UNLOCK ACCOUNT DETAILS
+${separator}
+Date     : $(date)
+Username : ${green}$name${NC}
+Expired  : $exp2
+UUID     : $uuid
+Protocol : $protokol2
+Status   : ${green}Unlocked${NC}
+${separator}"
 
 # Konfirmasi dari pengguna sebelum melakukan unlock
 read -p "Apakah Anda yakin ingin unlock akun ini? (y/n): " confirm

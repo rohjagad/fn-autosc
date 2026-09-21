@@ -491,16 +491,15 @@ clear
 
 openeuler() {
 clear
-echo -e "
-======================
-   OpenEuler Linux
-======================
+echo -e "${NC}${separator}
+         OPENEULER LINUX
+${separator}
+${green}1${NC}. OpenEuler 20.03
+${green}2${NC}. OpenEuler 22.03
+${green}3${NC}. OpenEuler 24.03
+${separator}
 
-1. OpenEuler 20.03
-2. OpenEuler 22.03
-3. OpenEuler 24.03
-======================
-"
+${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input Option: " opn
 case $opn in
 1) cd /root ; curl -O https://raw.githubusercontent.com/rohjagad/reinstall/main/reinstall.sh && bash reinstall.sh openeuler 20.03 && reboot  ;;
@@ -512,16 +511,15 @@ esac
 
 opensuse() {
 clear
-echo -e "
-====================
-   OpenSUSE Linux
-====================
+echo -e "${NC}${separator}
+          OPENSUSE LINUX
+${separator}
+${green}1${NC}. OpenSuse 15.5
+${green}2${NC}. OpenSuse 16.6
+${green}3${NC}. OpenSuse tumbleweed
+${separator}
 
-1. OpenSuse 15.5
-2. OpenSuse 16.6
-3. OpenSuse tumbleweed
-====================
-"
+${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input Option: " osu
 case $osu in
 1) cd /root ; curl -O https://raw.githubusercontent.com/rohjagad/reinstall/main/reinstall.sh && bash reinstall.sh opensuse 15.5 && reboot  ;;
@@ -533,17 +531,16 @@ esac
 
 debian() {
 clear
-echo -e "
-==================
-   Debian Linux
-==================
+echo -e "${NC}${separator}
+           DEBIAN LINUX
+${separator}
+${green}1${NC}. Debian 9
+${green}2${NC}. Debian 10
+${green}3${NC}. Debian 11
+${green}4${NC}. Debian 12
+${separator}
 
-1. Debian 9
-2. Debian 10
-3. Debian 11
-4. Debian 12
-==================
-"
+${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input Option: " db
 case $db in
 1) cd /root ; curl -O https://raw.githubusercontent.com/rohjagad/reinstall/main/reinstall.sh && bash reinstall.sh debian 9 && reboot  ;;
@@ -556,18 +553,17 @@ esac
 
 ubuntu() {
 clear
-echo -e "
-==================
-   Ubuntu Linux
-==================
+echo -e "${NC}${separator}
+           UBUNTU LINUX
+${separator}
+${green}1${NC}. Ubuntu 16.04
+${green}2${NC}. Ubuntu 18.04
+${green}3${NC}. Ubuntu 20.04
+${green}4${NC}. Ubuntu 22.04
+${green}5${NC}. Ubuntu 24.04
+${separator}
 
-1. Ubuntu 16.04
-2. Ubuntu 18.04
-3. Ubuntu 20.04
-4. Ubuntu 22.04
-5. Ubuntu 24.04
-==================
-"
+${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input Option: " wq
 case $wq in
 1) cd /root ; curl -O https://raw.githubusercontent.com/rohjagad/reinstall/main/reinstall.sh && bash reinstall.sh ubuntu 16.04 && reboot ;;
@@ -581,17 +577,16 @@ esac
 
 alpine() {
 clear
-echo -e "
-==================
-   Alpine Linux
-==================
+echo -e "${NC}${separator}
+           ALPINE LINUX
+${separator}
+${green}1${NC}. Alpine 3.17
+${green}2${NC}. Alpine 3.18
+${green}3${NC}. Alpine 3.19
+${green}4${NC}. Alpine 3.20
+${separator}
 
-1. Alpine 3.17
-2. Alpine 3.18
-3. Alpine 3.19
-4. Alpine 3.20
-==================
-"
+${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input Option: " ap
 case $ap in
 1) cd /root ; curl -O https://raw.githubusercontent.com/rohjagad/reinstall/main/reinstall.sh && bash reinstall.sh alpine 3.17 && reboot ;;
@@ -603,14 +598,14 @@ esac
 }
 
 rocky() {
-echo -e "
-=================
-   Rocky Linux
-=================
+echo -e "${NC}${separator}
+            ROCKY LINUX
+${separator}
+${green}1${NC}. Rocky Linux 8
+${green}2${NC}. Rocky Linux 9
+${separator}
 
-1. Rocky Linux 8
-2. Rocky Linux 9
-=================
+${orange}Press [Ctrl + C] to exit${NC}"
 "
 read -p "Input Options: " opw
 case $opw in

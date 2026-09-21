@@ -270,19 +270,17 @@ esac
 }
 
 rpot() {
-echo "
-Report Bug To
-=====================
+echo -e "${NC}${separator}
+          REPORT SCRIPT BUG
+${separator}
 Telegram:
-
 - FN AutoSC
 - @farell_aditya_ardian
 - @PR_Aiman
-=====================
+${blue_sep}
 Email:
-
 - widyabakti02@gmail.com
-=====================
+${separator}
 
 Thanks for using this script
 "

@@ -178,13 +178,13 @@ http=$(cat /etc/xray/json/upgrade.json | grep "###" | sort | uniq | wc -l)
 gpc=$(cat /etc/xray/json/grpc.json | grep "###" | sort | uniq | wc -l)
 split=$(cat /etc/xray/json/split.json | grep "###" | sort | uniq | wc -l)
 
-separator=$(rainbow_sep '============================')
+separator=$(rainbow_sep '===================================')
+blue_sep="${blue}-----------------------------------${NC}"
 clear
-echo -e "
-${NC}
- ${separator}
-         XTLS MENU
-Nginx  : $(status="$(systemctl show nginx.service --no-page)"
+echo -e "${NC}${separator}
+             XTLS MENU
+${separator}
+Nginx        : $(status="$(systemctl show nginx.service --no-page)"
 status_text=$(echo "${status}" | grep 'ActiveState=' | cut -f2 -d=)
 if [ "${status_text}" == "active" ]
 then
@@ -192,33 +192,25 @@ echo -e "${green}running${NC} ✓"
 else
 echo -e "${red}not running (Error)${NC}"
 fi)
- ${separator}
-Total Accounts
-
-WS   : $ws
-HTTP : $http
-gRPC : $gpc
-Split: $split
- ${separator}
-
-1. WebSocket (WS)
-2. HTTP Upgrade (HTTP)
-3. gRPC (XTLS)
-4. Split HTTP (Split)
- ${separator}
-
-5. System Menu
-6. Domain Menu
-7. Backup Menu
-8. Telegram Bot
- ${separator}
-Today${NC}: ${red}$ttoday$NC Yesterday${NC}: ${red}$tyest$NC This month${NC}: ${red}$tmon $NC
- ${separator}
+${blue_sep}
+${purple}TOTAL ACCOUNTS${NC}
+WS           : ${green}$ws${NC}
+HTTP         : ${green}$http${NC}
+gRPC         : ${green}$gpc${NC}
+Split        : ${green}$split${NC}
+${blue_sep}
+${purple}MENU${NC}
+${green}1${NC}. WebSocket (WS)        ${green}5${NC}. System Menu
+${green}2${NC}. HTTP Upgrade (HTTP)   ${green}6${NC}. Domain Menu
+${green}3${NC}. gRPC (XTLS)           ${green}7${NC}. Backup Menu
+${green}4${NC}. Split HTTP (Split)    ${green}8${NC}. Telegram Bot
+${blue_sep}
+Today: ${red}$ttoday${NC} Yesterday: ${red}$tyest${NC} This month: ${red}$tmon${NC}
+${separator}
 $rerechan
- ${separator}
-   Press [Ctrl + C] to exit
- ${separator}
-"
+${separator}
+
+${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input option: " opws
 case $opws in
 1) clear ; x-ws ;;

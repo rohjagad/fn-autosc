@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 [[ -e $(which curl) ]] && grep -q "1.1.1.1" /etc/resolv.conf || { 
     echo "nameserver 1.1.1.1" | cat - /etc/resolv.conf >> /etc/resolv.conf.tmp && mv /etc/resolv.conf.tmp /etc/resolv.conf
 }
@@ -49,9 +50,41 @@
         echo "Expired: $EXPIRED_DATE ($REMAINING_DAYS days)"
     }
 
-    output
 clear
-clear
+
+red='\033[0;31m'
+green='\033[0;32m'
+blue='\033[1;34m'
+purple='\033[1;35m'
+orange='\033[38;5;208m'
+NC='\033[0m'
+
+rainbow_sep() {
+  local text="${1:-===================================}"
+  local output=''
+  local i segment fraction r g b color
+  local -a red=(255 255 0 0 0 255 255)
+  local -a green=(0 255 255 255 0 0 0)
+  local -a blue=(0 0 0 255 255 255 0)
+  for ((i = 0; i < ${#text}; i++)); do
+    if ((i == ${#text} - 1)); then
+      segment=5
+      fraction=$((${#text} - 1))
+    else
+      segment=$((i * 6 / (${#text} - 1)))
+      fraction=$((i * 6 % (${#text} - 1)))
+    fi
+    r=$((red[segment] + (red[segment + 1] - red[segment]) * fraction / (${#text} - 1)))
+    g=$((green[segment] + (green[segment + 1] - green[segment]) * fraction / (${#text} - 1)))
+    b=$((blue[segment] + (blue[segment + 1] - blue[segment]) * fraction / (${#text} - 1)))
+    printf -v color '\033[38;2;%d;%d;%dm' "$r" "$g" "$b"
+    output+="${color}${text:i:1}"
+  done
+  printf '%b\n' "${output}${NC}"
+}
+
+separator=$(rainbow_sep '===================================')
+blue_sep="${blue}-----------------------------------${NC}"
 
 restore() {
 # Detail Informasi
@@ -61,14 +94,14 @@ ip="$ip4 / $ip6"
 date=$(date)
 domain=$(cat /etc/xray/domain)
 clear
-read -rp "Backup URL: " url
+read -rp "Input Link Database: " url
 
 cd /root
 wget -O backup.zip "$url"
 unzip backup.zip
 rm -f backup.zip
 sleep 1
-echo "Restoring backup data..."
+echo "Tengah Melakukan Backup Data"
 cd /root/backup
 cp passwd /etc/
 cp group /etc/
@@ -93,8 +126,8 @@ clear
 
 #echo "Telah Berjaya Melakukan Backup"
   echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo -e " VPS RESTORED SUCCESSFULLY "
-    echo -e "Please save the following data:"
+    echo -e "SUCCESSFULL RESTORE YOUR VPS"
+    echo -e "Please Save The Following Data"
     echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo -e "Your VPS IP : $ip"
     echo -e "DOMAIN      : $domain"
@@ -154,7 +187,7 @@ clear
     echo -e "DATE        : $date"
     echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━"
 else
-    echo "Error: File $file Not Found"
+    echo "Error: File $file not found"
 fi
 rm -fr /root/backup*
 }
@@ -300,19 +333,17 @@ rm -fr /root/backup*
 
 bmenu() {
 clear
-echo -e "
-============================
-< =    Backup Server     = >
-============================
+echo -e "${NC}${separator}
+            BACKUP MENU
+${separator}
+${green}1${NC}. Backup to File.io (Telegram)
+${green}2${NC}. Backup to Google Drive
+${green}3${NC}. Restore Backup via URL
+${green}4${NC}. Restore Backup via File
+${green}5${NC}. Restore Legacy Backup (< v1.23)
+${separator}
 
-1. Backup to File.io (Telegram)
-2. Backup to Google Drive
-3. Restore Backup via URL
-4. Restore Backup via File
-5. Restore Legacy Backup (< v1.23)
-============================
-   Press [Ctrl + C] to exit
-============================"
+${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input option: " opa
 case $opa in
 1) clear ; backup ;;

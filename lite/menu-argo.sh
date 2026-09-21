@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 [[ -e $(which curl) ]] && grep -q "1.1.1.1" /etc/resolv.conf || { 
     echo "nameserver 1.1.1.1" | cat - /etc/resolv.conf >> /etc/resolv.conf.tmp && mv /etc/resolv.conf.tmp /etc/resolv.conf
 }
@@ -49,10 +50,44 @@
         echo "Expired: $EXPIRED_DATE ($REMAINING_DAYS days)"
     }
 
-    output
 clear
 
 menu-argo() {
+
+red='\033[0;31m'
+green='\033[0;32m'
+blue='\033[1;34m'
+purple='\033[1;35m'
+orange='\033[38;5;208m'
+NC='\033[0m'
+
+rainbow_sep() {
+  local text="${1:-===================================}"
+  local output=''
+  local i segment fraction r g b color
+  local -a red=(255 255 0 0 0 255 255)
+  local -a green=(0 255 255 255 0 0 0)
+  local -a blue=(0 0 0 255 255 255 0)
+  for ((i = 0; i < ${#text}; i++)); do
+    if ((i == ${#text} - 1)); then
+      segment=5
+      fraction=$((${#text} - 1))
+    else
+      segment=$((i * 6 / (${#text} - 1)))
+      fraction=$((i * 6 % (${#text} - 1)))
+    fi
+    r=$((red[segment] + (red[segment + 1] - red[segment]) * fraction / (${#text} - 1)))
+    g=$((green[segment] + (green[segment + 1] - green[segment]) * fraction / (${#text} - 1)))
+    b=$((blue[segment] + (blue[segment + 1] - blue[segment]) * fraction / (${#text} - 1)))
+    printf -v color '\033[38;2;%d;%d;%dm' "$r" "$g" "$b"
+    output+="${color}${text:i:1}"
+  done
+  printf '%b\n' "${output}${NC}"
+}
+
+separator=$(rainbow_sep '===================================')
+blue_sep="${blue}-----------------------------------${NC}"
+
 # Fix Nameserver
 [[ -e $(which curl) ]] && grep -q "1.1.1.1" /etc/resolv.conf || {
     echo "nameserver 1.1.1.1" | cat - /etc/resolv.conf >> /etc/resolv.conf.tmp && mv /etc/resolv.conf.tmp /etc/resolv.conf
@@ -169,29 +204,28 @@ Currently supported protocols:
 "
 }
 tamp() {
-edussh_service=$(systemctl status cloudflared | grep Active | awk '{print $3}' | cut -d "(" -f2 | cut -d ")" -f1)
+edussh_service=$(systemctl status cloudflared 2>/dev/null | grep Active | awk '{print $3}' | cut -d "(" -f2 | cut -d ")" -f1)
 if [[ $edussh_service == "running" ]]; then
-ssws="\e[1;32m[ ON ]\033[0m"
+    ssws="${green}ON${NC}"
 else
-ssws="\e[1;31m[ OFF ]\033[0m"
+    ssws="${red}OFF${NC}"
 fi
 clear
-echo -e "
-==========================
-     Argo Tunnel Menu
-==========================
-Status: $ssws
+echo -e "${NC}${separator}
+         ARGO TUNNEL MENU
+${separator}
+Status       : $ssws
+${blue_sep}
+${green}1${NC}. Install Argo Tunnel
+${green}2${NC}. Restart Argo Tunnel
+${green}3${NC}. Argo Tunnel Details
+${green}0${NC}. Back to Main Menu
+${separator}
 
-1. Install Argo Tunnel
-2. Restart Argo Tunnel
-3. Argo Tunnel Details
-0. Back to Main Menu
-══════════════════════════
-   Press [Ctrl + C] to exit
-"
+${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input option: " opws
 case $opws in
-1) setup ;;
+1) clear ; setup ;;
 2) clear ; reres ;;
 3) clear ; detail ;;
 0) clear ; menu ;;
