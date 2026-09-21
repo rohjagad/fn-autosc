@@ -110,6 +110,79 @@ The following upstream quirks and limitations are documented and remain open:
 1. **Stale GitHub Hosts Entry**: `installer/v2ray.sh` writes `199.232.68.133 raw.githubusercontent.com` to `/etc/hosts`. While operational in most regions, this hardcoded IP may fail if Fastly rotates edge IPs.
 2. **SlowDNS Startup Status**: `dnstt.service` enters an inactive/failed state immediately after installation until the operator configures a nameserver domain and keypair via `menu-dnstt`.
 3. **Fail2ban SSH Log Detection**: `fail2ban.service` may report a missing auth log on minimal Debian systems that do not create `/var/log/auth.log` prior to the first SSH authentication attempt.
-4. **Duplicate Lite Installer Step**: `installer/lite.sh` invokes `website/install.sh` twice consecutively during the setup routine.
-5. **SplitHTTP Nginx Compatibility**: SplitHTTP over HTTP/2 reverse-proxy setups may produce protocol mismatches with certain client implementations that expect pure HTTP/1.1 chunked transport.
-6. **UDP Request Broad SNAT Routing**: `udp-request -mode=system` inserts a top-priority `10.0.0.0/8` SNAT rule. A dedicated `RETURN` rule preserves host management, but client traffic routing through overlapping private subnets requires manual exclusion.
+4. **SplitHTTP Nginx Compatibility**: SplitHTTP over HTTP/2 reverse-proxy setups may produce protocol mismatches with certain client implementations that expect pure HTTP/1.1 chunked transport.
+5. **UDP Request Broad SNAT Routing**: `udp-request -mode=system` inserts a top-priority `10.0.0.0/8` SNAT rule. A dedicated `RETURN` rule preserves host management, but client traffic routing through overlapping private subnets requires manual exclusion.
+6. **Hardcoded Telegram Bot Token**: `installer/full.sh` and `installer/lite.sh` contain a default bot token. Operators should replace it via `menu-bot` after installation.
+7. **Hardcoded WhatsApp Number**: `installer/ssh.sh` SSH issue banner contains a placeholder WhatsApp number.
+8. **BadVPN/UDPGW Not Installed**: SSH account cards reference BadVPN/UDPGW port 7300, but the service binary is not installed by the current installer.
+
+---
+
+## Account & Log File Paths
+
+### Account Creation Logs
+
+Stored as plain text when an account is created (add or trial). The Go database log viewers read these files and format them with ANSI colors for terminal display.
+
+| Protocol | Log Directory | File Pattern |
+| :--- | :--- | :--- |
+| VMess / VLESS / Trojan **WebSocket** | `/var/log/create/xray/ws/` | `{username}.log` |
+| VMess / VLESS / Trojan **HTTP Upgrade** | `/var/log/create/xray/http/` | `{username}.log` |
+| VMess / VLESS / Trojan **SplitHTTP** | `/var/log/create/xray/split/` | `{username}.log` |
+| VMess / VLESS / Trojan **gRPC** | `/var/log/create/xray/grpc/` | `{username}.log` |
+| **SSH** | `/var/log/create/ssh/` | `{username}.log` |
+
+Locked accounts are renamed from `.log` to `.locked` in the same directory.
+
+### Xray / V2Ray Runtime Logs
+
+| Service | Log File | Used By |
+| :--- | :--- | :--- |
+| V2Ray (WS) | `/var/log/v2ray/access.log` | `cek-xray-ws` |
+| Xray HTTP Upgrade | `/var/log/xray/upgrade.log` | `cek-xray-http` |
+| Xray SplitHTTP | `/var/log/xray/split.log` | `cek-xray-split` |
+| Xray gRPC | `/var/log/xray/grpc.log` | `cek-xray-grpc` |
+
+### Xray / V2Ray Config Files
+
+| Service | Config File |
+| :--- | :--- |
+| V2Ray (WS) | `/etc/v2ray/config.json` |
+| Xray HTTP Upgrade | `/etc/xray/json/http.json` |
+| Xray SplitHTTP | `/etc/xray/json/split.json` |
+| Xray gRPC | `/etc/xray/json/grpc.json` |
+
+### Quota & IP Limit Files
+
+| Protocol | Quota Directory | IP Limit Directory |
+| :--- | :--- | :--- |
+| WebSocket | `/etc/xray/quota/ws/` | `/etc/xray/limit/ip/xray/ws/` |
+| HTTP Upgrade | `/etc/xray/quota/http/` | `/etc/xray/limit/ip/xray/http/` |
+| SplitHTTP | `/etc/xray/quota/split/` | `/etc/xray/limit/ip/xray/split/` |
+| gRPC | `/etc/xray/quota/grpc/` | `/etc/xray/limit/ip/xray/grpc/` |
+
+Quota files: `{username}` (limit in bytes), `{username}_usage` (current usage in bytes).
+IP limit files: `{username}` (max concurrent IPs as integer).
+
+### Go Binaries (Database Viewers & Checkers)
+
+| Binary | Source | Function |
+| :--- | :--- | :--- |
+| `log-database-xray-ws` | `log-database-xray-ws.go` | View WS account logs with styled terminal output |
+| `log-database-xray-http` | `log-database-xray-http.go` | View HTTP Upgrade account logs |
+| `log-database-xray-split` | `log-database-xray-split.go` | View SplitHTTP account logs |
+| `log-database-xray-grpc` | `log-database-xray-grpc.go` | View gRPC account logs |
+| `log-acc-ssh` | `log-acc-ssh.go` | View SSH account logs |
+| `cek-xray-ws` | `cek-xray-ws.go` | WS account status (quota, IP limit, protocol) |
+| `cek-xray-http` | `cek-xray-http.go` | HTTP Upgrade account status (IP login, traffic, quota) |
+| `cek-xray-split` | `cek-xray-split.go` | SplitHTTP account status (IP login, traffic, quota) |
+| `cek-xray-grpc` | `cek-xray-grpc.go` | gRPC account status (IP login, traffic, quota) |
+| `limit-ip` | `limit-ip.go` | SSH IP limiter daemon |
+| `delete-ssh` | `delete-ssh.go` | Delete SSH accounts and their logs |
+| `extend-ssh` | `extend-ssh.go` | Extend SSH account expiry |
+| `list-ssh` | `list-ssh.go` | List SSH accounts from `/etc/passwd` |
+| `pwd-ssh` | `pwd-ssh.go` | Show SSH account passwords |
+| `change-limit-ip-ws` | `change-limit-ip-ws.go` | Change WS account IP limit |
+| `change-limit-ip-http` | `change-limit-ip-http.go` | Change HTTP Upgrade account IP limit |
+| `change-limit-ip-split` | `change-limit-ip-split.go` | Change SplitHTTP account IP limit |
+| `change-limit-ip-grpc` | `change-limit-ip-grpc.go` | Change gRPC account IP limit |

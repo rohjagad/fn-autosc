@@ -119,7 +119,7 @@ function check_quota() {
 
             rm -rf "$quota_file"
             rm -rf "$usage_file"
-            rm -fr /var/log/create/xray/http/${user}
+            rm -fr /var/log/create/xray/http/${user}.log
         fi
     fi
 }

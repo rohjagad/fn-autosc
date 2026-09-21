@@ -93,7 +93,7 @@ function check_quota() {
     local user=$1
     quota_file="/etc/xray/quota/ws/${user}"
     usage_file="/etc/xray/quota/ws/${user}_usage"
-    log_file="/var/log/create/xray/ws/${user}"
+    log_file="/var/log/create/xray/ws/${user}.log"
 
     if [[ ! -f "$quota_file" ]]; then
         exp=$(grep -w "^### $user" "/etc/v2ray/config.json" | awk '{print $3}' | sort | uniq)

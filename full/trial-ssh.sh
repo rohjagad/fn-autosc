@@ -136,6 +136,9 @@ EOF
 # Kirim notifikasi ke Telegram
 send_telegram_notification "$chat_id" "$key" "$message"
 
+mkdir -p /var/log/create/ssh
+echo "$message" > /var/log/create/ssh/${username}.log
+
 clear
 source /etc/funny/format.sh
 format_display "$message"
