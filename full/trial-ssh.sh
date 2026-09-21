@@ -137,4 +137,5 @@ EOF
 send_telegram_notification "$chat_id" "$key" "$message"
 
 clear
-echo "$message"
+source /etc/funny/format.sh
+format_display "$message"

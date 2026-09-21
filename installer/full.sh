@@ -118,6 +118,10 @@ chmod +x *
 rm -f full.zip
 cd
 
+# Terminal display formatter
+wget --no-check-certificate -O /etc/funny/format.sh ${hosting}/config/format.sh >> /dev/null 2>&1
+chmod +x /etc/funny/format.sh
+
 # Installasi SSH WebSocket
 wget --no-check-certificate ${hosting}/installer/ssh.sh >> /dev/null 2>&1
 chmod +x ssh.sh

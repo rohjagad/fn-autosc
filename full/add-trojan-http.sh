@@ -67,19 +67,19 @@ until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/creat
     read -p "Username: " user
     if [[ -z "$user" ]]; then
         clear
-        echo -e "Username failed: tidak boleh kosong."
+        echo -e "Username cannot be empty."
         continue
     fi
 
     if [[ $user =~ [A-Z] || $user =~ [[:space:]] ]]; then
         clear
-        echo -e "Username failed: tidak boleh menggunakan huruf kapital atau spasi."
+        echo -e "Username cannot contain uppercase letters or spaces."
         continue
     fi
 
     if [[ $user =~ [^a-z0-9_] ]]; then
         clear
-        echo -e "Username failed: hanya boleh menggunakan huruf kecil, angka, dan underscore."
+        echo -e "Username can only contain lowercase letters, numbers, and underscores."
         continue
     fi
 
@@ -110,11 +110,11 @@ done
 
 # Validasi UUID
 if [[ "$uuid" =~ [[:space:]] || -z "$uuid" ]]; then
-    echo "UUID kosong atau mengandung spasi, membuat UUID baru..."
+    echo "UUID empty or contains spaces, generating new UUID..."
     uuid=$(xray uuid)
-    echo "UUID baru: $uuid"
+    echo "New UUID: $uuid"
 else
-    echo "Menggunakan UUID yang diberikan: $uuid"
+    echo "Using provided UUID: $uuid"
 fi
 
 # Limit Quota
@@ -176,4 +176,5 @@ Link None: $link2
 curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL >/dev/null 2>&1
 echo -e "$TEKS" > /var/log/create/xray/http/${user}.log
 clear
-echo -e "$TEKS"
+source /etc/funny/format.sh
+format_display "$TEKS"

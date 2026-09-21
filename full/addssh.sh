@@ -161,7 +161,8 @@ EOF
     echo "$message" > "${log_dir}/${username}.log"
 
     clear_screen
-    echo "$message"
+    source /etc/funny/format.sh
+    format_display "$message"
 }
 
 main

@@ -127,4 +127,5 @@ curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "te
 echo -e "$TEKS" > /var/log/create/xray/ws/${user}.log
 echo "sed -i "/### $user $exp/ {N;d}" /etc/v2ray/config.json && systemctl restart v2ray && systemctl restart quota-ws && rm -fr /var/log/create/xray/ws/${user}.log && rm -fr /etc/xray/limit/ip/xray/ws/$user && rm -fr /etc/xray/quota/ws/$user" | at now + 60 minutes >/dev/null 2>&1
 clear
-echo -e "$TEKS"
+source /etc/funny/format.sh
+format_display "$TEKS"
