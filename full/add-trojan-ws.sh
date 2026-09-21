@@ -61,7 +61,7 @@ clear
 until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/create/xray/ws/${user}.log ]]; do
     echo -e "
 ════════════════════════════
-<=   Create  Trojan  WS   =>
+      Create Trojan WS
 ════════════════════════════
 "
     read -p "Username: " user
@@ -151,7 +151,7 @@ link2="trojan://${uuid}@${domain}:80?path=/trojanws&security=none&host=${domain}
 
 TEKS="
 ======================
-<= Trojan WebSocket =>
+   Trojan WebSocket
 ======================
 
 Remarks : $user

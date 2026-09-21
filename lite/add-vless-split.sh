@@ -61,7 +61,7 @@ clear
 until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/create/xray/split/${user}.log ]]; do
     echo -e "
 ═════════════════════════════
-<= CREATE VLESS SPLIT HTTP =>
+   Create VLess Split HTTP
 ═════════════════════════════
 "
     read -p "Username: " user
@@ -151,7 +151,7 @@ vlesslink2="vless://${uuid}@${domain}:80?path=/splitvl&security=none&encryption=
 
 TEKS="
 =======================
-<= VLESS SPLIT HTTP  =>
+    VLess Split HTTP
 =======================
 
 Remarks : $user

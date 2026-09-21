@@ -137,7 +137,7 @@ domargo=$(cat /etc/xray/domargo)
 doms=$(cat /etc/xray/domssh)
 clear
 echo -e "
-<= Argo Tunnel Service Details =>
+    Argo Tunnel Details
 ═════════════════════════════════
 
 Port HTTP:
@@ -177,8 +177,9 @@ ssws="\e[1;31m[ OFF ]\033[0m"
 fi
 clear
 echo -e "
-<= [ Argo Tunnel Menu ] =>
-══════════════════════════
+==========================
+     Argo Tunnel Menu
+==========================
 Status: $ssws
 
 1. Install Argo Tunnel

@@ -217,7 +217,7 @@ akun4() {
     warp -4 > /root/wgcf.conf
     clear
     echo -e "
-    <= Your WARP IPv4 Wireguard Account =>
+    Your WARP IPv4 WireGuard Account
     ======================================
          Wireguard Configuration
 
@@ -231,7 +231,7 @@ akun6() {
         warp -6 > /root/wgcf.conf
     clear
     echo -e "
-    <= Your WARP IPv6 Wireguard Account =>
+    Your WARP IPv6 WireGuard Account
     ======================================
          Wireguard Configuration
 
@@ -493,7 +493,7 @@ openeuler() {
 clear
 echo -e "
 ======================
-<= OpenEuler Linux =>
+   OpenEuler Linux
 ======================
 
 1. OpenEuler 20.03
@@ -514,7 +514,7 @@ opensuse() {
 clear
 echo -e "
 ====================
-<= OpenSuse Linux =>
+   OpenSUSE Linux
 ====================
 
 1. OpenSuse 15.5
@@ -535,7 +535,7 @@ debian() {
 clear
 echo -e "
 ==================
-<= Debian Linux =>
+   Debian Linux
 ==================
 
 1. Debian 9
@@ -558,7 +558,7 @@ ubuntu() {
 clear
 echo -e "
 ==================
-<= Ubuntu Linux =>
+   Ubuntu Linux
 ==================
 
 1. Ubuntu 16.04
@@ -583,7 +583,7 @@ alpine() {
 clear
 echo -e "
 ==================
-<= Alpine Linux =>
+   Alpine Linux
 ==================
 
 1. Alpine 3.17
@@ -605,7 +605,7 @@ esac
 rocky() {
 echo -e "
 =================
-<= Rocky Linux =>
+   Rocky Linux
 =================
 
 1. Rocky Linux 8

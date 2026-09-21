@@ -61,7 +61,7 @@ clear
 until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/create/xray/grpc/${user}.log ]]; do
     echo -e "
 ═════════════════════════════
-<=   Create  Vless  gRPC   =>
+      Create VLess gRPC
 ═════════════════════════════
 "
     read -p "Username: " user
@@ -148,7 +148,7 @@ vlesslink1="vless://$uuid@$domain:443?mode=gun&security=none&encryption=none&aut
 
 TEKS="
 ======================
-<= X-RAY VLESS gRPC =>
+    Xray VLess gRPC
 ======================
 
 Remarks : $user

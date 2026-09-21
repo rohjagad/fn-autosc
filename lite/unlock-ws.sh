@@ -79,7 +79,7 @@ locked_files=$(ls /var/log/create/xray/ws/*.locked)
 # Mengecek apakah ada file terkunci
 if [ $(echo "$locked_files" | wc -l) -gt 0 ]; then
     clear
-    echo -e "==========================\n<= Menu Unlock X-Ray WS =>\n=========================="
+    echo -e "==========================\n   Unlock X-Ray WS Menu\n=========================="
 
     # Loop untuk menampilkan semua akun terkunci
     for file in $locked_files; do

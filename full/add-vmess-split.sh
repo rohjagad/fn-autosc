@@ -61,7 +61,7 @@ clear
 until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/create/xray/split/${user}.log ]]; do
     echo -e "
 ═════════════════════════════
-<= CREATE VMESS SPLIT HTTP =>
+   Create VMess Split HTTP
 ═════════════════════════════
 "
     read -p "Username: " user
@@ -185,7 +185,7 @@ vmesslink2="vmess://$(echo $ask | base64 -w 0)"
 clear
 TEKS="
 ======================
-<= VMESS SPLIT HTTP =>
+   VMess Split HTTP
 ======================
 
 Remarks : $user

@@ -101,7 +101,7 @@ fi
 # Buat pesan notifikasi
 message=$(cat <<EOF
 ===================
-[<= SSH Account =>]
+    SSH Account
 ===================
 Domain     : $domain
 Username   : $username

@@ -61,7 +61,7 @@ clear
 until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/create/xray/http/${user}.log ]]; do
     echo -e "
 ═══════════════════════════════
-<= Create Vmess HTTP UPGRADE =>
+   Create VMess HTTP Upgrade
 ═══════════════════════════════
 "
     read -p "Username: " user
@@ -184,7 +184,7 @@ vmesslink2="vmess://$(echo $ask | base64 -w 0)"
 clear
 TEKS="
 ========================
-<= VMESS HTTP UPGRADE =>
+   VMess HTTP Upgrade
 ========================
 
 Remarks : $user

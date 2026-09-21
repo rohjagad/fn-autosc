@@ -101,7 +101,7 @@ link2="trojan://${uuid}@${domain}:80?path=/splittr&security=none&host=${domain}&
 
 TEKS="
 ======================
-<= Trojan SplitHTTP =>
+   Trojan Split HTTP
 ======================
 
 Remarks : $user

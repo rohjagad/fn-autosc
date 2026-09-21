@@ -61,7 +61,7 @@ clear
 until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/create/xray/split/${user}.log ]]; do
     echo -e "
 ══════════════════════════════
-<= CREATE TROJAN SPLIT HTTP =>
+  Create Trojan Split HTTP
 ══════════════════════════════
 "
     read -p "Username: " user
@@ -151,7 +151,7 @@ link2="trojan://${uuid}@${domain}:80?path=/splittr&security=none&host=${domain}&
 
 TEKS="
 ======================
-<= Trojan SplitHTTP =>
+   Trojan Split HTTP
 ======================
 
 Remarks : $user

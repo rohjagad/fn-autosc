@@ -61,7 +61,7 @@ clear
 until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/create/xray/grpc/${user}.log ]]; do
     echo -e "
 ═════════════════════════════
-<=   Create  Vmess  gRPC   =>
+      Create VMess gRPC
 ═════════════════════════════
 "
     read -p "Username: " user
@@ -166,7 +166,7 @@ vmesslink1="vmess://$(echo $grpc | base64 -w 0)"
 clear
 TEKS="
 =======================
-  <= Xray Vmess WS =>
+     Xray VMess gRPC
 =======================
 
 Remarks : $user

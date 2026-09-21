@@ -98,7 +98,7 @@ vlesslink1="vless://$uuid@$domain:443?mode=gun&security=none&encryption=none&aut
 
 TEKS="
 ======================
-<= X-RAY VLESS gRPC =>
+    Xray VLess gRPC
 ======================
 
 Remarks : $user

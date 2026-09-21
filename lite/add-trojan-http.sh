@@ -61,7 +61,7 @@ clear
 until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/create/xray/http/${user}.log ]]; do
     echo -e "
 ═══════════════════════════════
-<= Create Trojan HTTPUPGRADE =>
+ Create Trojan HTTP Upgrade
 ═══════════════════════════════
 "
     read -p "Username: " user
@@ -151,7 +151,7 @@ link2="trojan://${uuid}@${domain}:80?path=/luqito&security=none&host=${domain}&t
 
 TEKS="
 =========================
-<= Trojan HTTP UPGRADE =>
+  Trojan HTTP Upgrade
 =========================
 
 Remarks : $user

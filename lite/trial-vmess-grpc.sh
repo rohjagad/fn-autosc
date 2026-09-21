@@ -115,7 +115,7 @@ vmesslink1="vmess://$(echo $grpc | base64 -w 0)"
 clear
 TEKS="
 =======================
-  <= Xray Vmess WS =>
+     Xray VMess gRPC
 =======================
 
 Remarks : $user

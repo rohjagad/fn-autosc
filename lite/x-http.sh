@@ -70,7 +70,7 @@ xhttp() {
 
     clearScreen  # Bersihkan layar
     echo "============================"
-    echo "[ <=  XTLS HTTP UPGRADE => ]"
+    echo "     XTLS HTTP Upgrade      "
     echo "============================"
     echo -e "\nhttp   : \033[1;32m$http\033[0m"  # Tampilkan jumlah akun
     echo "============================"

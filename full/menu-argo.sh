@@ -172,7 +172,7 @@ domargo=$(cat /etc/xray/domargo)
 doms=$(cat /etc/xray/domssh)
 clear
 echo -e "
-<= Argo Tunnel Service Details =>
+    Argo Tunnel Details
 ═════════════════════════════════
 
 Port HTTP:

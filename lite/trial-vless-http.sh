@@ -101,7 +101,7 @@ vlesslink2="vless://${uuid}@${domain}:80?path=/imam&security=none&encryption=non
 
 TEKS="
 ========================
-<= VLESS HTTP UPGRADE =>
+   VLess HTTP Upgrade
 ========================
 
 Remarks : $user

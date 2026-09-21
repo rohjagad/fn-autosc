@@ -61,7 +61,7 @@ clear
 until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/create/xray/ws/${user}.log ]]; do
     echo -e "
 ════════════════════════════
-<=    Create  Vmess  WS   =>
+       Create VMess WS
 ════════════════════════════
 "
     read -p "Username: " user
@@ -184,7 +184,7 @@ vmesslink2="vmess://$(echo $ask | base64 -w 0)"
 clear
 TEKS="
 =======================
-  <= Xray Vmess WS =>
+     Xray VMess WS
 =======================
 
 Remarks : $user

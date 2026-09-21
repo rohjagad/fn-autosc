@@ -62,7 +62,7 @@ clear
 until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/create/xray/grpc/${user}.log ]]; do
     echo -e "
 ════════════════════════════
-<=   Create Trojan gRPC   =>
+    Create Trojan gRPC
 ════════════════════════════
 "
     read -p "Username: " user
@@ -149,7 +149,7 @@ link1="trojan://${uuid}@${domain}:443?mode=gun&security=tls&authority=${domain}&
 
 TEKS="
 =======================
-<= X-RAY Trojan gRPC =>
+   Xray Trojan gRPC
 =======================
 
 Remarks : $user

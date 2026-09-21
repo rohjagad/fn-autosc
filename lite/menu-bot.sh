@@ -169,7 +169,8 @@ ws="\e[1;31m[ OFF ]\033[0m"
 fi
 clear
 echo -e "
-<= [ Terminal Bot Menu ] =>
+===========================
+     Terminal Bot Menu
 ===========================
 Bot: $ws
 

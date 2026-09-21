@@ -101,7 +101,7 @@ link2="trojan://${uuid}@${domain}:80?path=/luqito&security=none&host=${domain}&t
 
 TEKS="
 =========================
-<= Trojan HTTP UPGRADE =>
+   Trojan HTTP Upgrade
 =========================
 
 Remarks : $user

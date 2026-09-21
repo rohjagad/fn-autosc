@@ -61,7 +61,7 @@ clear
 until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/create/xray/http/${user}.log ]]; do
     echo -e "
 ═══════════════════════════════
-<= Create Vless HTTP UPGRADE =>
+   Create VLess HTTP Upgrade
 ═══════════════════════════════
 "
     read -p "Username: " user
@@ -151,7 +151,7 @@ vlesslink2="vless://${uuid}@${domain}:80?path=/imam&security=none&encryption=non
 
 TEKS="
 ========================
-<= VLESS HTTP UPGRADE =>
+   VLess HTTP Upgrade
 ========================
 
 Remarks : $user

@@ -71,7 +71,7 @@ xws() {
 
     clearScreen  # Bersihkan layar
     echo "============================"
-    echo "[ <=   XTLS  WebSocket  => ]"
+    echo "       XTLS WebSocket       "
     echo "============================"
     echo -e "\nWS   : \033[1;32m$ws\033[0m"  # Tampilkan jumlah akun
     echo "============================"

@@ -70,7 +70,7 @@ xgrpc() {
 
     clearScreen  # Bersihkan layar
     echo "============================"
-    echo "[ <= XTLS TCP  TLS gRPC => ]"
+    echo "     XTLS TCP TLS gRPC      "
     echo "============================"
     echo -e "\ngrpc   : \033[1;32m$grpc\033[0m"  # Tampilkan jumlah akun
     echo "============================"

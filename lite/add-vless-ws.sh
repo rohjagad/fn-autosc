@@ -61,7 +61,7 @@ clear
 until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/create/xray/ws/${user}.log ]]; do
     echo -e "
 ════════════════════════════
-<=    Create  Vmess  WS   =>
+       Create VLess WS
 ════════════════════════════
 "
     read -p "Username: " user
@@ -151,7 +151,7 @@ vlesslink2="vless://${uuid}@${domain}:80?path=/vlessws&security=none&encryption=
 
 TEKS="
 =======================
-  <= Xray Vless WS =>
+     Xray VLess WS
 =======================
 
 Remarks : $user

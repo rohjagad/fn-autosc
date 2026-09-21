@@ -71,7 +71,7 @@ xsplit() {
 
     clearScreen  # Bersihkan layar
     echo "============================"
-    echo "[ <=  XTLS  Split HTTP  => ]"
+    echo "      XTLS Split HTTP       "
     echo "============================"
     echo -e "\nsplit   : \033[1;32m$split\033[0m"  # Tampilkan jumlah akun
     echo "============================"

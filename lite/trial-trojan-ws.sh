@@ -101,7 +101,7 @@ link2="trojan://${uuid}@${domain}:80?path=/trojanws&security=none&host=${domain}
 
 TEKS="
 ======================
-<= Trojan WebSocket =>
+   Trojan WebSocket
 ======================
 
 Remarks : $user

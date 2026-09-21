@@ -183,14 +183,15 @@ clear
 echo -e "
 ${NC}
  ${separator}
-[ <= MENU XTLS $(status="$(systemctl show nginx.service --no-page)"
+         XTLS MENU
+Nginx  : $(status="$(systemctl show nginx.service --no-page)"
 status_text=$(echo "${status}" | grep 'ActiveState=' | cut -f2 -d=)
 if [ "${status_text}" == "active" ]
 then
-echo -e "${NC}: "${green}"running"$NC" ✓"
+echo -e "${green}running${NC} ✓"
 else
-echo -e "${NC}: "$red"not running (Error)"$NC" "
-fi) => ]
+echo -e "${red}not running (Error)${NC}"
+fi)
  ${separator}
 Total Accounts
 

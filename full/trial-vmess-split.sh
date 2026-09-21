@@ -133,7 +133,7 @@ vmesslink2="vmess://$(echo $ask | base64 -w 0)"
 clear
 TEKS="
 ======================
-<= VMESS SPLIT HTTP =>
+   VMess Split HTTP
 ======================
 
 Remarks : $user

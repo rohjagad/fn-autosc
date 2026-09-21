@@ -101,7 +101,7 @@ vlesslink2="vless://${uuid}@${domain}:80?path=/splitvl&security=none&encryption=
 
 TEKS="
 =======================
-<= VLESS SPLIT HTTP  =>
+    VLess Split HTTP
 =======================
 
 Remarks : $user

@@ -101,7 +101,7 @@ vlesslink2="vless://${uuid}@${domain}:80?path=/vlessws&security=none&encryption=
 
 TEKS="
 =======================
-  <= Xray Vless WS =>
+     Xray VLess WS
 =======================
 
 Remarks : $user

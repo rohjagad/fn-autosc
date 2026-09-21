@@ -122,7 +122,7 @@ main() {
 
     local message=$(cat <<EOF
 ===================
-[<= SSH Account =>]
+    SSH Account
 ===================
 Domain     : $domain
 Username   : $username
