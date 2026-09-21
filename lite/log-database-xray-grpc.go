@@ -87,7 +87,10 @@ func formatLogForTerminal(raw string) string {
 				cleanTitle = strings.TrimSuffix(cleanTitle, "=>")
 				cleanTitle = strings.TrimSpace(cleanTitle)
 				result = append(result, colorPurple+cleanTitle+colorReset)
-			} else if strings.Contains(line, ":") && !strings.HasPrefix(trimmed, "vmess://") && !strings.HasPrefix(trimmed, "vless://") && !strings.HasPrefix(trimmed, "trojan://") && !strings.HasPrefix(trimmed, "http://") && !strings.HasPrefix(trimmed, "https://") && !strings.HasPrefix(trimmed, "Link ") {
+			} else if strings.HasPrefix(trimmed, "Link ") && strings.Contains(line, ":") {
+				parts := strings.SplitN(line, ":", 2)
+				result = append(result, fmt.Sprintf("%s:%s%s", parts[0], colorPurple, parts[1])+colorReset)
+			} else if strings.Contains(line, ":") && !strings.HasPrefix(trimmed, "vmess://") && !strings.HasPrefix(trimmed, "vless://") && !strings.HasPrefix(trimmed, "trojan://") && !strings.HasPrefix(trimmed, "http://") && !strings.HasPrefix(trimmed, "https://") {
 				parts := strings.SplitN(line, ":", 2)
 				result = append(result, fmt.Sprintf("%s:%s%s", parts[0], colorGreen, parts[1])+colorReset)
 			} else {
