@@ -81,13 +81,13 @@ func formatLogForTerminal(raw string) string {
 				result = append(result, blueSep)
 			}
 		} else {
-			if idx > 0 && isSep(idx-1) && idx < len(lines)-1 && isSep(idx+1) {
+			if idx > 0 && isSep(idx-1) && idx < len(lines)-1 && isSep(idx+1) && !strings.HasPrefix(trimmed, "Link ") {
 				cleanTitle := strings.TrimSpace(trimmed)
 				cleanTitle = strings.TrimPrefix(cleanTitle, "<=")
 				cleanTitle = strings.TrimSuffix(cleanTitle, "=>")
 				cleanTitle = strings.TrimSpace(cleanTitle)
 				result = append(result, colorPurple+cleanTitle+colorReset)
-			} else if strings.Contains(line, ":") && !strings.HasPrefix(trimmed, "vmess://") && !strings.HasPrefix(trimmed, "vless://") && !strings.HasPrefix(trimmed, "trojan://") && !strings.HasPrefix(trimmed, "http://") && !strings.HasPrefix(trimmed, "https://") {
+			} else if strings.Contains(line, ":") && !strings.HasPrefix(trimmed, "vmess://") && !strings.HasPrefix(trimmed, "vless://") && !strings.HasPrefix(trimmed, "trojan://") && !strings.HasPrefix(trimmed, "http://") && !strings.HasPrefix(trimmed, "https://") && !strings.HasPrefix(trimmed, "Link ") {
 				parts := strings.SplitN(line, ":", 2)
 				result = append(result, fmt.Sprintf("%s:%s%s", parts[0], colorGreen, parts[1])+colorReset)
 			} else {
