@@ -3,9 +3,12 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 )
 
 func main() {
@@ -25,8 +28,8 @@ func main() {
 
 Username:
 `, database)
-	fmt.Printf("============================\nTotal Account: %d\n============================\n", total)
-	fmt.Println("  Press CTRL + C To Exit")
+	fmt.Printf("============================\nTotal Accounts: %d\n============================\n", total)
+	fmt.Println("  Press [Ctrl + C] to exit")
 
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("Input Username: ")
@@ -37,11 +40,38 @@ Username:
 	logData, err := os.ReadFile(logFile)
 	if err != nil {
 		fmt.Println("\033[31m404 Log Not Found\033[0m")
-	} else {
-		// Menampilkan isi log jika file ada
-		clearScreen()
-		fmt.Println("\n" + string(logData))
+		return
 	}
+
+	clearScreen()
+	fmt.Println("\n" + string(logData))
+
+	chatIDBytes, errChat := os.ReadFile("/etc/funny/.chatid")
+	keyBytes, errKey := os.ReadFile("/etc/funny/.keybot")
+	if errChat == nil && errKey == nil {
+		chatID := strings.TrimSpace(string(chatIDBytes))
+		key := strings.TrimSpace(string(keyBytes))
+		if chatID != "" && key != "" {
+			sendToTelegram(string(logData), chatID, key)
+		}
+	}
+}
+
+func sendToTelegram(message, chatID, key string) {
+	if chatID == "" || key == "" {
+		return
+	}
+	urlStr := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", key)
+	formData := url.Values{
+		"chat_id": {chatID},
+		"text":    {message},
+	}
+	client := &http.Client{Timeout: 5 * time.Second}
+	resp, err := client.PostForm(urlStr, formData)
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
 }
 
 func clearScreen() {

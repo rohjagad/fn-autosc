@@ -3,15 +3,16 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"strings"
-	"net/http"
-	"io/ioutil"
+	"time"
 )
 
 func main() {
-	// Mendapatkan daftar akun X-Ray split yang aktif
+	// Mendapatkan daftar akun X-Ray Split yang aktif
 	cmd := exec.Command("bash", "-c", "ls /var/log/create/xray/split | grep -v '\\.locked$' | sed 's/\\.log$//' | sort | uniq")
 	out, err := cmd.Output()
 	if err != nil {
@@ -22,15 +23,15 @@ func main() {
 	total := strings.Count(database, "\n")
 
 	clearScreen()
-	fmt.Println("=================================")
-	fmt.Println("[ Log Database X-Ray SPLIT Account ]")
-	fmt.Println("=================================")
+	fmt.Println("====================================")
+	fmt.Println("[ Log Database X-Ray Split Account ]")
+	fmt.Println("====================================")
 	fmt.Println("Username:")
 	fmt.Println(database)
-	fmt.Println("=================================")
-	fmt.Printf("Total Account: %d\n", total)
-	fmt.Println("============================")
-	fmt.Println("  Press CTRL + C To Exit")
+	fmt.Println("====================================")
+	fmt.Printf("Total Accounts: %d\n", total)
+	fmt.Println("====================================")
+	fmt.Println("    Press [Ctrl + C] to exit")
 
 	// Meminta input username
 	reader := bufio.NewReader(os.Stdin)
@@ -47,50 +48,36 @@ func main() {
 		return
 	}
 
-	// Mengambil chat ID dan bot token dari file
-	chatID, err := ioutil.ReadFile("/etc/funny/.chatid")
-	if err != nil {
-		fmt.Println("Error reading chat ID:", err)
-		return
-	}
-	key, err := ioutil.ReadFile("/etc/funny/.keybot")
-	if err != nil {
-		fmt.Println("Error reading bot key:", err)
-		return
-	}
-
-	// Mengirim log ke Telegram
-	sendToTelegram(string(logData), strings.TrimSpace(string(chatID)), strings.TrimSpace(string(key)))
-
 	clearScreen()
 	fmt.Println(string(logData))
+
+	// Mengambil chat ID dan bot token jika bot sudah di-setup
+	chatIDBytes, errChat := os.ReadFile("/etc/funny/.chatid")
+	keyBytes, errKey := os.ReadFile("/etc/funny/.keybot")
+	if errChat == nil && errKey == nil {
+		chatID := strings.TrimSpace(string(chatIDBytes))
+		key := strings.TrimSpace(string(keyBytes))
+		if chatID != "" && key != "" {
+			sendToTelegram(string(logData), chatID, key)
+		}
+	}
 }
 
 func sendToTelegram(message, chatID, key string) {
-	// URL untuk mengirim pesan ke Telegram
-	url := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", key)
-
-	// Menyiapkan data yang dikirimkan
-	data := "chat_id=" + chatID + "&text=" + message
-
-	// Mengirim request ke Telegram API
-	client := &http.Client{}
-	req, err := http.NewRequest("POST", url, strings.NewReader(data))
-	if err != nil {
-		fmt.Println("Error creating request:", err)
+	if chatID == "" || key == "" {
 		return
 	}
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-
-	resp, err := client.Do(req)
+	urlStr := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", key)
+	formData := url.Values{
+		"chat_id": {chatID},
+		"text":    {message},
+	}
+	client := &http.Client{Timeout: 5 * time.Second}
+	resp, err := client.PostForm(urlStr, formData)
 	if err != nil {
-		fmt.Println("Error sending message to Telegram:", err)
 		return
 	}
 	defer resp.Body.Close()
-
-	// Mengabaikan respons
-	_, _ = ioutil.ReadAll(resp.Body)
 }
 
 func clearScreen() {
