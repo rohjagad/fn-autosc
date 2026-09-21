@@ -38,7 +38,7 @@ func rerechanBanner() {
 }
 
 func Credit() {
-	time.Sleep(1)
+	time.Sleep(1 * time.Second)
 	barisPanjang()
 	fmt.Println(Yellow + "  Terimakasih Telah Menggunakan" + Xark)
 	fmt.Println(Yellow + "          Script Credit" + Xark)

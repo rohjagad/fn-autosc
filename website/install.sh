@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Detail Hostibg File
+# Detail Hosting File
 hosting="https://raw.githubusercontent.com/rohjagad/fn-autosc/1.23/website"
 
 # Menginstall Package

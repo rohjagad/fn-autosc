@@ -67,5 +67,5 @@ fi
 
 # Terapkan perubahan
 sysctl -p >/dev/null 2>&1
-echo "Script Anda Berhasil Diperbaiki...."
+echo "Script successfully repaired...."
 }

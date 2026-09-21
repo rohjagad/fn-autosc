@@ -15,7 +15,7 @@ domain=$(cat /etc/xray/domain)
         local today=$(date +%s)
         local expired_date=$(date -d "$1" +%s 2>/dev/null)
         if [ $? -ne 0 ]; then
-            echo "Tanggal kadaluwarsa tidak valid."
+            echo "Invalid expiration date."
             exit 1
         fi
         echo $(( (expired_date - today) / 86400 ))
@@ -23,7 +23,7 @@ domain=$(cat /etc/xray/domain)
 
     # Unduh izin dan validasi
     clear
-    PERMISSION_DATA=$(curl -s "$PERMISSION_URL" || { echo "Gagal mengunduh izin."; exit 1; })
+    PERMISSION_DATA=$(curl -s "$PERMISSION_URL" || { echo "Failed to download permissions."; exit 1; })
 
     # Mencocokkan data berdasarkan IP lokal
     MATCH=$(echo "$PERMISSION_DATA" | grep "###" | grep "$LOCAL_IP")

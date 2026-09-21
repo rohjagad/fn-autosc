@@ -14,7 +14,7 @@
         local today=$(date +%s)
         local expired_date=$(date -d "$1" +%s 2>/dev/null)
         if [ $? -ne 0 ]; then
-            echo "Tanggal kadaluwarsa tidak valid."
+            echo "Invalid expiration date."
             exit 1
         fi
         echo $(( (expired_date - today) / 86400 ))
@@ -22,7 +22,7 @@
 
     # Unduh izin dan validasi
     clear
-    PERMISSION_DATA=$(curl -s "$PERMISSION_URL" || { echo "Gagal mengunduh izin."; exit 1; })
+    PERMISSION_DATA=$(curl -s "$PERMISSION_URL" || { echo "Failed to download permissions."; exit 1; })
 
     # Mencocokkan data berdasarkan IP lokal
     MATCH=$(echo "$PERMISSION_DATA" | grep "###" | grep "$LOCAL_IP")
@@ -88,8 +88,8 @@ blue_sep="${blue}-----------------------------------${NC}"
 
 restore() {
 # Detail Informasi
-ip6=$(curl -sS ipv4.icanhazip.com)
-ip4=$(curl -sS ipv6.icanhazip.com)
+ip4=$(curl -sS ipv4.icanhazip.com)
+ip6=$(curl -sS ipv6.icanhazip.com)
 ip="$ip4 / $ip6"
 date=$(date)
 domain=$(cat /etc/xray/domain)
@@ -101,7 +101,7 @@ wget -O backup.zip "$url"
 unzip backup.zip
 rm -f backup.zip
 sleep 1
-echo "Tengah Melakukan Backup Data"
+echo "Backing up data"
 cd /root/backup
 cp passwd /etc/
 cp group /etc/
@@ -138,8 +138,8 @@ rm -fr /root/backup*
 
 restf() {
 # Detail Informasi
-ip6=$(curl -sS ipv4.icanhazip.com)
-ip4=$(curl -sS ipv6.icanhazip.com)
+ip4=$(curl -sS ipv4.icanhazip.com)
+ip6=$(curl -sS ipv6.icanhazip.com)
 ip="$ip4 / $ip6"
 date=$(date)
 domain=$(cat /etc/xray/domain)
@@ -148,13 +148,13 @@ cd /root
 mv /root/*.zip /root/backup.zip
 file="backup.zip"
 if [ -f "$file" ]; then
-echo "$file ditemukan, melanjutkan proses..."
+echo "$file found, continuing..."
 sleep 2
 clear
 unzip backup.zip
 rm -f backup.zip
 sleep 1
-echo "Tengah Melakukan Backup Data"
+echo "Backing up data"
 cd /root/backup
 cp passwd /etc/
 cp group /etc/
@@ -194,8 +194,8 @@ rm -fr /root/backup*
 
 resold() {
 # Detail Informasi
-ip6=$(curl -sS ipv4.icanhazip.com)
-ip4=$(curl -sS ipv6.icanhazip.com)
+ip4=$(curl -sS ipv4.icanhazip.com)
+ip6=$(curl -sS ipv6.icanhazip.com)
 ip="$ip4 / $ip6"
 date=$(date)
 domain=$(cat /etc/xray/domain)

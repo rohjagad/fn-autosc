@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $output = shell_exec("sudo /usr/bin/restore-ftp 2>&1");
 
-                if (strpos("SUCCESSFULL RESTORE YOUR VPS") !== false) {
+                if (strpos($output, "SUCCESSFULL RESTORE YOUR VPS") !== false) {
                     echo "SUCCESSFULLY RESTORED YOUR VPS\n";
                 } else {
                     echo "Error: Restore process failed. Output:\n";

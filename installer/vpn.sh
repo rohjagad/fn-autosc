@@ -14,7 +14,7 @@
         local today=$(date +%s)
         local expired_date=$(date -d "$1" +%s 2>/dev/null)
         if [ $? -ne 0 ]; then
-            echo "Tanggal kadaluwarsa tidak valid."
+            echo "Invalid expiration date."
             exit 1
         fi
         echo $(( (expired_date - today) / 86400 ))
@@ -22,7 +22,7 @@
 
     # Unduh izin dan validasi
     clear
-    PERMISSION_DATA=$(curl -s "$PERMISSION_URL" || { echo "Gagal mengunduh izin."; exit 1; })
+    PERMISSION_DATA=$(curl -s "$PERMISSION_URL" || { echo "Failed to download permissions."; exit 1; })
 
     # Mencocokkan data berdasarkan IP lokal
     MATCH=$(echo "$PERMISSION_DATA" | grep "###" | grep "$LOCAL_IP")
@@ -39,7 +39,7 @@
     # Validasi masa aktif
     REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
     if [ "$REMAINING_DAYS" -lt 0 ]; then
-        echo "Izin telah kadaluwarsa."
+        echo "Permission expired."
         exit 1
     fi
 
@@ -69,7 +69,7 @@ export DEBIAN_FRONTEND=noninteractive
 OS=`uname -m`;
 MYIP=$(wget -qO- icanhazip.com);
 MYIP2="s/xxxxxxxxx/$MYIP/g";
-ANU=$(ip -o $ANU -4 route show to default | awk '{print $5}');
+ANU=$(ip -o -4 route show to default | awk '{print $5}');
 
 # Install OpenVPN dan Easy-RSA
 apt install openvpn -y
@@ -127,7 +127,7 @@ client
 dev tun
 proto udp
 setenv FRIENDLY_NAME "Beginner UDP"
-remote xxxxxxxxx 3128
+remote xxxxxxxxx 2200
 resolv-retry infinite
 route-method exe
 auth-user-pass

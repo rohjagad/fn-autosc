@@ -80,7 +80,7 @@ apt install -y screen curl jq bzip2 gzip coreutils rsyslog iftop \
  socat cron bash-completion ntpdate xz-utils  apt-transport-https \
  gnupg2 dnsutils lsb-release chrony
 
-curl -sSL https://deb.nodesource.com/setup_16.x | bash - 
+curl -sSL https://deb.nodesource.com/setup_20.x | bash - 
  apt-get install nodejs -y
 
 NET=$(ip -4 route show default 2>/dev/null | awk '{print $5}')
