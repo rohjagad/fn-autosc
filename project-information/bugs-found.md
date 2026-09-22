@@ -265,3 +265,134 @@ were exercised for real.
   upstream release URLs, and package repositories.
 - Most downloads do not use checksums, so availability and content depend on
   those external services at install time.
+
+## Comprehensive Audit & Live-Verified Bugs (September 2026 Audit)
+
+### 1. Fatal Bash Syntax Error in `menu-system.sh` (CONFIRMED)
+- **Files:** `full/menu-system.sh:608-629`, `lite/menu-system.sh:608-629`, and inside `menu/full.zip`, `menu/lite.zip`.
+- **Cause:** Stray double quote `"` on line 609 inside `rocky()`. Inverts quote parsing so `echo -e "` on line 621 closes the quote, and line 629 `read -p "Continue (y/n): " osw` crashes with:
+  ```text
+  syntax error near unexpected token `y/n'
+  ```
+- **Impact:** System menu cannot be executed by bash. Verified on live Debian 12 VPS.
+
+### 2. Missing Functions in Menus (CONFIRMED)
+- **`full/menu-dnstt.sh:182`:** Option 4 calls `typer`, which does not exist anywhere in the codebase (`typer: command not found`).
+- **`full/menu-argo.sh:229` & `lite/menu-argo.sh:229`:** Option 2 calls `reres`, which does not exist anywhere in the codebase (`reres: command not found`).
+- **`full/menu-system.sh:185`:** Calls `chmod /usr/bin/warp.sh` without a mode operand (`chmod: missing operand after '/usr/bin/warp.sh'`).
+
+### 3. Obsolete Packages Break Debian 12 Installer (CONFIRMED)
+- **Files:** `installer/package.sh:13,78`, `installer/slowdns.sh:59`.
+- **Cause:**
+  - `apt install -y ... python ...`: Debian 12 has no package named `python` (`E: Package 'python' has no installation candidate`).
+  - `apt install -y ... squid3 ...`: Debian 12 has no package named `squid3` (`E: Unable to locate package squid3`).
+- **Impact:** APT aborts the entire command with exit code 100 on Debian 12. Bundled packages (`jq`, `certbot`, `openvpn`, `dropbear`, `stunnel4`, `fail2ban`, `chrony`) fail to install. Verified on live VPS.
+
+### 4. IPv6 Breaks Authorization on Dual-Stack VPS (CONFIRMED)
+- **Files:** All scripts in `fn-autosc` (~199 occurrences).
+- **Cause:** `LOCAL_IP=$(curl -s ifconfig.me)` runs without `-4`. On dual-stack servers (like the test VPS), `ifconfig.me` returns an IPv6 address (`2001:df0:27b::1:50ef`). Since `fn-autosc-auth/izin.txt` only records IPv4 addresses, `MATCH` is always empty.
+- **Impact:** "Your IP doesn't have on database" and immediate exit 1 on any server with IPv6 enabled. Verified on live VPS.
+
+### 5. Stale Fastly IP Causes SSL Error on GitHub Downloads (CONFIRMED)
+- **File:** `installer/v2ray.sh:65-69`.
+- **Cause:** Hardcodes `199.232.68.133 raw.githubusercontent.com` into `/etc/hosts`. The IP currently serves a certificate for `*.github.io`.
+- **Impact:** Any standard curl/wget to `raw.githubusercontent.com` fails with:
+  ```text
+  curl: (60) SSL: no alternative certificate subject name matches target host name '199.232.68.133'
+  ```
+  Verified on live VPS.
+
+### 6. SlowDNS Port 53 Redirection Collision (CONFIRMED)
+- **File:** `installer/slowdns.sh:126,129`.
+- **Cause:** Line 126 inserts `PREROUTING ... --dport 53 -j REDIRECT --to-ports 5300`. Line 129 then inserts `PREROUTING ... --dport 53 -j REDIRECT --to-ports 530`. Because `iptables -I` without an index prepends at position 1, the port 530 rule takes precedence.
+- **Impact:** All inbound DNS queries on port 53 are redirected to port 530 where nothing listens (DNS server listens on 5300), breaking SlowDNS.
+
+### 7. HAProxy Never Enabled or Started by Installer (CONFIRMED)
+- **File:** `installer/stunnel5.sh`.
+- **Cause:** Installs haproxy and writes `/etc/haproxy/haproxy.cfg`, but never executes `systemctl enable haproxy` or `systemctl start haproxy`.
+- **Impact:** SSH over SSL on port 777 fails on fresh installs until `dm-menu.sh` is manually invoked.
+
+### 8. Web Restore Apache Site Never Enabled (CONFIRMED)
+- **File:** `website/install.sh:10,28`.
+- **Cause:** Writes `/etc/apache2/sites-available/upload.conf` and changes port to 855, but never runs `a2ensite upload.conf`.
+- **Impact:** Apache falls back to default `000-default.conf` serving `/var/www/html/` on port 855 instead of the Web Restore application.
+
+### 9. Wildcard Script Deletion in `/root/` (CONFIRMED)
+- **File:** `installer/noobz.sh:141`.
+- **Cause:** Executes `rm -f /root/*.sh` at script completion.
+- **Impact:** Wipes out all shell scripts in `/root/`, including operator custom tools and other pending installers.
+
+### 10. NoobzVPN User Deletion Wipes Entire Database (CONFIRMED)
+- **File:** `full/menu-noobz.sh:173`.
+- **Cause:** Runs `sed -i "/^### $name $exp/,/^},{/d" /etc/noobzvpns/.noob`. The file `.noob` is plain text (`### user exp`) and does not contain `},{`.
+- **Impact:** Sed deletes from the target user through the remainder of the file, destroying all subsequent user records.
+
+### 11. Account Lock Scripts Duplicate Instead of Removing Users (CONFIRMED)
+- **Files:** `full/locked-xray-*.sh` and `lite/locked-xray-*.sh` (8 files).
+- **Cause:** Copied from unlock scripts; calls `sed -i '/#vmess$/a\...` to add the user to `config.json`, then attempts deletion using `$user` while the input was `$name` (`$user` is empty).
+- **Impact:** Never disables the account in Xray/V2ray; instead creates duplicate user entries in the JSON config.
+
+### 12. Account Expiration Cleaner (`xp.sh`) Multi-Failure (CONFIRMED)
+- **File:** `full/xp.sh`.
+- **Bugs:**
+  1. WireGuard: `if [[ $exp < $today ]]` compares against undefined `$today` (empty string). Evaluates false; expired WG users are never deleted.
+  2. Missing file crash: `done < /etc/funny/.wireguard` crashes with `No such file or directory` if no WireGuard users have been added.
+  3. L2TP: `[[ "$exp2" = "0" ]]` uses string equality instead of `-le 0`. Accounts missed for >0 days are skipped forever.
+  4. L2TP service typo: `systemctl restart xl2tp` fails (`xl2tpd` is the unit name).
+  5. SSH username padding: pads `$username` with spaces up to 15 characters before `userdel --force $username`.
+  6. Leftover variables: SSH and L2TP Telegram notifications reference `$exp` and `$user` from the prior loop.
+  7. NoobzVPN credentials: reads non-existent `/etc/noobzvpns/.chatid` and `.keybot`.
+
+### 13. Extend Scripts Fail to Update Expiry in User Logs (CONFIRMED)
+- **Files:** `full/extend-*.sh` and `lite/extend-*.sh` (8 files).
+- **Cause:** Uses `sed -i "s/Expired: $exp/Expired: $exp4/"` (no space before colon), whereas all `add-*.sh` scripts create logs with `Expired : $exp` (space before colon).
+- **Impact:** Regex never matches; user log file retains old expiration date indefinitely.
+
+### 14. Non-Existent `xray@http` and `xray@ws` Systemd Services (CONFIRMED)
+- **`xray@http` (8 files):** `full/auto-delete-http.sh:108`, `lite/auto-delete-http.sh:108`, `full/extend-http.sh:127`, `lite/extend-http.sh:127`, `full/change-quota-http.sh:197`, `lite/change-quota-http.sh:197`, `full/locked-xray-http.sh:183`, `lite/locked-xray-http.sh:183`. Actual unit is `xray@upgrade`.
+- **`xray@ws` (9 files):** `full/restore-ftp.sh:87`, `lite/restore-ftp.sh:87`, `website/restore-ftp.sh:36`, `full/bmenu.sh:119,172,314`, `lite/bmenu.sh:119,172,314`. WebSocket is managed by `v2ray.service`.
+- **Impact:** Systemd restart fails (`Unit not found`); configuration changes are never reloaded.
+
+### 15. Incomplete Backup Restore (CONFIRMED)
+- **Files:** `full/restore-ftp.sh`, `lite/restore-ftp.sh`.
+- **Cause:** Backups archive `/etc/v2ray` and `/etc/crontab`, but restore scripts omit `cp -r v2ray /etc/` and `cp crontab /etc/`.
+- **Impact:** Restoring a backup completely loses all V2Ray/WebSocket accounts and crontab schedules.
+
+### 16. Protocol Mismatch in Nginx `default_backend` Upstream (CONFIRMED)
+- **Files:** `config/4.conf:64-67`, `config/6.conf`, `config/dual.conf`.
+- **Cause:**
+  ```nginx
+  upstream default_backend {
+      server 127.0.0.1:2080 weight=1; # SSH WebSocket
+      server 127.0.0.1:977 weight=1;  # Xray Vmess
+  }
+  ```
+- **Impact:** Round-robins across two incompatible protocols on `/`. 50% of SSH-WS and Vmess connections fail.
+- **Port 80 redirect:** Top server block redirects port 80 to HTTPS 301, breaking advertised plain HTTP proxying on port 80.
+
+### 17. Deprecated Cloudflare Warp Endpoint Returns 404 (CONFIRMED)
+- **File:** `full/menu-wg.sh:225`.
+- **Cause:** Calls `https://api.cloudflareclient.com/v0a737/reg`. Endpoint returns HTTP 404.
+- **Impact:** Warp configuration generation fails. Verified live on VPS.
+
+### 18. Dependency on `strings` Binary (CONFIRMED)
+- **Files:** `full/change-id-*.sh`, `full/list-xray-*.sh` (17 occurrences).
+- **Cause:** Pipes awk output into `| strings`. `strings` is part of `binutils` and not installed by default on minimal Linux.
+- **Impact:** Command fails with `strings: command not found`, returning empty UUIDs.
+
+### 19. System Log Truncation & Lockout in `limit-ip-ssh.sh` (CONFIRMED)
+- **File:** `full/limit-ip-ssh.sh:214-216`.
+- **Cause:** Runs `echo "" > /var/log/auth.log` every 5 minutes in cron.
+- **Impact:** Destroys system authentication audit trail; breaks Fail2ban SSH jail monitoring.
+- **Session tracking:** Greps historical login events from `auth.log` instead of active sessions, locking out legitimate users who logged in multiple times in the past.
+
+### 20. UID Check in Go Helpers Includes `nobody` (CONFIRMED)
+- **Files:** `full/delete-ssh.go:36`, `full/list-ssh.go:36`.
+- **Cause:** `id >= 1000` matches system user `nobody` (UID 65534).
+- **Impact:** `nobody` is displayed in SSH user lists and can be deleted via `delete-ssh`.
+
+### 21. Empty `rclone.conf` in Miscellaneous Repository (CONFIRMED)
+- **File:** `fn-autosc-miscellaneous/rclone.conf`.
+- **Cause:** Contains only `[dr] / type = drive / scope = drive` with no OAuth client credentials or tokens.
+- **Impact:** Google Drive backups via `backup-gd.sh` fail immediately with authorization errors.
+
