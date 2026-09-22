@@ -6,7 +6,7 @@
 
 
     # Konfigurasi URL izin
-    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/1.23/izin.txt"
+    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt"
     LOCAL_IP=$(curl -s ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
@@ -62,7 +62,7 @@ grey='\e[1;36m'
 NC='\e[0m'
 # ==================================================
 # Lokasi Hosting Penyimpan autoscript
-hosting="https://raw.githubusercontent.com/rohjagad/fn-autosc/1.23"
+hosting="https://raw.githubusercontent.com/rohjagad/fn-autosc/main"
 
 # var installation
 export DEBIAN_FRONTEND=noninteractive

@@ -6,7 +6,7 @@
 
 
     # Konfigurasi URL izin
-    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/1.23/izin.txt"
+    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt"
     LOCAL_IP=$(curl -s ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
@@ -70,7 +70,7 @@ if [[ -z $ips || ! $ips =~ ^(4|6|dual)$ ]]; then
 fi
 
 # Hosting
-hosting="https://raw.githubusercontent.com/rohjagad/fn-autosc/1.23"
+hosting="https://raw.githubusercontent.com/rohjagad/fn-autosc/main"
 
 # Install dan konfigurasi nginx
 apt update && apt install nginx -y
@@ -114,7 +114,7 @@ issue_certificate() {
     local key_path="$3"
 
     mkdir -p /root/.acme.sh
-    curl -fsSL https://raw.githubusercontent.com/rohjagad/fn-autosc-miscellaneous/1.23/acme.sh -o /root/.acme.sh/acme.sh
+    curl -fsSL https://raw.githubusercontent.com/rohjagad/fn-autosc-miscellaneous/main/acme.sh -o /root/.acme.sh/acme.sh
     chmod +x /root/.acme.sh/acme.sh
     /root/.acme.sh/acme.sh --upgrade --auto-upgrade
 

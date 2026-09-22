@@ -6,7 +6,7 @@
 
 
     # Konfigurasi URL izin
-    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/1.23/izin.txt"
+    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt"
     LOCAL_IP=$(curl -s ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
@@ -120,7 +120,7 @@ bigecho "Compiling and installing Libreswan..."
 SWAN_VER=3.32
 swan_file="libreswan-$SWAN_VER.tar.gz"
 swan_url1="https://github.com/rohjagad/fn-autosc-miscellaneous/releases/download/v1.23/$swan_file"
-swan_url2="https://raw.githubusercontent.com/rohjagad/fn-autosc-miscellaneous/1.23/$swan_file"
+swan_url2="https://raw.githubusercontent.com/rohjagad/fn-autosc-miscellaneous/main/$swan_file"
 if ! { wget -t 3 -T 30 -nv -O "$swan_file" "$swan_url1" || wget -t 3 -T 30 -nv -O "$swan_file" "$swan_url2"; }; then
   exit 1
 fi

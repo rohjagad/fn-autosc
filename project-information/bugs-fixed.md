@@ -194,7 +194,7 @@ This file records fixes confirmed in source review or live testing.
 ## Comprehensive Bug Sweep (14 bugs fixed)
 
 Full codebase audit cross-referenced with original script archive, verified on
-clean Debian 11 reinstall pulling only from GitHub `origin/1.23`.
+clean Debian 11 reinstall pulling only from GitHub `origin/main`.
 
 ### Critical / High
 

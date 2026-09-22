@@ -6,7 +6,7 @@
 
 
     # Konfigurasi URL izin
-    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/1.23/izin.txt"
+    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt"
     LOCAL_IP=$(curl -s ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
@@ -52,7 +52,7 @@
 
     output
 
-hosting="https://raw.githubusercontent.com/rohjagad/fn-autosc/1.23/udp"
+hosting="https://raw.githubusercontent.com/rohjagad/fn-autosc/main/udp"
 
 clear
 

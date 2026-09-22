@@ -1,9 +1,9 @@
 #!/bin/bash
-hosting="https://raw.githubusercontent.com/rohjagad/fn-autosc/1.23"
-curl -fsSL https://raw.githubusercontent.com/rohjagad/fn-autosc-miscellaneous/1.23/rclone-install.sh | bash
+hosting="https://raw.githubusercontent.com/rohjagad/fn-autosc/main"
+curl -fsSL https://raw.githubusercontent.com/rohjagad/fn-autosc-miscellaneous/main/rclone-install.sh | bash
 printf "q\n" | rclone config
 #wget -O /root/.config/rclone/rclone.conf "${hosting}/config/rclone.conf"
-wget -O /root/.config/rclone/rclone.conf "https://raw.githubusercontent.com/rohjagad/fn-autosc-miscellaneous/1.23/rclone.conf"
+wget -O /root/.config/rclone/rclone.conf "https://raw.githubusercontent.com/rohjagad/fn-autosc-miscellaneous/main/rclone.conf"
 git clone  https://github.com/rohjagad/wondershaper.git
 cd wondershaper
 make install

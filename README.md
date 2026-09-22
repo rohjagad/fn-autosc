@@ -47,7 +47,7 @@ Supported operating systems: Debian 10–12 and Ubuntu 20.04–24.04.
 
 The installer will only run on a server whose public IPv4 appears in:
 
-[`rohjagad/fn-autosc-auth/izin.txt`](https://github.com/rohjagad/fn-autosc-auth/blob/1.23/izin.txt)
+[`rohjagad/fn-autosc-auth/izin.txt`](https://github.com/rohjagad/fn-autosc-auth/blob/main/izin.txt)
 
 Each line has the form:
 
@@ -70,7 +70,7 @@ continuously enforced — not just at install time.
 Run as `root`:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/rohjagad/fn-autosc/1.23/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/rohjagad/fn-autosc/main/install.sh)
 ```
 
 The installer bootstraps `curl`/`wget`, configures Debian mirrors on stripped
@@ -782,4 +782,4 @@ Read these before exposing a server to the internet.
 
 ## Credits
 
-FN AutoSC · branch `1.23`
+FN AutoSC · branch `main`

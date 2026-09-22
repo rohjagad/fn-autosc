@@ -12,7 +12,7 @@ if grep -q "bullseye" /etc/os-release 2>/dev/null; then
     fi
 fi
 
-hosting="https://raw.githubusercontent.com/rohjagad/fn-autosc/1.23"
+hosting="https://raw.githubusercontent.com/rohjagad/fn-autosc/main"
 ungu="\033[0;35m"
 Xark="\033[0m"
 BlueCyan="\033[5;36m"
@@ -20,7 +20,7 @@ BlueCyan="\033[5;36m"
 function permision() {
 
     # Konfigurasi URL izin
-    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/1.23/izin.txt"
+    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt"
     LOCAL_IP=$(curl -s ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
