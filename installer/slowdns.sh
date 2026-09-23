@@ -86,8 +86,13 @@ install_slowdns() {
 ========================
 SlowDNS / DNSTT Settings
 ========================"
-  read -rp "Your Nameserver: " -e Nameserver
-  echo -e "$Nameserver" > /etc/slowdns/nsdomain
+  if [[ -s /etc/slowdns/nsdomain ]]; then
+    Nameserver=$(cat /etc/slowdns/nsdomain)
+  else
+    read -rp "Your Nameserver: " -e Nameserver
+    echo -e "$Nameserver" > /etc/slowdns/nsdomain
+  fi
+  echo "Your Nameserver: $Nameserver"
 
   rm -f /etc/systemd/system/dnstt.service
   systemctl stop dnstt 2>/dev/null || true

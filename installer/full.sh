@@ -68,15 +68,16 @@ while true; do
     read -p "Input Domain: " domain
     read -p "Input Email : " email
     read -p "Input Type IP VPS (4/6/dual): " ips
+    read -p "Your SlowDNS Nameserver: " nsdomain
     # Cek jika input kosong
     if [[ -z "$domain" ]]; then
-        echo "Domain tidak boleh kosong. Silakan coba lagi."
+        echo "Domain cannot be empty. Please try again."
         continue
     fi
 
     # Cek jika input mengandung spasi
     if [[ "$domain" =~ [[:space:]] ]]; then
-        echo "Domain tidak boleh mengandung spasi. Silakan coba lagi."
+        echo "Domain cannot contain spaces. Please try again."
         continue
     fi
 
@@ -96,6 +97,10 @@ echo -e "${email}" > /etc/funny/.email
 
 # Menyiman Tipe IP
 echo -e "${ips}" > /root/.ips
+
+# Menyimpan SlowDNS Nameserver
+mkdir -p /etc/slowdns
+echo -e "${nsdomain}" > /etc/slowdns/nsdomain
 
 # Package Sementara
 apt install wget curl -y
