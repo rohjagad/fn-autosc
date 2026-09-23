@@ -135,8 +135,7 @@ fi
 exp=`date -d "$masaaktif days" +"%y-%m-%d"`
 
 # Menambahkan Akun di Database
-sed -i '/#trojan$/a\### '"$user $exp"'\
-},{"password": "'""$uuid""'","email": "'""$user""'"' /etc/xray/json/upgrade.json
+sed -i '/#trojan$/{n;s/}/},\n### '"$user $exp"'\n{"password": "'""$uuid""'","email": "'""$user""'"}/}' /etc/xray/json/upgrade.json
 
 # Restart Service
 systemctl daemon-reload
