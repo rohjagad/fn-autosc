@@ -1,5 +1,7 @@
 # Bugs Found
 
+> **⚠ APPEND-ONLY:** Do not delete or overwrite existing entries. Always add new content at the very bottom of this file.
+
 This file records defects and operational issues found during source review and
 live testing on a fresh Debian 12 VPS.
 

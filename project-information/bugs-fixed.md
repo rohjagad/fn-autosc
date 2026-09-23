@@ -1,5 +1,7 @@
 # Bugs Fixed
 
+> **⚠ APPEND-ONLY:** Do not delete or overwrite existing entries. Always add new content at the very bottom of this file.
+
 This file records fixes confirmed in source review or live testing.
 
 ## TUI Restyle Regressions and Menu Bugs (fixed after KVM end-to-end testing)
