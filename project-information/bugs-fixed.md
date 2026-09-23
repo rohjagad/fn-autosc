@@ -551,3 +551,15 @@ All fixes live-verified on Debian 12 VPS (`202.155.17.126`) after fresh OS reins
 74. **`auto-delete-*.sh` Wildcard Quota Deletion Cross-Destroys Longer Usernames (Regression Fix)** (`full/auto-delete-{ws,grpc,http,split}.sh`, `lite/auto-delete-{ws,grpc,http,split}.sh`)
     - See regression `## 13.`: reverted the Bug 59 fix's `$user*` prefix glob back to the exact `$user` + `${user}_usage` path pair in all 8 daemons.
     - **Verified:** Live on Debian 12 VPS - ghost user `tst` cleaned while `tsta`'s quota file and config marker survived; `JSON_OK`.
+
+## Fresh-Reinstall Audit Cycle (Bug 75)
+
+75. **Reinstall Stacks Duplicate Cron Entries for Every Daemon** (`installer/xray.sh`)
+    - Added a strip-before-append guard: a `sed -i .../d` pass removes all previously installed panel `flock` lines (backup, xp, expire-ssh, limit-ip-*, auto-delete-*, kill-*) from `/etc/crontab` before the canonical 16-line block is appended, making repeat installs idempotent.
+    - **Verified:** Live on the reinstalled Debian 12 VPS - the same `sed` reduced 32 duplicated `flock` lines to 0, re-appending left exactly 16 unique lines with 0 duplicates.
+
+## Fresh-Reinstall Audit Cycle (Bug 76)
+
+76. **Backup Upload Produces an Empty Link** (`full/backup.sh`, `lite/backup.sh`)
+    - Added `-L --max-time 60` to the file.io upload, quoted the `jq` response parsing, and added a two-stage fallback: tmpfiles.org API (parsed `.data.url`, `id_link="tmpfiles.org"`) then litterbox/catbox 72h (`id_link="litterbox-72h"`). Both fallbacks were probed live from the VPS before wiring.
+    - **Verified:** Live on the fresh Debian 12 VPS - backup recorded `Link Backup: https://tmpfiles.org/.../backup.zip` with `Your ID: tmpfiles.org`. Full loop tested: deleted xray user `fr1` (4 config lines) and SSH user `fssh2`, downloaded the archive (7.7 MB, 121 files), ran `restore-ftp` (`SUCCESSFULL RESTORE YOUR VPS`) - both accounts returned with quota/log files intact, `JSON_OK`, all services active, crontab still duplicate-free.

@@ -85,9 +85,21 @@ zip -r backup.zip backup > /dev/null 2>&1
 file_path="/root/backup.zip"
 api_url="https://file.io"
 expiry_duration=$((14 * 24 * 60 * 60))
-response=$(curl -s -F "file=@$file_path" -F "expiry=$expiry_duration" $api_url)
-upload_link=$(echo $response | jq -r .link)
-id_link=$(echo $response | jq -r .key)
+response=$(curl -sL --max-time 60 -F "file=@$file_path" -F "expiry=$expiry_duration" $api_url)
+upload_link=$(echo "$response" | jq -r .link 2>/dev/null)
+id_link=$(echo "$response" | jq -r .key 2>/dev/null)
+# Bug 74: file.io discontinued anonymous uploads (it now returns its landing
+# page instead of JSON), and transfer.sh/0x0.st/bashupload are dead or
+# disabled. Fall back to working hosts so backups still produce a link.
+if [ -z "$upload_link" ] || [ "$upload_link" = "null" ]; then
+    response=$(curl -s --max-time 60 -F file=@"$file_path" https://tmpfiles.org/api/v1/upload)
+    upload_link=$(echo "$response" | jq -r .data.url 2>/dev/null)
+    id_link="tmpfiles.org"
+fi
+if [ -z "$upload_link" ] || [ "$upload_link" = "null" ]; then
+    upload_link=$(curl -s --max-time 60 -F "reqtype=fileupload" -F "time=72h" -F "fileToUpload=@$file_path" https://litterbox.catbox.moe/resources/internals/api.php)
+    id_link="litterbox-72h"
+fi
 email=$(cat /etc/funny/.email)
 
 # Persiapkan pesan Telegram

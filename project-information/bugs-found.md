@@ -645,3 +645,15 @@ All bugs verified on fresh Debian 12 VPS (`202.155.17.126`) reinstalled via `bin
 - **Files:** expiry path of `full/addssh.sh`, `full/trial-ssh.sh`, `full/xp.sh` (enforcement gap; fixed in `full/expire-ssh.sh`, `full/extend-ssh.go`, `installer/xray.sh`).
 - **Cause:** SSH accounts receive a shadow expiry date via `useradd -e`, but the dropbear daemon that actually serves SSH logins (Debian 12, v2022.83, built without PAM) contains no account-expiry check at all (`strings /usr/sbin/dropbear | grep -i expired` returns nothing) and never reads the shadow expire field during authentication. The only enforcement is `xp`'s cron, which deletes expired accounts every 15 minutes. Between the expiry moment and the next `xp` run, expired accounts authenticate normally.
 - **Impact:** Client-tested on the KVM VM against the Debian 12 VPS: an account with expiry set to Sep 22, 2026 authenticated and ran a full session from the VM (`Password auth succeeded for 'kvsx'` in the journal at 23:33:38; client saw the session start, exit 1 - no refusal) and only became unusable when `xp` deleted the user at the 23:45 cron run. Expired customers could keep using the service for up to 15 minutes after expiry, and an expired-but-not-yet-deleted account was indistinguishable from an active one to the client.
+
+## Fresh-Reinstall Audit Cycle (Bug 73)
+
+### 73. Reinstall Stacks Duplicate Cron Entries for Every Daemon (CONFIRMED)
+- **Files:** `installer/xray.sh` (cron block install; fixed with a strip-before-append guard).
+- **Cause:** The installer appended the 16-line daemon cron block to `/etc/crontab` unconditionally (`>>`). On a reinstall over an existing setup the old lines were still there, so every daemon line existed twice.
+- **Impact:** Verified live on the reinstalled Debian 12 VPS: all 16 daemon lines present ×2 (32 `flock` lines). Every 5-minute daemon ran twice per tick (serialized only by `flock`), the full `xp` sweep ran twice, and each IP-limit lock scheduled double at-unlock jobs.
+
+### 74. Backup Upload Produces an Empty Link (file.io API Discontinued) (CONFIRMED)
+- **Files:** `full/backup.sh`, `lite/backup.sh` (fixed with fallback upload chain).
+- **Cause:** The scripts POST the backup zip to `https://file.io` and parse `.link`/`.key` from the JSON response. file.io discontinued anonymous uploads: the endpoint now returns HTTP 301 to its marketing landing page (a Gatsby HTML site), so `upload_link` and `id_link` were always empty. `curl -s` without `-L` never even followed the redirect. Probes from the VPS confirmed transfer.sh (empty), 0x0.st (uploads disabled: "AI botnet spam"), and bashupload (empty) are also unusable.
+- **Impact:** Verified live on the fresh Debian 12 VPS: every backup completed the archive but recorded `Link Backup: ` (empty), so off-site restores were impossible - the backup feature was silently dead.

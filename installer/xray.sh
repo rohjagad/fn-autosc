@@ -136,6 +136,11 @@ apt install cron -y
 #*/5 * * * * root kill-split
 #*/5 * * * * root kill-grpc" >> /etc/crontab
 
+# Bug 73: reinstall-safe cron install. The block below used to append
+# unconditionally, so every reinstall stacked a second copy of all 17 daemon
+# lines (every daemon ran twice per tick and locks scheduled double at-jobs).
+# Drop previously installed panel lines first, then append exactly one set.
+sed -i '/flock -n \/tmp\/\(backup\|xp\|expire-ssh\|limit-ip-ssh\|limit-ip-ws\|limit-ip-split\|limit-ip-http\|limit-ip-grpc\|auto-delete-ws\|auto-delete-split\|auto-delete-http\|auto-delete-grpc\|kill-ws\|kill-http\|kill-split\|kill-grpc\)\.lock /d' /etc/crontab
 echo -e "0 0,6,12,18 * * * root flock -n /tmp/backup.lock backup
 0,15,30,45 * * * * root flock -n /tmp/xp.lock /usr/bin/xp
 */5 * * * * root flock -n /tmp/expire-ssh.lock expire-ssh
