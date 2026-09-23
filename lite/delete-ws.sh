@@ -118,6 +118,7 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/v2ray/config.json")
 
     if [ -n "$exp" ]; then
         sed -i "/### $user $exp/ {N;d}" /etc/v2ray/config.json
+        sed -i -z 's/},\n *\]/}\n        ]/' /etc/v2ray/config.json
     else
         echo "User not found in config.json!"
     fi

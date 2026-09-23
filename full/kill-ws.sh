@@ -103,6 +103,7 @@ function check_quota() {
         exp=$(grep -w "^### $user" "/etc/v2ray/config.json" | awk '{print $3}' | sort | uniq)
         if [[ -n "$exp" ]]; then
             sed -i "/### $user $exp/ {N;d}" /etc/v2ray/config.json
+            sed -i -z 's/},\n *\]/}\n        ]/' /etc/v2ray/config.json
             systemctl daemon-reload
             systemctl restart v2ray
         fi

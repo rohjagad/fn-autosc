@@ -101,6 +101,7 @@ function check_quota() {
         if [[ $usage -ge $quota_limit ]]; then
             exp=$(grep -w "^### $user" "/etc/xray/json/split.json" | cut -d ' ' -f 3 | sort | uniq)
             sed -i "/### $user $exp/ {N;d}" /etc/xray/json/split.json
+            sed -i -z 's/},\n *\]/}\n        ]/' /etc/xray/json/split.json
             systemctl daemon-reload
             systemctl restart xray@split
 
