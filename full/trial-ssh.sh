@@ -56,7 +56,7 @@ schedule_user_expiration() {
 
     # Buat perintah untuk memutus koneksi dan menghapus pengguna
     local disconnect_cmd="pkill -u $username"
-    local delete_cmd="userdel -f $username"
+    local delete_cmd="userdel -f $username; rm -f /var/log/create/ssh/${username}.log /etc/xray/limit/ip/ssh/${username}"
 
     # Jadwalkan dengan `at`
     echo "${disconnect_cmd}; ${delete_cmd}" | at now + "$minutes" minutes > /dev/null 2>&1

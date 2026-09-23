@@ -183,11 +183,11 @@ start_services() {
 }
 
 copy_certificates() {
-    cat /etc/letsencrypt/live/$domain/fullchain.pem >> /etc/xray/xray.crt
-    cat /etc/letsencrypt/live/$domain/privkey.pem >> /etc/xray/xray.key
-    cd /etc/xray
-    chmod 644 /etc/xray/xray* /etc/xray/*.pem
-    cd
+    cat /etc/letsencrypt/live/$domain/fullchain.pem > /etc/xray/xray.crt
+    cat /etc/letsencrypt/live/$domain/privkey.pem > /etc/xray/xray.key
+    mkdir -p /etc/haproxy
+    cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem
+    chmod 644 /etc/xray/xray* /etc/haproxy/funny.pem
 }
 
 if [[ $ip_version == "4" || $ip_version == "6" ]]; then
@@ -264,11 +264,11 @@ dm() {
         echo "$host" > /etc/xray/domain
         # Update konfigurasi di nginx.conf
         sed -i "s|server_name $old_domain;|server_name $host;|" /etc/nginx/nginx.conf
-	sed -i 's/${old_domain}/${host}/g' /var/log/create/xray/ws/*
-	sed -i 's/${old_domain}/${host}/g' /var/log/create/xray/http/*
-	sed -i 's/${old_domain}/${host}/g' /var/log/create/xray/split/*
-	sed -i 's/${old_domain}/${host}/g' /var/log/create/xray/split/*
-	sed -i 's/${old_domain}/${host}/g' /var/log/create/ssh/*
+	sed -i "s|${old_domain}|${host}|g" /var/log/create/xray/ws/* 2>/dev/null || true
+	sed -i "s|${old_domain}|${host}|g" /var/log/create/xray/http/* 2>/dev/null || true
+	sed -i "s|${old_domain}|${host}|g" /var/log/create/xray/split/* 2>/dev/null || true
+	sed -i "s|${old_domain}|${host}|g" /var/log/create/xray/grpc/* 2>/dev/null || true
+	sed -i "s|${old_domain}|${host}|g" /var/log/create/ssh/* 2>/dev/null || true
 
         # Log perubahan domain
         log_message="<b>🚀 Perubahan Domain Xray</b>%0A"

@@ -450,3 +450,47 @@ All fixes live-verified on Debian 12 VPS (`202.155.17.126`) after deployment of 
 51. **(Regression Fix) `restore-ftp.sh` Path Conflict Between Web and CLI** (`full/restore-ftp.sh`, `lite/restore-ftp.sh`, `website/restore-ftp.sh`)
     - Replaced single-source `mv` with dual-source check: tries `/var/www/uploads/*.zip` first, then falls back to `/root/*backup*.zip`. Both web upload and CLI backup restore paths now work regardless of which `restore-ftp` was installed last.
 
+---
+
+## Bugs 52–61: Post-Fresh-Install System Audit Fixes (September 2026)
+
+All fixes live-verified on Debian 12 VPS (`202.155.17.126`) after fresh OS reinstall and full script installation.
+
+52. **`xp.sh` SSH Expiration Leaves Ghost Logs and Uses Undefined Variables** (`full/xp.sh`, `lite/xp.sh`)
+    - Added `rm -f /var/log/create/ssh/${username}.log` upon SSH account expiration so deleted accounts no longer haunt `log-acc-ssh` and `pwd-ssh`.
+    - Defined `exp="$tgl $bulantahun"` in the SSH loop so Telegram expiration notifications display the valid date.
+    - Corrected cleanup from `rm -rf /etc/funny/limit/ssh/ip/$user` (undefined variable and wrong directory) to `rm -f /etc/xray/limit/ip/ssh/$username`.
+    - **Verified:** Created expired SSH user `testexp52`, verified user was deleted, log file removed, and limit file deleted on VPS.
+
+53. **`trial-ssh.sh` Scheduled Expiration Leaves Orphaned Database Logs** (`full/trial-ssh.sh`)
+    - Updated `schedule_user_expiration()` to execute `pkill -u $username; userdel -f $username; rm -f /var/log/create/ssh/${username}.log /etc/xray/limit/ip/ssh/${username}` via `at`.
+    - **Verified:** Created trial SSH user `trial194`. Confirmed scheduled `at` job contains the complete log and limit cleanup command.
+
+54. **Domain Update in `dm-menu.sh` Uses Single Quotes, Corrupts cert2 Keys, and Misses gRPC** (`full/dm-menu.sh`, `lite/dm-menu.sh`)
+    - Changed single quotes to double quotes: `sed -i "s|${old_domain}|${host}|g"` so bash properly interpolates domain variables into user logs.
+    - Added `/var/log/create/xray/grpc/*` and removed duplicated `split` line.
+    - In `cert2()`, changed `cat ... >> /etc/xray/xray.key` to overwrite `>` and added `/etc/haproxy/funny.pem` renewal.
+
+55. **"Restart All Services" in `menu-system.sh` Misses 12 Core Services** (`full/menu-system.sh`, `lite/menu-system.sh`)
+    - Updated `resall()` to restart all 20 running services: added `dropbear`, `haproxy`, `openvpn`, `wg-quick@wg0`, `noobzvpns`, `dnstt`, `udp-custom`, `udp-request`, `xl2tpd`, `ipsec`, `fn-ohp`, `opn`.
+    - **Verified:** Ran option 2 in `menu-system`; verified all 20 services restarted cleanly and remained active.
+
+56. **OS Reinstall Menu Prompt Variable Mismatch** (`full/menu-system.sh`)
+    - Changed `elif [[ $ip_version == "n" ]]; then` to `elif [[ $osw == "n" ]]; then` so entering `n` exits immediately.
+
+57. **`udp.sh` Installer Deletes Itself Mid-Execution** (`installer/udp.sh`)
+    - Changed `rm -fr /root/udp*` to `rm -fr /root/udp-custom` to prevent unlinking the executing script `/root/udp.sh`.
+
+58. **Backup and Restore Omit Non-Xray VPN Services** (`full/backup.sh`, `lite/backup.sh`, `full/bmenu.sh`, `lite/bmenu.sh`, `full/backup-gd.sh`, `full/restore-ftp.sh`, `lite/restore-ftp.sh`, `website/restore-ftp.sh`)
+    - Added `/etc/wireguard`, `/etc/slowdns`, `/etc/noobzvpns`, `/etc/ppp`, `/etc/ipsec.d`, and `/etc/ipsec.secrets` to all backup generation and restore functions.
+
+59. **`auto-delete-*.sh` Daemons Omit Deleting Quota Usage Files** (`full/auto-delete-*.sh`, `lite/auto-delete-*.sh` — 8 files)
+    - Changed `rm -f /etc/xray/quota/<proto>/$user` to wildcard `$user*` to remove both quota limit and `_usage` files.
+
+60. **SlowDNS Menu Missing Public Key and Connection Details** (`full/menu-dnstt.sh`)
+    - Added option 4 "View SlowDNS Information & Keys" to display the configured nameserver, server public key (`/etc/slowdns/server.pub`), target port (5300), and running status.
+
+61. **OpenVPN Generic `dev tun` Collides with `udp-request` TUN Requirement** (`installer/vpn.sh`)
+    - Explicitly set `dev tun2` for TCP 1194 and `dev tun3` for UDP 2200 in OpenVPN server configurations, leaving `tun0` available for `udp-request`.
+    - **Verified:** Confirmed `tun0` (udp-request), `tun2` (openvpn TCP), and `tun3` (openvpn UDP) all active and operating simultaneously without collisions.
+

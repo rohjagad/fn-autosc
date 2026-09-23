@@ -212,10 +212,12 @@ then
 else
 userdel --force $username
 rm -fr /etc/xray/limit/ip/ssh/$username
+rm -f /var/log/create/ssh/${username}.log
 systemctl daemon-reload
 systemctl restart ssh
 systemctl restart sshd
 systemctl restart ws
+exp="$tgl $bulantahun"
 TEKS="
 ====================
 SSH Account Expired
@@ -228,7 +230,6 @@ KEY=$(cat /etc/funny/.keybot)
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL
-rm -rf /etc/funny/limit/ssh/ip/$user
 clear
 fi
 done

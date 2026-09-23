@@ -84,6 +84,9 @@ wget ${hosting}/other/vpn.zip
 unzip -o vpn.zip
 rm -f vpn.zip
 chown -R root:root /etc/openvpn/server/easy-rsa/
+# Reserve tun0 for udp-request by assigning explicit tun interfaces to OpenVPN
+sed -i 's/^dev tun$/dev tun2/' /etc/openvpn/server/server-tcp-1194.conf
+sed -i 's/^dev tun$/dev tun3/' /etc/openvpn/server/server-udp-2200.conf
 
 cd
 mkdir -p /usr/lib/openvpn/

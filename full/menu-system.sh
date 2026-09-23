@@ -105,6 +105,8 @@ clear
 echo -e "Start Restart All Service"
 systemctl daemon-reload
 systemctl restart ssh
+systemctl restart sshd 2>/dev/null || true
+systemctl restart dropbear
 systemctl restart ws
 systemctl restart cron
 systemctl restart v2ray
@@ -116,6 +118,17 @@ systemctl restart quota-http
 systemctl restart quota-split
 systemctl restart quota-grpc
 systemctl restart nginx
+systemctl restart haproxy 2>/dev/null || true
+systemctl restart openvpn 2>/dev/null || true
+systemctl restart wg-quick@wg0 2>/dev/null || true
+systemctl restart noobzvpns 2>/dev/null || true
+systemctl restart dnstt 2>/dev/null || true
+systemctl restart udp-custom 2>/dev/null || true
+systemctl restart udp-request 2>/dev/null || true
+systemctl restart xl2tpd 2>/dev/null || true
+systemctl restart ipsec 2>/dev/null || true
+systemctl restart fn-ohp 2>/dev/null || true
+systemctl restart opn 2>/dev/null || true
 clear
 echo -e "
 \n
@@ -628,7 +641,7 @@ Please Save Your Data
 read -p "Continue (y/n): " osw
 if [[ $osw == "y" ]]; then
 os
-elif [[ $ip_version == "n" ]]; then
+elif [[ $osw == "n" ]]; then
 exit
 fi
 }

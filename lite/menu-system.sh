@@ -105,6 +105,8 @@ clear
 echo -e "Start Restart All Service"
 systemctl daemon-reload
 systemctl restart ssh
+systemctl restart sshd 2>/dev/null || true
+systemctl restart dropbear 2>/dev/null || true
 systemctl restart ws
 systemctl restart cron
 systemctl restart v2ray
@@ -116,6 +118,7 @@ systemctl restart quota-http
 systemctl restart quota-split
 systemctl restart quota-grpc
 systemctl restart nginx
+systemctl restart haproxy 2>/dev/null || true
 clear
 echo -e "
 \n

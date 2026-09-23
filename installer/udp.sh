@@ -62,7 +62,7 @@ apt install curl -y
 apt install dos2unix -y
 
 # Repository
-rm -fr /root/udp*
+rm -fr /root/udp-custom
 mkdir -p /root/udp-custom
 cd /root/udp-custom
 

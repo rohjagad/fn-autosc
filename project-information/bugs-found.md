@@ -523,4 +523,66 @@ were exercised for real.
 - **Cause:** Scripts execute `iptables-restore -t < /etc/iptables.up.rules`. The `-t` (`--test`) option tests rule parsing without loading or committing rules to the kernel netfilter tables.
 - **Impact:** Firewall configuration from `/etc/iptables.up.rules` is never actually applied on system boot.
 
+---
+
+## Live Audit Cycle 3: Post-Fresh-Install System Audit (Bugs 52–61)
+
+All bugs verified on fresh Debian 12 VPS (`202.155.17.126`) reinstalled via `bin456789/reinstall` followed by fresh `full.sh` execution.
+
+### 52. `xp.sh` SSH Expiration Leaves Ghost Logs and Uses Undefined Variables (CONFIRMED)
+- **Files:** `full/xp.sh:225-248`, `lite/xp.sh:215-238`.
+- **Cause:** In the SSH auto-expiration loop:
+  1. `/var/log/create/ssh/${username}.log` is never deleted upon account expiry.
+  2. The Telegram notification references `$exp`, which is undefined in the SSH loop (evaluates to empty or retains the value from the preceding gRPC loop).
+  3. The cleanup line executes `rm -rf /etc/funny/limit/ssh/ip/$user` where `$user` is undefined (loop variable is `$username`) and the path is incorrect (`/etc/xray/limit/ip/ssh/$username`).
+- **Impact:** Expired SSH accounts remain permanently listed in database tools (`log-acc-ssh` and `pwd-ssh`). Expiration notifications display empty dates. Verified live on Debian 12 VPS: created `testexp52`, ran `xp`; user was deleted from `/etc/passwd` but `/var/log/create/ssh/testexp52.log` remained and was listed in `log-acc-ssh`.
+
+### 53. `trial-ssh.sh` Scheduled Expiration Leaves Orphaned Database Logs (CONFIRMED)
+- **Files:** `full/trial-ssh.sh:53-62`.
+- **Cause:** `schedule_user_expiration()` schedules `pkill -u $username; userdel -f $username` via `at`, omitting deletion of `/var/log/create/ssh/${username}.log` and `/etc/xray/limit/ip/ssh/${username}`.
+- **Impact:** When trial accounts expire, their logs remain in `/var/log/create/ssh/`, polluting account lists in `log-acc-ssh` indefinitely. Verified live on Debian 12 VPS: trial account self-deletion command in `at -c <job>` lacked log and limit cleanup.
+
+### 54. Domain Update in `dm-menu.sh` Uses Single Quotes, Corrupts cert2 Keys, and Misses gRPC (CONFIRMED)
+- **Files:** `full/dm-menu.sh:193-195,267-271`, `lite/dm-menu.sh:193-195,267-271`.
+- **Cause:**
+  1. Lines 267–271 use single quotes: `sed -i 's/${old_domain}/${host}/g' /var/log/create/xray/*`. Single quotes prevent variable expansion in bash, so literal `${old_domain}` is searched instead of the actual domain name.
+  2. Line 270 duplicates `split` and omits `grpc` (`/var/log/create/xray/grpc/*`).
+  3. `cert2()` appends (`>>`) new certificates and keys to `/etc/xray/xray.crt` and `/etc/xray/xray.key`, duplicating keys and breaking cryptographic parsers on renewal. It also never updates `/etc/haproxy/funny.pem`.
+- **Impact:** Changing domain leaves all saved account connection links pointing to the old domain. Reissuing certificates with Certbot corrupts key files.
+
+### 55. "Restart All Services" in `menu-system.sh` Misses 12 Core Services (CONFIRMED)
+- **Files:** `full/menu-system.sh:76-96`, `lite/menu-system.sh:76-96`.
+- **Cause:** `resall()` only restarts 11 services and omits `dropbear`, `haproxy`, `openvpn`, `wg-quick@wg0`, `noobzvpns`, `dnstt`, `udp-custom`, `udp-request`, `xl2tpd`, `ipsec`, `fn-ohp`, `opn`.
+- **Impact:** Selecting option 2 leaves half the VPN, proxy, and load-balancer daemons un-restarted after system updates or configuration adjustments.
+
+### 56. OS Reinstall Menu Prompt Variable Mismatch (CONFIRMED)
+- **Files:** `full/menu-system.sh:555`.
+- **Cause:** In `information()`, `read -p "Continue (y/n): " osw` stores the user's response in `osw`, but line 555 checks `elif [[ $ip_version == "n" ]]; then`.
+- **Impact:** When the user enters `n` to cancel the OS reinstallation, the condition evaluates to false, causing execution to proceed to the OS selection menu instead of exiting.
+
+### 57. `udp.sh` Installer Deletes Itself Mid-Execution (CONFIRMED)
+- **Files:** `installer/udp.sh:69`.
+- **Cause:** Script executes `rm -fr /root/udp*`. Because the script is running from `/root/udp.sh`, the glob matches and deletes the executing script file itself before it completes.
+- **Impact:** Bash can seek to incorrect file offsets or abort execution mid-stream when its own script file is unlinked during execution.
+
+### 58. Backup and Restore Omit Non-Xray VPN Services (CONFIRMED)
+- **Files:** `full/backup.sh`, `lite/backup.sh`, `full/bmenu.sh`, `lite/bmenu.sh`, `full/backup-gd.sh`, `full/restore-ftp.sh`, `lite/restore-ftp.sh`, `website/restore-ftp.sh`.
+- **Cause:** Backup routines strictly archive `/etc/xray`, `/etc/v2ray`, `/var/log/create`, `/etc/funny`, and user databases, completely omitting `/etc/wireguard`, `/etc/slowdns`, `/etc/noobzvpns`, `/etc/ppp`, and `/etc/ipsec.d`.
+- **Impact:** Restoring a backup on a new server wipes out all WireGuard peers, NoobzVPN users, SlowDNS keys, and L2TP/IPSec credentials.
+
+### 59. `auto-delete-*.sh` Daemons Omit Deleting Quota Usage Files (CONFIRMED)
+- **Files:** `full/auto-delete-{ws,grpc,http,split}.sh`, `lite/auto-delete-{ws,grpc,http,split}.sh`.
+- **Cause:** Daemons run `rm -f /etc/xray/quota/<proto>/$user` without wildcard matching.
+- **Impact:** Leaves `/etc/xray/quota/<proto>/${user}_usage` orphaned on disk indefinitely after deleting unregistered accounts.
+
+### 60. SlowDNS Menu Missing Public Key and Connection Details (CONFIRMED)
+- **Files:** `full/menu-dnstt.sh:105-120`.
+- **Cause:** SlowDNS menu only offers options to change nameserver, renew server keys, or restart service. There is no option to display the server public key or client connection parameters.
+- **Impact:** Users setting up SlowDNS clients (HTTP Custom, NetMod, OpenTunnel) cannot retrieve their server public key from the menu and must manually read `/etc/slowdns/server.pub` via root shell.
+
+### 61. OpenVPN Generic `dev tun` Collides with `udp-request` TUN Requirement (CONFIRMED)
+- **Files:** `installer/vpn.sh:80-95`.
+- **Cause:** `udp-request-linux-amd64` hardcodes `tun0` when initializing its system TUN interface (`[ERRO] error init TUN exit status 2`). `installer/vpn.sh` extracts server configs with generic `dev tun`, which causes `openvpn-server@server-tcp-1194` to allocate `tun0` first, preventing `udp-request` from starting and causing continuous crash-restarts.
+- **Impact:** `udp-request` service enters permanent failure (`activating (auto-restart)`). Verified live on Debian 12 VPS: `tun0` was held by OpenVPN; reassigning OpenVPN to `dev tun2` / `dev tun3` allowed both OpenVPN and `udp-request` to run simultaneously and stably.
+
 

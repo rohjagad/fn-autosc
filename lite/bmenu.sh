@@ -112,6 +112,12 @@ cp -r xray /etc/
 cp -r v2ray /etc/
 cp -r funny /etc/
 cp -r create /var/log/
+cp -r wireguard /etc/ 2>/dev/null || true
+cp -r slowdns /etc/ 2>/dev/null || true
+cp -r noobzvpns /etc/ 2>/dev/null || true
+cp -r ppp /etc/ 2>/dev/null || true
+cp -r ipsec.d /etc/ 2>/dev/null || true
+cp ipsec.secrets /etc/ 2>/dev/null || true
 
 systemctl daemon-reload
 systemctl restart ssh
@@ -165,6 +171,12 @@ cp -r xray /etc/
 cp -r v2ray /etc/
 cp -r funny /etc/
 cp -r create /var/log/
+cp -r wireguard /etc/ 2>/dev/null || true
+cp -r slowdns /etc/ 2>/dev/null || true
+cp -r noobzvpns /etc/ 2>/dev/null || true
+cp -r ppp /etc/ 2>/dev/null || true
+cp -r ipsec.d /etc/ 2>/dev/null || true
+cp ipsec.secrets /etc/ 2>/dev/null || true
 
 systemctl daemon-reload
 systemctl restart ssh
@@ -217,6 +229,12 @@ cp crontab /etc/
 cp -r xray /etc/
 cp -r funny /etc/
 cp -r create /var/log/
+cp -r wireguard /etc/ 2>/dev/null || true
+cp -r slowdns /etc/ 2>/dev/null || true
+cp -r noobzvpns /etc/ 2>/dev/null || true
+cp -r ppp /etc/ 2>/dev/null || true
+cp -r ipsec.d /etc/ 2>/dev/null || true
+cp ipsec.secrets /etc/ 2>/dev/null || true
 
 # Mengubah Database XTLS WebSocket Ke V2ray WebSocket
 cd /etc/xray/json

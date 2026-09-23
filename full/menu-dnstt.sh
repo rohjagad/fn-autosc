@@ -102,6 +102,7 @@ ${blue_sep}
 ${green}1${NC}. Change Nameserver
 ${green}2${NC}. Renew Server Keys
 ${green}3${NC}. Restart SlowDNS Service
+${green}4${NC}. View SlowDNS Information & Keys
 ${green}0${NC}. Back to Main Menu
 ${separator}
 
@@ -175,6 +176,21 @@ ${orange}Press [Ctrl + C] to exit${NC}"
                 echo -e "
                 SlowDNS Restarted Successfully
                 =============================="
+                ;;
+            4)
+                clear
+                nsd=$(cat /etc/slowdns/nsdomain 2>/dev/null || echo "N/A")
+                pubkey=$(cat /etc/slowdns/server.pub 2>/dev/null || echo "N/A")
+                echo -e "${NC}${separator}
+        SLOWDNS INFORMATION
+${separator}
+Nameserver   : ${green}$nsd${NC}
+Public Key   : ${green}$pubkey${NC}
+Port Target  : 5300 (DNS -> 22 OpenSSH)
+Service      : $stat_msg
+${separator}"
+                read -n 1 -s -r -p "Press any key to return..."
+                mna89
                 ;;
             0)
                 menu
