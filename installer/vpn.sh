@@ -175,7 +175,7 @@ iptables -t nat -I POSTROUTING -s 10.7.0.0/24 -o $ANU -j MASQUERADE
 iptables-save > /etc/iptables.up.rules
 chmod +x /etc/iptables.up.rules
 
-iptables-restore -t < /etc/iptables.up.rules
+iptables-restore < /etc/iptables.up.rules
 netfilter-persistent save
 netfilter-persistent reload
 

@@ -69,6 +69,11 @@ rm -fr /usr/bin/go ; wget https://github.com/rohjagad/fn-autosc-miscellaneous/re
 install_slowdns() {
   export PATH="/usr/local/go/bin:$PATH"
   cd /root
+  # Preserve nsdomain if it exists
+  local saved_nsdomain=""
+  if [[ -s /etc/slowdns/nsdomain ]]; then
+    saved_nsdomain=$(cat /etc/slowdns/nsdomain)
+  fi
   rm -rf /etc/slowdns /root/dnstt
   git clone --depth 1 https://github.com/rohjagad/dnstt.git /root/dnstt
   cd /root/dnstt/dnstt-server
@@ -76,6 +81,10 @@ install_slowdns() {
   go mod tidy
   go build
   mkdir -p /etc/slowdns/
+  # Restore nsdomain if it was saved
+  if [[ -n "$saved_nsdomain" ]]; then
+    echo "$saved_nsdomain" > /etc/slowdns/nsdomain
+  fi
   mv dnstt-server /etc/slowdns/dns-server
   chmod +x /etc/slowdns/dns-server
   /etc/slowdns/dns-server -gen-key -privkey-file /etc/slowdns/server.key -pubkey-file /etc/slowdns/server.pub

@@ -223,7 +223,7 @@ echo "This will take 3-5 minutes, wait until the process is finished..."
 echo ""
 
 curl -d '{"key":"'$PUBLICKEY'", "install_id":"", "warp_enabled":true, "tos":"2019-11-17T00:00:00.000+01:00", "type":"Android", "locale":"en_GB"}' https://api.cloudflareclient.com/v0a2169/reg | tee warp.json > /dev/null
-sudo wg set wg0 peer '$CLOUDFLAREKEY' endpoint '$IPV4':51820 allowed-ips 172.16.0.0/24 > out.log 2> /dev/null
+sudo wg set wg0 peer "$CLOUDFLAREKEY" endpoint engage.cloudflareclient.com:51820 allowed-ips 172.16.0.0/24 > out.log 2> /dev/null
 wg-quick down wg0 > out.log 2> /dev/null
 wg-quick up wg0 > out.log 2> /dev/null
 

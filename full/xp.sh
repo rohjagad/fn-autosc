@@ -66,7 +66,6 @@ d2=$(date -d "$now" +%s)
 exp2=$(( (d1 - d2) / 86400 ))
 if [[ "$exp2" -le "0" ]]; then
 sed -i "/### $user $exp/ {N;d}" /etc/v2ray/config.json
-sed -i "/### $user $exp/ {N;d}" /etc/v2ray/config.json
         rm -f /var/log/create/xray/ws/${user}.log
         rm -f /etc/xray/quota/ws/$user*
         rm -f /etc/xray/limit/ip/xray/ws/$user
@@ -98,7 +97,6 @@ d1=$(date -d "$exp" +%s)
 d2=$(date -d "$now" +%s)
 exp2=$(( (d1 - d2) / 86400 ))
 if [[ "$exp2" -le "0" ]]; then
-sed -i "/### $user $exp/ {N;d}" /etc/xray/json/upgrade.json
 sed -i "/### $user $exp/ {N;d}" /etc/xray/json/upgrade.json
         rm -f /var/log/create/xray/http/${user}.log
         rm -f /etc/xray/quota/http/$user*
@@ -132,7 +130,6 @@ d2=$(date -d "$now" +%s)
 exp2=$(( (d1 - d2) / 86400 ))
 if [[ "$exp2" -le "0" ]]; then
 sed -i "/### $user $exp/ {N;d}" /etc/xray/json/split.json
-sed -i "/### $user $exp/ {N;d}" /etc/xray/json/split.json
         rm -f /var/log/create/xray/split/${user}.log
         rm -f /etc/xray/quota/split/$user*
         rm -f /etc/xray/limit/ip/xray/split/$user
@@ -164,7 +161,6 @@ d1=$(date -d "$exp" +%s)
 d2=$(date -d "$now" +%s)
 exp2=$(( (d1 - d2) / 86400 ))
 if [[ "$exp2" -le "0" ]]; then
-sed -i "/### $user $exp/ {N;d}" /etc/xray/json/grpc.json
 sed -i "/### $user $exp/ {N;d}" /etc/xray/json/grpc.json
         rm -f /var/log/create/xray/grpc/${user}.log
         rm -f /etc/xray/quota/grpc/$user*
@@ -328,8 +324,8 @@ for user in "${data[@]}"; do
     # Jika masa aktif sudah habis
     if [[ "$exp2" -le "0" ]]; then
         # Menghapus pengguna dari file dan sistem
-        sed -i "/### $user $exp/ {N;d}" /etc/funny/.noob
-        noobzvpns --remove-user "$user"
+        sed -i "/^### $user $exp/d" /etc/funny/.noob
+        noobzvpns remove "$user"
         
         # Menyiapkan teks untuk notifikasi
         TEKS="

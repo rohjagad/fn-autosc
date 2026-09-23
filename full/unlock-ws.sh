@@ -164,14 +164,11 @@ ${separator}"
 
 # Langsung lakukan unlock jika username valid
 if [ "$protokol2" == "Vmess" ]; then
-    sed -i '/#vmess$/a\### '"$name $exp2"'\
-    },{"id": "'""$uuid""'","alterid": 0,"email": "'""$name""'"' /etc/v2ray/config.json
+    sed -i '/#vmess$/{n;s/}/},\n### '"$name $exp2"'\n{"id": "'""$uuid""'","alterid": 0,"email": "'""$name""'"}/}' /etc/v2ray/config.json
 elif [ "$protokol2" == "Vless" ]; then
-    sed -i '/#vless$/a\### '"$name $exp2"'\
-    },{"id": "'""$uuid""'","email": "'""$name""'"' /etc/v2ray/config.json
+    sed -i '/#vless$/{n;s/}/},\n### '"$name $exp2"'\n{"id": "'""$uuid""'","email": "'""$name""'"}/}' /etc/v2ray/config.json
 elif [ "$protokol2" == "Trojan" ]; then
-    sed -i '/#trojan$/a\### '"$name $exp2"'\
-    },{"password": "'""$uuid""'","email": "'""$name""'"' /etc/v2ray/config.json
+    sed -i '/#trojan$/{n;s/}/},\n### '"$name $exp2"'\n{"password": "'""$uuid""'","email": "'""$name""'"}/}' /etc/v2ray/config.json
 else
     echo "Protokol tidak dikenal"
 fi

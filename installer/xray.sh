@@ -137,7 +137,7 @@ apt install cron -y
 #*/5 * * * * root kill-grpc" >> /etc/crontab
 
 echo -e "0 0,6,12,18 * * * root flock -n /tmp/backup.lock backup
-0,15,30,45 * * * * root flock -n /tmp/xp.lock sleep 300 && /usr/bin/xp
+0,15,30,45 * * * * root flock -n /tmp/xp.lock /usr/bin/xp
 */5 * * * * root flock -n /tmp/limit-ip-ssh.lock limit-ip-ssh
 */5 * * * * root flock -n /tmp/limit-ip-ws.lock limit-ip-ws
 */5 * * * * root flock -n /tmp/limit-ip-split.lock limit-ip-split

@@ -105,7 +105,16 @@ CHATID=$(cat /etc/funny/.chatid)
 KEY=$(cat /etc/funny/.keybot)
 TIME="10"
 URL1="https://api.telegram.org/bot$KEY/sendMessage"
-curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&text=$TEKS&parse_mode=html" $URL1 >/dev/null
+opwares="Detail Backup
+==================================
+Email         : $email
+ID VPS        : $id
+IP VPS        : $IP
+Domain.       : $domain
+Link Backup   : $link
+Date Backup   : $date
+=================================="
+curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&text=$opwares&parse_mode=html" $URL1 >/dev/null
 URL2="https://api.telegram.org/bot$KEY/sendDocument"
 cpt="$(date) / $domain"
 CAPTION="${cpt}"

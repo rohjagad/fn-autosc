@@ -23,6 +23,8 @@ wget --no-check-certificate ${hosting}/script.js >> /dev/null 2>&1
 wget --no-check-certificate ${hosting}/upload.php >> /dev/null 2>&1
 chmod +x *
 cd
+wget --no-check-certificate ${hosting}/restore-ftp.sh -O /usr/bin/restore-ftp >> /dev/null 2>&1
+chmod +x /usr/bin/restore-ftp
 
 # Mengkonfigurasi Port HTTP
 echo -e "Listen 855" > /etc/apache2/ports.conf

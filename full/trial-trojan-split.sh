@@ -85,8 +85,7 @@ exp=`date -d "$masaaktif days" +"%y-%m-%d"`
 uuid=$(xray uuid)
 
 # Menambahkan Akun di Database
-sed -i '/#trojan$/a\### '"$user $exp"'\
-},{"password": "'""$uuid""'","email": "'""$user""'"' /etc/xray/json/split.json
+sed -i '/#trojan$/{n;s/}/},\n### '"$user $exp"'\n{"password": "'""$uuid""'","email": "'""$user""'"}/}' /etc/xray/json/split.json
 
 # Restart Service
 systemctl daemon-reload
@@ -125,7 +124,7 @@ Link None: $link2
 "
 curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL >/dev/null 2>&1
 echo -e "$TEKS" > /var/log/create/xray/split/${user}.log
-echo "sed -i "/### $user $exp/ {N;d}" /etc/xray/json/split.json && systemctl restart xray@split && systemctl restart quota-split && rm -fr /var/log/create/xray/split/${user}.log && rm -fr /etc/xray/limit/ip/xray/split/$user && rm -fr /etc/xray/quota/split/$user" | at now + 60 minutes >/dev/null 2>&1
+echo 'sed -i "/### '"$user"' '"$exp"'/ {N;d}" /etc/xray/json/split.json && systemctl restart xray@split && systemctl restart quota-split && rm -fr /var/log/create/xray/split/'"$user"'.log && rm -fr /etc/xray/limit/ip/xray/split/'"$user"' && rm -fr /etc/xray/quota/split/'"$user"'' | at now + 60 minutes >/dev/null 2>&1
 clear
 source /etc/funny/format.sh
 format_display "$TEKS"

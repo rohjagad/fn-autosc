@@ -96,6 +96,10 @@ function check_quota() {
     log_file="/var/log/create/xray/ws/${user}.log"
 
     if [[ ! -f "$quota_file" ]]; then
+        # No quota file = unlimited quota if log exists, skip user
+        if [[ -f "$log_file" ]]; then
+            return
+        fi
         exp=$(grep -w "^### $user" "/etc/v2ray/config.json" | awk '{print $3}' | sort | uniq)
         if [[ -n "$exp" ]]; then
             sed -i "/### $user $exp/ {N;d}" /etc/v2ray/config.json

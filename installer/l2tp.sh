@@ -310,7 +310,7 @@ service iptables save
 iptables-restore < /etc/sysconfig/iptables 
 else
 iptables-save > /etc/iptables.up.rules
-iptables-restore -t < /etc/iptables.up.rules
+iptables-restore < /etc/iptables.up.rules
 netfilter-persistent save
 netfilter-persistent reload
 fi

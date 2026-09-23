@@ -127,6 +127,7 @@ info "Installing WireGuard"
 sleep 1
 apt install wireguard -y
 apt install wireguard-tools -y
+apt install qrencode -y
 check_install wireguard
 sleep 1
 server_priv_key=$(wg genkey)
