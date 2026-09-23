@@ -406,3 +406,47 @@ All fixes live-verified on Debian 12 VPS (`202.155.17.126`) after fresh OS reins
     - Removed `-t` flag from `iptables-restore` in both files.
     - **Verified:** `iptables -L -n` shows loaded rules (UDP ports 36711, 5300 accepted).
 
+---
+
+## Regression Fixes (September 2026)
+
+All fixes live-verified on Debian 12 VPS (`202.155.17.126`) after deployment of updated `menu/full.zip`.
+
+41. **(Regression Fix) Account Locking Omits Trailing-Comma JSON Cleanup** (`full/locked-xray-*.sh`, `lite/locked-xray-*.sh` — 8 files)
+    - Added `sed -i -z 's/},\n *\]/}\n        ]/' <config>` after every `{N;d}` deletion in all 8 `locked-xray-*.sh` scripts. Previously omitted when Bug 28 trailing-comma cleanup was applied to `delete-*.sh`, `kill-*.sh`, `xp.sh`, and `trial-*.sh`.
+    - **Verified:** Created `locktest1`, locked via `locked-xray-ws`. `v2ray test -c /etc/v2ray/config.json` returned `Configuration OK.` after lock. Unlocked, re-verified — JSON valid at every step.
+
+42. **(Regression Fix) Duplicate Legacy Output in Lock/Unlock Scripts** (`full/locked-xray-*.sh`, `lite/locked-xray-*.sh`, `full/unlock-*.sh`, `lite/unlock-*.sh` — 16 files)
+    - Removed duplicate unstyled `Detail Locked/Unlock X-Ray ...` output blocks and trailing `clear` calls left behind after TUI restyle. Only the styled rainbow-bordered card remains.
+    - **Verified:** Lock/unlock terminal output shows single styled card, no stutter or duplication.
+
+43. **(Regression Fix) `extend-ws.sh` Reads Obsolete `/etc/xray/json/ws.json`** (`full/extend-ws.sh`, `lite/extend-ws.sh`)
+    - Replaced all 4 occurrences of `/etc/xray/json/ws.json` with `/etc/v2ray/config.json` to match Bug 14's V2Ray migration.
+    - **Verified:** `extend-ws` found `locktest1` in `/etc/v2ray/config.json` and extended expiration from `26-09-23` to `26-09-28`.
+
+44. **(Regression Fix) `lite/list-xray-ws.sh` Reads Dead Config Path** (`lite/list-xray-ws.sh`)
+    - Changed `/etc/xray/json/ws.json` to `/etc/v2ray/config.json` at line 110 to match `full/list-xray-ws.sh`.
+
+45. **(Regression Fix) `quota-*.sh` Daemons Omit Trailing-Comma Cleanup** (`full/quota-*.sh`, `lite/quota-*.sh` — 8 files)
+    - Added `sed -i -z 's/},\n *\]/}\n        ]/' <config>` after every `{N;d}` deletion in all 8 quota daemon scripts. Previously omitted when Bug 28 was applied.
+
+46. **(Regression Fix) `quota-*.sh` Daemons Crash on Unlimited-Quota Accounts** (`full/quota-*.sh`, `lite/quota-*.sh` — 8 files)
+    - Wrapped `quota_limit=$(cat "$quota_file")` and its comparison block inside `if [[ -f "$quota_file" ]]; then ... fi` guard. Unlimited accounts (Quota = 0) never create quota files, causing `cat` errors and `bc` arithmetic failures every 30 seconds.
+
+47. **(Regression Fix) `limit-ip-ssh.sh` Still Truncates `/var/log/auth.log`** (`full/limit-ip-ssh.sh`)
+    - Commented out line 216 `echo "" > ${LOG}` which was missed when Bug 19 commented out line 214. The `${LOG}` variable points to `/var/log/auth.log`.
+    - **Verified:** Ran `limit-ip-ssh` on VPS with 43 lines in auth.log; line count unchanged afterward (was truncated to 1 before fix).
+
+48. **(Regression Fix) HAProxy Started With Default Config, Never Reloads** (`installer/stunnel5.sh`)
+    - Changed `systemctl start haproxy` to `systemctl restart haproxy`. On Debian 12, `apt install haproxy` auto-starts the service with default config; subsequent `start` is a no-op and port 777 never binds.
+    - **Verified:** After restart, `ss -tlpn | grep 777` shows `0.0.0.0:777` bound by haproxy.
+
+49. **(Regression Fix) Installer Telegram Notification Drops on Dual-Stack** (`installer/full.sh`, `installer/lite.sh`)
+    - Added `-4` flag to `curl` Telegram notification calls. On dual-stack hosts, `api.telegram.org` resolves IPv6 first; with `--max-time 10`, IPv6 timeout silently drops the notification before IPv4 fallback.
+
+50. **(Regression Fix) `vpn.sh` Destructive Wildcard Deletion Mid-Install** (`installer/vpn.sh`)
+    - Commented out `history -c`, `rm -f /root/*.sh`, `rm -f /root/install`, `rm -f /root/*install*` at end of `vpn.sh`. These ran at step 6 of the 14-step installer, destroying subsequent installer scripts and logs.
+
+51. **(Regression Fix) `restore-ftp.sh` Path Conflict Between Web and CLI** (`full/restore-ftp.sh`, `lite/restore-ftp.sh`, `website/restore-ftp.sh`)
+    - Replaced single-source `mv` with dual-source check: tries `/var/www/uploads/*.zip` first, then falls back to `/root/*backup*.zip`. Both web upload and CLI backup restore paths now work regardless of which `restore-ftp` was installed last.
+
