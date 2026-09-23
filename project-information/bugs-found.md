@@ -424,15 +424,27 @@ were exercised for real.
 - **Impact:** First account creation in any protocol/transport produces invalid JSON. V2Ray/Xray service crashes on restart and refuses to start until the malformed JSON is manually repaired. Every subsequent account creation also fails.
 - **Reproduction:** Run `add-vless-ws`, then `v2ray test -c /etc/v2ray/config.json` → `invalid character '}' after array element`.
 
+### 26. SlowDNS Nameserver Prompt Delayed ~15 Minutes Into Installation (CONFIRMED)
+- **Files:** `installer/full.sh`, `installer/slowdns.sh`.
+- **Cause:** The installer collects Domain, Email, and IP Type at the start of `full.sh`, then runs ~15 minutes of package/service installation before `slowdns.sh` prompts for the SlowDNS Nameserver.
+- **Impact:** User must remain at the terminal watching a long install, waiting for a single prompt that appears after all packages are installed. Creates a fill → wait → fill experience.
+
+### 27. Menu ZIP Files Packaged Without Execute Permissions (CONFIRMED)
+- **Files:** `menu/full.zip`, `menu/lite.zip`.
+- **Cause:** The `zip` command was run on source files that had `644` permissions. The zip stores file permissions, so `unzip -o` extracts all menu scripts as `644` (not executable).
+- **Impact:** Running `menu` or any menu command returns `permission denied`. The `chmod +x *` in `full.sh` line 123 is supposed to fix this but it runs in `/usr/bin` affecting all system files — a blunt workaround that may not always execute depending on the shell's working directory at that point.
+
 ## Live Audit and Verification Cycle (September 2026)
 
 - **Target VPS:** 202.155.17.126 (Debian 12 Bookworm, KVM).
 - **Testing Cycle:**
   1. Cloned repository and performed static code analysis.
-  2. Verified all 21 initial bugs plus newly uncovered deployment issues (Bugs 22-24).
+  2. Verified all 21 initial bugs plus newly uncovered deployment issues (Bugs 22-27).
   3. Replaced obsolete dependencies, fixed broken bash syntax, unified IPv4 resolution, and corrected service units.
   4. Compiled all Go binaries with `-ldflags="-s -w"` and rebuilt `menu/full.zip` and `menu/lite.zip`.
   5. Performed complete OS reinstallation via `bin456789/reinstall` to pristine Debian 12.
-  6. Successfully executed unattended full installation with dual-stack networking and SlowDNS.
-  7. Confirmed 18 active systemd services and operational TUI menu interface.
+  6. Successfully executed full installation with dual-stack networking and SlowDNS.
+  7. Confirmed 19 active systemd services and operational TUI menu interface.
+  8. Created accounts (VLESS WS, VMESS WS, Trojan WS, VLESS gRPC) and verified JSON config validity.
+  9. Confirmed end-to-end tunnel connectivity via Xray client (VLESS WS TLS → VPS → internet).
 

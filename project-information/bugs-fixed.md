@@ -340,3 +340,9 @@ changed:
 - **Account Creation:** Created VLESS WS, VMESS WS, Trojan WS, and VLESS gRPC accounts. All JSON configs pass `v2ray test` / `xray run -test` after each addition. V2Ray and all Xray instances remain active.
 - **Client Connection Test:** Xray client connected via VLESS WS TLS (port 443) through SOCKS5 proxy. `curl http://ifconfig.me` returned VPS IP `202.155.17.126`, confirming end-to-end tunnel functionality.
 
+26. **SlowDNS Nameserver Prompt Delayed** (`installer/full.sh`, `installer/slowdns.sh`)
+    - Moved `Your SlowDNS Nameserver` prompt from `slowdns.sh` (runs ~15 min into install) into `full.sh` alongside Domain, Email, and IP Type prompts. Nameserver is saved to `/etc/slowdns/nsdomain` upfront. `slowdns.sh` reads from that file if present, falling back to interactive prompt only when file is missing.
+
+27. **Menu ZIP Files Missing Execute Permissions** (`menu/full.zip`, `menu/lite.zip`)
+    - Set `chmod +x` on all files in build directories before running `zip`, so the zips now store files as `755` (`-rwxr-xr-x`). `unzip -o` extracts with correct execute permissions. No more `permission denied` on `menu` or any menu command after installation.
+
