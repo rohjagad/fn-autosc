@@ -7,7 +7,7 @@
 
     # Konfigurasi URL izin
     PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt"
-    LOCAL_IP=$(curl -s ifconfig.me) # Mendapatkan IP lokal
+    LOCAL_IP=$(curl -4 -s ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
     calculate_remaining_days() {
@@ -102,7 +102,6 @@ ${blue_sep}
 ${green}1${NC}. Change Nameserver
 ${green}2${NC}. Renew Server Keys
 ${green}3${NC}. Restart SlowDNS Service
-${green}4${NC}. Configure SlowDNS Mode
 ${green}0${NC}. Back to Main Menu
 ${separator}
 
@@ -177,10 +176,6 @@ ${orange}Press [Ctrl + C] to exit${NC}"
                 SlowDNS Restarted Successfully
                 =============================="
                 ;;
-	    4)
- 	        clear
- 	        typer
-	        ;;
             0)
                 menu
                 ;;

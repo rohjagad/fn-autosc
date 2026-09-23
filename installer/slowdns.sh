@@ -7,7 +7,7 @@
 
     # Konfigurasi URL izin
     PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt"
-    LOCAL_IP=$(curl -s ifconfig.me) # Mendapatkan IP lokal
+    LOCAL_IP=$(curl -4 -s ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
     calculate_remaining_days() {
@@ -56,7 +56,7 @@ red='\e[1;31m'
 green='\e[0;32m'
 NC='\e[0m'
 echo "Please Wait ...."
-REQUIRED_PACKAGES=("curl" "wget" "dnsutils" "git" "screen" "whois" "pwgen" "python" "jq" "fail2ban" "sudo" "gnutls-bin" "mlocate" "dh-make" "libaudit-dev" "build-essential" "dos2unix" "debconf-utils")
+REQUIRED_PACKAGES=("curl" "wget" "dnsutils" "git" "screen" "whois" "pwgen" "python3" "jq" "fail2ban" "sudo" "gnutls-bin" "mlocate" "dh-make" "libaudit-dev" "build-essential" "dos2unix" "debconf-utils")
 
 for package in "${REQUIRED_PACKAGES[@]}"; do
   if ! dpkg-query -W --showformat='${Status}\n' $package | grep -q "install ok installed"; then
@@ -125,8 +125,8 @@ install_firewall() {
   iptables -I INPUT -p udp --dport 5300 -j ACCEPT &>/dev/null
   iptables -t nat -I PREROUTING -i $interface -p udp --dport 53 -j REDIRECT --to-ports 5300
   local interface2=$(ip route get 1.1.1.1 | awk '/dev/ {print $5}')
-  iptables -I INPUT -p udp --dport 530 -j ACCEPT &>/dev/null
-  iptables -t nat -I PREROUTING -i $interface2 -p udp --dport 53 -j REDIRECT --to-ports 530
+  iptables -I INPUT -p udp --dport 5300 -j ACCEPT &>/dev/null
+  iptables -t nat -I PREROUTING -i $interface2 -p udp --dport 53 -j REDIRECT --to-ports 5300
   iptables-save >/etc/iptables.up.rules
   iptables-restore < /etc/iptables.up.rules
   netfilter-persistent save

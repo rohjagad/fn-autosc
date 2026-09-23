@@ -28,4 +28,7 @@ backend ssh-backend
 HAH
 clear
 
+systemctl enable haproxy
+systemctl start haproxy
+
 rm -f /root/stunnel5.sh

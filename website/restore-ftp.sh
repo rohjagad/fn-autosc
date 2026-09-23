@@ -33,7 +33,7 @@ rm -f backup.zip
 clear
 systemctl daemon-reload >/dev/null 2>&1
 systemctl restart ssh >/dev/null 2>&1
-systemctl restart xray@ws >/dev/null 2>&1
+systemctl restart v2ray >/dev/null 2>&1
 systemctl restart xray@grpc >/dev/null 2>&1
 systemctl restart xray@split >/dev/null 2>&1
 systemctl restart xray@upgrade >/dev/null 2>&1

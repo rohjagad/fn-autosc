@@ -7,7 +7,7 @@
 
     # Konfigurasi URL izin
     PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt"
-    LOCAL_IP=$(curl -s ifconfig.me) # Mendapatkan IP lokal
+    LOCAL_IP=$(curl -4 -s ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
     calculate_remaining_days() {
@@ -218,7 +218,7 @@ echo -e "1.23" > /etc/funny/version
 OUTPUT="
 DETAIL INSTALL SCRIPT 1.23
 =========================
-IP: $(curl ifconfig.me)
+IP: $(curl -4 ifconfig.me)
 Domain: $domain
 Email Own: $email
 Type IP: $ips

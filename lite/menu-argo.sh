@@ -7,7 +7,7 @@
 
     # Konfigurasi URL izin
     PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt"
-    LOCAL_IP=$(curl -s ifconfig.me) # Mendapatkan IP lokal
+    LOCAL_IP=$(curl -4 -s ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
     calculate_remaining_days() {
@@ -217,7 +217,6 @@ ${separator}
 Status       : $ssws
 ${blue_sep}
 ${green}1${NC}. Install Argo Tunnel
-${green}2${NC}. Restart Argo Tunnel
 ${green}3${NC}. Argo Tunnel Details
 ${green}0${NC}. Back to Main Menu
 ${separator}
@@ -226,7 +225,6 @@ ${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input option: " opws
 case $opws in
 1) clear ; setup ;;
-2) clear ; reres ;;
 3) clear ; detail ;;
 0) clear ; menu ;;
 *) clear ; tamp ;;

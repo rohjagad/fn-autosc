@@ -6,7 +6,7 @@
 
     # Konfigurasi URL izin
     PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt"
-    LOCAL_IP=$(curl -s ifconfig.me) # Mendapatkan IP lokal
+    LOCAL_IP=$(curl -4 -s ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
     calculate_remaining_days() {
@@ -194,7 +194,7 @@ function change_quota() {
             quota_status="No"
         fi
         systemctl daemon-reload
-        systemctl restart xray@http
+        systemctl restart xray@upgrade
         systemctl restart quota-http
         Loading_Animasi
         Loading_Succes

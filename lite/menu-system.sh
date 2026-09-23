@@ -7,7 +7,7 @@
 
     # Konfigurasi URL izin
     PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt"
-    LOCAL_IP=$(curl -s ifconfig.me) # Mendapatkan IP lokal
+    LOCAL_IP=$(curl -4 -s ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
     calculate_remaining_days() {
@@ -606,7 +606,6 @@ ${green}2${NC}. Rocky Linux 9
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-"
 read -p "Input Options: " opw
 case $opw in
 1) clear : cd /root ; curl -O https://raw.githubusercontent.com/rohjagad/reinstall/main/reinstall.sh && bash reinstall.sh rocky 8 && reboot ;;

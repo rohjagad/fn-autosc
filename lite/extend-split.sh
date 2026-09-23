@@ -6,7 +6,7 @@
 
     # Konfigurasi URL izin
     PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt"
-    LOCAL_IP=$(curl -s ifconfig.me) # Mendapatkan IP lokal
+    LOCAL_IP=$(curl -4 -s ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
     calculate_remaining_days() {
@@ -113,7 +113,7 @@ else
     exp3=$(($exp2 + $masaaktif))
     exp4=$(date -d "$exp3 days" +"%y-%m-%d") # Format tahun 2 digit
     sed -i "/### $user/c\### $user $exp4" /etc/xray/json/split.json
-    sed -i "s/Expired: $exp/Expired: $exp4/" /var/log/create/xray/split/${user}.log
+    sed -i "s/Expired : $exp/Expired : $exp4/" /var/log/create/xray/split/${user}.log
 
     echo -e "\n${YB}Reset total usage quota? (y/n):${NC}"
     read -rp "Input: " reset_quota

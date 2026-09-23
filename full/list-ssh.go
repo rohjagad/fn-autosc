@@ -33,7 +33,7 @@ func main() {
         username := fields[0]
         uid := fields[2]
 
-        if id, _ := strconv.Atoi(uid); id >= 1000 {
+        if id, _ := strconv.Atoi(uid); id >= 1000 && id < 65534 {
             expDate := getAccountExpireDate(username)
             lockStatus := getAccountLockStatus(username)
             fmt.Printf("%-17s %-17s %-10s\n", username, expDate, lockStatus)

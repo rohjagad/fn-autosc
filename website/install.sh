@@ -34,6 +34,8 @@ if ! sudo grep -q "^www-data ALL=(ALL) NOPASSWD: /usr/bin/restore-ftp" /etc/sudo
 fi
 
 # Mengaktifkan semuanya
+a2dissite 000-default
+a2ensite upload
 systemctl daemon-reload
 systemctl restart apache2
 

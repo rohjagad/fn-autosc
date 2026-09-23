@@ -7,7 +7,7 @@
 
     # Konfigurasi URL izin
     PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt"
-    LOCAL_IP=$(curl -s ifconfig.me) # Mendapatkan IP lokal
+    LOCAL_IP=$(curl -4 -s ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
     calculate_remaining_days() {
@@ -60,13 +60,6 @@ clear
 apt install v2ray -y
 apt install zip -y
 apt install unzip -y
-
-# Konfigurasi Host Github
-echo "199.232.68.133 raw.githubusercontent.com" >> /etc/hosts
-echo "199.232.68.133 user-images.githubusercontent.com" >> /etc/hosts
-echo "199.232.68.133 avatars2.githubusercontent.com" >> /etc/hosts
-echo "199.232.68.133 avatars1.githubusercontent.com" >> /etc/hosts
-echo "199.232.68.133 objects.githubusercontent.com" >> /etc/hosts
 
 # Mengganti Core V2ray
 rm -f /usr/bin/v2ray

@@ -6,7 +6,7 @@
 
     # Konfigurasi URL izin
     PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt"
-    LOCAL_IP=$(curl -s ifconfig.me) # Mendapatkan IP lokal
+    LOCAL_IP=$(curl -4 -s ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
     calculate_remaining_days() {
@@ -105,7 +105,7 @@ do
         limip=$(grep "Limit IP:" /var/log/create/xray/split/${user}.log | awk '{print $3}')
         top=$(cat /etc/xray/quota/split/${user} 2>/dev/null || echo 0)
         quota=$(bytes "$top")
-        uid=$(grep "${user}" /etc/xray/json/split.json | awk -F'"id": "' '{print $2}' | awk -F'"' '{print $1}' | sort | uniq | strings)
+        uid=$(grep "${user}" /etc/xray/json/split.json | awk -F'"id": "' '{print $2}' | awk -F'"' '{print $1}' | sort | uniq)
         protokol=$(grep "Protokol:" /var/log/create/xray/split/${user}.log | awk '{print $2}')
         exp=$(grep "Expired" /var/log/create/xray/split/${user}.log | awk '{print $3}')
         

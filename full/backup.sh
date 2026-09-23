@@ -6,7 +6,7 @@
 
     # Konfigurasi URL izin
     PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt"
-    LOCAL_IP=$(curl -s ifconfig.me) # Mendapatkan IP lokal
+    LOCAL_IP=$(curl -4 -s ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
     calculate_remaining_days() {
@@ -60,7 +60,7 @@ clear
 date=$(date)
 domain=$(cat /etc/xray/domain)
 cpt="$date / $domain"
-MYIP=$(curl -s ifconfig.me)
+MYIP=$(curl -4 -s ifconfig.me)
 
 # Proses Backup
 clear

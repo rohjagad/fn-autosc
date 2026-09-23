@@ -7,7 +7,7 @@
 
     # Konfigurasi URL izin
     PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt"
-    LOCAL_IP=$(curl -s ifconfig.me) # Mendapatkan IP lokal
+    LOCAL_IP=$(curl -4 -s ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
     calculate_remaining_days() {
@@ -170,7 +170,7 @@ if [ -z $name ]; then
 menu
 else
 exp=$(grep -we "^### $name" "/etc/noobzvpns/.noob" | cut -d ' ' -f 3 | sort | uniq)
-sed -i "/^### $name $exp/,/^},{/d" /etc/noobzvpns/.noob
+sed -i "/^### $name $exp/d" /etc/noobzvpns/.noob
 noobz_remove_user "$name"
 clear
 TEKS="

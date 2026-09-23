@@ -6,7 +6,7 @@
 
     # Konfigurasi URL izin
     PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt"
-    LOCAL_IP=$(curl -s ifconfig.me) # Mendapatkan IP lokal
+    LOCAL_IP=$(curl -4 -s ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
     calculate_remaining_days() {
@@ -162,22 +162,8 @@ Protocol : $protokol2
 Status   : ${red}Locked${NC}
 ${separator}"
 
-# Langsung lakukan unlock jika username valid
-if [ "$protokol2" == "Vmess" ]; then
-    sed -i '/#vmess$/a\### '"$name $exp2"'\
-    },{"id": "'""$uuid""'","alterid": 0,"email": "'""$name""'"' /etc/v2ray/config.json
-elif [ "$protokol2" == "Vless" ]; then
-    sed -i '/#vless$/a\### '"$name $exp2"'\
-    },{"id": "'""$uuid""'","email": "'""$name""'"' /etc/v2ray/config.json
-elif [ "$protokol2" == "Trojan" ]; then
-    sed -i '/#trojan$/a\### '"$name $exp2"'\
-    },{"password": "'""$uuid""'","email": "'""$name""'"' /etc/v2ray/config.json
-else
-    echo "Protokol tidak dikenal"
-fi
-
     exp=$(grep -wE "^### $name" "/etc/v2ray/config.json" | cut -d ' ' -f 3 | sort | uniq)
-    sed -i "/### $user $exp/ {N;d}" /etc/v2ray/config.json
+    sed -i "/### $name $exp/ {N;d}" /etc/v2ray/config.json
 mv /var/log/create/xray/ws/${name}.log /var/log/create/xray/ws/${name}.locked
 systemctl daemon-reload
 systemctl restart v2ray

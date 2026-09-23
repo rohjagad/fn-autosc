@@ -6,7 +6,7 @@
 
     # Konfigurasi URL izin
     PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt"
-    LOCAL_IP=$(curl -s ifconfig.me) # Mendapatkan IP lokal
+    LOCAL_IP=$(curl -4 -s ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
     calculate_remaining_days() {
@@ -211,6 +211,6 @@ echo "" > /tmp/login-db.txt
 echo "" > /tmp/login-ssh.txt
 echo "" > /tmp/vpn-login-tcp.txt
 echo "" > /tmp/vpn-login-udp.txt
-echo "" > /var/log/auth.log
+# echo "" > /var/log/auth.log
 # Membersihkan log asli dari file $LOG
 echo "" > ${LOG}

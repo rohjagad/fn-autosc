@@ -6,7 +6,7 @@
 
     # Konfigurasi URL izin
     PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt"
-    LOCAL_IP=$(curl -s ifconfig.me) # Mendapatkan IP lokal
+    LOCAL_IP=$(curl -4 -s ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
     calculate_remaining_days() {
@@ -204,10 +204,6 @@ while [ ${#tgl} -lt 2 ]
 do
 tgl="0"$tgl
 done
-while [ ${#username} -lt 15 ]
-do
-username=$username" " 
-done
 bulantahun=`echo $tglexp |awk -F" " '{print $2,$6}'`
 todaystime=`date +%s`
 if [ $userexpireinseconds -ge $todaystime ] ;
@@ -220,6 +216,7 @@ systemctl daemon-reload
 systemctl restart ssh
 systemctl restart sshd
 systemctl restart ws
+systemctl restart dropbear
 TEKS="
 ====================
 SSH Account Expired
@@ -247,7 +244,7 @@ exp=$(grep -w "^### $user" "/etc/funny/.l2tp" | cut -d ' ' -f 3)
 d1=$(date -d "$exp" +%s)
 d2=$(date -d "$now" +%s)
 exp2=$(( (d1 - d2) / 86400 ))
-if [[ "$exp2" = "0" ]]; then
+if [[ "$exp2" -le "0" ]]; then
 sed -i "/^### $user $exp/d" "/etc/funny/.l2tp"
 sed -i '/^"'"$user"'" l2tpd/d' /etc/ppp/chap-secrets
 sed -i '/^'"$user"':\$1\$/d' /etc/ipsec.d/passwd
@@ -256,7 +253,7 @@ TEKS="
 L2TP Account Expired
 ====================
 
--> $username / $exp
+-> $user / $exp
 ===================="
 CHATID=$(cat /etc/funny/.chatid)
 KEY=$(cat /etc/funny/.keybot)
@@ -264,18 +261,18 @@ TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL
 systemctl restart ipsec
-systemctl restart xl2tp
 systemctl restart xl2tpd
 chmod 600 /etc/ppp/chap-secrets* /etc/ipsec.d/passwd*
 fi
 done
 
 # WIREGUARD
+if [[ -f /etc/funny/.wireguard ]]; then
 while read expired; do
 	user=$(echo $expired | awk '{print $1}')
 	exp=$(echo $expired | awk '{print $2}')
 
-	if [[ $exp < $today ]]; then
+	if [[ $exp < $now ]]; then
 		sed -i "/^### Client ${user}\$/,/^$/d" /etc/wireguard/wg0.conf
 		if grep -q "### Client" /etc/wireguard/wg0.conf; then
 			line=$(grep -n AllowedIPs /etc/wireguard/wg0.conf | tail -1 | awk -F: '{print $1}')
@@ -292,7 +289,7 @@ while read expired; do
         WG Account Expired
         ====================
 
-        -> $username / $exp
+        -> $user / $exp
         ===================="
         CHATID=$(cat /etc/funny/.chatid)
         KEY=$(cat /etc/funny/.keybot)
@@ -301,6 +298,7 @@ while read expired; do
         curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL
 	fi
 done < /etc/funny/.wireguard
+fi
 
 # Noobz
 # <- Noobz Expired -> 
@@ -344,8 +342,8 @@ Exp : $exp
 ════════════════════════════
 "
         # Mengambil CHATID dan KEY dari file
-        CHATID=$(cat /etc/noobzvpns/.chatid)
-        KEY=$(cat /etc/noobzvpns/.keybot)
+        CHATID=$(cat /etc/funny/.chatid)
+        KEY=$(cat /etc/funny/.keybot)
         TIME="10"
         URL="https://api.telegram.org/bot$KEY/sendMessage"
 

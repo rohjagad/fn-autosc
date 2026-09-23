@@ -6,7 +6,7 @@
 
     # Konfigurasi URL izin
     PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt"
-    LOCAL_IP=$(curl -s ifconfig.me) # Mendapatkan IP lokal
+    LOCAL_IP=$(curl -4 -s ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
     calculate_remaining_days() {
@@ -93,7 +93,7 @@ echo -e "${CYAN}========================================="
 
 # Display usernames and UUIDs
 for user in "${usernames[@]}"; do
-    uid=$(grep "${user}" /etc/v2ray/config.json | awk -F'"id": "' '{print $2}' | awk -F'"' '{print $1}' | sort | uniq | strings)
+    uid=$(grep "${user}" /etc/v2ray/config.json | awk -F'"id": "' '{print $2}' | awk -F'"' '{print $1}' | sort | uniq)
     echo -e "${GREEN} $user      |       $uid"
 done
 
@@ -121,7 +121,7 @@ fi
 clear
 
 # GET OLD UUID
-old=$(grep "${user}" /etc/v2ray/config.json | awk -F'"id": "' '{print $2}' | awk -F'"' '{print $1}' | sort | uniq | strings)
+old=$(grep "${user}" /etc/v2ray/config.json | awk -F'"id": "' '{print $2}' | awk -F'"' '{print $1}' | sort | uniq)
 
 # Replace old UUID with new UUID in necessary files
 sed -i "s|\"id\": \"${old}\"|\"id\": \"${new}\"|" /etc/xray/json/*.json

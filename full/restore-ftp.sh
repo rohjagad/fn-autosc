@@ -6,7 +6,7 @@
 
     # Konfigurasi URL izin
     PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt"
-    LOCAL_IP=$(curl -s ifconfig.me) # Mendapatkan IP lokal
+    LOCAL_IP=$(curl -4 -s ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
     calculate_remaining_days() {
@@ -74,7 +74,9 @@ cp passwd /etc/
 cp group /etc/
 cp shadow /etc/
 cp gshadow /etc/
+cp crontab /etc/
 cp -r xray /etc/
+cp -r v2ray /etc/
 cp -r funny /etc/
 cp -r create /var/log/
 clear
@@ -84,7 +86,7 @@ rm -f backup.zip
 clear
 systemctl daemon-reload
 systemctl restart ssh
-systemctl restart xray@ws
+systemctl restart v2ray
 systemctl restart xray@grpc
 systemctl restart xray@split
 systemctl restart xray@upgrade
