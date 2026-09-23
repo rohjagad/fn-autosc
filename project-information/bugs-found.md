@@ -657,3 +657,8 @@ All bugs verified on fresh Debian 12 VPS (`202.155.17.126`) reinstalled via `bin
 - **Files:** `full/backup.sh`, `lite/backup.sh` (fixed with fallback upload chain).
 - **Cause:** The scripts POST the backup zip to `https://file.io` and parse `.link`/`.key` from the JSON response. file.io discontinued anonymous uploads: the endpoint now returns HTTP 301 to its marketing landing page (a Gatsby HTML site), so `upload_link` and `id_link` were always empty. `curl -s` without `-L` never even followed the redirect. Probes from the VPS confirmed transfer.sh (empty), 0x0.st (uploads disabled: "AI botnet spam"), and bashupload (empty) are also unusable.
 - **Impact:** Verified live on the fresh Debian 12 VPS: every backup completed the archive but recorded `Link Backup: ` (empty), so off-site restores were impossible - the backup feature was silently dead.
+
+### 75. Lock Message Lists Timestamp Fragments Instead of IP Addresses (CONFIRMED, pre-existing in V23)
+- **Files:** `full/limit-ip-ssh.sh` (one-token fix).
+- **Cause:** The multi-login log line format is `PID - USER - IP - TIME`, so the IP is always field 5. The lock-notification builder used `awk '{print $NF}'`, which returns the last token of the timestamp (`23:09:02` / `2026-09-23T21:04:17+08:00`) instead of the address. Same defect existed in the pristine V23 original.
+- **Impact:** Every SSH lock notification (log/Telegram `[ Time Login ]` section) listed time fragments where the offending IP addresses should be, making abuse review useless.

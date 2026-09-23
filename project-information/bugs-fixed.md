@@ -563,3 +563,9 @@ All fixes live-verified on Debian 12 VPS (`202.155.17.126`) after fresh OS reins
 76. **Backup Upload Produces an Empty Link** (`full/backup.sh`, `lite/backup.sh`)
     - Added `-L --max-time 60` to the file.io upload, quoted the `jq` response parsing, and added a two-stage fallback: tmpfiles.org API (parsed `.data.url`, `id_link="tmpfiles.org"`) then litterbox/catbox 72h (`id_link="litterbox-72h"`). Both fallbacks were probed live from the VPS before wiring.
     - **Verified:** Live on the fresh Debian 12 VPS - backup recorded `Link Backup: https://tmpfiles.org/.../backup.zip` with `Your ID: tmpfiles.org`. Full loop tested: deleted xray user `fr1` (4 config lines) and SSH user `fssh2`, downloaded the archive (7.7 MB, 121 files), ran `restore-ftp` (`SUCCESSFULL RESTORE YOUR VPS`) - both accounts returned with quota/log files intact, `JSON_OK`, all services active, crontab still duplicate-free.
+
+## Fresh-Reinstall Audit Cycle (Bug 77)
+
+77. **Lock Message Lists Timestamp Fragments Instead of IP Addresses** (`full/limit-ip-ssh.sh`)
+    - Changed the `ip_list` builder from `awk '{print $NF}'` to `awk '{print $5}'`, matching the `PID - USER - IP - TIME` line format for both classic and RFC3339 timestamps.
+    - **Verified:** Functional test on `PID - USER - IP - TIME` lines in both timestamp formats returned `10.9.9.1,10.9.9.2`; live on the Debian 12 VPS the fixed line is deployed (`print $5` present) and the lock path triggers normally.

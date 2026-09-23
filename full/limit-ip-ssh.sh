@@ -272,7 +272,9 @@ do
     cekcek=$(echo -e "$mulog" | grep -F " - $user - " | wc -l)
 
     # Mendapatkan daftar IP untuk pengguna
-    ip_list=$(echo -e "$mulog" | grep -F " - $user - " | awk '{print $NF}' | sort | uniq | tr '\n' ', ' | sed 's/, $//')
+    # Bug 75: the log line format is "PID - USER - IP - TIME", so the IP is
+    # always field 5. $NF returned a fragment of the timestamp instead.
+    ip_list=$(echo -e "$mulog" | grep -F " - $user - " | awk '{print $5}' | sort | uniq | tr '\n' ', ' | sed 's/, $//')
 
     # Pastikan user root tidak dikunci
     if [[ $user != "root" && $cekcek -gt $iplimit ]]; then
