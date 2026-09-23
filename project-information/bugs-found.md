@@ -448,3 +448,77 @@ were exercised for real.
   8. Created accounts (VLESS WS, VMESS WS, Trojan WS, VLESS gRPC) and verified JSON config validity.
   9. Confirmed end-to-end tunnel connectivity via Xray client (VLESS WS TLS → VPS → internet).
 
+---
+
+## Live Audit Cycle 2: Deep Component Verification (Bugs 28–40)
+
+### 28. Account Deletion Leaves Trailing Commas in JSON Configs Crashing V2Ray/Xray (CONFIRMED)
+- **Files:** `full/delete-{ws,split,grpc,http}.sh`, `lite/delete-{ws,split,grpc,http}.sh`, `full/xp.sh`, `lite/xp.sh`, `full/kill-{ws,split,grpc,http}.sh`, `lite/kill-{ws,split,grpc,http}.sh`.
+- **Cause:** Account deletion scripts execute `sed -i "/### $user $exp/ {N;d}" <config.json>`, stripping the user block and its comment header. Because accounts are added with leading commas following the template entry, deleting the newest account leaves a dangling trailing comma preceding the array's closing bracket (`}, \n ]`).
+- **Impact:** Go's standard JSON decoder (RFC 8259) rejects trailing commas. Service restarts crash with `invalid character ']' looking for beginning of value`. V2Ray and Xray daemons fail to boot, knocking all client tunnels offline. Verified live on Debian 12 VPS.
+
+### 29. Trial Account Self-Deletion Command Broken by Unescaped Quotes (CONFIRMED)
+- **Files:** All 24 `trial-*.sh` scripts in `full/` and `lite/`.
+- **Cause:** Scripts schedule auto-deletion via:
+  ```bash
+  echo "sed -i "/### $user $exp/ {N;d}" /etc/v2ray/config.json && systemctl restart v2ray ..." | at now + 60 minutes
+  ```
+  Unescaped nested double quotes cause bash to prematurely terminate the string and attempt to execute `d}` as an independent shell command: `/usr/bin/trial-vless-ws: line 131: d}: No such file or directory`.
+- **Impact:** The `at` daemon receives an empty/truncated command payload. Trial accounts are never automatically deleted after 60 minutes and persist indefinitely. Verified live on Debian 12 VPS.
+
+### 30. Trial and Unlock Scripts Use Broken Append-After Pattern (CONFIRMED)
+- **Files:** 24 `trial-*.sh` scripts and 8 `unlock-*.sh` scripts in `full/` and `lite/`.
+- **Cause:** While regular `add-*.sh` scripts were updated to use next-line substitution (`/#marker$/{n;s/}/...`), trial and unlock scripts still execute `sed -i '/#marker$/a\### user exp\n},{"id":...` which appends directly after the comment marker.
+- **Impact:** Injects entries between the `#marker` comment and the closing brace. Once a trial or unlock account exists, regular `add-*.sh` scripts fail to match their expected pattern, causing subsequent account creation to silently fail (`realuser WAS NOT ADDED!`). Verified live on Debian 12 VPS.
+
+### 31. `kill-ws.sh` Automatically Deletes Accounts with Unlimited Quota (CONFIRMED)
+- **Files:** `full/kill-ws.sh:98-106`, `lite/kill-ws.sh:98-106`.
+- **Cause:** In `add-*-ws.sh`, accounts created with Quota = 0 (unlimited) intentionally omit creating `/etc/xray/quota/ws/$user`. However, `kill-ws.sh` (running every 5 minutes in crontab) contains a logic defect checking `if [[ ! -f "$quota_file" ]]; then` and unconditionally deletes the user from `/etc/v2ray/config.json`.
+- **Impact:** Any WebSocket account configured with unlimited quota is deleted within 5 minutes of creation with log status `Deleted (Quota File Missing)`.
+
+### 32. SlowDNS Installer Wipes Entire Configuration Directory (CONFIRMED)
+- **Files:** `installer/slowdns.sh:71-72`.
+- **Cause:** `full.sh` saves the administrator's chosen nameserver into `/etc/slowdns/nsdomain` upfront. When `slowdns.sh` executes later in the install chain, line 71 executes `rm -rf /etc/slowdns /root/dnstt`, destroying the saved configuration before it can be read.
+- **Impact:** The check `if [[ -s /etc/slowdns/nsdomain ]]` evaluates to false, forcing the installer to stop at `read -rp "Your Nameserver: " -e Nameserver` and breaking unattended automated deployments. Verified live on Debian 12 VPS.
+
+### 33. NoobzVPN Auto-Expiration Deletes Adjacent Unexpired Accounts (CONFIRMED)
+- **Files:** `full/xp.sh:331-332`, `lite/xp.sh:330-331`.
+- **Cause:** `/etc/funny/.noob` records are single lines (`### $user $exp`). `xp.sh` executes `sed -i "/### $user $exp/ {N;d}" /etc/funny/.noob`. The `N` command reads the next line (the subsequent user) into pattern space and deletes both. Furthermore, line 332 executes `noobzvpns --remove-user "$user"` which fails (`error: unexpected argument '--remove-user' found`).
+- **Impact:** Legitimate unexpired accounts are purged from the database while the expired account is never removed from the active `noobzvpns` service. Verified live on Debian 12 VPS.
+
+### 34. Broken `flock` Syntax in Crontab Executes `xp` Unprotected After Delay (CONFIRMED)
+- **Files:** `installer/xray.sh:140`.
+- **Cause:** Crontab schedules `0,15,30,45 * * * * root flock -n /tmp/xp.lock sleep 300 && /usr/bin/xp`. The shell operator `&&` has lower precedence than flock; flock acquires the lock exclusively for `sleep 300`, releases the lock upon timeout, and then runs `/usr/bin/xp`.
+- **Impact:** `/usr/bin/xp` runs completely unlocked, allowing race conditions, while being artificially delayed by 5 minutes on every execution cycle. Verified live on Debian 12 VPS.
+
+### 35. Undefined `$TEKS` Variable Fails Telegram Backup Notification (CONFIRMED)
+- **Files:** `full/backup-gd.sh:107-108`, `lite/backup-gd.sh:107-108`.
+- **Cause:** Message summary text is assembled in variable `$opwares` on line 112, but line 108 invokes `curl` using unassigned `$TEKS`.
+- **Impact:** Telegram API responds with `400 Bad Request: message text is empty`; backup alerts are dropped.
+
+### 36. Path Mismatch Breaks Web-Based Restore (CONFIRMED)
+- **Files:** `website/upload.php:17,22`, `website/install.sh`, `full/restore-ftp.sh:61-64`.
+- **Cause:** `upload.php` saves uploaded archives to `/var/www/uploads/` and triggers `sudo /usr/bin/restore-ftp`. However, `website/install.sh` never deploys `website/restore-ftp.sh` to `/usr/bin/restore-ftp`. The installed script searches `/root/*backup*.zip`.
+- **Impact:** Uploading a backup via Apache port 855 fails 100% of the time with `File backup.zip Not Found`.
+
+### 37. `delete-split.sh` Deletes Quota File from Wrong Transport Directory (CONFIRMED)
+- **Files:** `full/delete-split.sh:125`, `lite/delete-split.sh:125`.
+- **Cause:** Line 125 executes `rm -f /etc/xray/quota/ws/$user` instead of targeting `/etc/xray/quota/split/$user`.
+- **Impact:** Orphaned files accumulate in `/etc/xray/quota/split/` while identically named accounts on WebSocket transport lose their quota configurations.
+
+### 38. Missing `qrencode` Package Breaks WireGuard QR Display (CONFIRMED)
+- **Files:** `full/menu-wg.sh:364`.
+- **Cause:** Option 5 ("Show WireGuard Config") calls `qrencode -t ansiutf8 -l L < ...`, but package `qrencode` is never installed by any setup script.
+- **Impact:** Terminal errors out with `qrencode: command not found`. Verified live on Debian 12 VPS.
+
+### 39. WireGuard WARP Registration Shell Variable Expansion Quoted Out (CONFIRMED)
+- **Files:** `full/menu-wg.sh:226,252`.
+- **Cause:** Line 226 passes `sudo wg set wg0 peer '$CLOUDFLAREKEY' endpoint '$IPV4':51820 ...` inside single quotes, preventing variable evaluation. `$IPV4` is also never defined.
+- **Impact:** Literal unexpanded strings are passed to `wg`, causing WARP peering to fail.
+
+### 40. `iptables-restore -t` Runs in Test Mode Without Applying Rules (CONFIRMED)
+- **Files:** `installer/l2tp.sh:313`, `installer/vpn.sh:178`.
+- **Cause:** Scripts execute `iptables-restore -t < /etc/iptables.up.rules`. The `-t` (`--test`) option tests rule parsing without loading or committing rules to the kernel netfilter tables.
+- **Impact:** Firewall configuration from `/etc/iptables.up.rules` is never actually applied on system boot.
+
+
