@@ -98,7 +98,7 @@ else
         # Jika pengguna tidak terdaftar di JSON dan tidak terkunci, hapus file terkait
         echo "Menghapus data untuk pengguna $user..."
         rm -f /var/log/create/xray/grpc/${user}.log
-        rm -f /etc/xray/quota/grpc/$user*
+        rm -f /etc/xray/quota/grpc/$user /etc/xray/quota/grpc/${user}_usage
         rm -f /etc/xray/limit/ip/xray/grpc/$user
 
         # Tambahkan nama pengguna ke daftar yang dihapus

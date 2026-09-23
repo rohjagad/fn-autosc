@@ -121,7 +121,7 @@ Link TLS : $vlesslink1
 "
 curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL >/dev/null 2>&1
 echo -e "$TEKS" > /var/log/create/xray/grpc/${user}.log
-echo 'sed -i "/### '"$user"' '"$exp"'/ {N;d}" /etc/xray/json/grpc.json && sed -i -z '"'"'s/},\n *\]/}\n        ]/'"'"' /etc/xray/json/grpc.json && systemctl restart xray@grpc && systemctl restart quota-grpc && rm -fr /var/log/create/xray/grpc/'"$user"'.log && rm -fr /etc/xray/limit/ip/xray/grpc/'"$user"' && rm -fr /etc/xray/quota/grpc/'"$user"'' | at now + 60 minutes >/dev/null 2>&1
+echo 'sed -i "/### '"$user"' '"$exp"'/ {N;d}" /etc/xray/json/grpc.json && sed -i -z '"'"'s/},\n *\]/}\n        ]/g'"'"' /etc/xray/json/grpc.json && systemctl restart xray@grpc && systemctl restart quota-grpc && rm -fr /var/log/create/xray/grpc/'"$user"'.log && rm -fr /etc/xray/limit/ip/xray/grpc/'"$user"' && rm -fr /etc/xray/quota/grpc/'"$user"' /etc/xray/quota/grpc/'"$user"'_usage' | at now + 60 minutes >/dev/null 2>&1
 clear
 source /etc/funny/format.sh
 format_display "$TEKS"

@@ -127,7 +127,7 @@ Link None: $vlesslink2
 "
 curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL >/dev/null 2>&1
 echo -e "$TEKS" > /var/log/create/xray/http/${user}.log
-echo 'sed -i "/### '"$user"' '"$exp"'/ {N;d}" /etc/xray/json/upgrade.json && sed -i -z '"'"'s/},\n *\]/}\n        ]/'"'"' /etc/xray/json/upgrade.json && systemctl restart xray@upgrade && systemctl restart quota-http && rm -fr /var/log/create/xray/http/'"$user"'.log && rm -fr /etc/xray/limit/ip/xray/http/'"$user"' && rm -fr /etc/xray/quota/http/'"$user"'' | at now + 60 minutes >/dev/null 2>&1
+echo 'sed -i "/### '"$user"' '"$exp"'/ {N;d}" /etc/xray/json/upgrade.json && sed -i -z '"'"'s/},\n *\]/}\n        ]/g'"'"' /etc/xray/json/upgrade.json && systemctl restart xray@upgrade && systemctl restart quota-http && rm -fr /var/log/create/xray/http/'"$user"'.log && rm -fr /etc/xray/limit/ip/xray/http/'"$user"' && rm -fr /etc/xray/quota/http/'"$user"' /etc/xray/quota/http/'"$user"'_usage' | at now + 60 minutes >/dev/null 2>&1
 clear
 source /etc/funny/format.sh
 format_display "$TEKS"

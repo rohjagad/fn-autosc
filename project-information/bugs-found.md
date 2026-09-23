@@ -586,3 +586,62 @@ All bugs verified on fresh Debian 12 VPS (`202.155.17.126`) reinstalled via `bin
 - **Impact:** `udp-request` service enters permanent failure (`activating (auto-restart)`). Verified live on Debian 12 VPS: `tun0` was held by OpenVPN; reassigning OpenVPN to `dev tun2` / `dev tun3` allowed both OpenVPN and `udp-request` to run simultaneously and stably.
 
 
+
+## Live Audit Cycle 4: Focus-Area Regression and Client-Path Audit (Bugs 62–71)
+
+### 62. Change-Limit-IP Tools Never Update the On-Disk Limit File (CONFIRMED)
+- **Files:** `full/change-limit-ip-{ws,grpc,http,split}.go`, `lite/change-limit-ip-{ws,grpc,http,split}.go`, `full/limit-ip.go`.
+- **Cause:** The Go tools rewrote only the `Limit IP:` line inside the account log (`/var/log/create/xray/<proto>/<user>.log`) and never touched `/etc/xray/limit/ip/xray/<proto>/<user>`, which is the file every enforcement cron actually reads. Non-numeric input was also accepted verbatim.
+- **Impact:** Changing an account's IP limit silently did nothing. Verified live on Debian 12 VPS: after changing limit 2 → 5, the log showed `Limit IP: 5` while `/etc/xray/limit/ip/xray/ws/testvm2` still contained `2`, so the enforcer kept locking at the old limit.
+
+### 63. Deleting a VMess Account Leaves Trailing Commas and Crash-Loops V2Ray (CONFIRMED)
+- **Files:** Shared comma fix-up `sed -i -z 's/},\n *\]/}\n        ]/'` (missing `g` flag) in ~34 scripts across `full/` and `lite/` (delete, lock/unlock, change-quota, kill, trial at-jobs, xp).
+- **Cause:** A VMess account exists in four inbounds, each ending with `},\n        ]`. The single-substitution sed replaced only the first match per invocation, leaving the other three inbounds with trailing commas.
+- **Impact:** After deleting a vmess user, `/etc/v2ray/config.json` became invalid JSON; V2Ray crash-looped (`status=1`, `restart=4`). Verified live on Debian 12 VPS: 4 `#vmess` markers → delete left 3 trailing commas → `JSON_BROKEN` → v2ray crash-loop.
+
+### 64. SSH IP-Limit Enrollment Uses GID Instead of UID (CONFIRMED)
+- **Files:** `full/limit-ip-ssh.sh`.
+- **Cause:** The `/etc/passwd` parse discarded field 3 (UID) and compared field 4 (GID) against 1000, while also lacking an upper bound. System accounts with GID 65534 (`sync`, `_apt`, `sshd`, `strongswan`) were enrolled as if they were SSH customers.
+- **Impact:** Junk limit files under `/etc/xray/limit/ip/ssh/` for system users; the lock loop iterated non-existent users on every cron run. Verified live on Debian 12 VPS: limit files present for `sync`, `_apt`, `sshd`, `strongswan`.
+
+### 65. Lite OS-Reinstall Menu Prompt Tests the Wrong Variable (CONFIRMED)
+- **Files:** `lite/menu-system.sh`.
+- **Cause:** The prompt reads into `$osw`, but the negative branch tests `elif [[ $ip_version == "n" ]]`, an unrelated/empty variable.
+- **Impact:** Entering `n` at the OS-reinstall prompt never exits and falls through into the reinstall path.
+
+### 66. `xp.sh` Wildcard Deletion Cross-Destroys Longer Usernames (CONFIRMED)
+- **Files:** `full/xp.sh`, `lite/xp.sh` (4 deletion sites each).
+- **Cause:** Expiry cleanup ran `rm -f /etc/xray/quota/ws/$user*` (and sibling paths) — a prefix glob shared with the original V23 sources.
+- **Impact:** Expiring user `xpw1` also deletes `xpw10`'s quota/log/limit files while `xpw10` is still active. Verified live on Debian 12 VPS after fix: expiring `xpw1` left `xpw10`'s quota file, log, and config marker intact.
+
+### 67. Menu Delete Scripts Leave `${user}_usage` Orphaned (CONFIRMED)
+- **Files:** `full/delete-{ws,grpc,http,split}.sh`, `lite/delete-{ws,grpc,http,split}.sh`.
+- **Cause:** Deletion removed the quota limit file, limit-IP file, log, and config marker, but never the `/etc/xray/quota/<proto>/<user>_usage` counter that `quota-*.sh` creates on every quota change.
+- **Impact:** Orphaned usage files accumulate forever and (with any prefix-based cleanup) can misreport quota for the next user reusing the same username. Verified live on Debian 12 VPS after fix: delete removed both `testvm2` and `testvm2_usage`.
+
+### 68. IP-Limit Enforcer Deletes the Config From the Marker to End-of-File (CONFIRMED)
+- **Files:** `full/limit-ip-{ws,grpc,http,split}.sh`, `lite/limit-ip-{ws,grpc,http,split}.sh`.
+- **Cause:** The triggered-delete used `sed -i "/^### $user $exp/,/^},{/d"` with `$exp` never assigned, and the end pattern `^},{` matches nothing (verified: `^},{` count = 0 in all four live configs — the identical line exists in original V23). An unmatched range deletes from the start pattern to the last line of the file.
+- **Impact:** The first account that exceeded its IP limit wiped the rest of its config (all accounts after it) and left broken JSON. Verified live on Debian 12 VPS: `$exp` undefined, `^},{` count 0, original line identical.
+
+### 69. WS IP-Limit Probe Calls the XRay Stats API on a V2Ray Port (CONFIRMED)
+- **Files:** the same 8 `limit-ip-*.sh` scripts.
+- **Cause:** The scripts run `xray api statsonline --server=127.0.0.1:10080`, but the WS transports on port 10080 are served by V2Ray, which returns `Unimplemented ... unknown service xray.app.stats.command.StatsService` and exposes no online-session metric at all. The empty result then fed `[[ "" -gt "2" ]]`, producing integer-expression errors every 5 minutes.
+- **Impact:** The WS limit check could never trigger and error-spammed cron output. Verified live on Debian 12 VPS: `Unimplemented` response on :10080, while `xray api statsonline` works against the xray-backed gRPC port :10083. (Decision recorded: v2ray-served transports now probe once and exit cleanly; xray-backed transports enforce for real.)
+
+### 70. Dropbear Login Events Are Invisible to the SSH IP Limit and Login Checker (CONFIRMED, pre-existing in V23)
+- **Files:** `full/limit-ip-ssh.sh`, `full/cek-login-ssh.sh`.
+- **Cause:** On Debian 12 the dropbear unit (the daemon actually serving SSH accounts on port 109) starts with `-EF` and logs only to the systemd journal — `/var/log/auth.log` contains zero dropbear lines (verified live: `grep -c dropbear /var/log/auth.log` = 0 while the journal showed `Password auth succeeded for 'kvs1' ...`). Both scripts grep the auth log for `Password auth succeeded`.
+- **Impact:** SSH-account logins were never counted: the multi-login IP limit never triggered for any real client, and `cek-login-ssh` printed an empty dropbear table. Verified live on Debian 12 VPS.
+
+### 71. Fixed Field Offsets Cannot Parse RFC3339 Auth-Log Timestamps (CONFIRMED, pre-existing in V23)
+- **Files:** `full/limit-ip-ssh.sh`, `full/cek-login-ssh.sh`.
+- **Cause:** Debian 12's rsyslog writes RFC3339 timestamps (`2026-09-23T23:10:07.792582+08:00 localhost sshd[82746]: Accepted password for ...`) while the parsers assume the classic `Sep 23 23:10:07` prefix with fixed positions (user = field 9, IP = field 11). On RFC3339 lines those positions hold the IP and `port`, so fields are shifted by two.
+- **Impact:** The OpenSSH branch counted nothing or mis-assigned fields on Debian 12, and `cek-login-ssh` displayed IP addresses in the Username column. Verified live on Debian 12 VPS.
+
+## Live Audit Cycle 4 Addendum: SSH Login-Path Expiry Finding (Bug 72)
+
+### 72. Expired SSH Accounts Are Not Refused at Login Until xp Cleanup (CONFIRMED, pre-existing in V23)
+- **Files:** expiry path of `full/addssh.sh`, `full/trial-ssh.sh`, `full/xp.sh` (enforcement gap; fixed in `full/expire-ssh.sh`, `full/extend-ssh.go`, `installer/xray.sh`).
+- **Cause:** SSH accounts receive a shadow expiry date via `useradd -e`, but the dropbear daemon that actually serves SSH logins (Debian 12, v2022.83, built without PAM) contains no account-expiry check at all (`strings /usr/sbin/dropbear | grep -i expired` returns nothing) and never reads the shadow expire field during authentication. The only enforcement is `xp`'s cron, which deletes expired accounts every 15 minutes. Between the expiry moment and the next `xp` run, expired accounts authenticate normally.
+- **Impact:** Client-tested on the KVM VM against the Debian 12 VPS: an account with expiry set to Sep 22, 2026 authenticated and ran a full session from the VM (`Password auth succeeded for 'kvsx'` in the journal at 23:33:38; client saw the session start, exit 1 - no refusal) and only became unusable when `xp` deleted the user at the 23:45 cron run. Expired customers could keep using the service for up to 15 minutes after expiry, and an expired-but-not-yet-deleted account was indistinguishable from an active one to the client.

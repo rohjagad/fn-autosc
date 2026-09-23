@@ -164,7 +164,7 @@ ${separator}"
 
     exp=$(grep -wE "^### $name" "/etc/v2ray/config.json" | cut -d ' ' -f 3 | sort | uniq)
     sed -i "/### $name $exp/ {N;d}" /etc/v2ray/config.json
-    sed -i -z 's/},\n *\]/}\n        ]/' /etc/v2ray/config.json
+    sed -i -z 's/},\n *\]/}\n        ]/g' /etc/v2ray/config.json
 mv /var/log/create/xray/ws/${name}.log /var/log/create/xray/ws/${name}.locked
 systemctl daemon-reload
 systemctl restart v2ray

@@ -76,11 +76,27 @@ DATE=$(date +"%Y-%m-%d %H:%M:%S")
 # Database
 username=$(grep '^###' /etc/xray/json/grpc.json | cut -d ' ' -f 2 | sort | uniq)
 
-# Loop through each username to check limits
+# Bug 69: probe online-session statistics once before looping. The WS
+# transport is served by V2Ray, which exposes no online-session metric, so
+# "xray api statsonline" can never answer there. Bail out cleanly instead of
+# raising integer-expression errors on every cron run.
+if ! xray api statsonline --server=127.0.0.1:10083 -email probe 2>&1 | grep -q "not found"; then
+    echo "IP limit check skipped: online statistics unavailable on 127.0.0.1:10083"
+    exit 0
+fi
+
 for user in $username; do
     # Get the limit and current online stats for each user
     limit=$(grep "Limit IP:" /var/log/create/xray/grpc/${user}.log | awk '{print $3}')
-    cek=$(xray api statsonline --server=127.0.0.1:10083 -email "$user" | jq -r '.stat.value')
+    # Bug 68 guard: 0 / missing / malformed limit = unlimited, never enforced
+    if ! [[ "$limit" =~ ^[1-9][0-9]*$ ]]; then
+        continue
+    fi
+    cek=$(xray api statsonline --server=127.0.0.1:10083 -email "$user" 2>/dev/null | jq -r '.stat.value // empty' 2>/dev/null)
+    # Skip when the online count is not a number (API error / unavailable)
+    if ! [[ "$cek" =~ ^[0-9]+$ ]]; then
+        continue
+    fi
     
     # Clear screen
     clear
@@ -88,13 +104,18 @@ for user in $username; do
     # Check if usage exceeds limit
     if [[ "$cek" -gt "$limit" ]]; then
         # Deleted Account
-        sed -i "/^### $user $exp/,/^},{/d" /etc/xray/json/grpc.json
-        systemctl restart xray@grpc >> /dev/null 2>&1
-        send_log
-#        rm -rf /etc/xray/quota/grpc/$user
-#        rm -rf /etc/xray/quota/grpc/${user}_usage
-#        rm -rf /etc/xray/quota/grpc/"${user}_usage"
-        mv /var/log/create/xray/grpc/${user}.log /var/log/create/xray/grpc/${user}.locked
+        # Bug 68: the legacy range pattern /^### $user $exp/,/^},{/d never
+        # matched its end address (no line starts with "},{") while $exp was
+        # undefined, so a triggered limit deleted the account block plus
+        # everything after it to the end of the file. Remove only the account.
+        exp=$(grep -wE "^### $user" "/etc/xray/json/grpc.json" | cut -d ' ' -f 3 | sort | uniq)
+        if [[ -n "$exp" ]]; then
+            sed -i "/^### $user $exp/ {N;d}" /etc/xray/json/grpc.json
+            sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/grpc.json
+            systemctl restart xray@grpc >> /dev/null 2>&1
+            send_log
+            mv /var/log/create/xray/grpc/${user}.log /var/log/create/xray/grpc/${user}.locked
+        fi
 
     else
         # If within limit, just clear the screen and display a message

@@ -165,6 +165,19 @@ func readFile(filePath string) string {
 	return strings.TrimSpace(string(content))
 }
 
+// isNumeric reports whether s consists only of ASCII digits (empty = invalid).
+func isNumeric(s string) bool {
+	if s == "" {
+		return false
+	}
+	for _, r := range s {
+		if r < '0' || r > '9' {
+			return false
+		}
+	}
+	return true
+}
+
 func main() {
 	clearScreen()
 
@@ -237,7 +250,7 @@ func main() {
 		loadingAnimasi()
 		loadingSucces()
 
-		if newIPLimit == "" {
+		if !isNumeric(newIPLimit) {
 			fmt.Println(Red + "Invalid input!" + Xark)
 		} else {
 			if err := os.WriteFile(limitFile, []byte(newIPLimit), 0644); err != nil {

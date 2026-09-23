@@ -118,12 +118,12 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/v2ray/config.json")
 
     if [ -n "$exp" ]; then
         sed -i "/### $user $exp/ {N;d}" /etc/v2ray/config.json
-        sed -i -z 's/},\n *\]/}\n        ]/' /etc/v2ray/config.json
+        sed -i -z 's/},\n *\]/}\n        ]/g' /etc/v2ray/config.json
     else
         echo "User not found in config.json!"
     fi
     rm -f /var/log/create/xray/ws/${user}.log
-    rm -f /etc/xray/quota/ws/$user
+    rm -f /etc/xray/quota/ws/$user /etc/xray/quota/ws/${user}_usage
     rm -f /etc/xray/limit/ip/xray/ws/$user
     systemctl restart v2ray > /dev/null 2>&1
     send_log

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"path/filepath"
 	"os"
 	"strings"
 	"time"
@@ -113,6 +114,33 @@ func updateLog(logFile string, newIPLimit string) {
 	}
 }
 
+
+// Bug 62: also update the enforced/displayed limit file that cek-xray reads,
+// so the change is reflected everywhere instead of only in the account log.
+func updateLimitFile(user, newIPLimit string) {
+	limitDir := "/etc/xray/limit/ip/xray/ws"
+	if err := os.MkdirAll(limitDir, 0755); err != nil {
+		fmt.Println(Red + "Error creating IP limit directory: " + err.Error() + Xark)
+		return
+	}
+	if err := os.WriteFile(filepath.Join(limitDir, user), []byte(newIPLimit+"\n"), 0644); err != nil {
+		fmt.Println(Red + "Error updating IP limit file: " + err.Error() + Xark)
+	}
+}
+
+// isNumeric reports whether s consists only of ASCII digits (empty = invalid).
+func isNumeric(s string) bool {
+	if s == "" {
+		return false
+	}
+	for _, r := range s {
+		if r < '0' || r > '9' {
+			return false
+		}
+	}
+	return true
+}
+
 func main() {
 	clearScreen()
 	rerechanBanner()
@@ -163,10 +191,12 @@ func main() {
 
 	loadingAnimasi()
 
-	if newIPLimit == "" {
+	if !isNumeric(newIPLimit) {
 		fmt.Println(Red + "Invalid input!" + Xark)
 	} else {
+		// keep the limit file cek-xray reads in sync (Bug 62)
 		updateLog(logFile, newIPLimit)
+		updateLimitFile(user, newIPLimit)
 	    clearScreen()
 		rerechanBanner()
 		barisPanjang()

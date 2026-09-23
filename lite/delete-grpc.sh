@@ -118,12 +118,12 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/grpc.json")
 
     if [ -n "$exp" ]; then
         sed -i "/### $user $exp/ {N;d}" /etc/xray/json/grpc.json
-        sed -i -z 's/},\n *\]/}\n        ]/' /etc/xray/json/grpc.json
+        sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/grpc.json
     else
         echo "User not found in config.json!"
     fi
     rm -f /var/log/create/xray/grpc/${user}.log
-    rm -f /etc/xray/quota/grpc/$user
+    rm -f /etc/xray/quota/grpc/$user /etc/xray/quota/grpc/${user}_usage
     rm -f /etc/xray/limit/ip/xray/grpc/$user
     systemctl restart xray@grpc > /dev/null 2>&1
     send_log

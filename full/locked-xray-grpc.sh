@@ -164,7 +164,7 @@ ${separator}"
 
     exp=$(grep -wE "^### $name" "/etc/xray/json/grpc.json" | cut -d ' ' -f 3 | sort | uniq)
     sed -i "/### $name $exp/ {N;d}" /etc/xray/json/grpc.json
-    sed -i -z 's/},\n *\]/}\n        ]/' /etc/xray/json/grpc.json
+    sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/grpc.json
 mv /var/log/create/xray/grpc/${name}.log /var/log/create/xray/grpc/${name}.locked
 systemctl daemon-reload
 systemctl restart xray@grpc

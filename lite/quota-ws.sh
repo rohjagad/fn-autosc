@@ -123,7 +123,7 @@ cekws() {
         if (( $(echo "$quota_used > $quota_limit" | bc -l) )); then
             exp=$(grep -w "^### $user" "/etc/v2ray/config.json" | awk '{print $3}')
             sed -i "/### $user $exp/ {N;d}" /etc/v2ray/config.json
-            sed -i -z 's/},\n *\]/}\n        ]/' /etc/v2ray/config.json
+            sed -i -z 's/},\n *\]/}\n        ]/g' /etc/v2ray/config.json
             total_usage=$(con "$quota_used")
             total_limit=$(con "$quota_limit")
             send_log

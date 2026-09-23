@@ -631,7 +631,7 @@ Please Save Your Data
 read -p "Continue (y/n): " osw
 if [[ $osw == "y" ]]; then
 os
-elif [[ $ip_version == "n" ]]; then
+elif [[ $osw == "n" ]]; then
 exit
 fi
 }

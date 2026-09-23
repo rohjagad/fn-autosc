@@ -68,34 +68,45 @@ else
     exit 1
 fi
 
-# Membaca Log
-grep -i "dropbear" $LOG | grep -i "Password auth succeeded" > /tmp/login-db.txt
-grep -i sshd $LOG | grep -i "Accepted password for" > /tmp/login-ssh.txt
-countdb=$(cat /tmp/login-db.txt | sort | uniq | wc -l )
-countsh=$(cat /tmp/login-ssh.txt | sort | uniq | wc -l)
+# Bug 70/71: same log-source and log-format fixes as limit-ip-ssh.sh - on
+# Debian 12 dropbear (the daemon serving SSH accounts) only logs to the
+# systemd journal so /var/log/auth.log has zero dropbear lines, and rsyslog
+# writes RFC3339 timestamps the old fixed field offsets cannot parse. Pull
+# dropbear from the journal when available and parse both formats from the
+# message body.
+DB_SRC=$(mktemp)
+SSH_SRC=$(mktemp)
+grep -E "Password auth succeeded" "$LOG" > "$DB_SRC"
+if command -v journalctl >/dev/null 2>&1 && journalctl -u dropbear -n 20 --no-pager 2>/dev/null | grep -q .; then
+    journalctl -u dropbear -n 10000 --no-pager 2>/dev/null | grep -E "Password auth succeeded" > "$DB_SRC"
+fi
+grep -E "Accepted password for" "$LOG" > "$SSH_SRC"
+countdb=$(wc -l < "$DB_SRC")
+countsh=$(wc -l < "$SSH_SRC")
 
 # Fungsi untuk menampilkan login Dropbear dengan PID dan Limit IP
 function show_dropbear_logins {
     print_color "═══════════[ Dropbear User Login ]═══════════"
     printf "%-20s| %-20s| %-12s| %-8s| %-8s\n" "Username" "IP Address" "Login Count" "PID" "Limit IP"
     echo "──────────────────────────────"
-    grep -i "dropbear" $LOG | grep -i "Password auth succeeded" | awk '{print $10, $12, $3}' | sort | uniq -c | while read -r count user ip pid; do
-        # Menghapus tanda petik tunggal pada username
-        user=$(echo "$user" | sed "s/'//g")
+    while IFS= read -r line; do
+        # Bug 70/71: message-body parse - works for classic and RFC3339 prefixes
+        user=$(sed -n "s/.*Password auth succeeded for '\([^']*\)' from.*/\1/p" <<< "$line")
+        hostport=$(sed -n "s/.*Password auth succeeded for '[^']*' from \([^ ]*\).*/\1/p" <<< "$line")
+        [ -n "$user" ] || continue
 
         # Mendapatkan limit IP dari file terkait
-        LIMIT_IP=$(get_limit_ip $user)
+        LIMIT_IP=$(get_limit_ip "$user")
 
-        # Mengambil angka PID setelah titik dua dan bukan keseluruhan
-        PID=$(echo $ip | cut -d: -f2)
+        # PID dari tag dropbear[PID]
+        PID=$(sed -n "s/.*dropbear\[\([0-9][0-9]*\)\].*/\1/p" <<< "$line")
 
-        # Cek jika PID ada, jika tidak maka jangan tampilkan
         if [ -z "$PID" ]; then
-            printf "%-20s| %-20s| %-12s| %-8s| %-8s\n" "$user" "$ip" "$countdb" "N/A" "$LIMIT_IP"
+            printf "%-20s| %-20s| %-12s| %-8s| %-8s\n" "$user" "$hostport" "$countdb" "N/A" "$LIMIT_IP"
         else
-            printf "%-20s| %-20s| %-12s| %-8s| %-8s\n" "$user" "$ip" "$countdb" "$PID" "$LIMIT_IP"
+            printf "%-20s| %-20s| %-12s| %-8s| %-8s\n" "$user" "$hostport" "$countdb" "$PID" "$LIMIT_IP"
         fi
-    done
+    done < "$DB_SRC"
     echo ""
 }
 
@@ -104,23 +115,24 @@ function show_openssh_logins {
     print_color "═══════════[ OpenSSH User Login ]═══════════"
     printf "%-20s| %-20s| %-12s| %-8s| %-8s\n" "Username" "IP Address" "Login Count" "PID" "Limit IP"
     echo "──────────────────────────────"
-    grep -i sshd $LOG | grep -i "Accepted password for" | awk '{print $9, $11, $3}' | sort | uniq -c | while read -r count user ip pid; do
-        # Menghapus tanda petik tunggal pada username
-        user=$(echo "$user" | sed "s/'//g")
+    while IFS= read -r line; do
+        # Bug 70/71: message-body parse - works for classic and RFC3339 prefixes
+        user=$(sed -n "s/.*Accepted password for \([^ ]*\) from .*/\1/p" <<< "$line")
+        ip=$(sed -n "s/.*Accepted password for [^ ]* from \([^ ]*\) port.*/\1/p" <<< "$line")
+        [ -n "$user" ] || continue
 
         # Mendapatkan limit IP dari file terkait
-        LIMIT_IP=$(get_limit_ip $user)
+        LIMIT_IP=$(get_limit_ip "$user")
 
-        # Mengambil angka PID setelah titik dua dan bukan keseluruhan
-        PID=$(echo $ip | cut -d: -f2)
+        # PID dari tag sshd[PID]
+        PID=$(sed -n "s/.*sshd\[\([0-9][0-9]*\)\].*/\1/p" <<< "$line")
 
-        # Cek jika PID ada, jika tidak maka jangan tampilkan
         if [ -z "$PID" ]; then
             printf "%-20s| %-20s| %-12s| %-8s| %-8s\n" "$user" "$ip" "$countsh" "N/A" "$LIMIT_IP"
         else
             printf "%-20s| %-20s| %-12s| %-8s| %-8s\n" "$user" "$ip" "$countsh" "$PID" "$LIMIT_IP"
         fi
-    done
+    done < "$SSH_SRC"
     echo ""
 }
 
@@ -143,16 +155,14 @@ function get_limit_ip {
 
 # Fungsi untuk menampilkan total aktif user
 function show_total_users {
-    total_users=$(grep -i "Accepted password" $LOG | wc -l)
+    total_users=$((countdb + countsh))
     print_color "═══════════════════════════════════════════════"
     print_color "Total Active Users: $total_users"
     print_color "═══════════════════════════════════════════════"
 }
 
-rm -fr /tmp/login-ssh.txt
-rm -fr /tmp/login-db.txt
-
-# Menampilkan hasil logins
+# Bug 70/71: count both daemons' events (dropbear logins were invisible)
 show_dropbear_logins
 show_openssh_logins
+rm -f "$DB_SRC" "$SSH_SRC" /tmp/login-ssh.txt /tmp/login-db.txt
 show_total_users

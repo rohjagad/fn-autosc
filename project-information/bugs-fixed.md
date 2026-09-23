@@ -494,3 +494,60 @@ All fixes live-verified on Debian 12 VPS (`202.155.17.126`) after fresh OS reins
     - Explicitly set `dev tun2` for TCP 1194 and `dev tun3` for UDP 2200 in OpenVPN server configurations, leaving `tun0` available for `udp-request`.
     - **Verified:** Confirmed `tun0` (udp-request), `tun2` (openvpn TCP), and `tun3` (openvpn UDP) all active and operating simultaneously without collisions.
 
+
+## Live Audit Cycle 4: Focus-Area Fixes (Bugs 62–71)
+
+62. **Change-Limit-IP Tools Never Update the On-Disk Limit File** (`full/change-limit-ip-{ws,grpc,http,split}.go`, `lite/change-limit-ip-{ws,grpc,http,split}.go`, `full/limit-ip.go`)
+    - Added `updateLimitFile()` (`path/filepath`, `mkdir -p`) to all 8 Go tools so every limit change also writes `/etc/xray/limit/ip/xray/<proto>/<user>`, and added `isNumeric` validation so non-numeric input is rejected; `full/limit-ip.go` now rejects non-numeric limits as well.
+    - **Verified:** Live on Debian 12 VPS — change limit 2 → 5 updated both the log (`Limit IP: 5`) and `/etc/xray/limit/ip/xray/ws/testvm2` (`5`).
+
+63. **Deleting a VMess Account Leaves Trailing Commas and Crash-Loops V2Ray** (~34 scripts in `full/` and `lite/`)
+    - Added the `g` flag to every `sed -i -z 's/},\n *\]/}\n        ]/'` fix-up (64 sites), so all four VMess inbounds are repaired in one pass.
+    - **Verified:** Live on Debian 12 VPS — vmess delete with 4 markers left `JSON_OK` and `v2ray active`; lock → unlock cycle kept `JSON_OK` and `active` both directions.
+
+64. **SSH IP-Limit Enrollment Uses GID Instead of UID** (`full/limit-ip-ssh.sh`)
+    - Changed the enrollment parse to `read -r username _ uid _ _ _ _` with `uid >= 1000 && uid < 65534` (plus `nobody`/`root` exclusions), added cleanup of stale limit files for no-longer-enrolled accounts, switched login matching to field-exact `grep -F " - $user - "`, and made non-numeric limit files fall back to `2`.
+    - **Verified:** Live on Debian 12 VPS — limit files for `sync`/`_apt`/`sshd`/`strongswan` removed; only real accounts (`banyan`, `kvs1`, `kvs2`) remain.
+
+65. **Lite OS-Reinstall Menu Prompt Tests the Wrong Variable** (`lite/menu-system.sh`)
+    - Changed `elif [[ $ip_version == "n" ]]` to `elif [[ $osw == "n" ]]` so `n` exits immediately.
+    - **Verified:** `bash -n` clean; variable now matches the read prompt.
+
+66. **`xp.sh` Wildcard Deletion Cross-Destroys Longer Usernames** (`full/xp.sh`, `lite/xp.sh`)
+    - Replaced all 8 `$user*` prefix globs with exact `$user` + `${user}_usage` path pairs.
+    - **Verified:** Live on Debian 12 VPS — expiring `xpw1` removed its log/quota/config marker while `xpw10`'s quota, log, and config marker survived.
+
+67. **Menu Delete Scripts Leave `${user}_usage` Orphaned** (`full/delete-*.sh`, `lite/delete-*.sh` — 8 files)
+    - Added `rm -f .../${user}_usage` alongside the existing quota-limit removal.
+    - **Verified:** Live on Debian 12 VPS — deleting `testvm2` removed both `testvm2` and `testvm2_usage`.
+
+68. **IP-Limit Enforcer Deletes the Config From the Marker to End-of-File** (`full/limit-ip-*.sh`, `lite/limit-ip-*.sh` — 8 files)
+    - Replaced the broken `/^### $user $exp/,/^},{/d` range (undefined `$exp`, never-matching end pattern) with: `exp` read from the config marker (empty → skip), `sed "/^### $user $exp/ {N;d}"` (removes exactly the marker + client line), and the `/g` trailing-comma fix-up. Added numeric guards: limit must match `^[1-9][0-9]*$` (0/missing = unlimited → skip) and the online count must be numeric.
+    - **Verified:** Live on Debian 12 VPS with a stats shim — triggered gRPC limit removed only `tstgrpc`, `grpc.json` stayed `JSON_OK`, `xray@grpc` stayed active.
+
+69. **WS IP-Limit Probe Calls the XRay Stats API on a V2Ray Port** (same 8 `limit-ip-*.sh`)
+    - Added a one-time pre-loop `xray api statsonline` probe: if the endpoint answers `Unimplemented`/no stats service (v2ray-served WS on :10080), print one `IP limit check skipped: online statistics unavailable ...` line and exit 0 instead of raising integer-expression errors every cron run; xray-backed transports (gRPC/split/HTTP on :10083/:10082) continue to enforce for real behind the same guard.
+    - **Verified:** Live on Debian 12 VPS — WS run exits cleanly with the skip message; gRPC run with valid stats performed a real, safe lock.
+
+70. **Dropbear Login Events Are Invisible to the SSH IP Limit and Login Checker** (`full/limit-ip-ssh.sh`, `full/cek-login-ssh.sh`)
+    - `limit-ip-ssh.sh` now reads dropbear successes from the systemd journal (`journalctl -u dropbear --since "-10 minutes"`) with an auth-log fallback when journalctl/the unit is absent. `cek-login-ssh.sh` uses the same journal source (bounded with `-n 10000`), and its total now counts both daemons.
+    - **Verified:** Live on Debian 12 VPS — 3 real dropbear logins as `kvs1` were counted and locked the account; `cek-login-ssh` dropbear table now lists `kvs1`/`root` rows with correct user, `ip:port`, PID, and limit.
+
+71. **Fixed Field Offsets Cannot Parse RFC3339 Auth-Log Timestamps** (`full/limit-ip-ssh.sh`, `full/cek-login-ssh.sh`)
+    - Both scripts now parse the message body (`Password auth succeeded for 'user' from ip:port` / `Accepted password for user from ip port n`) with the PID taken from the `tag[PID]` prefix, which is identical under classic and RFC3339 formats. The 10-minute window awk accepts both timestamp styles (`Mon DD HH:MM:SS` and `YYYY-MM-DDTHH:MM:SS...`).
+    - **Verified:** Format fixtures — old lines in both formats dropped, fresh lines in both kept; live VPS counted classic fakes (sshd) and journal lines (dropbear); `cek-login-ssh` Username column now shows usernames instead of IP addresses.
+
+## Live Audit Cycle 4 Addendum: Expiry Enforcement Fix and Regression Fixes (Bugs 72–74)
+
+72. **Expired SSH Accounts Are Not Refused at Login Until xp Cleanup** (`full/expire-ssh.sh`, `full/extend-ssh.go`, `installer/xray.sh`)
+    - Added `full/expire-ssh.sh`: walks `/etc/passwd` with the same enrollment filter as Bug 64 (uid >= 1000 and < 65534, excluding `root`/`nobody`), reads the shadow account-expiry date (field 8 - field 7 is inactivity, verified against `xp`'s `cut -f1,8` convention), and locks expired accounts with `passwd -l` - the same mechanism the multi-login limiter uses - while skipping accounts that are already locked. Never-expiring/numeric-invalid fields are ignored. Registered a `*/5` cron line in `installer/xray.sh` next to `limit-ip-ssh`.
+    - `full/extend-ssh.go`: after a successful `usermod -e` renewal, runs `passwd -u` when the new expiry is in the future so renewed customers can log in again instead of staying behind the expiry lock.
+    - **Verified:** Live on Debian 12 VPS - expired `kvsx3` locked (`P` -> `L`) while control accounts `banyan`/`kvs1`/`kvs2` (never expiring) stayed `P`. Client-verified from the KVM VM: locked expired account refused with `Permission denied` (exit 5) while it still existed; `xp`-deleted account (`kvsx2`) also refused (exit 5); renewal (+30 days) restored `P`, `expire-ssh` did not re-lock, and a subsequent VM login succeeded (session ran).
+
+73. **SSH Multi-Login Lock Re-applies Forever After Automatic Unlock (Regression Fix)** (`full/limit-ip-ssh.sh`)
+    - See regression `## 12.`: added a 10-minute time window (accepting classic and RFC3339 timestamps) before counting login events, so aged logins stop counting the moment the unlock delay passes.
+    - **Verified:** Live on Debian 12 VPS - logins older than the window alone did not lock (`kvs2` stayed `P`); 3 fresh logins locked; after unlocking past the window, a re-run kept the account `P` (no immediate re-lock); 3 real KVM/dropbear logins were counted and locked, and the locked account was refused client-side (`Permission denied`, exit 5).
+
+74. **`auto-delete-*.sh` Wildcard Quota Deletion Cross-Destroys Longer Usernames (Regression Fix)** (`full/auto-delete-{ws,grpc,http,split}.sh`, `lite/auto-delete-{ws,grpc,http,split}.sh`)
+    - See regression `## 13.`: reverted the Bug 59 fix's `$user*` prefix glob back to the exact `$user` + `${user}_usage` path pair in all 8 daemons.
+    - **Verified:** Live on Debian 12 VPS - ghost user `tst` cleaned while `tsta`'s quota file and config marker survived; `JSON_OK`.

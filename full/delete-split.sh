@@ -118,12 +118,12 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/split.json")
 
     if [ -n "$exp" ]; then
         sed -i "/### $user $exp/ {N;d}" /etc/xray/json/split.json
-        sed -i -z 's/},\n *\]/}\n        ]/' /etc/xray/json/split.json
+        sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/split.json
     else
         echo "User not found in config.json!"
     fi
     rm -f /var/log/create/xray/split/${user}.log
-    rm -f /etc/xray/quota/split/$user
+    rm -f /etc/xray/quota/split/$user /etc/xray/quota/split/${user}_usage
     rm -f /etc/xray/limit/ip/xray/split/$user
     systemctl restart xray@split > /dev/null 2>&1
     send_log
