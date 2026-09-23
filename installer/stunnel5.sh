@@ -29,6 +29,6 @@ HAH
 clear
 
 systemctl enable haproxy
-systemctl start haproxy
+systemctl restart haproxy
 
 rm -f /root/stunnel5.sh

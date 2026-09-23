@@ -262,8 +262,8 @@ systemctl daemon-reload
 systemctl enable opn
 systemctl start opn
 
-# Delete script
-history -c
-rm -f /root/*.sh
-rm -f /root/install
-rm -f /root/*install*
+# Delete script (disabled — destructive wildcard deletion)
+# history -c
+# rm -f /root/*.sh
+# rm -f /root/install
+# rm -f /root/*install*

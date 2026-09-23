@@ -164,22 +164,9 @@ ${separator}"
 
     exp=$(grep -wE "^### $name" "/etc/xray/json/upgrade.json" | cut -d ' ' -f 3 | sort | uniq)
     sed -i "/### $name $exp/ {N;d}" /etc/xray/json/upgrade.json
+    sed -i -z 's/},\n *\]/}\n        ]/' /etc/xray/json/upgrade.json
 mv /var/log/create/xray/http/${name}.log /var/log/create/xray/http/${name}.locked
 systemctl daemon-reload
 systemctl restart xray@upgrade
 # Send Notif Telegram
 send_log
-
-clear
-echo -e "
-Detail Locked X-Ray HTTP
-======================
-
-Date: $(date)
-Username: $name
-Expired on: $exp2
-UUID: $uuid
-Protokol: $protokol2
-Status: Locked
-======================
-"

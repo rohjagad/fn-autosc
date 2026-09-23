@@ -59,7 +59,12 @@ ip="$ip4 / $ip6"
 date=$(date)
 domain=$(cat /etc/xray/domain)
 cd /root
-mv /root/*backup*.zip /root/backup.zip
+# Check both upload and root locations
+if ls /var/www/uploads/*.zip 1>/dev/null 2>&1; then
+    mv /var/www/uploads/*.zip /root/backup.zip
+elif ls /root/*backup*.zip 1>/dev/null 2>&1; then
+    mv /root/*backup*.zip /root/backup.zip
+fi
 file="backup.zip"
 if [ -f "$file" ]; then
 echo "$file found, continuing..."

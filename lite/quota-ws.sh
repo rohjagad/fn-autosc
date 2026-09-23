@@ -118,16 +118,19 @@ cekws() {
 
         echo "$quota_used" > "$usage_file"
 
+        if [[ -f "$quota_file" ]]; then
         quota_limit=$(cat "$quota_file")
         if (( $(echo "$quota_used > $quota_limit" | bc -l) )); then
             exp=$(grep -w "^### $user" "/etc/v2ray/config.json" | awk '{print $3}')
             sed -i "/### $user $exp/ {N;d}" /etc/v2ray/config.json
+            sed -i -z 's/},\n *\]/}\n        ]/' /etc/v2ray/config.json
             total_usage=$(con "$quota_used")
             total_limit=$(con "$quota_limit")
             send_log
             rm -f "$usage_file" "$quota_file"
             systemctl restart v2ray
             echo "User $user reached quota limit and has been locked."
+        fi
         fi
     done
 }

@@ -213,4 +213,4 @@ echo "" > /tmp/vpn-login-tcp.txt
 echo "" > /tmp/vpn-login-udp.txt
 # echo "" > /var/log/auth.log
 # Membersihkan log asli dari file $LOG
-echo "" > ${LOG}
+# echo "" > ${LOG}

@@ -115,15 +115,18 @@ function cekhttp() {
         fi
         echo "$quota_used" > "$usage_file"
 
+        if [[ -f "$quota_file" ]]; then
         quota_limit=$(cat "$quota_file")
         if [[ "$quota_used" -gt "$quota_limit" ]]; then
             exp=$(grep -w "^### $user" "/etc/xray/json/upgrade.json" | cut -d ' ' -f 3 | sort | uniq)
             sed -i "/### $user $exp/ {N;d}" /etc/xray/json/upgrade.json
+            sed -i -z 's/},\n *\]/}\n        ]/' /etc/xray/json/upgrade.json
             total_usage=$(con "$quota_used")
             total_limit=$(con "$quota_limit")
             send_log
             rm -f "$usage_file" "$quota_file"
             echo "User $user reached quota limit and has been locked."
+        fi
         fi
 
         # Reset statistik

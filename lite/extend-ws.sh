@@ -78,7 +78,7 @@ send_log() {
 }
 
 clear
-NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/ws.json")
+NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/v2ray/config.json")
 if [[ ${NUMBER_OF_CLIENTS} == '0' ]]; then
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
     echo -e "                ${GB}XTLS X-RAY WEBSOCKET${NC}                "
@@ -96,7 +96,7 @@ echo -e "                ${GB}XTLS X-RAY WEBSOCKET${NC}                "
 echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 echo -e " ${YB}User  Expired${NC}  "
 echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-grep -E "^### " "/etc/xray/json/ws.json" | cut -d ' ' -f 2-3 | column -t | sort | uniq
+grep -E "^### " "/etc/v2ray/config.json" | cut -d ' ' -f 2-3 | column -t | sort | uniq
 echo ""
 echo -e "${YB}Tap enter to go back${NC}"
 echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
@@ -105,14 +105,14 @@ if [ -z $user ]; then
     x-ws
 else
     read -p "Expired (days): " masaaktif
-    exp=$(grep -wE "^### $user" "/etc/xray/json/ws.json" | cut -d ' ' -f 3 | sort | uniq)
+    exp=$(grep -wE "^### $user" "/etc/v2ray/config.json" | cut -d ' ' -f 3 | sort | uniq)
     now=$(date +%y-%m-%d) # Format tahun 2 digit
     d1=$(date -d "$exp" +%s)
     d2=$(date -d "$now" +%s)
     exp2=$(( (d1 - d2) / 86400 ))
     exp3=$(($exp2 + $masaaktif))
     exp4=$(date -d "$exp3 days" +"%y-%m-%d") # Format tahun 2 digit
-    sed -i "/### $user/c\### $user $exp4" /etc/xray/json/ws.json
+    sed -i "/### $user/c\### $user $exp4" /etc/v2ray/config.json
     sed -i "s/Expired : $exp/Expired : $exp4/" /var/log/create/xray/ws/${user}.log
 
     echo -e "\n${YB}Reset total usage quota? (y/n):${NC}"

@@ -183,19 +183,6 @@ if [[ "$confirm" == "y" || "$confirm" == "Y" ]]; then
     # Send Notif Telegram
     send_log
 
-    clear
-    echo -e "
-    Detail Unlock X-Ray gRPC
-    ========================
-
-    Date: $(date)
-    Username: $name
-    Expired on: $exp2
-    UUID: $uuid
-    Protokol: $protokol2
-    Status: Unlock
-    ========================
-    "
 else
     echo "Proses unlock dibatalkan."
 fi

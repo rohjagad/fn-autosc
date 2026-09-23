@@ -179,16 +179,3 @@ systemctl restart v2ray
 # Send Notif Telegram
 send_log
 
-clear
-echo -e "
-Detail Unlock X-Ray WS
-======================
-
-Date: $(date)
-Username: $name
-Expired on: $exp2
-UUID: $uuid
-Protokol: $protokol2
-Status: Unlock
-======================
-"
