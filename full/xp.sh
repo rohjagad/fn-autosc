@@ -308,7 +308,7 @@ clear
 # // Ini Adalah Auto Expired Untuk Noobzvpns
 
 # Membaca Akun Yang Aktif
-data=($(grep '^###' /etc/noobzvpns/.noob | awk '{print $2}' | sort | uniq))
+data=($(grep '^###' /etc/funny/.noob | awk '{print $2}' | sort | uniq))
 
 # Tahun-Bulan-Tanggal hari ini
 now=$(date +"%Y-%m-%d")
@@ -316,7 +316,7 @@ now=$(date +"%Y-%m-%d")
 # Mendefinisikan Bahwa user = data
 for user in "${data[@]}"; do
     # Membaca Masa Aktif Username
-    exp=$(grep -w "^### $user" /etc/noobzvpns/.noob | awk '{print $3}' | sort | uniq) 
+    exp=$(grep -w "^### $user" /etc/funny/.noob | awk '{print $3}' | sort | uniq) 
     
     # Menampilkan Masa Aktif Sesuai Username
     d1=$(date -d "$exp" +%s) 
@@ -328,7 +328,7 @@ for user in "${data[@]}"; do
     # Jika masa aktif sudah habis
     if [[ "$exp2" -le "0" ]]; then
         # Menghapus pengguna dari file dan sistem
-        sed -i "/### $user $exp/ {N;d}" /etc/noobzvpns/.noob
+        sed -i "/### $user $exp/ {N;d}" /etc/funny/.noob
         noobzvpns --remove-user "$user"
         
         # Menyiapkan teks untuk notifikasi

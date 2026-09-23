@@ -80,7 +80,7 @@ mkdir -p /opt/src
 cd /opt/src
 
 bigecho "Trying to auto discover IP of this server..."
-PUBLIC_IP=$(cat /etc/funny/.ip);
+PUBLIC_IP=$(cat /etc/.ip);
 
 bigecho "Installing packages required for the VPN..."
 if [[ ${OS} == "centos" ]]; then

@@ -129,7 +129,7 @@ read -p "Duration (Days): " masaaktif
 clear
 noobz_add_user "$user" "$pass" "$masaaktif"
 expi=`date -d "$masaaktif days" +"%Y-%m-%d"`
-echo "### ${user} ${expi}" >>/etc/noobzvpns/.noob
+echo "### ${user} ${expi}" >>/etc/funny/.noob
 clear
 TEKS="
 ════════════════════════════
@@ -156,7 +156,7 @@ echo "$TEKS"
 }
 
 function delete() {
-mna=$(grep -e "^### " "/etc/noobzvpns/.noob" | cut -d ' ' -f 2-3 | column -t | sort | uniq)
+mna=$(grep -e "^### " "/etc/funny/.noob" | cut -d ' ' -f 2-3 | column -t | sort | uniq)
 clear
 echo -e "
 ════════════════════════════
@@ -169,8 +169,8 @@ read -p "Username: " name
 if [ -z $name ]; then
 menu
 else
-exp=$(grep -we "^### $name" "/etc/noobzvpns/.noob" | cut -d ' ' -f 3 | sort | uniq)
-sed -i "/^### $name $exp/d" /etc/noobzvpns/.noob
+exp=$(grep -we "^### $name" "/etc/funny/.noob" | cut -d ' ' -f 3 | sort | uniq)
+sed -i "/^### $name $exp/d" /etc/funny/.noob
 noobz_remove_user "$name"
 clear
 TEKS="
