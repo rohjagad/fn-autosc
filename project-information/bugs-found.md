@@ -418,6 +418,12 @@ were exercised for real.
 
 ---
 
+### 25. Account Creation Breaks V2Ray/Xray Config JSON (CONFIRMED)
+- **Files:** All 24 `add-{vless,vmess,trojan}-{ws,http,grpc,split}.sh` scripts in `full/` and `lite/`.
+- **Cause:** The `sed -i '/#marker$/a\### user exp\n},{"id":"uuid","email":"user"}'` pattern appends a `},{ }` block after the `#vless`/`#vmess`/`#trojan` marker comment. The leading `}` in `},{` closes the first client object, but the original template already has a closing `}` on the next line, producing an extra unmatched brace.
+- **Impact:** First account creation in any protocol/transport produces invalid JSON. V2Ray/Xray service crashes on restart and refuses to start until the malformed JSON is manually repaired. Every subsequent account creation also fails.
+- **Reproduction:** Run `add-vless-ws`, then `v2ray test -c /etc/v2ray/config.json` → `invalid character '}' after array element`.
+
 ## Live Audit and Verification Cycle (September 2026)
 
 - **Target VPS:** 202.155.17.126 (Debian 12 Bookworm, KVM).

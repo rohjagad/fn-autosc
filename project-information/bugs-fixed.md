@@ -325,6 +325,10 @@ changed:
     - Recompiled all Go source files using Go 1.23 with stripped symbols (`-ldflags="-s -w"`).
     - Repacked `menu/full.zip` and `menu/lite.zip` with static ELF executables and shell scripts.
 
+25. **Account Creation JSON Corruption** (All 24 `add-*.sh` scripts in `full/` and `lite/`)
+    - Changed sed pattern from `/#marker$/a\...\n},{"key":"val"}` (append-after, producing extra `}`) to `/#marker$/{n;s/}/},\n### user exp\n{"key":"val"}/}` (next-line substitution, producing valid JSON array).
+    - Verified: multiple sequential account additions across all protocols/transports produce valid JSON. `v2ray test` and `xray run -test` pass. Services remain active after each addition.
+
 ### Live VPS Testing Verification
 
 - **Environment:** Clean Debian 12 Bookworm on KVM VPS (`202.155.17.126`).
@@ -333,4 +337,6 @@ changed:
 - **Service Status:** All 18 services active and running:
   - `nginx`, `ssh`, `sshd`, `dropbear`, `ws`, `v2ray`, `xray`, `xray@grpc`, `xray@upgrade`, `xray@split`, `haproxy`, `openvpn`, `wg-quick@wg0`, `noobzvpns`, `dnstt`, `udp-custom`, `xl2tpd`, `ipsec`.
 - **TUI Menu:** Verified operational, all protocols reporting status `ON`.
+- **Account Creation:** Created VLESS WS, VMESS WS, Trojan WS, and VLESS gRPC accounts. All JSON configs pass `v2ray test` / `xray run -test` after each addition. V2Ray and all Xray instances remain active.
+- **Client Connection Test:** Xray client connected via VLESS WS TLS (port 443) through SOCKS5 proxy. `curl http://ifconfig.me` returned VPS IP `202.155.17.126`, confirming end-to-end tunnel functionality.
 
