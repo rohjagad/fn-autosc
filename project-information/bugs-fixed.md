@@ -346,3 +346,61 @@ changed:
 27. **Menu ZIP Files Missing Execute Permissions** (`menu/full.zip`, `menu/lite.zip`)
     - Set `chmod +x` on all files in build directories before running `zip`, so the zips now store files as `755` (`-rwxr-xr-x`). `unzip -o` extracts with correct execute permissions. No more `permission denied` on `menu` or any menu command after installation.
 
+---
+
+## Bugs 28–40: Deep Component Verification Fixes (September 2026)
+
+All fixes live-verified on Debian 12 VPS (`202.155.17.126`) after fresh OS reinstall and full script installation.
+
+28. **Account Deletion Leaves Trailing Commas in JSON** (`full/delete-*.sh`, `lite/delete-*.sh`, `full/kill-*.sh`, `lite/kill-*.sh`, `full/xp.sh`, `lite/xp.sh`, all `trial-*.sh`)
+    - After every `sed -i "/### $user $exp/ {N;d}" <config>`, added `sed -i -z 's/},\n *\]/}\n        ]/' <config>` to strip trailing commas before `]`. For trial `at` commands, the cleanup is embedded inside the scheduled echo string.
+    - **Verified:** Added 3 users, deleted each one sequentially (middle → first → last). JSON stayed valid at every step. `v2ray test -c /etc/v2ray/config.json` returned `Configuration OK.` after each deletion.
+
+29. **Trial Account Self-Deletion Broken by Unescaped Quotes** (24 `trial-*.sh` in `full/` and `lite/`)
+    - Changed outer quoting from `echo "..."` (double quotes with nested unescaped double quotes) to `echo '...'` with proper `'"$var"'` variable splicing.
+    - **Verified:** `trial-vless-ws` created trial080 successfully. `atq` shows scheduled job. `at -c <job>` shows correctly formed `sed -i "/### trial080 26-09-24/ {N;d}" ... && sed -i -z 's/...' ...` command.
+
+30. **Trial and Unlock Scripts Use Broken Append Pattern** (24 `trial-*.sh`, 8 `unlock-*.sh` in `full/` and `lite/`)
+    - Replaced old `sed -i '/#marker$/a\...'` two-line append with correct `sed -i '/#marker$/{n;s/}/},\n### user exp\n{...}/}'` single-line substitution matching the working `add-*.sh` pattern.
+    - **Verified:** After creating trial account, `add-vless-ws` for `postuser` succeeded. Both entries present in config. JSON valid.
+
+31. **`kill-ws.sh` Deletes Unlimited Quota Accounts** (`full/kill-ws.sh`, `lite/kill-ws.sh`)
+    - Added guard: `if [[ -f "$log_file" ]]; then return; fi` before the deletion block. Accounts with a creation log but no quota file (unlimited quota) are now skipped.
+    - **Verified:** Created account with quota=0, no `/etc/xray/quota/ws/postuser` file existed. Ran `kill-ws`. Account remained in config.
+
+32. **SlowDNS Installer Wipes `/etc/slowdns/nsdomain`** (`installer/slowdns.sh`)
+    - Added `local saved_nsdomain` variable that reads `/etc/slowdns/nsdomain` before `rm -rf`, then restores it after `mkdir -p /etc/slowdns/`.
+    - **Verified:** After full installation, `cat /etc/slowdns/nsdomain` returns `slowdns.rohcuan.dpdns.org`. `dnstt` service active. No interactive prompt during install.
+
+33. **NoobzVPN Auto-Expiration Deletes Adjacent Accounts** (`full/xp.sh`, `lite/xp.sh`)
+    - Changed `sed -i "/### $user $exp/ {N;d}"` (deletes 2 lines) to `sed -i "/^### $user $exp/d"` (single-line records in `.noob`). Changed `noobzvpns --remove-user "$user"` to `noobzvpns remove "$user"`.
+    - Also removed duplicate `{N;d}` lines in the V2Ray/Xray sections of `xp.sh` (redundant second pass).
+    - **Verified:** `grep "noobzvpns" /usr/bin/xp` shows `noobzvpns remove "$user"`. sed uses single-line `d`.
+
+34. **Crontab `flock` Syntax Runs `xp` Unprotected** (`installer/xray.sh`)
+    - Changed `flock -n /tmp/xp.lock sleep 300 && /usr/bin/xp` to `flock -n /tmp/xp.lock /usr/bin/xp`. Removed the pointless 5-minute sleep.
+    - **Verified:** `grep xp /etc/crontab` shows `flock -n /tmp/xp.lock /usr/bin/xp`.
+
+35. **Undefined `$TEKS` in Backup Notification** (`full/backup-gd.sh`, `lite/backup-gd.sh`)
+    - Moved `opwares` message definition before the Telegram `curl` call and replaced `$TEKS` with `$opwares`.
+    - **Verified:** `grep -n "TEKS" /usr/bin/backup-gd` returns nothing. `opwares` is defined at line 108 and used at line 117.
+
+36. **Web-Based Restore Path Mismatch** (`website/install.sh`)
+    - Added `wget ... restore-ftp.sh -O /usr/bin/restore-ftp` and `chmod +x /usr/bin/restore-ftp` to `website/install.sh` so the restore script is actually deployed.
+    - `website/restore-ftp.sh` already uses the correct `/var/www/uploads/*.zip` path.
+
+37. **`delete-split.sh` Deletes Quota from Wrong Directory** (`full/delete-split.sh`, `lite/delete-split.sh`)
+    - Changed `rm -f /etc/xray/quota/ws/$user` to `rm -f /etc/xray/quota/split/$user`.
+    - **Verified:** `grep quota /usr/bin/delete-split` shows `/etc/xray/quota/split/$user`.
+
+38. **Missing `qrencode` Package** (`installer/wg.sh`)
+    - Added `apt install qrencode -y` to WireGuard installer.
+    - **Verified:** `which qrencode` returns `/usr/bin/qrencode` on fresh install.
+
+39. **WireGuard WARP Variables in Single Quotes** (`full/menu-wg.sh`)
+    - Changed `'$CLOUDFLAREKEY'` to `"$CLOUDFLAREKEY"` and replaced undefined `'$IPV4':51820` with `engage.cloudflareclient.com:51820`.
+
+40. **`iptables-restore -t` Runs in Test Mode** (`installer/l2tp.sh`, `installer/vpn.sh`)
+    - Removed `-t` flag from `iptables-restore` in both files.
+    - **Verified:** `iptables -L -n` shows loaded rules (UDP ports 36711, 5300 accepted).
+
