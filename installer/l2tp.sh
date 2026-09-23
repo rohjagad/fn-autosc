@@ -108,7 +108,9 @@ elif [[ $ver == '8' ]]; then
   yum "$REPO4" -y install systemd-devel libevent-devel fipscheck-devel 
 fi
 else
-apt install openssl iptables iptables-persistent -y
+echo iptables-persistent iptables-persistent/autosave_v4 boolean true | debconf-set-selections
+echo iptables-persistent iptables-persistent/autosave_v6 boolean true | debconf-set-selections
+DEBIAN_FRONTEND=noninteractive apt install openssl iptables iptables-persistent -y
 apt-get -y install libnss3-dev libnspr4-dev pkg-config \
   libpam0g-dev libcap-ng-dev libcap-ng-utils libselinux1-dev \
   libcurl4-nss-dev flex bison gcc make libnss3-tools \

@@ -75,7 +75,9 @@ ANU=$(ip -o -4 route show to default | awk '{print $5}');
 apt install openvpn -y
 apt install openvpn easy-rsa -y
 apt install unzip -y
-apt install openssl iptables iptables-persistent -y
+echo iptables-persistent iptables-persistent/autosave_v4 boolean true | debconf-set-selections
+echo iptables-persistent iptables-persistent/autosave_v6 boolean true | debconf-set-selections
+DEBIAN_FRONTEND=noninteractive apt install openssl iptables iptables-persistent -y
 mkdir -p /etc/openvpn/server/easy-rsa/
 cd /etc/openvpn/
 wget ${hosting}/other/vpn.zip

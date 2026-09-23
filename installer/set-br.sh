@@ -9,7 +9,8 @@ cd wondershaper
 make install
 rm -rf wondershaper
 echo > /home/limit
-apt install msmtp-mta ca-certificates bsd-mailx -y
+echo "msmtp-mta msmtp-mta/apparmor boolean false" | debconf-set-selections
+DEBIAN_FRONTEND=noninteractive apt install msmtp-mta ca-certificates bsd-mailx -y
 cat<<EOF>>/etc/msmtprc
 defaults
 tls on
