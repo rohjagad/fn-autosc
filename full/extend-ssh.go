@@ -29,7 +29,8 @@ func main() {
 		return
 	}
 
-	fmt.Print("Day Extend (days, 0 not allowed): ")
+	fmt.Println("0 not allowed")
+	fmt.Print("Day Extend (days): ")
 	daysInput, _ := reader.ReadString('\n')
 	daysInput = strings.TrimSpace(daysInput)
 	days, err := strconv.Atoi(daysInput)

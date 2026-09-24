@@ -191,7 +191,8 @@ func main() {
 	fmt.Printf(" Ip Limit   : %s\n", currentIPLimit)
 	barisPanjang()
 
-	fmt.Print("Input New IP Limit (0 not allowed): ")
+	fmt.Println("0 not allowed")
+	fmt.Print("Input New IP Limit: ")
 	var newIPLimit string
 	fmt.Scanln(&newIPLimit)
 

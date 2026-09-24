@@ -125,10 +125,11 @@ Create NoobzVPN Account
 ════════════════════════════"
 read -p "Username  : " user
 read -p "Password  : " pass
-read -p "Duration (Days, 0 not allowed): " masaaktif
+echo "0 not allowed"
+read -p "Duration (Days): " masaaktif
 while ! [[ "$masaaktif" =~ ^[1-9][0-9]*$ ]]; do
     echo -e "\033[0;31mValue must be a whole number greater than 0.\033[0m"
-    read -p "Duration (Days, 0 not allowed): " masaaktif || exit 1
+    read -p "Duration (Days): " masaaktif || exit 1
 done
 clear
 noobz_add_user "$user" "$pass" "$masaaktif"

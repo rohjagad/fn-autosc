@@ -249,7 +249,8 @@ func main() {
 		fmt.Printf(" Expiry     : %s\n", expiryDate)
 		barisPanjang()
 
-		fmt.Print("Input New IP (0 not allowed): ")
+		fmt.Println("0 not allowed")
+		fmt.Print("Input New IP   : ")
 		var newIPLimit string
 		fmt.Scanln(&newIPLimit)
 

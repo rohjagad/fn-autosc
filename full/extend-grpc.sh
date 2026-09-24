@@ -104,10 +104,11 @@ read -rp "Input Username : " user
 if [ -z $user ]; then
     x-grpc
 else
-    read -p "Expired (days, 0 not allowed): " masaaktif
+    echo "0 not allowed"
+    read -p "Expired (days): " masaaktif
     while ! [[ "$masaaktif" =~ ^[1-9][0-9]*$ ]]; do
         echo -e "\033[0;31mValue must be a whole number greater than 0.\033[0m"
-        read -p "Expired (days, 0 not allowed): " masaaktif || exit 1
+        read -p "Expired (days): " masaaktif || exit 1
     done
     exp=$(grep -wE "^### $user" "/etc/xray/json/grpc.json" | cut -d ' ' -f 3 | sort | uniq)
     now=$(date +%y-%m-%d) # Format tahun 2 digit

@@ -148,11 +148,12 @@ function create() {
 		newline
 		goback
 	fi
-	echo -e " Duration (Days, 0 not allowed): \c"
+	echo "0 not allowed"
+	echo -e " Duration (Days): \c"
 	read duration
 	while ! [[ "$duration" =~ ^[1-9][0-9]*$ ]]; do
 		echo -e "\033[0;31mValue must be a whole number greater than 0.\033[0m"
-		echo -e " Duration (Days, 0 not allowed): \c"
+		echo -e " Duration (Days): \c"
 		read duration || exit 1
 	done
 	exp=$(date -d +${duration}days +%Y-%m-%d)
@@ -311,11 +312,12 @@ function extend() {
 		newline
 		goback
 	fi 
-	echo -e " Duration (Days, 0 not allowed): \c"
+	echo "0 not allowed"
+	echo -e " Duration (Days): \c"
 	read extend
 	while ! [[ "$extend" =~ ^[1-9][0-9]*$ ]]; do
 		echo -e "\033[0;31mValue must be a whole number greater than 0.\033[0m"
-		echo -e " Duration (Days, 0 not allowed): \c"
+		echo -e " Duration (Days): \c"
 		read extend || exit 1
 	done
 
