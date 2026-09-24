@@ -507,7 +507,7 @@ read -p "Input Option: " opn
 case $opn in
 1) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh openeuler 20.03 && reboot  ;;
 2) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh openeuler 22.03 && reboot  ;;
-3) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh openeuler 24.04 && reboot  ;;
+3) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh openeuler 24.03 && reboot  ;;
 *) openeuler
 esac
 }
@@ -517,16 +517,16 @@ clear
 echo -e "${NC}${separator}
           OPENSUSE LINUX
 ${separator}
-${green}1${NC}. OpenSuse 15.5
-${green}2${NC}. OpenSuse 16.6
+${green}1${NC}. OpenSuse 16.0
+${green}2${NC}. OpenSuse Tumbleweed
 ${green}3${NC}. OpenSuse tumbleweed
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input Option: " osu
 case $osu in
-1) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh opensuse 15.5 && reboot  ;;
-2) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh opensuse 15.6 && reboot  ;;
+1) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh opensuse 16.0 && reboot  ;;
+2) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh opensuse tumbleweed && reboot  ;;
 3) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh opensuse tumbleweed && reboot  ;;
 *) opensuse ;;
 esac
@@ -559,7 +559,7 @@ clear
 echo -e "${NC}${separator}
            UBUNTU LINUX
 ${separator}
-${green}1${NC}. Ubuntu 16.04
+${green}1${NC}. Ubuntu 26.04
 ${green}2${NC}. Ubuntu 18.04
 ${green}3${NC}. Ubuntu 20.04
 ${green}4${NC}. Ubuntu 22.04
@@ -569,7 +569,7 @@ ${separator}
 ${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input Option: " wq
 case $wq in
-1) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh ubuntu 16.04 && reboot ;;
+1) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh ubuntu 26.04 && reboot ;;
 2) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh ubuntu 18.04 && reboot ;;
 3) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh ubuntu 20.04 && reboot ;;
 4) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh ubuntu 22.04 && reboot ;;
@@ -583,19 +583,19 @@ clear
 echo -e "${NC}${separator}
            ALPINE LINUX
 ${separator}
-${green}1${NC}. Alpine 3.17
-${green}2${NC}. Alpine 3.18
-${green}3${NC}. Alpine 3.19
-${green}4${NC}. Alpine 3.20
+${green}1${NC}. Alpine 3.21
+${green}2${NC}. Alpine 3.22
+${green}3${NC}. Alpine 3.23
+${green}4${NC}. Alpine 3.24
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input Option: " ap
 case $ap in
-1) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh alpine 3.17 && reboot ;;
-2) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh alpine 3.18 && reboot ;;
-3) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh alpine 3.19 && reboot ;;
-4) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh alpine 3.20 && reboot ;;
+1) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh alpine 3.21 && reboot ;;
+2) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh alpine 3.22 && reboot ;;
+3) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh alpine 3.23 && reboot ;;
+4) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh alpine 3.24 && reboot ;;
 *) clear ; alpine ;;
 esac
 }
@@ -672,16 +672,16 @@ Press CTRL + C to Exit
         05|5) clear ; ubuntu ;;
         06|6) clear ; echo -e "Coming Soon" ;; #redhat;;
         07|7) clear ; cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh centos 9 && reboot ;;
-        08|8) clear ; cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh alma 9 && reboot ;;
+        08|8) clear ; cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh almalinux 9 && reboot ;;
         09|9) clear ; openeuler ;;
         10) clear ; opensuse ;;
         11) clear ; cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh arch && reboot  ;;
-        12) clear ; cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh nixos 24.05 && reboot ;;
+        12) clear ; cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh nixos 26.05 && reboot ;;
         13) clear ; cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh oracle 8 && reboot ;;
-        14) clear ; cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh fedora 40 && reboot ;;
-        15) clear ; cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh gento && reboot  ;;
+        14) clear ; cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh fedora 43 && reboot ;;
+        15) clear ; cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh gentoo && reboot  ;;
         16) clear ; cd /root ;curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh opencloudos 8 && reboot ;;
-        17) clear ; cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh kali && reboot  ;;
+        17) clear ; cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh kali rolling && reboot  ;;
         *) clear ; echo "Invalid option. Please select a valid number.";;
     esac
 }

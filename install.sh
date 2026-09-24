@@ -35,11 +35,15 @@ if [ -z "${STY:-}" ] && [ -z "${TMUX:-}" ] && [ -t 0 ] && [ -t 1 ] && [ "${FN_NO
         if command -v screen >/dev/null 2>&1; then
             echo "Starting the install in screen session 'fninstall' - it survives SSH disconnects."
             echo "  detach: Ctrl-A then D        reattach: screen -r fninstall"
-            exec screen -S fninstall bash "$SELF"
+            # No `exec`: if screen cannot start we must fall through and install
+            # in this session rather than replacing the shell and dying silently.
+            screen -d -R fninstall bash "$SELF" && exit 0
+            echo "screen could not start - continuing in this session."
         elif command -v tmux >/dev/null 2>&1; then
             echo "Starting the install in tmux session 'fninstall' - it survives SSH disconnects."
             echo "  detach: Ctrl-B then D        reattach: tmux attach -t fninstall"
-            exec tmux new-session -A -s fninstall "bash '$SELF'"
+            tmux new-session -A -s fninstall "bash '$SELF'" && exit 0
+            echo "tmux could not start - continuing in this session."
         fi
     fi
     echo "NOTE: this install can take 15-30 minutes. If your SSH session drops, the"
