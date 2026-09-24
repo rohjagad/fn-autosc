@@ -20,7 +20,10 @@ format_display() {
     local total=${#all_lines[@]}
     local nseps=${#sep_lines[@]}
     local first_sep=${sep_lines[0]:-999}
-    local last_sep=${sep_lines[$((nseps-1))]:-999}
+    local last_sep=999
+    if (( nseps > 0 )); then
+        last_sep=${sep_lines[$((nseps-1))]:-999}
+    fi
     for ((i=0; i<total; i++)); do
         local line="${all_lines[$i]}"
         local trimmed="${line#"${line%%[![:space:]]*}"}"
@@ -66,7 +69,7 @@ format_display() {
                 local key="${line%%:*}" val="${line#*:}"
                 echo -e "${key}:${green}${val}${reset}"
             else
-                echo "$line"
+                echo -e "$line"
             fi
         fi
     done
