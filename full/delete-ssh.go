@@ -44,7 +44,7 @@ func main() {
     fmt.Println("                DELETE SSH                   ")
     fmt.Printf("%s━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━%s\n", cyan, reset)
 
-    fmt.Print("Input Username: ")
+    fmt.Print("\033[96;1mInput Username: \033[0m")
     var user string
     fmt.Scanln(&user)
 

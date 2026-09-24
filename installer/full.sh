@@ -65,10 +65,10 @@ echo -e "${ungu}            FN AutoSC      ${Xark} "
 echo -e "${BlueCyan} ——————————————————————————————————— ${Xark} "
 
 while true; do
-    read -p "Input Domain: " domain
-    read -p "Input Email : " email
-    read -p "Input Type IP VPS (4/6/dual): " ips
-    read -p "Your SlowDNS Nameserver: " nsdomain
+    read -p $'\033[96;1mInput Domain: \033[0m' domain
+    read -p $'\033[96;1mInput Email : \033[0m' email
+    read -p $'\033[96;1mInput Type IP VPS (4/6/dual): \033[0m' ips
+    read -p $'\033[96;1mYour SlowDNS Nameserver: \033[0m' nsdomain
     # Cek jika input kosong
     if [[ -z "$domain" ]]; then
         echo "Domain cannot be empty. Please try again."

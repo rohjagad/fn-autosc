@@ -60,20 +60,20 @@ clear
 
 until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/create/xray/ws/${user}.log ]]; do
     echo -e "
-════════════════════════════
-      Create Trojan WS
-════════════════════════════
+\033[96;1m════════════════════════════\033[0m
+      \033[1;33mCreate Trojan WS\033[0m
+\033[96;1m════════════════════════════\033[0m
 "
-    read -p "Username: " user
+    read -p $'\033[96;1mUsername: \033[0m' user
     if [[ -z "$user" ]]; then
         clear
-        echo -e "Username cannot be empty."
+        echo -e "\033[0;31mUsername cannot be empty.\033[0m"
         continue
     fi
 
     if [[ $user =~ [A-Z] || $user =~ [[:space:]] ]]; then
         clear
-        echo -e "Username cannot contain uppercase letters or spaces."
+        echo -e "\033[0;31mUsername cannot contain uppercase letters or spaces.\033[0m"
         continue
     fi
 
@@ -87,26 +87,26 @@ until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/creat
 
     if [[ ${client_exists} == '1' ]]; then
         clear
-        echo -e "Username already exists."
+        echo -e "\033[0;31mUsername already exists.\033[0m"
         continue
     fi
 
     if [[ -f /var/log/create/xray/ws/${user}.log ]]; then
         clear
-        echo -e "Username already exists in log file."
+        echo -e "\033[0;31mUsername already exists in log file.\033[0m"
         continue
     fi
 
     if [[ -f /var/log/create/xray/ws/${user}.locked ]]; then
         clear
-        echo -e "Username already exists in locked file."
+        echo -e "\033[0;31mUsername already exists in locked file.\033[0m"
         continue
     fi
 done
-    read -p "Limit Ip: " ip
-    read -p "Limit Quota: " quota
-    read -p "Active Time: " masaaktif
-    read -p "Input UUID (Empty Default): " uuid
+    read -p $'\033[96;1mLimit Ip: \033[0m' ip
+    read -p $'\033[96;1mLimit Quota: \033[0m' quota
+    read -p $'\033[96;1mActive Time: \033[0m' masaaktif
+    read -p $'\033[96;1mInput UUID (Empty Default): \033[0m' uuid
 
 # Validasi UUID
 if [[ "$uuid" =~ [[:space:]] || -z "$uuid" ]]; then
@@ -149,9 +149,9 @@ link1="trojan://${uuid}@${domain}:443?path=%2ftrojanws&security=tls&host=${domai
 link2="trojan://${uuid}@${domain}:80?path=/trojanws&security=none&host=${domain}&type=ws#${user}"
 
 TEKS="
-======================
-   Trojan WebSocket
-======================
+\033[96;1m======================\033[0m
+   \033[1;33mTrojan WebSocket\033[0m
+\033[96;1m======================\033[0m
 
 Remarks : $user
 Domain  : $domain
@@ -160,17 +160,17 @@ Expired : $exp
 Limit IP: $ip
 Quota   : $quota GB
 Protokol: Trojan
-======================
+\033[96;1m======================\033[0m
 
 Path: /trojanws
 Network: WebSocket
 Port TLS: 443, 2053, 2083, 2087, 2096
 Port None: 80, 8880, 2052, 2082, 2095
-======================
-Link TLS : $link1
-======================
-Link None: $link2
-======================
+\033[96;1m======================\033[0m
+\033[1;33mLink TLS : $link1\033[0m
+\033[96;1m======================\033[0m
+\033[1;33mLink None: $link2\033[0m
+\033[96;1m======================\033[0m
 "
 curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL >/dev/null 2>&1
 echo -e "$TEKS" > /var/log/create/xray/ws/${user}.log

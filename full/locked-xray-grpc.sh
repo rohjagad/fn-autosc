@@ -137,7 +137,7 @@ ${separator}"
     echo -e "${orange}Press [Ctrl + C] to exit${NC}"
     echo -e "${separator}"
 
-    read -p "Input Username to Lock: " name
+    read -p $'\033[96;1mInput Username to Lock: \033[0m' name
 else
     clear
     echo "No active accounts found to lock."

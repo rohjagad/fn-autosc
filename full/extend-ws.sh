@@ -86,7 +86,7 @@ if [[ ${NUMBER_OF_CLIENTS} == '0' ]]; then
     echo -e "  ${YB}You have no existing clients!${NC}"
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
     echo ""
-    read -n 1 -s -r -p "Press any key to back on menu"
+    read -n 1 -s -r -p $'\033[96;1mPress any key to back on menu\033[0m'
     x-ws
 fi
 
@@ -100,11 +100,11 @@ grep -E "^### " "/etc/v2ray/config.json" | cut -d ' ' -f 2-3 | column -t | sort 
 echo ""
 echo -e "${YB}Tap enter to go back${NC}"
 echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-read -rp "Input Username : " user
+read -rp $'\033[96;1mInput Username : \033[0m' user
 if [ -z $user ]; then
     x-ws
 else
-    read -p "Expired (days): " masaaktif
+    read -p $'\033[96;1mExpired (days): \033[0m' masaaktif
     exp=$(grep -wE "^### $user" "/etc/v2ray/config.json" | cut -d ' ' -f 3 | sort | uniq)
     now=$(date +%y-%m-%d) # Format tahun 2 digit
     d1=$(date -d "$exp" +%s)
@@ -116,7 +116,7 @@ else
     sed -i "s/Expired : $exp/Expired : $exp4/" /var/log/create/xray/ws/${user}.log
 
     echo -e "\n${YB}Reset total usage quota? (y/n):${NC}"
-    read -rp "Input: " reset_quota
+    read -rp $'\033[96;1mInput: \033[0m' reset_quota
     if [[ $reset_quota == "y" || $reset_quota == "Y" ]]; then
         echo -n > /etc/xray/quota/ws/${user}_usage
         quota_status="Reset"

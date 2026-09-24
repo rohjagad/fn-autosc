@@ -99,13 +99,13 @@ main() {
     local chat_id=$(read_file "/etc/funny/.chatid")
     local key=$(read_file "/etc/funny/.keybot")
 
-    echo "===================="
-    echo " Create SSH Account "
-    echo "===================="
-    read -p "Username: " username
-    read -p "Password: " password
-    read -p "Limit IP: " iplimit
-    read -p "Expired (days): " masaaktif
+    echo -e "\033[96;1m====================\033[0m"
+    echo -e "\033[1;33m Create SSH Account \033[0m"
+    echo -e "\033[96;1m====================\033[0m"
+    read -p $'\033[96;1mUsername: \033[0m' username
+    read -p $'\033[96;1mPassword: \033[0m' password
+    read -p $'\033[96;1mLimit IP: \033[0m' iplimit
+    read -p $'\033[96;1mExpired (days): \033[0m' masaaktif
 
     clear_screen
 
@@ -121,19 +121,19 @@ main() {
     local expiry=$(chage -l "$username" | grep "Account expires" | awk -F": " '{print $2}' | xargs)
 
     local message=$(cat <<EOF
-===================
-    SSH Account
-===================
+\033[96;1m===================\033[0m
+    \033[1;33mSSH Account\033[0m
+\033[96;1m===================\033[0m
 Domain     : $domain
 Username   : $username
 Password   : $password
 Expired    : $expiry
 Limit IP   : $iplimit
-===================
+\033[96;1m===================\033[0m
 DNS        : 1.1.1.1 / 8.8.8.8
 Pub Key    : $pub_key
 Nameserver : $nameserver
-===================
+\033[96;1m===================\033[0m
 OpenSSH    : 22, 3303
 Dropbear   : 111, 109
 NonTLS     : 80, 8880, 2052, 2082, 2086, 2095
@@ -146,11 +146,11 @@ Slowdns    : 53
 Udp Custom : 1-65535
 Udp Request: 1-65535
 BadVpn/Udpgw : 7300
-===================
+\033[96;1m===================\033[0m
 OVPN WS     : 2086
 OVPN TCP    : 1194
 Config OVPN : http://${domain}/web/tcp.ovpn
-===================
+\033[96;1m===================\033[0m
 EOF
 )
 

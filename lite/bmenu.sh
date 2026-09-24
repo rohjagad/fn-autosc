@@ -94,7 +94,7 @@ ip="$ip4 / $ip6"
 date=$(date)
 domain=$(cat /etc/xray/domain)
 clear
-read -rp "Input Link Database: " url
+read -rp $'\033[96;1mInput Link Database: \033[0m' url
 
 cd /root
 wget -O backup.zip "$url"
@@ -212,7 +212,7 @@ ip="$ip4 / $ip6"
 date=$(date)
 domain=$(cat /etc/xray/domain)
 clear
-read -rp "Backup URL: " url
+read -rp $'\033[96;1mBackup URL: \033[0m' url
 
 cd /root
 wget -O backup.zip "$url"
@@ -362,7 +362,7 @@ ${green}5${NC}. Restore Legacy Backup (< v1.23)
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-read -p "Input option: " opa
+read -p $'\033[96;1mInput option: \033[0m' opa
 case $opa in
 1) clear ; backup ;;
 2) clear ; backup-gd ;;

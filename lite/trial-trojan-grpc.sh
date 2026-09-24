@@ -96,9 +96,9 @@ systemctl restart quota-grpc
 link1="trojan://${uuid}@${domain}:443?mode=gun&security=tls&authority=${domain}&type=grpc&serviceName=trojan-grpc&sni=${domain}#${user}"
 
 TEKS="
-=======================
-   Xray Trojan gRPC
-=======================
+\033[96;1m=======================\033[0m
+   \033[1;33mXray Trojan gRPC\033[0m
+\033[96;1m=======================\033[0m
 
 Remarks : $user
 Domain  : $domain
@@ -107,14 +107,14 @@ Expired : $exp
 Limit IP: $ip
 Quota   : $quota GB
 Protokol: Trojan
-=======================
+\033[96;1m=======================\033[0m
 
 Service Name: trojan-grpc
 Network: gRPC GUN
 Port gRPC: 443, 2053, 2083, 2087, 2096
-=======================
-Link TLS : $link1
-=======================
+\033[96;1m=======================\033[0m
+\033[1;33mLink TLS : $link1\033[0m
+\033[96;1m=======================\033[0m
 "
 curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL >/dev/null 2>&1
 echo -e "$TEKS" > /var/log/create/xray/grpc/${user}.log

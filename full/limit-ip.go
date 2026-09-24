@@ -218,7 +218,7 @@ func main() {
 	fmt.Printf("   Account number: %d users\n", count)
 	barisPanjang()
 
-	fmt.Print("Input username: ")
+	fmt.Print("\033[96;1mInput username: \033[0m")
 	var user string
 	fmt.Scanln(&user)
 
@@ -243,7 +243,7 @@ func main() {
 		fmt.Printf(" Expiry     : %s\n", expiryDate)
 		barisPanjang()
 
-		fmt.Print("Input New IP   : ")
+		fmt.Print("\033[96;1mInput New IP   : \033[0m")
 		var newIPLimit string
 		fmt.Scanln(&newIPLimit)
 

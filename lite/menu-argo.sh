@@ -131,7 +131,7 @@ Example: mysubdom.myvpn.com
 Replace mysubdom with your subdomain and myvpn.com with your Cloudflare domain.
 =========================
 "
-read -p "New Domain: " opws
+read -p $'\033[96;1mNew Domain: \033[0m' opws
 cloudflared tunnel route dns $rcs $opws
 echo "$opws" > /etc/xray/domargo
 domargo="$opws"
@@ -222,7 +222,7 @@ ${green}0${NC}. Back to Main Menu
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-read -p "Input option: " opws
+read -p $'\033[96;1mInput option: \033[0m' opws
 case $opws in
 1) clear ; setup ;;
 3) clear ; detail ;;

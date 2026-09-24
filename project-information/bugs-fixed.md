@@ -569,3 +569,11 @@ All fixes live-verified on Debian 12 VPS (`202.155.17.126`) after fresh OS reins
 77. **Lock Message Lists Timestamp Fragments Instead of IP Addresses** (`full/limit-ip-ssh.sh`)
     - Changed the `ip_list` builder from `awk '{print $NF}'` to `awk '{print $5}'`, matching the `PID - USER - IP - TIME` line format for both classic and RFC3339 timestamps.
     - **Verified:** Functional test on `PID - USER - IP - TIME` lines in both timestamp formats returned `10.9.9.1,10.9.9.2`; live on the Debian 12 VPS the fixed line is deployed (`print $5` present) and the lock path triggers normally.
+
+## Fresh-Reinstall Audit Cycle (Bug 78)
+
+78. **Input Prompts and Create-Account Headers Render Plain White** (138 `.sh` + 21 `.go` files in `full/`, `lite/`, `install.sh`, `installer/`)
+    - Colored all **520** shell prompts (`read -p`/`read -rp`/`read -n 1 -s -r -p`) cyan via `$'\033[96;1m...\033[0m'` ANSI-C quoting so no expansion changes; the two `xl2tp` prompts containing `${NUMBER_OF_CLIENTS}` keep a split-quoted `"..."` segment so the variable still expands.
+    - Create-account screens (`add-*`, `trial-*`, `addssh`): header rules cyan, titles yellow, validation errors ("cannot"/"already exists") red. `echo -n` prompts switched to `echo -ne` with color; 6 `echo "===="` headers switched to `echo -e`.
+    - Colored all **31** Go input prompts (`fmt.Print("Input username: ")` etc.) cyan.
+    - **Verified:** `bash -n` passes on all 138 shell files; all 21 Go binaries compile; a line-by-line semantic diff against git HEAD accounts for all 1223 changed lines (695 pure-color, 518 prompt-quoting, 2 echo-flag, 6 echo→echo-e, 2 split-quote) with zero unresolved; every prompt's text (520 shell + 31 Go) compared byte-identical after color-stripping; `menu/full.zip` (115) and `menu/lite.zip` (98) rebuilt with entry lists diff-identical to the originals and contents syntax-gated.

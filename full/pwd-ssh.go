@@ -23,7 +23,7 @@ func main() {
 
 	fmt.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 	var username string
-	fmt.Print("Input username to change password: ")
+	fmt.Print("\033[96;1mInput username to change password: \033[0m")
 	fmt.Scanln(&username)
 	if !checkUserExists(username) {
 		fmt.Println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")

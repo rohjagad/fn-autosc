@@ -124,7 +124,7 @@ newline() {
 }
 
 goback() {
-  echo -e "Press any key to return \c" 
+  echo -e "\033[96;1mPress any key to return \033[0m\c" 
 	read back
 	case $back in
 	  *)
@@ -140,7 +140,7 @@ function create() {
 	newline
 	echo -e "Create WireGuard Account"
 	echo -e "========================"
-	echo -e " Username: \c"
+	echo -e "\033[96;1m Username: \033[0m\c"
 	read user
 	if grep -qw "^### Client ${user}\$" /etc/wireguard/wg0.conf; then
 		newline
@@ -148,7 +148,7 @@ function create() {
 		newline
 		goback
 	fi
-	echo -e " Duration (Days): \c"
+	echo -e "\033[96;1m Duration (Days): \033[0m\c"
 	read duration
 	exp=$(date -d +${duration}days +%Y-%m-%d)
 	expired=$(date -d "${exp}" +"%d %b %Y")
@@ -213,9 +213,9 @@ function warp() {
 source /etc/wireguard/params
 #ip=$(curl -sS curl -sS ipv4.icanhazip.com)
 clear
-echo -n "Enter your generated PRIVATE KEY: "
+echo -ne "\033[96;1mEnter your generated PRIVATE KEY: \033[0m"
 read PRIVATEKEY
-echo -n "Enter your generated PUBLIC KEY: "
+echo -ne "\033[96;1mEnter your generated PUBLIC KEY: \033[0m"
 read PUBLICKEY
 
 echo ""
@@ -265,7 +265,7 @@ function delete() {
 	newline
 	echo -e "Delete WireGuard User"
 	echo -e "====================="
-	echo -e " Username: \c"
+	echo -e "\033[96;1m Username: \033[0m\c"
 	read user
 	if grep -qw "^### Client ${user}\$" /etc/wireguard/wg0.conf; then
 		sed -i "/^### Client ${user}\$/,/^$/d" /etc/wireguard/wg0.conf
@@ -298,7 +298,7 @@ function extend() {
 	newline
 	echo -e "Extend WireGuard User"
 	echo -e "====================="
-	echo -e " Username: \c"
+	echo -e "\033[96;1m Username: \033[0m\c"
 	read user
 	if ! grep -qw "$user" /etc/funny/.wireguard; then
 		newline
@@ -306,7 +306,7 @@ function extend() {
 		newline
 		goback
 	fi 
-	echo -e " Duration Day: \c"
+	echo -e "\033[96;1m Duration Day: \033[0m\c"
 	read extend
 
 	exp_old=$(cat /etc/funny/.wireguard | grep -w $user | awk '{print $2}')
@@ -392,7 +392,7 @@ ${green}7${NC}. Back to Main Menu
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-read -p "Input option: " menu
+read -p $'\033[96;1mInput option: \033[0m' menu
 case $menu in
 1)
 	create

@@ -99,31 +99,31 @@ vlesslink1="vless://${uuid}@${domain}:443?path=/vless&security=tls&encryption=no
 vlesslink2="vless://${uuid}@${domain}:80?path=/vless&security=none&encryption=none&host=${domain}&type=ws#${user}"
 
 TEKS="
-=======================
-     Xray VLess WS
-=======================
+\033[96;1m=======================\033[0m
+     \033[1;33mXray VLess WS\033[0m
+\033[96;1m=======================\033[0m
 
 Remarks : $user
 Domain  : $domain
 UUID    : $uuid
 Expired : $exp
 Protokol: Vless
-=======================
+\033[96;1m=======================\033[0m
      Limit Detail
 
 Limit IP: $ip
 Quota   : $quota GB
-=======================
+\033[96;1m=======================\033[0m
 
 TLS: 443, 2053, 2083, 2087, 2096
 Path: /vless
 NoneTLS: 80, 8880, 2052, 2082, 2095
 Network: WebSocket
-=======================
-Link TLS : $vlesslink1
-=======================
-Link None: $vlesslink2
-=======================
+\033[96;1m=======================\033[0m
+\033[1;33mLink TLS : $vlesslink1\033[0m
+\033[96;1m=======================\033[0m
+\033[1;33mLink None: $vlesslink2\033[0m
+\033[96;1m=======================\033[0m
 "
 curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL >/dev/null 2>&1
 echo -e "$TEKS" > /var/log/create/xray/ws/${user}.log

@@ -123,9 +123,9 @@ echo -e "
 ════════════════════════════
 Create NoobzVPN Account
 ════════════════════════════"
-read -p "Username  : " user
-read -p "Password  : " pass
-read -p "Duration (Days): " masaaktif
+read -p $'\033[96;1mUsername  : \033[0m' user
+read -p $'\033[96;1mPassword  : \033[0m' pass
+read -p $'\033[96;1mDuration (Days): \033[0m' masaaktif
 clear
 noobz_add_user "$user" "$pass" "$masaaktif"
 expi=`date -d "$masaaktif days" +"%Y-%m-%d"`
@@ -165,7 +165,7 @@ Delete NoobzVPN Account
 $mna
 ════════════════════════════
 "
-read -p "Username: " name
+read -p $'\033[96;1mUsername: \033[0m' name
 if [ -z $name ]; then
 menu
 else
@@ -265,7 +265,7 @@ ${green}3${NC}. List Active Accounts
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-read -p "Input option: " inrere
+read -p $'\033[96;1mInput option: \033[0m' inrere
 case $inrere in
 1|01) clear ; create ;;
 2|02) clear ; delete ;;

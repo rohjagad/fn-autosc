@@ -60,11 +60,11 @@ echo -e "
 ==================
 Only X-Ray Trojan WebSocket TLS Routing
 =================="
-read -p "Input Name: " names
-read -p "Input Domain: " domain
-read -p "Input Port: " port
-read -p "Input Password: " password
-read -p "Input Path: " path
+read -p $'\033[96;1mInput Name: \033[0m' names
+read -p $'\033[96;1mInput Domain: \033[0m' domain
+read -p $'\033[96;1mInput Port: \033[0m' port
+read -p $'\033[96;1mInput Password: \033[0m' password
+read -p $'\033[96;1mInput Path: \033[0m' path
 clear
 DOMAIN_FILE="/root/.rules/domain"
 XRAY_CONFIG="/etc/xray/json/grpc.json"
@@ -205,11 +205,11 @@ echo -e "
 ==================
 Only X-Ray Vless None TLS
 =================="
-read -p "Input Name: " names
-read -p "Input Domain: " domain
-read -p "Input Port: " port
-read -p "Input UUID: " uid
-read -p "Input Path: " path
+read -p $'\033[96;1mInput Name: \033[0m' names
+read -p $'\033[96;1mInput Domain: \033[0m' domain
+read -p $'\033[96;1mInput Port: \033[0m' port
+read -p $'\033[96;1mInput UUID: \033[0m' uid
+read -p $'\033[96;1mInput Path: \033[0m' path
 clear
 DOMAIN_FILE="/root/.rules/domain"
 XRAY_CONFIG="/etc/xray/json/grpc.json"
@@ -354,11 +354,11 @@ echo -e "
 Only X-Ray VMESS None TLS
 =================="
 
-read -p "Input Name: " names
-read -p "Input Domain: " domain
-read -p "Input Port: " port
-read -p "Input UUID: " uid
-read -p "Input Path: " path
+read -p $'\033[96;1mInput Name: \033[0m' names
+read -p $'\033[96;1mInput Domain: \033[0m' domain
+read -p $'\033[96;1mInput Port: \033[0m' port
+read -p $'\033[96;1mInput UUID: \033[0m' uid
+read -p $'\033[96;1mInput Path: \033[0m' path
 clear
 
 DOMAIN_FILE="/root/.rules/domain"
@@ -594,7 +594,7 @@ echo -e "Success Back To Default Routing"
 
 restore-route() {
 while true; do
-    read -p "Are you sure you want to do a Restore? (y/n): " opw
+    read -p $'\033[96;1mAre you sure you want to do a Restore? (y/n): \033[0m' opw
     case $opw in
         y|Y)
             echo "Proceeding with Restore..."
@@ -626,7 +626,7 @@ echo -e "
  Press CTRL + C to Exit
 ==========================
 "
-read -p "Input Your Routing Protocol: " prot
+read -p $'\033[96;1mInput Your Routing Protocol: \033[0m' prot
 case $prot in
 1) clear ; vmessjir ;;
 2) clear ; vlessjir ;;
@@ -644,7 +644,7 @@ echo -e "
 1. Add Rules Domain
 ====================
 "
-read -p "Input Option: " op
+read -p $'\033[96;1mInput Option: \033[0m' op
 case $op in
 1) clear ; nano /root/.rules/domain ;;
 *) clear ; addrules ;;
@@ -666,7 +666,7 @@ echo -e "
 Press CTRL + C to Exit
 =====================
 "
-read -p "Input Option: " aws
+read -p $'\033[96;1mInput Option: \033[0m' aws
 case $aws in
 1) clear ; addroute ;;
 2) clear ; addrules ;;

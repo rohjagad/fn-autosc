@@ -96,28 +96,28 @@ systemctl restart quota-grpc
 vlesslink1="vless://$uuid@$domain:443?mode=gun&security=tls&encryption=none&authority=$domain&type=grpc&serviceName=vless-grpc&sni=$domain#${user}"
 
 TEKS="
-======================
-    Xray VLess gRPC
-======================
+\033[96;1m======================\033[0m
+    \033[1;33mXray VLess gRPC\033[0m
+\033[96;1m======================\033[0m
 
 Remarks : $user
 Domain  : $domain
 UUID    : $uuid
 Expired : $exp
 Protokol: Vless
-======================
+\033[96;1m======================\033[0m
      Limit Detail
 
 Limit IP: $ip
 Quota   : $quota GB
-======================
+\033[96;1m======================\033[0m
 
 Port: 443, 2053, 2083, 2087, 2096
 Network: gRPC
 Service Name: vless-grpc
-======================
-Link TLS : $vlesslink1
-======================
+\033[96;1m======================\033[0m
+\033[1;33mLink TLS : $vlesslink1\033[0m
+\033[96;1m======================\033[0m
 "
 curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL >/dev/null 2>&1
 echo -e "$TEKS" > /var/log/create/xray/grpc/${user}.log

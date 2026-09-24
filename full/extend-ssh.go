@@ -19,7 +19,7 @@ func main() {
 
 	reader := bufio.NewReader(os.Stdin)
 
-	fmt.Print("Username: ")
+	fmt.Print("\033[96;1mUsername: \033[0m")
 	username, _ := reader.ReadString('\n')
 	username = strings.TrimSpace(username)
 
@@ -29,7 +29,7 @@ func main() {
 		return
 	}
 
-	fmt.Print("Day Extend: ")
+	fmt.Print("\033[96;1mDay Extend: \033[0m")
 	daysInput, _ := reader.ReadString('\n')
 	daysInput = strings.TrimSpace(daysInput)
 	days, err := strconv.Atoi(daysInput)

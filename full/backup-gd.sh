@@ -61,7 +61,7 @@ clear
 email=$(cat /etc/funny/.email)
 if [[ "$email" = "" ]]; then
   echo -e "\e[0;37m Enter Your Email To Receive Backup"
-  read -rp " Email: " -e email
+  read -rp $'\033[96;1m Email: \033[0m' -e email
   cat <<EOF>>/etc/funny/.email
 $email
 EOF
@@ -150,6 +150,6 @@ echo -e "\e[0;37m Done!"
 echo ""
 echo -e "\e[0;37m Please Check Your Email Now!"
 echo ""
-read -sp " Press ENTER to go back"
+read -sp $'\033[96;1m Press ENTER to go back\033[0m'
 echo ""
 menu

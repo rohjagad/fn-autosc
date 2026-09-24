@@ -96,7 +96,7 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/split.json")
 		echo "You have no existing clients!"
 		echo ""
 		echo -e "\033[0;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-		read -n 1 -s -r -p "Press any key to back on menu"
+		read -n 1 -s -r -p $'\033[96;1mPress any key to back on menu\033[0m'
         x-split
 	fi
 
@@ -110,7 +110,7 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/split.json")
     echo ""
     red "tap enter to go back"
     echo -e "\033[0;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-    read -rp "Input Username: " user
+    read -rp $'\033[96;1mInput Username: \033[0m' user
     if [ -z "$user" ]; then
     x-split
     else

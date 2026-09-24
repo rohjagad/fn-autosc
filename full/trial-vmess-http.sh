@@ -131,36 +131,36 @@ vmesslink2="vmess://$(echo $ask | base64 -w 0)"
 
 clear
 TEKS="
-========================
-   VMess HTTP Upgrade
-========================
+\033[96;1m========================\033[0m
+   \033[1;33mVMess HTTP Upgrade\033[0m
+\033[96;1m========================\033[0m
 
 Remarks : $user
 Domain  : $domain
 UUID    : $uuid
 Expired : $exp
 Protokol: Vmess
-========================
+\033[96;1m========================\033[0m
      Limit Detail
 
 Limit IP: $ip
 Quota   : $quota GB
-========================
+\033[96;1m========================\033[0m
    Detail Port http
 
 TLS: 443, 2053, 2083, 2087, 2096
 NoneTLS: 80, 8880, 2052, 2082, 2095
-========================
+\033[96;1m========================\033[0m
 AlterID: 0
 Path   : /rere
 Network: HTTP Upgrade
 Alpn   : - [ None ]
 Decrypt: auto
-========================
-Link TLS : $vmesslink1
-========================
-Link None: $vmesslink2
-========================
+\033[96;1m========================\033[0m
+\033[1;33mLink TLS : $vmesslink1\033[0m
+\033[96;1m========================\033[0m
+\033[1;33mLink None: $vmesslink2\033[0m
+\033[96;1m========================\033[0m
 "
 curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL >/dev/null 2>&1
 echo -e "$TEKS" > /var/log/create/xray/http/${user}.log

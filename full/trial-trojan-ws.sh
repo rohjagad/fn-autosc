@@ -99,9 +99,9 @@ link1="trojan://${uuid}@${domain}:443?path=%2ftrojanws&security=tls&host=${domai
 link2="trojan://${uuid}@${domain}:80?path=/trojanws&security=none&host=${domain}&type=ws#${user}"
 
 TEKS="
-======================
-   Trojan WebSocket
-======================
+\033[96;1m======================\033[0m
+   \033[1;33mTrojan WebSocket\033[0m
+\033[96;1m======================\033[0m
 
 Remarks : $user
 Domain  : $domain
@@ -110,17 +110,17 @@ Expired : $exp
 Limit IP: $ip
 Quota   : $quota GB
 Protokol: Trojan
-======================
+\033[96;1m======================\033[0m
 
 Path: /trojanws
 Network: WebSocket
 Port TLS: 443, 2053, 2083, 2087, 2096
 Port None: 80, 8880, 2052, 2082, 2095
-======================
-Link TLS : $link1
-======================
-Link None: $link2
-======================
+\033[96;1m======================\033[0m
+\033[1;33mLink TLS : $link1\033[0m
+\033[96;1m======================\033[0m
+\033[1;33mLink None: $link2\033[0m
+\033[96;1m======================\033[0m
 "
 curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL >/dev/null 2>&1
 echo -e "$TEKS" > /var/log/create/xray/ws/${user}.log

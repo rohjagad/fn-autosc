@@ -99,7 +99,7 @@ ${green}9${NC}. Change SSH IP Limit
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-read -p "Input option: " aws
+read -p $'\033[96;1mInput option: \033[0m' aws
     case $aws in
     1) clear ; addssh ;;
     2) clear ; trial-ssh ;;

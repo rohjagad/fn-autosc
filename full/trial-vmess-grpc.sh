@@ -113,30 +113,30 @@ vmesslink1="vmess://$(echo $grpc | base64 -w 0)"
 
 clear
 TEKS="
-=======================
-     Xray VMess gRPC
-=======================
+\033[96;1m=======================\033[0m
+     \033[1;33mXray VMess gRPC\033[0m
+\033[96;1m=======================\033[0m
 
 Remarks : $user
 Domain  : $domain
 UUID    : $uuid
 Expired : $exp
 Protokol: Vmess
-=======================
+\033[96;1m=======================\033[0m
      Limit Detail
 
 Limit IP: $ip
 Quota   : $quota GB
-=======================
+\033[96;1m=======================\033[0m
 Port   : 443, 2053, 2083, 2087, 2096
 AlterID: 0
 Service: vmess-grpc
 Network: gRPC
 Alpn   : - [ None ]
 Decrypt: auto
-=======================
-Link TLS : $vmesslink1
-=======================
+\033[96;1m=======================\033[0m
+\033[1;33mLink TLS : $vmesslink1\033[0m
+\033[96;1m=======================\033[0m
 "
 curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL >/dev/null 2>&1
 echo -e "$TEKS" > /var/log/create/xray/grpc/${user}.log
