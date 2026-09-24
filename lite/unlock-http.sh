@@ -139,7 +139,7 @@ ${separator}"
     echo -e "${orange}Press [Ctrl + C] to exit${NC}"
     echo -e "${separator}"
 
-    read -p $'\033[96;1mInput Username to Unlock: \033[0m' name
+    read -p "Input Username to Unlock: " name
 else
     clear
     echo "No locked accounts found to unlock."
@@ -165,7 +165,7 @@ Status   : ${green}Unlocked${NC}
 ${separator}"
 
 # Konfirmasi dari pengguna sebelum melakukan unlock
-read -p $'\033[96;1mApakah Anda yakin ingin unlock akun ini? (y/n): \033[0m' confirm
+read -p "Apakah Anda yakin ingin unlock akun ini? (y/n): " confirm
 
 if [[ "$confirm" == "y" || "$confirm" == "Y" ]]; then
     # Logika melakukan unlock

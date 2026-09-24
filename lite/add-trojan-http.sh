@@ -64,7 +64,7 @@ until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/creat
  \033[1;33mCreate Trojan HTTP Upgrade\033[0m
 \033[38;2;255;0;0m-\033[38;2;255;51;0m-\033[38;2;255;102;0m-\033[38;2;255;153;0m-\033[38;2;255;204;0m-\033[38;2;255;255;0m-\033[38;2;204;255;0m-\033[38;2;153;255;0m-\033[38;2;102;255;0m-\033[38;2;51;255;0m-\033[38;2;0;255;0m-\033[38;2;0;255;51m-\033[38;2;0;255;102m-\033[38;2;0;255;153m-\033[38;2;0;255;204m-\033[38;2;0;255;255m-\033[38;2;0;204;255m-\033[38;2;0;153;255m-\033[38;2;0;102;255m-\033[38;2;0;51;255m-\033[38;2;0;0;255m-\033[38;2;51;0;255m-\033[38;2;102;0;255m-\033[38;2;153;0;255m-\033[38;2;204;0;255m-\033[38;2;255;0;255m-\033[38;2;255;0;204m-\033[38;2;255;0;153m-\033[38;2;255;0;102m-\033[38;2;255;0;51m-\033[38;2;255;0;0m-\033[0m
 "
-    read -p $'\033[96;1mUsername: \033[0m' user
+    read -p "Username: " user
     if [[ -z "$user" ]]; then
         clear
         echo -e "\033[0;31mUsername cannot be empty.\033[0m"
@@ -103,10 +103,10 @@ until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/creat
         continue
     fi
 done
-    read -p $'\033[96;1mLimit Ip: \033[0m' ip
-    read -p $'\033[96;1mLimit Quota: \033[0m' quota
-    read -p $'\033[96;1mActive Time: \033[0m' masaaktif
-    read -p $'\033[96;1mInput UUID (Empty Default): \033[0m' uuid
+    read -p "Limit Ip: " ip
+    read -p "Limit Quota: " quota
+    read -p "Active Time: " masaaktif
+    read -p "Input UUID (Empty Default): " uuid
 
 # Validasi UUID
 if [[ "$uuid" =~ [[:space:]] || -z "$uuid" ]]; then

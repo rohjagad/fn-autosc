@@ -94,7 +94,7 @@ function create() {
 clear
 domain=$IP2
 until [[ $VPN_USER =~ ^[a-zA-Z0-9_]+$ && ${CLIENT_EXISTS} == '0' ]]; do
-		read -rp $'\033[96;1mUsername : \033[0m' -e VPN_USER
+		read -rp "Username : " -e VPN_USER
 		CLIENT_EXISTS=$(grep -w $VPN_USER /etc/funny/.l2tp | wc -l)
 
 		if [[ ${CLIENT_EXISTS} == '1' ]]; then
@@ -103,8 +103,8 @@ until [[ $VPN_USER =~ ^[a-zA-Z0-9_]+$ && ${CLIENT_EXISTS} == '0' ]]; do
 			exit 1
 		fi
 	done
-read -p $'\033[96;1mPassword : \033[0m' VPN_PASSWORD
-read -p $'\033[96;1mDuration (Days) : \033[0m' masaaktif
+read -p "Password : " VPN_PASSWORD
+read -p "Duration (Days) : " masaaktif
 hariini=`date -d "0 days" +"%Y-%m-%d"`
 exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
 clear
@@ -160,9 +160,9 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/funny/.l2tp")
 	grep -E "^### " "/etc/funny/.l2tp" | cut -d ' ' -f 2-3 | nl -s ') '
 	until [[ ${CLIENT_NUMBER} -ge 1 && ${CLIENT_NUMBER} -le ${NUMBER_OF_CLIENTS} ]]; do
 		if [[ ${CLIENT_NUMBER} == '1' ]]; then
-			read -rp $'\033[96;1mSelect One Client[1]: \033[0m' CLIENT_NUMBER
+			read -rp "Select One Client[1]: " CLIENT_NUMBER
 		else
-			read -rp $'\033[96;1m'"Select One Client [1-${NUMBER_OF_CLIENTS}]: "$'\033[0m' CLIENT_NUMBER
+			read -rp "Select One Client [1-${NUMBER_OF_CLIENTS}]: " CLIENT_NUMBER
 		fi
 	done
 # match the selected number to a client name
@@ -207,12 +207,12 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/funny/.l2tp")
 	grep -E "^### " "/etc/funny/.l2tp" | cut -d ' ' -f 2-3 | nl -s ') '
 	until [[ ${CLIENT_NUMBER} -ge 1 && ${CLIENT_NUMBER} -le ${NUMBER_OF_CLIENTS} ]]; do
 		if [[ ${CLIENT_NUMBER} == '1' ]]; then
-			read -rp $'\033[96;1mSelect one client [1]: \033[0m' CLIENT_NUMBER
+			read -rp "Select one client [1]: " CLIENT_NUMBER
 		else
-			read -rp $'\033[96;1m'"Select one client [1-${NUMBER_OF_CLIENTS}]: "$'\033[0m' CLIENT_NUMBER
+			read -rp "Select one client [1-${NUMBER_OF_CLIENTS}]: " CLIENT_NUMBER
 		fi
 	done
-read -p $'\033[96;1mExpired (Days) : \033[0m' masaaktif
+read -p "Expired (Days) : " masaaktif
 user=$(grep -E "^### " "/etc/funny/.l2tp" | cut -d ' ' -f 2 | sed -n "${CLIENT_NUMBER}"p)
 exp=$(grep -E "^### " "/etc/funny/.l2tp" | cut -d ' ' -f 3 | sed -n "${CLIENT_NUMBER}"p)
 now=$(date +%Y-%m-%d)
@@ -250,7 +250,7 @@ ${green}5${NC}. Exit
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-read -p $'\033[96;1mInput option: \033[0m' menu
+read -p "Input option: " menu
 echo -e ""
 case $menu in
 1)

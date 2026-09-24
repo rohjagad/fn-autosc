@@ -165,7 +165,7 @@ function change_quota() {
     Daftar_Account
     baris_panjang
     echo ""
-    read -p $'\033[96;1m Input Username        :   \033[0m' user
+    read -p " Input Username        :   " user
 
     quota_file="/etc/xray/quota/grpc/${user}"
     log_file="/var/log/create/xray/grpc/${user}.log"
@@ -184,9 +184,9 @@ function change_quota() {
         echo -e ""
         baris_panjang
         echo ""
-        read -p $'\033[96;1m Input New Quota (GB) : \033[0m' new_quota
+        read -p " Input New Quota (GB) : " new_quota
         echo -e "\n${YellowBe}Reset total usage quota? (y/n):${Xark}"
-        read -rp $'\033[96;1mInput: \033[0m' reset_quota
+        read -rp "Input: " reset_quota
         if [[ $reset_quota == "y" || $reset_quota == "Y" ]]; then
             echo -n > /etc/xray/quota/grpc/${user}_usage
             quota_status="Reset"

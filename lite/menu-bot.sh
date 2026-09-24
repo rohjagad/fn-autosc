@@ -110,8 +110,8 @@ else
 [ 设置机器人通知 ]
 ===================
 "
-    read -p $'\033[96;1mAPI Key Bot: \033[0m' api
-    read -p $'\033[96;1mYour Chat ID: \033[0m' itd
+    read -p "API Key Bot: " api
+    read -p "Your Chat ID: " itd
     
     # [ Menyimpan API Key dan Chat ID ke file ]
     echo "$api" > "$api_file"
@@ -214,7 +214,7 @@ ${green}0${NC}. Back to Main Menu
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-read -p $'\033[96;1mInput option: \033[0m' opw
+read -p "Input option: " opw
 case $opw in
 1) clear ; install ;;
 2) clear ; hapus ;;
@@ -251,8 +251,8 @@ echo -e "
 [ Telegram Bot Setup ]
 ======================
 "
-read -p $'\033[96;1mBot API Key: \033[0m' api
-read -p $'\033[96;1mTelegram Chat ID: \033[0m' itd
+read -p "Bot API Key: " api
+read -p "Telegram Chat ID: " itd
 clear
 echo -e "
 Information
@@ -261,7 +261,7 @@ Bot API Key: $api
 Chat ID    : $itd
 ==============================
 "
-read -p $'\033[96;1mIs the data above correct? (y/n): \033[0m' opw
+read -p "Is the data above correct? (y/n): " opw
 case $opw in
 y) clear ; lanjut ;;
 n) clear ; add ;;
@@ -298,7 +298,7 @@ ${green}4${NC}. Report Script Bug
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-read -p $'\033[96;1mInput option: \033[0m' apws
+read -p "Input option: " apws
 case $apws in
 1) clear ; add ;;
 2) clear ; echo -e "\n Feature coming soon" ;;

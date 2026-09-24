@@ -86,7 +86,7 @@ if [[ ${NUMBER_OF_CLIENTS} == '0' ]]; then
     echo -e "  ${YB}You have no existing clients!${NC}"
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
     echo ""
-    read -n 1 -s -r -p $'\033[96;1mPress any key to back on menu\033[0m'
+    read -n 1 -s -r -p "Press any key to back on menu"
     x-http
 fi
 
@@ -100,11 +100,11 @@ grep -E "^### " "/etc/xray/json/upgrade.json" | cut -d ' ' -f 2-3 | column -t | 
 echo ""
 echo -e "${YB}Tap enter to go back${NC}"
 echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-read -rp $'\033[96;1mInput Username : \033[0m' user
+read -rp "Input Username : " user
 if [ -z $user ]; then
     x-http
 else
-    read -p $'\033[96;1mExpired (days): \033[0m' masaaktif
+    read -p "Expired (days): " masaaktif
     exp=$(grep -wE "^### $user" "/etc/xray/json/upgrade.json" | cut -d ' ' -f 3 | sort | uniq)
     now=$(date +%y-%m-%d) # Format tahun 2 digit
     d1=$(date -d "$exp" +%s)
@@ -116,7 +116,7 @@ else
     sed -i "s/Expired : $exp/Expired : $exp4/" /var/log/create/xray/http/${user}.log
 
     echo -e "\n${YB}Reset total usage quota? (y/n):${NC}"
-    read -rp $'\033[96;1mInput: \033[0m' reset_quota
+    read -rp "Input: " reset_quota
     if [[ $reset_quota == "y" || $reset_quota == "Y" ]]; then
         echo -n > /etc/xray/quota/http/${user}_usage
         quota_status="Reset"

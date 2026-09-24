@@ -98,7 +98,7 @@ SlowDNS / DNSTT Settings
   if [[ -s /etc/slowdns/nsdomain ]]; then
     Nameserver=$(cat /etc/slowdns/nsdomain)
   else
-    read -rp $'\033[96;1mYour Nameserver: \033[0m' -e Nameserver
+    read -rp "Your Nameserver: " -e Nameserver
     echo -e "$Nameserver" > /etc/slowdns/nsdomain
   fi
   echo "Your Nameserver: $Nameserver"

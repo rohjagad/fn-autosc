@@ -103,7 +103,7 @@ echo -e "${CYAN}=========================================${NC}"
 
 # Prompt user input for username and validate
 while true; do
-    read -p $'\033[96;1mInput Username: \033[0m' user
+    read -p "Input Username: " user
     if [[ -z "$user" || ! -f "/var/log/create/xray/http/${user}.log" ]]; then
         echo -e "${RED}Invalid username! Please try again.${NC}"
     else
@@ -112,7 +112,7 @@ while true; do
 done
 
 # Prompt for new UUID, generate if empty
-read -p $'\033[96;1m Input New UUID (or press Enter to auto-generate): \033[0m' new
+read -p " Input New UUID (or press Enter to auto-generate): " new
 if [[ -z "$new" ]]; then
     new=$(xray uuid)
     echo -e "Generated new UUID: $new"

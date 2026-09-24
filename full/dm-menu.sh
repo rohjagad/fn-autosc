@@ -101,7 +101,7 @@ Your Domain: $domain
 4 For IPv4 &  For IPv6
 "
 echo -e "Generate new Ceritificate Please Input Type Your VPS"
-read -p $'\033[96;1mInput Your Type Pointing ( 4 / 6 ): \033[0m' ip_version
+read -p "Input Your Type Pointing ( 4 / 6 ): " ip_version
 if [[ $ip_version == "4" ]]; then
     systemctl stop nginx
     mkdir -p /root/.acme.sh
@@ -172,7 +172,7 @@ Your Domain: $domain
 4 For IPv4 & 6 For IPv6
 "
 echo -e "Generate new Certificate. Please input your VPS type:"
-read -p $'\033[96;1mInput Your Type Pointing (4 for IPv4 / 6 for IPv6): \033[0m' ip_version
+read -p "Input Your Type Pointing (4 for IPv4 / 6 for IPv6): " ip_version
 
 stop_services() {
     systemctl stop nginx
@@ -236,7 +236,7 @@ dm() {
     echo -e "Current Domain:"
     echo -e "$(cat /etc/xray/domain)"
     echo ""
-    read -rp $'\033[96;1mNew Domain/Host: \033[0m' -e host
+    read -rp "New Domain/Host: " -e host
     echo ""
 
     if [ -z "$host" ]; then
@@ -256,7 +256,7 @@ dm() {
         curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&text=$log_message&parse_mode=html" $URL >/dev/null
 
         echo -e "\e[33m===================================\033[0m"
-        read -n 1 -s -r -p $'\033[96;1mPress any key to return to menu\033[0m'
+        read -n 1 -s -r -p "Press any key to return to menu"
         menu
     else
         # Simpan domain lama dan ganti dengan domain baru
@@ -287,7 +287,7 @@ dm() {
         curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&text=$log_message&parse_mode=html" $URL >/dev/null
 
         # Konfirmasi untuk memperbarui sertifikat
-        read -rp $'\033[96;1mRenew SSL certificate? (y/n): \033[0m' cert_choice
+        read -rp "Renew SSL certificate? (y/n): " cert_choice
         if [[ "$cert_choice" == "y" || "$cert_choice" == "Y" ]]; then
             echo -e "\nRenewing SSL certificate..."
             cert_status="Berhasil"
@@ -312,7 +312,7 @@ dm() {
         echo -e "\e[33m===================================\033[0m"
         echo "Notification sent to Telegram."
         echo -e "\e[33m===================================\033[0m"
-        read -n 1 -s -r -p $'\033[96;1mPress any key to return to menu\033[0m'
+        read -n 1 -s -r -p "Press any key to return to menu"
         menu
     fi
 }
@@ -344,7 +344,7 @@ ${green}2${NC}. Issue via Certbot
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-read -p $'\033[96;1mInput option: \033[0m' akz
+read -p "Input option: " akz
 case $akz in
 1) clear ; acme ;;
 2) clear ; cert2 ;;
@@ -390,7 +390,7 @@ ${green}4${NC}. Generate Self-Signed Certificate
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-read -p $'\033[96;1mInput option: \033[0m' apw
+read -p "Input option: " apw
 case $apw in
 1) clear ; dm ;;
 2) clear ; cert ;;

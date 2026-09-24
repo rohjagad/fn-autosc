@@ -108,7 +108,7 @@ ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
         
-        read -p $'\033[96;1mInput option: \033[0m' dn1
+        read -p "Input option: " dn1
         case $dn1 in
             1)
                 clear
@@ -120,7 +120,7 @@ ${orange}Press [Ctrl + C] to exit${NC}"
                 =================
                 Nameserver: $nsd
                 "
-                read -p $'\033[96;1mInput Nameserver: \033[0m' nsdomen
+                read -p "Input Nameserver: " nsdomen
                 clear
                 echo "${nsdomen}" > /etc/slowdns/nsdomain
                 systemctl stop dnstt.service
@@ -189,7 +189,7 @@ Public Key   : ${green}$pubkey${NC}
 Port Target  : 5300 (DNS -> 22 OpenSSH)
 Service      : $stat_msg
 ${separator}"
-                read -n 1 -s -r -p $'\033[96;1mPress any key to return...\033[0m'
+                read -n 1 -s -r -p "Press any key to return..."
                 mna89
                 ;;
             0)

@@ -122,7 +122,7 @@ ${green}4${NC}. gRPC (XTLS)
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-read -p $'\033[96;1mInput option: \033[0m' opws
+read -p "Input option: " opws
 case $opws in
 1) clear ; x-ws ;;
 2) clear ; x-http ;;

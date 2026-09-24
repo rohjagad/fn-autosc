@@ -305,7 +305,7 @@ ${rechan}
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-read -p $'\033[96;1mInput option: \033[0m' opw
+read -p "Input option: " opw
 case $opw in
 1) clear ; menu-ssh ;;
 2) clear ; menu-x ;;

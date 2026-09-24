@@ -64,7 +64,7 @@ until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/creat
        \033[1;33mCreate VLess WS\033[0m
 \033[38;2;255;0;0m-\033[38;2;255;56;0m-\033[38;2;255;113;0m-\033[38;2;255;170;0m-\033[38;2;255;226;0m-\033[38;2;227;255;0m-\033[38;2;170;255;0m-\033[38;2;114;255;0m-\033[38;2;57;255;0m-\033[38;2;0;255;0m-\033[38;2;0;255;56m-\033[38;2;0;255;113m-\033[38;2;0;255;170m-\033[38;2;0;255;226m-\033[38;2;0;227;255m-\033[38;2;0;170;255m-\033[38;2;0;114;255m-\033[38;2;0;57;255m-\033[38;2;0;0;255m-\033[38;2;56;0;255m-\033[38;2;113;0;255m-\033[38;2;170;0;255m-\033[38;2;226;0;255m-\033[38;2;255;0;227m-\033[38;2;255;0;170m-\033[38;2;255;0;114m-\033[38;2;255;0;57m-\033[38;2;255;0;0m-\033[0m
 "
-    read -p $'\033[96;1mUsername: \033[0m' user
+    read -p "Username: " user
     if [[ -z "$user" ]]; then
         clear
         echo -e "\033[0;31mUsername cannot be empty.\033[0m"
@@ -103,10 +103,10 @@ until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/creat
         continue
     fi
 done
-    read -p $'\033[96;1mLimit Ip: \033[0m' ip
-    read -p $'\033[96;1mLimit Quota: \033[0m' quota
-    read -p $'\033[96;1mActive Time: \033[0m' masaaktif
-    read -p $'\033[96;1mInput UUID (Empty Default): \033[0m' uuid
+    read -p "Limit Ip: " ip
+    read -p "Limit Quota: " quota
+    read -p "Active Time: " masaaktif
+    read -p "Input UUID (Empty Default): " uuid
 
 # Validasi UUID
 if [[ "$uuid" =~ [[:space:]] || -z "$uuid" ]]; then

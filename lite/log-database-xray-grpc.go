@@ -139,7 +139,7 @@ func main() {
 	fmt.Println(outerSep)
 
 	reader := bufio.NewReader(os.Stdin)
-	fmt.Print("\033[96;1mInput Username: \033[0m")
+	fmt.Print("Input Username: ")
 	input, _ := reader.ReadString('\n')
 	input = strings.TrimSpace(input)
 

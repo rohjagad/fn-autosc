@@ -133,7 +133,7 @@ ${separator}
 ${orange}Press [Ctrl + C] to exit${NC}"
 
     # Input pilihan dari pengguna
-    read -p $'\033[96;1mInput option: \033[0m' opsplit
+    read -p "Input option: " opsplit
 
     # Menangani pilihan berdasarkan input pengguna
     case $opsplit in

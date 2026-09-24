@@ -64,7 +64,7 @@ until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/creat
   \033[1;33mCreate Trojan Split HTTP\033[0m
 \033[38;2;255;0;0m-\033[38;2;255;52;0m-\033[38;2;255;105;0m-\033[38;2;255;158;0m-\033[38;2;255;211;0m-\033[38;2;247;255;0m-\033[38;2;194;255;0m-\033[38;2;141;255;0m-\033[38;2;88;255;0m-\033[38;2;36;255;0m-\033[38;2;0;255;17m-\033[38;2;0;255;70m-\033[38;2;0;255;123m-\033[38;2;0;255;175m-\033[38;2;0;255;228m-\033[38;2;0;229;255m-\033[38;2;0;176;255m-\033[38;2;0;124;255m-\033[38;2;0;71;255m-\033[38;2;0;18;255m-\033[38;2;35;0;255m-\033[38;2;87;0;255m-\033[38;2;140;0;255m-\033[38;2;193;0;255m-\033[38;2;246;0;255m-\033[38;2;255;0;212m-\033[38;2;255;0;159m-\033[38;2;255;0;106m-\033[38;2;255;0;53m-\033[38;2;255;0;0m-\033[0m
 "
-    read -p $'\033[96;1mUsername: \033[0m' user
+    read -p "Username: " user
     if [[ -z "$user" ]]; then
         clear
         echo -e "\033[0;31mUsername cannot be empty.\033[0m"
@@ -103,10 +103,10 @@ until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/creat
         continue
     fi
 done
-    read -p $'\033[96;1mLimit Ip: \033[0m' ip
-    read -p $'\033[96;1mLimit Quota: \033[0m' quota
-    read -p $'\033[96;1mActive Time: \033[0m' masaaktif
-    read -p $'\033[96;1mInput UUID (Empty Default): \033[0m' uuid
+    read -p "Limit Ip: " ip
+    read -p "Limit Quota: " quota
+    read -p "Active Time: " masaaktif
+    read -p "Input UUID (Empty Default): " uuid
 
 # Validasi UUID
 if [[ "$uuid" =~ [[:space:]] || -z "$uuid" ]]; then

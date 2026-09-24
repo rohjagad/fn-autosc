@@ -87,7 +87,7 @@ separator=$(rainbow_sep '===================================')
 blue_sep="${blue}-----------------------------------${NC}"
 
 bnnr() {
-read -p $'\033[96;1mInput Your Banner\033[0m' bns
+read -p "Input Your Banner" bns
 echo -e "$bns" > /etc/issue.net
 systemctl daemon-reload
 systemctl restart dropbear
@@ -246,7 +246,7 @@ akun6() {
 
 token() {
     clear
-    read -p $'\033[96;1mInput Your Token Teams WARP+: \033[0m' token
+    read -p "Input Your Token Teams WARP+: " token
     clear
     warp -T $token
 }
@@ -261,7 +261,7 @@ add() {
     2. Create Account (IPv6)
     ==============================
     Press [Ctrl + C] to exit"
-    read -p $'\033[96;1mInput option: \033[0m' aws
+    read -p "Input option: " aws
     case $aws in
     1) akun4 ;;
     2) akun6 ;;
@@ -288,7 +288,7 @@ menuwg() {
     9. Exit
     ==========================
     Press [Ctrl + C] to exit"
-    read -p $'\033[96;1mInput option: \033[0m' opt
+    read -p "Input option: " opt
     case $opt in
     1) install ;;
     2) status ;;
@@ -325,7 +325,7 @@ echo -e "\e[1;32m═════════════════════
 echo -e " x)   MAIN MENU"
 echo -e "\e[1;32m══════════════════════════════════════════\e[m" | lolcat
 echo -e ""
-read -p $'\033[96;1m Select menu :  \033[0m'  opt
+read -p " Select menu :  "  opt
 echo -e ""
 case $opt in
 		1)
@@ -337,7 +337,7 @@ case $opt in
 	    echo -e "\e[0m            Time Zone Set Asia Malaysia  "
 		echo -e "\e[0m                                                   "
 	    echo -e "\e[1;32m══════════════════════════════════════════\e[m"
-        read -sp $'\033[96;1m Press ENTER to go back\033[0m'
+        read -sp " Press ENTER to go back"
         echo ""
         change_timezone
 		;;
@@ -351,7 +351,7 @@ case $opt in
 		echo -e "\e[0m                                                   "
 		echo -e "\e[1;32m══════════════════════════════════════════\e[m"
 		echo ""
-        read -sp $'\033[96;1m Press ENTER to go back\033[0m'
+        read -sp " Press ENTER to go back"
         echo ""
         change_timezone
 		;;
@@ -365,7 +365,7 @@ case $opt in
 		echo -e "\e[0m                                                   "
 		echo -e "\e[1;32m══════════════════════════════════════════\e[m"
 		echo ""
-        read -sp $'\033[96;1m Press ENTER to go back\033[0m'
+        read -sp " Press ENTER to go back"
         echo ""
         change_timezone
 		;;
@@ -379,7 +379,7 @@ case $opt in
 		echo -e "\e[0m                                                   "
 		echo -e "\e[1;32m══════════════════════════════════════════\e[m"
 		echo ""
-        read -sp $'\033[96;1m Press ENTER to go back\033[0m'
+        read -sp " Press ENTER to go back"
         echo ""
         change_timezone
 		;;
@@ -393,7 +393,7 @@ case $opt in
 		echo -e "\e[0m                                                   "
 		echo -e "\e[1;32m══════════════════════════════════════════\e[m"
 		echo ""
-        read -sp $'\033[96;1m Press ENTER to go back\033[0m'
+        read -sp " Press ENTER to go back"
         echo ""
         change_timezone
 		;;
@@ -407,7 +407,7 @@ case $opt in
 		echo -e "\e[0m                                                   "
 		echo -e "\e[1;32m══════════════════════════════════════════\e[m"
 		echo ""
-        read -sp $'\033[96;1m Press ENTER to go back\033[0m'
+        read -sp " Press ENTER to go back"
         echo ""
         change_timezone
 		;;
@@ -421,7 +421,7 @@ case $opt in
 		echo -e "\e[0m                                                   "
 		echo -e "\e[1;32m══════════════════════════════════════════\e[m"
 		echo ""
-        read -sp $'\033[96;1m Press ENTER to go back\033[0m'
+        read -sp " Press ENTER to go back"
         echo ""
         change_timezone
 		;;
@@ -435,7 +435,7 @@ case $opt in
 		echo -e "\e[0m                                                   "
 		echo -e "\e[1;32m══════════════════════════════════════════\e[m"
 		echo ""
-        read -sp $'\033[96;1m Press ENTER to go back\033[0m'
+        read -sp " Press ENTER to go back"
         echo ""
         change_timezone
 		;;
@@ -444,7 +444,7 @@ case $opt in
         echo ""
 		timedatectl
 	    echo ""
-        read -sp $'\033[96;1m Press ENTER to go back\033[0m'
+        read -sp " Press ENTER to go back"
         echo ""
         change_timezone
 		;;
@@ -503,7 +503,7 @@ ${green}3${NC}. OpenEuler 24.03
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-read -p $'\033[96;1mInput Option: \033[0m' opn
+read -p "Input Option: " opn
 case $opn in
 1) cd /root ; curl -O https://raw.githubusercontent.com/rohjagad/reinstall/main/reinstall.sh && bash reinstall.sh openeuler 20.03 && reboot  ;;
 2) cd /root ; curl -O https://raw.githubusercontent.com/rohjagad/reinstall/main/reinstall.sh && bash reinstall.sh openeuler 22.03 && reboot  ;;
@@ -523,7 +523,7 @@ ${green}3${NC}. OpenSuse tumbleweed
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-read -p $'\033[96;1mInput Option: \033[0m' osu
+read -p "Input Option: " osu
 case $osu in
 1) cd /root ; curl -O https://raw.githubusercontent.com/rohjagad/reinstall/main/reinstall.sh && bash reinstall.sh opensuse 15.5 && reboot  ;;
 2) cd /root ; curl -O https://raw.githubusercontent.com/rohjagad/reinstall/main/reinstall.sh && bash reinstall.sh opensuse 15.6 && reboot  ;;
@@ -544,7 +544,7 @@ ${green}4${NC}. Debian 12
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-read -p $'\033[96;1mInput Option: \033[0m' db
+read -p "Input Option: " db
 case $db in
 1) cd /root ; curl -O https://raw.githubusercontent.com/rohjagad/reinstall/main/reinstall.sh && bash reinstall.sh debian 9 && reboot  ;;
 2) cd /root ; curl -O https://raw.githubusercontent.com/rohjagad/reinstall/main/reinstall.sh && bash reinstall.sh debian 10 && reboot  ;;
@@ -567,7 +567,7 @@ ${green}5${NC}. Ubuntu 24.04
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-read -p $'\033[96;1mInput Option: \033[0m' wq
+read -p "Input Option: " wq
 case $wq in
 1) cd /root ; curl -O https://raw.githubusercontent.com/rohjagad/reinstall/main/reinstall.sh && bash reinstall.sh ubuntu 16.04 && reboot ;;
 2) cd /root ; curl -O https://raw.githubusercontent.com/rohjagad/reinstall/main/reinstall.sh && bash reinstall.sh ubuntu 18.04 && reboot ;;
@@ -590,7 +590,7 @@ ${green}4${NC}. Alpine 3.20
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-read -p $'\033[96;1mInput Option: \033[0m' ap
+read -p "Input Option: " ap
 case $ap in
 1) cd /root ; curl -O https://raw.githubusercontent.com/rohjagad/reinstall/main/reinstall.sh && bash reinstall.sh alpine 3.17 && reboot ;;
 2) cd /root ; curl -O https://raw.githubusercontent.com/rohjagad/reinstall/main/reinstall.sh && bash reinstall.sh alpine 3.18 && reboot ;;
@@ -609,7 +609,7 @@ ${green}2${NC}. Rocky Linux 9
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-read -p $'\033[96;1mInput Options: \033[0m' opw
+read -p "Input Options: " opw
 case $opw in
 1) clear : cd /root ; curl -O https://raw.githubusercontent.com/rohjagad/reinstall/main/reinstall.sh && bash reinstall.sh rocky 8 && reboot ;;
 2) clear ; cd /root ; curl -O https://raw.githubusercontent.com/rohjagad/reinstall/main/reinstall.sh && bash reinstall.sh rocky 9 && reboot ;;
@@ -628,7 +628,7 @@ Password: $uuid
 =====================
 Please Save Your Data
 "
-read -p $'\033[96;1mContinue (y/n): \033[0m' osw
+read -p "Continue (y/n): " osw
 if [[ $osw == "y" ]]; then
 os
 elif [[ $osw == "n" ]]; then
@@ -663,7 +663,7 @@ os() {
 =========================
 Press CTRL + C to Exit
 "
-    read -p $'\033[96;1mInput Options: \033[0m' os
+    read -p "Input Options: " os
     case $os in
         01|1) clear ; rocky ;;
         02|2) clear ; alpine ;;
@@ -700,7 +700,7 @@ echo -e "
 ==========================
   Autoscript FN AutoSC
 "
-read -p $'\033[96;1mInput option: \033[0m' ws
+read -p "Input option: " ws
 case $ws in
 1) clear ; os ;; #information ;; #os ;;
 2) menu ;;
@@ -727,7 +727,7 @@ ${green}8${NC}. Change SSH Banner
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-read -p $'\033[96;1mInput option: \033[0m' asu
+read -p "Input option: " asu
 case $asu in
 1) clear ; change_timezone ;;
 2) clear ; resall ;;

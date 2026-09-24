@@ -137,7 +137,7 @@ ${separator}"
     echo -e "${orange}Press [Ctrl + C] to exit${NC}"
     echo -e "${separator}"
 
-    read -p $'\033[96;1mInput Username to Unlock: \033[0m' name
+    read -p "Input Username to Unlock: " name
 else
     clear
     echo "No locked accounts found to unlock."
