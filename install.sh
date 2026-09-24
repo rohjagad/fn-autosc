@@ -13,6 +13,43 @@ if ! command -v curl >/dev/null 2>&1 && ! command -v wget >/dev/null 2>&1; then
     apt-get install -y -qq curl wget ca-certificates >/dev/null 2>&1 || true
 fi
 
+hosting="https://raw.githubusercontent.com/rohjagad/fn-autosc/main"
+
+# ---- Persistent session -------------------------------------------------
+# The install takes 15-30 minutes. Run it inside screen/tmux so that a dropped
+# SSH connection cannot interrupt it. If we are not already inside one, hand
+# off to a session named "fninstall". Set FN_NO_SESSION=1 to opt out.
+if [ -z "${STY:-}" ] && [ -z "${TMUX:-}" ] && [ -t 0 ] && [ -t 1 ] && [ "${FN_NO_SESSION:-0}" != "1" ]; then
+    SELF="$0"
+    if [ ! -f "$SELF" ]; then                     # e.g. bash <(curl ...) - re-fetch a real copy
+        SELF=/root/fn-install.sh
+        curl -fsSL "$hosting/install.sh" -o "$SELF" 2>/dev/null || \
+            wget -qO "$SELF" "$hosting/install.sh" 2>/dev/null
+    fi
+    if [ -f "$SELF" ]; then
+        if ! command -v screen >/dev/null 2>&1 && ! command -v tmux >/dev/null 2>&1; then
+            echo "No screen/tmux found - installing screen so the install survives disconnects..."
+            apt-get update -qq >/dev/null 2>&1 || true
+            apt-get install -y -qq screen >/dev/null 2>&1 || true
+        fi
+        if command -v screen >/dev/null 2>&1; then
+            echo "Starting the install in screen session 'fninstall' - it survives SSH disconnects."
+            echo "  detach: Ctrl-A then D        reattach: screen -r fninstall"
+            exec screen -S fninstall bash "$SELF"
+        elif command -v tmux >/dev/null 2>&1; then
+            echo "Starting the install in tmux session 'fninstall' - it survives SSH disconnects."
+            echo "  detach: Ctrl-B then D        reattach: tmux attach -t fninstall"
+            exec tmux new-session -A -s fninstall "bash '$SELF'"
+        fi
+    fi
+    echo "NOTE: this install can take 15-30 minutes. If your SSH session drops, the"
+    echo "      install stops. Re-run it inside screen to be safe:"
+    echo "        screen -S fninstall      # start the session"
+    echo "        screen -r fninstall      # reattach later to watch progress"
+    sleep 6
+fi
+# -------------------------------------------------------------------------
+
 if grep -q "bullseye" /etc/os-release 2>/dev/null; then
     if ! grep -qs "deb.debian.org/debian.*bullseye" /etc/apt/sources.list /etc/apt/sources.list.d/* 2>/dev/null; then
         echo "deb http://deb.debian.org/debian bullseye main contrib non-free" >> /etc/apt/sources.list
@@ -21,7 +58,6 @@ if grep -q "bullseye" /etc/os-release 2>/dev/null; then
     fi
 fi
 
-hosting="https://raw.githubusercontent.com/rohjagad/fn-autosc/main"
 ungu="\033[0;35m"
 Xark="\033[0m"
 BlueCyan="\033[5;36m"

@@ -67,10 +67,36 @@ continuously enforced — not just at install time.
 
 ### Install Command
 
-Run as `root`:
+Run as `root`. The install takes 15-30 minutes, so run it inside a terminal
+multiplexer — a dropped SSH connection then cannot interrupt it:
 
 ```bash
+# start a persistent session (screen is installed for you if it is missing)
+screen -S fninstall
+
+# run the installer inside it and answer the prompts
 bash <(curl -fsSL https://raw.githubusercontent.com/rohjagad/fn-autosc/main/install.sh)
+```
+
+Detach at any time with **`Ctrl-A` then `D`** — the installation keeps running
+on the server. Come back later and watch it:
+
+```bash
+screen -r fninstall     # reattach to the running install
+screen -ls              # list sessions (if you forget the name)
+```
+
+`install.sh` now does this for you: started outside `screen`/`tmux`, it
+re-launches itself in a session named `fninstall` (set `FN_NO_SESSION=1` to opt
+out). `tmux` works just as well — detach with `Ctrl-B` then `D`, reattach with
+`tmux attach -t fninstall`.
+
+To keep a transcript you can follow without attaching, turn logging on when you
+create the session:
+
+```bash
+screen -S fninstall -L -Logfile /root/fn-install.log
+tail -f /root/fn-install.log      # follow it from a second SSH connection
 ```
 
 The installer bootstraps `curl`/`wget`, configures Debian mirrors on stripped
