@@ -71,6 +71,10 @@ Run as `root`. The install takes 15-30 minutes, so run it inside a terminal
 multiplexer — a dropped SSH connection then cannot interrupt it:
 
 ```bash
+# a stripped image may ship no downloader at all - install one first, since
+# fetching the installer below is itself a download
+command -v curl >/dev/null 2>&1 || { apt-get update -qq && apt-get install -y curl; }
+
 # start a persistent session (screen is installed for you if it is missing)
 screen -S fninstall
 
@@ -99,8 +103,10 @@ screen -S fninstall -L -Logfile /root/fn-install.log
 tail -f /root/fn-install.log      # follow it from a second SSH connection
 ```
 
-The installer bootstraps `curl`/`wget`, configures Debian mirrors on stripped
-images, then verifies authorization before doing anything else.
+The installer bootstraps `curl`/`wget` for its own payload, configures Debian
+mirrors on stripped images, then verifies authorization before doing anything
+else. Fetching the installer in the first place still needs a downloader, which
+is why the block above installs `curl` first.
 
 ### Installation Prompts
 
