@@ -103,9 +103,21 @@ until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/creat
         continue
     fi
 done
-    read -p "Limit Ip: " ip
-    read -p "Limit Quota: " quota
-    read -p "Active Time: " masaaktif
+    read -p "Limit Ip (0 not allowed): " ip
+    while ! [[ "$ip" =~ ^[1-9][0-9]*$ ]]; do
+        echo -e "\033[0;31mValue must be a whole number greater than 0.\033[0m"
+        read -p "Limit Ip (0 not allowed): " ip || exit 1
+    done
+    read -p "Limit Quota (GBs, 0 not allowed): " quota
+    while ! [[ "$quota" =~ ^[1-9][0-9]*$ ]]; do
+        echo -e "\033[0;31mValue must be a whole number greater than 0.\033[0m"
+        read -p "Limit Quota (GBs, 0 not allowed): " quota || exit 1
+    done
+    read -p "Active Time (days, 0 not allowed): " masaaktif
+    while ! [[ "$masaaktif" =~ ^[1-9][0-9]*$ ]]; do
+        echo -e "\033[0;31mValue must be a whole number greater than 0.\033[0m"
+        read -p "Active Time (days, 0 not allowed): " masaaktif || exit 1
+    done
     read -p "Input UUID (Empty Default): " uuid
 
 # Validasi UUID

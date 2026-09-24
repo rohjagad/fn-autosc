@@ -104,7 +104,11 @@ read -rp "Input Username : " user
 if [ -z $user ]; then
     x-ws
 else
-    read -p "Expired (days): " masaaktif
+    read -p "Expired (days, 0 not allowed): " masaaktif
+    while ! [[ "$masaaktif" =~ ^[1-9][0-9]*$ ]]; do
+        echo -e "\033[0;31mValue must be a whole number greater than 0.\033[0m"
+        read -p "Expired (days, 0 not allowed): " masaaktif || exit 1
+    done
     exp=$(grep -wE "^### $user" "/etc/v2ray/config.json" | cut -d ' ' -f 3 | sort | uniq)
     now=$(date +%y-%m-%d) # Format tahun 2 digit
     d1=$(date -d "$exp" +%s)

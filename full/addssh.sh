@@ -104,8 +104,16 @@ main() {
     echo -e "\033[38;2;255;0;0m-\033[38;2;255;80;0m-\033[38;2;255;161;0m-\033[38;2;255;241;0m-\033[38;2;188;255;0m-\033[38;2;108;255;0m-\033[38;2;27;255;0m-\033[38;2;0;255;53m-\033[38;2;0;255;134m-\033[38;2;0;255;214m-\033[38;2;0;215;255m-\033[38;2;0;135;255m-\033[38;2;0;54;255m-\033[38;2;26;0;255m-\033[38;2;107;0;255m-\033[38;2;187;0;255m-\033[38;2;255;0;242m-\033[38;2;255;0;162m-\033[38;2;255;0;81m-\033[38;2;255;0;0m-\033[0m"
     read -p "Username: " username
     read -p "Password: " password
-    read -p "Limit IP: " iplimit
-    read -p "Expired (days): " masaaktif
+    read -p "Limit IP (0 not allowed): " iplimit
+    while ! [[ "$iplimit" =~ ^[1-9][0-9]*$ ]]; do
+        echo -e "\033[0;31mValue must be a whole number greater than 0.\033[0m"
+        read -p "Limit IP (0 not allowed): " iplimit || exit 1
+    done
+    read -p "Expired (days, 0 not allowed): " masaaktif
+    while ! [[ "$masaaktif" =~ ^[1-9][0-9]*$ ]]; do
+        echo -e "\033[0;31mValue must be a whole number greater than 0.\033[0m"
+        read -p "Expired (days, 0 not allowed): " masaaktif || exit 1
+    done
 
     clear_screen
 

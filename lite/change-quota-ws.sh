@@ -184,7 +184,11 @@ function change_quota() {
         echo -e ""
         baris_panjang
         echo ""
-        read -p " Input New Quota (GB) : " new_quota
+        read -p " Input New Quota (GBs, 0 not allowed) : " new_quota
+        while ! [[ "$new_quota" =~ ^[1-9][0-9]*$ ]]; do
+            echo -e "\033[0;31mValue must be a whole number greater than 0.\033[0m"
+            read -p " Input New Quota (GBs, 0 not allowed) : " new_quota || exit 1
+        done
         echo -e "\n${YellowBe}Reset total usage quota? (y/n):${Xark}"
         read -rp "Input: " reset_quota
         if [[ $reset_quota == "y" || $reset_quota == "Y" ]]; then
@@ -200,7 +204,7 @@ function change_quota() {
         Loading_Succes
 
         # Validasi jika input kuota kosong atau tidak valid
-        if [[ -z "$new_quota" || ! "$new_quota" =~ ^[0-9]+$ ]]; then
+        if [[ -z "$new_quota" || ! "$new_quota" =~ ^[1-9][0-9]*$ ]]; then
             echo -e "${Red} Invalid quota input. No changes made. ${Xark}"
             return 1
         else

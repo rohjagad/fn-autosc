@@ -148,8 +148,13 @@ function create() {
 		newline
 		goback
 	fi
-	echo -e " Duration (Days): \c"
+	echo -e " Duration (Days, 0 not allowed): \c"
 	read duration
+	while ! [[ "$duration" =~ ^[1-9][0-9]*$ ]]; do
+		echo -e "\033[0;31mValue must be a whole number greater than 0.\033[0m"
+		echo -e " Duration (Days, 0 not allowed): \c"
+		read duration || exit 1
+	done
 	exp=$(date -d +${duration}days +%Y-%m-%d)
 	expired=$(date -d "${exp}" +"%d %b %Y")
 
@@ -306,8 +311,13 @@ function extend() {
 		newline
 		goback
 	fi 
-	echo -e " Duration Day: \c"
+	echo -e " Duration (Days, 0 not allowed): \c"
 	read extend
+	while ! [[ "$extend" =~ ^[1-9][0-9]*$ ]]; do
+		echo -e "\033[0;31mValue must be a whole number greater than 0.\033[0m"
+		echo -e " Duration (Days, 0 not allowed): \c"
+		read extend || exit 1
+	done
 
 	exp_old=$(cat /etc/funny/.wireguard | grep -w $user | awk '{print $2}')
 	diff=$((($(date -d "${exp_old}" +%s)-$(date +%s))/(86400)))

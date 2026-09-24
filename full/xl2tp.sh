@@ -104,7 +104,11 @@ until [[ $VPN_USER =~ ^[a-zA-Z0-9_]+$ && ${CLIENT_EXISTS} == '0' ]]; do
 		fi
 	done
 read -p "Password : " VPN_PASSWORD
-read -p "Duration (Days) : " masaaktif
+read -p "Duration (Days, 0 not allowed) : " masaaktif
+while ! [[ "$masaaktif" =~ ^[1-9][0-9]*$ ]]; do
+    echo -e "\033[0;31mValue must be a whole number greater than 0.\033[0m"
+    read -p "Duration (Days, 0 not allowed) : " masaaktif || exit 1
+done
 hariini=`date -d "0 days" +"%Y-%m-%d"`
 exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
 clear
@@ -212,7 +216,11 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/funny/.l2tp")
 			read -rp "Select one client [1-${NUMBER_OF_CLIENTS}]: " CLIENT_NUMBER
 		fi
 	done
-read -p "Expired (Days) : " masaaktif
+read -p "Expired (Days, 0 not allowed) : " masaaktif
+while ! [[ "$masaaktif" =~ ^[1-9][0-9]*$ ]]; do
+    echo -e "\033[0;31mValue must be a whole number greater than 0.\033[0m"
+    read -p "Expired (Days, 0 not allowed) : " masaaktif || exit 1
+done
 user=$(grep -E "^### " "/etc/funny/.l2tp" | cut -d ' ' -f 2 | sed -n "${CLIENT_NUMBER}"p)
 exp=$(grep -E "^### " "/etc/funny/.l2tp" | cut -d ' ' -f 3 | sed -n "${CLIENT_NUMBER}"p)
 now=$(date +%Y-%m-%d)

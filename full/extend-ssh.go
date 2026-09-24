@@ -29,13 +29,13 @@ func main() {
 		return
 	}
 
-	fmt.Print("Day Extend: ")
+	fmt.Print("Day Extend (days, 0 not allowed): ")
 	daysInput, _ := reader.ReadString('\n')
 	daysInput = strings.TrimSpace(daysInput)
 	days, err := strconv.Atoi(daysInput)
-	if err != nil {
+	if err != nil || days < 1 {
 		clearScreen()
-		fmt.Println("\033[31mInvalid input for days\033[0m")
+		fmt.Println("\033[31mDays must be a whole number greater than 0\033[0m")
 		return
 	}
 

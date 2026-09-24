@@ -165,9 +165,15 @@ func readFile(filePath string) string {
 	return strings.TrimSpace(string(content))
 }
 
-// isNumeric reports whether s consists only of ASCII digits (empty = invalid).
-func isNumeric(s string) bool {
+// isPositiveInt reports whether s is a base-10 integer >= 1. A value of 0
+// is rejected on purpose so it can never silently mean "unlimited" or
+// "no limit" - an operator who wants no practical bound enters a
+// deliberately large number instead (bug 79).
+func isPositiveInt(s string) bool {
 	if s == "" {
+		return false
+	}
+	if s[0] == '0' {
 		return false
 	}
 	for _, r := range s {
@@ -243,14 +249,14 @@ func main() {
 		fmt.Printf(" Expiry     : %s\n", expiryDate)
 		barisPanjang()
 
-		fmt.Print("Input New IP   : ")
+		fmt.Print("Input New IP (0 not allowed): ")
 		var newIPLimit string
 		fmt.Scanln(&newIPLimit)
 
 		loadingAnimasi()
 		loadingSucces()
 
-		if !isNumeric(newIPLimit) {
+		if !isPositiveInt(newIPLimit) {
 			fmt.Println(Red + "Invalid input!" + Xark)
 		} else {
 			if err := os.WriteFile(limitFile, []byte(newIPLimit), 0644); err != nil {
