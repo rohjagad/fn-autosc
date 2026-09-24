@@ -128,10 +128,10 @@ while true; do
     case $pks in
         [yY]) 
             # Lanjutkan dengan eksekusi perintah
-            sed -i "s|"id": "${old}"|"id": "${new}"|" /etc/xray/json/*.json
-            sed -i "s|"password": "${old}"|"password": "${new}"|" /etc/xray/json/*.json
+            sed -i "s|\"id\": \"${old}\"|\"id\": \"${new}\"|" /etc/xray/json/*.json
+            sed -i "s|\"password\": \"${old}\"|\"password\": \"${new}\"|" /etc/xray/json/*.json
             sed -i "s|UUID   : $old|UUID   : $new|" /var/log/create/xray/grpc/${user}.log
-            sed -i 's/${old}/${new}/g' /var/log/create/xray/grpc/${user}.log
+            sed -i "s/${old}/${new}/g" /var/log/create/xray/grpc/${user}.log
 
             # Restart All Service
             systemctl daemon-reload

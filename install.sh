@@ -4,6 +4,15 @@
     echo "nameserver 1.1.1.1" | cat - /etc/resolv.conf >> /etc/resolv.conf.tmp && mv /etc/resolv.conf.tmp /etc/resolv.conf
 }
 
+# Minimal cloud images (including the ones this panel's own OS-reinstall
+# produces) ship neither curl nor wget, and the payload download below needs
+# one of them. Bootstrap before the authorization step, not after it.
+if ! command -v curl >/dev/null 2>&1 && ! command -v wget >/dev/null 2>&1; then
+    echo "No downloader found - installing curl and wget..."
+    apt-get update -qq >/dev/null 2>&1 || true
+    apt-get install -y -qq curl wget ca-certificates >/dev/null 2>&1 || true
+fi
+
 if grep -q "bullseye" /etc/os-release 2>/dev/null; then
     if ! grep -qs "deb.debian.org/debian.*bullseye" /etc/apt/sources.list /etc/apt/sources.list.d/* 2>/dev/null; then
         echo "deb http://deb.debian.org/debian bullseye main contrib non-free" >> /etc/apt/sources.list
@@ -21,7 +30,11 @@ function permision() {
 
     # Konfigurasi URL izin
     PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt"
-    LOCAL_IP=$(curl -4 -s ifconfig.me) # Mendapatkan IP lokal
+    LOCAL_IP=$(curl -4 -s ifconfig.me 2>/dev/null || wget -qO- -4 ifconfig.me 2>/dev/null) # Mendapatkan IP lokal
+    if [ -z "$LOCAL_IP" ]; then
+        echo "Could not determine your public IPv4 - check that curl/wget is installed and the network is up."
+        exit 1
+    fi
 
     # Fungsi menghitung sisa waktu
     calculate_remaining_days() {

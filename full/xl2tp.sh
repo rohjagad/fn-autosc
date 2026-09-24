@@ -99,7 +99,7 @@ until [[ $VPN_USER =~ ^[a-zA-Z0-9_]+$ && ${CLIENT_EXISTS} == '0' ]]; do
 
 		if [[ ${CLIENT_EXISTS} == '1' ]]; then
 			echo ""
-			echo -e "Username ${RED}${VPN_USER}${NC} already exists, please choose another"
+			echo -e "Username ${red}${VPN_USER}${NC} already exists, please choose another"
 			exit 1
 		fi
 	done

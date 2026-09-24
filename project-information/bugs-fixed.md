@@ -642,3 +642,47 @@ All fixes live-verified on Debian 12 VPS (`202.155.17.126`) after fresh OS reins
     - **Verified:** `bash -n` passes on all 50 changed files; the transform is a pure 1:1 line swap (**466 insertions / 466 deletions**) and the form styling is provably intact (rainbow rules **384 -> 52**, i.e. form only; `1;33m` **170 -> 36**, form only). Rendering the reverted card through `format_display` gives **0** stderr, **2** rainbow `=` outer, **6** blue `-` inner, **1** purple header, **2** deep-purple links, **14** green values and **0** escapes left; a faithful port of the Go `formatLogForTerminal` over the same content now detects **8** separators (was **0**) and yields **3** rainbow `=` / **5** blue `-` / **1** purple / **2** deep purple / **14** green.
     - **Zips:** `menu/full.zip` md5 `0b2c9345` -> `d3b685d3` (115 entries, **26** replaced) and `menu/lite.zip` `beb3f455` -> `a2e4aea7` (98 entries, **24** replaced), rebuilt in place with **identical entry lists** and **0** non-0755 entries; extracted entries are byte-identical to their sources, `unzip -tq` is clean, and **no Go binary was rebuilt** because no Go source changed (the viewers read the plain content correctly as-is).
     - **Deploy pending:** the test VPS went unreachable (provider-side outage) during this cycle, so this fix is committed and pushed for fresh installs but not yet deployed or live-verified on the VPS.
+
+## Fresh-Reinstall Audit Cycle (Bugs 86-93)
+
+86. **`change-id-grpc` Now Actually Changes the ID** (`full/change-id-grpc.sh`, `lite/change-id-grpc.sh`)
+    - The two config substitutions were rewritten with escaped inner quotes - `sed -i "s|\"id\": \"${old}\"|\"id\": \"${new}\"|" /etc/xray/json/*.json` and the same for `"password"` - so the pattern that reaches `sed` is now `"id": "OLD"` instead of the quote-stripped `id: OLD`. The log rewrite at line 134 was moved from single quotes (where `'s/${old}/${new}/g'` matched the literal text `${old}`) to double quotes so the variables expand.
+    - **Live on the fresh Debian 12 install:** created `bug84test` with `add-vmess-grpc`, then ran `change-id-grpc`; the UUID read back from `/etc/xray/json/grpc.json` was `cfbbaafc-8d52-450c-9fb0-145bc8221e6d` both **before and after** the change - the operation silently did nothing. Locally, the fixed pattern rewrites a real config line and the log line. Test account and its quota/limit/log files removed afterwards.
+    - No `(Regression Fix)` marker: V23 carries the identical broken pattern.
+
+87. **The Locked-HTTP Notification Names the Account** (`full/locked-xray-http.sh`, `lite/locked-xray-http.sh`)
+    - `<code>$user</code>` -> `<code>$name</code>` on the notification line, matching what the script actually assigns (`read -p "Input Username to Lock: " name`) and what its three siblings already used.
+    - **Live:** `bash -uc 'echo "$user"'` reports `user: unbound variable`, and the installed script's own assignment is `name` - so every HTTP lock notification was sent with an empty username.
+    - No marker: V23 line 68 already reads `<code>$user</code>`.
+
+88. **The lite Menu Renders Its Colours** (`lite/menu.sh`)
+    - Added the three missing definitions the file was already using - `export blue='\033[1;34m'`, `export purple='\033[1;35m'`, `export orange='\033[38;5;208m'` - immediately after `NC`, matching `full/menu.sh:181-183`. `blue` is used for `blue_sep` and was masked from shellcheck by a function-local array of the same name, so it is fixed here too.
+    - **Live:** the `menu` extracted from the shipped `menu/lite.zip` used `${purple}` twice, `${orange}` once and `${blue}` six times while defining **none** of them, so the "TOTAL ACCOUNTS" heading, the inner dividers and the "Press [Ctrl + C] to exit" footer rendered in the default foreground.
+    - **`(Regression Fix)`** - the menu standardization introduced the usages (and the full menu's definitions) but synced the lite file without the definitions; V23's `lite/menu.sh` used neither colour.
+
+89. **The UDP-Request Fallback Points at the File That Exists** (`installer/request.sh`)
+    - `${hosting}/udp-request-linux-amd64` -> `${hosting}/udp/udp-request-linux-amd64`. The GitHub release URL remains the primary source and is unchanged.
+    - **Verified against the network:** the old path returns **404** while the new one returns 200 (the binary is committed at `udp/udp-request-linux-amd64`), so the second source is now a real fallback instead of a guaranteed 404.
+
+90. **`limit-ip-ssh` Iterates Its Array Safely** (`full/limit-ip-ssh.sh`)
+    - `for user in ${username[@]}` -> `for user in "${username[@]}"`, clearing the ShellCheck SC2068 error and stopping word-splitting from inventing usernames.
+    - **Verified:** `username=("a b")` iterated unquoted yields `[a]` and `[b]` (each of which would get its own `/etc/xray/limit/ip/ssh/<fragment>` default file), while the quoted form yields `[a b]`.
+    - No marker: V23 has the same unquoted line.
+
+91. **The OS-Reinstall Menu Points at a Maintained Reinstaller** (`full/menu-system.sh`, `lite/menu-system.sh`)
+    - All **31** reinstall URLs in each file repointed from `raw.githubusercontent.com/rohjagad/reinstall/main/reinstall.sh` to `raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh`, the maintained upstream the fork mirrors.
+    - **Live on this VPS:** running the fork reached `***** MOD DEBIAN INITRD *****`, downloaded upstream `trans.sh`, then aborted with `***** ERROR ***** / This script is outdated, please download reinstall.sh again`; the fork carries `SCRIPT_VERSION=4BACD833-A585-23BA-6CBB-9AA4E08E0004` while upstream is at `...0005`, and only the latter's GUID appears in `trans.sh`. The identical command with the upstream script completed, isolating the fault to the stale fork. The aborted run left the machine neither modified nor boot-primed.
+    - No marker: the reinstall menu is a repo-added feature that never worked, not a regression of something that did.
+
+92. **`xl2tp` Prints Its Warning in Red** (`full/xl2tp.sh`)
+    - `Username ${RED}${VPN_USER}${NC} already exists` -> `Username ${red}${VPN_USER}${NC} already exists`, using the lower-case `red` the file actually defines.
+    - **Live:** the installed script defines `red`, `green`, `blue`, `purple`, `orange`, `NC` and no `RED`; evaluating the line as written emitted no colour code at all, while the `${red}` form emitted `\033[0;31m`.
+    - No marker: V23 has the same line.
+
+93. **The Installer Bootstraps Its Own Downloader** (`install.sh`)
+    - `install.sh` now installs `curl`/`wget`/`ca-certificates` when **both** are absent, before the authorization step rather than after it, so the README's claim that "the installer bootstraps `curl`/`wget`" is now true. `LOCAL_IP` gained a `wget` fallback and an explicit `Could not determine your public IPv4 - check that curl/wget is installed and the network is up.` error, replacing the misleading `Your IP doesn't have on database` that an empty IP previously produced.
+    - **Live on the fresh Debian 12 install:** `command -v curl` and `command -v wget` both returned nothing; `printf 'full\n' | bash install.sh` printed `/root/install.sh: line 24: curl: command not found` and the same at line 39, then `Your IP doesn't have on database`, and exited. Installing `curl`/`wget` by hand and re-running the identical command passed the licence gate and started `full.sh` normally.
+    - No marker: the bootstrap never existed, so nothing regressed.
+
+- **Cycle artefacts:** `menu/full.zip` md5 `0b2c9345` -> **`5354da08`** (115 entries, 5 replaced: `change-id-grpc`, `limit-ip-ssh`, `locked-xray-http`, `menu-system`, `xl2tp`) and `menu/lite.zip` `beb3f455` -> **`cf5e937c`** (98 entries, 4 replaced: `change-id-grpc`, `locked-xray-http`, `menu`, `menu-system`), rebuilt in place with identical entry lists and 0 non-0755 entries; `unzip -tq` clean on both. `install.sh` and `installer/request.sh` are fetched from GitHub raw and are not zip entries. No Go source changed, so no binary was rebuilt.
+- **Fresh-install verification:** the eight bugs were reproduced on a **freshly reinstalled Debian 12** (`PRETTY_NAME="Debian GNU/Linux 12 (bookworm)"`, kernel `6.1.0-50-cloud-amd64`) with the autoscript installed from GitHub `main` (`INSTALL SUCCESS`, `funny` 1.23, xray/v2ray/nginx/wg-quick@wg0/quota-ws/dnstt/dropbear all active) - i.e. on the buggy code, before any fix - so each reproduction is against what a real fresh install ships.

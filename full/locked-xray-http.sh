@@ -101,7 +101,7 @@ send_log() {
 <b>⚠️ X-RAY HTTP LOCKED ACOUNT ⚠️</b>
 <b>━━━━━━━━━━━━━━━━━━━━━━━</b>
 <b>🗓️  Date     :</b> <code>$DATE</code>
-<b>👤 Username :</b> <code>$user</code>
+<b>👤 Username :</b> <code>$name</code>
 <b>📌 Expired  :</b> <b>$exp2</b>
 <b>🛡️  Protokol :</b> <b>$protokol2</b>
 <b>━━━━━━━━━━━━━━━━━━━━━━━</b>

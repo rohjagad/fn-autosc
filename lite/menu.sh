@@ -84,6 +84,9 @@ export green='\033[0;32m'
 export RED='\033[0;31m'
 export GREEN='\033[0;32m'
 export NC='\033[0m'
+export blue='\033[1;34m'
+export purple='\033[1;35m'
+export orange='\033[38;5;208m'
 export BICyan='\033[0;36m'
 
 rainbow_sep() {
