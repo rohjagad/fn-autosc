@@ -148,7 +148,8 @@ function create() {
 		newline
 		goback
 	fi
-	echo "0 not allowed"
+	echo ""
+	echo -e "\033[38;5;208m0 not allowed\033[0m"
 	echo -e " Duration (Days): \c"
 	read duration
 	while ! [[ "$duration" =~ ^[1-9][0-9]*$ ]]; do
@@ -312,7 +313,8 @@ function extend() {
 		newline
 		goback
 	fi 
-	echo "0 not allowed"
+	echo ""
+	echo -e "\033[38;5;208m0 not allowed\033[0m"
 	echo -e " Duration (Days): \c"
 	read extend
 	while ! [[ "$extend" =~ ^[1-9][0-9]*$ ]]; do

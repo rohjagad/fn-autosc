@@ -104,7 +104,8 @@ until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/creat
         continue
     fi
 done
-    echo "0 not allowed"
+    echo ""
+    echo -e "\033[38;5;208m0 not allowed\033[0m"
     read -p "Limit Ip: " ip
     while ! [[ "$ip" =~ ^[1-9][0-9]*$ ]]; do
         echo -e "\033[0;31mValue must be a whole number greater than 0.\033[0m"

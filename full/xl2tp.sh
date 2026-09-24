@@ -104,7 +104,8 @@ until [[ $VPN_USER =~ ^[a-zA-Z0-9_]+$ && ${CLIENT_EXISTS} == '0' ]]; do
 		fi
 	done
 read -p "Password : " VPN_PASSWORD
-echo "0 not allowed"
+echo ""
+echo -e "\033[38;5;208m0 not allowed\033[0m"
 read -p "Duration (Days) : " masaaktif
 while ! [[ "$masaaktif" =~ ^[1-9][0-9]*$ ]]; do
     echo -e "\033[0;31mValue must be a whole number greater than 0.\033[0m"
@@ -217,7 +218,8 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/funny/.l2tp")
 			read -rp "Select one client [1-${NUMBER_OF_CLIENTS}]: " CLIENT_NUMBER
 		fi
 	done
-echo "0 not allowed"
+echo ""
+echo -e "\033[38;5;208m0 not allowed\033[0m"
 read -p "Expired (Days) : " masaaktif
 while ! [[ "$masaaktif" =~ ^[1-9][0-9]*$ ]]; do
     echo -e "\033[0;31mValue must be a whole number greater than 0.\033[0m"

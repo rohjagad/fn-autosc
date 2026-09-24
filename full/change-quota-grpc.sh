@@ -184,7 +184,8 @@ function change_quota() {
         echo -e ""
         baris_panjang
         echo ""
-        echo "0 not allowed"
+        echo ""
+        echo -e "\033[38;5;208m0 not allowed\033[0m"
         read -p " Input New Quota (GBs) : " new_quota
         while ! [[ "$new_quota" =~ ^[1-9][0-9]*$ ]]; do
             echo -e "\033[0;31mValue must be a whole number greater than 0.\033[0m"
