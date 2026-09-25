@@ -858,3 +858,20 @@ Fresh OS via the panel's own reinstall path, then `install.sh` (`full`, `autosc.
 - All **62** OS-reinstall menu invocations match upstream's supported distro/version list (0 typos) - the R-1 regression stays fixed.
 - Every **active** download URL in `install.sh`/`installer/*.sh` returns 200 (only the two bare base-URL assignments do not, which is expected).
 - The Go tools' shipped binaries contain the Bug-62 path literal (`/etc/xray/limit/ip/xray/`) and the Bug-72 `passwd` call, i.e. the prebuilt binaries are not stale relative to their sources.
+
+## Audit Follow-up - Deployment Note and Open Items (September 2026)
+
+### Deployment note - the ACME address used for the verification install
+
+The certificate on the freshly installed test host was issued with the placeholder address `admin@rohcuan.dpdns.org`. The installer writes whatever address it is given to `/etc/funny/.email`, and `dm-menu` now reads it from there (the fix for the hardcoded addresses), so replacing it is a one-file edit followed by a certificate re-issue. Set a real operator address before treating this host as anything other than a test.
+
+### Still open by the owner's decision - not defects introduced by this audit
+
+- **Hardcoded WhatsApp contact in the SSH banner** (`installer/ssh.sh:71-72`). Tracked as README Known Issues item 4 and explicitly deferred by the owner. The same class of hardcoding as the Telegram token, but it is a contact rather than a credential, and nothing ever claimed it had been removed, so it was not changed here.
+- **Inherited secrets left in place.** `installer/set-br.sh` ships a Gmail address and app password for `msmtp`, and `installer/l2tp.sh` a default `VPN_IPSEC_PSK='myvpn'`. Both come from V23, both are already called out in the README's Security Notes, and neither was ever documented as fixed - so they are recorded defaults for the owner to rotate, not false-positive claims.
+- **The lite edition was not live-verified in this cycle.** The full edition was installed end to end on a fresh OS and re-checked after a reboot; fix 97's lite behaviour (the cron block omitting `expire-ssh` and `limit-ip-ssh`) was verified only in a sandbox with a lite command set - full 16 lines, lite 14, unchanged by a second run. The code path is identical and the only variable is which commands exist, but a real lite install is still worth running when convenient.
+
+### Left as-is deliberately
+
+- The dangling `/etc/systemd/system/multi-user.target.wants/xray.service` symlink - the unit three lines above removes `xray.service` on purpose and installs its own `xray@.service`, so the symlink points at nothing. systemd ignores it (`list-unit-files` reports 0, no boot warning); adding a cleanup would be churn for no behavioural gain.
+- The duplicated authorization check (`install.sh` calls `permision`, then `full.sh`/`lite.sh` call it again) - inherited from V23, costs two extra HTTP requests per install, harmless.
