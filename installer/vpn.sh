@@ -244,7 +244,7 @@ apt install python3 -y
 cat> /etc/systemd/system/opn.service << END
 [Unit]
 Description=Python Proxy Mod By geovpn
-Documentation=https://t.me/geovpn
+Documentation=https://t.me/rohcuan
 After=network.target nss-lookup.target
 
 [Service]

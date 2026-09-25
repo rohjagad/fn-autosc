@@ -875,3 +875,13 @@ The certificate on the freshly installed test host was issued with the placehold
 
 - The dangling `/etc/systemd/system/multi-user.target.wants/xray.service` symlink - the unit three lines above removes `xray.service` on purpose and installs its own `xray@.service`, so the symlink points at nothing. systemd ignores it (`list-unit-files` reports 0, no boot warning); adding a cleanup would be churn for no behavioural gain.
 - The duplicated authorization check (`install.sh` calls `permision`, then `full.sh`/`lite.sh` call it again) - inherited from V23, costs two extra HTTP requests per install, harmless.
+
+## Contact Details Updated to the Operator's Own (September 2026)
+
+Closed the last hardcoded-contact item. The SSH banner written by `installer/ssh.sh` carried the previous author's details: an order/trial line pointing at `wa.me/62858630085249`, and a `chat.whatsapp.com` group invite belonging to a third party.
+
+- `installer/ssh.sh` now shows `https://wa.me/6289512992313` on the order/trial line, and replaces the group invite with `❖Ƭʜᴇ TELEGRAM => https://t.me/rohcuan`.
+- The panel's own systemd units that advertised another party's channel were repointed to the operator as well: `installer/slowdns.sh` and `full/menu-dnstt.sh` (`Documentation=https://t.me/fn_project`) and `installer/vpn.sh` (`Documentation=https://t.me/geovpn`) now all use `https://t.me/rohcuan`.
+- `full/menu-dnstt.sh` is a packed entry, so `menu/full.zip` was rebuilt in place: 115 entries, entry list identical, 0 content mismatches, 0 non-755, and the packed copy verified byte-identical to its source.
+- Verified: the old number, the old group invite and both old `t.me` targets return 0 occurrences across `installer/`, `full/` and `lite/`.
+- README: the Known Issues list drops the "hardcoded WhatsApp number" entry, the change is recorded in the since-fixed list, and the arrangement is recorded as an intentional decision (`is-decision.md` section 9).

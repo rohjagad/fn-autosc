@@ -775,12 +775,14 @@ Binaries are built with `-ldflags='-s -w'` for a small footprint.
    transport may not work through HTTP/2 reverse proxies.
 3. **UDP Request SNAT** — the broad `10.0.0.0/8` SNAT rule can overlap client
    private subnets and may need manual exclusion.
-4. **Hardcoded WhatsApp number** — appears in the SSH banner (`installer/ssh.sh`).
 
 Formerly listed here and since fixed: the stale `raw.githubusercontent.com`
 hosts entry; the hardcoded Telegram bot token (the install notification now
 reads the operator's own `/etc/funny/.keybot` and `/etc/funny/.chatid` and
 sends nothing when they are unset, so no credential is committed); the
+hardcoded third-party contacts in the SSH banner (the order/trial line now
+shows `wa.me/6289512992313`, and the previous author's group invite has been
+replaced by `t.me/rohcuan`); the
 Fail2ban/auth-log gap (now
 configured against the systemd journal, which is where Debian 12 sshd and
 dropbear actually log); the BadVPN/UDPGW `7300` port (the `other/badvpn` binary

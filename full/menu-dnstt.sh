@@ -129,7 +129,7 @@ ${orange}Press [Ctrl + C] to exit${NC}"
                 
                 echo -e "[Unit]
                 Description=SlowDNS FN AutoSC Autoscript Service
-                Documentation=https://t.me/fn_project
+                Documentation=https://t.me/rohcuan
                 After=network.target nss-lookup.target
 
                 [Service]

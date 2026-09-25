@@ -110,7 +110,7 @@ SlowDNS / DNSTT Settings
   cat >/etc/systemd/system/dnstt.service <<END
 [Unit]
 Description=SlowDNS FN AutoSC Autoscript Service
-Documentation=https://t.me/fn_project
+Documentation=https://t.me/rohcuan
 After=network.target nss-lookup.target
 
 [Service]
