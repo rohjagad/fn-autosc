@@ -85,3 +85,7 @@ This document tracks intentional design decisions, configurations, and behaviors
 - **Reason:** the file host existed only to produce a link, and Telegram already receives the archive itself. The link added a third-party copy of the backup, an expiry the panel could not honour, and a dead-host fallback chain to maintain (file.io had already stopped serving anonymous uploads). Sending the document is a single request, needs no external service, and is what the operator actually uses.
 - **What changed:** both `backup.sh` scripts lose the upload block, the `Your ID` and `Link Backup` fields and the "AutoDelete After 7 Days" claim, and the commented-out `sendMessage` block; the caption now carries the email, server IP and date/domain only. The menu entry reads "Backup to Telegram", and the README's backup section matches. `jq` is no longer used by the backup path (it stays installed for other uses).
 - **Note for auditors:** the absence of a backup link is intended. Do not reinstate a file host; if a downloadable link is ever wanted it should be a deliberate, operator-owned destination rather than an anonymous public one.
+
+### Section 12 revision - caption fields
+
+The Telegram caption was reduced to **Domain / IP / Date**. The `Email` line and the now-unused `email=$(cat /etc/funny/.email)` read were removed from both `backup.sh` scripts, so the backup notification no longer surfaces the ACME address. The decision itself is unchanged, and the README's "Where it goes" was updated to match.

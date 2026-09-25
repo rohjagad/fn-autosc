@@ -906,3 +906,9 @@ The "Hardcoded WhatsApp contact" bullet in the Audit Follow-up above was written
 - README: the backup menu table, the "Where it goes" section and the stale file.io note were updated.
 - `menu/full.zip` (114 entries) and `menu/lite.zip` (97 entries) were rebuilt: 0 content mismatches, 0 non-755, and the packed `backup`/`bmenu` verified to contain no file-host references.
 - Verified: `file.io`, `tmpfiles`, `litterbox`, `upload_link` and `id_link` no longer appear in either backup script or in the packed entries. Recorded as decision 12.
+
+## Backup Caption Reduced to Domain / IP / Date (September 2026)
+
+- `full/backup.sh` and `lite/backup.sh`: the caption's `Email` line was replaced by the domain, so the attachment is captioned `Domain` / `IP` / `Date`; the now-unused `email=$(cat /etc/funny/.email)` read was dropped. `/etc/funny/.email` remains in use by ACME (`dm-menu`).
+- README "Where it goes" updated to describe the caption as domain / IP / date.
+- `menu/full.zip` (114 entries) and `menu/lite.zip` (97 entries) rebuilt: 0 mismatches, 0 non-755, packed `backup` verified to match its source.

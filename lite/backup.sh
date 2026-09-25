@@ -82,7 +82,6 @@ cd /root
 zip -r backup.zip backup > /dev/null 2>&1
 
 file_path="/root/backup.zip"
-email=$(cat /etc/funny/.email)
 
 # Persiapkan pesan Telegram. The archive is delivered as a Telegram document;
 # there is no file-host upload and therefore no expiring public link.
@@ -90,9 +89,9 @@ TEKS="
 [ Information Your Backup Data ]
 ================================
 
-Email         : $email
-Your IP       : $MYIP
-Date / Domain : $date / $domain
+Domain : $domain
+IP     : $MYIP
+Date   : $date
 ================================
 "
 

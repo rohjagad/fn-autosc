@@ -473,8 +473,8 @@ The staged tree is zipped to `/root/backup.zip`.
 ### Where It Goes
 
 - **`backup`** — sends the archive to **Telegram as a document attachment**,
-  captioned with the email, server IP, domain and timestamp. Runs on the
-  4×/day cron schedule.
+  captioned with the domain, server IP and date. Runs on the 4×/day cron
+  schedule.
 - **Telegram is the only delivery channel.** There is no file-host upload and
   therefore no expiring public link, no Google Drive variant, and no email
   notification. The Google Drive and email paths were removed, and the
