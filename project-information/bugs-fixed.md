@@ -722,3 +722,23 @@ All fixes live-verified on Debian 12 VPS (`202.155.17.126`) after fresh OS reins
 - **Artifacts as deployed:** `menu/full.zip` md5 **`dfff5179`** (115 entries) and `menu/lite.zip` md5 **`e59a78cd`** (98 entries), both last changed by `dcb3acd`. Earlier-cycle hashes (`6f81b7c5`/`064f7c6b`, `0b2c9345`/`beb3f455`, `5354da08`/`cf5e937c`) are historical and no longer current.
 - **Verification practice - two false positives to avoid repeating.** (1) Rule-line counts differ per card: `add-vmess-grpc` legitimately carries **6** plain `=` rules while `add-vmess-ws` carries **8**, so a hard-coded expected count is the wrong assertion - compare against the same file's source or its hash instead. (2) Grepping for `echo -e "$line"` from inside a double-quoted `$( )` mangles the escaping and reports a false zero; use `grep -F` with the literal in single quotes, or simply compare md5s as above. The md5 is the dependable check for `/etc/funny/format.sh`.
 - **Test-driver improvements for future reinstall cycles.** The progress poller should key on the *installed* kernel marker (`-cloud-amd64`) together with `PRETTY_NAME`, and should accept a lingering `pgrep` self-match as completion rather than waiting for zero matching processes - this cycle both conditions failed to fire even though the install had finished, costing two false waits. It should also try both port 22 (installer) and port 3303 (post-install) since the panel moves sshd during installation.
+
+## Status of the "Not Fixed Yet" List and README Known Issues (re-verified against the code)
+
+Every open finding was re-checked against the current tree rather than trusted from the docs. **Four are no longer true** and are stale documentation; the rest are genuinely still open.
+
+**Resolved since being listed as open:**
+- **Stale `199.232.68.133 raw.githubusercontent.com` hosts entry** (`installer/v2ray.sh`) - the block was removed (see the "Removed obsolete block writing hardcoded `199.232.68.133`..." entry earlier in this document). The address now appears only inside these docs.
+- **Hardcoded Telegram bot token** in `installer/full.sh` / `installer/lite.sh` - `grep -rE 'bot[0-9]{6,}:[A-Za-z0-9_-]{20,}'` returns **0** across `installer/`, `full/`, `lite/` and `install.sh`.
+- **`file.io` expiry mismatch** - `full/backup.sh` and `lite/backup.sh` now fall back to `tmpfiles.org` and then `litterbox.catbox.moe` (72h) when file.io fails, so the caption's expiry claim is no longer the operative one.
+- **Broken menu entries "Argo option 2 (`reres`)" and "SlowDNS option 4 (`typer`)"** - neither symbol exists anywhere in `full/`, `lite/` or `installer/`; `menu-argo.sh` has no option 2 at all, and `menu-dnstt.sh` option 4 renders a SlowDNS information panel.
+
+**Still open (verified present in the code today):**
+- **BadVPN/UDPGW port 7300 is advertised but unsupported.** `full/addssh.sh:158` and `full/trial-ssh.sh:133` print `BadVpn/Udpgw : 7300` on every SSH account card, while no `badvpn`/`udpgw` binary exists anywhere in the tree - the service is never installed, so every SSH account promises a port that does not answer.
+- **`chmod +x *` executes inside `/usr/bin`.** `installer/full.sh:123` and `installer/lite.sh:117` make every file in the current directory executable during the menu install; that directory is `/usr/bin`, so the mode change lands on the whole system binary directory instead of just the unpacked menu entries.
+- **Hardcoded WhatsApp contact in the SSH banner.** `installer/ssh.sh:71-72` embeds a personal `wa.me` number and a WhatsApp group invite that operators cannot change without editing the file.
+- **Hardcoded ACME addresses in `dm-menu.sh`.** `full/dm-menu.sh` carries three personal addresses (`faraskun02@gmail.com:163`, `melon334456@gmail.com:328`, `rerechan0202@gmail.com:365`) and `lite/dm-menu.sh` one; all four are handed to Let's Encrypt on the operator's behalf.
+- **Fail2ban is installed but never configured.** `installer/package.sh:13,77` install the package, but no `jail.local` or `jail.d` is created anywhere in the tree, so it runs on upstream defaults and the "missing auth log" warning on minimal Debian stands.
+- **Restore path conflict (regression 11).** Unchanged: `website/restore-ftp.sh` reads only `/var/www/uploads/*.zip` while `full/restore-ftp.sh` reads only `/root/*backup*.zip`; whichever is installed last wins.
+- **SlowDNS still needs a manual DNS record** (README Known Issues 2) - `dnstt.service` stays inactive until the nameserver domain resolves to the host.
+- **Design caveats rather than defects:** the broad `10.0.0.0/8` SNAT rule for the UDP request can overlap client private subnets, and HTTP/2-fronted SplitHTTP may not suit clients that expect plain HTTP/1.1 chunked transport.
