@@ -759,3 +759,27 @@ The "Cycle Epilogue" above records that the test VPS ended the cycle running the
 The epilogue's verification claims are unaffected in substance - they were recorded from the machine while it *was* in that state, and the repository, zips and GitHub-served artifacts are unchanged by the reset. Only the description of the live box is stale: it currently carries no panel, so any further live verification needs a fresh install first.
 
 For the same reason, the `/usr/bin` evidence quoted in the `chmod +x *` correction (`442` files, all executable) was gathered while the panel was installed. The argument it supports does not depend on that: `/usr/bin` exists to hold executables, so in practice there is nothing there for the guard to change - that is a property of the directory, not of that particular host.
+
+## Remaining Open Items Closed (September 2026)
+
+The `## Not Fixed Yet` list has been reduced to nothing actionable. Two of its entries were already fixed in code, four were fixed now, and two are deferred by their owner (the hardcoded WhatsApp banner and the SlowDNS DNS record, both listed in the README's Known Issues).
+
+**BadVPN/UDPGW port 7300 is now real, because the repository already shipped the binary** (`installer/ssh.sh`)
+- The repo carries `other/badvpn` - verified to be **BadVPN udpgw 1.999.130**, an x86-64 ELF - and serves it from GitHub raw (200), yet nothing ever installed it, while `full/addssh.sh:158` and `full/trial-ssh.sh:133` advertise `BadVpn/Udpgw : 7300` on every SSH account card. Note the card line is **not** inherited: V23's own `addssh.sh` has no `7300` line, so the advertisement was added here while its companion install step was not. The correct fix was therefore to instal it, not to delete the claim.
+- `installer/ssh.sh` now fetches `other/badvpn` to `/usr/bin/badvpn-udpgw`, marks it executable, and runs it under `badvpn-udpgw.service` with `--listen-addr 127.0.0.1:7300 --max-clients 1000 --max-connections-for-client 10 --client-socket-sndbuf 100000`, following the same unit pattern as the existing `ws.service`.
+- **Verified live** on a bare Debian 12: the binary reports `BadVPN udpgw 1.999.130`, runs, and `ss -ltn` shows `LISTEN 127.0.0.1:7300`. It listens on **TCP** - `/proc/net/tcp` matches port 7300 (hex `1C84`) while `/proc/net/udp` does not - which is correct for udpgw (it tunnels UDP inside a TCP connection), so the README's port table was corrected from `UDP` to `TCP (localhost)`.
+
+**Fail2ban is now actually configured** (`installer/package.sh`)
+- Fail2ban was installed but never configured, so it ran on defaults, which on Debian expect `/var/log/auth.log` - a file a minimal install does not create until the first login. That is exactly the "missing auth log" symptom: the first start after `apt install` fails with `Failed during configuration: Have not found any log file for sshd jail`.
+- `installer/package.sh` now installs `python3-systemd`, stops the auto-started daemon, writes `/etc/fail2ban/jail.local` with `backend = systemd` for `[DEFAULT]`, `[sshd]` and `[dropbear]` (Debian 12 sshd and dropbear both log to the journal), then enables and restarts it.
+- **Verified live** on a bare Debian 12: the service is `active`, `fail2ban-client status` reports `dropbear,sshd`, and the sshd jail was already showing **4 currently banned** addresses from real internet brute-forcing - i.e. it is reading the journal and banning, not merely loaded. The pre-fix `Have not found any log file` error no longer appears once the jail is in place.
+
+**The Certbot addresses in `dm-menu.sh` now come from the operator** (`full/dm-menu.sh`, `lite/dm-menu.sh`)
+- Three personal Gmail addresses were hardcoded for ACME: `faraskun02@gmail.com` (the `cert2()` helper), `melon334456@gmail.com` (inline in the `fn()` certbot call) and `rerechan0202@gmail.com` (the CSR subject fields) - three per tree, six in total. Every certificate the panel issued was therefore registered to someone else's address.
+- All six now read the address the installer already stores: `email=$(cat /etc/funny/.email 2>/dev/null || echo "admin@example.com")`, with the inline certbot call reading the same file directly since `$email` is not set in that function's scope. `grep -c '@gmail.com'` is now **0** in both files.
+
+**Two entries were already fixed and are simply stale documentation**
+- **Restore path conflict (regression 11):** all three scripts now check both locations - `full/restore-ftp.sh`, `lite/restore-ftp.sh` and `website/restore-ftp.sh` each reference `/var/www/uploads/*.zip` **and** `/root/*backup*.zip`, so the web-vs-CLI conflict is gone.
+- **UDP Request SNAT `10.0.0.0/8`:** not fixed because it is not this repository's rule to narrow. `installer/request.sh` already installs a host-exclusion guard (`ExecStartPost` plus a 15-second `udp-request-fixnet.timer` that re-asserts `iptables -t nat -I POSTROUTING -s $ip_nat -j RETURN`); the broad client-subnet SNAT is performed by the `udp-request` binary itself, so it stays a documented caveat in the README rather than a code change here.
+
+**Deferred by the owner:** the hardcoded WhatsApp banner (`installer/ssh.sh`) and the SlowDNS nameserver record, both left in the README's Known Issues by request.

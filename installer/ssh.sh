@@ -143,5 +143,31 @@ systemctl enable ws
 systemctl start ws
 
 
+# Installasi BadVPN UDP Gateway (udpgw) - port 7300 pada kartu akun SSH
+cd /usr/bin
+wget --no-check-certificate ${hosting}/other/badvpn -O /usr/bin/badvpn-udpgw >> /dev/null 2>&1
+chmod +x /usr/bin/badvpn-udpgw
+
+cat> /etc/systemd/system/badvpn-udpgw.service << END
+[Unit]
+Description=BadVPN UDP Gateway (udpgw)
+Documentation=https://github.com/rohjagad/fn-autosc
+After=syslog.target network-online.target
+
+[Service]
+User=root
+NoNewPrivileges=true
+ExecStart=/usr/bin/badvpn-udpgw --listen-addr 127.0.0.1:7300 --max-clients 1000 --max-connections-for-client 10 --client-socket-sndbuf 100000
+Restart=on-failure
+LimitNPROC=10000
+LimitNOFILE=1000000
+
+[Install]
+WantedBy=multi-user.target
+END
+
+systemctl daemon-reload
+systemctl enable --now badvpn-udpgw >> /dev/null 2>&1
+
 # Menghapus File Tidak Penting
 rm -f /root/ssh.sh

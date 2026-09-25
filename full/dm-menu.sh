@@ -160,7 +160,7 @@ fi
 }
 
 cert2() {
-email="faraskun02@gmail.com"
+email=$(cat /etc/funny/.email 2>/dev/null || echo "admin@example.com")
 domain=$(cat /etc/xray/domain)
 
 clear
@@ -325,7 +325,7 @@ systemctl stop nginx
 cd /root/
 clear
 echo "Starting... Port 80 will be stopped during SSL certificate installation"
-certbot certonly --standalone --preferred-challenges http --agree-tos --email melon334456@gmail.com -d $domain 
+certbot certonly --standalone --preferred-challenges http --agree-tos --email "$(cat /etc/funny/.email 2>/dev/null || echo "admin@example.com")" -d $domain 
 cp /etc/letsencrypt/live/$domain/fullchain.pem /etc/xray/xray.crt
 cp /etc/letsencrypt/live/$domain/privkey.pem /etc/xray/xray.key
 cd /etc/xray
@@ -362,7 +362,7 @@ locality="Kab. Kota Waringin Timur"
 organization="FN AutoSC"
 organizationalunit="99999"
 commonname="FN"
-email="rerechan0202@gmail.com"
+email=$(cat /etc/funny/.email 2>/dev/null || echo "admin@example.com")
 
 # delete
 rm -fr /etc/xray/xray.*

@@ -101,6 +101,29 @@ rm -rf /root/vnstat-2.6 >/dev/null 2>&1
 
 apt install -y libnss3-dev libnspr4-dev pkg-config libpam0g-dev libcap-ng-dev libcap-ng-utils libselinux1-dev libcurl4-nss-dev flex bison make libnss3-tools libevent-dev xl2tpd pptpd
 
+# Fail2ban: Debian ships no jail, and the default backend expects
+# /var/log/auth.log which a minimal install does not create until the first
+# login. Debian 12 sshd and dropbear log to the systemd journal, so read that.
+apt install -y python3-systemd >/dev/null 2>&1
+systemctl stop fail2ban >/dev/null 2>&1
+cat > /etc/fail2ban/jail.local << END
+[DEFAULT]
+backend  = systemd
+bantime  = 1h
+findtime = 10m
+maxretry = 5
+
+[sshd]
+enabled = true
+backend = systemd
+
+[dropbear]
+enabled = true
+backend = systemd
+END
+systemctl enable fail2ban >/dev/null 2>&1
+systemctl restart fail2ban >/dev/null 2>&1
+
 yellow() { echo -e "\\033[33;1m${*}\\033[0m"; }
 yellow "Dependencies successfully installed..."
 sleep 3

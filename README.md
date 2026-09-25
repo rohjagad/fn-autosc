@@ -247,7 +247,7 @@ change quota, and lock.
 | L2TP / IPsec | UDP | `500`, `4500`, `1701` |
 | NoobzVPN | TCP | `8080`, `8443` |
 | SlowDNS (DNSTT) | UDP / DNS | `53` → `5300` |
-| BadVPN / UDPGW | UDP | `7300` |
+| BadVPN / UDPGW | TCP | `7300` (localhost) |
 | Web restore interface | HTTP (Apache) | `855` |
 
 ### HTTP / TLS Front-End Ports
@@ -769,27 +769,23 @@ Binaries are built with `-ldflags='-s -w'` for a small footprint.
 
 ## Known Issues
 
-1. **Stale GitHub hosts entry** — `installer/v2ray.sh` writes a fixed
-   `raw.githubusercontent.com` IP to `/etc/hosts`, which may break if Fastly
-   rotates edge addresses.
-2. **SlowDNS needs manual setup** — `dnstt.service` is inactive until a
+1. **SlowDNS needs manual setup** — `dnstt.service` is inactive until a
    nameserver domain is configured via `menu-dnstt`.
-3. **Fail2ban on minimal systems** — may report a missing auth log before the
-   first SSH login creates `/var/log/auth.log`.
-4. **SplitHTTP and HTTP/2** — some clients expecting plain HTTP/1.1 chunked
+2. **SplitHTTP and HTTP/2** — some clients expecting plain HTTP/1.1 chunked
    transport may not work through HTTP/2 reverse proxies.
-5. **UDP Request SNAT** — the broad `10.0.0.0/8` SNAT rule can overlap client
+3. **UDP Request SNAT** — the broad `10.0.0.0/8` SNAT rule can overlap client
    private subnets and may need manual exclusion.
-6. **Hardcoded Telegram token** — the installer ships a default bot token;
-   replace it via `menu-bot`.
-7. **Hardcoded WhatsApp number** — appears in the SSH banner (`installer/ssh.sh`).
-8. **BadVPN / UDPGW not installed** — SSH account cards mention port `7300`, but
-   the service binary is not installed.
-9. **Broken menu entries** — Argo option 2 (`reres`) and SlowDNS option 4
-   (`typer`) reference functions that do not exist.
-10. **Two hardcoded emails** in `dm-menu.sh` for Certbot issuance.
-11. **`file.io` expiry mismatch** — the backup link is set to 14 days, but the
-    Telegram caption says 7.
+4. **Hardcoded WhatsApp number** — appears in the SSH banner (`installer/ssh.sh`).
+
+Formerly listed here and since fixed: the stale `raw.githubusercontent.com`
+hosts entry; the hardcoded Telegram bot token; the Fail2ban/auth-log gap (now
+configured against the systemd journal, which is where Debian 12 sshd and
+dropbear actually log); the BadVPN/UDPGW `7300` port (the `other/badvpn` binary
+the repository already shipped is now installed and run as
+`badvpn-udpgw.service` on `127.0.0.1:7300`); the broken Argo/SlowDNS menu
+entries; the hardcoded Certbot addresses in `dm-menu.sh` (now read from
+`/etc/funny/.email`); and the `file.io` expiry mismatch (backups fall back to
+`tmpfiles.org` and then `litterbox.catbox.moe`).
 
 ---
 
