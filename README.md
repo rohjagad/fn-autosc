@@ -778,7 +778,10 @@ Binaries are built with `-ldflags='-s -w'` for a small footprint.
 4. **Hardcoded WhatsApp number** — appears in the SSH banner (`installer/ssh.sh`).
 
 Formerly listed here and since fixed: the stale `raw.githubusercontent.com`
-hosts entry; the hardcoded Telegram bot token; the Fail2ban/auth-log gap (now
+hosts entry; the hardcoded Telegram bot token (the install notification now
+reads the operator's own `/etc/funny/.keybot` and `/etc/funny/.chatid` and
+sends nothing when they are unset, so no credential is committed); the
+Fail2ban/auth-log gap (now
 configured against the systemd journal, which is where Debian 12 sshd and
 dropbear actually log); the BadVPN/UDPGW `7300` port (the `other/badvpn` binary
 the repository already shipped is now installed and run as
@@ -800,9 +803,12 @@ Read these before exposing a server to the internet.
 - **Backups contain password hashes.** The archive includes `/etc/shadow` and
   `/etc/gshadow`, and `backup` uploads it to a public file host and Telegram.
   Treat backup links as secrets.
-- **Secrets are committed to the repository** — a Telegram bot token, a Gmail
-  app password (`installer/set-br.sh`), and the L2TP pre-shared key. Rotate
-  them, and do not reuse this repository's defaults on a production server.
+- **Secrets are committed to the repository** — a Gmail app password
+  (`installer/set-br.sh`) and the L2TP pre-shared key. Rotate them, and do not
+  reuse this repository's defaults on a production server. (The Telegram bot
+  token that used to be listed here is gone: the install notification now uses
+  the operator's own credentials from `/etc/funny/`, and sends nothing when
+  they are unset.)
 - **Authorization is remote and IP-based.** If GitHub is unreachable, or the
   IP is not listed, scripts fail closed and exit.
 

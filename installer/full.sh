@@ -232,11 +232,16 @@ Type Script: Full
 =========================
 FN AutoSC
 "
-CHATID="6713772874"
-KEY="8610037724:AAGSblxT8cN5Ed0EZxBP94JLfomeFymv8jA"
+# Install notification uses the operator's own bot credentials, set later via
+# menu-bot (/etc/funny/.keybot and /etc/funny/.chatid). No credential is
+# committed to the repository and nothing is sent anywhere by default.
+CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
+KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
-URL="https://api.telegram.org/bot$KEY/sendMessage"
-curl -4 -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$OUTPUT" $URL >/dev/null 2>&1
+if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
+    URL="https://api.telegram.org/bot$KEY/sendMessage"
+    curl -4 -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$OUTPUT" $URL >/dev/null 2>&1
+fi
 
 # Status Installasi
 clear
