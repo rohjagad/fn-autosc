@@ -920,3 +920,14 @@ The "Hardcoded WhatsApp contact" bullet in the Audit Follow-up above was written
 - Applied identically to `full/menu-bot.sh` and `lite/menu-bot.sh`; the README's `menu-bot` section was corrected to list the four options the menu actually presents.
 - An earlier attempt had renamed the separate *Terminal Bot* menu (the Node.js bot installer reached through option 3) instead; that was a misreading of the request and was reverted - the terminal-bot menu keeps its own name and options.
 - Archives rebuilt: `menu/full.zip` (114 entries) and `menu/lite.zip` (97 entries), 0 content mismatches, 0 non-755.
+
+### Revision - bot credentials split from notifications and auto backup
+
+The bot menu was restructured so the credentials are entered **once**:
+
+- **1. Set Up Bot Credentials** - prompts for the Telegram chat ID and the bot API key and writes them to `/etc/funny/.chatid` and `/etc/funny/.keybot` (the old `add()` flow, renamed to `creds()` and asking for the chat ID first).
+- **2. Set Up Bot Notifications** - reads those files and never asks again; sends one test message so the operator can see the bot works, reporting success or Telegram's error.
+- **3. Set Up Bot Auto Backup** - reads the same files and never asks again; additionally guarantees the 4x/day backup cron line exists and prints the summary.
+- Both new entries go through a `havecreds` guard that tells the operator to run option 1 first when the files are missing.
+
+"Terminal Bot Menu" and "Report Script Bug" moved to options 4 and 5. Applied to `full/menu-bot.sh` and `lite/menu-bot.sh`; README section updated. Archives rebuilt (114 / 97 entries, 0 mismatches, 0 non-755), and `notif()` verified to contain no `read -p`.

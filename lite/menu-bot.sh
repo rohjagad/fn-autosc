@@ -244,15 +244,34 @@ Owner Chat ID: $itd
 "
 }
 
-add() {
+havecreds() {
+# Notifications and auto backup both reuse the credentials written by
+# "Set Up Bot Credentials" - they never ask for them again.
+if [ -s /etc/funny/.keybot ] && [ -s /etc/funny/.chatid ]; then
+    return 0
+fi
 clear
 echo -e "
-======================
-[ Telegram Bot Setup ]
-======================
+=========================================
+ Bot Credentials Not Set
+=========================================
+ Choose "1. Set Up Bot Credentials" first,
+ then come back to this menu.
+=========================================
 "
-read -p "Bot API Key: " api
+return 1
+}
+
+creds() {
+# The single place the bot credentials are entered.
+clear
+echo -e "
+=====================
+[ Bot Credentials ]
+=====================
+"
 read -p "Telegram Chat ID: " itd
+read -p "Bot API Key     : " api
 clear
 echo -e "
 Information
@@ -264,16 +283,51 @@ Chat ID    : $itd
 read -p "Is the data above correct? (y/n): " opw
 case $opw in
 y) clear ; lanjut ;;
-n) clear ; add ;;
-*) clear ; add ;;
+n) clear ; creds ;;
+*) clear ; creds ;;
 esac
 }
 
+notif() {
+# Uses the saved credentials; sends one test message to prove it works.
+havecreds || return
+local key id resp
+key=$(cat /etc/funny/.keybot)
+id=$(cat /etc/funny/.chatid)
+clear
+echo "Sending a test notification to Telegram..."
+resp=$(curl -4 -s --max-time 15 -d "chat_id=$id" \
+    --data-urlencode "text=[ FN AutoSC ] Notification setup complete - the bot is configured correctly." \
+    "https://api.telegram.org/bot$key/sendMessage")
+clear
+if echo "$resp" | grep -q '"ok":true'; then
+    echo -e "
+=========================================
+ Bot Notifications
+=========================================
+ Status  : enabled
+ Chat ID : $id
+ A test message has been sent to that chat.
+=========================================
+"
+else
+    echo -e "
+=========================================
+ Bot Notifications - FAILED
+=========================================
+ Telegram replied:
+ $resp
+
+ Check the API key and chat ID (option 1).
+=========================================
+"
+fi
+}
+
 setbotup() {
-# The bot credentials are the ones option 1 writes; this entry also guarantees
-# the scheduled backup exists, so choosing it is all that is needed for the
-# archive to be delivered to Telegram automatically.
-add
+# Uses the saved credentials; additionally guarantees the scheduled backup
+# exists, so the archive is delivered to Telegram automatically.
+havecreds || return
 grep -q 'flock -n /tmp/backup.lock backup' /etc/crontab 2>/dev/null || \
     echo '0 0,6,12,18 * * * root flock -n /tmp/backup.lock backup' >> /etc/crontab
 clear
@@ -310,19 +364,21 @@ clear
 echo -e "${NC}${separator}
         TELEGRAM BOT MENU
 ${separator}
-${green}1${NC}. Set Up Bot Notifications
-${green}2${NC}. Set Up Bot Auto Backup
-${green}3${NC}. Terminal Bot Menu
-${green}4${NC}. Report Script Bug
+${green}1${NC}. Set Up Bot Credentials
+${green}2${NC}. Set Up Bot Notifications
+${green}3${NC}. Set Up Bot Auto Backup
+${green}4${NC}. Terminal Bot Menu
+${green}5${NC}. Report Script Bug
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input option: " apws
 case $apws in
-1) clear ; add ;;
-2) clear ; setbotup ;;
-3) clear ; termbot ;;
-4) clear ; rpot ;;
+1) clear ; creds ;;
+2) clear ; notif ;;
+3) clear ; setbotup ;;
+4) clear ; termbot ;;
+5) clear ; rpot ;;
 *) clear ; mna ;;
 esac
 }
