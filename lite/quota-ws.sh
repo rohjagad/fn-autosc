@@ -92,7 +92,7 @@ cekws() {
     users=$(grep '^###' /etc/xray/json/ws.json | cut -d ' ' -f 2 | sort | uniq)
 
     for user in $users; do
-        # Ambil statistik penggunaan dari V2Ray API
+        # Ambil statistik penggunaan dari Xray API
         usage_data=$(xray api stats --server=127.0.0.1:10080 | grep "user>>>${user}>>>traffic" | awk '{print $2}')
         inb=$(echo "$usage_data" | sed -n 1p | sed 's/MB//')
 

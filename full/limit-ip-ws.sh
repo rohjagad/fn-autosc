@@ -76,10 +76,11 @@ DATE=$(date +"%Y-%m-%d %H:%M:%S")
 # Database
 username=$(grep '^###' /etc/xray/json/ws.json | cut -d ' ' -f 2 | sort | uniq)
 
-# Bug 69: probe online-session statistics once before looping. The WS
-# transport is served by V2Ray, which exposes no online-session metric, so
-# "xray api statsonline" can never answer there. Bail out cleanly instead of
-# raising integer-expression errors on every cron run.
+# Bug 69 regression guard: probe online-session statistics once before looping
+# so a transport whose stats service is unavailable exits cleanly instead of
+# raising integer-expression errors on every cron run. All four transports are
+# served by Xray (see is-decision.md section 13), so this probe answers; the
+# guard is kept in case a transport is ever pointed at a stats-less core again.
 if ! xray api statsonline --server=127.0.0.1:10080 -email probe 2>&1 | grep -q "not found"; then
     echo "IP limit check skipped: online statistics unavailable on 127.0.0.1:10080"
     exit 0

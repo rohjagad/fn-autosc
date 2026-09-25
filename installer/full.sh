@@ -206,7 +206,7 @@ systemctl daemon-reload
 systemctl restart fn-ohp
 systemctl restart noobzvpns
 
-# Fix Xray/V2Ray setelah seluruh instalasi selesai.
+# Fix Xray setelah seluruh instalasi selesai.
 wget --no-check-certificate ${hosting}/fix/fix.sh >> /dev/null 2>&1
 chmod +x fix.sh
 ./fix.sh

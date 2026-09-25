@@ -55,7 +55,7 @@ clear
 systemctl daemon-reload
 clear
 
-##----- Auto Remove Xray / V2ray Websocket
+##----- Auto Remove Xray Websocket
 data=( `cat /etc/xray/json/ws.json | grep '^###' | cut -d ' ' -f 2 | sort | uniq`);
 now=`date +"%Y-%m-%d"`
 for user in "${data[@]}"
@@ -88,7 +88,7 @@ systemctl restart xray@ws
 fi
 done
 
-##----- Auto Remove Xray / V2ray HTTP UPGRADE
+##----- Auto Remove Xray HTTP UPGRADE
 data=( `cat /etc/xray/json/upgrade.json | grep '^###' | cut -d ' ' -f 2 | sort | uniq`);
 now=`date +"%Y-%m-%d"`
 for user in "${data[@]}"
@@ -121,7 +121,7 @@ systemctl restart xray@upgrade
 fi
 done
 
-##----- Auto Remove Xray / V2ray Split HTTP
+##----- Auto Remove Xray Split HTTP
 data=( `cat /etc/xray/json/split.json | grep '^###' | cut -d ' ' -f 2 | sort | uniq`);
 now=`date +"%Y-%m-%d"`
 for user in "${data[@]}"
@@ -154,7 +154,7 @@ systemctl restart xray@split
 fi
 done
 
-##----- Auto Remove Xray / V2ray grpc HTTP
+##----- Auto Remove Xray grpc HTTP
 data=( `cat /etc/xray/json/grpc.json | grep '^###' | cut -d ' ' -f 2 | sort | uniq`);
 now=`date +"%Y-%m-%d"`
 for user in "${data[@]}"

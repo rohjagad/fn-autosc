@@ -200,7 +200,7 @@ Port HTTPS:
 Currently supported protocols:
 -> SSH WebSockets
 -> All Connections via Nginx
--> Xray / V2Ray / Sing-box
+-> Xray / Sing-box
 "
 }
 tamp() {

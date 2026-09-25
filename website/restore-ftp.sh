@@ -28,7 +28,6 @@ cp shadow /etc/ >/dev/null 2>&1
 cp gshadow /etc/ >/dev/null 2>&1
 cp crontab /etc/ >/dev/null 2>&1
 cp -r xray /etc/ >/dev/null 2>&1
-cp -r v2ray /etc/ >/dev/null 2>&1
 cp -r funny /etc/ >/dev/null 2>&1
 cp -r create /var/log/ >/dev/null 2>&1
 cp -r wireguard /etc/ >/dev/null 2>&1 || true
@@ -44,7 +43,7 @@ rm -f backup.zip
 clear
 systemctl daemon-reload >/dev/null 2>&1
 systemctl restart ssh >/dev/null 2>&1
-systemctl restart v2ray >/dev/null 2>&1
+systemctl restart xray@ws >/dev/null 2>&1
 systemctl restart xray@grpc >/dev/null 2>&1
 systemctl restart xray@split >/dev/null 2>&1
 systemctl restart xray@upgrade >/dev/null 2>&1
