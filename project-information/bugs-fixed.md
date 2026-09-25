@@ -991,3 +991,14 @@ The migration's verification treated `app/stats/command: user>>>probe>>>online n
 - `bash -n` passes on all four changed scripts; the `full/` and `lite/` copies are byte-identical.
 - `xray run -test -config /etc/xray/json/ws.json` -> `Configuration OK.`
 - No bare `xray api stats` (without `-name`) remains under `full/` or `lite/`; `json/ws.json` now differs from the 1.20 reference template only by its trailing newline.
+
+### Fresh-reinstall verification of fixes 100-103 (Debian 12, full edition)
+
+The VPS was reinstalled from scratch with upstream `bin456789/reinstall` (`debian 12`; SSH moves to the panel's 3303) and then `install.sh` (`full`, `autosc.rohcuan.dpdns.org`, `dual`, nameserver `slowdns.rohcuan.dpdns.org`) reached `INSTALL SUCCESS`. The install pulled the committed code, so this exercises the **shipped** path, not a hand patch. The panel install took about 12 minutes.
+
+- **Deployed artefacts:** `/etc/xray/json/ws.json` carries `"statsUserOnline": true` (lines 197-199) and `xray run -test` reports `Configuration OK.`; `/usr/bin/quota-ws` and `/usr/bin/cek-xray-ws` are md5-identical to `full/quota-ws.sh` / `full/cek-xray-ws.sh` at `c032912` and to the packed `menu/full.zip` entries; no bare `xray api stats` (without `-name`) remains; the crontab schedules `limit-ip-ws`.
+- **Fix 100 (IP limit):** a test vmess-WS account (`bugtest`, `Limit IP: 1`) was opened from two client addresses, `203.0.113.7` and `198.51.100.9`, supplied the way nginx does (`X-Forwarded-For`). `xray api statsonline -email bugtest` returned **2** and `statsonlineiplist` named both addresses. `/usr/bin/limit-ip-ws` then removed the account (8 -> 0 rows), created `/var/log/create/xray/ws/bugtest.locked`, and left `xray@ws` `active` with the config still `Configuration OK.`
+- **Fix 101 (quota):** quota-ws wrote `/etc/xray/quota/ws/bugtest_usage = 46973216` after the sessions' traffic - previously no `_usage` file was ever produced.
+- **Fix 102 (traffic):** `cek-xray-ws` printed `Traffic Uplink: 156 bytes (156 B)` and `Traffic Downlink: 36225156 bytes (34.54 MB)`.
+- **Fix 103 (IP count):** the same screen printed `Total IP Login: 2 / 1`, matching `statsonline`.
+- **Environment notes (host-specific, not code):** this VPS's IPv6 cannot reach Fastly, so the Debian installer's mirror check stalled and was unblocked by pinning IPv4 in the installer environment - the same recovery recorded for the earlier cycle (decision 8). The installed system then received `Acquire::ForceIPv4 "true"` in `/etc/apt/apt.conf.d/` so apt does not repeat the hang. The test account and its files were removed afterwards and `/etc/hosts` was restored to its standard content. Final state: all panel services `active`, SSH on 3303, `menu` present, 0 non-executable files in `/usr/bin`, no v2ray, and the ZeroSSL certificate for `autosc.rohcuan.dpdns.org` valid to 2026-12-24.
