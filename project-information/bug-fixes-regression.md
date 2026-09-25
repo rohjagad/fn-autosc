@@ -101,3 +101,10 @@ This document records regressions, incomplete patches, and side effects introduc
 - **Impact:** the account log lost the standard styling `a7b3613` had established: the rules printed verbatim instead of being repainted to rainbow `=` outer / blue `-` inner, the section title stayed yellow instead of purple, and the `Link` rows fell to the generic value branch and rendered green instead of deep purple. Because it is the screen operators read an account back from, the loss showed on every account.
 - **Verification:** a faithful port of the Go `formatLogForTerminal` detects **0** separators in the escaped card and **8** after the revert; `format_display` goes from **9** junk lines to **0**, with the full palette restored (2 rainbow / 6 blue / 1 purple / 2 deep purple / 14 green).
 - **Fix:** the card blocks' structural lines are plain again (fix 85, `(Regression Fix)`), so both consumers restyle them; the create-account FORM rules and titles were deliberately left in the rainbow-dash / yellow style that the operator had asked to keep.
+
+## 16. Status of Regression 11 - Resolved
+
+Regression 11 above is presented with a `Fix Path` and no `Verification`, which now reads as open. It is not: checked against the tree, all three scripts resolve the web-vs-CLI path conflict by looking in **both** locations.
+
+- `full/restore-ftp.sh`, `lite/restore-ftp.sh` and `website/restore-ftp.sh` each reference `/var/www/uploads/*.zip` **and** `/root/*backup*.zip`, so whichever interface invokes restore, the archive is found regardless of which one was installed last. The block is identical across the three files.
+- This entry is recorded here rather than edited in place because these documents are append-only; regression 11 should be read as closed, and any future listing derived from a "has Fix Path but no Verification" heuristic will flag it as a false positive.
