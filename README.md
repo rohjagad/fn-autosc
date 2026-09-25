@@ -452,7 +452,7 @@ These jobs are added to `/etc/crontab` during installation. Each runs under
 
 | Option | Action |
 | :---: | :--- |
-| 1 | Backup to file.io and Telegram (`backup`) |
+| 1 | Backup to Telegram (`backup`) |
 | 2 | Restore from a URL |
 | 3 | Restore from a local file |
 | 4 | Restore a legacy backup (pre-1.23) |
@@ -472,13 +472,14 @@ The staged tree is zipped to `/root/backup.zip`.
 
 ### Where It Goes
 
-- **`backup`** — uploads the archive to an anonymous file host (file.io, then
-  `tmpfiles.org`, then `litterbox.catbox.moe` when an earlier one refuses) and
-  sends **both the link and the archive itself** to Telegram. Runs on the
+- **`backup`** — sends the archive to **Telegram as a document attachment**,
+  captioned with the email, server IP, domain and timestamp. Runs on the
   4×/day cron schedule.
-- **Telegram is the only delivery channel.** The Google Drive variant
-  (`backup-gd`, rclone) and the email notification (msmtp with a committed
-  Gmail app password) were removed; see the decisions document, section 11.
+- **Telegram is the only delivery channel.** There is no file-host upload and
+  therefore no expiring public link, no Google Drive variant, and no email
+  notification. The Google Drive and email paths were removed, and the
+  file-host upload was dropped in their favour (decisions document, sections
+  11 and 12).
 
 ### Restore
 
@@ -791,8 +792,8 @@ dropbear actually log); the BadVPN/UDPGW `7300` port (the `other/badvpn` binary
 the repository already shipped is now installed and run as
 `badvpn-udpgw.service` on `127.0.0.1:7300`); the broken Argo/SlowDNS menu
 entries; the hardcoded Certbot addresses in `dm-menu.sh` (now read from
-`/etc/funny/.email`); and the `file.io` expiry mismatch (backups fall back to
-`tmpfiles.org` and then `litterbox.catbox.moe`).
+`/etc/funny/.email`); and the `file.io` expiry mismatch (now moot - the
+file-host upload has been removed entirely in favour of Telegram attachments).
 
 ---
 

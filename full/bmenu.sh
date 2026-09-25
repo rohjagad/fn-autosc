@@ -354,7 +354,7 @@ clear
 echo -e "${NC}${separator}
             BACKUP MENU
 ${separator}
-${green}1${NC}. Backup to File.io (Telegram)
+${green}1${NC}. Backup to Telegram
 ${green}2${NC}. Restore Backup via URL
 ${green}3${NC}. Restore Backup via File
 ${green}4${NC}. Restore Legacy Backup (< v1.23)

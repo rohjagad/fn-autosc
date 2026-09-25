@@ -898,3 +898,11 @@ The "Hardcoded WhatsApp contact" bullet in the Audit Follow-up above was written
 - The only `mail` call sites in the tree were in the two deleted scripts, so nothing sends email any more. `/etc/funny/.email` is retained: ACME (`dm-menu`) reads it.
 - Verified: `backup-gd`, `rclone`, `drive.google`, `smtp.gmail`, `msmtp`, `bsd-mailx` and the old Gmail address now appear nowhere in `installer/ full/ lite/ config/ install.sh README.md` except the explanatory comments recording the removal. The archives were rebuilt and re-verified - 0 content mismatches, 0 non-755, `backup-gd` absent, and the packed `bmenu` updated to match its source.
 - This closes the Gmail app-password bullet from the audit follow-up above. What remains open from that list is the L2TP `VPN_IPSEC_PSK` (an inherited default) and a live lite install. The arrangement is recorded as decision 11.
+
+## Backup Delivery Simplified to a Telegram Attachment (September 2026)
+
+- `full/backup.sh` and `lite/backup.sh`: removed the file-host upload (file.io -> tmpfiles.org -> litterbox.catbox.moe), the `Your ID` and `Link Backup` caption fields, the "AutoDelete After 7 Days" claim and the commented-out `sendMessage` block. The archive is now sent only as a Telegram document (`sendDocument`), captioned with the email, server IP and date/domain.
+- `full/bmenu.sh` and `lite/bmenu.sh`: option 1 now reads "Backup to Telegram" instead of "Backup to File.io (Telegram)".
+- README: the backup menu table, the "Where it goes" section and the stale file.io note were updated.
+- `menu/full.zip` (114 entries) and `menu/lite.zip` (97 entries) were rebuilt: 0 content mismatches, 0 non-755, and the packed `backup`/`bmenu` verified to contain no file-host references.
+- Verified: `file.io`, `tmpfiles`, `litterbox`, `upload_link` and `id_link` no longer appear in either backup script or in the packed entries. Recorded as decision 12.

@@ -87,39 +87,19 @@ cp /etc/ipsec.secrets /root/backup/ 2>/dev/null || true
 cd /root
 zip -r backup.zip backup > /dev/null 2>&1
 
-# Upload file ZIP ke file.io dan ambil link
 file_path="/root/backup.zip"
-api_url="https://file.io"
-expiry_duration=$((14 * 24 * 60 * 60))
-response=$(curl -sL --max-time 60 -F "file=@$file_path" -F "expiry=$expiry_duration" $api_url)
-upload_link=$(echo "$response" | jq -r .link 2>/dev/null)
-id_link=$(echo "$response" | jq -r .key 2>/dev/null)
-# Bug 74: file.io discontinued anonymous uploads (it now returns its landing
-# page instead of JSON), and transfer.sh/0x0.st/bashupload are dead or
-# disabled. Fall back to working hosts so backups still produce a link.
-if [ -z "$upload_link" ] || [ "$upload_link" = "null" ]; then
-    response=$(curl -s --max-time 60 -F file=@"$file_path" https://tmpfiles.org/api/v1/upload)
-    upload_link=$(echo "$response" | jq -r .data.url 2>/dev/null)
-    id_link="tmpfiles.org"
-fi
-if [ -z "$upload_link" ] || [ "$upload_link" = "null" ]; then
-    upload_link=$(curl -s --max-time 60 -F "reqtype=fileupload" -F "time=72h" -F "fileToUpload=@$file_path" https://litterbox.catbox.moe/resources/internals/api.php)
-    id_link="litterbox-72h"
-fi
 email=$(cat /etc/funny/.email)
 
-# Persiapkan pesan Telegram
+# Persiapkan pesan Telegram. The archive is delivered as a Telegram document;
+# there is no file-host upload and therefore no expiring public link.
 TEKS="
 [ Information Your Backup Data ]
 ================================
 
-Email      : $email
-Your ID    : $id_link
-Your IP    : $MYIP
-Link Backup: $upload_link
-Date / Domain: $date / $domain
+Email         : $email
+Your IP       : $MYIP
+Date / Domain : $date / $domain
 ================================
-Your File Backup AutoDelete After 7 Days
 "
 
 # Cek dan buat file backup.log jika tidak ada
@@ -138,10 +118,7 @@ clear
 CHATID=$(cat /etc/funny/.chatid)
 KEY=$(cat /etc/funny/.keybot)
 TIME="10"
-#URL1="https://api.telegram.org/bot$KEY/sendMessage"
-#curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&text=$TEKS&parse_mode=html" $URL1 >/dev/null
-
-# Kirim file backup ke Telegram
+# Kirim file backup ke Telegram (sebagai lampiran)
 URL2="https://api.telegram.org/bot$KEY/sendDocument"
 CAPTION="$TEKS"
 curl -s --max-time $TIME -F chat_id=$CHATID -F document=@backup.zip -F caption="$CAPTION" $URL2
@@ -152,5 +129,5 @@ rm -fr /root/backup*
 # Output informasi backup ke layar
 clear
 echo "$TEKS"
-echo "Please Save your Link Backup"
+echo "Backup sent to Telegram"
 
