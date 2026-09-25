@@ -141,7 +141,11 @@ apt install cron -y
 # lines (every daemon ran twice per tick and locks scheduled double at-jobs).
 # Drop previously installed panel lines first, then append exactly one set.
 sed -i '/flock -n \/tmp\/\(backup\|xp\|expire-ssh\|limit-ip-ssh\|limit-ip-ws\|limit-ip-split\|limit-ip-http\|limit-ip-grpc\|auto-delete-ws\|auto-delete-split\|auto-delete-http\|auto-delete-grpc\|kill-ws\|kill-http\|kill-split\|kill-grpc\)\.lock /d' /etc/crontab
-echo -e "0 0,6,12,18 * * * root flock -n /tmp/backup.lock backup
+# Only schedule daemons this edition actually ships. The lite edition has no
+# SSH tools, and a crontab entry for a command that is not installed fails on
+# every tick ("flock: failed to execute expire-ssh: No such file or directory").
+# Resolve each line's program and append the line only when it exists here.
+cron_block="0 0,6,12,18 * * * root flock -n /tmp/backup.lock backup
 0,15,30,45 * * * * root flock -n /tmp/xp.lock /usr/bin/xp
 */5 * * * * root flock -n /tmp/expire-ssh.lock expire-ssh
 */5 * * * * root flock -n /tmp/limit-ip-ssh.lock limit-ip-ssh
@@ -156,7 +160,16 @@ echo -e "0 0,6,12,18 * * * root flock -n /tmp/backup.lock backup
 */5 * * * * root flock -n /tmp/kill-ws.lock kill-ws
 */5 * * * * root flock -n /tmp/kill-http.lock kill-http
 */5 * * * * root flock -n /tmp/kill-split.lock kill-split
-*/5 * * * * root flock -n /tmp/kill-grpc.lock kill-grpc" >> /etc/crontab
+*/5 * * * * root flock -n /tmp/kill-grpc.lock kill-grpc"
+while IFS= read -r cron_line; do
+    [ -z "$cron_line" ] && continue
+    cron_prog="${cron_line##* }"
+    if command -v "$cron_prog" >/dev/null 2>&1 || [ -x "/usr/bin/${cron_prog##*/}" ]; then
+        echo "$cron_line" >> /etc/crontab
+    else
+        echo "Skipping cron entry for ${cron_prog##*/}: not installed in this edition"
+    fi
+done <<< "$cron_block"
 
 # Menginstall Backup Database 2
 cd
