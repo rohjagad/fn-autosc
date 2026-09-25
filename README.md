@@ -453,14 +453,13 @@ These jobs are added to `/etc/crontab` during installation. Each runs under
 | Option | Action |
 | :---: | :--- |
 | 1 | Backup to file.io and Telegram (`backup`) |
-| 2 | Backup to Google Drive (`backup-gd`) |
-| 3 | Restore from a URL |
-| 4 | Restore from a local file |
-| 5 | Restore a legacy backup (pre-1.23) |
+| 2 | Restore from a URL |
+| 3 | Restore from a local file |
+| 4 | Restore a legacy backup (pre-1.23) |
 
 ### What Gets Backed Up
 
-Both backup commands stage the same content:
+The backup command stages:
 
 ```text
 /etc/passwd          /etc/xray/          /etc/crontab
@@ -473,10 +472,13 @@ The staged tree is zipped to `/root/backup.zip`.
 
 ### Where It Goes
 
-- **`backup`** — uploads to file.io (auto-expiring link) and sends the archive
-  to Telegram. Runs on the 4×/day cron schedule.
-- **`backup-gd`** — uploads to Google Drive via rclone, emails a summary, and
-  sends the link to Telegram. Manual only.
+- **`backup`** — uploads the archive to an anonymous file host (file.io, then
+  `tmpfiles.org`, then `litterbox.catbox.moe` when an earlier one refuses) and
+  sends **both the link and the archive itself** to Telegram. Runs on the
+  4×/day cron schedule.
+- **Telegram is the only delivery channel.** The Google Drive variant
+  (`backup-gd`, rclone) and the email notification (msmtp with a committed
+  Gmail app password) were removed; see the decisions document, section 11.
 
 ### Restore
 
@@ -805,12 +807,12 @@ Read these before exposing a server to the internet.
 - **Backups contain password hashes.** The archive includes `/etc/shadow` and
   `/etc/gshadow`, and `backup` uploads it to a public file host and Telegram.
   Treat backup links as secrets.
-- **Secrets are committed to the repository** — a Gmail app password
-  (`installer/set-br.sh`) and the L2TP pre-shared key. Rotate them, and do not
-  reuse this repository's defaults on a production server. (The Telegram bot
-  token that used to be listed here is gone: the install notification now uses
-  the operator's own credentials from `/etc/funny/`, and sends nothing when
-  they are unset.)
+- **A secret is still committed to the repository** — the L2TP pre-shared key
+  (`installer/l2tp.sh`). Rotate it, and do not reuse this repository's default
+  on a production server. (The Telegram bot token and the Gmail app password
+  that used to be listed here are both gone: install notifications use the
+  operator's own `/etc/funny/` credentials, and the email and Google Drive
+  backup paths have been removed.)
 - **Authorization is remote and IP-based.** If GitHub is unreachable, or the
   IP is not listed, scripts fail closed and exit.
 

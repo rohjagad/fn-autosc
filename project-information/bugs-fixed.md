@@ -889,3 +889,12 @@ Closed the last hardcoded-contact item. The SSH banner written by `installer/ssh
 ### Correction to the open-items list above
 
 The "Hardcoded WhatsApp contact" bullet in the Audit Follow-up above was written before the operator supplied their own details. It is superseded by the "Contact Details Updated to the Operator's Own" section that follows it: the banner now carries `wa.me/6289512992313` and `t.me/rohcuan`, and the README no longer lists a hardcoded WhatsApp number as a known issue. Still open from that list: the Gmail app password and the L2TP PSK (inherited defaults, owner's call) and a live lite install (fix 97's lite path is sandbox-verified only).
+
+## Google Drive and Email Backup Paths Removed (September 2026)
+
+- Deleted `full/backup-gd.sh` and `lite/backup-gd.sh`, and removed the `backup-gd` entries from the archives: `menu/full.zip` 115 -> 114, `menu/lite.zip` 98 -> 97 entries.
+- `full/bmenu.sh` and `lite/bmenu.sh`: the "Backup to Google Drive" option is gone and the remaining entries renumbered (1 backup, 2-4 restore).
+- `installer/set-br.sh`: dropped the rclone install and remote-config fetch, and the `msmtp`/`bsd-mailx` block that wrote `/etc/msmtprc` with the previous author's Gmail address and app password - together with the port-587 firewall rules and the `www-data` chown that only existed for it. The script now installs wondershaper only.
+- The only `mail` call sites in the tree were in the two deleted scripts, so nothing sends email any more. `/etc/funny/.email` is retained: ACME (`dm-menu`) reads it.
+- Verified: `backup-gd`, `rclone`, `drive.google`, `smtp.gmail`, `msmtp`, `bsd-mailx` and the old Gmail address now appear nowhere in `installer/ full/ lite/ config/ install.sh README.md` except the explanatory comments recording the removal. The archives were rebuilt and re-verified - 0 content mismatches, 0 non-755, `backup-gd` absent, and the packed `bmenu` updated to match its source.
+- This closes the Gmail app-password bullet from the audit follow-up above. What remains open from that list is the L2TP `VPN_IPSEC_PSK` (an inherited default) and a live lite install. The arrangement is recorded as decision 11.

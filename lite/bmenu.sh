@@ -355,20 +355,18 @@ echo -e "${NC}${separator}
             BACKUP MENU
 ${separator}
 ${green}1${NC}. Backup to File.io (Telegram)
-${green}2${NC}. Backup to Google Drive
-${green}3${NC}. Restore Backup via URL
-${green}4${NC}. Restore Backup via File
-${green}5${NC}. Restore Legacy Backup (< v1.23)
+${green}2${NC}. Restore Backup via URL
+${green}3${NC}. Restore Backup via File
+${green}4${NC}. Restore Legacy Backup (< v1.23)
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input option: " opa
 case $opa in
 1) clear ; backup ;;
-2) clear ; backup-gd ;;
-3) clear ; restore ;;
-4) clear ; restf ;;
-5) clear ; resold ;;
+2) clear ; restore ;;
+3) clear ; restf ;;
+4) clear ; resold ;;
 *) clear ; bmenu ;;
 esac
 }
