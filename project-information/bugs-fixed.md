@@ -885,3 +885,7 @@ Closed the last hardcoded-contact item. The SSH banner written by `installer/ssh
 - `full/menu-dnstt.sh` is a packed entry, so `menu/full.zip` was rebuilt in place: 115 entries, entry list identical, 0 content mismatches, 0 non-755, and the packed copy verified byte-identical to its source.
 - Verified: the old number, the old group invite and both old `t.me` targets return 0 occurrences across `installer/`, `full/` and `lite/`.
 - README: the Known Issues list drops the "hardcoded WhatsApp number" entry, the change is recorded in the since-fixed list, and the arrangement is recorded as an intentional decision (`is-decision.md` section 9).
+
+### Correction to the open-items list above
+
+The "Hardcoded WhatsApp contact" bullet in the Audit Follow-up above was written before the operator supplied their own details. It is superseded by the "Contact Details Updated to the Operator's Own" section that follows it: the banner now carries `wa.me/6289512992313` and `t.me/rohcuan`, and the README no longer lists a hardcoded WhatsApp number as a known issue. Still open from that list: the Gmail app password and the L2TP PSK (inherited defaults, owner's call) and a live lite install (fix 97's lite path is sandbox-verified only).
