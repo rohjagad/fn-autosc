@@ -1,7 +1,7 @@
 # Architectural Decisions (Not Bugs)
 
 > Renamed from `is-decision-not-bug.md`. References in `bugs-found.md` were
-> updated to `decision.md` at the same time; the content below is unchanged.
+> updated to `is-decision.md` at the same time; the content below is unchanged.
 
 This document tracks intentional design decisions, configurations, and behaviors in `fn-autosc` that may appear anomalous during audits but are deliberate choices rather than bugs.
 
