@@ -269,6 +269,25 @@ n) clear ; add ;;
 esac
 }
 
+setbotup() {
+# The bot credentials are the ones option 1 writes; this entry also guarantees
+# the scheduled backup exists, so choosing it is all that is needed for the
+# archive to be delivered to Telegram automatically.
+add
+grep -q 'flock -n /tmp/backup.lock backup' /etc/crontab 2>/dev/null || \
+    echo '0 0,6,12,18 * * * root flock -n /tmp/backup.lock backup' >> /etc/crontab
+clear
+echo -e "
+=========================================
+ Bot Auto Backup
+=========================================
+ Chat ID  : $(cat /etc/funny/.chatid 2>/dev/null)
+ Schedule : 0 0,6,12,18 (4x daily)
+ Delivery : Telegram document
+=========================================
+"
+}
+
 rpot() {
 echo -e "${NC}${separator}
           REPORT SCRIPT BUG
@@ -292,7 +311,7 @@ echo -e "${NC}${separator}
         TELEGRAM BOT MENU
 ${separator}
 ${green}1${NC}. Set Up Bot Notifications
-${green}2${NC}. Set Up Bot Menu Panel
+${green}2${NC}. Set Up Bot Auto Backup
 ${green}3${NC}. Terminal Bot Menu
 ${green}4${NC}. Report Script Bug
 ${separator}
@@ -301,7 +320,7 @@ ${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input option: " apws
 case $apws in
 1) clear ; add ;;
-2) clear ; echo -e "\n Feature coming soon" ;;
+2) clear ; setbotup ;;
 3) clear ; termbot ;;
 4) clear ; rpot ;;
 *) clear ; mna ;;

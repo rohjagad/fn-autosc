@@ -621,13 +621,14 @@ to it. Ingress points at `localhost:80` and the WebSocket backend on `2080`.
 
 | Option | Action |
 | :---: | :--- |
-| 1 | Set bot token and chat ID (`/etc/funny/.keybot`, `/etc/funny/.chatid`) |
-| 2 | Bot menu panel (placeholder) |
-| 3 | Terminal bot — a Node.js service exposing menus over Telegram |
+| 1 | Set up bot notifications (API key + chat ID → `/etc/funny/.keybot`, `/etc/funny/.chatid`) |
+| 2 | Set up bot auto backup (same credentials, and guarantees the 4×/day scheduled backup) |
+| 3 | Terminal bot menu — install / uninstall / restart the Node.js bot |
 | 4 | Report a script bug |
 
 Once configured, account creation, deletion, extension, quota kills, and
-backups all post notifications.
+backups all post notifications — and the backup archive itself is delivered to
+Telegram (see the Backup Menu section).
 
 ### System Menu — `menu-system`
 

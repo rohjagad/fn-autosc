@@ -912,3 +912,11 @@ The "Hardcoded WhatsApp contact" bullet in the Audit Follow-up above was written
 - `full/backup.sh` and `lite/backup.sh`: the caption's `Email` line was replaced by the domain, so the attachment is captioned `Domain` / `IP` / `Date`; the now-unused `email=$(cat /etc/funny/.email)` read was dropped. `/etc/funny/.email` remains in use by ACME (`dm-menu`).
 - README "Where it goes" updated to describe the caption as domain / IP / date.
 - `menu/full.zip` (114 entries) and `menu/lite.zip` (97 entries) rebuilt: 0 mismatches, 0 non-755, packed `backup` verified to match its source.
+
+## Telegram Bot Menu: Dead Placeholder Replaced with Bot Auto Backup (September 2026)
+
+- The Telegram Bot menu (`menu-bot`, main-menu option 6) had an option 2 "Set Up Bot Menu Panel" whose only action was `echo "Feature coming soon"` - an abandoned placeholder. It is now **"Set Up Bot Auto Backup"**.
+- Its action calls a new `setbotup()`: it runs the existing bot setup (API key + chat ID, written to `/etc/funny/.keybot` and `/etc/funny/.chatid`) and then guarantees the 4x/day scheduled backup exists in `/etc/crontab` (`grep -q ... || echo ...` - idempotent). It finishes with a short summary (chat ID, schedule, delivery = Telegram document). Since Telegram is now the only backup channel, this entry is how an operator turns automatic backup delivery on.
+- Applied identically to `full/menu-bot.sh` and `lite/menu-bot.sh`; the README's `menu-bot` section was corrected to list the four options the menu actually presents.
+- An earlier attempt had renamed the separate *Terminal Bot* menu (the Node.js bot installer reached through option 3) instead; that was a misreading of the request and was reverted - the terminal-bot menu keeps its own name and options.
+- Archives rebuilt: `menu/full.zip` (114 entries) and `menu/lite.zip` (97 entries), 0 content mismatches, 0 non-755.
