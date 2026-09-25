@@ -74,9 +74,9 @@ func main() {
 	fmt.Println("    Log X-Ray WebSocket   ")
 	fmt.Printf("%s━━━━━━━━━━━━━━━━━━━━━━━%s\n", BLUE, NC)
 
-	configPath := "/etc/v2ray/config.json"
+	configPath := "/etc/xray/json/ws.json"
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
-		fmt.Println("Config file /etc/v2ray/config.json not found!")
+		fmt.Println("Config file /etc/xray/json/ws.json not found!")
 		return
 	}
 

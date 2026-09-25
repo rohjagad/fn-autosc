@@ -1,7 +1,7 @@
 # FN AutoSC
 
 A menu-driven VPS automation suite for tunnelling protocols, proxy services, and
-Xray / V2Ray account management.
+Xray account management.
 
 One command installs SSH WebSocket, Xray (VMess / VLESS / Trojan over WebSocket,
 HTTP Upgrade, SplitHTTP, and gRPC), OpenVPN, WireGuard, L2TP/IPsec, NoobzVPN,
@@ -132,7 +132,7 @@ The full installer runs these stages, in order:
 4. Install the terminal display formatter (`/etc/funny/format.sh`).
 5. Install SSH, Dropbear, and SSH WebSocket (`ssh.sh`).
 6. Install Xray (`xray.sh`) — HTTP Upgrade, SplitHTTP, gRPC.
-7. Install V2Ray (`v2ray.sh`) — WebSocket.
+7. Install the WebSocket transport, served by Xray (`ws.sh`).
 8. Install the web restore interface (`website/install.sh`).
 9. Install Nginx and obtain SSL certificates (`diamond.sh`).
 10. Install OpenVPN, Squid, OHP (`vpn.sh`).
@@ -143,7 +143,7 @@ The full installer runs these stages, in order:
 15. Install UDP Custom (`udp.sh`) and UDP Request (`request.sh`).
 16. Apply system tuning and repairs (`fix/fix.sh`).
 
-The Lite installer runs a smaller subset: packages, menu, SSH, Xray, V2Ray,
+The Lite installer runs a smaller subset: packages, menu, SSH, Xray (all four transports),
 website, and Nginx/SSL. It **skips** OpenVPN, SlowDNS, L2TP, WireGuard,
 NoobzVPN, and UDP.
 
@@ -156,7 +156,7 @@ NoobzVPN, and UDP.
 | Base packages + Node.js 20 + vnStat | ✅ | ✅ |
 | SSH / Dropbear / SSH WebSocket | ✅ | ✅ |
 | Xray (HTTP Upgrade, SplitHTTP, gRPC) | ✅ | ✅ |
-| V2Ray (WebSocket) | ✅ | ✅ |
+| Xray (WebSocket) | ✅ | ✅ |
 | Nginx + SSL certificates | ✅ | ✅ |
 | Web restore interface | ✅ | ✅ |
 | OpenVPN + Squid + OHP | ✅ | ❌ |
@@ -252,7 +252,7 @@ change quota, and lock.
 
 ### HTTP / TLS Front-End Ports
 
-Nginx terminates every Xray / V2Ray transport on the **same set of ports**.
+Nginx terminates every Xray transport on the **same set of ports**.
 Pick any port your network allows — they all serve the same service.
 
 **TLS ports:**
@@ -281,7 +281,7 @@ match the server path exactly** — these are what the account creation cards
 show you.
 
 Clients connect on any port listed above. Nginx inspects the path and forwards
-internally to the correct V2Ray / Xray backend. Those internal ports are bound
+internally to the correct Xray backend. Those internal ports are bound
 to `127.0.0.1` only and are never reachable from outside.
 
 | Protocol | Transport | TLS Path | NoneTLS Path | Internal Backend |
@@ -390,7 +390,7 @@ Each account with a quota has two files:
 /etc/xray/quota/<protocol>/<username>_usage    # current usage, in bytes
 ```
 
-Usage is measured through the Xray/V2Ray stats API by the `quota-*` services
+Usage is measured through the Xray stats API by the `quota-*` services
 (`quota-ws`, `quota-http`, `quota-split`, `quota-grpc`), which run continuously.
 
 When usage reaches the limit, `kill-*` removes the account and notifies
@@ -463,9 +463,9 @@ The backup command stages:
 
 ```text
 /etc/passwd          /etc/xray/          /etc/crontab
-/etc/group           /etc/v2ray/
-/etc/shadow          /etc/funny/
-/etc/gshadow         /var/log/create/
+/etc/group           /etc/funny/
+/etc/shadow          /var/log/create/
+/etc/gshadow
 ```
 
 The staged tree is zipped to `/root/backup.zip`.
@@ -484,11 +484,12 @@ The staged tree is zipped to `/root/backup.zip`.
 ### Restore
 
 All restore paths unzip the archive and copy `passwd`, `group`, `shadow`,
-`gshadow`, `crontab`, `xray`, `v2ray`, `funny`, and `create` back into place,
-then restart SSH, V2Ray, the four Xray instances, Nginx, and cron.
+`gshadow`, `crontab`, `xray`, `funny`, and `create` back into place,
+then restart SSH, the four Xray instances, Nginx, and cron.
 
-The legacy restore additionally migrates old WS backups by converting
-`/etc/xray/json/ws.json` into the modern `/etc/v2ray/config.json`.
+The legacy restore additionally repairs an old WS backup's config by
+re-appending the standard outbounds/routing/stats block to
+`/etc/xray/json/ws.json`.
 
 A standalone `restore-ftp` command performs the same restore, taking its zip
 from `/var/www/uploads/` — this is what the web interface calls.
@@ -670,7 +671,7 @@ Files are named `{username}.log`. Locking renames them to `{username}.locked`.
 
 | Service | Log |
 | :--- | :--- |
-| V2Ray (WS) | `/var/log/v2ray/access.log` |
+| Xray WebSocket (WS) | `/var/log/xray/ws.log` |
 | Xray HTTP Upgrade | `/var/log/xray/upgrade.log` |
 | Xray SplitHTTP | `/var/log/xray/split.log` |
 | Xray gRPC | `/var/log/xray/grpc.log` |
@@ -679,7 +680,7 @@ Files are named `{username}.log`. Locking renames them to `{username}.locked`.
 
 | Service | Config |
 | :--- | :--- |
-| V2Ray (WS) | `/etc/v2ray/config.json` |
+| Xray WebSocket (WS) | `/etc/xray/json/ws.json` |
 | Xray HTTP Upgrade | `/etc/xray/json/upgrade.json` |
 | Xray SplitHTTP | `/etc/xray/json/split.json` |
 | Xray gRPC | `/etc/xray/json/grpc.json` |
@@ -734,7 +735,7 @@ Binaries are built with `-ldflags='-s -w'` for a small footprint.
 
 ## Bugs Fixed
 
-- **Typos that silently broke features** — `apt insfall` in `v2ray.sh`,
+- **Typos that silently broke features** — `apt insfall` in the WebSocket installer (now `ws.sh`),
   `systemctl resrart` in the restore scripts, `cp -r creare` in the website
   restore, `Hostibg`, and `INSTALL SUCCES`.
 - **Swapped IPv4/IPv6 variables** in `bmenu.sh` and the restore scripts, which

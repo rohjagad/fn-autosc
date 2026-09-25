@@ -74,7 +74,7 @@ DATE=$(date +"%Y-%m-%d %H:%M:%S")
 }
 
 # Database
-username=$(grep '^###' /etc/v2ray/config.json | cut -d ' ' -f 2 | sort | uniq)
+username=$(grep '^###' /etc/xray/json/ws.json | cut -d ' ' -f 2 | sort | uniq)
 
 # Bug 69: probe online-session statistics once before looping. The WS
 # transport is served by V2Ray, which exposes no online-session metric, so
@@ -108,11 +108,11 @@ for user in $username; do
         # matched its end address (no line starts with "},{") while $exp was
         # undefined, so a triggered limit deleted the account block plus
         # everything after it to the end of the file. Remove only the account.
-        exp=$(grep -wE "^### $user" "/etc/v2ray/config.json" | cut -d ' ' -f 3 | sort | uniq)
+        exp=$(grep -wE "^### $user" "/etc/xray/json/ws.json" | cut -d ' ' -f 3 | sort | uniq)
         if [[ -n "$exp" ]]; then
-            sed -i "/^### $user $exp/ {N;d}" /etc/v2ray/config.json
-            sed -i -z 's/},\n *\]/}\n        ]/g' /etc/v2ray/config.json
-            systemctl restart v2ray >> /dev/null 2>&1
+            sed -i "/^### $user $exp/ {N;d}" /etc/xray/json/ws.json
+            sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/ws.json
+            systemctl restart xray@ws >> /dev/null 2>&1
             send_log
             mv /var/log/create/xray/ws/${user}.log /var/log/create/xray/ws/${user}.locked
         fi

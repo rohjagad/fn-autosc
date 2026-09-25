@@ -89,11 +89,11 @@ con() {
 
 # Fungsi untuk memeriksa penggunaan ws
 cekws() {
-    users=$(grep '^###' /etc/v2ray/config.json | cut -d ' ' -f 2 | sort | uniq)
+    users=$(grep '^###' /etc/xray/json/ws.json | cut -d ' ' -f 2 | sort | uniq)
 
     for user in $users; do
         # Ambil statistik penggunaan dari V2Ray API
-        usage_data=$(v2ray api stats --server=127.0.0.1:10080 | grep "user>>>${user}>>>traffic" | awk '{print $2}')
+        usage_data=$(xray api stats --server=127.0.0.1:10080 | grep "user>>>${user}>>>traffic" | awk '{print $2}')
         inb=$(echo "$usage_data" | sed -n 1p | sed 's/MB//')
 
         # Validasi data inb
@@ -121,14 +121,14 @@ cekws() {
         if [[ -f "$quota_file" ]]; then
         quota_limit=$(cat "$quota_file")
         if (( $(echo "$quota_used > $quota_limit" | bc -l) )); then
-            exp=$(grep -w "^### $user" "/etc/v2ray/config.json" | awk '{print $3}')
-            sed -i "/### $user $exp/ {N;d}" /etc/v2ray/config.json
-            sed -i -z 's/},\n *\]/}\n        ]/g' /etc/v2ray/config.json
+            exp=$(grep -w "^### $user" "/etc/xray/json/ws.json" | awk '{print $3}')
+            sed -i "/### $user $exp/ {N;d}" /etc/xray/json/ws.json
+            sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/ws.json
             total_usage=$(con "$quota_used")
             total_limit=$(con "$quota_limit")
             send_log
             rm -f "$usage_file" "$quota_file"
-            systemctl restart v2ray
+            systemctl restart xray@ws
             echo "User $user reached quota limit and has been locked."
         fi
         fi

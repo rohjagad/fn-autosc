@@ -6,7 +6,7 @@ NC="\033[0m"
 BLUE="\033[0;34m"
 
 # Log file path
-log_path="/var/log/v2ray/access.log"
+log_path="/var/log/xray/ws.log"
 
 # Check if log file exists
 if [[ ! -f "$log_path" ]]; then
@@ -78,8 +78,8 @@ for user in "${users[@]}"; do
     echo "Protocol Account: $protocol"
 
     # Traffic stats (uplink and downlink)
-    uplink=$(v2ray api stats --server=127.0.0.1:10080 | grep "user>>>${user}>>>traffic>>>uplink" | awk '{print $2}')
-    downlink=$(v2ray api stats --server=127.0.0.1:10080 | grep "user>>>${user}>>>traffic>>>downlink" | awk '{print $2}')
+    uplink=$(xray api stats --server=127.0.0.1:10080 | grep "user>>>${user}>>>traffic>>>uplink" | awk '{print $2}')
+    downlink=$(xray api stats --server=127.0.0.1:10080 | grep "user>>>${user}>>>traffic>>>downlink" | awk '{print $2}')
     echo "Traffic Uplink: ${uplink} connections"
     echo "Traffic Downlink: ${downlink} connections"
     echo "Quota: $quota"
@@ -87,4 +87,4 @@ for user in "${users[@]}"; do
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 done
 
-echo -n > /var/log/v2ray/access.log
+echo -n > /var/log/xray/ws.log

@@ -200,7 +200,7 @@ function change_quota() {
             quota_status="No"
         fi
         systemctl daemon-reload
-        systemctl restart v2ray
+        systemctl restart xray@ws
         systemctl restart quota-ws
         Loading_Animasi
         Loading_Succes

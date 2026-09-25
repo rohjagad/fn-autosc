@@ -60,7 +60,7 @@ TIME="10"
 DATE=$(date +"%Y-%m-%d %H:%M:%S")
 
 # Daftar pengguna dari konfigurasi Xray (ambil username dari file JSON)
-users=$(grep '^###' /etc/v2ray/config.json | cut -d ' ' -f 2 | sort | uniq)
+users=$(grep '^###' /etc/xray/json/ws.json | cut -d ' ' -f 2 | sort | uniq)
 
 # Daftar pengguna yang terkunci (cek file dengan ekstensi .locked)
 userlock=$(ls /var/log/create/xray/ws/ | grep '.locked$' | sed 's/\.locked$//')
@@ -106,7 +106,7 @@ else
     # Restart layanan Xray setelah penghapusan
     echo "Restarting Xray service..."
     systemctl daemon-reload
-    systemctl restart v2ray
+    systemctl restart xray@ws
 fi
 
 # Kirim notifikasi hanya jika ada pengguna yang dihapus

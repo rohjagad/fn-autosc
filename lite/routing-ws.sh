@@ -66,7 +66,7 @@ read -p "Input Password: " password
 read -p "Input Path: " path
 clear
 DOMAIN_FILE="/root/.rules/domain"
-XRAY_CONFIG="/etc/v2ray/config.json"
+XRAY_CONFIG="/etc/xray/json/ws.json"
 
 # Mengecek apakah file domain ada, jika tidak, menggunakan default
 if [ -f "$DOMAIN_FILE" ]; then
@@ -79,10 +79,10 @@ else
 fi
 
 # Mendapatkan nomor baris untuk bagian "outbounds"
-line=$(cat /etc/v2ray/config.json | grep -n '"outbounds":' | awk -F: '{print $1}' | head -1)
+line=$(cat /etc/xray/json/ws.json | grep -n '"outbounds":' | awk -F: '{print $1}' | head -1)
 
 # Menghapus bagian setelah "outbounds"
-sed -i "${line},\$d" /etc/v2ray/config.json
+sed -i "${line},\$d" /etc/xray/json/ws.json
 
 # Membuat konfigurasi baru untuk "outbounds" dan "routing"
 TEXT="
@@ -190,7 +190,7 @@ echo "$TEXT" >> "$XRAY_CONFIG"
 
 # Reload dan restart Xray service
 systemctl daemon-reload
-systemctl restart v2ray
+systemctl restart xray@ws
 
 clear
 echo -e "Routing Success With Trojan WebSocket TLS"
@@ -210,7 +210,7 @@ read -p "Input UUID: " uid
 read -p "Input Path: " path
 clear
 DOMAIN_FILE="/root/.rules/domain"
-XRAY_CONFIG="/etc/v2ray/config.json"
+XRAY_CONFIG="/etc/xray/json/ws.json"
 
 # Mengecek apakah file domain ada, jika tidak, menggunakan default
 if [ -f "$DOMAIN_FILE" ]; then
@@ -223,10 +223,10 @@ else
 fi
 
 # Mendapatkan nomor baris untuk bagian "outbounds"
-line=$(cat /etc/v2ray/config.json | grep -n '"outbounds":' | awk -F: '{print $1}' | head -1)
+line=$(cat /etc/xray/json/ws.json | grep -n '"outbounds":' | awk -F: '{print $1}' | head -1)
 
 # Menghapus bagian setelah "outbounds"
-sed -i "${line},\$d" /etc/v2ray/config.json
+sed -i "${line},\$d" /etc/xray/json/ws.json
 
 # Membuat konfigurasi baru untuk "outbounds" dan "routing"
 TEXT="
@@ -337,7 +337,7 @@ echo "$TEXT" >> "$XRAY_CONFIG"
 
 # Reload dan restart Xray service
 systemctl daemon-reload
-systemctl restart v2ray
+systemctl restart xray@ws
 
 clear
 echo -e "Routing Success With All Protocol X-Ray WebSocket using Xray Vless WS NoneTLS"
@@ -359,7 +359,7 @@ read -p "Input Path: " path
 clear
 
 DOMAIN_FILE="/root/.rules/domain"
-XRAY_CONFIG="/etc/v2ray/config.json"
+XRAY_CONFIG="/etc/xray/json/ws.json"
 
 # Mengecek apakah file domain ada, jika tidak, menggunakan default
 if [ -f "$DOMAIN_FILE" ]; then
@@ -372,10 +372,10 @@ else
 fi
 
 # Mendapatkan nomor baris untuk bagian "outbounds"
-line=$(cat /etc/v2ray/config.json | grep -n '"outbounds":' | awk -F: '{print $1}' | head -1)
+line=$(cat /etc/xray/json/ws.json | grep -n '"outbounds":' | awk -F: '{print $1}' | head -1)
 
 # Menghapus bagian setelah "outbounds"
-sed -i "${line},\$d" /etc/v2ray/config.json
+sed -i "${line},\$d" /etc/xray/json/ws.json
 
 # Membuat konfigurasi baru untuk "outbounds" dan "routing"
 TEXT="
@@ -487,7 +487,7 @@ echo "$TEXT" >> "$XRAY_CONFIG"
 
 # Reload dan restart Xray service
 systemctl daemon-reload
-systemctl restart v2ray
+systemctl restart xray@ws
 
 clear
 echo -e "Routing Success With All Protocol X-Ray VMESS WebSocket Non-TLS"
@@ -495,13 +495,13 @@ echo -e "Routing Success With All Protocol X-Ray VMESS WebSocket Non-TLS"
 
 resd() {
 # Mengambil Lokasi Xray Config
-XRAY_CONFIG="/etc/v2ray/config.json"
+XRAY_CONFIG="/etc/xray/json/ws.json"
 
 # Mendapatkan nomor baris untuk bagian "outbounds"
-line=$(cat /etc/v2ray/config.json | grep -n '"outbounds":' | awk -F: '{print $1}' | head -1)
+line=$(cat /etc/xray/json/ws.json | grep -n '"outbounds":' | awk -F: '{print $1}' | head -1)
 
 # Menghapus bagian setelah "outbounds"
-sed -i "${line},\$d" /etc/v2ray/config.json
+sed -i "${line},\$d" /etc/xray/json/ws.json
 TEXT="
     \"outbounds\": [
     {
@@ -579,7 +579,7 @@ echo "$TEXT" >> "$XRAY_CONFIG"
 
 # Reload dan restart Xray service
 systemctl daemon-reload
-systemctl restart v2ray
+systemctl restart xray@ws
 
 clear
 echo -e "Success Back To Default Routing"

@@ -81,7 +81,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Fetch all usernames and UUIDs
-usernames=($(grep "^### " /etc/v2ray/config.json | awk '{print $2}' | sort | uniq))
+usernames=($(grep "^### " /etc/xray/json/ws.json | awk '{print $2}' | sort | uniq))
 
 # Clear screen and display header
 clear
@@ -93,7 +93,7 @@ echo -e "${CYAN}========================================="
 
 # Display usernames and UUIDs
 for user in "${usernames[@]}"; do
-    uid=$(grep "${user}" /etc/v2ray/config.json | awk -F'"id": "' '{print $2}' | awk -F'"' '{print $1}' | sort | uniq)
+    uid=$(grep "${user}" /etc/xray/json/ws.json | awk -F'"id": "' '{print $2}' | awk -F'"' '{print $1}' | sort | uniq)
     echo -e "${GREEN} $user      |       $uid"
 done
 
@@ -121,7 +121,7 @@ fi
 clear
 
 # GET OLD UUID
-old=$(grep "${user}" /etc/v2ray/config.json | awk -F'"id": "' '{print $2}' | awk -F'"' '{print $1}' | sort | uniq)
+old=$(grep "${user}" /etc/xray/json/ws.json | awk -F'"id": "' '{print $2}' | awk -F'"' '{print $1}' | sort | uniq)
 
 # Replace old UUID with new UUID in necessary files
 sed -i "s|\"id\": \"${old}\"|\"id\": \"${new}\"|" /etc/xray/json/*.json
@@ -131,7 +131,7 @@ sed -i 's/${old}/${new}/g' /var/log/create/xray/ws/${user}.log
 
 # Restart All Service
 systemctl daemon-reload
-systemctl restart v2ray
+systemctl restart xray@ws
 
 # Log Information
 send_log

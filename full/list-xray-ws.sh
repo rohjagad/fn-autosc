@@ -107,7 +107,7 @@ do
         limip=$(grep "Limit IP:" /var/log/create/xray/ws/${user}.log | awk '{print $3}')
         top=$(cat /etc/xray/quota/ws/${user} 2>/dev/null || echo 0)
         quota=$(bytes "$top")
-        uid=$(grep "${user}" /etc/v2ray/config.json | awk -F'"id": "' '{print $2}' | awk -F'"' '{print $1}' | sort | uniq)
+        uid=$(grep "${user}" /etc/xray/json/ws.json | awk -F'"id": "' '{print $2}' | awk -F'"' '{print $1}' | sort | uniq)
         protokol=$(grep "Protokol:" /var/log/create/xray/ws/${user}.log | awk '{print $2}')
         exp=$(grep "Expired" /var/log/create/xray/ws/${user}.log | awk '{print $3}')
         

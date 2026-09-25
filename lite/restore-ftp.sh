@@ -81,7 +81,6 @@ cp shadow /etc/
 cp gshadow /etc/
 cp crontab /etc/
 cp -r xray /etc/
-cp -r v2ray /etc/
 cp -r funny /etc/
 cp -r create /var/log/
 cp -r wireguard /etc/ 2>/dev/null || true
@@ -97,7 +96,7 @@ rm -f backup.zip
 clear
 systemctl daemon-reload
 systemctl restart ssh
-systemctl restart v2ray
+systemctl restart xray@ws
 systemctl restart xray@grpc
 systemctl restart xray@split
 systemctl restart xray@upgrade

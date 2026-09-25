@@ -72,7 +72,7 @@ else
 fi
 
 sshd="$(awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd | wc -l)"
-ws=$(cat /etc/v2ray/config.json 2>/dev/null | grep "###" | sort | uniq | wc -l)
+ws=$(cat /etc/xray/json/ws.json 2>/dev/null | grep "###" | sort | uniq | wc -l)
 http=$(cat /etc/xray/json/upgrade.json 2>/dev/null | grep "###" | sort | uniq | wc -l)
 gpc=$(cat /etc/xray/json/grpc.json 2>/dev/null | grep "###" | sort | uniq | wc -l)
 split=$(cat /etc/xray/json/split.json 2>/dev/null | grep "###" | sort | uniq | wc -l)
@@ -222,7 +222,7 @@ resh="${red}OFF${NC}"
 fi
 
 ### Status XTLS WebSocket
-vxws=$(service v2ray status | grep active | cut -d ' ' $stat)
+vxws=$(service xray@ws status | grep active | cut -d ' ' $stat)
 if [ "$vxws" = "active" ]; then
 xws="${green}ON${NC}"
 else

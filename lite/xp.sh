@@ -56,17 +56,17 @@ systemctl daemon-reload
 clear
 
 ##----- Auto Remove Xray / V2ray Websocket
-data=( `cat /etc/v2ray/config.json | grep '^###' | cut -d ' ' -f 2 | sort | uniq`);
+data=( `cat /etc/xray/json/ws.json | grep '^###' | cut -d ' ' -f 2 | sort | uniq`);
 now=`date +"%Y-%m-%d"`
 for user in "${data[@]}"
 do
-exp=$(grep -w "^### $user" "/etc/v2ray/config.json" | cut -d ' ' -f 3 | sort | uniq)
+exp=$(grep -w "^### $user" "/etc/xray/json/ws.json" | cut -d ' ' -f 3 | sort | uniq)
 d1=$(date -d "$exp" +%s)
 d2=$(date -d "$now" +%s)
 exp2=$(( (d1 - d2) / 86400 ))
 if [[ "$exp2" -le "0" ]]; then
-sed -i "/### $user $exp/ {N;d}" /etc/v2ray/config.json
-sed -i -z 's/},\n *\]/}\n        ]/g' /etc/v2ray/config.json
+sed -i "/### $user $exp/ {N;d}" /etc/xray/json/ws.json
+sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/ws.json
         rm -f /var/log/create/xray/ws/${user}.log
         rm -f /etc/xray/quota/ws/$user /etc/xray/quota/ws/${user}_usage
         rm -f /etc/xray/limit/ip/xray/ws/$user
@@ -84,7 +84,7 @@ URL="https://api.telegram.org/bot$KEY/sendMessage"
 curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL
 clear
 systemctl daemon-reload
-systemctl restart v2ray
+systemctl restart xray@ws
 fi
 done
 

@@ -109,7 +109,7 @@ systemctl restart sshd 2>/dev/null || true
 systemctl restart dropbear
 systemctl restart ws
 systemctl restart cron
-systemctl restart v2ray
+systemctl restart xray@ws
 systemctl restart xray@upgrade
 systemctl restart xray@split
 systemctl restart xray@grpc

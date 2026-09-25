@@ -84,11 +84,11 @@ exp=`date -d "$masaaktif days" +"%y-%m-%d"`
 uuid=$(xray uuid)
 
 # Menambahkan akun pada json
-sed -i '/#vmess$/{n;s/}/},\n### '"$user $exp"'\n{"id": "'""$uuid""'","alterid": 0,"email": "'""$user""'"}/}' /etc/v2ray/config.json
+sed -i '/#vmess$/{n;s/}/},\n### '"$user $exp"'\n{"id": "'""$uuid""'","alterid": 0,"email": "'""$user""'"}/}' /etc/xray/json/ws.json
 
 # Me Restart Service
 systemctl daemon-reload
-systemctl restart v2ray
+systemctl restart xray@ws
 systemctl restart quota-ws
 
 # Konfigurasi Json WS TLS
@@ -164,7 +164,7 @@ Link None: $vmesslink2
 "
 curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's/\\033\[[0-9;]*m//g' -e 's/\x1b\[[0-9;]*m//g')" $URL >/dev/null 2>&1
 echo -e "$TEKS" > /var/log/create/xray/ws/${user}.log
-echo 'sed -i "/### '"$user"' '"$exp"'/ {N;d}" /etc/v2ray/config.json && sed -i -z '"'"'s/},\n *\]/}\n        ]/g'"'"' /etc/v2ray/config.json && systemctl restart v2ray && systemctl restart quota-ws && rm -fr /var/log/create/xray/ws/'"$user"'.log && rm -fr /etc/xray/limit/ip/xray/ws/'"$user"' && rm -fr /etc/xray/quota/ws/'"$user"' /etc/xray/quota/ws/'"$user"'_usage' | at now + 60 minutes >/dev/null 2>&1
+echo 'sed -i "/### '"$user"' '"$exp"'/ {N;d}" /etc/xray/json/ws.json && sed -i -z '"'"'s/},\n *\]/}\n        ]/g'"'"' /etc/xray/json/ws.json && systemctl restart xray@ws && systemctl restart quota-ws && rm -fr /var/log/create/xray/ws/'"$user"'.log && rm -fr /etc/xray/limit/ip/xray/ws/'"$user"' && rm -fr /etc/xray/quota/ws/'"$user"' /etc/xray/quota/ws/'"$user"'_usage' | at now + 60 minutes >/dev/null 2>&1
 clear
 source /etc/funny/format.sh
 format_display "$TEKS"

@@ -72,7 +72,6 @@ cp /etc/group /root/backup/
 cp /etc/shadow /root/backup/
 cp /etc/gshadow /root/backup/
 cp -r /etc/xray /root/backup/xray
-cp -r /etc/v2ray /root/backup/v2ray
 cp -r /var/log/create /root/backup/create
 cp -r /etc/funny /root/backup/funny
 cp /etc/crontab /root/backup/

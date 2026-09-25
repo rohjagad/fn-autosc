@@ -1,6 +1,6 @@
 {
   "log" : {
-    "access": "/var/log/v2ray/access.log",
+    "access": "/var/log/xray/ws.log",
     "loglevel": "info"
   },
   "inbounds": [

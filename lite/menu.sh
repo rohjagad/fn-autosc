@@ -176,7 +176,7 @@ echo -e "${NC}: "$red"not running (Error)"$NC" "
 fi
 
 # Total Akun
-ws=$(cat /etc/v2ray/config.json | grep "###" | sort | uniq | wc -l)
+ws=$(cat /etc/xray/json/ws.json | grep "###" | sort | uniq | wc -l)
 http=$(cat /etc/xray/json/upgrade.json | grep "###" | sort | uniq | wc -l)
 gpc=$(cat /etc/xray/json/grpc.json | grep "###" | sort | uniq | wc -l)
 split=$(cat /etc/xray/json/split.json | grep "###" | sort | uniq | wc -l)

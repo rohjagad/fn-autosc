@@ -109,7 +109,6 @@ cp shadow /etc/
 cp gshadow /etc/
 cp crontab /etc/
 cp -r xray /etc/
-cp -r v2ray /etc/
 cp -r funny /etc/
 cp -r create /var/log/
 cp -r wireguard /etc/ 2>/dev/null || true
@@ -121,8 +120,8 @@ cp ipsec.secrets /etc/ 2>/dev/null || true
 
 systemctl daemon-reload
 systemctl restart ssh
-systemctl restart v2ray
-systemctl restart v2ray
+systemctl restart xray@ws
+systemctl restart xray@ws
 systemctl restart xray@grpc
 systemctl restart xray@split
 systemctl restart xray@upgrade
@@ -168,7 +167,6 @@ cp shadow /etc/
 cp gshadow /etc/
 cp crontab /etc/
 cp -r xray /etc/
-cp -r v2ray /etc/
 cp -r funny /etc/
 cp -r create /var/log/
 cp -r wireguard /etc/ 2>/dev/null || true
@@ -180,8 +178,8 @@ cp ipsec.secrets /etc/ 2>/dev/null || true
 
 systemctl daemon-reload
 systemctl restart ssh
-systemctl restart v2ray
-systemctl restart v2ray
+systemctl restart xray@ws
+systemctl restart xray@ws
 systemctl restart xray@grpc
 systemctl restart xray@split
 systemctl restart xray@upgrade
@@ -236,20 +234,20 @@ cp -r ppp /etc/ 2>/dev/null || true
 cp -r ipsec.d /etc/ 2>/dev/null || true
 cp ipsec.secrets /etc/ 2>/dev/null || true
 
-# Mengubah Database XTLS WebSocket Ke V2ray WebSocket
+# Repair the WS config a legacy backup has restored: replace the UUID
+# placeholder, then re-append the standard outbounds/routing/stats block below.
+# The config is already at the path the service reads, so nothing is moved.
 cd /etc/xray/json
-mv ws.json /etc/v2ray/config.json
-sed -i "s/rerechan-store/$(xray uuid)/g" /etc/v2ray/config.json
-sed -i 's|/var/log/xray/ws.log|/var/log/v2ray/access.log|g' /etc/v2ray/config.json
+sed -i "s/rerechan-store/$(xray uuid)/g" /etc/xray/json/ws.json
 
 # Mengambil Lokasi Xray Config
-XRAY_CONFIG="/etc/v2ray/config.json"
+XRAY_CONFIG="/etc/xray/json/ws.json"
 
 # Mendapatkan nomor baris untuk bagian "outbounds"
-line=$(cat /etc/v2ray/config.json | grep -n '"outbounds":' | awk -F: '{print $1}' | head -1)
+line=$(cat /etc/xray/json/ws.json | grep -n '"outbounds":' | awk -F: '{print $1}' | head -1)
 
 # Menghapus bagian setelah "outbounds"
-sed -i "${line},\$d" /etc/v2ray/config.json
+sed -i "${line},\$d" /etc/xray/json/ws.json
 TEXT="
     \"outbounds\": [
     {
@@ -328,8 +326,8 @@ echo "$TEXT" >> "$XRAY_CONFIG"
 # Memulai Service
 systemctl daemon-reload
 systemctl restart ssh
-systemctl restart v2ray
-systemctl restart v2ray
+systemctl restart xray@ws
+systemctl restart xray@ws
 systemctl restart xray@grpc
 systemctl restart xray@split
 systemctl restart xray@upgrade

@@ -142,12 +142,12 @@ chmod +x xray.sh
 cd
 rm -f /root/xray.sh
 
-# Installasi V2Ray
-wget --no-check-certificate ${hosting}/installer/v2ray.sh >> /dev/null 2>&1
-chmod +x v2ray.sh
-./v2ray.sh
+# Installasi WebSocket (Xray)
+wget --no-check-certificate ${hosting}/installer/ws.sh >> /dev/null 2>&1
+chmod +x ws.sh
+./ws.sh
 cd
-rm -f /root/v2ray.sh
+rm -f /root/ws.sh
 
 # Menginstall WebSite Restore
 wget --no-check-certificate -O /root/website.sh "${hosting}/website/install.sh" >> /dev/null 2>&1

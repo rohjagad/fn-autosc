@@ -98,7 +98,7 @@ clearScreen() {
 
 # Fungsi utama untuk menampilkan menu dan menangani pilihan pengguna
 xws() {
-    ws=$(countAccounts "/etc/v2ray/config.json")
+    ws=$(countAccounts "/etc/xray/json/ws.json")
 
     clearScreen
     echo -e "${NC}${separator}

@@ -100,12 +100,12 @@ function check_quota() {
         if [[ -f "$log_file" ]]; then
             return
         fi
-        exp=$(grep -w "^### $user" "/etc/v2ray/config.json" | awk '{print $3}' | sort | uniq)
+        exp=$(grep -w "^### $user" "/etc/xray/json/ws.json" | awk '{print $3}' | sort | uniq)
         if [[ -n "$exp" ]]; then
-            sed -i "/### $user $exp/ {N;d}" /etc/v2ray/config.json
-            sed -i -z 's/},\n *\]/}\n        ]/g' /etc/v2ray/config.json
+            sed -i "/### $user $exp/ {N;d}" /etc/xray/json/ws.json
+            sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/ws.json
             systemctl daemon-reload
-            systemctl restart v2ray
+            systemctl restart xray@ws
         fi
 
         echo -e "User tanpa file kuota ditemukan
@@ -127,11 +127,11 @@ function check_quota() {
         usage=$(cat "$usage_file")
 
         if [[ $usage -ge $quota_limit ]]; then
-            exp=$(grep -w "^### $user" "/etc/v2ray/config.json" | awk '{print $3}' | sort | uniq)
+            exp=$(grep -w "^### $user" "/etc/xray/json/ws.json" | awk '{print $3}' | sort | uniq)
             if [[ -n "$exp" ]]; then
-                sed -i "/^### $user $exp/,/^###/d" /etc/v2ray/config.json
+                sed -i "/^### $user $exp/,/^###/d" /etc/xray/json/ws.json
                 systemctl daemon-reload
-                systemctl restart v2ray
+                systemctl restart xray@ws
             fi
 
             readable_limit=$(human_readable "$quota_limit")
@@ -155,7 +155,7 @@ function check_quota() {
 }
 
 function process_quota() {
-    users=$(grep '^###' /etc/v2ray/config.json | cut -d ' ' -f 2 | sort | uniq)
+    users=$(grep '^###' /etc/xray/json/ws.json | cut -d ' ' -f 2 | sort | uniq)
 
     for user in $users; do
         check_quota "$user"
@@ -163,4 +163,4 @@ function process_quota() {
 }
 
 process_quota
-echo -n > /var/log/v2ray/access.log
+echo -n > /var/log/xray/ws.log

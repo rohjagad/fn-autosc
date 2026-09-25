@@ -164,18 +164,18 @@ ${separator}"
 
 # Langsung lakukan unlock jika username valid
 if [ "$protokol2" == "Vmess" ]; then
-    sed -i '/#vmess$/{n;s/}/},\n### '"$name $exp2"'\n{"id": "'""$uuid""'","alterid": 0,"email": "'""$name""'"}/}' /etc/v2ray/config.json
+    sed -i '/#vmess$/{n;s/}/},\n### '"$name $exp2"'\n{"id": "'""$uuid""'","alterid": 0,"email": "'""$name""'"}/}' /etc/xray/json/ws.json
 elif [ "$protokol2" == "Vless" ]; then
-    sed -i '/#vless$/{n;s/}/},\n### '"$name $exp2"'\n{"id": "'""$uuid""'","email": "'""$name""'"}/}' /etc/v2ray/config.json
+    sed -i '/#vless$/{n;s/}/},\n### '"$name $exp2"'\n{"id": "'""$uuid""'","email": "'""$name""'"}/}' /etc/xray/json/ws.json
 elif [ "$protokol2" == "Trojan" ]; then
-    sed -i '/#trojan$/{n;s/}/},\n### '"$name $exp2"'\n{"password": "'""$uuid""'","email": "'""$name""'"}/}' /etc/v2ray/config.json
+    sed -i '/#trojan$/{n;s/}/},\n### '"$name $exp2"'\n{"password": "'""$uuid""'","email": "'""$name""'"}/}' /etc/xray/json/ws.json
 else
     echo "Protokol tidak dikenal"
 fi
 
 mv /var/log/create/xray/ws/${name}.locked /var/log/create/xray/ws/${name}.log
 systemctl daemon-reload
-systemctl restart v2ray
+systemctl restart xray@ws
 # Send Notif Telegram
 send_log
 

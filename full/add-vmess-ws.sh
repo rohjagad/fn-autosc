@@ -83,7 +83,7 @@ until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/creat
         continue
     fi
 
-    client_exists=$(grep -w $user /etc/v2ray/config.json | wc -l)
+    client_exists=$(grep -w $user /etc/xray/json/ws.json | wc -l)
 
     if [[ ${client_exists} == '1' ]]; then
         clear
@@ -149,11 +149,11 @@ fi
 exp=`date -d "$masaaktif days" +"%y-%m-%d"`
 
 # Menambahkan akun pada json
-sed -i '/#vmess$/{n;s/}/},\n### '"$user $exp"'\n{"id": "'""$uuid""'","alterid": 0,"email": "'""$user""'"}/}' /etc/v2ray/config.json
+sed -i '/#vmess$/{n;s/}/},\n### '"$user $exp"'\n{"id": "'""$uuid""'","alterid": 0,"email": "'""$user""'"}/}' /etc/xray/json/ws.json
 
 # Me Restart Service
 systemctl daemon-reload
-systemctl restart v2ray
+systemctl restart xray@ws
 systemctl restart quota-ws
 
 # Konfigurasi Json WS TLS
