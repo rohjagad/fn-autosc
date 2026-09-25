@@ -92,35 +92,35 @@ cekws() {
     users=$(grep '^###' /etc/xray/json/ws.json | cut -d ' ' -f 2 | sort | uniq)
 
     for user in $users; do
-        # Ambil statistik penggunaan dari Xray API
-        usage_data=$(xray api stats --server=127.0.0.1:10080 | grep "user>>>${user}>>>traffic" | awk '{print $2}')
-        inb=$(echo "$usage_data" | sed -n 1p | sed 's/MB//')
+        # Ambil statistik penggunaan dari Xray API (raw bytes). Bug 99: the
+        # migration kept V2Ray's `api stats` call, but Xray's `stats` needs an
+        # explicit -name and errors without one, so use the same statsquery +
+        # inb/outb + reset pattern as quota-grpc/http/split.
+        usage_data=$(xray api statsquery --server=127.0.0.1:10080 | grep -C 2 "$user" | grep value | awk '{print $2}' | sed 's/,//g; s/"//g')
+        inb=$(echo "$usage_data" | sed -n 1p)
+        outb=$(echo "$usage_data" | sed -n 2p)
 
-        # Validasi data inb
-        if [[ -z "$inb" ]]; then
-            echo "Data inbound usage for user $user is incomplete. Skipping."
+        # Validasi data inb dan outb
+        if [[ -z "$inb" || -z "$outb" ]]; then
+            echo "Data usage for user $user is incomplete. Skipping."
             continue
         fi
 
-        inb_bytes=$(echo "$inb * 1048576" | bc)
-        quota_used=$inb_bytes
+        quota_used=$((inb + outb))
 
         usage_file="/etc/xray/quota/ws/${user}_usage"
         quota_file="/etc/xray/quota/ws/${user}"
 
         if [ -f "$usage_file" ]; then
             previous_usage=$(cat "$usage_file")
-            quota_used=$(echo "$quota_used + $previous_usage" | bc)
+            quota_used=$((quota_used + previous_usage))
         fi
-
-        # Hapus titik dan angka desimal
-        quota_used=$(echo "$quota_used" | cut -d '.' -f 1)
 
         echo "$quota_used" > "$usage_file"
 
         if [[ -f "$quota_file" ]]; then
         quota_limit=$(cat "$quota_file")
-        if (( $(echo "$quota_used > $quota_limit" | bc -l) )); then
+        if [[ "$quota_used" -gt "$quota_limit" ]]; then
             exp=$(grep -w "^### $user" "/etc/xray/json/ws.json" | awk '{print $3}')
             sed -i "/### $user $exp/ {N;d}" /etc/xray/json/ws.json
             sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/ws.json
@@ -132,6 +132,10 @@ cekws() {
             echo "User $user reached quota limit and has been locked."
         fi
         fi
+
+        # Reset statistik supaya pass berikutnya membaca delta, bukan total
+        xray api stats --server=127.0.0.1:10080 -name "user>>>${user}>>>traffic>>>downlink" -reset >/dev/null 2>&1
+        xray api stats --server=127.0.0.1:10080 -name "user>>>${user}>>>traffic>>>uplink" -reset >/dev/null 2>&1
     done
 }
 

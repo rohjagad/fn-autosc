@@ -49,8 +49,10 @@ for user in "${users[@]}"; do
     # Filter logs for the user
     logs=$(grep "email: $user" "$log_path")
     
-    # Count unique IPs
-    ip_count=$(echo "$logs" | awk '{print $1}' | sort -u | wc -l)
+    # Count unique client IPs. Bug 101: the access line starts with the date, so
+    # $1 is the day; the address is the token after "from" (`<ip>:<port>`), which
+    # is the X-Forwarded-For address nginx supplies.
+    ip_count=$(echo "$logs" | awk '{for(i=1;i<=NF;i++) if($i=="from"){print $(i+1); break}}' | sed 's/:[0-9]*$//' | sed '/^$/d' | sort -u | wc -l)
 
     # IP limit
     ip_limit=$(cat "/etc/xray/limit/ip/xray/ws/${user}")
@@ -77,11 +79,13 @@ for user in "${users[@]}"; do
     [[ -z "$protocol" ]] && protocol="Not available"
     echo "Protocol Account: $protocol"
 
-    # Traffic stats (uplink and downlink)
-    uplink=$(xray api stats --server=127.0.0.1:10080 | grep "user>>>${user}>>>traffic>>>uplink" | awk '{print $2}')
-    downlink=$(xray api stats --server=127.0.0.1:10080 | grep "user>>>${user}>>>traffic>>>downlink" | awk '{print $2}')
-    echo "Traffic Uplink: ${uplink} connections"
-    echo "Traffic Downlink: ${downlink} connections"
+    # Traffic stats (uplink and downlink). Bug 100: `xray api stats` requires an
+    # explicit -name and errors without one; read both counters via statsquery
+    # (patterns also stop one username from matching another). Counters are bytes.
+    uplink=$(xray api statsquery --server=127.0.0.1:10080 -pattern "user>>>${user}>>>traffic>>>uplink" 2>/dev/null | jq -r '.stat[0].value // 0' 2>/dev/null)
+    downlink=$(xray api statsquery --server=127.0.0.1:10080 -pattern "user>>>${user}>>>traffic>>>downlink" 2>/dev/null | jq -r '.stat[0].value // 0' 2>/dev/null)
+    echo "Traffic Uplink: ${uplink:-0} bytes ($(format_bytes "${uplink:-0}"))"
+    echo "Traffic Downlink: ${downlink:-0} bytes ($(format_bytes "${downlink:-0}"))"
     echo "Quota: $quota"
 
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━${NC}"

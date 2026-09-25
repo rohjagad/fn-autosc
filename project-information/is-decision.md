@@ -103,3 +103,7 @@ The Telegram caption was reduced to **Domain / IP / Date**. The `Email` line and
 ### Section 13 addendum - the bundled V2Ray asset is deleted
 
 `v2ray/v2ray-linux-64.zip` (16 MB) has been removed from the repository; nothing has fetched it since this decision. That also retires the "V2Ray archive" entry from the bundled-pin list in section 8. A follow-up sweep (case-insensitive this time, and across every code tree) removed the last references: `website/restore-ftp.sh` still copied the directory on restore and restarted the service, the four `limit-ip-*.sh` scripts carried a stale V2Ray comment, and `xp.sh`, `quota-ws.sh` and `menu-argo.sh` still named it.
+
+### Section 13 addendum 2 - the migration is completed against the 1.20 template
+
+The migration first reused V23's V2Ray-era `json/ws.json` and its WS scripts with a mechanical `v2ray` -> `xray` substitution. That left the WS IP limit inert (`statsUserOnline` was missing from the policy block) and broke WS quota accounting and the `cek-xray-ws` traffic display (`xray api stats` requires `-name`, unlike V2Ray's). The template now matches the 1.20 `Json/ws.json` and the stats reads use `statsquery`, the same pattern as `quota-grpc`/`quota-http`/`quota-split`. Recorded as fixes 100-103; see `bugs-fixed.md` and regression 19.
