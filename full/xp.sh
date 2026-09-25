@@ -61,7 +61,11 @@ now=`date +"%Y-%m-%d"`
 for user in "${data[@]}"
 do
 exp=$(grep -w "^### $user" "/etc/xray/json/ws.json" | cut -d ' ' -f 3 | sort | uniq)
-d1=$(date -d "$exp" +%s)
+d1=$(date -d "$exp" +%s 2>/dev/null)
+if [ -z "$d1" ]; then
+    echo "Skipping $user: unparseable expiry '$exp'"
+    continue
+fi
 d2=$(date -d "$now" +%s)
 exp2=$(( (d1 - d2) / 86400 ))
 if [[ "$exp2" -le "0" ]]; then
@@ -94,7 +98,11 @@ now=`date +"%Y-%m-%d"`
 for user in "${data[@]}"
 do
 exp=$(grep -w "^### $user" "/etc/xray/json/upgrade.json" | cut -d ' ' -f 3 | sort | uniq)
-d1=$(date -d "$exp" +%s)
+d1=$(date -d "$exp" +%s 2>/dev/null)
+if [ -z "$d1" ]; then
+    echo "Skipping $user: unparseable expiry '$exp'"
+    continue
+fi
 d2=$(date -d "$now" +%s)
 exp2=$(( (d1 - d2) / 86400 ))
 if [[ "$exp2" -le "0" ]]; then
@@ -127,7 +135,11 @@ now=`date +"%Y-%m-%d"`
 for user in "${data[@]}"
 do
 exp=$(grep -w "^### $user" "/etc/xray/json/split.json" | cut -d ' ' -f 3 | sort | uniq)
-d1=$(date -d "$exp" +%s)
+d1=$(date -d "$exp" +%s 2>/dev/null)
+if [ -z "$d1" ]; then
+    echo "Skipping $user: unparseable expiry '$exp'"
+    continue
+fi
 d2=$(date -d "$now" +%s)
 exp2=$(( (d1 - d2) / 86400 ))
 if [[ "$exp2" -le "0" ]]; then
@@ -160,7 +172,11 @@ now=`date +"%Y-%m-%d"`
 for user in "${data[@]}"
 do
 exp=$(grep -w "^### $user" "/etc/xray/json/grpc.json" | cut -d ' ' -f 3 | sort | uniq)
-d1=$(date -d "$exp" +%s)
+d1=$(date -d "$exp" +%s 2>/dev/null)
+if [ -z "$d1" ]; then
+    echo "Skipping $user: unparseable expiry '$exp'"
+    continue
+fi
 d2=$(date -d "$now" +%s)
 exp2=$(( (d1 - d2) / 86400 ))
 if [[ "$exp2" -le "0" ]]; then
@@ -242,7 +258,11 @@ now=`date +"%Y-%m-%d"`
 for user in "${data[@]}"
 do
 exp=$(grep -w "^### $user" "/etc/funny/.l2tp" | cut -d ' ' -f 3)
-d1=$(date -d "$exp" +%s)
+d1=$(date -d "$exp" +%s 2>/dev/null)
+if [ -z "$d1" ]; then
+    echo "Skipping $user: unparseable expiry '$exp'"
+    continue
+fi
 d2=$(date -d "$now" +%s)
 exp2=$(( (d1 - d2) / 86400 ))
 if [[ "$exp2" -le "0" ]]; then
@@ -273,7 +293,7 @@ while read expired; do
 	user=$(echo $expired | awk '{print $1}')
 	exp=$(echo $expired | awk '{print $2}')
 
-	if [[ $exp < $now ]]; then
+	if [ -n "$exp" ] && [[ "$exp" =~ ^[0-9]{2}-[0-9]{2}-[0-9]{2}$ ]] && [[ $exp < $now ]]; then
 		sed -i "/^### Client ${user}\$/,/^$/d" /etc/wireguard/wg0.conf
 		if grep -q "### Client" /etc/wireguard/wg0.conf; then
 			line=$(grep -n AllowedIPs /etc/wireguard/wg0.conf | tail -1 | awk -F: '{print $1}')
@@ -320,8 +340,12 @@ for user in "${data[@]}"; do
     exp=$(grep -w "^### $user" /etc/funny/.noob | awk '{print $3}' | sort | uniq) 
     
     # Menampilkan Masa Aktif Sesuai Username
-    d1=$(date -d "$exp" +%s) 
-    d2=$(date -d "$now" +%s) 
+    d1=$(date -d "$exp" +%s 2>/dev/null)
+    if [ -z "$d1" ]; then
+        echo "Skipping $user: unparseable expiry '$exp'"
+        continue
+    fi
+    d2=$(date -d "$now" +%s)
     
     # Menghitung selisih hari
     exp2=$(( (d1 - d2) / 86400 )) 

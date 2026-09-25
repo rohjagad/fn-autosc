@@ -121,7 +121,7 @@ cekws() {
         if [[ -f "$quota_file" ]]; then
         quota_limit=$(cat "$quota_file")
         if [[ "$quota_used" -gt "$quota_limit" ]]; then
-            exp=$(grep -w "^### $user" "/etc/xray/json/ws.json" | awk '{print $3}')
+            exp=$(grep -w "^### $user" "/etc/xray/json/ws.json" | awk '{print $3}' | sort -u)
             sed -i "/### $user $exp/ {N;d}" /etc/xray/json/ws.json
             sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/ws.json
             total_usage=$(con "$quota_used")

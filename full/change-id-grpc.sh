@@ -93,7 +93,7 @@ echo -e "${CYAN}========================================="
 
 # Display usernames and UUIDs
 for user in "${usernames[@]}"; do
-    uid=$(grep "${user}" /etc/xray/json/grpc.json | awk -F'"id": "' '{print $2}' | awk -F'"' '{print $1}' | sort | uniq)
+    uid=$(grep -F "\"email\": \"${user}\"" /etc/xray/json/grpc.json | sed -nE 's/.*"(id|password)": "([^"]+)".*/\2/p' | sort -u | head -1)
     echo -e "${GREEN} $user      |       $uid"
 done
 
@@ -103,7 +103,7 @@ echo -e "${CYAN}=========================================${NC}"
 
 # Prompt user input for username and validate
 while true; do
-    read -p "Input Username: " user
+    read -p "Input Username: " user || exit 1
     if [[ -z "$user" || ! -f "/var/log/create/xray/grpc/${user}.log" ]]; then
         echo -e "${RED}Invalid username! Please try again.${NC}"
     else
@@ -121,17 +121,17 @@ fi
 clear
 
 # GET OLD UUID
-old=$(grep "${user}" /etc/xray/json/grpc.json | awk -F'"id": "' '{print $2}' | awk -F'"' '{print $1}' | sort | uniq)
+old=$(grep -F "\"email\": \"${user}\"" /etc/xray/json/grpc.json | sed -nE 's/.*"(id|password)": "([^"]+)".*/\2/p' | sort -u | head -1)
 
 while true; do
-    read -p "Please Input option (y/n): " pks
+    read -p "Please Input option (y/n): " pks || exit 1
     case $pks in
         [yY]) 
             # Lanjutkan dengan eksekusi perintah
             sed -i "s|\"id\": \"${old}\"|\"id\": \"${new}\"|" /etc/xray/json/*.json
             sed -i "s|\"password\": \"${old}\"|\"password\": \"${new}\"|" /etc/xray/json/*.json
-            sed -i "s|UUID   : $old|UUID   : $new|" /var/log/create/xray/grpc/${user}.log
-            sed -i "s/${old}/${new}/g" /var/log/create/xray/grpc/${user}.log
+            sed -i -E "s|^( *UUID[[:space:]]*:).*|\1 ${new}|" /var/log/create/xray/grpc/${user}.log
+            [ -n "$old" ] && sed -i "s|${old}|${new}|g" /var/log/create/xray/grpc/${user}.log
 
             # Restart All Service
             systemctl daemon-reload

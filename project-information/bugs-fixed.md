@@ -1002,3 +1002,57 @@ The VPS was reinstalled from scratch with upstream `bin456789/reinstall` (`debia
 - **Fix 102 (traffic):** `cek-xray-ws` printed `Traffic Uplink: 156 bytes (156 B)` and `Traffic Downlink: 36225156 bytes (34.54 MB)`.
 - **Fix 103 (IP count):** the same screen printed `Total IP Login: 2 / 1`, matching `statsonline`.
 - **Environment notes (host-specific, not code):** this VPS's IPv6 cannot reach Fastly, so the Debian installer's mirror check stalled and was unblocked by pinning IPv4 in the installer environment - the same recovery recorded for the earlier cycle (decision 8). The installed system then received `Acquire::ForceIPv4 "true"` in `/etc/apt/apt.conf.d/` so apt does not repeat the hang. The test account and its files were removed afterwards and `/etc/hosts` was restored to its standard content. Final state: all panel services `active`, SSH on 3303, `menu` present, 0 non-executable files in `/usr/bin`, no v2ray, and the ZeroSSL certificate for `autosc.rohcuan.dpdns.org` valid to 2026-12-24.
+
+## Full Live Feature Test Campaign and Six Fixes (September 2026)
+
+Every panel feature was exercised against a **real external client**: a Debian 12 KVM guest (`fnclient`) running on the local machine's `/dev/kvm`, with Xray 25.3.6 installed from the upstream release. It connects over the Internet to `autosc.rohcuan.dpdns.org` (nginx -> the Xray inbounds), so the VPS sees genuine remote source addresses; a second client and some checks run from the VPS itself. Unless stated otherwise everything below was observed live.
+
+### Real bugs found and fixed (104-109)
+
+104. **gRPC dead on port 443 for dual-stack installs** (`config/dual.conf`) - see Found 102. Added `http2` to both 443 listeners, matching `config/4.conf`. Verified: gRPC `vmess`/`vless`/`trojan` go from `000` to `200` on 443, ws and httpupgrade unaffected.
+105. **SplitHTTP/TLS threw away by nginx buffering** (`config/4.conf`, `config/6.conf`, `config/dual.conf`) - see Found 103. Added `proxy_request_buffering off;` and `proxy_buffering off;` to the `/splitvm`, `/splitvl` and `/splittr` locations. Verified: the three TLS split links go from `000` to `200` with 1 MB transferred.
+106. **`change-id-*` silently did nothing** (`full/` and `lite/` for ws/http/grpc/split) - see Found 104. The id/password extraction now anchors on the account's `"email"` field and pulls only the id/password token; the card line is matched with a whitespace-tolerant `-E` pattern; and the "replace everywhere in the log" sed is quoted so its variables expand (and is guarded against an empty old value). Verified for all four transports: the JSON id changes, the card's `UUID` line follows it, sed reports no errors, the service restarts and the config stays `Configuration OK.`
+107. **Over-quota WS accounts escaped quota-ws** (`full/quota-ws.sh`, `lite/quota-ws.sh`) - see Found 105. Added `| sort -u` to the expiry extraction, matching the sibling transports. Verified live with real traffic: an over-quota WS vmess account is now deleted by quota-ws itself within its 30-second cycle, config still valid.
+108. **A failed backup destroyed the only copy** (`full/backup.sh`, `lite/backup.sh`) - see Found 106. The credentials are read with `2>/dev/null` and checked up front (keeping the archive and exiting 1 when unset), the upload timeout is 120 s, the response is inspected for `"ok":true`, and the archive is deleted only on a confirmed delivery. Verified: with no credentials the archive is kept (3.6 MB, 156 files) and the script exits 1 instead of claiming success.
+109. **`trial-ssh` never wrote its IP limit** (`full/trial-ssh.sh`) - see Found 107. `create_ssh_user` now writes `1` to `/etc/xray/limit/ip/ssh/<user>`, matching the card and `addssh`. Verified: the next trial account carries the limit file with value 1.
+
+### Transport matrix - 21/21 with a real external client
+
+One account per protocol x transport (`add-vmess-/vless-/trojan-` x `ws/http/grpc/split`) was created through the panel's own menus, and each panel-generated share link was turned into an Xray client config and used to pull 1 MB from `speed.cloudflare.com`. **21 of 21 links passed** (TLS and NoneTLS forms where the card offers both): ws 6/6, HTTPUpgrade 6/6, gRPC 3/3, SplitHTTP 6/6. Before fixes 104-105 this was 15/21 (all gRPC and all split-TLS failed).
+
+### Account tools across all protocols x transports
+
+`change-quota`, `change-limit-ip`, `extend`, `locked-xray`, `unlock` were run against all 12 accounts and `change-id` against the 8 vmess/vless ones; every JSON/quota/limit/lock side effect was asserted. All pass after fixes 104-106, and `list-xray-*`, `cek-xray-*` and `log-database-xray-*` run clean for all four transports. (`cek-xray-ws` exits 1 with "No active users found!" when the log is empty - the Go siblings exit 0 - which is a cosmetic difference, not a defect: it only affects the menu's return code.)
+
+### Enforcement
+
+- **Multi-login (limit-ip)** for **all four transports**: an account with `Limit IP: 1` was opened from two genuinely distinct public addresses (the client VM's 157.15.139.236 and the VPS's own 202.155.17.126). `statsonline` reported **online=2** with both addresses listed, and `limit-ip-<tr>` deleted the account, wrote the `.locked` file and left the service active - 4/4.
+- **Expiry (`xp`)** deleted back-dated accounts in ws, upgrade, split and grpc - 4/4.
+- **`auto-delete-*` GC** removed an orphan log plus its quota and limit files whose owner was absent from the JSON.
+- **Quota expiry (`quota-ws`)** deleted an over-quota WS account within its own cycle after fix 107.
+- **SSH multi-login (`limit-ip-ssh`)** locked an account after repeated logins (`passwd -S` -> `L`), and `expire-ssh` ran clean.
+
+### SSH
+
+`addssh` created an account that logged in successfully on **all four SSH listeners** (OpenSSH 3303, Dropbear 111/109/69); the only message is the missing home directory, which is the documented tunnel-only design (decision 7). `trial-ssh` created an account (with its limit file after fix 109) and scheduled its `at` cleanup; `extend-ssh` moved the expiry; `delete-ssh` removed the user; `expire-ssh` ran clean.
+
+### Trials, cron, backup, system menu
+
+- **Trials:** `trial-vmess-ws`, `trial-vless-ws`, `trial-trojan-ws`, `trial-vmess-http`, `trial-vless-grpc`, `trial-trojan-split` each created an account (with its log) and queued the `at` cleanup job; `trial-ssh` likewise.
+- **Cron:** all **16** panel crontab commands were run once with their `flock` wrapper - **16/16 exited 0** (backup, xp, expire-ssh, the four limit-ip-*, the four auto-delete-*, the four kill-*).
+- **Backup:** produced a 3.6 MB archive containing 156 files including the expected `/etc/xray`, `/etc/funny`, `/etc/crontab`, `/etc/passwd` and `/etc/shadow` paths; after fix 108 it is retained when delivery cannot happen.
+- **System menu:** option 2 (Restart All Services) restarted every panel service and all returned `active`; option 5 (Service & Port Details) rendered; option 8 (Change SSH Banner) replaced `/etc/issue.net` and the original was restored. The shipped banner already carries the operator's contacts.
+
+### Revision - EOF guards on the change-id prompts (fix 106)
+
+While driving `change-id-*` non-interactively the username prompt and the gRPC `(y/n)` confirmation were found to spin at 100% CPU once stdin reached EOF: `read` fails, the variable stays empty, the `while true` branch never matches and the loop repeats instantly. This is the same class as the earlier bot-menu EOF fix. All eight files now read `read ... || exit 1`, so an exhausted stdin exits instead of spinning; interactive behaviour is unchanged.
+
+### Additional fix - `xp` deleted accounts with an unparseable expiry (fix 110)
+
+Found while investigating the disappearance of the account `vm_ws` during the campaign (see Found 108). All six dated blocks in `full/xp.sh` and `lite/xp.sh` now verify the parsed date before using it: `d1=$(date -d "$exp" +%s 2>/dev/null)`, and when `d1` is empty the account is skipped with a message instead of being deleted. The WireGuard branch additionally requires `$exp` to match `^[0-9]{2}-[0-9]{2}-[0-9]{2}$` before its string comparison.
+
+- **Verified live:** `datetest4` (`### datetest4 99-99-99`) survives with `Skipping datetest4: unparseable expiry '99-99-99'`, while `datetest5` (`### datetest5 20-01-01`) is still deleted with its log. Config remained valid.
+
+### Observation - one account disappeared during the campaign and could not be attributed
+
+While re-running the mutator matrix the account `vm_ws` was found completely gone (no config entry, no card/log, no quota or limit file) with no entry in `/etc/xray/.quota.logs`. It was present when the first matrix finished at ~16:40 and absent from the backup taken at ~16:53. A canary account with the same shape (created, extended, locked, unlocked, then run through `xp`, `kill-ws`, `limit-ip-ws`, `auto-delete-ws` and `quota-ws`) survived all of them, so none of the daemons deletes a healthy account; the most plausible cause is Found 108 - a corrupted `###` date (for example from an interrupted edit) makes `xp` delete the account and its files silently. Fix 110 removes that path. The lesson worth recording is that `xp` and `quota-ws` delete without writing to `/etc/xray/.quota.logs`; adding a deletion log to them would make any future recurrence attributable.

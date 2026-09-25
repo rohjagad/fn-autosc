@@ -113,19 +113,34 @@ echo "$TEKS" >> /etc/funny/backup.log
 clear
 
 # Kirim pesan ke Telegram
-CHATID=$(cat /etc/funny/.chatid)
-KEY=$(cat /etc/funny/.keybot)
-TIME="10"
+CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
+KEY=$(cat /etc/funny/.keybot 2>/dev/null)
+TIME="120"
+clear
+if [ -z "$CHATID" ] || [ -z "$KEY" ]; then
+    # No credentials means the upload cannot succeed; keep the only copy instead
+    # of deleting it and claiming success.
+    echo "$TEKS"
+    echo "Telegram credentials are not configured (/etc/funny/.chatid, /etc/funny/.keybot)."
+    echo "The backup archive was KEPT at $file_path"
+    exit 1
+fi
 # Kirim file backup ke Telegram (sebagai lampiran)
 URL2="https://api.telegram.org/bot$KEY/sendDocument"
 CAPTION="$TEKS"
-curl -s --max-time $TIME -F chat_id=$CHATID -F document=@backup.zip -F caption="$CAPTION" $URL2
+RESP=$(curl -s --max-time $TIME -F chat_id=$CHATID -F document=@backup.zip -F caption="$CAPTION" $URL2 2>&1)
 
-# Bersihkan file backup setelah selesai
-rm -fr /root/backup*
-
-# Output informasi backup ke layar
-clear
-echo "$TEKS"
-echo "Backup sent to Telegram"
+# Bersihkan file backup hanya bila Telegram benar-benar menerimanya
+if echo "$RESP" | grep -q '"ok":true'; then
+    rm -fr /root/backup*
+    clear
+    echo "$TEKS"
+    echo "Backup sent to Telegram"
+else
+    clear
+    echo "$TEKS"
+    echo "Telegram upload FAILED - the backup archive was KEPT at $file_path"
+    echo "$RESP" | head -c 300
+    exit 1
+fi
 
