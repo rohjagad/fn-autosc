@@ -931,3 +931,21 @@ The bot menu was restructured so the credentials are entered **once**:
 - Both new entries go through a `havecreds` guard that tells the operator to run option 1 first when the files are missing.
 
 "Terminal Bot Menu" and "Report Script Bug" moved to options 4 and 5. Applied to `full/menu-bot.sh` and `lite/menu-bot.sh`; README section updated. Archives rebuilt (114 / 97 entries, 0 mismatches, 0 non-755), and `notif()` verified to contain no `read -p`.
+
+### Revision - bot credentials show the registered values and accept changes
+
+"Set Up Bot Credentials" now opens with the values already registered
+
+```
+=====================
+[ Bot Credentials ]
+=====================
+ Registered Chat ID : <current or "<not set>">
+ Registered API Key : <current or "<not set>">
+
+ Press ENTER on a field to keep its value.
+```
+
+and its two prompts accept a replacement (a blank line keeps the registered value). If, after keeping/replacing, either value would still be empty, it reports "Both values are required" and re-opens the form instead of writing empty files - so a fresh setup can never store blanks.
+
+The three prompts also carry an EOF guard (`read ... || return`): previously, running the menu without a terminal made `read` fail instantly and the function recursed without end; now it returns. Verified in a sandbox with a patched path - entering both values saves them; pressing ENTER on both keeps the registered pair; changing only the chat ID keeps the key; and with stdin exhausted the function exits instead of looping.

@@ -263,15 +263,35 @@ return 1
 }
 
 creds() {
-# The single place the bot credentials are entered.
+# The single place the bot credentials are entered or changed. The registered
+# values are shown first; pressing ENTER on a field keeps the registered value.
 clear
+cur_id=$(cat /etc/funny/.chatid 2>/dev/null)
+cur_key=$(cat /etc/funny/.keybot 2>/dev/null)
 echo -e "
 =====================
 [ Bot Credentials ]
 =====================
+ Registered Chat ID : ${cur_id:-<not set>}
+ Registered API Key : ${cur_key:-<not set>}
+
+ Press ENTER on a field to keep its value.
 "
-read -p "Telegram Chat ID: " itd
-read -p "Bot API Key     : " api
+read -p "Telegram Chat ID: " itd || return
+read -p "Bot API Key     : " api || return
+[ -z "$itd" ] && itd="$cur_id"
+[ -z "$api" ] && api="$cur_key"
+if [ -z "$itd" ] || [ -z "$api" ]; then
+    clear
+    echo -e "
+==============================
+ Both values are required.
+==============================
+"
+    sleep 2
+    clear ; creds
+    return
+fi
 clear
 echo -e "
 Information
@@ -280,7 +300,7 @@ Bot API Key: $api
 Chat ID    : $itd
 ==============================
 "
-read -p "Is the data above correct? (y/n): " opw
+read -p "Is the data above correct? (y/n): " opw || return
 case $opw in
 y) clear ; lanjut ;;
 n) clear ; creds ;;

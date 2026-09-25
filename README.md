@@ -621,7 +621,7 @@ to it. Ingress points at `localhost:80` and the WebSocket backend on `2080`.
 
 | Option | Action |
 | :---: | :--- |
-| 1 | Set up bot credentials (Telegram chat ID + bot API key → `/etc/funny/.keybot`, `/etc/funny/.chatid`) |
+| 1 | Set up bot credentials — shows the registered chat ID and API key, then accepts new values (press ENTER on a field to keep it) → `/etc/funny/.keybot`, `/etc/funny/.chatid` |
 | 2 | Set up bot notifications — reuses the saved credentials and sends one test message |
 | 3 | Set up bot auto backup — reuses the saved credentials and guarantees the 4×/day scheduled backup |
 | 4 | Terminal bot menu — install / uninstall / restart the Node.js bot |
