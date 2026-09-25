@@ -145,6 +145,53 @@ install_firewall() {
   iptables-restore < /etc/iptables.up.rules
   netfilter-persistent save
   netfilter-persistent reload
+
+  # Keep the UDP 53 -> 5300 redirect ahead of the wildcard UDP captures.
+  #
+  # udp-request runs with -mode=system and inserts wildcard captures
+  # (udp dpts:1:8988 and 1:65535) at the TOP of nat PREROUTING when it starts,
+  # and it starts after this script does. iptables is first-match, so on the
+  # installed system every inbound UDP 53 packet was being redirected to
+  # udp-custom and dnstt on 5300 never saw a query - the nameserver delegation
+  # resolved to this host, but this host never answered it. Re-assert the
+  # redirect at position 1 on a timer so it also survives a reboot or any
+  # service restart. Same pattern as the udp-request host-SNAT guard.
+  cat > /usr/local/bin/slowdns-fixnet.sh <<'FIXSH'
+#!/bin/bash
+# Put the SlowDNS UDP 53 redirect at position 1 of nat PREROUTING.
+IFACE=$(ip -4 route show default | awk '{print $5; exit}')
+[ -z "$IFACE" ] && exit 0
+while iptables -t nat -D PREROUTING -i "$IFACE" -p udp --dport 53 -j REDIRECT --to-ports 5300 2>/dev/null; do :; done
+iptables -t nat -I PREROUTING 1 -i "$IFACE" -p udp --dport 53 -j REDIRECT --to-ports 5300
+iptables -I INPUT -p udp --dport 5300 -j ACCEPT
+exit 0
+FIXSH
+  chmod +x /usr/local/bin/slowdns-fixnet.sh
+
+  cat >/etc/systemd/system/slowdns-fixnet.service <<FIXSVC
+[Unit]
+Description=Keep the SlowDNS UDP 53 redirect ahead of the wildcard UDP captures
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/slowdns-fixnet.sh
+FIXSVC
+
+  cat >/etc/systemd/system/slowdns-fixnet.timer <<FIXTMR
+[Unit]
+Description=Re-assert the SlowDNS UDP 53 redirect every 15 seconds
+
+[Timer]
+OnBootSec=30s
+OnUnitActiveSec=15s
+
+[Install]
+WantedBy=timers.target
+FIXTMR
+
+  systemctl daemon-reload
+  systemctl enable --now slowdns-fixnet.timer
 }
 
 install_slowdns
