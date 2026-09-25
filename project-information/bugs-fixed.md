@@ -785,3 +785,76 @@ The `## Not Fixed Yet` list has been reduced to nothing actionable. Two of its e
 **Deferred by the owner:** the hardcoded WhatsApp banner (`installer/ssh.sh`) and the SlowDNS nameserver record, both left in the README's Known Issues by request.
 
 - **Process note - the archives must be rebuilt whenever a zipped source changes.** The commit that closed the open items above initially went out with the corrected `dm-menu.sh` in `full/` and `lite/` but **not** inside `menu/full.zip` / `menu/lite.zip`, because the zip-rebuild helper was missing from `/tmp` and the command did not abort on its failure. A fresh install unpacks the archives, not the source tree, so it would still have received the hardcoded addresses. Corrected in the following commit: `menu/full.zip` and `menu/lite.zip` were rebuilt in place (1 entry each, `dm-menu`), with entry lists identical and 0 non-0755 entries, and the packed entries verified byte-identical to their sources. The durable lesson is to assert the packed copy after any change to a zipped file - compare the extracted entry's md5 against the source's, as done here - rather than trusting that the rebuild ran.
+
+## ADDENDUM: the Telegram-token false positive (found during this audit)
+
+`bugs-fixed.md` (in the "Status of the Not Fixed Yet List" section) claimed:
+
+> **Hardcoded Telegram bot token** in `installer/full.sh` / `installer/lite.sh` - `grep -rE 'bot[0-9]{6,}:[A-Za-z0-9_-]{20,}'` returns **0** ...
+
+That verification is invalid. The stored value was `KEY="8610037724:AAGS..."` - a bare `<id>:<secret>` with **no `bot` prefix**, which the pattern `bot[0-9]{6,}:...` can never match. The grep therefore reported 0 for a file that still contained the token, and the entry was recorded as fixed when nothing had changed. V23 confirms the feature is inherited rather than newly added, but with a **different** token (`6981433170:AAH8q0tC...`), i.e. the fork only swapped the credential.
+
+- The token was live in two files: `installer/full.sh:236` and `installer/lite.sh:172`, used by the install-complete notification that posts the new host's IP, domain, email and edition to a fixed chat.
+- It is a real credential, committed to a public repository, and the README's own Security Notes already told operators to rotate it - so it was fixed rather than merely re-documented: both installers now read the operator's own `/etc/funny/.keybot` and `/etc/funny/.chatid` (the files `menu-bot` manages) and **send nothing when they are unset**. No credential is committed, and a fresh install no longer reports the operator's details to a third party. The install-notification feature is retained for operators who configure a bot.
+- Re-verified with a pattern that actually matches the value - `grep -rE '[0-9]{8,10}:[A-Za-z0-9_-]{30,}'` over `installer/ full/ lite/ config/ install.sh website/` - which now returns **0**.
+- The README Security Notes and Known Issues text were corrected in the same change so they describe the new behaviour instead of the old claim.
+
+## Regression and False-Positive Audit of All Commits (September 2026)
+
+A full pass over the project's history was run against the **V23 reference archive** (`/var/home/rscimung/Downloads/V23 Linux Ubuntu, Debian, Kali.zip`) to separate genuine regressions from changes that only look like them. The findings below are the actionable ones; the rest of this section is the register of what was investigated and deliberately **not** reported.
+
+### Real bugs found and fixed (96-99)
+
+96. **udp-request fallback URL doubled `/udp/`** (`installer/request.sh`) - see regression 17. Regression introduced by `f0e4c10`; V23's line was correct. Fixed and the corrected URL returns 200.
+97. **Edition-agnostic crontab in `installer/xray.sh`** - see regression 18. `expire-ssh` was added by the Bug-72 fix and `limit-ip-ssh` inherited from V23; neither exists in the lite edition. Fixed to append only lines whose command resolves.
+98. **Committed Telegram bot token removed** (`installer/full.sh`, `installer/lite.sh`) - see the addendum above. This is the entry that `bugs-fixed.md` already claimed was done; the claim was false and the code is now changed to match. The install notification reads `/etc/funny/.keybot` and `/etc/funny/.chatid` and is skipped when they are unset.
+99. **SlowDNS never answered because the UDP 53 redirect was shadowed** (`installer/slowdns.sh`) - **the most consequential find of the cycle.** `udp-request` runs with `-mode=system` and inserts wildcard captures (`udp dpts:1:8988` and `dpts:1:65535`) at the **top** of `nat PREROUTING` when it starts, and it starts *after* `slowdns.sh` has placed the `udp dport 53 -> REDIRECT --to-ports 5300` rule. iptables is first-match, so every inbound UDP 53 packet was redirected to udp-custom (8989) and `dnstt` on 5300 never saw a query: the delegated nameserver resolved to the host, but the host stayed silent. Inherited from V23 (V23 has the same `-mode=system` unit and the same ordering), not a fork regression - but it made the whole feature non-functional.
+   - **Confirmed live by rule counters**, not by inference: the `dpt:53 -> 5300` rule had **0 packets** while the `dpts:1:8988 -> 8989` rule above it carried all of them.
+   - `installer/slowdns.sh` now installs `/usr/local/bin/slowdns-fixnet.sh` plus a `slowdns-fixnet` oneshot + 15-second timer that deletes any stale copy and re-inserts the redirect at **position 1**, so it is always evaluated before the wildcards and survives a reboot or a service restart. This mirrors the existing `udp-request-fixnet` host-SNAT guard.
+   - **Verified live:** after the change, Google's resolver returns `Status: 3, Comment: Response from 202.155.17.126.` for a name in the delegated zone, where it had returned `Status: 2, Name servers did not respond [202.155.17.126]`. The nameserver is now answering.
+
+### Live reinstall verification (fresh Debian 12, full edition)
+
+Fresh OS via the panel's own reinstall path, then `install.sh` (`full`, `autosc.rohcuan.dpdns.org`, `dual`, nameserver `slowdns.rohcuan.dpdns.org`). `INSTALL SUCCESS` after ~21 minutes.
+
+- **Services:** all panel services `active` - `nginx ssh sshd dropbear ws v2ray xray xray@grpc xray@upgrade xray@split haproxy openvpn wg-quick@wg0 noobzvpns dnstt udp-custom udp-request xl2tpd ipsec badvpn-udpgw fail2ban cron`, plus the new `slowdns-fixnet.timer`.
+- **Fix 97 exercised:** `/etc/crontab` holds 16 panel lines and **every one of their commands exists** (the full edition ships `expire-ssh` and `limit-ip-ssh`, so nothing is skipped). On lite the same code omits those two, giving 14 - verified in the sandbox.
+- **Fix 96:** the install took the release-CDN primary for `udp-request` (so the fallback was not exercised); the corrected fallback URL was verified separately to return 200 from the host.
+- **Fix 98:** `grep` over the installed `/usr/bin` finds no committed token, and `dm-menu` has no hardcoded Gmail address.
+- **Fix 99:** `dnstt` listening on 5300 and now answering externally (above).
+- **Other fixes:** `badvpn-udpgw` binary present and `LISTEN 127.0.0.1:7300`; `fail2ban` active with jails `dropbear,sshd`; `/etc/funny/format.sh` md5 `d7715e9e5f73297442e8beabfb04b08b`; `v2ray test` reports `Configuration OK.`; 1422 files in `/usr/bin` with **0 non-executable**; `menu` present.
+- **Certificate:** issued by **ZeroSSL** (`CN = autosc.rohcuan.dpdns.org`, valid to 2026-12-24) - the documented automated ACME fallback, Let's Encrypt being rate-limited at the time; `/etc/haproxy/funny.pem` present.
+- **SSH:** the Debian cloud image leaves `Port 22` uncommented, so the panel's appended `Port 3303` leaves both listening - port 22 stays usable (unlike a netboot image, where `#Port 22` is commented and only 3303 opens).
+- **Reboot check:** the host was rebooted and re-verified. Every panel service returned (the only non-`active` name is the intentionally absent `xray.service`, above), the SlowDNS fix persisted - the timer re-asserted the redirect so rule 1 is again `dpt:53 -> 5300`, and Google's resolver again reports `Response from 202.155.17.126` for a name in the delegated zone - the crontab still holds exactly 16 lines, `badvpn-udpgw` still listens on 7300, `v2ray test` still reports `Configuration OK.`, the certificate is still in place, `menu` is present, and `/usr/bin` still has 0 non-executable files. All expected ports are listening (22, 3303, 80, 443, 2052/2053/2082/2083/2087/2095/2096, 777, 855, 1194, 1723, 3128, 7300, 8001-8003, 8080, 8443, 8880, 10080-10083, 14016, 2019/2020/2023, 23456/24456/25432/31234/33456).
+
+### Investigated and deliberately not reported as bugs
+
+- **`lite/menu-system.sh` runs `chmod /usr/bin/warp.sh` with no mode** (full uses `chmod +x ...`). This is *not* a bug: the very next line in both files is `chmod +x /usr/bin/*`, the same reliability guard already agreed to be beneficial, which makes the file executable regardless. The only difference is a cosmetic `chmod: missing operand` line during install.
+- **shellcheck `SC2128` across ~50 menus** ("expanding an array without an index") - false positive. `rainbow_sep()` declares `local -a green=(...)`, shadowing the exported scalar `green` **inside the function only**. Tested directly: the separator renders 19 distinct RGB colours and `${green}` outside the function still expands to the scalar escape.
+- **`json/{grpc,split,upgrade,ws}.json` are not valid JSON** - they are templates whose inline `#vless`/`#vmess` marker lines are rewritten by the account scripts, and they are byte-identical to V23. Expected.
+- **Zip "content mismatches" and "non-755 entries"** - harness artifacts. Every entry is `0755`; the entries that differ from their source are the Go tools, which ship as prebuilt ELF binaries while the source is `.go`.
+- **`backups`, `log-format`, `log-source`, `menu-warp`, `menu-rout`, `restore-route` look like dangling commands** - the first three are English words inside comments; the last three are shell functions defined in the same file (V23 does the same). No broken references.
+- **Port `977` removed from `upstream default_backend`** (fix 16) - safe: no file in the tree references 977 any more, so the entry was already dead.
+- **The `rere` download removed from `install.sh`** (V23 fetched `/usr/bin/rere`) - nothing in the tree executes a `rere` binary; `/rere` exists only as an nginx WebSocket location for the VMess-HTTP transport.
+- **`curl ... -o file || wget -q url` fallback without `-O`** - safe: tested that `curl -f` leaves no partial file on a 404, so wget cannot create a `file.1` and the `./file` that follows is the complete download.
+- **`xray.service` is absent after a reboot** - by design, not a defect. `installer/xray.sh` deliberately removes the upstream `xray.service` that `install-release.sh` has just created (lines 62-63) and installs its own templated `xray@.service`; the main Xray's config is an empty `{}` and no transport uses it. Every transport is served by `xray@grpc`/`@upgrade`/`@split` and `v2ray`. It appears `active` immediately after an install only because `install-release.sh` started it before `xray.sh` deleted the unit; after a reboot it is correctly gone, and the post-reboot check sees 19 listening `xray`/`v2ray` sockets. The one residue is a dangling `/etc/systemd/system/multi-user.target.wants/xray.service` symlink, which systemd ignores (`list-unit-files` reports 0, no boot warning). Cosmetic, so left alone.
+
+### Documented claims that are imprecise (corrected here, not code changes)
+
+- `is-decision.md` section 5 still describes the hand-off as `exec screen -S fninstall bash /root/fn-install.sh`. The code is deliberately **not** `exec` any more (`screen -d -R fninstall bash "$SELF" && exit 0`, with a fall-through), because `exec` replaced the shell and died silently when screen failed. Corrected by an appended note rather than editing the decision text.
+- Fix 58's file list names `lite/backup.sh`/`lite/bmenu.sh` as having gained `/etc/wireguard`, `/etc/slowdns` etc. The lite edition ships none of those services (WireGuard, SlowDNS, L2TP and OpenVPN are full-only by design), so the additions are, correctly, full-only; no data is lost because a lite host has nothing to back up in those paths.
+- Fix 62 names the Go validator `isNumeric`; the code calls it `isPositiveInt`. The validation is present in both `change-limit-ip-*.go` and `limit-ip.go`; only the name in the note is wrong.
+
+### Documented inherited defaults, deliberately not changed
+
+- `installer/set-br.sh` ships a Gmail address and app password for `msmtp`, and `installer/l2tp.sh` a default `VPN_IPSEC_PSK='myvpn'`. Both are inherited from V23 and both are already called out in the README's **Security Notes** ("Secrets are committed to the repository … Rotate them, and do not reuse this repository's defaults"). They are pre-existing, documented defaults rather than a false claim of being fixed, so they are left as they are and left to the owner to decide. Unlike the Telegram token, nothing here asserted they were already removed.
+- The duplicate authorization check (`install.sh` calls `permision`, then `full.sh`/`lite.sh` call it again) is inherited from V23 as well. It costs two extra HTTP requests per install and is harmless, so it is noted rather than changed.
+
+### Static-verification results (all clean)
+
+- `bash -n` on **207** shell scripts: 0 failures.
+- shellcheck at **error** severity: **0** findings in the current tree vs 5 in V23 (including V23's genuinely broken `website/restore-ftp.sh`, which failed to parse). Warning-level diff vs V23 produced only the cosmetic SC2128/unused-colour noise above.
+- Zip archives: 115/98 entries, 0 mismatches, **0 non-755**; packed `dm-menu` byte-identical to source.
+- All **62** OS-reinstall menu invocations match upstream's supported distro/version list (0 typos) - the R-1 regression stays fixed.
+- Every **active** download URL in `install.sh`/`installer/*.sh` returns 200 (only the two bare base-URL assignments do not, which is expected).
+- The Go tools' shipped binaries contain the Bug-62 path literal (`/etc/xray/limit/ip/xray/`) and the Bug-72 `passwd` call, i.e. the prebuilt binaries are not stale relative to their sources.

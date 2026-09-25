@@ -108,3 +108,27 @@ Regression 11 above is presented with a `Fix Path` and no `Verification`, which 
 
 - `full/restore-ftp.sh`, `lite/restore-ftp.sh` and `website/restore-ftp.sh` each reference `/var/www/uploads/*.zip` **and** `/root/*backup*.zip`, so whichever interface invokes restore, the archive is found regardless of which one was installed last. The block is identical across the three files.
 - This entry is recorded here rather than edited in place because these documents are append-only; regression 11 should be read as closed, and any future listing derived from a "has Fix Path but no Verification" heuristic will flag it as a false positive.
+
+## 17. udp-request Raw Fallback URL Doubled Its Own Path (Regression from f0e4c10)
+
+`installer/request.sh` sets `hosting="https://raw.githubusercontent.com/rohjagad/fn-autosc/main/udp"` - the base already ends in `/udp`, because the original line always used it as `${hosting}/udp-request-linux-amd64`. Commit `f0e4c10` (the bugs 84-91 sweep) added a release-CDN primary URL and a raw fallback, but wrote the fallback as `${hosting}/udp/udp-request-linux-amd64`, resolving to `.../main/udp/udp/udp-request-linux-amd64` -> **404**.
+
+- The V23 original is the proof of intent: same `hosting` value, line `wget ... ${hosting}/udp-request-linux-amd64` - a single `/udp`. The fork changed only the repo in the base URL, then the fallback was written against the wrong base.
+- The sibling `installer/udp.sh` gets it right because **its** `hosting` is `.../main` (no `/udp`), so `${hosting}/udp/udp-custom-linux-amd64` is correct. The two files' bases differ, which is exactly how the mistake slipped through.
+- Impact is confined to the fallback: the normal path is the release asset (`fn-autosc-miscellaneous/.../v1.23/udp-request-linux-amd64`, 200). Only when the CDN fails would the panel fall back to a 404, leaving `udp-request` without its binary and the service unable to start - i.e. precisely in the situation the fallback exists for.
+- Fixed to `${hosting}/udp-request-linux-amd64` (200). A tree-wide scan for the same class - a `${hosting}` usage that repeats a path segment already present in the base - found no other instance.
+
+## 18. Crontab Scheduled Commands the Installed Edition Does Not Ship (Regression from the Bug-72 Fix)
+
+`installer/xray.sh` appends the panel's cron block unconditionally, and both `installer/full.sh` and `installer/lite.sh` run that same script. Two of the seventeen lines name tools that only the full edition ships:
+
+```
+*/5 * * * * root flock -n /tmp/expire-ssh.lock expire-ssh
+*/5 * * * * root flock -n /tmp/limit-ip-ssh.lock limit-ip-ssh
+```
+
+The lite edition has no SSH tooling at all (`lite/` contains no `*ssh*` file and `menu/lite.zip` no `*ssh*` entry), so on every lite install those two cron jobs run every five minutes and fail with `flock: failed to execute expire-ssh: No such file or directory`.
+
+- `expire-ssh` is **new in this fork** - the Bug-72 fix added `full/expire-ssh.sh` and registered its cron line - so that half is a regression introduced by a fix.
+- `limit-ip-ssh` is **inherited from V23**: V23's `installer/xray.sh` already appended the same line while V23's lite also shipped no `limit-ip-ssh`. The audit did not create it, but it is the same defect and is fixed with it.
+- Fixed by resolving each line's program and appending the line only when it exists (`command -v`, with an `/usr/bin/<name>` fallback): full keeps all 16 lines, lite keeps 14, and the strip-before-append idempotency is unchanged. Verified in a sandbox with full/lite command sets: full 16 (once `/usr/bin/xp` is present as on a real install), lite 14, and a second run changes nothing.
