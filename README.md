@@ -131,17 +131,16 @@ The full installer runs these stages, in order:
 3. Download and unpack the menu suite into `/usr/bin`.
 4. Install the terminal display formatter (`/etc/funny/format.sh`).
 5. Install SSH, Dropbear, and SSH WebSocket (`ssh.sh`).
-6. Install Xray (`xray.sh`) — HTTP Upgrade, SplitHTTP, gRPC.
-7. Install the WebSocket transport, served by Xray (`ws.sh`).
-8. Install the web restore interface (`website/install.sh`).
-9. Install Nginx and obtain SSL certificates (`diamond.sh`).
-10. Install OpenVPN, Squid, OHP (`vpn.sh`).
-11. Install SlowDNS (`slowdns.sh`).
-12. Install L2TP/IPsec (`l2tp.sh`).
-13. Install WireGuard (`wg.sh`).
-14. Install NoobzVPN (`noobz.sh`).
-15. Install UDP Custom (`udp.sh`) and UDP Request (`request.sh`).
-16. Apply system tuning and repairs (`fix/fix.sh`).
+6. Install Xray (`xray.sh`) — WebSocket, HTTP Upgrade, SplitHTTP, gRPC (all four transports).
+7. Install the web restore interface (`website/install.sh`).
+8. Install Nginx and obtain SSL certificates (`diamond.sh`).
+9. Install OpenVPN, Squid, OHP (`vpn.sh`).
+10. Install SlowDNS (`slowdns.sh`).
+11. Install L2TP/IPsec (`l2tp.sh`).
+12. Install WireGuard (`wg.sh`).
+13. Install NoobzVPN (`noobz.sh`).
+14. Install UDP Custom (`udp.sh`) and UDP Request (`request.sh`).
+15. Apply system tuning and repairs (`fix/fix.sh`).
 
 The Lite installer runs a smaller subset: packages, menu, SSH, Xray (all four transports),
 website, and Nginx/SSL. It **skips** OpenVPN, SlowDNS, L2TP, WireGuard,

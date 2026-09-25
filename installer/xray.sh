@@ -100,6 +100,11 @@ chmod +x upgrade.json
 chmod +x split.json
 chmod +x grpc.json
 
+# The WS template ships "rerechan-store" as the inbound's default client id.
+# Replace it with a real per-install UUID so the default account is not a
+# publicly-known value (the other transports ship a fixed id; this is stricter).
+sed -i "s/rerechan-store/$(xray uuid)/g" /etc/xray/json/ws.json
+
 # Membuat File Log
 mkdir -p /var/log/xray
 cd /var/log/xray
@@ -240,6 +245,7 @@ END
 
 # Menyalakan Service
 systemctl daemon-reload
+systemctl enable xray@ws
 systemctl enable quota-ws
 systemctl enable xray@upgrade
 systemctl enable quota-http
@@ -249,6 +255,7 @@ systemctl enable xray@grpc
 systemctl enable quota-grpc
 
 # Melakukan Start Service
+systemctl start xray@ws
 systemctl start quota-ws
 systemctl start xray@upgrade
 systemctl start quota-http
