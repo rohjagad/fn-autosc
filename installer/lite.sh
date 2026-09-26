@@ -158,6 +158,7 @@ Domain: $domain
 Email Own: $email
 Type IP: $ips
 Type Script: Lite
+SSH Port: 22, 3303
 =========================
 FN AutoSC
 "

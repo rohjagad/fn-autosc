@@ -54,8 +54,20 @@
 
 hosting="https://raw.githubusercontent.com/rohjagad/fn-autosc/main"
 
-# Menanbah Port SSH
-echo -e "Port 3303" >> /etc/ssh/sshd_config
+# Menanbah Port SSH.
+#
+# sshd listens ONLY on the ports named by active Port directives, and Debian
+# ships the default as a commented "#Port 22". Appending "Port 3303" alone
+# therefore *closes* 22 - but the SSH cards, the README's port table and dnstt's
+# forward target (127.0.0.1:22, the SlowDNS SSH-over-DNS backend) all assume 22
+# keeps listening. Whether it did depended on the base image (a netboot image
+# leaves #Port 22 commented, an older cloud image left it active), which is not
+# something the panel can rely on. Make both explicit and idempotent.
+for _port in 22 3303; do
+    grep -qE "^[[:space:]]*Port[[:space:]]+${_port}[[:space:]]*$" /etc/ssh/sshd_config || \
+        echo "Port ${_port}" >> /etc/ssh/sshd_config
+done
+unset _port
 systemctl daemon-reload
 systemctl restart ssh
 systemctl restart sshd

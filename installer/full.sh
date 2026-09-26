@@ -222,6 +222,7 @@ Domain: $domain
 Email Own: $email
 Type IP: $ips
 Type Script: Full
+SSH Port: 22, 3303
 =========================
 FN AutoSC
 "

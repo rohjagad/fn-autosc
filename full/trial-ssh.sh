@@ -132,7 +132,7 @@ Enhanced   : 2080
 HTTP Proxy : 3128 ( Limit IP to Server )
 OHP        : 9088
 WS TLS     : 443, 2053, 2083, 2087, 2096
-STUNNEL5   : 443
+STUNNEL5   : 777
 Slowdns    : 53
 Udp Custom : 1-65535
 Udp Request: 1-65535

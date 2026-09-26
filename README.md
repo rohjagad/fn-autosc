@@ -236,7 +236,7 @@ change quota, and lock.
 | :--- | :--- | :--- |
 | OpenSSH | TCP | `22`, `3303` |
 | Dropbear | TCP | `109`, `111` |
-| Stunnel5 / HAProxy | TCP over TLS | `443`, `777` |
+| Stunnel5 / HAProxy | TCP over TLS | `777` |
 | Squid Proxy | HTTP CONNECT | `3128` |
 | FN-OHP | HTTP proxy for OpenVPN | `9088` |
 | OpenVPN TCP | TCP | `1194` |
