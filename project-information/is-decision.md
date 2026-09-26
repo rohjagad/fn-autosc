@@ -134,3 +134,13 @@ The two automatic enforcement paths behave differently, deliberately:
 This matches the pre-existing `kill-*` behaviour (which already removed the card) and `xp`. The earlier quota wording ("has been locked") and the leftover card were the defects (Found 117 / fix 119). If a quota breach should instead be recoverable, the quota and usage files must be kept and re-armed when the account is unlocked - that is a design change, not a bug fix.
 
 **Rule for future changes:** a daemon that removes a client from a `json/*.json` must (a) delete with `/### <user> <exp>/ {N;d}` plus the trailing-comma cleanup, never a bare range, (b) restart its transport when the config was written by its own process, and (c) leave no file behind that still describes the account unless it is a `.locked` card meant for `unlock-*`.
+
+## 17. `location /` Serves SSH-WebSocket Only; There Is No VMess Catch-All
+
+Both reference versions load-balanced nginx's `location /` across the SSH-WebSocket backend (`127.0.0.1:2080`) and a VMess catch-all (`127.0.0.1:977`), so a client using an arbitrary path landed on the VMess inbound roughly half the time - and, just as importantly, an **SSH-WebSocket** client using `/` landed on the VMess inbound the other half and failed. `68c4068` removed the `:977` line ("incompatible port 977"), and the canonical-path change removed the now-unroutable `:977` inbound, leaving `/` deterministic: it always reaches `wsEpro` (`127.0.0.1:2080`), which forwards to the SSH-WebSocket listener.
+
+Keep it that way. The "arbitrary path" convenience is not worth a nondeterministic SSH-WebSocket endpoint, and the README already tells clients to use the dedicated transport paths (`/vmws`, `/vlws`, `/trws`, ...). Restoring the round-robin would reintroduce a 50% failure rate for SSH-WebSocket users on `/`. Recorded because both upstream versions contain the `:977` line, so a future reviewer comparing against them could otherwise read its absence as an accidental regression.
+
+### Addendum to section 16 - the account card is removed at once, not by the GC
+
+`auto-delete-*` already removes a card whose user is neither in the config nor `.locked` (verified live by planting such a card), so the phantom a quota deletion used to leave was transient - it disappeared within the five-minute cron cycle. Fix 119 still removes the card directly in `quota-*`: it closes that window and keeps the deletion complete even when `auto-delete-*` cannot run (its licence check or cron), and it matches what `kill-*` and `xp` already did. The substantive part of fix 119 remains the wording - the account is deleted, not locked.
