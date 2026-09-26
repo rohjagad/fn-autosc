@@ -1265,3 +1265,19 @@ before). The test accounts were then removed and the API token and restore key r
 
 The sentence "`cep-xray-*` binaries carry their own ports" in the reinstall-verification list above
 should read "`cek-xray-*` binaries carry their own ports".
+
+## Second Pass on the API Layer - Fixes 141-142 (September 26, 2026)
+
+| Fix | Found | Change |
+| :-- | :-- | :-- |
+| 141 | 139 | `lib.sh` gains `re_escape`, which quotes a value for a `grep -E` pattern; `delete-xray`, `renew-xray` and `add-xray` build `^### <escaped-name>` from it, and the NoobzVPN handlers use `grep -F`. |
+| 142 | 140 | `server` holds a module-level lock around the handler subprocess, so the panel's scripts - which rewrite whole shared files - never run concurrently. Cheap paths (auth, 404, OPTIONS) still run in parallel. |
+
+Verified live after the change: `DELETE /delete-xray {"username":".*"}` and `{"username":"a.b"}`
+now answer `no such account` and change nothing; the ordinary lifecycle still works; and **12/12**
+concurrent `/add-vmess` calls succeed, giving 12 markers, 12 client objects and a config that
+`xray -test` accepts. The fixed `lib.sh`, `server` and five handlers on the test host were compared
+by MD5 with the repository and match.
+
+Fix 136 was corrected in the same pass: `client_max_body_size 0` now applies only to the gRPC and
+SplitHTTP locations (see the revision note in `bugs-found.md`).

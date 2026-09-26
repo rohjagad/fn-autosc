@@ -219,3 +219,20 @@ The lesson recorded for the next cycle: a fix that adds a guard must be verified
 the counterpart *actually produces* (fix 126/127), a fix that touches one location must be repeated
 in every location that expresses the same thing (fix 133/129), and any `exit` inside `$( )` is dead
 (fix 119/136).
+
+## 26. The Same Session's Own Changes, Re-checked (September 26, 2026)
+
+Two of this session's changes were themselves defective, and were caught and corrected by
+re-testing them rather than trusting them:
+
+- **The threaded server (Found 140).** The restored `fn-autosc-api` replaced the reference's
+  single-threaded `HTTPServer` with `ThreadingHTTPServer` as a hardening measure. The panel's
+  scripts are not concurrency-safe - they rewrite whole shared files - and twelve concurrent creates
+  lost four of them. The reference's single-threading was load-bearing, not a limitation to improve
+  away. Restored by a lock around handler execution.
+- **`client_max_body_size 0` (fix 136).** Raising the limit in the `http` block fixed the gRPC 413
+  but also lifted nginx's 1 MB bound on the buffering locations, which is a disk-fill DoS. Scoped to
+  the streaming locations.
+
+Both are the same lesson as regression 25: a change that is "more capable" than the original needs
+the original's constraints re-derived before it is assumed safe.

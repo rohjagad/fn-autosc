@@ -1045,3 +1045,76 @@ check.
   after the Google Drive backup removal (decision 11) but harmless.
 - **`full/restore-ftp.sh` is dead**: the zip installs it as `/usr/bin/restore-ftp`, then
   `website/install.sh` overwrites it with the website copy, which is the one that runs.
+
+## Second Pass on the API Layer (September 26, 2026)
+
+Continuing the scan into areas the first pass did not reach - the API's behaviour under hostile or
+concurrent input, the daemons' functional paths, `change-id`, the backup/restore pair and the raw
+assets - found two more defects, both in `fn-autosc-api`.
+
+Found 139. **A caller-supplied name was used as a regular expression** (`fn-autosc-api/handlers/delete-xray`,
+`renew-xray`, `add-xray`, `add/delete-noobz`) - the handlers test membership with
+`grep -qE "^### ${user}( |$)"`, interpolating the name unescaped. `add-*` validates the name first,
+but `delete-xray` and `renew-xray` do not, so the name was an ERE.
+- **Confirmed live:** `DELETE /delete-xray {"username":"a.b"}` matched (and removed) the unrelated
+  account `axb` while reporting `deleted_from:["ws"]` for a name that never existed, and
+  `{"username":".*"}` deleted **every account of the transport**. `renew-xray` had the same match.
+- The NoobzVPN handlers had the weaker form of it (`grep -q "$user"`).
+- Secondary effect, also confirmed: because the config entry is removed under the regex name while
+  the delete script looks for the literal name, the account's card, quota file and limit file are
+  left behind - and their survival then **blocks re-creating that username** ("exists in log file").
+
+Found 140. **Concurrent requests ran the panel's scripts in parallel** (`fn-autosc-api/server`) -
+the reference is a single-threaded `HTTPServer`, which serialised everything. The restored server
+used `ThreadingHTTPServer`, so two requests could run two panel scripts at once - and those scripts
+rewrite whole shared files (`json/*.json`, `/etc/passwd`, the service units) with no locking.
+- **Confirmed live:** twelve concurrent `/add-vmess` calls returned eight successes and four errors,
+  and only **8 of the 12** accounts existed afterwards (`xray -test` still passed, so the config was
+  not corrupted - the edits were simply lost). A threading change was described as hardening in the
+  last session; it was a correctness regression.
+
+### Fix 136 revision - the request-body cap was lifted too widely
+
+The same review caught a defect in this session's own fix 136. Setting `client_max_body_size 0` in
+the `http` block removed nginx's 1 MB request-body bound from **every** location, including the
+WebSocket, HTTPUpgrade and `/` locations, which do not set `proxy_request_buffering off` and
+therefore buffer the body to disk - turning the fix into a disk-fill DoS on the public listener. It
+is now set only on the locations that carry the tunnel as a request body and stream it (the three
+gRPC locations, which also gain `proxy_request_buffering off`, and the three SplitHTTP locations).
+Verified live: a 3 MB POST to `/vmws` is back to `413`, a 3 MB POST to `/vmgr` is not, and a real
+3 MB gRPC tunnel upload still completes.
+
+### Checked in the second pass and found clean
+
+- **`xp` for Xray** (the block whose WireGuard sibling fix 128 changed): an expired `ws` account and
+  an expired `grpc` account were both removed with `xp: deleted <user> (expiry 20-01-01)` audit lines
+  and a future-dated account survived.
+- **`change-id-ws`** (fixes 104/111): the config id, the card's `UUID` line and **both** base64
+  `vmess://` links all moved to the new UUID together; the config stayed valid.
+- **create -> delete -> recreate** on ws/http/split/grpc and vless/ws leaves no card, quota or limit
+  file behind, so a deleted name can be created again.
+- **Cron and services** on the fresh install: `/etc/crontab` carries all 16 panel lines with every
+  command resolving, cron ran 88 commands in 30 minutes with no failures, no systemd unit failed,
+  and `opn`, `squid`, `fn-ohp`, `dnstt` and `haproxy` are all active. `backup` and `xp` are
+  scheduled (an earlier look was misled by output truncation).
+- **Backup and restore are symmetric:** `backup.sh` archives exactly the set `restore-ftp.sh` copies
+  back, and the restore's `cp -r xray /etc/` merges into the existing directory (it does not nest).
+- **`config/squid.conf` and `config/format.sh`** exist and are served (200); the squid ACL placeholder
+  `rerechan` is substituted with the host's IPv4 at install.
+- **Risky-pattern sweeps** found nothing: no unquoted `rm -rf $var`, no truncating redirect to a
+  system file, no `eval`, and the only `curl | bash` is the standard NodeSource setup in
+  `installer/package.sh`.
+- **Log rotation**: `logrotate.timer` is active and `/etc/logrotate.d` covers the xray/nginx logs;
+  the panel's `kill-*` daemons truncate `ws.log` every five minutes anyway, so the transport logs do
+  not grow without bound.
+
+### Noted, not defects
+
+- `other/fnohp` is a **32-bit i386** Go binary while `other/fn.ohp` is 64-bit; only `fnohp` is used,
+  and `fn.ohp` is downloaded to `/etc/fn.ohp` and never referenced. It runs on this host (i386
+  emulation) but is a portability smell rather than a defect.
+- `other/dinda` is a Python script with CRLF line endings; it is run as `python3 -O <file>`, so the
+  endings are harmless.
+- `website/restore-ftp.sh` restarts `ssh`, the four `xray@*` units, `nginx` and `cron` but not
+  `haproxy`, `dropbear` or the `quota-*` daemons; all of those run independently, so nothing is left
+  in a broken state.

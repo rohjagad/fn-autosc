@@ -370,3 +370,20 @@ The whole layer was then re-verified on a **freshly reinstalled Debian 12 host**
 repositories, and end-to-end from the KVM client: 8/8 transport links carried real traffic, the two
 gRPC accounts also uploaded 3 MB (which needed the panel's `client_max_body_size` fix), and every new
 endpoint behaved. The token and the web-restore key were rotated afterwards.
+
+### Revision 2 - hostile and concurrent input (September 26, 2026)
+
+A second pass over this layer, recorded as Found 139-140 / fixes 141-142, found two more defects:
+
+- A caller-supplied name was used as a regular expression. `DELETE /delete-xray {"username":"a.b"}`
+  deleted the unrelated account `axb`, and `{"username":".*"}` deleted every account of the
+  transport. Names are now escaped with `re_escape` before being embedded in a `^### <name>`
+  pattern; the NoobzVPN lookups use `grep -F`.
+- The server's threading let two panel scripts run at once, and they rewrite whole shared files:
+  twelve concurrent `/add-vmess` calls created only eight accounts. Handler execution is now
+  serialised by a lock (the reference was single-threaded, which did the same silently). Cheap paths
+  stay parallel.
+
+The `client_max_body_size` fix was also scoped down: it now applies only to the gRPC and SplitHTTP
+locations, which carry the tunnel as a request body and stream it, rather than to every location -
+the WebSocket/HTTPUpgrade/`/` locations buffer, so an unlimited body there was a disk-fill DoS.
