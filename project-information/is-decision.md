@@ -144,3 +144,32 @@ Keep it that way. The "arbitrary path" convenience is not worth a nondeterminist
 ### Addendum to section 16 - the account card is removed at once, not by the GC
 
 `auto-delete-*` already removes a card whose user is neither in the config nor `.locked` (verified live by planting such a card), so the phantom a quota deletion used to leave was transient - it disappeared within the five-minute cron cycle. Fix 119 still removes the card directly in `quota-*`: it closes that window and keeps the deletion complete even when `auto-delete-*` cannot run (its licence check or cron), and it matches what `kill-*` and `xp` already did. The substantive part of fix 119 remains the wording - the account is deleted, not locked.
+
+## 18. The Panel API Lives in Its Own Repository, and FN-API Is Reference-Only
+
+The panel's nginx config has always proxied `/api/` to `127.0.0.1:9000`, and the service meant to
+answer there is FN-API. Its handler bundle (`/usr/bin/rere/<endpoint>`) and the `menu-api` command
+were lost - the original `rere` download came from `https://scvps.rerechanstore.eu.org/rere`
+(Rerechan's infrastructure, now dead) and the upstream parent repository returns 404 - so the API
+could not run at all.
+
+Restoring it inside `rohjagad/FN-API` was ruled out: that repository is the provider's own package and
+is left untouched. The restored layer therefore lives in a dedicated public repository,
+[`rohjagad/fn-autosc-api`](https://github.com/rohjagad/fn-autosc-api), which carries:
+
+- its **own server** (Python 3, standard library only) rather than FN-API's `core/server`. It keeps
+  the original contract - tokens in `/etc/xray/.key`, the raw `Authorization` header,
+  `<METHOD> /<name>` running `/usr/bin/rere/<name>` with the body on stdin, JSON bodies, logging to
+  `/etc/xray/api.log` - but binds `127.0.0.1` by default, accepts a single path segment only, threads
+  the server, and reports a failing handler's stdout alongside the error;
+- `lib.sh` and one handler per endpoint (documented in `fn-api.md`), plus `menu-api` to install,
+  uninstall, report status and rotate the token.
+
+**Nothing in `fn-autosc` and nothing in the API fetches or modifies `rohjagad/FN-API`; it is kept
+purely as a reference** for the original endpoint list. The panel installer does not install the API:
+it is an optional add-on, `menu-api install`, and the panel works without it.
+
+**Rule for future changes:** a new account type that should be reachable over the API needs a handler
+in `fn-autosc-api/handlers/`, an entry in `menu-api`'s handler list, and a row in the endpoint table
+of `fn-api.md`. An endpoint with no backend on this panel must return the explicit unsupported error
+rather than failing obscurely.
