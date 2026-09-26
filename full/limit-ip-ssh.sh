@@ -253,7 +253,7 @@ mulog=$(mesinssh)
 rm -f "$recent_auth" "$DB_LOG" "$SSH_LOG"
 date=$(date)
 
-for user in "${username[@]}"
+for user in $username
 do
     file_path="/etc/xray/limit/ip/ssh/$user"
     if [ ! -f "$file_path" ]; then

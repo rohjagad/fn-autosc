@@ -302,7 +302,7 @@ while read expired; do
 	user=$(echo $expired | awk '{print $1}')
 	exp=$(echo $expired | awk '{print $2}')
 
-	if [ -n "$exp" ] && [[ "$exp" =~ ^[0-9]{2}-[0-9]{2}-[0-9]{2}$ ]] && [[ $exp < $now ]]; then
+	if [ -n "$exp" ] && [[ "$exp" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] && [[ $exp < $now ]]; then
 	xp_log "deleted wireguard client $user (expiry $exp)"
 		sed -i "/^### Client ${user}\$/,/^$/d" /etc/wireguard/wg0.conf
 		if grep -q "### Client" /etc/wireguard/wg0.conf; then

@@ -611,7 +611,7 @@ ${separator}
 ${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input Options: " opw
 case $opw in
-1) clear : cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh rocky 8 && reboot ;;
+1) clear ; cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh rocky 8 && reboot ;;
 2) clear ; cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh rocky 9 && reboot ;;
 *) rocky ;;
 esac

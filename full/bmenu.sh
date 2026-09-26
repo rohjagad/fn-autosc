@@ -321,7 +321,8 @@ TEXT="
     \"levels\": {
       \"0\": {
         \"statsUserDownlink\": true,
-        \"statsUserUplink\": true
+        \"statsUserUplink\": true,
+        \"statsUserOnline\": true
       }
     },
     \"system\": {

@@ -23,7 +23,7 @@ export DEBIAN_FRONTEND=noninteractive
 
     # Unduh izin dan validasi
     clear
-    PERMISSION_DATA=$(curl -s "$PERMISSION_URL" || { echo "Failed to download permissions."; exit 1; })
+    PERMISSION_DATA=$(curl -s "$PERMISSION_URL") || { echo "Failed to download permissions."; exit 1; }
 
     # Mencocokkan data berdasarkan IP lokal
     MATCH=$(echo "$PERMISSION_DATA" | grep "###" | grep "$LOCAL_IP")
@@ -89,7 +89,7 @@ done
 # Menyimpan Domain
 mkdir -p /etc/xray
 echo -e "${domain}" > /etc/xray/domain
-curl -sS ipinfo.io/ip > /etc/.ip
+curl -4 -sS ipinfo.io/ip > /etc/.ip
 
 # Menyimpan Email
 mkdir -p /etc/funny

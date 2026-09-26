@@ -22,7 +22,7 @@
 
     # Unduh izin dan validasi
     clear
-    PERMISSION_DATA=$(curl -s "$PERMISSION_URL" || { echo "Failed to download permissions."; exit 1; })
+    PERMISSION_DATA=$(curl -s "$PERMISSION_URL") || { echo "Failed to download permissions."; exit 1; }
 
     # Mencocokkan data berdasarkan IP lokal
     MATCH=$(echo "$PERMISSION_DATA" | grep "###" | grep "$LOCAL_IP")
@@ -67,7 +67,7 @@ hosting="https://raw.githubusercontent.com/rohjagad/fn-autosc/main"
 # var installation
 export DEBIAN_FRONTEND=noninteractive
 OS=`uname -m`;
-MYIP=$(wget -qO- icanhazip.com);
+MYIP=$(wget -4 -qO- ipv4.icanhazip.com);
 MYIP2="s/xxxxxxxxx/$MYIP/g";
 ANU=$(ip -o -4 route show to default | awk '{print $5}');
 

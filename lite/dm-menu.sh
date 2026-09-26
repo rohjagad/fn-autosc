@@ -183,8 +183,16 @@ start_services() {
 }
 
 copy_certificates() {
-    cat /etc/letsencrypt/live/$domain/fullchain.pem > /etc/xray/xray.crt
-    cat /etc/letsencrypt/live/$domain/privkey.pem > /etc/xray/xray.key
+    # `cat src > dst` creates/truncates dst before src is read, so when certbot
+    # failed (rate limit, HTTP-01 failure) and never produced the files the live
+    # certificate was left as a 0-byte file and nginx could not start. Refuse to
+    # touch it unless certbot actually produced a non-empty pair.
+    if [[ ! -s /etc/letsencrypt/live/$domain/fullchain.pem || ! -s /etc/letsencrypt/live/$domain/privkey.pem ]]; then
+        echo "certbot did not produce certificate files for $domain - keeping the existing certificate."
+        return 1
+    fi
+    cp /etc/letsencrypt/live/$domain/fullchain.pem /etc/xray/xray.crt
+    cp /etc/letsencrypt/live/$domain/privkey.pem /etc/xray/xray.key
     mkdir -p /etc/haproxy
     cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem
     chmod 644 /etc/xray/xray* /etc/haproxy/funny.pem
@@ -198,9 +206,12 @@ if [[ $ip_version == "4" || $ip_version == "6" ]]; then
         certbot certonly --standalone --preferred-challenges http -d $domain --non-interactive --agree-tos --email $email --preferred-challenges http --standalone-supported-challenges http
     fi
 
-    copy_certificates
+    if copy_certificates; then
+        echo "Cert installed for IPv$ip_version."
+    else
+        echo "Certificate renewal failed - the previously installed certificate was kept."
+    fi
     start_services
-    echo "Cert installed for IPv$ip_version."
 else
     echo "Invalid IP version. Please choose '4' for IPv4 or '6' for IPv6."
     sleep 3
@@ -326,11 +337,16 @@ cd /root/
 clear
 echo "Starting... Port 80 will be stopped during SSL certificate installation"
 certbot certonly --standalone --preferred-challenges http --agree-tos --email "$(cat /etc/funny/.email 2>/dev/null || echo "admin@example.com")" -d $domain 
-cp /etc/letsencrypt/live/$domain/fullchain.pem /etc/xray/xray.crt
-cp /etc/letsencrypt/live/$domain/privkey.pem /etc/xray/xray.key
+if [[ -s /etc/letsencrypt/live/$domain/fullchain.pem && -s /etc/letsencrypt/live/$domain/privkey.pem ]]; then
+    cp /etc/letsencrypt/live/$domain/fullchain.pem /etc/xray/xray.crt
+    cp /etc/letsencrypt/live/$domain/privkey.pem /etc/xray/xray.key
+    mkdir -p /etc/haproxy
+    cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem
+    chmod 644 /etc/xray/xray* /etc/haproxy/funny.pem
+else
+    echo "certbot failed - keeping the existing certificate."
+fi
 cd /etc/xray
-chmod 644 /etc/xray/xray.key
-chmod 644 /etc/xray/xray.crt
 systemctl start nginx
 }
 

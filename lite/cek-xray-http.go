@@ -64,7 +64,7 @@ func ReadFile(path string) string {
 
 // ParseStats parses traffic stats for a specific user
 func ParseStats(user string, direction string) int64 {
-	output, err := ExecuteCommand("xray", "api", "statsquery", "--server=127.0.0.1:10080")
+	output, err := ExecuteCommand("xray", "api", "statsquery", "--server=127.0.0.1:10081")
 	if err != nil {
 		return 0
 	}
@@ -120,7 +120,7 @@ func main() {
 	clearScreen()
 
 	fmt.Printf("%s━━━━━━━━━━━━━━━━━━━━━━━%s\n", BLUE, NC)
-	fmt.Println("  Log X-Ray SPLIT HTTP  ")
+	fmt.Println("  Log X-Ray HTTP UPGRADE  ")
 	fmt.Printf("%s━━━━━━━━━━━━━━━━━━━━━━━%s\n", BLUE, NC)
 
 	// Load user list from config file
@@ -159,7 +159,7 @@ func main() {
 
 	// Process each user
 	for _, user := range users {
-		ipCountOutput, err := ExecuteCommand("xray", "api", "statsonline", "--server=127.0.0.1:10080", "-email", user)
+		ipCountOutput, err := ExecuteCommand("xray", "api", "statsonline", "--server=127.0.0.1:10081", "-email", user)
 		if err != nil || ipCountOutput == "" {
 			continue
 		}

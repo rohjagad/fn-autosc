@@ -22,7 +22,7 @@
 
     # Unduh izin dan validasi
     clear
-    PERMISSION_DATA=$(curl -s "$PERMISSION_URL" || { echo "Failed to download permissions."; exit 1; })
+    PERMISSION_DATA=$(curl -s "$PERMISSION_URL") || { echo "Failed to download permissions."; exit 1; }
 
     # Mencocokkan data berdasarkan IP lokal
     MATCH=$(echo "$PERMISSION_DATA" | grep "###" | grep "$LOCAL_IP")
@@ -136,10 +136,10 @@ END
 
 install_firewall() {
   local interface=$(ip route get 8.8.8.8 | awk '/dev/ {print $5}')
-  iptables -I INPUT -p udp --dport 5300 -j ACCEPT &>/dev/null
+  iptables -C INPUT -p udp --dport 5300 -j ACCEPT 2>/dev/null || iptables -I INPUT -p udp --dport 5300 -j ACCEPT &>/dev/null
   iptables -t nat -I PREROUTING -i $interface -p udp --dport 53 -j REDIRECT --to-ports 5300
   local interface2=$(ip route get 1.1.1.1 | awk '/dev/ {print $5}')
-  iptables -I INPUT -p udp --dport 5300 -j ACCEPT &>/dev/null
+  iptables -C INPUT -p udp --dport 5300 -j ACCEPT 2>/dev/null || iptables -I INPUT -p udp --dport 5300 -j ACCEPT &>/dev/null
   iptables -t nat -I PREROUTING -i $interface2 -p udp --dport 53 -j REDIRECT --to-ports 5300
   iptables-save >/etc/iptables.up.rules
   iptables-restore < /etc/iptables.up.rules
@@ -163,7 +163,9 @@ IFACE=$(ip -4 route show default | awk '{print $5; exit}')
 [ -z "$IFACE" ] && exit 0
 while iptables -t nat -D PREROUTING -i "$IFACE" -p udp --dport 53 -j REDIRECT --to-ports 5300 2>/dev/null; do :; done
 iptables -t nat -I PREROUTING 1 -i "$IFACE" -p udp --dport 53 -j REDIRECT --to-ports 5300
-iptables -I INPUT -p udp --dport 5300 -j ACCEPT
+# This runs every 15 seconds: insert only when the rule is absent, or the
+# INPUT chain grows without bound (one rule per tick, forever).
+iptables -C INPUT -p udp --dport 5300 -j ACCEPT 2>/dev/null || iptables -I INPUT -p udp --dport 5300 -j ACCEPT
 exit 0
 FIXSH
   chmod +x /usr/local/bin/slowdns-fixnet.sh

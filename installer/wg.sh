@@ -22,7 +22,7 @@
 
     # Unduh izin dan validasi
     clear
-    PERMISSION_DATA=$(curl -s "$PERMISSION_URL" || { echo "Failed to download permissions."; exit 1; })
+    PERMISSION_DATA=$(curl -s "$PERMISSION_URL") || { echo "Failed to download permissions."; exit 1; }
 
     # Mencocokkan data berdasarkan IP lokal
     MATCH=$(echo "$PERMISSION_DATA" | grep "###" | grep "$LOCAL_IP")
@@ -132,7 +132,7 @@ check_install wireguard
 sleep 1
 server_priv_key=$(wg genkey)
 server_pub_key=$(echo "${server_priv_key}" | wg pubkey)
-ip=$(curl ipinfo.io/ip)
+ip=$(curl -4 -s ipinfo.io/ip)
 netinfo=$(ip -o -4 route show to default | awk '{print $5}')
 echo -e "ip=${ip}
 server_priv_key=${server_priv_key}
