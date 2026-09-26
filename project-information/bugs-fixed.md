@@ -1130,3 +1130,16 @@ Fresh Debian 12 via `bin456789/reinstall`, then the panel from commit `4797f92` 
 
 - **Positive - 21/21.** One account was created for each of the twelve protocol/transport combinations using the panel's own `add-*` script, and the card it printed was replayed from the external client VM (source IP 157.15.139.236). Every TLS link and every NoneTLS link (all transports except gRPC) returned `200` with 300,000 bytes - WebSocket, HTTPUpgrade and SplitHTTP now share one path between their TLS and NoneTLS forms exactly as intended.
 - **Negative - 12/12.** The same credentials rebuilt against the old paths (`/vmess`, `/vless`, `/trojanws`, `/rere`, `/imam`, `/luqito`, `/splitvm`, `/splitvl`, `/splittr`, `vmess-grpc`, `vless-grpc`, `trojan-grpc`) all failed (`http=000`), confirming the old paths were removed rather than kept as aliases.
+
+### Broader live pass - local KVM client against the VPS (September 26, 2026)
+
+A full feature pass was run with the local `/dev/kvm` guest (Xray 25.3.6, public IP 157.15.139.236) as the external client against the freshly installed VPS. The transport work is what the rename touches; the rest re-checks the panel after the reinstall.
+
+- **Transport matrix - 21/21.** One account per protocol/transport combination was created with the panel's own `add-*` script and each card replayed from the client: every TLS link and every NoneTLS link returned `200` with 300,000 bytes - WebSocket, HTTPUpgrade and SplitHTTP on both the TLS and the NoneTLS form of their single path, and gRPC (TLS only). `cek-xray-ws` then showed each account with `Total IP Login` and its quota usage.
+- **Multi-login / IP limit.** With `iplim` (Limit IP 1) online from two genuinely different hosts - the VPS itself (202.155.17.126) and the KVM guest (157.15.139.236) - `limit-ip-ws` removed the account, moved its card to `iplim.locked`, and reloaded `xray@ws` (`Configuration OK.`). The nginx access log carried the client-supplied `X-Forwarded-For` values (`198.51.100.7`, `203.0.113.9`) next to the real addresses, confirming the forwarded IP is what the online counter uses.
+- **Trials.** All twelve `trial-*` scripts produced an account (three per transport) and queued an `at` job - twelve in total.
+- **`xp`.** An account retimed to `20-01-01` was deleted and logged: `2026-09-26 11:26:19 xp: deleted xptest (expiry 20-01-01)`.
+- **extend / delete.** `extend-ws` moved an expiry from `26-10-26` to `26-11-25`; `delete-ws` removed its account.
+- **Backup.** With `/etc/funny/.chatid` and `/etc/funny/.keybot` absent, `backup` exited 1 after reporting `Telegram credentials are not configured` **and kept the archive** at `/root/backup.zip` (3,713,842 bytes) - fix 108's behaviour.
+- **cron / menu.** Sixteen panel cron lines present; `menu` present.
+- All test accounts, cards, quota/limit files and `at` jobs were removed afterwards; every service is active and every Xray config reports `Configuration OK.`
