@@ -1256,3 +1256,55 @@ Found 145. **`menu-bot` cannot install its bot: the tree runs Node 20, the bot n
   Xray instance after deleting an over-quota account (V23 restarted `v2ray`), its `xp` removes quota
   files with the `$user*` glob that a later audit reverted here, and its `auto-delete-*` removes only
   the quota file and leaves `<user>_usage` behind. Ours keeps the exact-pair paths and the restart.
+
+## Fifth Pass - Account Management, Cron, Time/Date, Limits (September 26, 2026)
+
+A dedicated pass over the areas named - account management, cron, time/date, the limiter, quota /
+GB bandwidth, IP limit, trial IP limit and SSH account management - diffing our tree against both
+archives token by token (paths, units, services, operators) and exercising the flows live. **No new
+defect was confirmed in our tree.** The pass did establish, with the source as evidence, where ours
+is right and a reference is wrong, and it recorded one latent risk that could not be reproduced.
+
+### Reference defects our tree already fixes (each verified against both archives)
+
+| Area | The references | Ours |
+| :-- | :-- | :-- |
+| HTTPUpgrade service name | `auto-delete-http` / `change-quota-http` / `extend-http` / `locked-xray-http` restart **`xray@http`**, a unit nothing ever creates - the installer enables `xray@upgrade`, so those restarts never happen | restarts `xray@upgrade` (the enabled unit) |
+| Node package | both list `python` on the `apt install` line; there is no `python` package on Debian 12 (`Candidate: none`), so the whole line - `jq`, `certbot`, `fail2ban` and the rest - aborts | `python3` |
+| SplitHTTP delete | `delete-split` removes `/etc/xray/quota/**ws**/$user` - a different transport's file - and leaves the split account's own quota files, so a deleted split account is orphaned and a same-named WS account loses its quota | `/etc/xray/quota/split/` plus `${user}_usage` |
+| SSH IP-limit state | `xp` cleans `/etc/funny/limit/ssh/ip/`, a directory nothing creates, while the limit lives in `/etc/xray/limit/ip/ssh/`, so an expired SSH account's limit file survives | one path throughout |
+| WireGuard expiry | `xp` guards on `^[0-9]{2}-[0-9]{2}-[0-9]{2}$` while `menu-wg` writes `%Y-%m-%d`, so the WG cleanup never fires (Found 126) | the 4-digit shape `menu-wg` actually writes |
+| Noobz state | mix `/etc/noobzvpns/.noob`, `.chatid`, `.keybot` **and** `/etc/funny/…` | one set under `/etc/funny` |
+| restore-ftp | `systemctl **resrart** xray@split` (a typo, so the restart never runs) | the correct verb |
+
+### Verified correct in our tree, live on the fresh install
+
+- **Trial** (vmess-ws): created `trial051`, config date `26-09-27`, card present, limit file `1`,
+  quota file `1073741824` (1 GB in bytes), and an `at` job 60 minutes out; `atd` is active.
+- **All twelve trial scripts** write both the IP-limit and quota files (same as 1.20), and
+  `trial-ssh` writes the limit file its card advertises (Found 107's fix).
+- **Trial count in the card vs the file**: `Limit IP: 1` and the file `1`.
+- **SSH IP limiter, end to end**: with `Limit IP 1` and two distinct logins, it locked the account
+  (`passwd -S` -> `L`) and scheduled the 15-minute auto-unlock. `passwd -l` prefixes the shadow hash
+  with `!` and leaves the password intact - confirmed by comparing the hash before and after.
+- **Xray unlock**: after simulating the limiter's lock (client removed, card renamed `.locked`),
+  `unlock-ws` restored the client **with `"level": 0`**, renamed the card back and left the limit and
+  quota files untouched, config valid.
+- **Units and operators**: `quota-*` all trigger on `-gt` and `kill-*` all on `-ge` (matching 1.20),
+  with the per-transport quota paths correct in every daemon.
+- **Time/date**: the expiry format matches between writer and reader on both families; the SSH
+  expiry is enforced by the OS at local midnight and the Xray one by `xp`, so the UTC-vs-local
+  arithmetic difference is not customer-visible.
+- **Cron**: `/etc/crontab` carries the full panel block; `atd` active; `kill-*`/`quota-*` conditions
+  consistent.
+
+### Observation - the cron daemons share files but not a lock (unreproduced)
+
+`xp` (minutes 0/15/30/45) and the `*/5` daemons (`kill-*`, `limit-ip-*`, `auto-delete-*`) start at
+the same minute and each `sed -i`s the same `json/*.json`; each holds only its **own** `flock`, so
+two different daemons can read-modify-write the same file concurrently. That is the same class as
+Found 140 (the API's threaded handlers) - but unlike that one it did **not** reproduce: ten iterations
+with an expired account (for `xp`) and an over-quota account (for `kill-ws`) ran concurrently and no
+edit was ever lost, because each daemon's edit window is a single fast `sed`, not a multi-second
+script. Recorded as a latent risk rather than a confirmed defect, since the audit's rule is to
+demonstrate before claiming.

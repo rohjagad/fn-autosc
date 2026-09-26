@@ -308,3 +308,25 @@ three classes the owner asked about. The evidence is a presence matrix over the 
   ours. The references' `install.sh` is 124 lines and downloads a now-dead handler bundle.
 - The whole `fn-autosc-api` repository, and `client_max_body_size`/`level` as above.
 - Cosmetic: the install summary's `SSH Port:` line and `menu-api`'s inactive-service warning.
+
+## 28. The Reference Archive Is the Bug Holders in These Areas (September 26, 2026)
+
+Following the fifth pass, it is worth recording the shape of what it found. In account management,
+cron, time/date, the limiter, quota and the IP limit - the areas the owner asked about - **every
+token-level divergence from both archives was one our tree had already fixed**, not one it had
+introduced:
+
+- a service that is never created (`xray@http` restarts in the four HTTPUpgrade scripts, against an
+  installer that enables `xray@upgrade`);
+- a package that does not exist (`python` on Debian 12, aborting the whole `apt install` line);
+- a wrong transport's quota path in `delete-split` (`/etc/xray/quota/ws/`);
+- a state path nothing creates (`/etc/funny/limit/ssh/ip/`);
+- a date regex that cannot match the dates the writer emits (`^[0-9]{2}-…` vs `%Y-%m-%d`);
+- split NoobzVPN state between `/etc/noobzvpns/…` and `/etc/funny/…`;
+- and a typo that silently disables a restart (`systemctl resrart xray@split`).
+
+This is the complement of regression 27. There, our own changes had to be re-checked against the
+source because they were "more capable" than it. Here, the source is simply wrong in seven places and
+the tree already carries the corrections - which is the point of keeping both archives: the audit
+has to cut both ways, keeping our divergences only where they are justified and matching the source
+where it is right.
