@@ -101,7 +101,7 @@ grpc=`cat<<eof
 "id": "${uuid}",
 "aid": "0",
 "net": "grpc",
-"path": "vmess-grpc",
+"path": "vmgr",
 "type": "none",
 "host": "${domain}",
 "tls": "tls"
@@ -130,7 +130,7 @@ Quota   : $quota GB
 =======================
 Port   : 443, 2053, 2083, 2087, 2096
 AlterID: 0
-Service: vmess-grpc
+Service: vmgr
 Network: gRPC
 Alpn   : - [ None ]
 Decrypt: auto

@@ -29,7 +29,7 @@
       "streamSettings": {
         "network": "splithttp",
         "splithttpSettings": {
-          "path": "/splitvm"
+          "path": "/vmspl"
         }
       },
       "sniffing": {
@@ -58,7 +58,7 @@
       "streamSettings": {
         "network": "splithttp",
         "splithttpSettings": {
-          "path": "/splitvl"
+          "path": "/vlspl"
         }
       },
       "sniffing": {
@@ -86,7 +86,7 @@
       "streamSettings": {
         "network": "splithttp",
         "splithttpSettings": {
-          "path": "/splittr"
+          "path": "/trspl"
         }
       },
       "sniffing": {

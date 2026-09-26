@@ -1100,3 +1100,26 @@ After fix 116 was committed the entire cycle was run again from scratch, so this
 - **Positive:** the same paths with the **new per-install credentials** give **12/12 authenticated** (300,000 bytes each), including the previously dead HTTPUpgrade trojan.
 
 That closes the open-bug sweep: the shipped installer no longer exposes any usable default credential, deletions are logged, the change-id card links follow the UUID, `cek-xray-ws` exits 0 when idle, and `quota-ws` no longer spams the journal.
+
+## Transport Path Rename to a Canonical Scheme (September 26, 2026)
+
+Requested change: each protocol/transport pair now has exactly one path and the previous paths are removed (no aliases kept).
+
+| Protocol | Transport | Old path | New path |
+| :--- | :--- | :--- | :--- |
+| VMess | WebSocket | `/vmess` (TLS) + `/worryfree` (NoneTLS) | `/vmws` |
+| VLESS | WebSocket | `/vless` | `/vlws` |
+| Trojan | WebSocket | `/trojanws` | `/trws` |
+| VMess | HTTPUpgrade | `/rere` | `/vmhu` |
+| VLESS | HTTPUpgrade | `/imam` | `/vlhu` |
+| Trojan | HTTPUpgrade | `/luqito` | `/trhu` |
+| VMess | SplitHTTP | `/splitvm` | `/vmspl` |
+| VLESS | SplitHTTP | `/splitvl` | `/vlspl` |
+| Trojan | SplitHTTP | `/splittr` | `/trspl` |
+| VMess | gRPC | `vmess-grpc` | `vmgr` |
+| VLESS | gRPC | `vless-grpc` | `vlgr` |
+| Trojan | gRPC | `trojan-grpc` | `trgr` |
+
+Changed: the four `json/*.json` templates, the three `config/*.conf` nginx configs, every `full/` and `lite/` `add-*`/`trial-*` script (link generation and the account cards), `menu/full.zip` and `menu/lite.zip`, and the README transport table. Because `/vmws` now serves both the TLS and the NoneTLS form, the redundant `:95`/`:96`/`:977` VMess-WS inbounds and their `/worryfree`/`/kuota-habis` locations were removed (see the observation in bugs-found.md); `location /` (SSH-over-WS to `wsEpro` on `:2080`) is unchanged. The gRPC menu's *command* names (`add-vmess-grpc`, ...) deliberately still contain the old string.
+
+Verified live after a clean reinstall of the OS and the panel (details below).

@@ -29,7 +29,7 @@
       "streamSettings": {
         "network": "grpc",
         "grpcSettings": {
-          "serviceName": "vless-grpc"
+          "serviceName": "vlgr"
         }
       }
     },
@@ -49,7 +49,7 @@
       "streamSettings": {
         "network": "grpc",
         "grpcSettings": {
-          "serviceName": "vmess-grpc"
+          "serviceName": "vmgr"
         }
       }
     },
@@ -69,7 +69,7 @@
       "streamSettings": {
         "network": "grpc",
         "grpcSettings": {
-          "serviceName": "trojan-grpc"
+          "serviceName": "trgr"
         }
       }
     }

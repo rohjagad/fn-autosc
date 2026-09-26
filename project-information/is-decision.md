@@ -115,3 +115,11 @@ The four Xray templates (`json/ws.json`, `json/grpc.json`, `json/split.json`, `j
 **Rule for future changes:** if a new template or default client is added, add its committed value to that loop. A template default is acceptable only when its credential is generated per install. The templates' `###` marker lines must stay in place - the account scripts insert new clients after them - so removing the default client outright is not the approach; randomising it is.
 
 Verified end to end on a fresh install: the committed values occur 0 times in `/etc/xray/json`, and from an external client they authenticate 0/11 while the per-install values authenticate 12/12 (fixes 111/116).
+
+## 15. Transport Paths Follow a Fixed Scheme, and Old Paths Are Removed
+
+Every protocol/transport pair carries one short path, `{proto}{transport}`: `vmws`/`vlws`/`trws` for WebSocket, `vmhu`/`vlhu`/`trhu` for HTTPUpgrade, `vmspl`/`vlspl`/`trspl` for SplitHTTP, and `vmgr`/`vlgr`/`trgr` as the gRPC service names. The same path string is used for the TLS and the NoneTLS form of a transport - Xray does not terminate TLS here, nginx does, so the port decides which listener is reached.
+
+**Rule for future changes:** keep the `{vm|vl|tr}{ws|hu|gr|spl}` pattern. When a transport is added, add its path to the four `json/*.json` templates, the three `config/*.conf` nginx configs and the `add-*`/`trial-*` scripts in both editions, then rebuild `menu/*.zip`. Do not keep the previous path as an alias: old links are expected to stop working, which is acceptable because a path is only ever published on the account card at creation time (an existing client keeps working with its stored path only until the operator re-issues it).
+
+VMess-WS is the one transport that previously had two paths (`/vmess` for TLS and `/worryfree` for NoneTLS) backed by two inbounds (`:23456`, `:95`) that every account was written into; it is now the single `/vmws` on `:23456`. The other VMess-WS inbounds (`:977` on `/` and `:96` on `/kuota-habis`) were unreachable - the `:977` catch-all had already been dropped from the nginx upstream in `68c4068` - and were removed together with their locations. gRPC has no NoneTLS form: its locations are only reached over TLS.

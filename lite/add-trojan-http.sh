@@ -157,10 +157,10 @@ systemctl restart xray@upgrade
 systemctl restart quota-http
 
 # Konfigurasi Trojan http TLS
-link1="trojan://${uuid}@${domain}:443?path=/luqito&security=tls&host=${domain}&type=httpupgrade&sni=${domain}#${user}"
+link1="trojan://${uuid}@${domain}:443?path=/trhu&security=tls&host=${domain}&type=httpupgrade&sni=${domain}#${user}"
 
 # Konfigurasi Trojan http NonTLS
-link2="trojan://${uuid}@${domain}:80?path=/luqito&security=none&host=${domain}&type=httpupgrade#${user}"
+link2="trojan://${uuid}@${domain}:80?path=/trhu&security=none&host=${domain}&type=httpupgrade#${user}"
 
 TEKS="
 =========================
@@ -176,7 +176,7 @@ Quota   : $quota GB
 Protokol: Trojan
 =========================
 
-Path: /luqito
+Path: /trhu
 Network: HTTP Upgrade
 Port TLS: 443, 2053, 2083, 2087, 2096
 Port None: 80, 8880, 2052, 2082, 2095

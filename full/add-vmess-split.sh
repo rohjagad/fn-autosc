@@ -167,7 +167,7 @@ acs=`cat<<eof
 "id": "${uuid}",
 "aid": "0",
 "net": "splithttp",
-"path": "/splitvm",
+"path": "/vmspl",
 "type": "none",
 "host": "${domain}",
 "tls": "tls"
@@ -184,7 +184,7 @@ ask=`cat<<eof
 "id": "${uuid}",
 "aid": "0",
 "net": "splithttp",
-"path": "/splitvm",
+"path": "/vmspl",
 "type": "none",
 "host": "${domain}",
 "tls": "none"
@@ -218,7 +218,7 @@ TLS: 443, 2053, 2083, 2087, 2096
 NoneTLS: 80, 8880, 2052, 2082, 2095
 ======================
 AlterID: 0
-Path   : /splitvm
+Path   : /vmspl
 Network: Split HTTP
 Alpn   : - [ None ]
 Decrypt: auto

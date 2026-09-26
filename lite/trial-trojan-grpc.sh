@@ -93,7 +93,7 @@ systemctl restart xray@grpc
 systemctl restart quota-grpc
 
 # Konfigurasi Trojan gRPC TLS
-link1="trojan://${uuid}@${domain}:443?mode=gun&security=tls&authority=${domain}&type=grpc&serviceName=trojan-grpc&sni=${domain}#${user}"
+link1="trojan://${uuid}@${domain}:443?mode=gun&security=tls&authority=${domain}&type=grpc&serviceName=trgr&sni=${domain}#${user}"
 
 TEKS="
 =======================
@@ -109,7 +109,7 @@ Quota   : $quota GB
 Protokol: Trojan
 =======================
 
-Service Name: trojan-grpc
+Service Name: trgr
 Network: gRPC GUN
 Port gRPC: 443, 2053, 2083, 2087, 2096
 =======================

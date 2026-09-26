@@ -93,7 +93,7 @@ systemctl restart xray@grpc
 systemctl restart quota-grpc
 
 # Konfigurasi Vless gRPC
-vlesslink1="vless://$uuid@$domain:443?mode=gun&security=tls&encryption=none&authority=$domain&type=grpc&serviceName=vless-grpc&sni=$domain#${user}"
+vlesslink1="vless://$uuid@$domain:443?mode=gun&security=tls&encryption=none&authority=$domain&type=grpc&serviceName=vlgr&sni=$domain#${user}"
 
 TEKS="
 ======================
@@ -114,7 +114,7 @@ Quota   : $quota GB
 
 Port: 443, 2053, 2083, 2087, 2096
 Network: gRPC
-Service Name: vless-grpc
+Service Name: vlgr
 ======================
 Link TLS : $vlesslink1
 ======================

@@ -93,10 +93,10 @@ systemctl restart xray@upgrade
 systemctl restart quota-http
 
 # Konfigurasi Vless WS TLS
-vlesslink1="vless://${uuid}@${domain}:443?path=/imam&security=tls&encryption=none&host=${domain}&type=httpupgrade&sni=${domain}#${user}"
+vlesslink1="vless://${uuid}@${domain}:443?path=/vlhu&security=tls&encryption=none&host=${domain}&type=httpupgrade&sni=${domain}#${user}"
 
 # Konfigurasi Vless WS NoneTLS
-vlesslink2="vless://${uuid}@${domain}:80?path=/imam&security=none&encryption=none&host=${domain}&type=httpupgrade#${user}"
+vlesslink2="vless://${uuid}@${domain}:80?path=/vlhu&security=none&encryption=none&host=${domain}&type=httpupgrade#${user}"
 
 TEKS="
 ========================
@@ -116,7 +116,7 @@ Quota   : $quota GB
 ========================
 
 TLS: 443, 2053, 2083, 2087, 2096
-Path: /imam
+Path: /vlhu
 NoneTLS: 80, 8880, 2052, 2082, 2095
 Network: HTTP Upgrade
 ========================

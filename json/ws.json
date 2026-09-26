@@ -29,67 +29,7 @@
       "streamSettings": {
         "network": "ws",
         "wsSettings": {
-          "path": "/vless"
-        }
-      }
-    },
-    {
-      "listen": "127.0.0.1",
-      "port": 977,
-      "protocol": "vmess",
-      "settings": {
-        "clients": [
-          {
-            "id": "rerechan-store",
-            "alterId": 0
-#vmess
-          }
-        ]
-      },
-      "streamSettings": {
-        "network": "ws",
-        "wsSettings": {
-          "path": "/"
-        }
-      }
-    },
-    {
-      "listen": "127.0.0.1",
-      "port": 95,
-      "protocol": "vmess",
-      "settings": {
-        "clients": [
-          {
-            "id": "rerechan-store",
-            "alterId": 0
-#vmess
-          }
-        ]
-      },
-      "streamSettings": {
-        "network": "ws",
-        "wsSettings": {
-          "path": "/worryfree"
-        }
-      }
-    },
-    {
-      "listen": "127.0.0.1",
-      "port": 96,
-      "protocol": "vmess",
-      "settings": {
-        "clients": [
-          {
-            "id": "rerechan-store",
-            "alterId": 0
-#vmess
-          }
-        ]
-      },
-      "streamSettings": {
-        "network": "ws",
-        "wsSettings": {
-          "path": "/kuota-habis"
+          "path": "/vlws"
         }
       }
     },
@@ -109,7 +49,7 @@
       "streamSettings": {
         "network": "ws",
         "wsSettings": {
-          "path": "/vmess"
+          "path": "/vmws"
         }
       }
     },
@@ -130,7 +70,7 @@
       "streamSettings": {
         "network": "ws",
         "wsSettings": {
-          "path": "/trojanws"
+          "path": "/trws"
         }
       }
     }

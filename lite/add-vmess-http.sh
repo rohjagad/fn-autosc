@@ -166,7 +166,7 @@ acs=`cat<<eof
 "id": "${uuid}",
 "aid": "0",
 "net": "httpupgrade",
-"path": "/rere",
+"path": "/vmhu",
 "type": "none",
 "host": "${domain}",
 "tls": "tls"
@@ -183,7 +183,7 @@ ask=`cat<<eof
 "id": "${uuid}",
 "aid": "0",
 "net": "httpupgrade",
-"path": "/rere",
+"path": "/vmhu",
 "type": "none",
 "host": "${domain}",
 "tls": "none"
@@ -217,7 +217,7 @@ TLS: 443, 2053, 2083, 2087, 2096
 NoneTLS: 80, 8880, 2052, 2082, 2095
 ========================
 AlterID: 0
-Path   : /rere
+Path   : /vmhu
 Network: HTTP Upgrade
 Alpn   : - [ None ]
 Decrypt: auto

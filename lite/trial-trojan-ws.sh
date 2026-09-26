@@ -93,10 +93,10 @@ systemctl restart xray@ws
 systemctl restart quota-ws
 
 # Konfigurasi Trojan WS TLS
-link1="trojan://${uuid}@${domain}:443?path=%2ftrojanws&security=tls&host=${domain}&type=ws&sni=${domain}#${user}"
+link1="trojan://${uuid}@${domain}:443?path=%2ftrws&security=tls&host=${domain}&type=ws&sni=${domain}#${user}"
 
 # Konfigurasi Trojan WS NonTLS
-link2="trojan://${uuid}@${domain}:80?path=/trojanws&security=none&host=${domain}&type=ws#${user}"
+link2="trojan://${uuid}@${domain}:80?path=/trws&security=none&host=${domain}&type=ws#${user}"
 
 TEKS="
 ======================
@@ -112,7 +112,7 @@ Quota   : $quota GB
 Protokol: Trojan
 ======================
 
-Path: /trojanws
+Path: /trws
 Network: WebSocket
 Port TLS: 443, 2053, 2083, 2087, 2096
 Port None: 80, 8880, 2052, 2082, 2095

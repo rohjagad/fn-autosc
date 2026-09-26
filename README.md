@@ -285,18 +285,18 @@ to `127.0.0.1` only and are never reachable from outside.
 
 | Protocol | Transport | TLS Path | NoneTLS Path | Internal Backend |
 | :--- | :--- | :--- | :--- | :--- |
-| VMess WS | WebSocket | `/vmess` | `/worryfree` | `127.0.0.1:23456` / `:95` |
-| VLESS WS | WebSocket | `/vless` | `/vless` | `127.0.0.1:14016` |
-| Trojan WS | WebSocket | `/trojanws` | `/trojanws` | `127.0.0.1:25432` |
-| VMess HTTP Upgrade | HTTPUpgrade | `/rere` | `/rere` | `127.0.0.1:8001` |
-| VLESS HTTP Upgrade | HTTPUpgrade | `/imam` | `/imam` | `127.0.0.1:8003` |
-| Trojan HTTP Upgrade | HTTPUpgrade | `/luqito` | `/luqito` | `127.0.0.1:8002` |
-| VMess SplitHTTP | SplitHTTP | `/splitvm` | `/splitvm` | `127.0.0.1:2019` |
-| VLESS SplitHTTP | SplitHTTP | `/splitvl` | `/splitvl` | `127.0.0.1:2023` |
-| Trojan SplitHTTP | SplitHTTP | `/splittr` | `/splittr` | `127.0.0.1:2020` |
-| VMess gRPC | gRPC | `vmess-grpc` | — | `127.0.0.1:31234` |
-| VLESS gRPC | gRPC | `vless-grpc` | — | `127.0.0.1:24456` |
-| Trojan gRPC | gRPC | `trojan-grpc` | — | `127.0.0.1:33456` |
+| VMess WS | WebSocket | `/vmws` | `/vmws` | `127.0.0.1:23456` |
+| VLESS WS | WebSocket | `/vlws` | `/vlws` | `127.0.0.1:14016` |
+| Trojan WS | WebSocket | `/trws` | `/trws` | `127.0.0.1:25432` |
+| VMess HTTP Upgrade | HTTPUpgrade | `/vmhu` | `/vmhu` | `127.0.0.1:8001` |
+| VLESS HTTP Upgrade | HTTPUpgrade | `/vlhu` | `/vlhu` | `127.0.0.1:8003` |
+| Trojan HTTP Upgrade | HTTPUpgrade | `/trhu` | `/trhu` | `127.0.0.1:8002` |
+| VMess SplitHTTP | SplitHTTP | `/vmspl` | `/vmspl` | `127.0.0.1:2019` |
+| VLESS SplitHTTP | SplitHTTP | `/vlspl` | `/vlspl` | `127.0.0.1:2023` |
+| Trojan SplitHTTP | SplitHTTP | `/trspl` | `/trspl` | `127.0.0.1:2020` |
+| VMess gRPC | gRPC | `vmgr` | — | `127.0.0.1:31234` |
+| VLESS gRPC | gRPC | `vlgr` | — | `127.0.0.1:24456` |
+| Trojan gRPC | gRPC | `trgr` | — | `127.0.0.1:33456` |
 
 ### Why arbitrary paths are unstable
 
@@ -304,15 +304,14 @@ You may have seen advice to use paths like `/anything` or `/custom`. Those are
 **not** dedicated paths and will be unstable.
 
 Any path that does not match a specific location block falls through to the
-Nginx `location /` catch-all, which load-balances between two backends:
+Nginx `location /` catch-all, which forwards to the SSH WebSocket backend:
 
 ```text
 127.0.0.1:2080   SSH WebSocket (wsEpro)
-127.0.0.1:977    VMess WS catch-all
 ```
 
-Roughly half of those connections land on the SSH WebSocket backend and fail.
-Use `/vmess`, `/vless`, `/trojanws`, and the other paths in the table above —
+Those connections land on the SSH WebSocket backend and fail.
+Use `/vmws`, `/vlws`, `/trws`, and the other paths in the table above —
 they route 100% of traffic to a dedicated backend and are fast and stable.
 
 ---

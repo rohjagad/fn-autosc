@@ -29,7 +29,7 @@
       "streamSettings": {
         "network": "httpupgrade",
         "httpupgradeSettings": {
-          "path": "/rere"
+          "path": "/vmhu"
         }
       },
       "sniffing": {
@@ -57,7 +57,7 @@
       "streamSettings": {
         "network": "httpupgrade",
         "httpupgradeSettings": {
-          "path": "/luqito"
+          "path": "/trhu"
         }
       },
       "sniffing": {
@@ -85,7 +85,7 @@
       "streamSettings": {
         "network": "httpupgrade",
         "httpupgradeSettings": {
-          "path": "/imam"
+          "path": "/vlhu"
         }
       },
       "sniffing": {

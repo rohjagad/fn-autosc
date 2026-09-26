@@ -157,10 +157,10 @@ systemctl restart xray@split
 systemctl restart quota-split
 
 # Konfigurasi Trojan split TLS
-link1="trojan://${uuid}@${domain}:443?path=/splittr&security=tls&host=${domain}&type=splithttp&sni=${domain}#${user}"
+link1="trojan://${uuid}@${domain}:443?path=/trspl&security=tls&host=${domain}&type=splithttp&sni=${domain}#${user}"
 
 # Konfigurasi Trojan split NonTLS
-link2="trojan://${uuid}@${domain}:80?path=/splittr&security=none&host=${domain}&type=splithttp#${user}"
+link2="trojan://${uuid}@${domain}:80?path=/trspl&security=none&host=${domain}&type=splithttp#${user}"
 
 TEKS="
 ======================
@@ -176,7 +176,7 @@ Quota   : $quota GB
 Protokol: Trojan
 ======================
 
-Path: /splittr
+Path: /trspl
 Network: Split HTTP
 Port TLS: 443, 2053, 2083, 2087, 2096
 Port None: 80, 8880, 2052, 2082, 2095

@@ -93,10 +93,10 @@ systemctl restart xray@split
 systemctl restart quota-split
 
 # Konfigurasi Vless WS TLS
-vlesslink1="vless://${uuid}@${domain}:443?path=/splitvl&security=tls&encryption=none&host=${domain}&type=splithttp&sni=${domain}#${user}"
+vlesslink1="vless://${uuid}@${domain}:443?path=/vlspl&security=tls&encryption=none&host=${domain}&type=splithttp&sni=${domain}#${user}"
 
 # Konfigurasi Vless WS NoneTLS
-vlesslink2="vless://${uuid}@${domain}:80?path=/splitvl&security=none&encryption=none&host=${domain}&type=splithttp#${user}"
+vlesslink2="vless://${uuid}@${domain}:80?path=/vlspl&security=none&encryption=none&host=${domain}&type=splithttp#${user}"
 
 TEKS="
 =======================
@@ -116,7 +116,7 @@ Quota   : $quota GB
 =======================
 
 TLS: 443, 2053, 2083, 2087, 2096
-Path: /splitvl
+Path: /vlspl
 NoneTLS: 80, 8880, 2052, 2082, 2095
 Network: Split HTTP
 =======================
