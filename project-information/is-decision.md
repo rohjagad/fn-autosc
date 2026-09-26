@@ -220,3 +220,28 @@ Two divergences surfaced in this scan and were left as they are, to keep the fix
   guards the case explicitly; the twelve sub-installers and the 180 panel scripts do not. Adding the
   guard to ~193 files for a path that already blocks, and that is only reachable by running a
   sub-installer directly, is not worth the churn; recorded instead.
+
+## 22. The Installer Keeps Both SSH Ports Explicit, Rather Than Trusting the Base Image
+
+`installer/ssh.sh` appended `Port 3303` to `sshd_config`. Because sshd listens only on the ports
+named by active `Port` directives and Debian ships the default as a commented `#Port 22`, whether
+port 22 survived depended on the base image - a netboot image closed it, an older cloud image did
+not, and the cloud image the panel's own reinstaller now fetches closes it. That silently disabled
+**SlowDNS**, whose dnstt service forwards the tunnel to `127.0.0.1:22`, and it contradicted every SSH
+card and the README's port table.
+
+The installer now makes both ports explicit and idempotent. Keeping 22 as well as 3303 is the
+conservative choice rather than a new exposure: 22 is the base OS default, the panel has always
+advertised it, `fail2ban` (installed and active) polices it, and the alternative - moving dnstt's
+target to 3303 and removing 22 from the cards - would be a larger change than making the installer
+deliver what the panel already promises. An operator who wants 3303 only can edit `sshd_config`; the
+panel does not offer that choice.
+
+## 23. Per-User Quota Counters Need an Explicit `level` on the Client
+
+Xray 25.3.6 creates `user>>><email>>>traffic>>>uplink/downlink` only for clients that carry an
+explicit `level`; `policy.levels."0".statsUserUplink/Downlink` alone is not enough, while the
+`>>>online` counter works without one. Every account the panel created lacked a level, so the quota
+daemons had nothing to read. The panel's clients now all carry `"level": 0`. The default level is 0
+anyway, so this changes no routing or policy behaviour - it only makes Xray emit the counters the
+panel has always assumed it emitted.

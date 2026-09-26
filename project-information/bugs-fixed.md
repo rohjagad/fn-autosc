@@ -1281,3 +1281,18 @@ by MD5 with the repository and match.
 
 Fix 136 was corrected in the same pass: `client_max_body_size 0` now applies only to the gRPC and
 SplitHTTP locations (see the revision note in `bugs-found.md`).
+
+## Third Pass - Fixes 143-145 (September 26, 2026)
+
+| Fix | Found | Change |
+| :-- | :-- | :-- |
+| 143 | 141 | Every client literal the panel writes now carries `"level": 0` - 56 scripts (`add-*`, `trial-*`, `unlock-*`, both editions, 72 client literals), and `menu/full.zip` / `menu/lite.zip` rebuilt. |
+| 144 | 142 | `installer/ssh.sh` now guarantees both `Port 22` and `Port 3303` are present, idempotently, instead of relying on the base image's `#Port 22`; the install summary prints `SSH Port: 22, 3303`. |
+| 145 | 143 | The cards say `STUNNEL5 : 777` and the README's row lists `777` only. |
+
+Verified live for fix 143 (see Found 141): a panel-created account now produces per-user traffic
+counters and `quota-ws` deletes it once over quota, watched from a clean account through t=30 s.
+Verified live for fix 144: after applying the same block to the running host, `ss` shows both 22 and
+3303 listening, an external client gets `SSH-2.0-OpenSSH` on **both**, and `127.0.0.1:22` - dnstt's
+forward target - answers again. Fix 145 was verified by `openssl s_client -connect :777`, which
+returns `SSH-2.0-dropbear` (while `:443` returns nothing SSH-related).

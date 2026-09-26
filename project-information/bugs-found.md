@@ -1118,3 +1118,69 @@ Verified live: a 3 MB POST to `/vmws` is back to `413`, a 3 MB POST to `/vmgr` i
 - `website/restore-ftp.sh` restarts `ssh`, the four `xray@*` units, `nginx` and `cron` but not
   `haproxy`, `dropbear` or the `quota-*` daemons; all of those run independently, so nothing is left
   in a broken state.
+
+## Third Pass - Quota Enforcement, SSH Ports and the Cards (September 26, 2026)
+
+### Quota, and the client `level` Xray needs to count it
+
+Found 141. **Per-account quota enforcement was dead on every transport: the panel's clients
+carried no `level`** (`full/add-*.sh`, `full/trial-*.sh`, `full/unlock-*.sh` and the `lite/` copies,
+56 scripts) - the quota daemons read the per-user traffic counters
+`user>>><email>>>traffic>>>uplink/downlink` with `xray api statsquery` and parse them with
+`grep value`. On the pinned Xray 25.3.6, a client written as
+`{"id": "..","alterid": 0,"email": ".."}` produces **no traffic counters at all** - only the
+`>>>online` counter, which does not need a level, so the feature looked alive. The extraction
+therefore returned nothing, the daemon `continue`d for every account, no `<user>_usage` file was ever
+accumulated, and an over-quota account was **never** deleted.
+
+- **Confirmed live, both directions, on the current install.** A vmess-ws account created by the
+  panel and driven with 1,000,000 bytes of real traffic had **no** `user>>>qfix>>>traffic>>>`
+  counters (`xray api statsquery` listed only the `api` and `blocked` counters) and `quota-ws` left
+  it alone. Adding `"level": 0` to that one client and restarting made both counters appear; the
+  daemon then accumulated `usage 1001442 > quota 300000` and deleted the account, removed its card
+  and quota files, wrote `quota-ws: deleted qfix ...` and restarted `xray@ws`.
+- **Repeated from a clean account with the fixed add script, no hand editing:** the account's client
+  literal carried `"level": 0`, the counters appeared, and watched every 15 s the daemon deleted it
+  by **t=30 s** (markers 1 -> 0, audit line written, counters cleared by the restart).
+- **The sibling transports are the same code** - `add-*-{http,split,grpc}` write the identical
+  client shape, and the fix carries each new account's `"level": 0` in `upgrade.json`, `split.json`
+  and `grpc.json` as well.
+- **Discrepancy to flag:** the fix-101 verification in `bugs-fixed.md` records
+  `/etc/xray/quota/ws/bugtest_usage = 46973216` and an accumulator that rose by 8,519,875 bytes for an
+  8,000,000-byte transfer - i.e. it observed the counters working. That was also on pinned Xray
+  25.3.6. Either that account was written with a level by the test harness rather than by the panel's
+  own add script, or the behaviour differs in a way this pass did not reproduce. The A/B above is
+  reproducible on the shipped code and is what the fix is based on; the earlier note should not be
+  read as proof that the panel's clients were being counted.
+
+Found 142. **The installer closed SSH port 22 while everything else assumes it stays open**
+(`installer/ssh.sh`) - the script appended `Port 3303` to `sshd_config`, and because sshd listens
+**only** on the ports named by active `Port` directives and Debian ships the default as a commented
+`#Port 22`, that *closed* 22. Whether it did depended on the base image (a netboot image leaves it
+commented, an older cloud image left it active), and the cloud image the panel's own reinstaller now
+fetches leaves it commented - confirmed on the fresh install (`#Port 22`, `Port 3303`, only 3303
+listening). Three things depend on 22 being open:
+- the SSH and trial cards (`OpenSSH : 22, 3303`) and the README's port table;
+- **dnstt's forward target**: `ExecStart=/etc/slowdns/dns-server ... 127.0.0.1:22`, so with nothing
+  on 22 the SlowDNS SSH-over-DNS tunnel accepts the DNS query and then fails to reach SSH - the
+  SlowDNS feature was broken, not just mislabelled;
+- the operator's own access: install over port 22 and the port they connected on is gone afterwards,
+  while the documentation still advertises it.
+
+Found 143. **The Stunnel5/HAProxy card advertised port 443** (`full/addssh.sh`, `full/trial-ssh.sh`) -
+443 is nginx (the Xray TLS listener); the HAProxy TLS frontend binds **777**, which is what actually
+answers with `SSH-2.0-dropbear` after its TLS handshake (verified with `openssl s_client`). A client
+following the card's `STUNNEL5 : 443` never reaches SSH. Inherited from V23, which had the same
+`bind *:777` / card-443 mismatch; the 1.20 reference dropped the line instead.
+
+### Observations from the third pass
+
+- **A `quota-*` deletion leaves the account's limit file behind.** After the over-quota deletion,
+  `/etc/xray/limit/ip/xray/ws/<user>` was still present (the card, quota and usage files are removed).
+  It is harmless - the add scripts overwrite the limit file for a reused name and `auto-delete-*`
+  does not read it - but it is inconsistent with `delete-*`, which removes it.
+- **Up to one 30-second interval of usage is lost if `xray@<transport>` restarts between a transfer
+  and the daemon's read**, because the counters are in memory and the usage file only accumulates
+  what a cycle has already read. It under-charges, never over-charges.
+- **`other/fnohp` is 32-bit i386** and the unused `other/fn.ohp` is 64-bit; `other/dinda` has CRLF
+  endings (harmless, it runs as `python3 -O <file>`).
