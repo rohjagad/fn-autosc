@@ -145,3 +145,34 @@ Response:
 **Rebuilding the upstream handler bundle is therefore complete and now shipped in `rohjagad/fn-autosc-api` for every endpoint this panel can
 serve**; the only endpoints that cannot work are `add-ss` and `add-socks`, because the panel - and
 both reference versions - have no Shadowsocks or Socks5 account type at all.
+
+### Follow-up - self-contained server and final acceptance (2026-09-26)
+
+The layer now ships its **own** server (`fn-autosc-api/server`) instead of fetching `core/server`
+from FN-API, which is reference-only; `menu-api` was fixed to fetch `server`, `lib.sh` and
+`handlers/` from `fn-autosc-api` itself (the earlier layout change had left it requesting
+`api/lib.sh`).
+
+`menu-api install` was re-run from a commit-pinned fetch (the `raw.githubusercontent.com` copy of the
+just-changed `menu-api` was stale for a few minutes - the installer is unaffected once the cache
+catches up, and `fn-autosc-api`'s README records the commit-pinned workaround). The service came up
+on our own server, **bound to `127.0.0.1:9000`**.
+
+Final acceptance, run from the `/dev/kvm` client against `https://<domain>/api/`:
+
+| Call | Result |
+| :-- | :-- |
+| `GET /ping` without a token | `401` |
+| `GET /ping` | success |
+| `POST /add-vmess {core:"ws"}` | success, 2 links |
+| `POST /add-vless {core:"grpc"}` | success, 1 link |
+| `GET /list-xray` | `count: 2` |
+| `GET /cek-xray` | success |
+| `POST /addssh` then `GET /list-ssh` | created and listed |
+| `POST /add-ss` | `{"status":"error"}` as designed |
+| `DELETE /delete-xray` for both accounts | `deleted_from: ["ws"]` and `["grpc"]` |
+| `DELETE /delete-ssh` | success |
+| `GET /list-xray` afterwards | `count: 0` |
+| `--path-as-is /../etc/passwd` | `404` - only a single path segment is accepted |
+
+The test accounts were removed and the token rotated afterwards.
