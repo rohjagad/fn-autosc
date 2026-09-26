@@ -1343,3 +1343,43 @@ above the captures) is taken before it reaches its service. That includes the pa
 - **Tightened after the first attempt:** the re-asserting timer kept the default
   `AccuracySec=1min`, which left the services captured for up to a minute after a `udp-request`
   restart; `AccuracySec=1s` brings the restoration to 15 s (measured).
+
+## Seventh Pass - The Lite Edition on a Fresh OS (September 26, 2026)
+
+The OS was reinstalled and **lite** installed from the repositories to exercise the edition that had
+only ever been read, not run. Two defects, one of them a failed service on every lite install.
+
+Found 147. **`dropbear.service` fails on every lite install** (`installer/lite.sh`) - `package.sh`
+installs the `dropbear` package and Debian enables and starts it on its default port 22, but the
+script that moves dropbear onto ports 109/111 is `installer/ssh.sh`, and **`lite.sh` never runs it**
+(it installs only package/xray/diamond/website, matching both references). sshd already owns 22, so
+dropbear cannot bind.
+- **Confirmed live on the fresh lite install:** `systemctl --failed` -> `dropbear.service loaded
+  failed`, and its journal `Failed listening on '22': Error listening: Address already in use` /
+  `Early exit: No listening ports available.` / `Start request repeated too quickly.`
+- **Inherited:** both reference `lite.sh` files are the same - package/xray/diamond/website, no
+  ssh.sh - so their lite editions ship a failing dropbear too.
+- Lite genuinely has no SSH tooling (no `addssh`, `delete-ssh`, `list-ssh`, `extend-ssh`, `pwd-ssh`,
+  `limit-ip-ssh`, `expire-ssh`, no `menu-ssh` option), so the service is not merely misconfigured,
+  it is unused.
+
+Found 148. **The README's "Variants - Full vs Lite" table over-states lite** (`README.md`) - it marks
+`SSH / Dropbear / SSH WebSocket` as `✅ | ✅`, but lite installs none of them, and (separately) still
+said `Node.js 20` after fix 147 moved the tree back to Node 16. The other rows match the lite
+installer's step list; the lite transport matrix was verified separately (below).
+
+### Verified on the lite install
+
+- **Transports (KVM client, real traffic):** 4/4 - vmess ws 200/1,000,000; vmess grpc 200/1,000,000
+  plus a **3 MB upload** 200 (fix 136's body-size cap holds in lite too); vless sandbox
+  splithttp 200/1,000,000; trojan httpupgrade 200/1,000,000.
+- **The API's lite behaviour (fix 123):** `add-vmess` succeeded, and the full-only endpoints returned
+  a clean `this panel edition does not ship '<tool>'` - `addssh`, `list-ssh`, `cek-ssh` (for
+  `cek-login-ssh`) and `add-noobz` (for `noobzvpns`) - instead of the shell error once reported as
+  success. `ping`, `list-xray`, `delete-xray` and the designed `add-ss` error all behaved.
+- **Crontab:** 20 non-comment lines with **no** `expire-ssh`/`limit-ip-ssh` lines (fix 95 holding on
+  a real lite install).
+- **Units:** nginx + all four `xray@*` + all four `quota-*` active, `xray -test` OK on all four
+  configs, `nginx -t` OK; the only failure was dropbear, above.
+- Lite does not install SlowDNS/UDP/Noobz/WireGuard/OpenVPN/OHP - by design, matching both
+  references' `lite.sh`; the README table already marks those rows `❌`.

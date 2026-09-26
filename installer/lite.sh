@@ -95,6 +95,12 @@ apt install vnstat -y
 wget --no-check-certificate ${hosting}/installer/package.sh >> /dev/null 2>&1
 chmod +x package.sh
 ./package.sh
+
+# Lite ships no SSH tooling, so installer/ssh.sh never runs - and that is the
+# script that moves dropbear off its default port 22. sshd already owns 22, so
+# dropbear failed on every lite install ("Failed listening on '22': Address
+# already in use", then systemd gave up). Disable the unused service.
+systemctl disable --now dropbear >/dev/null 2>&1 || true
 cd
 rm -f /root/package.sh
 

@@ -152,8 +152,8 @@ NoobzVPN, and UDP.
 
 | Component | Full | Lite |
 | :--- | :---: | :---: |
-| Base packages + Node.js 20 + vnStat | ✅ | ✅ |
-| SSH / Dropbear / SSH WebSocket | ✅ | ✅ |
+| Base packages + Node.js 16 + vnStat | ✅ | ✅ |
+| SSH / Dropbear / SSH WebSocket | ✅ | ❌ |
 | Xray (HTTP Upgrade, SplitHTTP, gRPC) | ✅ | ✅ |
 | Xray (WebSocket) | ✅ | ✅ |
 | Nginx + SSL certificates | ✅ | ✅ |

@@ -1333,3 +1333,13 @@ Verified live: with the guard ran by systemd, a fresh `menu-wg` client tunnelled
 and `1.1.1.1` at 0% loss, egress `202.155.17.126`), an OpenVPN UDP client brought up `tun0` and
 egressed through the VPS, and after `systemctl restart udp-request` broke the ordering the timer
 restored the bypasses in **15 s** (previously up to a minute).
+
+## Seventh Pass - Fixes 149-150 (September 26, 2026)
+
+| Fix | Found | Change |
+| :-- | :-- | :-- |
+| 149 | 147 | `installer/lite.sh` disables the dropbear service after `package.sh`: lite never runs `ssh.sh`, so dropbear stays on port 22, which sshd owns, and it failed on every install. Lite ships no SSH tooling, so the service is unused. |
+| 150 | 148 | The README's "Variants" table marks `SSH / Dropbear / SSH WebSocket` as `❌` for lite and says `Node.js 16`. |
+
+Verified live for fix 149: applying the same disable on the running lite host left
+`systemctl --failed` empty with sshd still listening on 22.
