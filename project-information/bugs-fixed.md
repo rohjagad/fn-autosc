@@ -1311,3 +1311,14 @@ what the fix is based on.
 
 The rest of fix 101 stands: adopting 1.20's `statsquery … | grep value` + `api stats -name … -reset`
 shape is correct, and is what makes the counters readable once they exist.
+
+## Fourth Pass - Fixes 146-147 (September 26, 2026)
+
+| Fix | Found | Change |
+| :-- | :-- | :-- |
+| 146 | 144 | `full/addssh.sh` and `full/trial-ssh.sh` print `OVPN TCP/UDP: 1194 / 2200` and `Config OVPN : http://${domain}/web/openvpn.zip`, matching 1.20 and the two servers the panel actually runs. `OVPN WS : 2086` is kept - it is accurate for the `dinda` design this tree (and V23) uses. `menu/full.zip` rebuilt. |
+| 147 | 145 | `installer/package.sh` installs Node **16** again (`setup_16.x`), matching both references, with a comment recording why: the bot's native dependencies do not build on Node 20 and `node-termios` has no newer release. |
+
+Verified for fix 146: the built card shows the new lines, and the URLs it names are the ones the
+panel serves (both 200). Verified for fix 147 by the A/B in Found 145 - the bot builds and starts on
+Node 16 and cannot on Node 20.

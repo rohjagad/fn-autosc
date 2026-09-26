@@ -158,8 +158,8 @@ Udp Request: 1-65535
 BadVpn/Udpgw : 7300
 ===================
 OVPN WS     : 2086
-OVPN TCP    : 1194
-Config OVPN : http://${domain}/web/tcp.ovpn
+OVPN TCP/UDP: 1194 / 2200
+Config OVPN : http://${domain}/web/openvpn.zip
 ===================
 EOF
 )

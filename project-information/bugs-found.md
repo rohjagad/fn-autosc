@@ -1200,3 +1200,59 @@ Reading both archives settles where these came from:
   The panel has always assumed 22 stays open; the fix makes it so.
 - **Found 130's `STUNNEL5` sibling (Found 143):** the 443 mismatch is V23's (which also binds 777);
   1.20 dropped the line entirely, and its card has no `STUNNEL5` row.
+
+## Fourth Pass - Reference-Driven (September 26, 2026)
+
+Both archives were re-read again, this time diffing our tree against them field by field (cards,
+nginx locations/directives, daemon logic, menus, Go tools, installer package lists) and checking each
+difference's provenance. Two defects surfaced that our tree carries and the references do not, in the
+"the reference is a better baseline" sense.
+
+Found 144. **The SSH and trial cards under-report OpenVPN** (`full/addssh.sh`, `full/trial-ssh.sh`) -
+they print `OVPN TCP : 1194` and `Config OVPN : .../tcp.ovpn`, while the panel installs and runs
+**two** OpenVPN servers and publishes a combined archive.
+- Both references' `vpn.sh` create the TCP 1194 *and* UDP 2200 servers; ours does too - confirmed
+  live: `openvpn-server@server-tcp-1194` and `openvpn-server@server-udp-2200` both `active`, and
+  `2200/udp` is listening.
+- Both create `/var/www/html/openvpn.zip` containing `client-tcp-1194.ovpn` and
+  `client-udp-2200.ovpn`; both `/web/tcp.ovpn` and `/web/openvpn.zip` return 200.
+- **1.20's card already says `OVPN TCP/UDP: 1194 / 2200` and points at `openvpn.zip`** (both in
+  `addssh.sh` and `trial-ssh.sh`); **V23's card has the same omission ours does.** Ours inherited
+  V23's line, so a client following the card never learns about the UDP server and is given only the
+  TCP profile.
+- The `NoneTLS` list difference in the same cards (`…, 2086, 2095` in 1.20 vs `…, 2095` here) is
+  **not** a defect: V23 and ours serve the OpenVPN-WebSocket with `dinda` on 2086 and nginx does not
+  bind it, while 1.20 dropped dinda and put 2086 back in nginx. Both are self-consistent.
+
+Found 145. **`menu-bot` cannot install its bot: the tree runs Node 20, the bot needs Node 16**
+(`installer/package.sh`) - commit `74b4c6b` ("... Node 16 EOL ...") changed
+`deb.nodesource.com/setup_16.x` to `setup_20.x`.
+- The bot `menu-bot` unpacks from `bot.zip` pins `node-pty ^0.9.0` and `node-termios 0.0.13` - native
+  addons from the Node 16 era.
+- **Confirmed live:** with the installed Node 20, `npm install` in the unpacked bot fails at
+  `node-pty` (`src/unix/pty.cc`, `NODE_MODULE(pty, init)`, `make ... Error 1`), `node_modules` is
+  left empty and `node server.js` dies on a missing module - so `menu-bot`'s install produces a
+  `bot.service` that cannot start.
+- **Confirmed live the other way:** with a portable Node 16.20.2, `npm install` reports
+  `added 29 packages`, both `node-pty` and `node-termios` build, and the bot starts ("Couldn't load
+  the configuration file, starting the wizard.").
+- **Both reference archives install Node 16** (`setup_16.x`) for exactly this reason, and
+  `setup_16.x` is still served (200). `node-termios` has no release newer than 0.0.13, so the bot
+  cannot be moved to Node 20 without patching the third-party bundle first.
+- The README advertises the Telegram bot (`menu-bot`) as a supported feature, so this is a broken
+  advertised feature, not a cosmetic one.
+
+### Where the source says our tree is right and a reference is wrong
+
+- **`apt install python` cannot succeed on Debian 12** - the `python` package does not exist
+  (`apt-cache policy python` -> Candidate: none). Both references' `package.sh` list `python` on the
+  same `apt install` line as `jq`, `certbot`, `fail2ban` and the rest, so that whole line aborts and
+  none of those packages install. Ours says `python3`, which is why our fresh installs populate.
+- **The SSH limit path:** both references clean `/etc/funny/limit/ssh/ip/` in `xp.sh`, a directory
+  nothing creates, while writing and reading `/etc/xray/limit/ip/ssh/`. Ours uses that one path
+  everywhere (`addssh`, `trial-ssh`, `limit-ip-ssh`, `cek-login-ssh`, `delete-ssh`, `limit-ip.go`,
+  `xp`), so an expired SSH account's limit file is actually removed.
+- **1.20 regressed parts of the daemons that V23 had right:** its `quota-*` no longer restarts the
+  Xray instance after deleting an over-quota account (V23 restarted `v2ray`), its `xp` removes quota
+  files with the `$user*` glob that a later audit reverted here, and its `auto-delete-*` removes only
+  the quota file and leaves `<user>_usage` behind. Ours keeps the exact-pair paths and the restart.

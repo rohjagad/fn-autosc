@@ -80,7 +80,16 @@ apt install -y screen curl jq bzip2 gzip coreutils rsyslog iftop \
  socat cron bash-completion ntpdate xz-utils  apt-transport-https \
  gnupg2 dnsutils lsb-release chrony
 
-curl -sSL https://deb.nodesource.com/setup_20.x | bash - 
+# Node.js is installed for exactly one consumer: the Telegram terminal bot that
+# `menu-bot` unpacks from bot.zip. That bot pins node-pty ^0.9.0 and
+# node-termios 0.0.13, two native addons from the Node 16 era that do **not**
+# build against Node 20 (verified: npm install fails at node-pty, node_modules
+# is left empty and the bot cannot start), and node-termios has no newer
+# release. Both reference archives install Node 16 here for the same reason.
+# Commit 74b4c6b raised this to setup_20.x to get off an EOL release, which
+# silently broke the bot; keep 16 until bot.zip's dependencies are updated
+# first.
+curl -sSL https://deb.nodesource.com/setup_16.x | bash - 
  apt-get install nodejs -y
 
 NET=$(ip -4 route show default 2>/dev/null | awk '{print $5}')
