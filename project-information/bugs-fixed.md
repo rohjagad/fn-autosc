@@ -1090,3 +1090,13 @@ The VPS was reinstalled from scratch (upstream `bin456789/reinstall` `debian 12`
 ### Additional fix - the HTTPUpgrade trojan template account was dead (fix 116)
 
 Found 114 was discovered during the verification above. `json/upgrade.json`'s trojan client now uses `password` like the other three templates, so the shipped account is well-formed and the installer's randomisation lands in the right field. Verified on the reinstalled host: the templated (randomised) HTTPUpgrade-trojan credential now authenticates (`200`, 300,000 bytes), and the positive sweep is **12/12**.
+
+### Second fresh-reinstall verification (September 26, 2026) - the whole cycle, end to end
+
+After fix 116 was committed the entire cycle was run again from scratch, so this install pulled the final code (including the corrected `json/upgrade.json`). Fresh Debian 12 via `bin456789/reinstall`, then `install.sh` (`full`, `autosc.rohcuan.dpdns.org`, `dual`, nameserver `slowdns.rohcuan.dpdns.org`) to `INSTALL SUCCESS`; SSH moved to 3303.
+
+- **Templates:** every committed default (`rerechan-store`, `cfbbaafc-…`, `019e0bf3-…`, `af7d5cf8-…`, `diy2020`, `nonescript-fn-project`) occurs **0** times in `/etc/xray/json/*.json`; the HTTPUpgrade trojan client now declares `password`; all four configs report `Configuration OK.`, every service is `active`, `menu` is present and `/usr/bin` has 0 non-executable files.
+- **Negative (external client VM, 157.15.139.236):** probing through nginx with **only the committed default values** gives **0/11 authenticated** across ws/gRPC/SplitHTTP/HTTPUpgrade.
+- **Positive:** the same paths with the **new per-install credentials** give **12/12 authenticated** (300,000 bytes each), including the previously dead HTTPUpgrade trojan.
+
+That closes the open-bug sweep: the shipped installer no longer exposes any usable default credential, deletions are logged, the change-id card links follow the UUID, `cek-xray-ws` exits 0 when idle, and `quota-ws` no longer spams the journal.
