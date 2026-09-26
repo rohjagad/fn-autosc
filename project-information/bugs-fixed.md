@@ -1123,3 +1123,10 @@ Requested change: each protocol/transport pair now has exactly one path and the 
 Changed: the four `json/*.json` templates, the three `config/*.conf` nginx configs, every `full/` and `lite/` `add-*`/`trial-*` script (link generation and the account cards), `menu/full.zip` and `menu/lite.zip`, and the README transport table. Because `/vmws` now serves both the TLS and the NoneTLS form, the redundant `:95`/`:96`/`:977` VMess-WS inbounds and their `/worryfree`/`/kuota-habis` locations were removed (see the observation in bugs-found.md); `location /` (SSH-over-WS to `wsEpro` on `:2080`) is unchanged. The gRPC menu's *command* names (`add-vmess-grpc`, ...) deliberately still contain the old string.
 
 Verified live after a clean reinstall of the OS and the panel (details below).
+
+### Live verification (clean reinstall)
+
+Fresh Debian 12 via `bin456789/reinstall`, then the panel from commit `4797f92` to `INSTALL SUCCESS`. On that install `nginx -t` passes, all four Xray configs report `Configuration OK.`, every inbound carries its new path (`/vlws`, `/vmws`, `/trws`; `vlgr`/`vmgr`/`trgr`; `/vmspl`/`/vlspl`/`/trspl`; `/vmhu`/`/vlhu`/`/trhu`), no committed default credential appears anywhere in `/etc/xray/json`, and no old path appears in the live nginx config.
+
+- **Positive - 21/21.** One account was created for each of the twelve protocol/transport combinations using the panel's own `add-*` script, and the card it printed was replayed from the external client VM (source IP 157.15.139.236). Every TLS link and every NoneTLS link (all transports except gRPC) returned `200` with 300,000 bytes - WebSocket, HTTPUpgrade and SplitHTTP now share one path between their TLS and NoneTLS forms exactly as intended.
+- **Negative - 12/12.** The same credentials rebuilt against the old paths (`/vmess`, `/vless`, `/trojanws`, `/rere`, `/imam`, `/luqito`, `/splitvm`, `/splitvl`, `/splittr`, `vmess-grpc`, `vless-grpc`, `trojan-grpc`) all failed (`http=000`), confirming the old paths were removed rather than kept as aliases.
