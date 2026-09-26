@@ -88,18 +88,19 @@ affect it: the handlers call the panel's scripts by their unchanged names (`add-
 
 The handler layer and an installer now live in a dedicated repository,
 [`rohjagad/fn-autosc-api`](https://github.com/rohjagad/fn-autosc-api), so the API no longer depends
-on the dead upstream bundle and `rohjagad/FN-API` stays untouched (it is still read, read-only, for
-`core/server`):
+on the dead upstream bundle - it is now fully self-contained, and `rohjagad/FN-API` is reference-only:
 
 | Path | What it does |
 | :-- | :-- |
-| `menu-api` | install / uninstall / status / regenerate-token, plus an interactive menu. Fetches the server from the FN-API repo, patches it to bind `127.0.0.1`, writes `/etc/xray/.key`, installs the handlers and creates `api.service` |
+| `server` | the API server itself (Python 3, stdlib only): binds `127.0.0.1:9000`, authenticates against `/etc/xray/.key`, runs `/usr/bin/rere/<endpoint>` with the body on stdin, returns its stdout, logs to `/etc/xray/api.log` |
+| `menu-api` | install / uninstall / status / regenerate-token, plus an interactive menu. Installs `server`, `lib.sh` and the handlers, writes `/etc/xray/.key` and creates `api.service` |
 | `lib.sh` | shared helpers, installed to `/usr/local/lib/fn-api/lib.sh` - reads a JSON body on stdin, writes JSON on stdout |
 | `handlers/` | one executable per endpoint, each wrapping the panel's own scripts |
 
-`menu-api install` fetches `core/server` from `rohjagad/FN-API`, applies
-`s/('', port)/('127.0.0.1', port)/` so the API is reachable only through nginx, installs `lib.sh` and the handlers,
-and starts `api.service`.
+`menu-api install` fetches `server`, `lib.sh` and the handlers **from `fn-autosc-api` itself** and
+starts `api.service`. Nothing is fetched from `rohjagad/FN-API`, which is kept only as a reference
+for the original endpoint list. The server binds `127.0.0.1` by default so the API is reachable only
+through nginx's `/api/` location.
 
 ```
 wget -O /usr/bin/menu-api https://raw.githubusercontent.com/rohjagad/fn-autosc-api/main/menu-api
