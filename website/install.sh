@@ -35,11 +35,21 @@ if ! sudo grep -q "^www-data ALL=(ALL) NOPASSWD: /usr/bin/restore-ftp" /etc/sudo
   echo "www-data ALL=(ALL) NOPASSWD: /usr/bin/restore-ftp" | sudo EDITOR='tee -a' visudo
 fi
 
+# The restore endpoint authenticates with a dedicated key so that the web
+# server user can read it without exposing the 0600 API token in /etc/xray/.key.
+# Only root and www-data can read it.
+mkdir -p /etc/funny
+[ -s /etc/funny/.restore.key ] || head -c 32 /dev/urandom | base64 | tr -d '/+=\n' | head -c 40 > /etc/funny/.restore.key
+chown root:www-data /etc/funny/.restore.key 2>/dev/null || true
+chmod 640 /etc/funny/.restore.key
+
 # Mengaktifkan semuanya
 a2dissite 000-default
 a2ensite upload
 systemctl daemon-reload
 systemctl restart apache2
+
+echo "  restore page (http://<ip>:855) requires the key in /etc/funny/.restore.key (read it as root)"
 
 # Menghapus File Installasi
 rm -f /root/website.sh

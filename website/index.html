@@ -10,6 +10,11 @@
     <div class="container">
         <h1>Restore Database VPS</h1>
         <form id="uploadForm" enctype="multipart/form-data">
+            <label for="token" class="file-label">
+                <span class="file-icon">🔑</span> API Token
+            </label>
+            <input type="password" id="token" name="token" placeholder="The restore key from /etc/funny/.restore.key"
+                   required autocomplete="current-password" class="file-input">
             <label for="file" class="file-label">
                 <span class="file-icon">📁</span> Upload your File Backup
             </label>

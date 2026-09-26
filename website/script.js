@@ -5,6 +5,12 @@ form.addEventListener('submit', async (event) => {
     event.preventDefault();
     const fileInput = document.getElementById('file');
     const file = fileInput.files[0];
+    const token = document.getElementById('token').value.trim();
+
+    if (!token) {
+        showMessage('Error: Enter the restore key from /etc/funny/.restore.key.', 'error');
+        return;
+    }
 
     if (!file || file.name !== 'backup.zip') {
         showMessage('Error: Please upload a file named "backup.zip".', 'error');
@@ -12,6 +18,7 @@ form.addEventListener('submit', async (event) => {
     }
 
     const formData = new FormData();
+    formData.append('token', token);
     formData.append('backup', file);
 
     try {
