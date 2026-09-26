@@ -83,3 +83,56 @@ affect it: the handlers call the panel's scripts by their unchanged names (`add-
 4. run it as a service, e.g. `ExecStart=/usr/bin/python3 /usr/bin/api-server`, ideally bound to
    loopback
 5. it is then reachable as `https://<domain>/api/<path>`
+
+## Rebuilt here: the `api/` layer
+
+The handler layer and an installer are now part of this repository, so the API no longer
+depends on the dead upstream bundle:
+
+| Path | What it does |
+| :-- | :-- |
+| `api/menu-api` | install / uninstall / status / regenerate-token, plus an interactive menu. Fetches the server from the FN-API repo, patches it to bind `127.0.0.1`, writes `/etc/xray/.key`, installs the handlers and creates `api.service` |
+| `api/lib.sh` | shared helpers, installed to `/usr/local/lib/fn-api/lib.sh` - reads a JSON body on stdin, writes JSON on stdout |
+| `api/handlers/` | one executable per endpoint, each wrapping the panel's own scripts |
+
+`menu-api install` fetches `core/server` from `rohjagad/FN-API`, applies
+`s/('', port)/('127.0.0.1', port)/` so the API is reachable only through nginx, installs
+`api/lib.sh` and the handlers, and starts `api.service`.
+
+### Endpoint contract
+
+Request body is a JSON object on stdin; the response is a JSON object on stdout. `jq` is used
+throughout (already installed by the panel).
+
+| Endpoint | Method | Body fields | Backend |
+| :-- | :-- | :-- | :-- |
+| `ping` | any | - | health check |
+| `add-vmess` / `add-vless` / `add-trojan` | POST | `username`, `core` (ws/http/split/grpc, default ws), `expired` (days), `limit-ip`, `quota` | `add-<proto>-<core>` |
+| `addssh` | POST | `username`, `password`, `expired`, `limit-ip` | `addssh` |
+| `add-noobz` | POST | `username`, `password`, `expired` | `noobzvpns` |
+| `list-xray` | GET | - | the four `json/*.json` (username, expiry, transport) |
+| `list-ssh` / `cek-ssh` | GET | - | `list-ssh` / `cek-login-ssh` (text body) |
+| `cek-xray` | GET | - | the four `cek-xray-*` (text body) |
+| `list-noobz` | GET | - | `noobzvpns print-all` (text body) |
+| `delete-xray` | DELETE | `username` | `delete-ws/http/split/grpc` for every transport that holds it |
+| `delete-ssh` | DELETE | `username` | `delete-ssh` |
+| `delete-noobz` | DELETE | `username` | `noobzvpns remove` |
+| `add-ss`, `add-socks` | - | - | `501`-style JSON: no Shadowsocks/Socks5 backend exists (nor in either reference) |
+
+Example:
+
+```
+curl -sk -H 'Authorization: <token>' -H 'Content-Type: application/json' \
+     -d '{"username":"alice","core":"ws","expired":30,"limit-ip":2,"quota":5}' \
+     https://<domain>/api/add-vmess
+```
+
+Response:
+
+```json
+{"status":"success","username":"alice","protocol":"vmess","core":"ws","expired":"26-10-26","links":["vmess://..."]}
+```
+
+**Rebuilding the upstream handler bundle is therefore complete for every endpoint this panel can
+serve**; the only endpoints that cannot work are `add-ss` and `add-socks`, because the panel - and
+both reference versions - have no Shadowsocks or Socks5 account type at all.
