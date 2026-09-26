@@ -891,3 +891,157 @@ The three points from the reference audit were reviewed and settled:
 ### Correction to the audit follow-up
 
 Only `full/cek-xray-ws.go` ever existed - `lite/` never carried a Go `cek-xray-ws` (its Go sources are `cek-xray-grpc/http/split.go` and the other tools). The observation's heading "(and `lite/`)" and the follow-up's "`full/cek-xray-ws.go` and `lite/cek-xray-ws.go` were deleted" were therefore both inaccurate, and the first removal attempt listed a non-existent `lite/cek-xray-ws.go`, so `git rm` aborted without deleting anything. `full/cek-xray-ws.go` is now genuinely removed; the shipped `cek-xray-ws` is unchanged in both editions - the shell script `full/cek-xray-ws.sh` / `lite/cek-xray-ws.sh`, which the archives still carry.
+
+## Four-Repository Scan - all four repositories (September 26, 2026)
+
+All four of the project's repositories were scanned: `fn-autosc` (the panel), `fn-autosc-auth`
+(the rental authorization list), `fn-autosc-miscellaneous` (the non-forkable assets) and
+`fn-autosc-api` (the restored HTTP API). Every candidate was verified live on the test VPS with the
+local `/dev/kvm` guest as a real external client, or proven from the source with a concrete trigger.
+The VPS was then reinstalled to Debian 12 with the upstream reinstaller and the panel reinstalled
+from the repositories, and the fixes were re-verified on that clean install.
+
+### `fn-autosc-api`
+
+Found 119. **A missing required field did not stop a handler - the error JSON became the value**
+(`fn-autosc-api/lib.sh`, every handler) - `need` was always called as `user="$(need username)"`, so
+its `fail` ran inside a command-substitution subshell: the `exit` ended only the subshell, the
+assignment kept the error text, and the handler carried on and ran the panel script with
+`{"status":"error","message":"missing required field: username"}` as the username. The caller saw a
+nested, garbled error (`the panel did not create '{"status":"error",...}'`). Confirmed live against
+`/add-vmess` and `/addssh` with an empty body.
+
+Found 120. **`core` accepts `http` but the API reported the panel's internal name `upgrade`**
+(`fn-autosc-api/handlers/list-xray`, `delete-xray`) - `add-*` takes `core=http`, but `list-xray`
+returned `transport:"upgrade"` and `delete-xray` `deleted_from:["upgrade"]`, and `core=upgrade` is
+rejected. A caller could not feed a listed transport back into add/delete/renew. Confirmed live.
+
+Found 121. **The API reported success without checking, and returned shell errors as success**
+(`fn-autosc-api/handlers/*`) - `delete-xray` and `delete-noobz` reported a successful removal
+without verifying it (unlike `add-xray`/`addssh`/`delete-ssh`); `delete-ssh` reported success for a
+username that never existed; and the handlers that call SSH/Noobz tools ran them unconditionally, so
+on the lite edition (which ships none of them) `list-ssh`/`cek-ssh` returned
+`{"status":"success","text":"bash: /usr/bin/list-ssh: No such file or directory"}`. Confirmed by
+inspection and reproduced on the VPS with the tool path removed.
+
+Found 122. **The reference's `renew-ssh`, `renew-xray` and `password-ssh` endpoints were missing**
+(`fn-autosc-api/handlers/`) - the FN-API reference README documents them and the panel ships the
+tools behind them (`extend-ssh`, `extend-{ws,http,split,grpc}`, `pwd-ssh`), but the restored layer
+404'd them. Confirmed against the reference README and the panel tree.
+
+Found 123. **The server's GET handlers inherited the server's stdin** (`fn-autosc-api/server`) -
+`subprocess.run(input=None)` leaves the child's stdin as the server's, so a GET handler's
+`body=$(cat)` reads the server's stdin instead of seeing EOF. Under systemd that is `/dev/null` so it
+works, but a manually run server blocks. The reference's 401 `WWW-Authenticate` and OPTIONS `Allow`
+headers were also missing.
+
+Found 124. **`menu-api install` reported a partial install as success** (`fn-autosc-api/menu-api`) -
+the handler fetch loop used `curl ... && chmod`, so a handler that 404'd was silently skipped and the
+install still printed success. This is the state the raw-CDN staleness produced during the previous
+session. Confirmed by inspection.
+
+### `fn-autosc` panel
+
+Found 125. **`addssh` leaked the Telegram API response into the account card** (`full/addssh.sh`) -
+`send_telegram_notification`'s `curl` was not silenced, unlike every sibling, so the JSON Telegram
+returns (or the 404 body when no bot is configured, as on a fresh install) was printed into the
+card - and therefore into the `text` field of `/api/addssh`. Observed live.
+
+Found 126. **The WireGuard expiry cleanup could never fire** (`full/xp.sh`, `lite/xp.sh`) - the block
+guards with `[[ "$exp" =~ ^[0-9]{2}-[0-9]{2}-[0-9]{2}$ ]]`, but `menu-wg.sh` writes `%Y-%m-%d`. The
+regex can never match a 4-digit year, so expired WireGuard peers, their client configs and their
+`.wireguard` entries were never removed. Regression introduced by fix 110's guard, which used the
+Xray cards' `%y-%m-%d` shape.
+
+Found 127. **The SSH IP limiter iterated a scalar as an array, so it was dead** (`full/limit-ip-ssh.sh`) -
+`username=$(while ... done < /etc/passwd)` is a newline-separated scalar, but the loop was
+`for user in "${username[@]}"`, which yields one word containing every username. No account ever
+matched the " - user - " login count and nothing was ever locked. Regression introduced by fix 90's
+quoting change; that fix's verification used an array literal, not the scalar the script builds.
+
+Found 128. **The gRPC, HTTPUpgrade and SplitHTTP "Check Online Users" tools queried the WebSocket
+stats API** (`full/cek-xray-{grpc,http,split}.go`, both editions) - all three passed
+`--server=127.0.0.1:10080`, the WS port, instead of their own 10081/10082/10083 (which the shell
+`limit-ip-*` siblings use), so menu option 7 printed no accounts for three of the four transports.
+
+Found 129. **A WS routing change or legacy restore silently re-broke WS IP limiting**
+(`full/routing-ws.sh` four blocks, `full/bmenu.sh`, both editions) - the regenerated `ws.json`
+`policy.levels."0"` block omitted `statsUserOnline`, the flag Found 98 / fix 100 restored. Every
+sibling routing script sets it; the WS one did not, so after a routing change the online counter was
+never created again and `limit-ip-ws` stopped enforcing.
+
+Found 130. **`cert2` truncated the live certificate when certbot failed, and `fn` left HAProxy on the
+old one** (`full/dm-menu.sh`, `lite/dm-menu.sh`) - `copy_certificates` ran `cat /etc/letsencrypt/... >
+/etc/xray/xray.crt`, and the shell creates/truncates the destination before reading the source, so a
+failed certbot (rate limit, HTTP-01 failure) left 0-byte cert/key files and nginx failed to start.
+`fn()` replaced the certificate but never rebuilt `/etc/haproxy/funny.pem`.
+
+Found 131. **Three smaller panel defects** - `xl2tp.sh` overwrote the card's `domain=$(cat
+/etc/xray/domain)` with `domain=$IP2`, a variable that exists nowhere, so the L2TP card printed a
+blank Domain; `menu-system.sh`'s rocky reinstall used `clear :` instead of `clear ;`, feeding `:` to
+`clear`; and the HTTPUpgrade and SplitHTTP viewers had their titles swapped.
+
+### `fn-autosc` installer and config
+
+Found 132. **The SlowDNS fixnet timer inserted an `INPUT` ACCEPT rule every 15 seconds, forever**
+(`installer/slowdns.sh`) - the nat redirect is delete-then-insert, but the companion
+`iptables -I INPUT -p udp --dport 5300 -j ACCEPT` had no delete, and the timer runs it every 15s.
+The test host held **904** duplicate rules when the scan started (903 of 903 INPUT rules). Regression
+introduced by fix 97's timer; the sibling `udp-request` guard gets this right.
+
+Found 133. **`/vlspl` and `/trspl` never received the SplitHTTP timeouts** (`config/4.conf`,
+`6.conf`, `dual.conf`) - `/vmspl` carries `proxy_read_timeout/send_timeout/connect_timeout/
+client_body_timeout 300s`, the other two only the buffering directives, so the http-level
+`client_body_timeout 12;` still governed the VLESS/Trojan SplitHTTP request body. Introduced by the
+canonical path rename, which added the two locations; fix 105 had scoped itself to `/splitvm`.
+
+Found 134. **No `client_max_body_size`, so every gRPC upload above 1 MB was rejected with 413**
+(`config/4.conf`, `6.conf`, `dual.conf`) - nginx's default 1m applies to a gRPC stream's single
+request body. Confirmed live: a 3 MB POST to `/vmgr` returned 413 and a 4 KB one 200.
+
+Found 135. **Three public-IP lookups omitted `-4`** (`installer/vpn.sh`, `installer/full.sh`,
+`installer/wg.sh`) - on this dual-stack host `wget -qO- icanhazip.com` returns an IPv6 literal
+(confirmed: `2001:df0:27b::1:50ef`), which malformed the OpenVPN profile's `remote`, the squid ACL
+and the WireGuard `Endpoint`. The project fixed this class in bug 4 and missed these three.
+
+Found 136. **A failed permission download was reported as an expired licence** (`install.sh` and
+twelve sub-installers) - `PERMISSION_DATA=$(curl -s "$URL" || { echo "Failed..."; exit 1; })` put the
+`exit` inside the subshell, so the assignment kept the error text and the gate went on to print
+"Your IP doesn't have on database". Confirmed live.
+
+Found 137. **`set-br.sh` never removed its clone** (`installer/set-br.sh`) - `rm -rf wondershaper` ran
+from inside `/root/wondershaper`, so the tree survived and a re-install hit an existing directory.
+
+### `fn-autosc` website
+
+Found 138. **The web-restore endpoint was unauthenticated root code execution** (`website/upload.php`,
+`website/install.sh`) - `upload.php` accepted a `.zip` and ran `sudo /usr/bin/restore-ftp`, which
+unpacks the archive over `/etc/passwd`, `/etc/shadow`, `/etc/group`, `/etc/crontab`, `/etc/xray`,
+`/etc/funny` and more, with no authentication of any kind. The apache vhost serves it on
+`0.0.0.0:855` and the installer enables it on every install, so anyone who could reach that port
+could overwrite `/etc/shadow` and take over the host. Confirmed live from the KVM client: port 855
+reachable, the form served with no credential field, and a POST processed through to the file-type
+check.
+
+### Observations from this scan
+
+- **`fn-autosc-auth` carries no defect.** The list is data: the only accuracy note is that the first
+  entry (`vm-test-debian12 157.15.139.236 2026-09-16`) has expired, which matters only if the panel
+  itself is run from that test guest.
+- **The authorization gate fails closed only because of its comment header.** With `LOCAL_IP` empty
+  (ifconfig.me unreachable) `grep "$LOCAL_IP"` matches every `###` line; the first is the
+  `# Format: ### ...` comment, whose fourth field is `<rental-label>` and does not parse as a date, so
+  `REMAINING_DAYS` is negative and the gate blocks. Verified live against the real `izin.txt`. If the
+  comment header is ever removed an empty `LOCAL_IP` would authorize the first entry - `install.sh`
+  guards this case, the twelve sub-installers and the 180 panel scripts do not.
+- **`calculate_remaining_days`\'s invalid-date branch is dead code** in every copy: `local
+  expired_date=$(date ...)` makes `$?` the status of `local`, not of `date`. The caller's
+  `REMAINING_DAYS < 0` check still blocks, so behaviour is unchanged.
+- **`unlock-ws` has no confirmation prompt while its three siblings do** - this matches **both**
+  reference archives exactly (V23 and 1.20), so it is inherited, not introduced; recorded rather than
+  changed.
+- **`fn-autosc-miscellaneous` assets are valid** - `acme.sh` parses, and the `cloudflared` deb, the
+  `go`, `libreswan` and `vnstat` tarballs are intact. `rclone.conf` and `rclone-install.sh` are dead
+  after the Google Drive backup removal (decision 11) but harmless.
+- **`full/restore-ftp.sh` is dead**: the zip installs it as `/usr/bin/restore-ftp`, then
+  `website/install.sh` overwrites it with the website copy, which is the one that runs.

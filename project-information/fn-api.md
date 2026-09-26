@@ -163,11 +163,25 @@ non-zero exit is reserved for a genuine failure and surfaces as HTTP `500`.
 | `delete-xray` | DELETE | `username` | `delete-ws`/`-http`/`-split`/`-grpc` for every transport that holds it | `status`, `username`, `deleted_from[]` |
 | `delete-ssh` | DELETE | `username` | `delete-ssh` | `status`, `message` |
 | `delete-noobz` | DELETE | `username` | `noobzvpns remove` | `status`, `message` |
+| `renew-xray` | PUT/POST | `username`, `days`, `core` (default `ws`) | `extend-<core>` (keeps the account's usage) | `status`, `username`, `core`, `previous_expired`, `expired` |
+| `renew-ssh` | PUT/POST | `username`, `days` | `extend-ssh` | `status`, `username`, `previous_expired`, `expired` |
+| `password-ssh` | PUT/POST | `username`, `password` | `pwd-ssh` (also rewrites the account card) | `status`, `message` |
 | `add-ss`, `add-socks` | any | — | — | `{"status":"error","message":"unsupported endpoint …"}` |
 
 `add-vmess` / `add-vless` / `add-trojan` are three tiny wrappers over one `add-xray` handler; the
 protocol comes from the handler name and `core` selects the transport, so `{core:"grpc"}` builds a
 `add-vmess-grpc` account and `{core:"http"}` (HTTPUpgrade) one in `upgrade.json`.
+
+The transport is named the same everywhere: `core` accepts `ws`, `http`, `split` or `grpc`, and
+`list-xray` / `delete-xray` / `renew-xray` report it back under those names. The panel's internal name
+for the HTTPUpgrade config, `upgrade`, is not exposed.
+
+Every mutating handler **verifies** the panel did the work and answers `{"status":"error",...}` when
+it did not, so a `success` means the change is in the config; a handler whose panel tool is absent
+(the lite edition ships no SSH tooling and no NoobzVPN) says
+`this panel edition does not ship '<tool>'` instead of returning the shell's error text as success.
+The username is validated before the panel script runs, and when the panel itself refuses, its own
+explanation is appended to the error.
 
 **Example**
 
@@ -272,9 +286,18 @@ services active, `Configuration OK.`).
 
 ## 10. Coverage and limitations
 
-Every endpoint the panel can serve is implemented. The only ones that cannot work are **`add-ss`** and
-**`add-socks`**: the panel — and both reference versions — have no Shadowsocks or Socks5 account type
-at all, so those endpoints return a clear error rather than pretending.
+Every endpoint the panel can serve is implemented - including the reference's `renew-ssh`,
+`renew-xray` and `password-ssh`, which the restored layer initially missed. The only endpoints that
+cannot work are **`add-ss`** and **`add-socks`**: the panel - and both reference versions - have no
+Shadowsocks or Socks5 account type at all, so those return a clear error rather than pretending.
+
+Two limitations are the panel's own, and the endpoints report them rather than hiding them:
+
+- `renew-ssh` and `password-ssh` drive tools the lite edition does not ship; on lite they answer
+  `this panel edition does not ship 'extend-ssh'`.
+- `password-ssh` uses the panel's `pwd-ssh`, which reads the new password with Go's `Scanln` and so
+  stops at the first space; a password containing whitespace is rejected instead of silently
+  truncated.
 
 The panel's account types and the API surface they map to: SSH/OpenVPN (`addssh`, `list-ssh`,
 `cek-ssh`, `delete-ssh`), Xray VMess/VLESS/Trojan over WebSocket, HTTPUpgrade, SplitHTTP and gRPC
@@ -322,3 +345,28 @@ The panel's account types and the API surface they map to: SSH/OpenVPN (`addssh`
   reporting.
 - Only endpoints the panel can actually serve are implemented; `add-ss` / `add-socks` return an
   explicit "no backend" error instead of failing obscurely.
+
+---
+
+## 14. Revision - Four-Repository Scan (September 26, 2026)
+
+The whole layer was re-audited against the panel and the reference README, and the defects found are
+recorded as Found 119-126 / fixes 121-126 in `bugs-found.md` and `bugs-fixed.md`. In summary:
+
+- `need` was called as `user="$(need username)"`, so its `fail` ran in a subshell and the handler
+  continued with the error JSON as the username; replaced by `require <field> <var>`, which assigns
+  in the caller's shell.
+- `list-xray`/`delete-xray` reported the internal name `upgrade` where `core` accepts `http`.
+- `delete-xray`/`delete-noobz` did not verify the removal; handlers whose panel tool is absent
+  reported the shell error as success; `delete-ssh` reported success for a name that never existed.
+- The reference's `renew-ssh`, `renew-xray` and `password-ssh` were missing; added, each verifying
+  the expiry or the shadow hash changed.
+- The server passed `None` as stdin, so a GET handler inherited the server's stdin; and the
+  reference's `WWW-Authenticate` and `Allow` headers were missing. Both restored.
+- `menu-api install` now aborts when the server, `lib.sh` or a handler fails to fetch, instead of
+  reporting a partial install as success.
+
+The whole layer was then re-verified on a **freshly reinstalled Debian 12 host** from the pushed
+repositories, and end-to-end from the KVM client: 8/8 transport links carried real traffic, the two
+gRPC accounts also uploaded 3 MB (which needed the panel's `client_max_body_size` fix), and every new
+endpoint behaved. The token and the web-restore key were rotated afterwards.

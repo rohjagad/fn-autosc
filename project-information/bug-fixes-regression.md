@@ -179,3 +179,43 @@ Both reference archives were verified (MD5 matches) and diffed against our tree 
 - **Our lifecycle fixes are less destructive than upstream, not more.** New 1.20's `xp.sh` carries nine range deletes of the form `/^### $user $exp/,/^},{/d` (which never match their end anchor and truncate the file) and no unparseable-expiry guard; ours has zero range deletes and six guards.
 - **Two deliberate divergences from both references**, recorded in the observation in bugs-found.md: the `:977` catch-all backend/inbound is gone, and `quota-*` now removes the account card and says "deleted" where upstream kept the card and said "has been locked".
 - **One piece of dead code left by the migration:** `full/cek-xray-ws.go` / `lite/cek-xray-ws.go` are never built or packaged.
+
+## 25. Fixes From Earlier Cycles Regressed Themselves, and the References Say So (September 26, 2026)
+
+The four-repository scan's most valuable result is not the new defects but that **five of them were
+introduced by earlier fixes in this same audit**, each in a place the fix did not reach. All five
+were checked against both reference archives before being changed.
+
+- **WireGuard expiry (Found 126) - regression from fix 110.** Fix 110 added a date guard to every
+  `xp.sh` block. The Xray cards carry `%y-%m-%d`, so the guard was written as
+  `^[0-9]{2}-[0-9]{2}-[0-9]{2}$`; `menu-wg.sh` writes `%Y-%m-%d`. The guard therefore disabled the
+  WireGuard cleanup entirely. The correctness test is the writer, not the siblings.
+- **SSH IP limiter (Found 127) - regression from fix 90.** Fix 90 quoted `for user in
+  ${username[@]}` as `"${username[@]}"`. The array syntax is only meaningful when `username` is an
+  array; the script assigns it from a command substitution, so it is a scalar and the quoted form
+  iterates once with the whole blob. **The verification in fix 90 used an array literal
+  (`username=("a b")`), not the scalar the script actually builds** - a verification that tested the
+  fix rather than the code.
+- **SlowDNS fixnet timer (Found 132) - regression from fix 97.** Fix 97 added a 15-second timer to
+  re-assert the forwarded UDP 53 redirect. Its nat rule is delete-then-insert; the companion `INPUT`
+  accept it also performs was a bare insert, so the chain grew by one rule every 15 seconds (904 at
+  the time of the scan). The sibling `udp-request` guard, which fix 97 cites as its model, does the
+  delete first.
+- **SplitHTTP timeouts (Found 133) - regression from the canonical path rename.** Fix 105 gave
+  `/splitvm` the long timeouts and scoped itself explicitly to that location. The rename then created
+  `/vlspl` and `/trspl` by moving the other two locations and did not carry the directives with them,
+  so the two transports the fix was about were still broken over TLS.
+- **WS online counter (Found 129) - fix 100 was not applied where it also mattered.** Fix 100 restored
+  `statsUserOnline` to `json/ws.json`. `routing-ws.sh` and `bmenu.sh` *regenerate* that file's policy
+  tail, and they still omitted it, so any WS routing change or legacy restore undid the fix. The
+  sweep looked for the flag in the template and stopped there.
+
+Two more are the same shape in the new API layer: `lib.sh`'s `need` (Found 119) and the installer's
+permission guard (Found 136) both put an `exit` inside a command substitution, where it ends only the
+subshell. In the API the consequence was worse than in the installer because the handler kept running
+and fed the error text to a root script.
+
+The lesson recorded for the next cycle: a fix that adds a guard must be verified against the value
+the counterpart *actually produces* (fix 126/127), a fix that touches one location must be repeated
+in every location that expresses the same thing (fix 133/129), and any `exit` inside `$( )` is dead
+(fix 119/136).
