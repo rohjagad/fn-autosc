@@ -1322,3 +1322,14 @@ shape is correct, and is what makes the counters readable once they exist.
 Verified for fix 146: the built card shows the new lines, and the URLs it names are the ones the
 panel serves (both 200). Verified for fix 147 by the A/B in Found 145 - the bot builds and starts on
 Node 16 and cannot on Node 20.
+
+## Sixth Pass - Fix 148 (September 26, 2026)
+
+| Fix | Found | Change |
+| :-- | :-- | :-- |
+| 148 | 146 | `installer/request.sh`'s `udp-request-fixnet` guard now re-asserts `RETURN` rules for udp dport `51820`, `2200`, `500`, `4500` and `1701` above `udp-request`'s wildcard captures, alongside the host-SNAT exclusion it already did - delete-then-insert, on the existing 15-second timer, which also gains `AccuracySec=1s`. `installer/slowdns.sh`'s timer gets the same `AccuracySec`. |
+
+Verified live: with the guard ran by systemd, a fresh `menu-wg` client tunnelled (ping `10.66.66.1`
+and `1.1.1.1` at 0% loss, egress `202.155.17.126`), an OpenVPN UDP client brought up `tun0` and
+egressed through the VPS, and after `systemctl restart udp-request` broke the ordering the timer
+restored the bypasses in **15 s** (previously up to a minute).

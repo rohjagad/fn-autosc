@@ -187,6 +187,7 @@ Description=Re-assert the SlowDNS UDP 53 redirect every 15 seconds
 [Timer]
 OnBootSec=30s
 OnUnitActiveSec=15s
+AccuracySec=1s
 
 [Install]
 WantedBy=timers.target

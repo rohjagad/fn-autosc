@@ -113,23 +113,46 @@ systemctl daemon-reload
 systemctl enable udp-request
 systemctl start udp-request
 
-# Penjaga rule host agar tidak kena SNAT udp-request bila service restart berulang
+# Penjaga rule: udp-request menyisipkan rule-nya di paling atas setiap kali
+# service-nya (re)start, jadi dua kebocoran harus di-assert ulang oleh timer:
+#  1. SNAT lebar (POSTROUTING) yang mengenai alamat host sendiri;
+#  2. capture UDP wildcard (PREROUTING dpts:1:8988 dan dpts:8990:65535
+#     -> 8989, lalu dpts:1:65535 -> 36711) yang menelan handshake layanan UDP
+#     milik panel sendiri: WireGuard 51820, OpenVPN UDP 2200, IPsec/IKE
+#     500/4500 dan L2TP 1701. iptables first-match, dan diverifikasi live -
+#     handshake klien WireGuard mendarat di rule capture, tunnel tidak pernah
+#     naik; begitu RETURN dipasang di atasnya, tunnel langsung jalan (ping ke
+#     10.66.66.1 dan egress lewat VPS).
+cat > /usr/local/bin/udp-request-fixnet.sh <<-FIXSH
+#!/bin/bash
+ip_nat="$ip_nat"
+[ -n "\$ip_nat" ] && { iptables -t nat -D POSTROUTING -s "\$ip_nat" -j RETURN 2>/dev/null; iptables -t nat -I POSTROUTING 1 -s "\$ip_nat" -j RETURN; }
+for p in 51820 2200 500 4500 1701; do
+    while iptables -t nat -D PREROUTING -p udp --dport "\$p" -j RETURN 2>/dev/null; do :; done
+    iptables -t nat -I PREROUTING 1 -p udp --dport "\$p" -j RETURN
+done
+exit 0
+FIXSH
+chmod +x /usr/local/bin/udp-request-fixnet.sh
 cat > /etc/systemd/system/udp-request-fixnet.service <<-FIXSVC
 [Unit]
-Description=Keep host IP out of udp-request SNAT
+Description=Keep the panel's own UDP services out of udp-request's capture and SNAT
 After=network.target
 
 [Service]
 Type=oneshot
-ExecStart=/bin/bash -c 'iptables -t nat -D POSTROUTING -s $ip_nat -j RETURN 2>/dev/null; iptables -t nat -I POSTROUTING 1 -s $ip_nat -j RETURN; exit 0'
+ExecStart=/usr/local/bin/udp-request-fixnet.sh
 FIXSVC
 cat > /etc/systemd/system/udp-request-fixnet.timer <<-FIXTMR
 [Unit]
-Description=Re-assert host SNAT exclusion every 15 seconds
+Description=Re-assert the host SNAT exclusion and the panel's UDP service bypasses every 15 seconds
 
 [Timer]
 OnBootSec=30s
 OnUnitActiveSec=15s
+# default AccuracySec is 1min, which left the panel's own UDP services captured
+# for up to a minute after every udp-request restart
+AccuracySec=1s
 
 [Install]
 WantedBy=timers.target

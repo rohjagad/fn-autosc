@@ -330,3 +330,17 @@ source because they were "more capable" than it. Here, the source is simply wron
 the tree already carries the corrections - which is the point of keeping both archives: the audit
 has to cut both ways, keeping our divergences only where they are justified and matching the source
 where it is right.
+
+## 29. Fix 97 Protected One UDP Port and Left the Rest Captured (Inherited, Then Half-Fixed Here)
+
+Found 97 diagnosed the panel's own `udp-request` wildcard capture swallowing the SlowDNS
+UDP-53 redirect and fixed it with a 15-second re-assert timer for **port 53 only**. The capture
+itself is `dpts:1:8988` + `dpts:8990:65535` (plus a `1:65535` DNAT for `udp-request` itself), so it
+swallows *every* other inbound UDP service the panel installs - WireGuard 51820, OpenVPN UDP 2200,
+IPsec/IKE 500/4500 and L2TP 1701 - and fix 97 left those to be discovered later (Found 146).
+
+The lesson is the same one regression 25 recorded in the other direction: a fix that names one value
+out of a family has to ask whether the family has other members. Here the "family" was not other
+transports of the same tool but other ports of the same capture. Fix 148 generalises it, and the
+timer's default `AccuracySec=1min` - which made even the port-53 fix restore up to a minute late -
+is now `1s`.

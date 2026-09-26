@@ -1308,3 +1308,38 @@ with an expired account (for `xp`) and an over-quota account (for `kill-ws`) ran
 edit was ever lost, because each daemon's edit window is a single fast `sed`, not a multi-second
 script. Recorded as a latent risk rather than a confirmed defect, since the audit's rule is to
 demonstrate before claiming.
+
+## Sixth Pass - The Panel's UDP Capture Swallows Its Own UDP VPNs (September 26, 2026)
+
+Found 146. **`udp-request`'s wildcard capture hijacks the handshakes of the panel's own UDP
+services, so WireGuard and OpenVPN-UDP are dead** (`installer/request.sh`, `installer/udp.sh`) -
+`udp-request` runs with `-mode=system` and inserts, at the top of nat `PREROUTING`, captures for
+**every** UDP port:
+
+```text
+-A PREROUTING -i ens3 -p udp --dport 8990:65535 -j REDIRECT --to-ports 8989
+-A PREROUTING -i ens3 -p udp --dport 1:8988    -j REDIRECT --to-ports 8989
+-A PREROUTING -i ens3 -p udp --dport 1:65535   -j DNAT --to-destination :36711
+```
+
+iptables is first-match, so every inbound UDP packet that is not port 53 (which `slowdns` re-asserts
+above the captures) is taken before it reaches its service. That includes the panel's own
+`WireGuard` (51820), `OpenVPN UDP` (2200), `IPsec/IKE` (500, 4500) and `L2TP` (1701).
+
+- **Confirmed live, WireGuard A/B.** A client created by `menu-wg` (config `Endpoint =
+  202.155.17.126:51820`, peer registered on `wg0`) came up with **no handshake**: the server peer's
+  `wg show` transfer stayed `0 0` while the wildcard rule's counter rose by 28 packets - the
+  handshake was landing on the capture. `UdpInDatagrams` also rose, so the packets do reach the host;
+  they are simply redirected. With `RETURN` rules for udp dport 51820/2200 inserted above the
+  captures the tunnel came up immediately: ping to `10.66.66.1` **0% loss**, ping `1.1.1.1` **0%
+  loss**, egress `202.155.17.126`.
+- **Confirmed live, OpenVPN UDP.** `openvpn --config udp.ovpn` (the profile the card advertises,
+  `remote 202.155.17.126 2200`) brought up `tun0 10.7.0.6` and routed the client's traffic through
+  the VPS (`ifconfig.me` -> `202.155.17.126`).
+- **Inherited from both references:** neither archive reserves any of those ports above the capture
+  (`grep -rhoE 'dport (51820|2200|500|4500|1701)'` finds nothing in V23 or 1.20 either). This is the
+  same shape as Found 97 - the SlowDNS UDP-53 redirect shadowed by the same capture - but fix 97
+  protected **only port 53**, so the other UDP services stayed broken.
+- **Tightened after the first attempt:** the re-asserting timer kept the default
+  `AccuracySec=1min`, which left the services captured for up to a minute after a `udp-request`
+  restart; `AccuracySec=1s` brings the restoration to 15 s (measured).
