@@ -129,6 +129,31 @@ sed -i "s|\"password\": \"${old}\"|\"password\": \"${new}\"|" /etc/xray/json/*.j
 sed -i -E "s|^( *UUID[[:space:]]*:).*|\1 ${new}|" /var/log/create/xray/http/${user}.log
 [ -n "$old" ] && sed -i "s|${old}|${new}|g" /var/log/create/xray/http/${user}.log
 
+# The vmess share links in the card are base64 blobs that embed the UUID, so the
+# plaintext replacement above cannot reach them. Rewrite those links as well, or
+# the saved card keeps handing out the dead UUID.
+if [ -n "$old" ] && command -v python3 >/dev/null 2>&1; then
+python3 - "$old" "$new" "/var/log/create/xray/http/${user}.log" <<'PYEOF' 2>/dev/null || true
+import base64, json, re, sys
+old, new, path = sys.argv[1], sys.argv[2], sys.argv[3]
+try:
+    data = open(path, encoding="utf-8", errors="surrogateescape").read()
+except Exception:
+    sys.exit(0)
+def _fix(m):
+    b = m.group(1)
+    try:
+        j = json.loads(base64.b64decode(b + "=" * (-len(b) % 4)))
+    except Exception:
+        return m.group(0)
+    if isinstance(j, dict) and j.get("id") == old:
+        j["id"] = new
+    return "vmess://" + base64.b64encode(json.dumps(j, separators=(",", ":")).encode()).decode()
+open(path, "w", encoding="utf-8", errors="surrogateescape").write(
+    re.sub(r"vmess://([A-Za-z0-9+/=]+)", _fix, data))
+PYEOF
+fi
+
 # Restart All Service
 systemctl daemon-reload
 systemctl restart xray@upgrade

@@ -238,7 +238,19 @@ cp ipsec.secrets /etc/ 2>/dev/null || true
 # placeholder, then re-append the standard outbounds/routing/stats block below.
 # The config is already at the path the service reads, so nothing is moved.
 cd /etc/xray/json
-sed -i "s/rerechan-store/$(xray uuid)/g" /etc/xray/json/ws.json
+# A restored archive can still carry the committed defaults; replace all of them
+# (not just "rerechan-store") with per-install random values, as the installer does.
+for def in "rerechan-store" \
+           "cfbbaafc-8d52-450c-9fb0-145bc8221e6d" \
+           "019e0bf3-dd56-11e9-aa37-5600024c1d6a" \
+           "af7d5cf8-442d-4bb3-8a76-eb367178781d" \
+           "diy2020" \
+           "nonescript-fn-project"; do
+    rep="$(xray uuid)"
+    sed -i "s|${def}|${rep}|g" \
+        /etc/xray/json/ws.json /etc/xray/json/upgrade.json \
+        /etc/xray/json/split.json /etc/xray/json/grpc.json 2>/dev/null
+done
 
 # Mengambil Lokasi Xray Config
 XRAY_CONFIG="/etc/xray/json/ws.json"

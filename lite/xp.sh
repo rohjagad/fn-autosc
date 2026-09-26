@@ -55,6 +55,10 @@ clear
 systemctl daemon-reload
 clear
 
+# Deletions are destructive and were previously silent; keep an audit line so a
+# vanished account can always be attributed to xp.
+xp_log() { echo "$(date '+%F %T') xp: $*" >> /etc/xray/.quota.logs; }
+
 ##----- Auto Remove Xray Websocket
 data=( `cat /etc/xray/json/ws.json | grep '^###' | cut -d ' ' -f 2 | sort | uniq`);
 now=`date +"%Y-%m-%d"`
@@ -69,6 +73,7 @@ fi
 d2=$(date -d "$now" +%s)
 exp2=$(( (d1 - d2) / 86400 ))
 if [[ "$exp2" -le "0" ]]; then
+    xp_log "deleted $user (expiry $exp)"
 sed -i "/### $user $exp/ {N;d}" /etc/xray/json/ws.json
 sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/ws.json
         rm -f /var/log/create/xray/ws/${user}.log
@@ -106,6 +111,7 @@ fi
 d2=$(date -d "$now" +%s)
 exp2=$(( (d1 - d2) / 86400 ))
 if [[ "$exp2" -le "0" ]]; then
+    xp_log "deleted $user (expiry $exp)"
 sed -i "/### $user $exp/ {N;d}" /etc/xray/json/upgrade.json
 sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/upgrade.json
         rm -f /var/log/create/xray/http/${user}.log
@@ -143,6 +149,7 @@ fi
 d2=$(date -d "$now" +%s)
 exp2=$(( (d1 - d2) / 86400 ))
 if [[ "$exp2" -le "0" ]]; then
+    xp_log "deleted $user (expiry $exp)"
 sed -i "/### $user $exp/ {N;d}" /etc/xray/json/split.json
 sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/split.json
         rm -f /var/log/create/xray/split/${user}.log
@@ -180,6 +187,7 @@ fi
 d2=$(date -d "$now" +%s)
 exp2=$(( (d1 - d2) / 86400 ))
 if [[ "$exp2" -le "0" ]]; then
+    xp_log "deleted $user (expiry $exp)"
 sed -i "/### $user $exp/ {N;d}" /etc/xray/json/grpc.json
 sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/grpc.json
         rm -f /var/log/create/xray/grpc/${user}.log
@@ -265,6 +273,7 @@ fi
 d2=$(date -d "$now" +%s)
 exp2=$(( (d1 - d2) / 86400 ))
 if [[ "$exp2" -le "0" ]]; then
+    xp_log "deleted $user (expiry $exp)"
 sed -i "/^### $user $exp/d" "/etc/funny/.l2tp"
 sed -i '/^"'"$user"'" l2tpd/d' /etc/ppp/chap-secrets
 sed -i '/^'"$user"':\$1\$/d' /etc/ipsec.d/passwd
@@ -293,6 +302,7 @@ while read expired; do
 	exp=$(echo $expired | awk '{print $2}')
 
 	if [ -n "$exp" ] && [[ "$exp" =~ ^[0-9]{2}-[0-9]{2}-[0-9]{2}$ ]] && [[ $exp < $now ]]; then
+	xp_log "deleted wireguard client $user (expiry $exp)"
 		sed -i "/^### Client ${user}\$/,/^$/d" /etc/wireguard/wg0.conf
 		if grep -q "### Client" /etc/wireguard/wg0.conf; then
 			line=$(grep -n AllowedIPs /etc/wireguard/wg0.conf | tail -1 | awk -F: '{print $1}')
@@ -351,6 +361,7 @@ for user in "${data[@]}"; do
     
     # Jika masa aktif sudah habis
     if [[ "$exp2" -le "0" ]]; then
+        xp_log "deleted $user (expiry $exp)"
         # Menghapus pengguna dari file dan sistem
         sed -i "/^### $user $exp/d" /etc/funny/.noob
         noobzvpns remove "$user"

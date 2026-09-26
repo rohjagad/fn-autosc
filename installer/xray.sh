@@ -100,10 +100,25 @@ chmod +x upgrade.json
 chmod +x split.json
 chmod +x grpc.json
 
-# The WS template ships "rerechan-store" as the inbound's default client id.
-# Replace it with a real per-install UUID so the default account is not a
-# publicly-known value (the other transports ship a fixed id; this is stricter).
-sed -i "s/rerechan-store/$(xray uuid)/g" /etc/xray/json/ws.json
+# Every template ships publicly-known default credentials and the repository is
+# public, while the account scripts only ADD clients - the shipped defaults stay
+# active on every install. Replace all of them with per-install random values so
+# no committed credential can be used against a fresh host.
+#   ws.json      rerechan-store (vmess x3, trojan), cfbbaafc-... (vless, vmess)
+#   grpc.json    cfbbaafc-...                        (vless, vmess, trojan)
+#   split.json   019e0bf3-... , af7d5cf8-... , diy2020
+#   upgrade.json nonescript-fn-project               (vmess, vless, trojan)
+for def in "rerechan-store" \
+           "cfbbaafc-8d52-450c-9fb0-145bc8221e6d" \
+           "019e0bf3-dd56-11e9-aa37-5600024c1d6a" \
+           "af7d5cf8-442d-4bb3-8a76-eb367178781d" \
+           "diy2020" \
+           "nonescript-fn-project"; do
+    rep="$(xray uuid)"
+    sed -i "s|${def}|${rep}|g" \
+        /etc/xray/json/ws.json /etc/xray/json/upgrade.json \
+        /etc/xray/json/split.json /etc/xray/json/grpc.json
+done
 
 # Membuat File Log
 mkdir -p /var/log/xray

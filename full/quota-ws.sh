@@ -102,7 +102,9 @@ cekws() {
 
         # Validasi data inb dan outb
         if [[ -z "$inb" || -z "$outb" ]]; then
-            echo "Data usage for user $user is incomplete. Skipping."
+            # No counters for this user in this interval - nothing to charge.
+            # Stay quiet: the old message spammed the journal every 30s per idle
+            # account.
             continue
         fi
 
@@ -121,6 +123,7 @@ cekws() {
         if [[ -f "$quota_file" ]]; then
         quota_limit=$(cat "$quota_file")
         if [[ "$quota_used" -gt "$quota_limit" ]]; then
+            echo "$(date '+%F %T') quota-ws: deleted $user (usage $quota_used > quota $quota_limit)" >> /etc/xray/.quota.logs
             exp=$(grep -w "^### $user" "/etc/xray/json/ws.json" | awk '{print $3}' | sort -u)
             sed -i "/### $user $exp/ {N;d}" /etc/xray/json/ws.json
             sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/ws.json

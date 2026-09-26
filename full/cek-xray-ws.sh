@@ -40,8 +40,10 @@ echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━�
 users=($(grep "email:" "$log_path" | awk '{print $NF}' | cut -d':' -f2 | sort -u))
 
 if [[ ${#users[@]} -eq 0 ]]; then
+    # Nothing has connected since the log was last cleared. This is a normal
+    # state, so return success like the Go cek tools do (it is not an error).
     echo "No active users found!"
-    exit 1
+    exit 0
 fi
 
 # Process each active user

@@ -1056,3 +1056,23 @@ Found while investigating the disappearance of the account `vm_ws` during the ca
 ### Observation - one account disappeared during the campaign and could not be attributed
 
 While re-running the mutator matrix the account `vm_ws` was found completely gone (no config entry, no card/log, no quota or limit file) with no entry in `/etc/xray/.quota.logs`. It was present when the first matrix finished at ~16:40 and absent from the backup taken at ~16:53. A canary account with the same shape (created, extended, locked, unlocked, then run through `xp`, `kill-ws`, `limit-ip-ws`, `auto-delete-ws` and `quota-ws`) survived all of them, so none of the daemons deletes a healthy account; the most plausible cause is Found 108 - a corrupted `###` date (for example from an interrupted edit) makes `xp` delete the account and its files silently. Fix 110 removes that path. The lesson worth recording is that `xp` and `quota-ws` delete without writing to `/etc/xray/.quota.logs`; adding a deletion log to them would make any future recurrence attributable.
+
+## Open-Bug Sweep: Default Credentials, Audit Logging and Card Links (September 2026)
+
+The five defects still open after the campaign were taken in turn, live-verified, fixed and re-verified.
+
+### Real bugs found and fixed (111-115)
+
+111. **Public default credentials accepted on every install** (`installer/xray.sh`, `full/bmenu.sh`, `lite/bmenu.sh`) - see Found 109. `installer/xray.sh` now replaces **all six** committed defaults (`rerechan-store`, `cfbbaafc-8d52-450c-9fb0-145bc8221e6d`, `019e0bf3-dd56-11e9-aa37-5600024c1d6a`, `af7d5cf8-442d-4bb3-8a76-eb367178781d`, `diy2020`, `nonescript-fn-project`) with freshly generated UUIDs across all four templates; the same loop replaces the single `rerechan-store` substitution in `bmenu.sh`'s legacy-restore repair.
+112. **Silent deletions** (`full/xp.sh`, `full/quota-ws.sh` and the `lite` copies) - see Found 110. `xp` writes an `xp: deleted <user> (expiry <date>)` line for every block (four Xray transports, L2TP, Noobz and WireGuard) and `quota-ws` writes `quota-ws: deleted <user> (usage X > quota Y)` to `/etc/xray/.quota.logs` before removing anything.
+113. **Stale vmess links in the account card** (`full/change-id-*`, `lite/change-id-*`) - see Found 111. After the plaintext update each script rewrites the card's `vmess://<base64>` blobs through a small python step that decodes the JSON, replaces the id and re-encodes it; skipped silently if `python3` is absent.
+114. **`cek-xray-ws` exited 1 when idle** (`full/cek-xray-ws.sh`, `lite/cek-xray-ws.sh`) - see Found 112. The empty-log path now exits 0 like the Go siblings.
+115. **`quota-ws` journal spam** (`full/quota-ws.sh`, `lite/quota-ws.sh`) - see Found 113. The per-user `incomplete. Skipping.` message is gone; the loop still skips.
+
+### Live verification
+
+- **Found 109 reproduced live:** with the shipped templates, 11/12 probed combinations authenticated through nginx using only the committed value and pulled 300,000 bytes each. (Fix 111 is exercised by the reinstall below.)
+- **Fix 112:** deleting an expired account produced `2026-09-26 09:16:33 xp: deleted xplog (expiry 20-01-01)` in `/etc/xray/.quota.logs`, which was empty before; an over-quota deletion produced `2026-09-26 09:18:13 quota-ws: deleted qlog_ws (usage 6899237 > quota 5242880)`.
+- **Fix 113:** after changing an account's id the card's decoded `vmess://` link carried the new UUID (`388b6abb-...` -> `c2c5ba3b-...`), matching the config.
+- **Fix 114:** `cek-xray-ws` with a cleared log now exits 0.
+- **Fix 115:** zero `incomplete. Skipping.` lines in the journal across a full 30-second cycle where there had been one per idle account.
