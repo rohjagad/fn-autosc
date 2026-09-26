@@ -850,3 +850,17 @@ The README's "Why arbitrary paths are unstable" section states that nginx `locat
 ## Follow-up - SlowDNS `/rere` PATH entry removed (September 26, 2026)
 
 The observation above is superseded. `installer/slowdns.sh` now appends `export PATH="/usr/local/go/bin:$PATH"`, matching the clean form the same script already uses in `install_slowdns()`, and the dead `:/rere` entry was removed from `/root/.bashrc` on the live host. No `:/rere` remains anywhere in the tree; `slowdns.sh` passes `bash -n` and shellcheck.
+
+Found 115. **`kill-ws` deletes an over-quota account with a sed *range* that runs past its own record** (`full/kill-ws.sh`, `lite/kill-ws.sh`, over-quota branch) - `sed -i "/^### $user $exp/,/^###/d"` has no end anchor of its own: the range stops at the *next* `###` marker, or at end-of-file when the account is the last one in the file.
+- **Confirmed live, last-account case:** with the target as the final marker, a single `kill-ws` run truncated `/etc/xray/json/ws.json` from 155 to 50 lines - it swallowed the closing brackets, the JSON became invalid (`unexpected EOF`) and **`xray@ws` failed to start**, taking the WebSocket transport down (restored from a snapshot).
+- **Confirmed live, mid-file case:** triggering on the first of three accounts left the file syntactically valid but removed every `###` marker; the middle account's client object survived in the config while becoming invisible to `xp`, `quota-*`, `limit-ip-*`, `lock`, `delete` and `extend` (they all enumerate `^###`) - an orphaned, unmanageable account that still authenticates.
+- The sibling scripts (`kill-http/split/grpc`, `limit-ip-*`, `quota-*`, `delete-*`, `xp`, `locked-*`) all use the safe `/### user exp/ {N;d}` form; only `kill-ws` carries the range. Inherited from V23.
+
+Found 116. **`quota-http`, `quota-split` and `quota-grpc` never reload Xray after deleting an over-quota account** (`full/quota-{http,split,grpc}.sh`) - `quota-ws` ends its deletion with `systemctl restart xray@ws`, the other three never restart anything, so the deleted client stays live in the running core.
+- **Confirmed live:** an HTTPUpgrade account over its quota was removed from `upgrade.json`, yet its link kept returning `200` (300 KB); it only stopped (`000`) after a manual `systemctl restart xray@upgrade`.
+
+Found 117. **A quota deletion leaves the account card behind as a phantom "Active" account** (`full/quota-*.sh`, all four transports) - the daemon removes the client and the quota/usage files but never touches `/var/log/create/xray/<transport>/<user>.log`, and still prints/sends "has been locked".
+- **Confirmed live:** after `quota-ws` deleted `t_quota`, `ws.json` had no entry and the quota files were gone, but `t_quota.log` remained; the Lock menu still listed it as `Active`, and `unlock-ws` answered "No locked accounts found" (it only lists `*.locked`), so the account cannot be restored.
+- `kill-*` and `xp` both remove the card when they delete an account, so `quota-*` is the outlier; the leftover card also makes the deleted name appear in `change-quota-*` and `change-limit-ip-*`.
+
+Found 118. **`quota-http`, `quota-split` and `quota-grpc` delete accounts without writing any audit line** - only `quota-ws` writes to `/etc/xray/.quota.logs` (fix 112 was applied to `ws` only), so an over-quota deletion on the other three transports is silent, the exact class fix 112 set out to remove.

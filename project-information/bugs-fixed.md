@@ -1147,3 +1147,21 @@ A full feature pass was run with the local `/dev/kvm` guest (Xray 25.3.6, public
 ### Follow-up - the vestigial `:/rere` PATH entry was removed (September 26, 2026)
 
 Tidy-up of the observation in bugs-found.md: `installer/slowdns.sh` appended `:/rere` - a directory that has never existed - to root's `PATH`, while the other branch of the same script already used the clean `"/usr/local/go/bin:$PATH"`. The two now agree, and the dead entry was stripped from `/root/.bashrc` on the live host. No behaviour change (a non-existent directory never contributed to command resolution); `bash -n` and shellcheck are clean.
+
+## Lifecycle Daemon Fixes - kill-ws and quota-* (September 26, 2026)
+
+A KVM-client pass over expiration, IP limit, bandwidth, renew, change-IP, change-bandwidth and lock/unlock found the following. All are fixed and verified live.
+
+117. **`kill-ws` range delete** (`full/kill-ws.sh`, `lite/kill-ws.sh`) - see Found 115. The over-quota branch now uses the same safe form as every sibling script: `sed -i "/### $user $exp/ {N;d}"` followed by the `sed -z 's/},\n *\]/}\n        ]/g'` trailing-comma cleanup.
+118. **`quota-{http,split,grpc}` never reloaded Xray** - see Found 116. Each ends its deletion with `systemctl restart xray@upgrade|@split|@grpc`, matching `quota-ws`.
+119. **Phantom card and wrong wording on a quota deletion** - see Found 117. All four `quota-*` daemons now `rm -f` the account card and print "has been deleted" instead of "has been locked".
+120. **Missing audit lines on `quota-{http,split,grpc}`** - see Found 118. Each writes `quota-<transport>: deleted <user> (usage X > quota Y)` to `/etc/xray/.quota.logs`, as `quota-ws` already did.
+
+### What was already correct
+
+Still verified working in the same pass: `extend-*` moves the expiry in both the config and the account card (`26-10-26` -> `26-11-05`); `change-limit-ip-*` updates the card and the enforced `limit/ip` file together; `change-quota-*` rewrites the quota file, resets the usage on request and updates the card; the manual lock (`locked-xray-*`) removes the client and moves the card to `.locked` preserving UUID and expiry, and `unlock-*` restores it to the same UUID with a working link; `xp` deletes expired accounts and logs them.
+
+### Live verification of fixes 117-120
+
+- **Fix 117:** an over-quota `kill-ws` deletion of the file's *last* account now removes exactly the marker and its object (153 -> 151 lines) and leaves `Configuration OK.` with `xray@ws` active - where the old range truncated the file to 50 lines and the service failed.
+- **Fixes 118/119/120:** an HTTPUpgrade account pushed just over its quota had its client removed from `upgrade.json`, its card and quota files removed, a `2026-09-26 17:41:21 quota-http: deleted t_h3 (usage 1355936 > quota 1048577)` line written, and its link **failed immediately** (0/1) with `xray@upgrade` active. The same check on `quota-ws` gave the identical result (`quota-ws: deleted t_w3`, card gone, link 0/1).

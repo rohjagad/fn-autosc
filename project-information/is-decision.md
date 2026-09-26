@@ -123,3 +123,14 @@ Every protocol/transport pair carries one short path, `{proto}{transport}`: `vmw
 **Rule for future changes:** keep the `{vm|vl|tr}{ws|hu|gr|spl}` pattern. When a transport is added, add its path to the four `json/*.json` templates, the three `config/*.conf` nginx configs and the `add-*`/`trial-*` scripts in both editions, then rebuild `menu/*.zip`. Do not keep the previous path as an alias: old links are expected to stop working, which is acceptable because a path is only ever published on the account card at creation time (an existing client keeps working with its stored path only until the operator re-issues it).
 
 VMess-WS is the one transport that previously had two paths (`/vmess` for TLS and `/worryfree` for NoneTLS) backed by two inbounds (`:23456`, `:95`) that every account was written into; it is now the single `/vmws` on `:23456`. The other VMess-WS inbounds (`:977` on `/` and `:96` on `/kuota-habis`) were unreachable - the `:977` catch-all had already been dropped from the nginx upstream in `68c4068` - and were removed together with their locations. gRPC has no NoneTLS form: its locations are only reached over TLS.
+
+## 16. A Quota Breach Deletes the Account; Only an IP-Limit Breach Locks It
+
+The two automatic enforcement paths behave differently, deliberately:
+
+- **IP-limit breach** (`limit-ip-*`): the client is removed from the config, the card is moved to `<user>.locked`, the IP-limit file is kept, and the message says "Locked". `unlock-*` restores the account with the same UUID, expiry and IP limit.
+- **Quota breach** (`quota-*` and `kill-*`): the account is deleted outright - client, card, quota and usage files - and the message says "deleted". It is not restorable, because the quota/usage files are gone and `unlock-*` only lists `*.locked`.
+
+This matches the pre-existing `kill-*` behaviour (which already removed the card) and `xp`. The earlier quota wording ("has been locked") and the leftover card were the defects (Found 117 / fix 119). If a quota breach should instead be recoverable, the quota and usage files must be kept and re-armed when the account is unlocked - that is a design change, not a bug fix.
+
+**Rule for future changes:** a daemon that removes a client from a `json/*.json` must (a) delete with `/### <user> <exp>/ {N;d}` plus the trailing-comma cleanup, never a bare range, (b) restart its transport when the config was written by its own process, and (c) leave no file behind that still describes the account unless it is a `.locked` card meant for `unlock-*`.

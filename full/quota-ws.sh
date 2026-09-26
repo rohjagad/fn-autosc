@@ -131,8 +131,9 @@ cekws() {
             total_limit=$(con "$quota_limit")
             send_log
             rm -f "$usage_file" "$quota_file"
+            rm -f /var/log/create/xray/ws/${user}.log
             systemctl restart xray@ws
-            echo "User $user reached quota limit and has been locked."
+            echo "User $user reached quota limit and has been deleted."
         fi
         fi
 

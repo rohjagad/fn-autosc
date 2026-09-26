@@ -118,6 +118,7 @@ function ceksplit() {
         if [[ -f "$quota_file" ]]; then
         quota_limit=$(cat "$quota_file")
         if [[ "$quota_used" -gt "$quota_limit" ]]; then
+            echo "$(date '+%F %T') quota-split: deleted $user (usage $quota_used > quota $quota_limit)" >> /etc/xray/.quota.logs
             exp=$(grep -w "^### $user" "/etc/xray/json/split.json" | cut -d ' ' -f 3 | sort | uniq)
             sed -i "/### $user $exp/ {N;d}" /etc/xray/json/split.json
             sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/split.json
@@ -125,7 +126,9 @@ function ceksplit() {
             total_limit=$(con "$quota_limit")
             send_log
             rm -f "$usage_file" "$quota_file"
-            echo "User $user reached quota limit and has been locked."
+            rm -f /var/log/create/xray/split/${user}.log
+            systemctl restart xray@split
+            echo "User $user reached quota limit and has been deleted."
         fi
         fi
 
