@@ -84,20 +84,28 @@ affect it: the handlers call the panel's scripts by their unchanged names (`add-
    loopback
 5. it is then reachable as `https://<domain>/api/<path>`
 
-## Rebuilt here: the `api/` layer
+## Rebuilt in `rohjagad/fn-autosc-api`
 
-The handler layer and an installer are now part of this repository, so the API no longer
-depends on the dead upstream bundle:
+The handler layer and an installer now live in a dedicated repository,
+[`rohjagad/fn-autosc-api`](https://github.com/rohjagad/fn-autosc-api), so the API no longer depends
+on the dead upstream bundle and `rohjagad/FN-API` stays untouched (it is still read, read-only, for
+`core/server`):
 
 | Path | What it does |
 | :-- | :-- |
-| `api/menu-api` | install / uninstall / status / regenerate-token, plus an interactive menu. Fetches the server from the FN-API repo, patches it to bind `127.0.0.1`, writes `/etc/xray/.key`, installs the handlers and creates `api.service` |
-| `api/lib.sh` | shared helpers, installed to `/usr/local/lib/fn-api/lib.sh` - reads a JSON body on stdin, writes JSON on stdout |
-| `api/handlers/` | one executable per endpoint, each wrapping the panel's own scripts |
+| `menu-api` | install / uninstall / status / regenerate-token, plus an interactive menu. Fetches the server from the FN-API repo, patches it to bind `127.0.0.1`, writes `/etc/xray/.key`, installs the handlers and creates `api.service` |
+| `lib.sh` | shared helpers, installed to `/usr/local/lib/fn-api/lib.sh` - reads a JSON body on stdin, writes JSON on stdout |
+| `handlers/` | one executable per endpoint, each wrapping the panel's own scripts |
 
 `menu-api install` fetches `core/server` from `rohjagad/FN-API`, applies
-`s/('', port)/('127.0.0.1', port)/` so the API is reachable only through nginx, installs
-`api/lib.sh` and the handlers, and starts `api.service`.
+`s/('', port)/('127.0.0.1', port)/` so the API is reachable only through nginx, installs `lib.sh` and the handlers,
+and starts `api.service`.
+
+```
+wget -O /usr/bin/menu-api https://raw.githubusercontent.com/rohjagad/fn-autosc-api/main/menu-api
+chmod +x /usr/bin/menu-api
+menu-api install
+```
 
 ### Endpoint contract
 
@@ -133,6 +141,6 @@ Response:
 {"status":"success","username":"alice","protocol":"vmess","core":"ws","expired":"26-10-26","links":["vmess://..."]}
 ```
 
-**Rebuilding the upstream handler bundle is therefore complete for every endpoint this panel can
+**Rebuilding the upstream handler bundle is therefore complete and now shipped in `rohjagad/fn-autosc-api` for every endpoint this panel can
 serve**; the only endpoints that cannot work are `add-ss` and `add-socks`, because the panel - and
 both reference versions - have no Shadowsocks or Socks5 account type at all.

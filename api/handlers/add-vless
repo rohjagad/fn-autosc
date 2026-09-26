@@ -1,2 +1,0 @@
-#!/bin/bash
-exec "$(dirname "$0")/add-xray" --proto vless
