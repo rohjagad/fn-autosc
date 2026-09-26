@@ -170,3 +170,12 @@ Related, same class: `xp` and `quota-ws` deleted accounts with no audit line (fi
 ## 23. Quota and kill Daemons Corrupted, Orphaned or Silently Deleted Accounts (Inherited)
 
 Live testing of the lifecycle features found three inherited defects in the quota/kill family. `kill-ws`'s over-quota branch deleted with a sed *range* (`/^### user exp/,/^###/d`) instead of the `{N;d}` pair used everywhere else: when the account was the file's last marker the range ran to end-of-file and truncated `ws.json` (invalid JSON, `xray@ws` failed to start, WebSocket transport down), and otherwise it ate the next account's marker, leaving that account's client object orphaned and invisible to every panel tool. `quota-{http,split,grpc}` never reloaded their Xray service, so a deleted over-quota client kept working until an unrelated restart. And `quota-*` left the account card behind - a phantom "Active" entry the Lock menu still offered while `unlock-*` could not restore it (it only lists `*.locked`) - while printing "has been locked"; on three transports it also wrote no audit line at all. Found 115-118 / fixes 117-120.
+
+## 24. Reference Audit - Divergences From Both Upstream Versions (September 26, 2026)
+
+Both reference archives were verified (MD5 matches) and diffed against our tree for the three regression classes the owner asked about - over-engineering, over-fixing, and fixes that break other code.
+
+- **No cross-breakage found.** Nothing outside the append-only docs still references anything we removed (`v2ray`, `backup-gd`, `/etc/v2ray`, `/worryfree`, `/kuota-habis`); every command a menu dispatches resolves to a file in the packed archive; and every commit that touched a `.go` source also rebuilt `menu/*.zip`, so no shipped binary is stale.
+- **Our lifecycle fixes are less destructive than upstream, not more.** New 1.20's `xp.sh` carries nine range deletes of the form `/^### $user $exp/,/^},{/d` (which never match their end anchor and truncate the file) and no unparseable-expiry guard; ours has zero range deletes and six guards.
+- **Two deliberate divergences from both references**, recorded in the observation in bugs-found.md: the `:977` catch-all backend/inbound is gone, and `quota-*` now removes the account card and says "deleted" where upstream kept the card and said "has been locked".
+- **One piece of dead code left by the migration:** `full/cek-xray-ws.go` / `lite/cek-xray-ws.go` are never built or packaged.

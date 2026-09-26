@@ -864,3 +864,18 @@ Found 117. **A quota deletion leaves the account card behind as a phantom "Activ
 - `kill-*` and `xp` both remove the card when they delete an account, so `quota-*` is the outlier; the leftover card also makes the deleted name appear in `change-quota-*` and `change-limit-ip-*`.
 
 Found 118. **`quota-http`, `quota-split` and `quota-grpc` delete accounts without writing any audit line** - only `quota-ws` writes to `/etc/xray/.quota.logs` (fix 112 was applied to `ws` only), so an over-quota deletion on the other three transports is silent, the exact class fix 112 set out to remove.
+
+## Observation - reference audit against V23 and Autoscript 1.20 (September 26, 2026)
+
+Both archives were extracted and their MD5s match the values recorded in `original-source-do-not-edit/README.md` (`fdc1097ec7e10047a6d5af4c0e1cf6d5` and `a3d06894546eb982e4ab474cddbbb3c0`), so the comparison is against the intended bytes. Diffing our tree against both found three points worth recording.
+
+**1. The `:977` catch-all backend is gone - a divergence from *both* references.** Both archives carry it in `upstream default_backend`:
+- V23: `server 127.0.0.1:2080` + `server 127.0.0.1:977`
+- 1.20: `server 127.0.0.1:2080` + `127.0.0.1:2081` + `server 127.0.0.1:977`
+- ours: `server 127.0.0.1:2080` only
+
+`68c4068` removed the 977 line ("Bug 16: Remove incompatible port 977") and the canonical-path change then removed the `:977` inbound, so `location /` now reaches only the SSH-WebSocket backend. It is deliberate and the README documents it, but it is a straight behavioural removal versus both upstream versions: an arbitrary-path VMess client that could connect against upstream (roughly half the time, given the load balance) can never connect now. Recorded for the owner rather than changed in either direction.
+
+**2. `cek-xray-ws.go` (and `lite/`) is dead source.** `44c4c90` added a Go `cek-xray-ws` and built it into `menu/*.zip`; `73ace38` (the V2Ray -> Xray migration) switched the packaged entry back to the shell script `cek-xray-ws.sh` but left the `.go` in the tree. A sweep of every `full/*.go` against the shipped zip shows `cek-xray-ws` is the only one whose packaged form is not a compiled binary - the other seventeen are ELF. The README's "Go binaries" table still maps `cek-xray-ws` to `cek-xray-ws.go`.
+
+**3. Correction to Found 117.** `auto-delete-*` already removes an orphaned card and its quota files when the user is neither in the config nor `.locked` - confirmed live by planting a card with no config entry and watching `auto-delete-ws` delete it and its quota file on the next run. So the phantom card a quota deletion left behind was transient (cleaned within the five-minute cron cycle), not permanent, and `unlock-*` refusing to list it is correct because a quota deletion is terminal. The substantive part of fix 119 is the message wording; the extra card removal only closes the up-to-five-minute window and matches what `kill-*` already did.

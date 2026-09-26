@@ -713,7 +713,7 @@ shell scripts.
 | `log-database-xray-split` | `log-database-xray-split.go` | Styled SplitHTTP log viewer |
 | `log-database-xray-grpc` | `log-database-xray-grpc.go` | Styled gRPC log viewer |
 | `log-acc-ssh` | `log-acc-ssh.go` | Styled SSH log viewer |
-| `cek-xray-ws` | `cek-xray-ws.go` | WS account status |
+| `cek-xray-ws` | `cek-xray-ws.sh` (shell, not Go) | WS account status |
 | `cek-xray-http` | `cek-xray-http.go` | HTTP Upgrade account status |
 | `cek-xray-split` | `cek-xray-split.go` | SplitHTTP account status |
 | `cek-xray-grpc` | `cek-xray-grpc.go` | gRPC account status |
