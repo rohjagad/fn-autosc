@@ -149,7 +149,7 @@ fi
 exp=`date -d "$masaaktif days" +"%y-%m-%d"`
 
 # Menambahkan akun pada json
-sed -i '/#vless$/{n;s/}/},\n### '"$user $exp"'\n{"id": "'""$uuid""'","email": "'""$user""'"}/}' /etc/xray/json/grpc.json
+sed -i '/#vless$/{n;s/}/},\n### '"$user $exp"'\n{"id": "'""$uuid""'","email": "'""$user""'","level": 0}/}' /etc/xray/json/grpc.json
 
 # Restart Service
 systemctl daemon-reload

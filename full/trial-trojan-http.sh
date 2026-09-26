@@ -85,7 +85,7 @@ exp=`date -d "$masaaktif days" +"%y-%m-%d"`
 uuid=$(xray uuid)
 
 # Menambahkan Akun di Database
-sed -i '/#trojan$/{n;s/}/},\n### '"$user $exp"'\n{"password": "'""$uuid""'","email": "'""$user""'"}/}' /etc/xray/json/upgrade.json
+sed -i '/#trojan$/{n;s/}/},\n### '"$user $exp"'\n{"password": "'""$uuid""'","email": "'""$user""'","level": 0}/}' /etc/xray/json/upgrade.json
 
 # Restart Service
 systemctl daemon-reload

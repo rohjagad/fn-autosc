@@ -84,7 +84,7 @@ exp=`date -d "$masaaktif days" +"%y-%m-%d"`
 uuid=$(xray uuid)
 
 # Menambahkan akun pada json
-sed -i '/#vmess$/{n;s/}/},\n### '"$user $exp"'\n{"id": "'""$uuid""'","alterid": 0,"email": "'""$user""'"}/}' /etc/xray/json/split.json
+sed -i '/#vmess$/{n;s/}/},\n### '"$user $exp"'\n{"id": "'""$uuid""'","alterid": 0,"email": "'""$user""'","level": 0}/}' /etc/xray/json/split.json
 
 # Me Restart Service
 systemctl daemon-reload
