@@ -1296,3 +1296,18 @@ Verified live for fix 144: after applying the same block to the running host, `s
 3303 listening, an external client gets `SSH-2.0-OpenSSH` on **both**, and `127.0.0.1:22` - dnstt's
 forward target - answers again. Fix 145 was verified by `openssl s_client -connect :777`, which
 returns `SSH-2.0-dropbear` (while `:443` returns nothing SSH-related).
+
+### Correction to fix 101's live verification (September 26, 2026)
+
+Fix 101's verification, above, records `/etc/xray/quota/ws/bugtest_usage = 46973216` and an
+accumulator that "rose by 8,519,875 bytes after an 8,000,000-byte transfer ... recorded once, no
+double counting". **That observation cannot have come from an account the panel created.** The
+counters it describes (`user>>><email>>>traffic>>>uplink/downlink`) do not exist for a client
+written the way `add-vmess-ws` writes them - neither archive writes a `level` either, and the pinned
+Xray 25.3.6 only emits those counters for a client that carries one (Found 141, with a repeated A/B).
+Either the test account was written by hand with an explicit `level`, or the reading was of something
+else. It should not be cited as proof that the shipped path accounted usage; the A/B in Found 141 is
+what the fix is based on.
+
+The rest of fix 101 stands: adopting 1.20's `statsquery … | grep value` + `api stats -name … -reset`
+shape is correct, and is what makes the counters readable once they exist.

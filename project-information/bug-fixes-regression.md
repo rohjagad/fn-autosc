@@ -236,3 +236,75 @@ re-testing them rather than trusting them:
 
 Both are the same lesson as regression 25: a change that is "more capable" than the original needs
 the original's constraints re-derived before it is assumed safe.
+
+## 27. Source-Grounded Review: Over-Fixes, False Positives and Over-Engineering (September 26, 2026)
+
+Both reference archives were re-read (MD5-verified) and diffed against our tree specifically for the
+three classes the owner asked about. The evidence is a presence matrix over the same strings in
+`V23`, `1.20` and our tree, cross-checked file by file where a count differed.
+
+### Over-fixes - changes that went beyond the reference and caused harm
+
+- **`limit-ip-ssh`'s loop (fix 90).** Both references write
+  `username=$(while ... done < /etc/passwd)` and then **`for user in ${username[@]}` - deliberately
+  unquoted**, because the variable is a newline-separated *scalar* and the unquoted form is the
+  idiom that splits it. Fix 90 "hardened" that to `"${username[@]}"`, which iterates once with the
+  whole blob, so **the SSH IP limiter stopped enforcing** (Found 127). This is the clearest
+  over-fix in the tree: the reference was right and the fix broke it. Fix 129 restored the
+  reference's semantics (`for user in $username`). A tree-wide scan for the same shape - a variable
+  used as `"${name[@]}"` that is assigned as a scalar - now finds **none**: `users`, `usernames`,
+  `data` and `frames` are all real arrays, exactly as in the references.
+- **The certificate copy (commit `873e529`, bugs 52-61).** The references' acme stage uses
+  `cat ...fullchain.pem >> /etc/xray/xray.crt` (which silently never renews, because the first
+  chain in the file wins) and their `cert2` stage uses `cp`. Our tree changed the form to
+  `cat ...fullchain.pem > /etc/xray/xray.crt`, which fixes the append-duplication but introduces
+  truncate-on-failure (Found 130). The fix (143) is the guarded `cp` form - the shape the
+  references already use for the same job. Both of this tree's forms were worse than the reference's
+  `cert2`, in different ways.
+- **The API server's threading (our own code).** The FN-API reference `core/server` is a plain
+  single-threaded `HTTPServer`. The restored layer was built with `ThreadingHTTPServer` as
+  "hardening"; when that lost four of twelve concurrent creates, a lock was added - which made the
+  threading pointless for handlers. Since nginx fronts the server and buffers requests, thread-per-
+  connection buys nothing. Reverted to `HTTPServer` and the lock removed: simpler, and the
+  reference's design.
+
+### Divergences that are *not* over-fixes - the source was checked and the change is needed
+
+- **`"level": 0` on clients (fix 143).** Neither archive writes a `level` anywhere - the string does
+  not occur in either tree's scripts or JSON. The pinned Xray 25.3.6 does not emit per-user traffic
+  counters without it, so the quota feature cannot work otherwise (A/B in Found 141). The
+  references share the defect; this is a necessary divergence, not an over-fix.
+- **`client_max_body_size 0` (fix 136).** Absent from both archives. The 413 on a >1 MB gRPC upload
+  was reproduced live, and the fix is scoped to the streaming locations only.
+- **`-4` on public-IP lookups (bug 4 and later).** Neither archive uses `-4` at all (0 occurrences
+  each; ours has 203). The lookups are gated on a **dual-stack** host returning an IPv6 literal -
+  confirmed on the test VPS (`icanhazip.com` -> `2001:df0:27b::…`) - and the rental gate compares the
+  result against an IPv4-only `izin.txt`, so the change is load-bearing. It is a large mechanical
+  divergence from both references and is recorded as such.
+- **Keeping SSH port 22 (fix 144).** Both archives' installers append `Port 3303` and neither keeps
+  22 explicitly, and both then point dnstt at `127.0.0.1:22` and print `OpenSSH : 22, 3303` on every
+  card. Their design *assumes* 22 stays listening; ours just closed it on the image our own
+  reinstaller fetches. The fix makes the panel deliver what both references intend.
+
+### Fixes that match the newer reference rather than diverging
+
+- **`cek-xray-{grpc,http,split}.go` ports (fix 130):** V23 has all three on `10080` (wrong); **1.20
+  has 10083/10081/10082** - exactly what our fix restores. The migration had copied V23's files.
+- **`statsUserOnline` coverage (fixes 100/129):** 1.20 carries it in
+  `Json/ws.json`, `routing-ws.sh` and the three siblings; ours now carries it in exactly those plus
+  `bmenu.sh`. V23 had it only for the non-WS transports.
+- **The quota read/reset pattern (fix 101):** 1.20's `quota-ws.sh` is
+  `xray api statsquery … | grep -C 2 … | grep value` + `xray api stats -name … -reset` - character
+  for character the shape our fix adopted. V23 used the V2Ray `api stats` form.
+- **The `at` quoting in the trial scripts (commit `cfa878e`):** the references write
+  `echo "sed -i "/### $user $exp/ {N;d}" …" | at …`, whose nested unescaped quotes mangle the
+  command. Our single-quote/concatenation form is the correct one - a real fix, not an over-fix.
+
+### Additions that appear in neither reference (recorded, not defects)
+
+- `expire-ssh` + its cron line - a cleanup tool the references do not have; they rely on `useradd -e`
+  alone. Kept.
+- `install.sh`'s downloader bootstrap, its screen/tmux hand-off and its empty-`LOCAL_IP` guard - all
+  ours. The references' `install.sh` is 124 lines and downloads a now-dead handler bundle.
+- The whole `fn-autosc-api` repository, and `client_max_body_size`/`level` as above.
+- Cosmetic: the install summary's `SSH Port:` line and `menu-api`'s inactive-service warning.

@@ -1184,3 +1184,19 @@ following the card's `STUNNEL5 : 443` never reaches SSH. Inherited from V23, whi
   what a cycle has already read. It under-charges, never over-charges.
 - **`other/fnohp` is 32-bit i386** and the unused `other/fn.ohp` is 64-bit; `other/dinda` has CRLF
   endings (harmless, it runs as `python3 -O <file>`).
+
+### Source-grounded attributions for Found 130, 141 and 142 (September 26, 2026)
+
+Reading both archives settles where these came from:
+
+- **Found 130 (the certificate copy) is self-inflicted, not inherited.** The references' `cert2`
+  stage copies the pair with `cp`; their acme stage appends with `>>`. Our tree's `cat … > …` form
+  was introduced by commit `873e529` (bugs 52-61) - a "fix" that traded the references'
+  append-duplication for truncate-on-failure. Fix 143 restores the references' `cp` (guarded).
+- **Found 141 (`level`) is shared with both references.** Neither archive writes a `level`
+  anywhere. The defect is inherited; the fix is a divergence that the pinned Xray makes necessary.
+- **Found 142 (SSH port 22) is shared with both references.** Both append `Port 3303`, neither keeps
+  22 explicitly, and both point dnstt at `127.0.0.1:22` and print `OpenSSH : 22, 3303` on every card.
+  The panel has always assumed 22 stays open; the fix makes it so.
+- **Found 130's `STUNNEL5` sibling (Found 143):** the 443 mismatch is V23's (which also binds 777);
+  1.20 dropped the line entirely, and its card has no `STUNNEL5` row.
