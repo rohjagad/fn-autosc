@@ -107,3 +107,11 @@ The Telegram caption was reduced to **Domain / IP / Date**. The `Email` line and
 ### Section 13 addendum 2 - the migration is completed against the 1.20 template
 
 The migration first reused V23's V2Ray-era `json/ws.json` and its WS scripts with a mechanical `v2ray` -> `xray` substitution. That left the WS IP limit inert (`statsUserOnline` was missing from the policy block) and broke WS quota accounting and the `cek-xray-ws` traffic display (`xray api stats` requires `-name`, unlike V2Ray's). The template now matches the 1.20 `Json/ws.json` and the stats reads use `statsquery`, the same pattern as `quota-grpc`/`quota-http`/`quota-split`. Recorded as fixes 100-103; see `bugs-fixed.md` and regression 19.
+
+## 14. No Shipped Credential May Be Usable: The Installer Randomises Every Default
+
+The four Xray templates (`json/ws.json`, `json/grpc.json`, `json/split.json`, `json/upgrade.json`) each ship a template client, and the repository is public. Because the account scripts only ever add clients, a shipped default stays active on every install, so any committed value is effectively a public credential. `installer/xray.sh` therefore replaces **all six** known defaults (`rerechan-store`, `cfbbaafc-8d52-450c-9fb0-145bc8221e6d`, `019e0bf3-dd56-11e9-aa37-5600024c1d6a`, `af7d5cf8-442d-4bb3-8a76-eb367178781d`, `diy2020`, `nonescript-fn-project`) with freshly generated UUIDs, and `bmenu.sh`'s legacy-restore repair applies the same loop to a restored archive.
+
+**Rule for future changes:** if a new template or default client is added, add its committed value to that loop. A template default is acceptable only when its credential is generated per install. The templates' `###` marker lines must stay in place - the account scripts insert new clients after them - so removing the default client outright is not the approach; randomising it is.
+
+Verified end to end on a fresh install: the committed values occur 0 times in `/etc/xray/json`, and from an external client they authenticate 0/11 while the per-install values authenticate 12/12 (fixes 111/116).
