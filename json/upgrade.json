@@ -48,7 +48,7 @@
       "settings": {
         "clients": [
           {
-            "id": "nonescript-fn-project"
+            "password": "nonescript-fn-project"
 #trojan
           }
         ],

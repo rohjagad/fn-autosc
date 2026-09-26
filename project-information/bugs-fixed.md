@@ -1076,3 +1076,17 @@ The five defects still open after the campaign were taken in turn, live-verified
 - **Fix 113:** after changing an account's id the card's decoded `vmess://` link carried the new UUID (`388b6abb-...` -> `c2c5ba3b-...`), matching the config.
 - **Fix 114:** `cek-xray-ws` with a cleared log now exits 0.
 - **Fix 115:** zero `incomplete. Skipping.` lines in the journal across a full 30-second cycle where there had been one per idle account.
+
+## Fresh-Reinstall Verification of Fixes 111-115 (September 26, 2026) and One Further Fix
+
+The VPS was reinstalled from scratch (upstream `bin456789/reinstall` `debian 12`) and the panel reinstalled from the committed code, then every fixed behaviour was re-checked from a **real external client** - the rebuilt Debian 12 / Xray 25.3.6 KVM guest on the local machine (source IP 157.15.139.236).
+
+- **Fix 111 (credentials):** in the four installed templates the committed defaults appear **0** times; each inbound carries a per-install UUID. Probing through nginx from the client VM with **nothing but the committed values** gives **0/11 authenticated** (vless/vmess/trojan across ws/gRPC/SplitHTTP/HTTPUpgrade), where before the fix 11/12 connected. The same paths with the **new per-install credentials** give **12/12 authenticated** (300,000 bytes each), proving the randomisation produced valid configs.
+- **Fix 112 (deletion logging):** exercised again on the fresh host - `xp` wrote `2026-09-26 … xp: deleted xplog (expiry 20-01-01)` and `quota-ws` wrote `quota-ws: deleted qlog_ws (usage 6899237 > quota 5242880)` to `/etc/xray/.quota.logs`.
+- **Fix 113 (card links):** changing an account id updated the card's decoded `vmess://` link to the new UUID.
+- **Fix 114 (cek exit):** `cek-xray-ws` with a cleared log exits 0.
+- **Fix 115 (quota noise):** zero `incomplete. Skipping.` lines across a full cycle.
+
+### Additional fix - the HTTPUpgrade trojan template account was dead (fix 116)
+
+Found 114 was discovered during the verification above. `json/upgrade.json`'s trojan client now uses `password` like the other three templates, so the shipped account is well-formed and the installer's randomisation lands in the right field. Verified on the reinstalled host: the templated (randomised) HTTPUpgrade-trojan credential now authenticates (`200`, 300,000 bytes), and the positive sweep is **12/12**.
