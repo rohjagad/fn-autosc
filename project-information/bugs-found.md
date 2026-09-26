@@ -846,3 +846,7 @@ The README's "Why arbitrary paths are unstable" section states that nginx `locat
 ## Observation - stray `/rere` entry in SlowDNS's PATH (September 26, 2026)
 
 `installer/slowdns.sh` appends `:/rere` to root's `PATH` (`export PATH="/usr/local/go/bin:$PATH:/rere"`). `/rere` was never a directory the panel created: it existed only as the nginx location for the VMess HTTPUpgrade transport (and a `rere` binary download that was removed from `install.sh` in an earlier fix). That location is now `/vmhu`, so the PATH entry is doubly vestigial. It is harmless - appending a non-existent directory to `PATH` changes no command resolution - and was left in place because the SlowDNS installer is otherwise unrelated to the transport paths.
+
+## Follow-up - SlowDNS `/rere` PATH entry removed (September 26, 2026)
+
+The observation above is superseded. `installer/slowdns.sh` now appends `export PATH="/usr/local/go/bin:$PATH"`, matching the clean form the same script already uses in `install_slowdns()`, and the dead `:/rere` entry was removed from `/root/.bashrc` on the live host. No `:/rere` remains anywhere in the tree; `slowdns.sh` passes `bash -n` and shellcheck.

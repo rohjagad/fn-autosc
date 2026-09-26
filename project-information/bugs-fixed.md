@@ -1143,3 +1143,7 @@ A full feature pass was run with the local `/dev/kvm` guest (Xray 25.3.6, public
 - **Backup.** With `/etc/funny/.chatid` and `/etc/funny/.keybot` absent, `backup` exited 1 after reporting `Telegram credentials are not configured` **and kept the archive** at `/root/backup.zip` (3,713,842 bytes) - fix 108's behaviour.
 - **cron / menu.** Sixteen panel cron lines present; `menu` present.
 - All test accounts, cards, quota/limit files and `at` jobs were removed afterwards; every service is active and every Xray config reports `Configuration OK.`
+
+### Follow-up - the vestigial `:/rere` PATH entry was removed (September 26, 2026)
+
+Tidy-up of the observation in bugs-found.md: `installer/slowdns.sh` appended `:/rere` - a directory that has never existed - to root's `PATH`, while the other branch of the same script already used the clean `"/usr/local/go/bin:$PATH"`. The two now agree, and the dead entry was stripped from `/root/.bashrc` on the live host. No behaviour change (a non-existent directory never contributed to command resolution); `bash -n` and shellcheck are clean.
