@@ -1343,3 +1343,37 @@ restored the bypasses in **15 s** (previously up to a minute).
 
 Verified live for fix 149: applying the same disable on the running lite host left
 `systemctl --failed` empty with sshd still listening on 22.
+
+### Fresh-reinstall acceptance of fixes 147-150 (Debian 12, September 27, 2026)
+
+The OS was reinstalled twice: once for the lite run above, then again for a fresh **full** install,
+which is what the tree is normally deployed as. Both pulled the committed code, so they exercise the
+shipped path.
+
+**Lite install (before the full reinstall):**
+
+- `dropbear.service` was the only failed unit, exactly as Found 147 describes; disabling it left
+  `systemctl --failed` empty with sshd still on 22 (fix 149).
+- Transports from the KVM client: **4/4** - vmess ws, vmess grpc (with a 3 MB upload), vless
+  splithttp, trojan httpupgrade, all 200 with 1,000,000 bytes.
+- The API's lite behaviour: `add-vmess` succeeded and the full-only endpoints answered
+  `this panel edition does not ship '<tool>'` for `addssh`, `list-ssh`, `cek-ssh`/`cek-login-ssh`
+  and `add-noobz`/`noobzvpns`, instead of the shell error once reported as success.
+- Fix 147 verified on the installed Node: `node -v` -> `v16.20.2`, `npm install` built both
+  `node-pty` and `node-termios`, and the bot started.
+- Fix 140 verified: `upload.php` answered 401 without the key and passed the gate with it; the key
+  is `640 root:www-data`.
+
+**Full install (fresh OS):** Node `v16.20.2`, SSH on 22/3303/109/111, **0 failed units**, every
+service active (nginx, the four `xray@*`, the four `quota-*`, dnstt, noobzvpns, badvpn-udpgw, opn,
+fn-ohp, haproxy, squid, wg-quick@wg0, xl2tpd, strongswan), 22 non-comment cron lines including the
+two SSH ones, both fixnet timers active and **five VPN-bypass rules** in nat PREROUTING. Then:
+
+- **API lifecycle:** ping, `list-xray` (4), `renew-xray` (`26-09-29` -> `26-10-04`), `addssh`,
+  `renew-ssh`, `password-ssh`, `add-noobz`, `list-noobz`, `delete-ssh`, `delete-noobz` - all as
+  designed.
+- **Transports from the KVM:** 4/4 again, including the 3 MB gRPC upload.
+- **The VPNs the sixth pass fixed, now from a fresh install:** a `menu-wg` client tunnelled (tunnel
+  ping 0% loss, egress `202.155.17.126`) and an OpenVPN UDP client brought up `tun0 10.7.0.6` with
+  egress through the VPS - both on the installer-written bypass rules, with no manual rule needed.
+- Test accounts and the WG peer were removed; the host ended at 0 xray, 0 ssh and 0 WG peers.
