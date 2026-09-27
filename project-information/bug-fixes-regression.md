@@ -581,3 +581,14 @@ applied to it:
 | **Over-strictness** | Neither fix refuses anything new: lifetime still requires membership (unlisted IP still rejected); extend still rewrites the requested account, just not its longer-named neighbour. |
 | **Over-engineering** | Fix 175: 6-line branch, no new files/flags/calls. Fix 176: one-line anchor per file, same tool (`sed`), no new dependency. Sibling patterns deliberately left alone to avoid churn (see Fix 176 scope note). |
 | **vs the source** | Fix 175 completes our own Decision 28 (both references gate on a date; the miss was ours). Fix 176 diverges from both references (V23 identical unanchored) because the reference corrupts data - necessary divergence, minimal form. `trial-ssh.sh` missing gate, `kill-ws` log truncation, `xp.sh` per-user restarts, `udp` 36711 display, `diamond.sh` pkill, and sibling unanchored deletes are all inherited and recorded, not changed here. |
+
+## 40. Second Reinstall Cycle and Complete Audit Review (September 28, 2026)
+
+Section 35's four-check rule applied across the two fresh-reinstall cycles and the complete codebase audit:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Zero regressions across two fresh OS reinstalls. Both OpenSSH (3303) and Dropbear (109) tunnelled; all four XTLS transports (WS, gRPC, SplitHTTP, HTTPUpgrade) authenticated and tunnelled to `202.155.17.126`; WireGuard ping and egress 100% functional. All services active, 0 failed units. |
+| **Over-strictness** | Audited all menu input loops and gates. Anchoring `extend-*` to `^### $user ` protects against neighbour-account corruption without restricting valid usernames. Quantity fields reject 0 per Decision 4, failing safe with exit on EOF. WARP refusal only triggers on date licenses, preserving license validity. |
+| **Over-engineering** | Audited all patches: no new daemon, no external library, no complex abstraction added. The tree remains minimal shell scripts and Go binaries. Dead-code and unneeded abstractions were omitted. |
+| **vs the source** | Both reference archives (`Autoscript New 1.20.zip` and `V23 Linux Ubuntu, Debian, Kali.zip`) verified byte-for-byte in `original-source-do-not-edit/` (MD5 and SHA-256 match README exactly). Divergences (Dropbear 2019.78 pin, WS on Xray, license lifetime, WARP guard, canonical transport paths) are documented in `is-decision.md` as intentional architecture choices. |

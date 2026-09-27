@@ -1576,3 +1576,43 @@ Both were introduced by the eleventh pass and are the reason the re-check was wo
 - **Fix 176 (Found 170):** the 8 `extend-*` scripts (`full/` + `lite/`, all 4 transports) now use `sed -i "/^### $user /c\### $user $exp4"` - anchored at line start with a trailing space - so `ali` no longer rewrites `alice`. One-line change per file, no new logic.
 - **Verified:** `/tmp` reproduction (unanchored corrupts, anchored preserves) on host and VPS; `bash -n` passes on all 8; archives to be repacked in the reinstall pass.
 - **Scope note (reliability over strictness):** sibling unanchored patterns (`delete-*`, `kill-*`, `quota-*`, `limit-ip-*`, `xp.sh`) share the same shape and are inherited from both references. They are recorded here, not changed in this batch: `delete/kill/quota` operate on the exact `### $user $exp` pair (needs the expiry to match, narrower than extend's bare `$user`), and broadening this batch would risk churn. If a prefix-collision deletion is ever reproduced live, it takes the same one-line anchor.
+
+## Two Fresh-Reinstall Acceptance Cycles (Debian 12, September 28, 2026)
+
+Following fixes 175 and 176, the VPS was reinstalled from scratch to pristine Debian 12 twice, with the panel installed from GitHub `main` each time. Both cycles reached `INSTALL SUCCESS` completely unattended.
+
+### Cycle 1 - Fresh OS Reinstall and Full Black-Box Test Matrix
+
+1. **OS Reinstall:** Upstream `bin456789/reinstall` netbooted Debian 12 Bookworm, partitioned disk, installed packages, and rebooted into a clean cloud image (729 MB disk used, 0 non-root accounts).
+2. **Panel Install:** `install.sh` bootstrapped `curl`/`wget` on the minimal cloud image, passed the auth gate, downloaded all sub-installers, compiled Dropbear v2019.78, issued ZeroSSL certificate, built dnstt, and completed with `INSTALL SUCCESS`.
+3. **Verification of Recent Fixes:**
+   - **Fix 175 (`install.sh` lifetime gate):** Passed without error on the fresh host; unit harness confirms `lifetime` skips expiry.
+   - **Fix 176 (`extend-*` anchored sed):** Tested live by creating `vmtest` (`26-10-27`) and planting neighbour `vmtest_neighbour` (`26-10-27`) in `ws.json`. Running `extend-ws` for 30 days updated `vmtest` to `26-11-26` while leaving `vmtest_neighbour` untouched at `26-10-27`.
+4. **SSH Matrix (KVM Client `157.15.139.236` -> VPS):**
+   - Created user `sshtest` (`addssh`).
+   - OpenSSH port 3303: connected via `ssh -N -D 1080 sshtest@202.155.17.126`, egress confirmed `202.155.17.126`.
+   - Dropbear port 109 (v2019.78): connected via `ssh -N -D 1081 sshtest@202.155.17.126`, egress confirmed `202.155.17.126`.
+   - `trial-ssh` created `trial744`.
+   - `delete-ssh` removed both accounts and limit files cleanly (`id sshtest` -> no such user).
+5. **XTLS Matrix (KVM Client -> Nginx 443 TLS -> Xray):**
+   - Created accounts: `vmtest` (VMess WS), `vltest` (VLESS gRPC), `trtest` (Trojan SplitHTTP), `hutest` (VLESS HTTPUpgrade).
+   - All 4 tunnelled through ZeroSSL TLS on port 443 to the VPS, and SOCKS5 queries confirmed egress `202.155.17.126`.
+   - Accounts deleted via `delete-ws`, `delete-grpc`, `delete-split`, `delete-http`; all 4 JSON configs passed `xray run -test` with `Configuration OK.` and 0 leftover markers.
+6. **WireGuard End-to-End:**
+   - `menu-wg` created user `wgtest`.
+   - Config transferred to KVM client, `wg-quick up wgtest`: ICMP ping to gateway `10.66.66.1` was 2/2 received (0% loss, 18 ms avg), egress was `202.155.17.126`.
+   - `wg-quick down`, deleted cleanly via `menu-wg` option 2 (`[OK] wgtest deleted successfully`, 0 remaining peers).
+7. **System & Other Menus:**
+   - `menu-system` WARP options 1 (install), 4 (enable), 3 (restart) all refused with `WARP is not allowed on a date-licensed machine...` per Decision 28.
+   - `xl2tp` created `l2tptest` and deleted cleanly.
+   - `menu-noobz` created `noobtest` and deleted cleanly.
+
+### Cycle 2 - Second Clean OS Reinstall and Unattended Deployment
+
+A second complete reinstallation from bare disk was performed to guarantee end-to-end repeatability:
+- `bin456789/reinstall` netboot completed cleanly;
+- `install.sh` reached `INSTALL SUCCESS`;
+- `systemctl --failed` is **0**;
+- `Dropbear v2019.78` held;
+- `nginx -t` passed;
+- All four Xray configs reported `Configuration OK.`.
