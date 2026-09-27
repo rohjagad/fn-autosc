@@ -103,11 +103,15 @@ http=$(cat /etc/xray/json/upgrade.json 2>/dev/null | grep "###" | sort | uniq | 
 gpc=$(cat /etc/xray/json/grpc.json 2>/dev/null | grep "###" | sort | uniq | wc -l)
 split=$(cat /etc/xray/json/split.json 2>/dev/null | grep "###" | sort | uniq | wc -l)
 
+# Xray/XTLS core version (moved here from the main menu, which is too cramped)
+xver=$(xray version 2>/dev/null | awk '{print $2}' | head -n 1)
+
 clear
 echo -e "${NC}${separator}
             XTLS MENU
 ${separator}
 Status       : $stat_msg
+XTLS Version : ${xver:-unknown}
 ${blue_sep}
 ${purple}TOTAL ACCOUNTS${NC}
 WS           : $ws

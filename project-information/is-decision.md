@@ -348,3 +348,28 @@ password was refused with exit 5. The test VPS now runs 2019.78.
 **Rule for future changes:** the Dropbear version is one value, held by this pin - do not let one base
 image's apt version decide it, and if the pin is ever raised, change the tarball, its sha256 and this
 section together.
+
+## 26. Version Strings Live in Their Own Submenus, Not the Main Menu
+
+**The owner's decision is that the main menu is too crowded for version lines**: the XTLS/Xray
+version belongs in the XTLS menu and the Dropbear version in the SSH menu. Both references put
+`VERSION XTLS : $xver` on the main menu (their `full/menu.sh` computes `xver` from `xray version` at
+the top and prints it near the header), so dropping it is a deliberate divergence, not an oversight.
+
+**What moved.** The XTLS version is now `XTLS Version :` inside `full/menu-x.sh`, and the main menu no
+longer computes or prints `xver` at all. The Dropbear version is a new `Dropbear Ver :` line in
+`full/menu-ssh.sh`, read as `dropbear -V` (so it shows the pinned `v2019.78`, decision 25). Both are
+read with a `2>/dev/null` guard and fall back to `unknown` when the binary is missing, so neither
+menu can fail on a host where the daemon was not installed.
+
+**Lite.** Lite has no SSH menu (it ships no SSH tooling), so there is nothing to add there. Its main
+screen *is* the XTLS menu - `lite/menu.sh` defines `menu-x()` and shows it directly - so the XTLS
+version was added to it, which also gives lite a version display it never had: the references and the
+old lite build showed none anywhere.
+
+**Verified live** on the Debian 12 test VPS after repacking and deploying: the full main menu no
+longer prints a version line, the XTLS menu shows `XTLS Version : 25.3.6`, the SSH menu shows
+`Dropbear Ver : v2019.78`, and the lite menu shows `XTLS Version : 25.3.6` on its XTLS screen.
+
+**Rule for future changes:** status/version strings belong on the menu they describe; keep the main
+menu to server identity, counts, service state and the menu list.

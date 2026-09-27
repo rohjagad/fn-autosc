@@ -84,10 +84,15 @@ rainbow_sep() {
 separator=$(rainbow_sep '===================================')
 blue_sep="${blue}-----------------------------------${NC}"
 
+# Dropbear version (the panel pins 2019.78 - see is-decision.md 25)
+dver=$(dropbear -V 2>&1 | awk '{print $2}' | head -n 1)
+
 clear
 echo -e "${NC}${separator}
              SSH MENU
 ${separator}
+Dropbear Ver : ${dver:-unknown}
+${blue_sep}
 ${green}1${NC}. Create SSH Account
 ${green}2${NC}. Trial SSH Account
 ${green}3${NC}. Delete SSH Account

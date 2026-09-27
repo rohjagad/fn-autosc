@@ -53,7 +53,8 @@
 
 
 clear
-xver=$(xray version | awk '{print $2}' | head -n 1)
+# The XTLS/Xray version is shown in the XTLS menu (menu-x.sh), not here - the
+# main menu is already crowded.
 domain=$(cat /etc/xray/domain 2>/dev/null)
 ips_mode=$(cat /root/.ips 2>/dev/null | tr -d '[:space:]')
 if [[ "$ips_mode" == "4" ]]; then
@@ -276,7 +277,6 @@ clear
 echo -e "${NC}${separator}
      VPN MANAGEMENT PANEL
 ${separator}
-XTLS VERSION : $xver
 SERVER DOMAIN: $domain
 SERVER IP    : $ip_display
 Uptime       : $uptime

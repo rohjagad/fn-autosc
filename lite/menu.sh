@@ -182,6 +182,9 @@ http=$(cat /etc/xray/json/upgrade.json | grep "###" | sort | uniq | wc -l)
 gpc=$(cat /etc/xray/json/grpc.json | grep "###" | sort | uniq | wc -l)
 split=$(cat /etc/xray/json/split.json | grep "###" | sort | uniq | wc -l)
 
+# Xray/XTLS core version
+xver=$(xray version 2>/dev/null | awk '{print $2}' | head -n 1)
+
 separator=$(rainbow_sep '===================================')
 blue_sep="${blue}-----------------------------------${NC}"
 clear
@@ -196,6 +199,7 @@ echo -e "${green}running${NC} ✓"
 else
 echo -e "${red}not running (Error)${NC}"
 fi)
+XTLS Version : ${xver:-unknown}
 ${blue_sep}
 ${purple}TOTAL ACCOUNTS${NC}
 WS           : ${green}$ws${NC}
