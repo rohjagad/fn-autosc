@@ -647,3 +647,14 @@ Section 35's four-check rule applied to Fixes 183 and 184:
 | **Over-strictness** | Does not restrict or validate user input; strictly improves displayed precision of traffic data and prevents dead listening ports. |
 | **Over-engineering** | Fix 183: 8 characters (`scale=2; `) in two files. Fix 184: one moved cleanup line and removal of redundant restart calls. No new files or helper functions. |
 | **vs the source** | Both references truncated gigabyte bandwidth to whole integers and resurrected dead HAProxy frontends in lite. Aligning traffic calculation with real bytes and removing dead listeners is necessary for correctness. |
+
+## 46. Submenu EOF Guards and Loop Termination - Four Checks (September 28, 2026)
+
+Section 35's four-check rule applied to Fix 185:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Interactive user inputs are completely unaffected; `|| exit 0` only executes when `read` encounters end-of-file (non-zero status). Valid selections dispatch identical case branches. `bash -n` clean across all 15 touched files. |
+| **Over-strictness** | Does not restrict input formats or options; strictly terminates processes cleanly when input streams close rather than consuming 100% CPU in infinite loops. |
+| **Over-engineering** | Standard `|| exit 0` append on existing `read` commands. No new functions, variables, or dependencies added. |
+| **vs the source** | Both references lacked EOF guards on all submenus and helper loops, causing runaway CPU spinning when run via automated runners or closed streams. Aligning with Fix 162/172 standards completes robust EOF handling across the entire script suite. |

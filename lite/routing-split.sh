@@ -601,7 +601,7 @@ echo -e "Success Back To Default Routing"
 
 restore-route() {
 while true; do
-    read -p "Are you sure you want to do a Restore? (y/n): " opw
+    read -p "Are you sure you want to do a Restore? (y/n): " opw || exit 0
     case $opw in
         y|Y)
             echo "Proceeding with Restore..."

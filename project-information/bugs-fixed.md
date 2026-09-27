@@ -1656,3 +1656,8 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 184 (Found 178):** in `installer/lite.sh`, placed `systemctl disable --now haproxy` after `diamond.sh` execution so the unit remains disabled on completed lite installs. In `lite/menu-system.sh`, removed the dead `ws` and `haproxy` restarts from `resall()`. In `lite/dm-menu.sh`, removed `systemctl restart haproxy` from the certificate installation branches so renewals do not bring port 777 back up. Repacked both menu archives (`menu/full.zip` and `menu/lite.zip`) with 0 diffs and all entries at 0755.
 - **Verified:** `bash -n` clean across all 4 touched files; archive entries byte-synchronized.
+
+### Fix 185 - EOF guards across all submenus and restore loops (Found 179)
+
+- **Fix 185 (Found 179):** added `|| exit 0` to `read` statements feeding loops or self-referential `case` defaults across 15 files: `full/menu-dnstt.sh`, `full/menu-ssh.sh`, `full/menu-system.sh`, `lite/menu-system.sh`, `full/xl2tp.sh`, and all 8 `routing-*` scripts (`full/` and `lite/`). Repacked both menu archives (`menu/full.zip` and `menu/lite.zip`) with 0 diffs and all entries at 0755.
+- **Verified live on VPS:** deployed to `/usr/bin/`; `menu-dnstt < /dev/null` renders exactly once and exits 0; `printf '1\n' | xl2tp` exits cleanly without spinning or timing out; `change_timezone` renders once and exits 0 on EOF.

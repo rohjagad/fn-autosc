@@ -312,7 +312,7 @@ add() {
     2. Create Account (IPv6)
     ==============================
     Press [Ctrl + C] to exit"
-    read -p "Input option: " aws
+    read -p "Input option: " aws || exit 0
     case $aws in
     1) akun4 ;;
     2) akun6 ;;
@@ -339,7 +339,7 @@ menuwg() {
     9. Exit
     ==========================
     Press [Ctrl + C] to exit"
-    read -p "Input option: " opt
+    read -p "Input option: " opt || exit 0
     case $opt in
     1) install ;;
     2) status ;;
@@ -376,7 +376,7 @@ echo -e "\e[1;32m═════════════════════
 echo -e " x)   MAIN MENU"
 echo -e "\e[1;32m══════════════════════════════════════════\e[m" | lolcat
 echo -e ""
-read -p " Select menu :  "  opt
+read -p " Select menu :  "  opt || exit 0
 echo -e ""
 case $opt in
 		1)
@@ -714,7 +714,7 @@ os() {
 =========================
 Press CTRL + C to Exit
 "
-    read -p "Input Options: " os
+    read -p "Input Options: " os || exit 0
     case $os in
         01|1) clear ; rocky ;;
         02|2) clear ; alpine ;;

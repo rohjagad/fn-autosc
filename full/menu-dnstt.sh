@@ -116,7 +116,7 @@ ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
         
-        read -p "Input option: " dn1
+        read -p "Input option: " dn1 || exit 0
         case $dn1 in
             1)
                 clear

@@ -101,7 +101,7 @@ domain=$(cat /etc/xray/domain)
 function create() {
 clear
 until [[ $VPN_USER =~ ^[a-zA-Z0-9_]+$ && ${CLIENT_EXISTS} == '0' ]]; do
-		read -rp "Username : " -e VPN_USER
+		read -rp "Username : " -e VPN_USER || exit 0
 		CLIENT_EXISTS=$(grep -w $VPN_USER /etc/funny/.l2tp | wc -l)
 
 		if [[ ${CLIENT_EXISTS} == '1' ]]; then
@@ -173,9 +173,9 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/funny/.l2tp")
 	grep -E "^### " "/etc/funny/.l2tp" | cut -d ' ' -f 2-3 | nl -s ') '
 	until [[ ${CLIENT_NUMBER} -ge 1 && ${CLIENT_NUMBER} -le ${NUMBER_OF_CLIENTS} ]]; do
 		if [[ ${CLIENT_NUMBER} == '1' ]]; then
-			read -rp "Select One Client[1]: " CLIENT_NUMBER
+			read -rp "Select One Client[1]: " CLIENT_NUMBER || exit 0
 		else
-			read -rp "Select One Client [1-${NUMBER_OF_CLIENTS}]: " CLIENT_NUMBER
+			read -rp "Select One Client [1-${NUMBER_OF_CLIENTS}]: " CLIENT_NUMBER || exit 0
 		fi
 	done
 # match the selected number to a client name
@@ -220,9 +220,9 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/funny/.l2tp")
 	grep -E "^### " "/etc/funny/.l2tp" | cut -d ' ' -f 2-3 | nl -s ') '
 	until [[ ${CLIENT_NUMBER} -ge 1 && ${CLIENT_NUMBER} -le ${NUMBER_OF_CLIENTS} ]]; do
 		if [[ ${CLIENT_NUMBER} == '1' ]]; then
-			read -rp "Select one client [1]: " CLIENT_NUMBER
+			read -rp "Select one client [1]: " CLIENT_NUMBER || exit 0
 		else
-			read -rp "Select one client [1-${NUMBER_OF_CLIENTS}]: " CLIENT_NUMBER
+			read -rp "Select one client [1-${NUMBER_OF_CLIENTS}]: " CLIENT_NUMBER || exit 0
 		fi
 	done
 echo ""
@@ -269,7 +269,7 @@ ${green}5${NC}. Exit
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-read -p "Input option: " menu
+read -p "Input option: " menu || exit 0
 echo -e ""
 case $menu in
 1)

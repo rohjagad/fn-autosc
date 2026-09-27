@@ -123,7 +123,7 @@ ${green}9${NC}. Change SSH IP Limit
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-read -p "Input option: " aws
+read -p "Input option: " aws || exit 0
     case $aws in
     1) clear ; addssh ;;
     2) clear ; trial-ssh ;;
