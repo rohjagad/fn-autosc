@@ -208,14 +208,21 @@ bash warp.sh install
 bash warp.sh wgd
 fi
 chmod +x /usr/bin/warp.sh
-chmod +x /usr/bin/*
 clear
 }
 
 status() {
     clear
-    warp.sh status
-    curl -s https://www.cloudflare.com/cdn-cgi/trace
+    if command -v warp.sh >/dev/null 2>&1 || [[ -x /usr/bin/warp.sh ]]; then
+        /usr/bin/warp.sh status 2>/dev/null || warp.sh status 2>/dev/null || true
+    else
+        echo "WARP is not installed. Choose option 1 to install first."
+    fi
+    echo ""
+    echo "Cloudflare Trace:"
+    curl -s --max-time 10 https://www.cloudflare.com/cdn-cgi/trace
+    echo ""
+    read -n 1 -s -r -p "Press any key to return..." || true
 }
 
 enable() {
@@ -226,6 +233,7 @@ enable() {
     if [ "$EXPIRED_DATE" != "lifetime" ]; then
         clear
         echo -e "WARP is not allowed on a date-licensed machine: it changes the server IP and would break the license check."
+        read -n 1 -s -r -p "Press any key to return..." || true
         return
     fi
     # install() sets WARP up with P3TERX warp.sh ("warp.sh wgd"), i.e. the
@@ -239,6 +247,7 @@ enable() {
     else
         echo -e "WARP is not running"
     fi
+    read -n 1 -s -r -p "Press any key to return..." || true
 }
 
 disable() {
@@ -250,6 +259,7 @@ disable() {
     else
         echo -e "success disable warp"
     fi
+    read -n 1 -s -r -p "Press any key to return..." || true
 }
 
 restart() {
@@ -258,48 +268,74 @@ restart() {
     if [ "$EXPIRED_DATE" != "lifetime" ]; then
         clear
         echo -e "WARP is not allowed on a date-licensed machine: it changes the server IP and would break the license check."
+        read -n 1 -s -r -p "Press any key to return..." || true
         return
     fi
-    warp.sh restart
+    warp.sh restart 2>/dev/null || true
     systemctl daemon-reload
-    systemctl restart wg-quick@wgcf
+    systemctl restart wg-quick@wgcf 2>/dev/null || true
     clear
     echo -e "Done Restart Service Warp Wireguard"
+    read -n 1 -s -r -p "Press any key to return..." || true
 }
 
 akun4() {
-    warp -4 > /root/wgcf.conf
     clear
+    local conf=""
+    if [[ -f /etc/wireguard/wgcf.conf ]]; then
+        conf=$(cat /etc/wireguard/wgcf.conf)
+    elif [[ -f /etc/wireguard/wgcf-profile.conf ]]; then
+        conf=$(cat /etc/wireguard/wgcf-profile.conf)
+    elif command -v warp >/dev/null 2>&1; then
+        conf=$(warp -4 2>/dev/null || cat /root/wgcf.conf 2>/dev/null)
+    fi
     echo -e "
     Your WARP IPv4 WireGuard Account
     ======================================
          Wireguard Configuration
 
-    $(cat /root/wgcf.conf)
+    ${conf:-No WARP WireGuard configuration found. Install WARP first.}
     ======================================
     "
     rm -fr /root/wgcf.conf
+    read -n 1 -s -r -p "Press any key to return..." || true
 }
 
 akun6() {
-        warp -6 > /root/wgcf.conf
     clear
+    local conf=""
+    if [[ -f /etc/wireguard/wgcf.conf ]]; then
+        conf=$(cat /etc/wireguard/wgcf.conf)
+    elif [[ -f /etc/wireguard/wgcf-profile.conf ]]; then
+        conf=$(cat /etc/wireguard/wgcf-profile.conf)
+    elif command -v warp >/dev/null 2>&1; then
+        conf=$(warp -6 2>/dev/null || cat /root/wgcf.conf 2>/dev/null)
+    fi
     echo -e "
     Your WARP IPv6 WireGuard Account
     ======================================
          Wireguard Configuration
 
-    $(cat /root/wgcf.conf)
+    ${conf:-No WARP WireGuard configuration found. Install WARP first.}
     ======================================
     "
     rm -fr /root/wgcf.conf
+    read -n 1 -s -r -p "Press any key to return..." || true
 }
 
 token() {
     clear
-    read -p "Input Your Token Teams WARP+: " token
+    read -p "Input Your Token Teams WARP+: " token || return
     clear
-    warp -T $token
+    if command -v warp >/dev/null 2>&1; then
+        warp -T "$token"
+    elif [[ -x /usr/bin/warp.sh ]]; then
+        echo "Teams token registration requires fscarmen warp client."
+    else
+        echo "WARP is not installed. Install WARP first."
+    fi
+    echo ""
+    read -n 1 -s -r -p "Press any key to return..." || true
 }
 
 add() {

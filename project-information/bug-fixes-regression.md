@@ -713,3 +713,14 @@ Section 35's four-check rule applied to Fixes 192 and 193:
 | **Over-strictness** | Does not restrict upload file sizes or backup contents; strictly protects staged shadow hashes and ensures restored accounts function immediately. |
 | **Over-engineering** | Simple targeted `cp` statements into existing archive structure and standard `0600` permissions. No new helper binaries or dependencies. |
 | **vs the source** | Both references omitted `/var/www/html/` client configs and printed misleading status messages during restore. Preserving complete client state across migrations is essential for server restore integrity. |
+
+## 52. WARP Submenu Usability, Binary Verification, and Permission Scoping - Four Checks (September 28, 2026)
+
+Section 35's four-check rule applied to Fix 194:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | WARP installer and profile generation functionality is completely preserved. Valid configuration files are parsed from their real locations on disk. `bash -n` clean across both files. |
+| **Over-strictness** | Eliminates confusing error spew and screen flashing; operators can now read status traces and configuration details. |
+| **Over-engineering** | Standard existence checks (`command -v`, `[[ -f ]]`) and standard bash pause prompt (`read -n 1`). Removed 1 redundant wildcard permission line. Zero new dependencies. |
+| **vs the source** | Both references inherited broken flags from mixing up P3TERX and Fscarmen WARP scripts, lacked terminal pauses, and ran `chmod +x /usr/bin/*`. Fixing these aligns the submenu with the actual installed software stack. |

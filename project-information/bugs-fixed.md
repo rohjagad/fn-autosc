@@ -1701,3 +1701,14 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 193 (Found 187):** in `website/upload.php`, changed upload archive mode from `0644` to `0600` (`chmod($target_file, 0600)`) so sensitive files like `/etc/shadow` are never world-readable while staged. Added post-execution cleanup `if (file_exists($target_file)) { @unlink($target_file); }` to guarantee failed or unprocessed archives are pruned immediately.
 - **Verified:** `php -l` clean; verified live on VPS.
+
+### Fix 194 - WARP submenu robust command handling, pauses, and scoped permissions (Found 188)
+
+- **Fix 194 (Found 188):** in `full/menu-system.sh` and `lite/menu-system.sh`:
+  1. Updated `status()` to verify `warp.sh` existence before calling, printing a clear message if not installed.
+  2. Updated `akun4()` and `akun6()` to read the real profile path `/etc/wireguard/wgcf.conf` (where P3TERX `warp.sh` writes the WireGuard configuration), falling back cleanly to `No WARP WireGuard configuration found. Install WARP first.`.
+  3. Updated `token()` to validate tool availability instead of crashing with `command not found`.
+  4. Added `read -n 1 -s -r -p "Press any key to return..."` across `status()`, `enable()`, `disable()`, `restart()`, `akun4()`, `akun6()`, and `token()` so outputs remain visible to the operator.
+  5. Scoped `install()` to `chmod +x /usr/bin/warp.sh`, deleting the dangerous system-wide `chmod +x /usr/bin/*`.
+  Repacked both menu archives (`menu/full.zip` and `menu/lite.zip`) with 0 diffs and all entries at 0755.
+- **Verified live on VPS:** tested option 2 (Status), option 7->1 (Account), and option 6 (Token): all display clean, actionable output and pause for operator keypress without error.

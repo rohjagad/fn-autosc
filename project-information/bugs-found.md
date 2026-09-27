@@ -1679,3 +1679,11 @@ Found 186. **`backup.sh` omitted `/var/www/html/` configs, leaving restored Wire
 Found 187. **`upload.php` staged uploaded backup archives world-readable (`0644`) and never cleaned up failed uploads** (`website/upload.php:82`) - `upload.php` set `chmod($target_file, 0644)` on uploaded backup files in `/var/www/uploads/`. Because backup archives contain `/etc/shadow`, `/etc/gshadow`, WireGuard private keys, and Xray credentials, world-readable mode exposed sensitive credentials to unprivileged local processes. Furthermore, if `restore-ftp` failed (such as an invalid zip), `$target_file` remained in `/var/www/uploads/` indefinitely.
 - **Confirmed by inspection:** `chmod` was explicitly set to `0644`, and there was no cleanup handler after `shell_exec("sudo /usr/bin/restore-ftp")`.
 - **Ours:** introduced during web-restore security enhancement and missed during permissions hardening.
+
+Found 188. **WARP submenu invoked non-existent commands (`warp -4/-6/-T`), wiped terminal output instantly, and ran `chmod +x /usr/bin/*`** (`full/menu-system.sh`, `lite/menu-system.sh`, lines 220-335) - the WARP submenu carried multiple broken invocations:
+1. `akun4()`, `akun6()`, and `token()` executed `warp -4 > /root/wgcf.conf`, `warp -6`, and `warp -T $token`. The system has no `warp` binary (WARP was installed by P3TERX's `warp.sh`, while `-4/-6/-T` were flags from an unrelated script, Fscarmen `warp`). Calling these printed `warp: command not found` and `cat: /root/wgcf.conf: No such file or directory`.
+2. In `status()`, running `warp.sh status` before WARP was installed printed `warp.sh: command not found`.
+3. In `status()`, `enable()`, `disable()`, `restart()`, `akun4()`, `akun6()`, and `token()`, the actions returned immediately to `menuwg()`, which instantly executed `clear`. In interactive sessions, status and account displays were wiped within milliseconds before the user could read them.
+4. Line 226 in `install()` executed `chmod +x /usr/bin/*`, modifying permissions across all 1500+ system binaries in `/usr/bin/`.
+- **Confirmed live on VPS:** running status or account creation printed `command not found` and was instantly wiped by the menu loop.
+- **Inherited from both references** (both V23 and 1.20 carried these identical broken calls, lack of pauses, and `chmod +x /usr/bin/*`).
