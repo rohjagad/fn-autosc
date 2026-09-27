@@ -344,3 +344,64 @@ out of a family has to ask whether the family has other members. Here the "famil
 transports of the same tool but other ports of the same capture. Fix 148 generalises it, and the
 timer's default `AccuracySec=1min` - which made even the port-53 fix restore up to a minute late -
 is now `1s`.
+
+## 30. Self-Review of the Newest Fixes - Over-Engineering, Over-Strictness, Regression (September 27, 2026)
+
+The owner asked for the whole fix history to be re-checked for the three classes. Both archives were
+re-verified first (MD5/SHA match `original-source-do-not-edit/README.md`); then `bugs-fixed.md`,
+`bugs-found.md`, `is-decision.md` and the commit log were read, and every fix made since the previous
+review (sections 25-29, which end at fix ~142) was checked against both versions.
+
+### Regression
+
+- **Fix 151 exposed a heavy, previously unreachable installer.** Removing the guard that made the WARP
+  menu abort on every full install also made its Debian branch run for the first time:
+  `deb http://deb.debian.org/debian/ unstable main` plus `apt install linux-headers-$(uname -r)`. On
+  the test host that pulled **linux-image-6.1.0-53** - a new kernel - along with llvm and the media
+  stack (observed live). Nothing was wrong before because nothing could reach it. Fixed: the unstable
+  repository and the kernel headers are now used only when the running kernel has **no** WireGuard
+  module; Debian 12 ships it in-tree (`modinfo wireguard` -> `.../wireguard.ko` on the test host, so
+  the in-tree branch is taken). Both references have the unconditional lines, so they share the
+  hazard; the guard is ours, added because our fix is what made it reachable.
+- **The nginx trust change (fixes 153/154) has no hidden consumer.** A tree-wide search finds no
+  script, menu, Go tool or PHP page that reads `$http_x_forwarded_for`, `X-Real-IP` or the nginx
+  access log, and the API server does not either. Changing what those headers carry, or what
+  `$remote_addr` means, therefore cannot regress a panel feature - only what Xray and the SSH-WebSocket
+  backend see, which is the point of the change.
+
+### Over-strictness - checked, and none is a trap
+
+- **Decision 4 (reject 0 on every quantity field).** Driven live through the API: `add-vmess` with
+  `expired:0`, `limit-ip:0` and `quota:0` each returned `{"status":"error","message":"the panel did
+  not create ..."}` and left **0 accounts and 0 cards** - the validation loops end in `|| exit 1`, so
+  EOF terminates them instead of spinning. An API caller using the references' `0` gets a clean error,
+  not a hang and not a half-created account. The references accept any value (`read -p "Limit Ip:"`,
+  `if [[ $quota -gt 0 ]]`, `date -d "$masaaktif days"`), so this is a deliberate, documented
+  divergence that fails safe. The one rough edge is cosmetic: the API's error text embeds the
+  script's own output, including the `cat: /etc/funny/.chatid: No such file` lines when the bot is
+  not configured.
+- **Decision 7 (`-s /bin/false -M`)** stays inside the SSH forwarding accounts and was verified live.
+- **Decision 16 (quota breach deletes, IP breach locks)** is deliberate, and the IP breach being the
+  *recoverable* one is what keeps the Cloudflare item below non-destructive.
+- **Decision 19 (restore key, fails closed)** - a fresh install always writes `/etc/funny/.restore.key`,
+  and an archive predating it leaves that file in place, so a restore cannot lock the operator out.
+- **Fix 154's Cloudflare range list - the one real fragility.** `real_ip_header CF-Connecting-IP` is
+  honoured only for peers inside `set_real_ip_from`, so if Cloudflare publishes a new range and the
+  list is not refreshed, requests from that edge keep the edge as `$remote_addr` and the IP limit
+  would count Cloudflare edges instead of clients - locking accounts that exceed their limit (and
+  `unlock-*` restores them, so it is recoverable, not destructive). Maintenance rule: refresh
+  `set_real_ip_from` from `https://www.cloudflare.com/ips-v4` and `/ips-v6` and reload nginx; because
+  every install downloads the current `config/*.conf` from the repository, keeping the repository's
+  list current is the rule for us.
+
+### Over-engineering - checked, nothing to undo
+
+- The two `*-fixnet` timers, the `set_real_ip_from` block and the API repository each answer a
+  reproduced defect; none is infrastructure without a failure behind it.
+- The previous review's over-fixes stay reverted and re-scanned clean: no variable is iterated as
+  `"${x[@]}"` unless it is a real array (`users`/`usernames`/`data` are all `x=( ... )`, in ours and
+  in the references), no `proxy_add_x_forwarded_for` remains, and the certificate stage uses
+  acme.sh's install rather than an append.
+- Additions present in neither archive are still only the ones this review can justify: the
+  `set_real_ip_from` block, `udp-request-fixnet` and `keyexchange=ikev1` are count-0 in both V23 and
+  1.20, and each traces to a defect reproduced on the test host.

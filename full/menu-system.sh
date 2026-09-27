@@ -173,11 +173,20 @@ Info="${Green_font_prefix}[information]${Font_color_suffix}"
         if [[ $OS == 'ubuntu' ]]; then
         apt install -y wireguard
 elif [[ $OS == 'debian' ]]; then
-        echo "deb http://deb.debian.org/debian/ unstable main" >/etc/apt/sources.list.d/unstable.list
-        printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' >/etc/apt/preferences.d/limit-unstable
-        apt update
-        apt install -y wireguard-tools iptables iptables-persistent
-        apt install -y linux-headers-$(uname -r)
+        # Debian 12 ships WireGuard in-tree. Only fall back to Debian unstable
+        # plus the matching kernel headers when the running kernel has no
+        # WireGuard module; doing it unconditionally installs a new kernel and
+        # a large dependency set for nothing (observed on the test host:
+        # linux-image-6.1.0-53 plus llvm and the media stack).
+        if modinfo wireguard >/dev/null 2>&1 || grep -qw wireguard "/lib/modules/$(uname -r)/modules.builtin" 2>/dev/null; then
+                apt install -y wireguard-tools iptables iptables-persistent
+        else
+                echo "deb http://deb.debian.org/debian/ unstable main" >/etc/apt/sources.list.d/unstable.list
+                printf 'Package: *\nPin: release a=unstable\nPin-Priority: 90\n' >/etc/apt/preferences.d/limit-unstable
+                apt update
+                apt install -y wireguard-tools iptables iptables-persistent
+                apt install -y linux-headers-$(uname -r)
+        fi
 elif [[ ${OS} == 'centos' ]]; then
         curl -Lo /etc/yum.repos.d/wireguard.repo https://copr.fedorainfracloud.org/coprs/jdoss/wireguard/repo/epel-7/jdoss-wireguard-epel-7.repo
         yum -y update
