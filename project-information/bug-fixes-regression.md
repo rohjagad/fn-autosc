@@ -625,3 +625,14 @@ Section 35's four-check rule applied to Fix 181:
 | **Over-strictness** | Eliminates strict rejection of user inputs that match on-screen prompt labels; fails safe to default loop for non-numeric/out-of-bounds input. |
 | **Over-engineering** | Simple pattern expansion `1|01)` within existing bash `case` statements. No new flags, variables, or functions added. |
 | **vs the source** | Both references carried the mismatch between display `01` and case `1)`. Aligning input matching with on-screen text resolves operator confusion and broken script dispatch. |
+
+## 44. API Menu Lifetime Support and Handler Modes - Four Checks (September 28, 2026)
+
+Section 35's four-check rule applied to Fix 182:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Standard dated licenses continue to validate identically against `fn-autosc-auth/izin.txt`. Only `lifetime` entries bypass the date subtraction. `bash -n menu-api` clean. |
+| **Over-strictness** | Eliminates unwarranted rejection of lifetime licensed servers attempting to run or install the API management menu. |
+| **Over-engineering** | 10 lines of standard shell conditionals mirroring the existing gate stanza from `fn-autosc` Decision 28. No new flags, endpoints, or dependencies. |
+| **vs the source** | FN-API reference repository had no licensing gate at all. The gate was added during our fork's layer restoration; bringing it into alignment with Decision 28 maintains consistency across both repositories. |

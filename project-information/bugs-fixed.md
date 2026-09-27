@@ -1641,3 +1641,8 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 181 (Found 175):** updated the case branches for options 1 through 9 to `1|01)`, `2|02)`, ..., `9|09)` across all 8 transport menus (`full/x-{ws,grpc,split,http}.sh` and `lite/x-{ws,grpc,split,http}.sh`), allowing users to input either the single digit or the zero-padded number displayed on the screen. Repacked both menu archives (`menu/full.zip` and `menu/lite.zip`) with 0 diffs and all entries at 0755.
 - **Verified live:** deployed to `/usr/bin/x-ws`; verified `01` and `1` both launch `add-vmess-ws`, and `07` launches `cek-xray-ws`.
+
+### Fix 182 - menu-api lifetime license support and handler executable permissions (Found 176)
+
+- **Fix 182 (Found 176):** in `fn-autosc-api` (`8165cb2`), updated `gate()` in `menu-api` to check `EXPIRED_DATE = "lifetime"` first, skipping the expiry subtraction and printing `Expired: lifetime` per Decision 28. Marked all handlers in `handlers/` and the `server` script as `0755` executable in git.
+- **Verified:** unit evaluation confirms `lifetime` passes with exit code 0, future dates pass, and expired dates reject. Pushed to `fn-autosc-api` repository.
