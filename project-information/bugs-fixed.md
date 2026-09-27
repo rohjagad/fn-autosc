@@ -1661,3 +1661,8 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 185 (Found 179):** added `|| exit 0` to `read` statements feeding loops or self-referential `case` defaults across 15 files: `full/menu-dnstt.sh`, `full/menu-ssh.sh`, `full/menu-system.sh`, `lite/menu-system.sh`, `full/xl2tp.sh`, and all 8 `routing-*` scripts (`full/` and `lite/`). Repacked both menu archives (`menu/full.zip` and `menu/lite.zip`) with 0 diffs and all entries at 0755.
 - **Verified live on VPS:** deployed to `/usr/bin/`; `menu-dnstt < /dev/null` renders exactly once and exits 0; `printf '1\n' | xl2tp` exits cleanly without spinning or timing out; `change_timezone` renders once and exits 0 on EOF.
+
+### Fix 186 - robust IP fallbacks for OpenVPN, Squid, and WireGuard installers (Found 180)
+
+- **Fix 186 (Found 180):** in `installer/vpn.sh` and `installer/wg.sh`, added fallback chains (`wget -4 ... || cat /etc/.ip || echo "$LOCAL_IP"` and `curl -4 ... || cat /etc/.ip || echo "$LOCAL_IP"`) to ensure `MYIP`, `MYIP1`, and WireGuard's `ip=` never resolve to empty strings.
+- **Verified:** `bash -n` clean on both installers; tested on live VPS: `/etc/squid/squid.conf` and `/etc/wireguard/params` populate with valid IP `202.155.17.126`.

@@ -658,3 +658,14 @@ Section 35's four-check rule applied to Fix 185:
 | **Over-strictness** | Does not restrict input formats or options; strictly terminates processes cleanly when input streams close rather than consuming 100% CPU in infinite loops. |
 | **Over-engineering** | Standard `|| exit 0` append on existing `read` commands. No new functions, variables, or dependencies added. |
 | **vs the source** | Both references lacked EOF guards on all submenus and helper loops, causing runaway CPU spinning when run via automated runners or closed streams. Aligning with Fix 162/172 standards completes robust EOF handling across the entire script suite. |
+
+## 47. Installer Public IP Lookup Fallbacks - Four Checks (September 28, 2026)
+
+Section 35's four-check rule applied to Fix 186:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | When external lookups succeed, the identical IPv4 address is obtained. When external lookups fail or time out, valid IP is recovered from `/etc/.ip` or `$LOCAL_IP`. `bash -n` clean on both files. |
+| **Over-strictness** | Does not restrict network environments; directly prevents invalid syntax in generated daemon configuration files. |
+| **Over-engineering** | 2-stage fallback `|| cat /etc/.ip || echo "$LOCAL_IP"` using existing filesystem state. No new dependencies or tools. |
+| **vs the source** | Both references made un-guarded remote calls during installation. Preventing configuration corruption when third-party lookup services fail is necessary for resilient unattended deployment. |

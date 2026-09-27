@@ -75,9 +75,9 @@ hosting="https://raw.githubusercontent.com/rohjagad/fn-autosc/main"
 # var installation
 export DEBIAN_FRONTEND=noninteractive
 OS=`uname -m`;
-MYIP=$(wget -4 -qO- ipv4.icanhazip.com);
+MYIP=$(wget -4 -qO- ipv4.icanhazip.com 2>/dev/null || cat /etc/.ip 2>/dev/null || echo "$LOCAL_IP")
 MYIP2="s/xxxxxxxxx/$MYIP/g";
-ANU=$(ip -o -4 route show to default | awk '{print $5}');
+ANU=$(ip -o -4 route show to default | awk '{print $5; exit}');
 
 # Install OpenVPN dan Easy-RSA
 apt install openvpn -y
@@ -230,7 +230,7 @@ END
 apt-get -y install squid
 rm -f /etc/squid/squid.conf
 wget -O /etc/squid/squid.conf "${hosting}/config/squid.conf" >> /dev/null 2>&1
-MYIP1=$(wget -qO- ipv4.icanhazip.com);
+MYIP1="${MYIP:-$(cat /etc/.ip 2>/dev/null || echo "$LOCAL_IP")}"
 MYIP3="s/rerechan/$MYIP1/g";
 sed -i $MYIP3 /etc/squid/squid.conf
 service squid restart
