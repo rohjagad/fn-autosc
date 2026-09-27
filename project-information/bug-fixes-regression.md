@@ -560,3 +560,15 @@ Section 37 counted nine `command | grep | awk` lines. Decision 27's correction n
 to the four SSH front-ends (OpenSSH, Dropbear, WS ePro, Stunnel5), so it is four probes in a single
 column. The four checks themselves are unchanged: display-only, `n/a` fallback, no new dependency, and
 still an owner-requested divergence (the references show no service version at all).
+
+## 38. Lifetime Auth and the WARP Guard - the Four Checks (September 27, 2026)
+
+Decision 28 touches 192 gate copies plus the WARP submenu in both editions. Section 35's rule
+applied to it:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Dated entries behave exactly as before: the unit harness shows future-date exits 0, past-date exits 1, and garbage/empty inputs behave byte-for-byte as the original (including its quirk that the `exit 1` never escapes the command substitution). The WARP refusal only fires on date-licensed machines; `disable()`/`status()` and the `wg0` Cloudflare peer are untouched. `bash -n` passes on all 194 touched files. |
+| **Over-strictness** | The refusal names the reason and the remedy (a `lifetime` entry); it does not abort the menu, only the WARP action (`return`, not `exit`). The lifetime skip keeps the membership check - an unlisted machine is still rejected. |
+| **Over-engineering** | One `if` in the gate, one `if` line on the expiry check, one line in each `output()`; one shared guard paragraph in the three WARP functions. No new files, no flags, no extra network calls - `enable()` reuses `$EXPIRED_DATE` the gate already set. |
+| **vs the source** | Both references gate on a date unconditionally and drive WARP with `warp-cli`; neither knows `lifetime`. This is owner-requested, recorded as decision 28 - not invented logic replacing a reference behaviour. |

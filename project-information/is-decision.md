@@ -419,3 +419,39 @@ The block is four lines in a single column, which also removes the two-column `p
 
 Verified live after the change: `OpenSSH 9.2p1`, `Dropbear v2019.78`, `WS ePro v1.2.3`, `Stunnel5 5.68`,
 in the SSH menu's existing layout.
+
+## 28. A "lifetime" Auth Entry Means Auth Is Off, and Date-Licensed Machines May Not Use WARP
+
+**The owner's two rules, both driven by what is written in `fn-autosc-auth`'s `izin.txt`:**
+
+1. **If the entry's date field is `lifetime` instead of a date, auth is off.** Every copy of the
+   licence gate (192 files across `full/`, `lite/` and `installer/`) now checks
+   `EXPIRED_DATE = "lifetime"` first and skips the expiry validation, printing `Expired: lifetime`.
+   The membership check (the machine must still be listed) is unchanged. Because the installer
+   scripts carry the same gate, a lifetime machine is detected **at installation** - it installs
+   without a date instead of dying in `calculate_remaining_days` with "Invalid expiration date".
+   No `fn-autosc-auth` entry uses `lifetime` yet; the code is ready for the first one.
+
+2. **If the entry has an expiry date, the panel must not enable WARP.** WARP moves egress through
+   Cloudflare, the licence gate then sees an unlisted IP, and the whole panel locks the operator
+   out (Found 168) - so on a date-licensed machine WARP would break the very license it runs
+   under. `install()`, `enable()` and `restart()` in the Cloudflare WARP submenu (both editions)
+   now refuse unless `$EXPIRED_DATE` is `lifetime`, telling the operator why. `install()` and
+   `restart()` are guarded too, not just `enable()`: installing brings `wgcf` up de facto, and
+   `systemctl restart` would start an inactive `wgcf` - same hazard, same guard. `disable()`,
+   `status()`, the Teams token and the account creation do not change routing and are untouched.
+   The WireGuard menu's "Add Cloudflare WARP" only adds a peer route to `wg0` (`172.16.0.0/24`),
+   never moves egress, so it is not guarded.
+
+**Verified live** on the dated test VPS (`vps-audit`, 2027-12-31): Install, Enable and Restart all
+print the refusal and leave `wgcf` down with egress unchanged. The lifetime path was executed
+from the deployed `enable()` with a stubbed `lifetime` date: `Done Enable Warp`, `wgcf` up,
+egress moved to a WARP address, then restored with a direct `systemctl` (not the menu, per
+Found 168). A unit harness confirmed the patched gate: `lifetime` exits 0, a future date exits
+0, a past date exits 1, and garbage/empty inputs behave byte-for-byte as the original code did
+(the `exit 1` inside `calculate_remaining_days` never escaped its command substitution, before
+or after - a pre-existing quirk, out of scope).
+
+**Rule for future changes:** the licence gate stays one shape in all copies - any new exemption
+goes in the same `if`, and any new feature that moves egress must take the same WARP guard.
+`fn-autosc-auth` itself is only ever read, never written, by this panel.

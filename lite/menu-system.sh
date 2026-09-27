@@ -38,8 +38,15 @@
     EXPIRED_DATE=$(echo "$MATCH" | awk '{print $4}')
 
     # Validasi masa aktif
+    # A "lifetime" entry means auth is off: the expiry check is skipped
+    # (is-decision.md 28). This gate also runs during installation, so a
+    # lifetime machine installs without a date.
+    if [ "$EXPIRED_DATE" = "lifetime" ]; then
+        REMAINING_DAYS="lifetime"
+    else
     REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
-    if [ "$REMAINING_DAYS" -lt 0 ]; then
+    fi
+    if [ "$REMAINING_DAYS" != "lifetime" ] && [ "$REMAINING_DAYS" -lt 0 ]; then
         echo "Authorization has expired."
         exit 1
     fi
@@ -48,7 +55,7 @@
     output() {
         echo "Username: $USERNAME"
         echo "IPv4: $PERMISSION_IP"
-        echo "Expired: $EXPIRED_DATE ($REMAINING_DAYS days)"
+        if [ "$REMAINING_DAYS" = "lifetime" ]; then echo "Expired: lifetime"; else echo "Expired: $EXPIRED_DATE ($REMAINING_DAYS days)"; fi
     }
 
 clear
@@ -132,6 +139,15 @@ clear
 
 install() {
 clear
+    # Date-licensed machines must not bring WARP up: it moves egress through
+    # Cloudflare, the licence gate then sees an unlisted IP and the whole
+    # panel locks out (Found 168). Only "lifetime" entries may use WARP
+    # (is-decision.md 28). $EXPIRED_DATE comes from the gate above.
+    if [ "$EXPIRED_DATE" != "lifetime" ]; then
+        clear
+        echo -e "WARP is not allowed on a date-licensed machine: it changes the server IP and would break the license check."
+        return
+    fi
 # Check OS version
 if [[ -e /etc/debian_version ]]; then
         source /etc/os-release
@@ -205,6 +221,15 @@ status() {
 }
 
 enable() {
+    # Date-licensed machines must not bring WARP up: it moves egress through
+    # Cloudflare, the licence gate then sees an unlisted IP and the whole
+    # panel locks out (Found 168). Only "lifetime" entries may use WARP
+    # (is-decision.md 28). $EXPIRED_DATE comes from the gate above.
+    if [ "$EXPIRED_DATE" != "lifetime" ]; then
+        clear
+        echo -e "WARP is not allowed on a date-licensed machine: it changes the server IP and would break the license check."
+        return
+    fi
     # install() sets WARP up with P3TERX warp.sh ("warp.sh wgd"), i.e. the
     # wg-quick@wgcf interface, and restart() drives that same unit - so enable
     # must drive it too. warp-cli is not the control path here: on a warp.sh
@@ -230,6 +255,13 @@ disable() {
 }
 
 restart() {
+    # Same guard as install()/enable(): restarting would start an inactive
+    # wgcf and move egress, breaking a date license the same way.
+    if [ "$EXPIRED_DATE" != "lifetime" ]; then
+        clear
+        echo -e "WARP is not allowed on a date-licensed machine: it changes the server IP and would break the license check."
+        return
+    fi
     warp.sh restart
     systemctl daemon-reload
     systemctl restart wg-quick@wgcf

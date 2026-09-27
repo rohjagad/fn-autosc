@@ -147,8 +147,15 @@ rainbow_sep() {
     EXPIRED_DATE=$(echo "$MATCH" | awk '{print $4}')
 
     # Validasi masa aktif
+    # A "lifetime" entry means auth is off: the expiry check is skipped
+    # (is-decision.md 28). This gate also runs during installation, so a
+    # lifetime machine installs without a date.
+    if [ "$EXPIRED_DATE" = "lifetime" ]; then
+        REMAINING_DAYS="lifetime"
+    else
     REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
-    if [ "$REMAINING_DAYS" -lt 0 ]; then
+    fi
+    if [ "$REMAINING_DAYS" != "lifetime" ] && [ "$REMAINING_DAYS" -lt 0 ]; then
         echo "Authorization has expired."
         exit 1
     fi
@@ -157,7 +164,7 @@ rainbow_sep() {
     output() {
         echo "Username: $USERNAME"
         echo "IPv4: $PERMISSION_IP"
-        echo "Expired: $EXPIRED_DATE ($REMAINING_DAYS days)"
+        if [ "$REMAINING_DAYS" = "lifetime" ]; then echo "Expired: lifetime"; else echo "Expired: $EXPIRED_DATE ($REMAINING_DAYS days)"; fi
     }
 
 clear
