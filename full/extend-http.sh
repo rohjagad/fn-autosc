@@ -131,7 +131,7 @@ else
     exp2=$(( (d1 - d2) / 86400 ))
     exp3=$(($exp2 + $masaaktif))
     exp4=$(date -d "$exp3 days" +"%y-%m-%d") # Format tahun 2 digit
-    sed -i "/### $user/c\### $user $exp4" /etc/xray/json/upgrade.json
+    sed -i "/^### $user /c\### $user $exp4" /etc/xray/json/upgrade.json
     sed -i "s/Expired : $exp/Expired : $exp4/" /var/log/create/xray/http/${user}.log
 
     echo -e "\n${YB}Reset total usage quota? (y/n):${NC}"

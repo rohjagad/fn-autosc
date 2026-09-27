@@ -572,3 +572,12 @@ applied to it:
 | **Over-strictness** | The refusal names the reason and the remedy (a `lifetime` entry); it does not abort the menu, only the WARP action (`return`, not `exit`). The lifetime skip keeps the membership check - an unlisted machine is still rejected. |
 | **Over-engineering** | One `if` in the gate, one `if` line on the expiry check, one line in each `output()`; one shared guard paragraph in the three WARP functions. No new files, no flags, no extra network calls - `enable()` reuses `$EXPIRED_DATE` the gate already set. |
 | **vs the source** | Both references gate on a date unconditionally and drive WARP with `warp-cli`; neither knows `lifetime`. This is owner-requested, recorded as decision 28 - not invented logic replacing a reference behaviour. |
+
+## 39. Batch-1 Fixes (Found 169-170) - the Four Checks (September 28, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Fix 175 reuses the exact Decision 28 stanza (same `if`, same `output()` line); dated/garbage/empty inputs behave as the original `install.sh` did. Fix 176 only narrows the match (adds `^` + trailing space); non-colliding usernames behave identically (single marker rewritten either way). `bash -n` passes on all 9 touched files. |
+| **Over-strictness** | Neither fix refuses anything new: lifetime still requires membership (unlisted IP still rejected); extend still rewrites the requested account, just not its longer-named neighbour. |
+| **Over-engineering** | Fix 175: 6-line branch, no new files/flags/calls. Fix 176: one-line anchor per file, same tool (`sed`), no new dependency. Sibling patterns deliberately left alone to avoid churn (see Fix 176 scope note). |
+| **vs the source** | Fix 175 completes our own Decision 28 (both references gate on a date; the miss was ours). Fix 176 diverges from both references (V23 identical unanchored) because the reference corrupts data - necessary divergence, minimal form. `trial-ssh.sh` missing gate, `kill-ws` log truncation, `xp.sh` per-user restarts, `udp` 36711 display, `diamond.sh` pkill, and sibling unanchored deletes are all inherited and recorded, not changed here. |

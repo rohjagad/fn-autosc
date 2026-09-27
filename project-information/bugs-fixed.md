@@ -1565,3 +1565,14 @@ Both were introduced by the eleventh pass and are the reason the re-check was wo
 - **Fix 174 (Found 167):** `full/menu-system.sh` and `lite/menu-system.sh` had `enable()`/`disable()` call `warp-cli connect`/`disconnect`, while `install()` sets WARP up with P3TERX `warp.sh` (`warp.sh wgd`) and `restart()` already drives `wg-quick@wgcf`. Enable/disable now do the same: `systemctl enable --now wg-quick@wgcf` / `systemctl disable --now wg-quick@wgcf` (plus a `wg-quick down wgcf` fallback), and both check the interface afterwards instead of printing a fixed message, so the menu says `WARP is not running` / `WARP is still running` when it did not do what was asked.
 - **Verified live:** `Cloudflare WARP > Enable` brought `wgcf` up and egress became `104.28.245.124`; the disable path's commands (`systemctl disable --now wg-quick@wgcf`) brought it down and restored `202.155.17.126`.
 - **Caveat, recorded as Found 168:** with WARP up the *entire panel* is unreachable through the menus (the licence gate), so the fixed disable cannot be invoked from the menu until Found 168 is addressed.
+
+### Fix 175 - root installer honours lifetime (Found 169)
+
+- **Fix 175 (Found 169):** `install.sh` `permision()` now carries the same lifetime branch as the other 192 copies: `lifetime` skips `calculate_remaining_days` and prints `Expired: lifetime`; dated entries behave byte-for-byte as before. This closes the Decision 28 gap where a lifetime machine died at the entry point.
+- **Verified:** unit harness (`lifetime` -> 0, future -> 0, past -> 1); `bash -n install.sh` passes; gate-file sweep now shows 193/193 with the lifetime branch.
+
+### Fix 176 - extend matches the exact account (Found 170)
+
+- **Fix 176 (Found 170):** the 8 `extend-*` scripts (`full/` + `lite/`, all 4 transports) now use `sed -i "/^### $user /c\### $user $exp4"` - anchored at line start with a trailing space - so `ali` no longer rewrites `alice`. One-line change per file, no new logic.
+- **Verified:** `/tmp` reproduction (unanchored corrupts, anchored preserves) on host and VPS; `bash -n` passes on all 8; archives to be repacked in the reinstall pass.
+- **Scope note (reliability over strictness):** sibling unanchored patterns (`delete-*`, `kill-*`, `quota-*`, `limit-ip-*`, `xp.sh`) share the same shape and are inherited from both references. They are recorded here, not changed in this batch: `delete/kill/quota` operate on the exact `### $user $exp` pair (needs the expiry to match, narrower than extend's bare `$user`), and broadening this batch would risk churn. If a prefix-collision deletion is ever reproduced live, it takes the same one-line anchor.
