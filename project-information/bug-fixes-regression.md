@@ -524,3 +524,21 @@ found defects in changes that had already been verified live. The archives must 
 against `original-source-do-not-edit/README.md` before they are used as the reference, and when a
 suspected defect turns out to be the references' own behaviour, that is recorded too (section 28),
 so it is not "fixed" into a divergence later.
+
+## 36. Dropbear 2019.78 Pin - the Four Checks (September 27, 2026)
+
+Decision 25 pins Dropbear to 2019.78. It is a behaviour change, not a bug fix, so the section 35 rule
+is applied to it here.
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | The service plumbing is untouched (init script, unit, ports 111/109/69, host keys), so nothing the panel does against Dropbear changes. The build is deliberately made **without PAM**, matching the Debian package - which is what `expire-ssh.sh` depends on (bug 72) - and 2019.78 emits the same `Password auth succeeded for '<user>'` journal line that `limit-ip-ssh.sh` and `cek-login-ssh.sh` parse. Only the binary version changes. |
+| **Over-strictness** | None. The build is skipped when `dropbear -V` already reports v2019.78, so re-runs cost nothing (verified: 3 s, binary untouched). A checksum mismatch or a failed build warns and leaves the installed build in place rather than aborting the install. Only `dropbear-bin` is held, and only so an upgrade cannot undo the pin; the `dropbear` plumbing package is not held. |
+| **Over-engineering** | One installer block and one dependency line. It reuses the existing pinned-asset pattern (the misc repository's `main` + `v1.23` release, as vnstat/libreswan/go already do) and the upstream tarball, and adds no service, timer or daemon. |
+| **vs the source** | Both references run plain `apt install dropbear` and take the base image's build; neither pins a version. This is therefore a **recorded divergence chosen by the owner** (decision 25), not an invented mechanism - and it changes no port, path or config key the references use. |
+
+**Known, accepted differences:** 2019.78 predates ed25519 host keys and RSA-SHA2, but negotiates with
+current clients over its ECDSA host key, so password auth is unaffected (verified live); it logs one
+harmless `Failed loading .../dropbear_dss_host_key` on start because it supports DSS and the Debian
+package no longer generates that key - no DSS key is created, since DSA is weak and unnecessary. Lite
+is unaffected (it never runs `ssh.sh` and disables Dropbear, fix 149).
