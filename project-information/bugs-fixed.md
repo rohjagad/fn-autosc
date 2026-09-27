@@ -1542,3 +1542,9 @@ account - leaving it unchanged." instead of rewriting it to `70-01-07`.
   is now present there too.
 
 Both were introduced by the eleventh pass and are the reason the re-check was worth doing.
+
+### Fix 171 - menu archive entries are executable, and the sources are marked executable (Found 163)
+
+- **Fix 171 (Found 163):** both archives are rebuilt with **every entry at `0755`** (content verified byte-identical, entry-name sets unchanged), so an `unzip` of `menu/full.zip` or `menu/lite.zip` now restores executable menus without relying on the installer's `chmod +x *`. The repository's shell scripts are marked **executable in git** (204 files, mode-only change) so the `cp`+`zip` repack that caused this cannot reintroduce `0644`. On the live host, `chmod +x /usr/bin/menu-system /usr/bin/menu-bot` restores the two affected files and the stray `menu.sh`, `menu-x.sh`, `menu-ssh.sh` duplicates (created by a mis-targeted `scp` earlier this session) are removed.
+- **Verified live:** `find /usr/bin -maxdepth 1 -type f ! -perm -u+x` now returns nothing, the System Menu opens directly (exit 0) and from the main menu's option 10, and a fresh `unzip` of the rebuilt archive yields 0 non-executable entries.
+- **Why the installer did not catch it:** `chmod +x *` after `unzip` does make a real install work, which is why this was invisible until a manual unpack was used; the artefact itself was wrong.
