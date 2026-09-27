@@ -223,6 +223,19 @@ if uname -m | grep -qi '^arm'; then
   fi
 fi
 
+# The template above is libreswan syntax (used on CentOS, where this script
+# builds libreswan). Debian and Ubuntu install strongSwan instead, which uses
+# different keywords and proposal syntax: its starter logged "unknown keyword
+# 'ikev2'" and "skipped invalid proposal string", leaving the connection with
+# no valid IKE proposal, so every client got NO_PROPOSAL_CHOSEN and L2TP/IPsec
+# could not connect at all. Normalise the file when strongSwan is what is
+# actually installed; CentOS's libreswan config is left untouched.
+if ipsec --version 2>/dev/null | grep -qi 'strongswan'; then
+  sed -i 's/^\(\s*\)ikev2=never/\1keyexchange=ikev1/' /etc/ipsec.conf
+  sed -i 's/^\(\s*\)ike=.*/\1ike=aes256-sha256-modp1024,aes128-sha1-modp1024,aes256-sha1-modp1024,aes128-sha256-modp1024,aes256-sha256-modp2048,aes128-sha256-modp2048/' /etc/ipsec.conf
+  sed -i 's/^\(\s*\)phase2alg=.*/\1esp=aes256-sha256,aes128-sha1,aes256-sha1,aes128-sha256,aes256-sha1-modp1024,aes256-sha256-modp1024/' /etc/ipsec.conf
+fi
+
 # Specify IPsec PSK
 cat > /etc/ipsec.secrets <<EOF
 %any  %any  : PSK "$VPN_IPSEC_PSK"

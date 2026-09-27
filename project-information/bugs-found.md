@@ -1383,3 +1383,63 @@ installer's step list; the lite transport matrix was verified separately (below)
   configs, `nginx -t` OK; the only failure was dropbear, above.
 - Lite does not install SlowDNS/UDP/Noobz/WireGuard/OpenVPN/OHP - by design, matching both
   references' `lite.sh`; the README table already marks those rows `❌`.
+
+## Eighth Pass - The Still-Untested Services (September 27, 2026)
+
+This pass drove the services that had never been exercised: SlowDNS/dnstt, NoobzVPN, the dinda
+OVPN-WS proxy, BadVPN udpgw, Cloudflare WARP, and a first end-to-end L2TP/IPsec attempt. Two
+defects, both inherited and both live-verified.
+
+Found 149. **Cloudflare WARP could never be installed on a full install** (`full/menu-system.sh`,
+`lite/menu-system.sh`) - `menu-warp`'s `install()` aborted at a guard testing
+`/etc/wireguard/params`, and that file is written by `installer/wg.sh`. Every full install therefore
+prints `WireGuard sudah diinstal.` and exits the whole system menu before any WARP code runs.
+- **Confirmed live:** `menu-system` -> 3 (WARP) -> 1 (Install) printed that message and the menu
+  script exited, with `/etc/wireguard/params` present because wg.sh always writes it.
+- **Inherited:** both references' `Full/menu-system.sh` and `Lite/menu-system.sh` carry the same
+  guard, and both references' `full.sh` also run wg.sh, so their WARP menu is dead on a full install
+  too. WARP is a separate WireGuard interface (`wgcf`), so the guard tests the wrong thing; the
+  correct "already installed" check already exists a few lines below (`/usr/bin/warp.sh`).
+- The lite copy also ran `chmod /usr/bin/warp.sh` (no mode), so `warp.sh` was left non-executable and
+  the WARP submenu's status/restart/account entries would fail; the full copy already had `chmod +x`.
+
+Found 150. **L2TP/IPsec cannot negotiate on Debian and Ubuntu** (`installer/l2tp.sh`) - the script
+installs **strongSwan** (`apt install strongswan`) but writes a **libreswan** `ipsec.conf`
+(`protostack=netkey`, `interfaces=%defaultroute`, `ikev2=never`, `ike=...;modp1024`,
+`phase2alg=...`). On the live host strongSwan 5.9.8's starter logged `unknown keyword 'ikev2'` and
+`skipped invalid proposal string: aes256-sha2`, so the connection loaded with **no valid IKE
+proposal** and every client was answered with `NO_PROPOSAL_CHOSEN`.
+- **Confirmed live, A/B:** before the fix a client's `ipsec up` returned `received NO_PROPOSAL_CHOSEN`
+  / `establishing connection 'L2TP-PSK' failed`; after re-writing the three lines in strongSwan
+  syntax the same client negotiated `selected proposal: ESP:AES_CBC_128/HMAC_SHA1_96` and the
+  server's xl2tpd logged `Call established with ...`.
+- **Inherited:** both references' `installer/l2tp.sh` have the same strongswan-install /
+  libreswan-config mismatch. Only CentOS builds libreswan, where the template is correct.
+- The full PPP leg could not be finished in the test guest (its Debian cloud kernel ships no `ppp`
+  modules), but IPsec/IKE/ESP and the L2TP control connection - exactly what the defect broke - both
+  succeed after the fix.
+
+### Verified working, or explained (no new defect)
+
+- **SlowDNS / dnstt - works end to end.** `dnstt-client -udp <vps>:53` over the `slowdns-fixnet`
+  UDP 53 -> 5300 redirect carried a real SSH session (`TUNNEL_OK`, root@localhost).
+- **NoobzVPN - transports work, no Linux client.** Server 3.3.1-b answers the configured
+  `HTTP/1.1 101 Switching Protocols` on 8080 (plain) and 8443 (TLS 1.3), both reachable from
+  outside; the menu's create and delete paths drive `noobzvpns add --password/--expired` and
+  `noobzvpns remove` correctly and update `/etc/funny/.noob`. The client protocol is proprietary to
+  the Android app, so no tunnel was driven.
+- **dinda (OVPN-WS :2086) - service works, port blocked upstream.** From loopback it answers
+  `HTTP/1.1 101 Switching Protocols` for `X-Real-Host: 127.0.0.1:22` and `127.0.0.1:1194` and
+  `403 Forbidden!` for a foreign host. From outside, 2086 (and 2082/2095/2096, which nginx serves as
+  the other NonTLS ports) never reach the VPS: `tcpdump -ni ens3` captured **0 packets** during
+  probes from several continents, so the filtering is upstream of the host. The port choices are
+  identical to both references; nothing in the repository can change a provider firewall.
+- **BadVPN udpgw - works.** Relaying a datagram to a loopback echo through `127.0.0.1:7300`
+  returned the echoed payload once the client framed packets the way badvpn does (PacketProto, a
+  *little-endian* two-byte length prefix). The loopback bind is what the badvpn documentation itself
+  prescribes (`--listen-addr 127.0.0.1:7300`, reached through the SSH tunnel).
+- **WARP runtime after the fix** - `warp.sh wgd` brought `wgcf` up with the default route left on
+  ens3 (its `from <server-ip> lookup main` rule protects the SSH path). Note that the same install
+  path adds the Debian **unstable** repository and runs `apt install linux-headers-$(uname -r)`,
+  which pulled a new kernel and a large dependency set; that is inherited behaviour, recorded here,
+  and the test host was cleaned back up (WARP removed, unstable repo deleted, extra kernel purged).

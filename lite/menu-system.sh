@@ -153,10 +153,10 @@ fi
 Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && Font_color_suffix="\033[0m"
 Info="${Green_font_prefix}[information]${Font_color_suffix}"
 
-if [[ -e /etc/wireguard/params ]]; then
-        echo -e "${Info} WireGuard sudah diinstal."
-        exit 1
-fi
+# This used to abort when /etc/wireguard/params existed, but that file is
+# written by installer/wg.sh. WARP is a separate WireGuard interface (wgcf),
+# and the existing /usr/bin/warp.sh check below already handles
+# re-installation.
 
 # Install WireGuard tools and module
         if [[ $OS == 'ubuntu' ]]; then
@@ -185,7 +185,7 @@ wget git.io/warp.sh
 bash warp.sh install
 bash warp.sh wgd
 fi
-chmod /usr/bin/warp.sh
+chmod +x /usr/bin/warp.sh
 chmod +x /usr/bin/*
 clear
 }

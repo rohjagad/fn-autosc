@@ -1377,3 +1377,23 @@ two SSH ones, both fixnet timers active and **five VPN-bypass rules** in nat PRE
   ping 0% loss, egress `202.155.17.126`) and an OpenVPN UDP client brought up `tun0 10.7.0.6` with
   egress through the VPS - both on the installer-written bypass rules, with no manual rule needed.
 - Test accounts and the WG peer were removed; the host ended at 0 xray, 0 ssh and 0 WG peers.
+
+## Eighth Pass - Fixes 151-152 (September 27, 2026)
+
+| Fix | Found | Change |
+| :-- | :-- | :-- |
+| 151 | 149 | `full/menu-system.sh` and `lite/menu-system.sh`: remove the `/etc/wireguard/params` guard that made the WARP installer abort on every full install, and give lite's copy the same `chmod +x /usr/bin/warp.sh` as full. |
+| 152 | 150 | `installer/l2tp.sh`: after writing `ipsec.conf`, normalise it to strongSwan syntax (`keyexchange=ikev1`, `ike=`/`esp=` in strongSwan form) whenever strongSwan is the installed implementation, so Debian/Ubuntu can negotiate IKEv1 again. CentOS's libreswan config is left untouched. |
+
+Verified live for fix 151: the fixed menu ran the WARP install through to completion - `warp.sh
+install` finished, the WARP client reported `IPv4 Network : WARP` / `IPv6 Network : WARP`,
+`warp.sh wgd` brought up the `wgcf` interface with the default route still on ens3 (SSH unaffected),
+and the panel stayed healthy. WARP was then uninstalled, the Debian unstable repository it added was
+removed and the extra kernel it pulled was purged.
+
+Verified live for fix 152: with the normalised config the same client's `ipsec up L2TP-PSK` reported
+`selected proposal: ESP:AES_CBC_128/HMAC_SHA1_96` and `connection 'L2TP-PSK' established
+successfully` (previously `NO_PROPOSAL_CHOSEN`), and the server's xl2tpd logged
+`Call established with 157.15.139.236`. The IPsec SA and the L2TP control connection are the two
+things the defect broke; the PPP session itself could not be finished in the test guest because its
+Debian cloud kernel carries no `ppp` modules.
