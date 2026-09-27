@@ -1717,3 +1717,8 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 195 (Found 189):** in `full/menu-system.sh` and `lite/menu-system.sh`, added `read -n 1 -s -r -p "Press any key to return..."` across `detail()`, `resall()`, and `bnnr()` so the output remains visible on screen until acknowledged. In `lite/menu-system.sh`, trimmed the SSH port listings from `detail()` so the displayed ports match the actual services installed in the lite edition. Repacked both menu archives (`menu/full.zip` and `menu/lite.zip`) with 0 diffs and all entries at 0755.
 - **Verified live on VPS:** verified that `detail()` and `bnnr()` pause for operator input and display cleanly before returning.
+
+### Fix 196 - interactive pauses and menu loop preservation in menu-argo and menu-dnstt (Found 190)
+
+- **Fix 196 (Found 190):** in `full/menu-argo.sh` and `lite/menu-argo.sh`, added `read -n 1 -s -r -p "Press any key to return..."` to `detail()`, guarded `/etc/xray/domargo` with `2>/dev/null || echo "Not configured"`, and updated case options 1 and 3 in `tamp()` to return to `tamp` after completion. In `full/menu-dnstt.sh`, added pauses and recursive `mna89` returns across options 1, 2, and 3 so confirmation notices remain visible on screen until acknowledged. Repacked both menu archives (`menu/full.zip` and `menu/lite.zip`) with 0 diffs and all entries at 0755.
+- **Verified live on VPS:** tested option 3 in `menu-argo` and option 3 in `menu-dnstt`: both pause for user keypress and loop back cleanly to their respective menus.

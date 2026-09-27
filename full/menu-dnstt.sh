@@ -160,6 +160,8 @@ ${orange}Press [Ctrl + C] to exit${NC}"
                 ===============================
                 New Nameserver: $nsdomen
                 ==============================="
+                read -n 1 -s -r -p "Press any key to return..." || true
+                mna89
                 ;;
             2)
                 clear
@@ -175,6 +177,8 @@ ${orange}Press [Ctrl + C] to exit${NC}"
                 echo -e "
                 Server Keys Renewed Successfully
                 ================================"
+                read -n 1 -s -r -p "Press any key to return..." || true
+                mna89
                 ;;
             3)
                 clear
@@ -184,6 +188,8 @@ ${orange}Press [Ctrl + C] to exit${NC}"
                 echo -e "
                 SlowDNS Restarted Successfully
                 =============================="
+                read -n 1 -s -r -p "Press any key to return..." || true
+                mna89
                 ;;
             4)
                 clear

@@ -735,3 +735,14 @@ Section 35's four-check rule applied to Fix 195:
 | **Over-strictness** | Does not restrict commands or input; strictly allows terminal operators to view the results of requested actions before screens are cleared. |
 | **Over-engineering** | Standard `read -n 1` pauses and cleanup of inaccurate display text. No new files or external dependencies. |
 | **vs the source** | Both references lacked pauses, causing confusing screen wiping when submenus were run from the main menu. Adding standard prompt returns resolves terminal usability. |
+
+## 54. Menu-Argo and Menu-DNSTT Confirmation Pauses and Loop Returns - Four Checks (September 28, 2026)
+
+Section 35's four-check rule applied to Fix 196:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Tunnel configurations, key renewals, and service restarts execute identically; only standard prompt pauses and loop returns are added to prevent premature menu termination. `bash -n` clean across all 3 files. |
+| **Over-strictness** | Does not restrict options or parameters; strictly enables operators to read service states and status messages. |
+| **Over-engineering** | Standard `read -n 1` pauses and standard case statement recursive calls. No new utilities or files added. |
+| **vs the source** | Both references lacked pauses and loop returns, causing frustrating screen wipes in interactive sessions. Aligning with Fix 194/195 provides consistent UI navigation across the panel. |

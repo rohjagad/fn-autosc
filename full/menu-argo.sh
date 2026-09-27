@@ -170,13 +170,13 @@ sudo cloudflared service install
 
 detail() {
 clear
-edussh_service=$(systemctl status cloudflared | grep Active | awk '{print $3}' | cut -d "(" -f2 | cut -d ")" -f1)
+edussh_service=$(systemctl status cloudflared 2>/dev/null | grep Active | awk '{print $3}' | cut -d "(" -f2 | cut -d ")" -f1)
 if [[ $edussh_service == "running" ]]; then
 ssws="\e[1;32m[ ON ]\033[0m"
 else
 ssws="\e[1;31m[ OFF ]\033[0m"
 fi
-domargo=$(cat /etc/xray/domargo)
+domargo=$(cat /etc/xray/domargo 2>/dev/null || echo "Not configured")
 clear
 echo -e "
     Argo Tunnel Details
@@ -209,6 +209,8 @@ Currently supported protocols:
 -> All Connections via Nginx
 -> Xray / Sing-box
 "
+read -n 1 -s -r -p "Press any key to return..." || true
+echo ""
 }
 tamp() {
 edussh_service=$(systemctl status cloudflared 2>/dev/null | grep Active | awk '{print $3}' | cut -d "(" -f2 | cut -d ")" -f1)
@@ -231,8 +233,8 @@ ${separator}
 ${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input option: " opws || exit 0
 case $opws in
-1) clear ; setup ;;
-3) clear ; detail ;;
+1) clear ; setup ; tamp ;;
+3) clear ; detail ; tamp ;;
 0) clear ; menu ;;
 *) clear ; tamp ;;
 esac
