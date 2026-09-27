@@ -57,14 +57,14 @@ for user in "${users[@]}"; do
     ip_count=$(echo "$logs" | awk '{for(i=1;i<=NF;i++) if($i=="from"){print $(i+1); break}}' | sed 's/:[0-9]*$//' | sed '/^$/d' | sort -u | wc -l)
 
     # IP limit
-    ip_limit=$(cat "/etc/xray/limit/ip/xray/ws/${user}")
+    ip_limit=$(cat "/etc/xray/limit/ip/xray/ws/${user}" 2>/dev/null)
     if [[ -z "$ip_limit" ]]; then
         ip_limit="Not available"
     fi
       
     # Quota usage and limit
-    quota_usage=$(cat "/etc/xray/quota/ws/${user}_usage")
-    quota_limit=$(cat "/etc/xray/quota/ws/${user}")
+    quota_usage=$(cat "/etc/xray/quota/ws/${user}_usage" 2>/dev/null)
+    quota_limit=$(cat "/etc/xray/quota/ws/${user}" 2>/dev/null)
     if [[ -z "$quota_usage" || -z "$quota_limit" ]]; then
         quota="Not available"
     else

@@ -61,8 +61,8 @@
     output
 clear
 domain=$(cat /etc/xray/domain)
-CHATID=$(cat /etc/funny/.chatid)
-KEY=$(cat /etc/funny/.keybot)
+CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
+KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 clear

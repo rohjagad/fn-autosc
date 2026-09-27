@@ -323,8 +323,8 @@ notif() {
 # Uses the saved credentials; sends one test message to prove it works.
 havecreds || return
 local key id resp
-key=$(cat /etc/funny/.keybot)
-id=$(cat /etc/funny/.chatid)
+key=$(cat /etc/funny/.keybot 2>/dev/null)
+id=$(cat /etc/funny/.chatid 2>/dev/null)
 clear
 echo "Sending a test notification to Telegram..."
 resp=$(curl -4 -s --max-time 15 -d "chat_id=$id" \

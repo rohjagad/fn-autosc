@@ -1671,3 +1671,13 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 187 (Found 181):** removed the 5-line `# IGNORE THIS` server block from `config/4.conf`, eliminating spurious 301 redirects on IPv4 NoneTLS connections and bringing `4.conf` into complete structural alignment with `6.conf` and `dual.conf`.
 - **Verified:** `nginx -t` passes with zero errors on the live VPS; all 15 location directives verified identical across `4.conf`, `6.conf`, and `dual.conf`.
+
+### Fix 188 - graceful missing quota and limit handling in cek-xray-ws (Found 182)
+
+- **Fix 188 (Found 182):** added `2>/dev/null` to quota usage, quota limit, and IP limit reads in `full/cek-xray-ws.sh` and `lite/cek-xray-ws.sh`. Missing files now resolve cleanly to `Not available`, identical to the Go sister tools.
+- **Verified live on VPS:** deployed and executed against fresh account with 0 usage: 0 error messages printed.
+
+### Fix 189 - Telegram credential read error suppression sweep (Found 183)
+
+- **Fix 189 (Found 183):** added `2>/dev/null` to all unguarded `cat /etc/funny/.chatid` and `cat /etc/funny/.keybot` reads across 136 scripts in `full/`, `lite/`, and `installer/`. Repacked both menu archives (`menu/full.zip` and `menu/lite.zip`) with 0 diffs and all entries at 0755.
+- **Verified live on VPS:** executed `add-vmess-ws` without configured bot: 0 errors leaked to stdout/stderr.

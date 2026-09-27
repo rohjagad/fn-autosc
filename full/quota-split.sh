@@ -62,8 +62,8 @@ clear
 
 # Fungsi untuk mengirim log ke Telegram
 function send_log() {
-    CHATID=$(cat /etc/funny/.chatid)
-    KEY=$(cat /etc/funny/.keybot)
+    CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
+    KEY=$(cat /etc/funny/.keybot 2>/dev/null)
     URL="https://api.telegram.org/bot${KEY}/sendMessage"
 
     TEXT="

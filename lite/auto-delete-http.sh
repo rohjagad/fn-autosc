@@ -60,8 +60,8 @@
     output
 clear
 # Variabel untuk Telegram bot
-CHATID=$(cat /etc/funny/.chatid)
-KEY=$(cat /etc/funny/.keybot)
+CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
+KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 TIME="10"
 DATE=$(date +"%Y-%m-%d %H:%M:%S")

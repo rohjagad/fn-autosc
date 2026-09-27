@@ -680,3 +680,14 @@ Section 35's four-check rule applied to Fix 187:
 | **Over-strictness** | Eliminates strict redirection of direct-IP NoneTLS connections; clients on port 80 are routed directly to their requested paths. |
 | **Over-engineering** | Deletion of 6 dead lines. No new configuration, directives, or abstractions added. |
 | **vs the source** | V23 carried this commented `# IGNORE THIS` developer snippet, while 1.20 and both sibling configurations (`6.conf`, `dual.conf`) omitted it. Deleting it restores consistent multi-transport behavior. |
+
+## 49. Cek-Xray-WS Quota Guards and Tree-Wide Telegram Credential Stderr Suppression - Four Checks (September 28, 2026)
+
+Section 35's four-check rule applied to Fixes 188 and 189:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | When credentials or quota files exist, their contents are read identically. When files do not exist, empty string is returned cleanly without stderr pollution. `bash -n` clean across all 136 touched files. |
+| **Over-strictness** | Eliminates unwanted error noise on clean installs; does not restrict any functionality or input. |
+| **Over-engineering** | Standard Unix `2>/dev/null` stderr suppression on existing `cat` calls. Zero new files, dependencies, or daemons. |
+| **vs the source** | Both references lacked error suppression, causing constant stderr noise in CLI menus and API payloads when optional bot integration was unused. Aligning with clean Unix conventions is necessary for production reliability. |

@@ -160,8 +160,8 @@ PAYLOAD   : GET / HTTP/1.1[crlf]Host: [host][crlf]Upgrade: websocket[crlf][crlf]
 ════════════════════════════
 Expired   : $expi
 ════════════════════════════"
-CHATID=$(cat /etc/funny/.chatid)
-KEY=$(cat /etc/funny/.keybot)
+CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
+KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 curl -s --max-time $TIME -d "chat_id=$CHATID&text=$TEKS" $URL
@@ -196,8 +196,8 @@ User: $name
 Exp : $exp
 ════════════════════════════
 "
-CHATID=$(cat /etc/funny/.chatid)
-KEY=$(cat /etc/funny/.keybot)
+CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
+KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 curl -s --max-time $TIME -d "chat_id=$CHATID&text=$TEKS" $URL

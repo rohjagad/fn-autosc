@@ -65,8 +65,8 @@ GB='\e[32;1m'
 YB='\e[33;1m'
 
 send_log() {
-    CHATID=$(cat /etc/funny/.chatid)
-    KEY=$(cat /etc/funny/.keybot)
+    CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
+    KEY=$(cat /etc/funny/.keybot 2>/dev/null)
     URL="https://api.telegram.org/bot$KEY/sendMessage"
     TIME="10"
     DATE=$(date +"%y-%m-%d %H:%M:%S") # Format tahun menjadi 2 digit

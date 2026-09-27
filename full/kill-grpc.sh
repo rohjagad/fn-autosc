@@ -64,8 +64,8 @@ function send_log() {
     local user=$1
     local limit=$2
     local total=$3
-    CHATID=$(cat /etc/funny/.chatid)
-    KEY=$(cat /etc/funny/.keybot)
+    CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
+    KEY=$(cat /etc/funny/.keybot 2>/dev/null)
     TIME="10"
     TEXT="
 <code>────────────────────</code>

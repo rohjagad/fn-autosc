@@ -94,8 +94,8 @@ X-Ray WS Account Expired
 
 -> $user / $exp
 ===================="
-CHATID=$(cat /etc/funny/.chatid)
-KEY=$(cat /etc/funny/.keybot)
+CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
+KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL
@@ -132,8 +132,8 @@ X-Ray http Account Expired
 
 -> $user / $exp
 ===================="
-CHATID=$(cat /etc/funny/.chatid)
-KEY=$(cat /etc/funny/.keybot)
+CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
+KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL
@@ -170,8 +170,8 @@ X-Ray split Account Expired
 
 -> $user / $exp
 ===================="
-CHATID=$(cat /etc/funny/.chatid)
-KEY=$(cat /etc/funny/.keybot)
+CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
+KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL
@@ -208,8 +208,8 @@ X-Ray grpc Account Expired
 
 -> $user / $exp
 ===================="
-CHATID=$(cat /etc/funny/.chatid)
-KEY=$(cat /etc/funny/.keybot)
+CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
+KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL
@@ -258,8 +258,8 @@ SSH Account Expired
 
 -> $username / $exp
 ===================="
-CHATID=$(cat /etc/funny/.chatid)
-KEY=$(cat /etc/funny/.keybot)
+CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
+KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL
@@ -293,8 +293,8 @@ L2TP Account Expired
 
 -> $user / $exp
 ===================="
-CHATID=$(cat /etc/funny/.chatid)
-KEY=$(cat /etc/funny/.keybot)
+CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
+KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL
@@ -331,8 +331,8 @@ while read expired; do
 
         -> $user / $exp
         ===================="
-        CHATID=$(cat /etc/funny/.chatid)
-        KEY=$(cat /etc/funny/.keybot)
+        CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
+        KEY=$(cat /etc/funny/.keybot 2>/dev/null)
         TIME="10"
         URL="https://api.telegram.org/bot$KEY/sendMessage"
         curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL
@@ -392,8 +392,8 @@ Exp : $exp
 ════════════════════════════
 "
         # Mengambil CHATID dan KEY dari file
-        CHATID=$(cat /etc/funny/.chatid)
-        KEY=$(cat /etc/funny/.keybot)
+        CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
+        KEY=$(cat /etc/funny/.keybot 2>/dev/null)
         TIME="10"
         URL="https://api.telegram.org/bot$KEY/sendMessage"
 
