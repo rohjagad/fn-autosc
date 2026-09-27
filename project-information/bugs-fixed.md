@@ -1626,3 +1626,13 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 178 (Found 172):** all 9 restore unzippers across `full/restore-ftp.sh`, `lite/restore-ftp.sh`, `website/restore-ftp.sh`, `full/bmenu.sh`, and `lite/bmenu.sh` now use `unzip -o backup.zip` to overwrite existing files cleanly without prompting. The 3 back-to-back duplicated `systemctl restart xray@ws` lines in `full/bmenu.sh` and `lite/bmenu.sh` were deduplicated to a single restart. Repacked both menu archives (`menu/full.zip` and `menu/lite.zip`) with 0 non-755 entries and 0 diffs.
 - **Verified:** `bash -n` clean across all touched files; non-interactive `unzip -o` replaces existing staging files without hanging.
+
+### Fix 179 - conditional Xray restart in auto-delete daemons (Found 173)
+
+- **Fix 179 (Found 173):** moved `systemctl restart xray@<transport>` inside `if [ -n "$deleted_users" ]; then` across all 8 `auto-delete-*` scripts (`full/` and `lite/`, all 4 transports). When 0 accounts are deleted, the daemons perform zero service restarts.
+- **Verified live:** with active account `testlive` present, `auto-delete-ws` ran and `xray@ws` MainPID remained identical (59902 -> 59902). When an orphan `.log` was planted, the daemon deleted it and restarted `xray@ws` (MainPID 59902 -> 60116).
+
+### Fix 180 - silenced idle-account journal spam in quota daemons (Found 174)
+
+- **Fix 180 (Found 174):** replaced `echo "Data usage for user $user is incomplete. Skipping."` with `continue` in `full/quota-{grpc,http,split}.sh` and `lite/quota-{grpc,http,split}.sh` (6 files), extending Fix 115 across all transports. Repacked both menu archives (`menu/full.zip` and `menu/lite.zip`) with 0 diffs and all entries at 0755.
+- **Verified live:** deployed to `/usr/bin/quota-grpc`, restarted service, created `testidle` on gRPC, and waited 35 seconds: 0 noise lines logged to the systemd journal.

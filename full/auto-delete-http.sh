@@ -110,14 +110,13 @@ else
         deleted_users+="$user "
     done
 
-    # Restart layanan Xray setelah penghapusan
+fi
+
+# Restart layanan dan kirim notifikasi hanya jika ada pengguna yang dihapus
+if [ -n "$deleted_users" ]; then
     echo "Restarting Xray service..."
     systemctl daemon-reload
     systemctl restart xray@upgrade
-fi
-
-# Kirim notifikasi hanya jika ada pengguna yang dihapus
-if [ -n "$deleted_users" ]; then
     TEXT="
 <b>━━━━━━━━━━━━━━━━━━━━━━━</b>
 <b>⚠️ X-RAY HTTP Clear Log ⚠️</b>

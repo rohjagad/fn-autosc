@@ -109,7 +109,9 @@ function ceksplit() {
 
         # Validasi data inb dan outb
         if [[ -z "$inb" || -z "$outb" ]]; then
-            echo "Data usage for user $user is incomplete. Skipping."
+            # No counters for this user in this interval - nothing to charge.
+            # Stay quiet: the old message spammed the journal every 30s per idle
+            # account (Fix 115 extended to all transports).
             continue
         fi
 

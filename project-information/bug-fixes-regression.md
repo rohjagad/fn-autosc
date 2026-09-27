@@ -603,3 +603,14 @@ Section 35's four-check rule applied to Fixes 177 and 178:
 | **Over-strictness** | Neither fix restricts any valid user operation. Pruning expired WireGuard peers matches the documented lifecycle of every other protocol in `xp.sh`. |
 | **Over-engineering** | Fix 177: 4 lines of shell logic using existing systemd units. Fix 178: standard `-o` flag on already-used `unzip` command. No new daemon, script, or configuration file. |
 | **vs the source** | Both references omitted restarting `wg-quick@wg0` in `xp.sh`, allowing expired clients to tunnel indefinitely. Both references ran `unzip` without `-o` and duplicated `systemctl restart xray@ws`. Divergence is necessary to stop data leakage from expired accounts and prevent stdin hangs. |
+
+## 42. Auto-Delete Conditional Restarts and Quota Daemon Noise Pruning - Four Checks (September 28, 2026)
+
+Section 35's four-check rule applied to Fixes 179 and 180:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Fix 179 preserves the exact service restart whenever an orphan account is genuinely deleted; it only eliminates the restart when nothing was removed, removing connection drops for active users. Fix 180 brings gRPC, SplitHTTP, and HTTPUpgrade into identical alignment with WebSocket (Fix 115). `bash -n` clean across all 14 touched files. |
+| **Over-strictness** | Neither fix alters account validation or deletion criteria; both strictly prevent unwarranted process disruptions and log bloat. |
+| **Over-engineering** | Fix 179: moved 2 existing lines inside an existing `if` block. Fix 180: removed 1 noisy `echo` line. Zero new dependencies or files. |
+| **vs the source** | Both references restarted Xray unconditionally on every 5-minute cron run and spammed the journal every 30 seconds for idle accounts. Pruning both inherited defects is necessary for operational server stability. |
