@@ -1496,3 +1496,14 @@ Verified live after the revert, all from one client (157.15.139.236): through Cl
 map's `default` fallback, which is the case that used to come out `127.0.0.1`); and `statsonline`
 reported 2 for the two real addresses, so the limiter counts clients, not edges. A brand-new
 Cloudflare range now changes nothing, because no range list is involved.
+
+### Correction - the header form is the references', not ours
+
+Fix 153 changed every Xray location's `X-Forwarded-For`/`X-Real-IP` to the panel's `$clientRealIp`
+map, fix 154 added `set_real_ip_from` + `CF-Connecting-IP` behind a range list, and 156/157 added a
+refresher for it. Re-reading both archives shows none of that was needed: V23 and 1.20 already send
+`X-Real-IP $remote_addr` plus `X-Forwarded-For $proxy_add_x_forwarded_for` (and the `grpc_set_header`
+equivalents), and Xray takes the first entry of the chain, which Cloudflare makes the real client.
+All three configs and the live host are back to the references' lines, the map is log-only again, and
+`installer/cf-realip.sh` plus its cron are gone. Verified live with the references' form: through
+Cloudflare the access log records the real client and the online count is correct.

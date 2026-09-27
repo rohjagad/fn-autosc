@@ -287,3 +287,22 @@ the two real addresses (value 2).
 
 **Rule for future changes:** do not put a trusted-proxy range list on the IP-limit path, and keep both
 fallbacks in the `$clientRealIp` map. The nginx config carries a short note pointing here.
+
+### Correction to section 24 - the mechanism is the references' own, not our map
+
+Section 24 described the counted address as coming from the panel's `$clientRealIp` map. Checked
+against the archives, that is not what the tree does, and it should not: **both references already
+handle this.** They set `X-Real-IP $remote_addr` and `X-Forwarded-For $proxy_add_x_forwarded_for` in
+every Xray location (the same with `grpc_set_header`), and Xray takes the **first** entry of that
+chain - the real client behind Cloudflare, the peer for a direct connection. Their
+`map $http_x_forwarded_for $clientRealIp` exists only for the access log, not for the headers.
+
+Our `$clientRealIp` header substitution (fix 153) and the `set_real_ip_from` range list (fix 154,
+refresher 156/157) were both inventions and are reverted; the configs and the live host carry the
+references' lines unchanged and the map is log-only again. So section 24's rule stands - do not
+harden the IP-limit path - with its other half now explicit: **if the reference already solves it,
+keep the reference's solution.**
+
+Verified live with the references' form: a client through Cloudflare is recorded as
+`from 202.155.17.126` (the real address, not the edge) and `statsonline` counts it. A brand-new
+Cloudflare range changes nothing, because no range list is involved.

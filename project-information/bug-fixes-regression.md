@@ -451,3 +451,17 @@ send `$clientRealIp` again, `installer/cf-realip.sh`, its `diamond.sh` wiring an
 removed, and the reasoning is `is-decision.md` section 24. This is the same lesson as section 25 in a
 new place - a change that is "more secure" than the original can still be the wrong change when it
 moves the failure onto normal traffic. Forged headers are explicitly out of scope.
+
+## 33. Both IP-Limit Changes This Session Were Inventions the References Already Had (September 27, 2026)
+
+Sections 30-32 tracked the forwarded-header and `real_ip` work. Re-reading both archives for the
+follow-up shows the whole sequence was unnecessary: the references already send
+`X-Real-IP $remote_addr` plus `X-Forwarded-For $proxy_add_x_forwarded_for` to every Xray upstream, and
+Xray takes the first entry of that chain - the real client behind Cloudflare and the peer otherwise.
+Their `$clientRealIp` map is for the access log only. Fix 153's header substitution, fix 154's
+`set_real_ip_from` and the refresher are all reverted; the tree and the live host carry the
+references' lines.
+
+This is section 25's lesson in a new key: before adding a mechanism, check whether the source already
+solves the problem. The IP limit works through Cloudflare with no range list and no header rewriting,
+so a new Cloudflare range is a non-issue.
