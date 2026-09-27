@@ -1458,3 +1458,24 @@ inert and `$remote_addr` is the true peer. The map and log format are still the 
 Verified live for fix 157: running the refresher when the list was current left `nginx.conf`
 byte-identical (no reload, no backup left behind); after deleting two ranges by hand it restored the
 full published set and reloaded cleanly (`nginx -t` OK, `https://.../web/tcp.ovpn` = 200).
+
+### Correction to fix 156 in the tenth pass
+
+Fix 156 is recorded above as re-syncing the three configs from `/29` to `/32`. Checked against git,
+that is not what happened: `165a535` (fix 153) is the commit that carried `2c0f:f248::/29`, and
+`e40be5c` (fix 154) is the commit that had already corrected it to `2c0f:f248::/32` when it rewrote
+the block. The repository's configs have been correct since `e40be5c`; the `/29` survived only in the
+**live** apply of fix 153 on the test host, which the run of `cf-realip-refresh` (fix 157) then
+replaced with Cloudflare's published `/32`. Fix 156's entry is therefore a re-verification, not a
+change to the repository, and the substantive correction for a live host is fix 157's refresher.
+
+### Correction to that correction - where the /29 actually came from
+
+Checked against git, neither `165a535` nor `e40be5c` ever carried `2c0f:f248::/29`: `165a535` has no
+`set_real_ip_from` block at all (fix 153 only changed the forwarded-header values), and `e40be5c`
+added the block with Cloudflare's published `2c0f:f248::/32`. The `/29` existed only in the
+**host-side** script that applied the real_ip change to the live nginx.conf during fix 154 - the
+repository was correct throughout. What fix 157 changed on a live host is therefore the whole point:
+the refresher replaced the hand-written list with Cloudflare's published one. Fix 156 and the two
+correction notes can be read together as: repository correct; live apply off by one CIDR; refresher
+delivers the authoritative list at install and weekly.
