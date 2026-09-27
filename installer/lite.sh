@@ -13,7 +13,8 @@ export DEBIAN_FRONTEND=noninteractive
     # Fungsi menghitung sisa waktu
     calculate_remaining_days() {
         local today=$(date +%s)
-        local expired_date=$(date -d "$1" +%s 2>/dev/null)
+        local expired_date
+        expired_date=$(date -d "$1" +%s 2>/dev/null)
         if [ $? -ne 0 ]; then
             echo "Invalid expiration date."
             exit 1
@@ -101,6 +102,9 @@ chmod +x package.sh
 # dropbear failed on every lite install ("Failed listening on '22': Address
 # already in use", then systemd gave up). Disable the unused service.
 systemctl disable --now dropbear >/dev/null 2>&1 || true
+# stunnel5/haproxy (port 777) is configured to forward to dropbear:109, which lite
+# neither moves nor uses, so the frontend would be dead. Turn it off with it.
+systemctl disable --now haproxy >/dev/null 2>&1 || true
 cd
 rm -f /root/package.sh
 

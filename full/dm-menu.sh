@@ -13,7 +13,8 @@
     # Fungsi menghitung sisa waktu
     calculate_remaining_days() {
         local today=$(date +%s)
-        local expired_date=$(date -d "$1" +%s 2>/dev/null)
+        local expired_date
+        expired_date=$(date -d "$1" +%s 2>/dev/null)
         if [ $? -ne 0 ]; then
             echo "Invalid expiration date."
             exit 1
@@ -360,7 +361,7 @@ ${green}2${NC}. Issue via Certbot
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-read -p "Input option: " akz
+read -p "Input option: " akz || exit 0
 case $akz in
 1) clear ; acme ;;
 2) clear ; cert2 ;;
@@ -382,14 +383,16 @@ email=$(cat /etc/funny/.email 2>/dev/null || echo "admin@example.com")
 
 # delete
 rm -fr /etc/xray/xray.*
-rm -fr /etc/xray/funny.pem
+rm -f /etc/haproxy/funny.pem
 
 # make a certificate
 openssl genrsa -out /etc/xray/xray.key 2048
 openssl req -new -x509 -key /etc/xray/xray.key -out /etc/xray/xray.crt -days 1095 \
 -subj "/C=$country/ST=$state/L=$locality/O=$organization/OU=$organizationalunit/CN=$commonname/emailAddress=$email"
-chmod 644 /etc/xray/*
+cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem 2>/dev/null
+chmod 644 /etc/xray/xray.crt /etc/xray/xray.key /etc/haproxy/funny.pem 2>/dev/null
 systemctl daemon-reload
+systemctl restart haproxy 2>/dev/null || true
 service nginx restart
 echo -e "Self-signed certificate generated successfully"
 }
@@ -406,7 +409,7 @@ ${green}4${NC}. Generate Self-Signed Certificate
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-read -p "Input option: " apw
+read -p "Input option: " apw || exit 0
 case $apw in
 1) clear ; dm ;;
 2) clear ; cert ;;

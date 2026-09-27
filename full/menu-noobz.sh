@@ -12,7 +12,8 @@
     # Fungsi menghitung sisa waktu
     calculate_remaining_days() {
         local today=$(date +%s)
-        local expired_date=$(date -d "$1" +%s 2>/dev/null)
+        local expired_date
+        expired_date=$(date -d "$1" +%s 2>/dev/null)
         if [ $? -ne 0 ]; then
             echo "Invalid expiration date."
             exit 1
@@ -172,7 +173,7 @@ $mna
 ════════════════════════════
 "
 read -p "Username: " name
-if [ -z $name ]; then
+if [ -z "$name" ]; then
 menu
 else
 exp=$(grep -we "^### $name" "/etc/funny/.noob" | cut -d ' ' -f 3 | sort | uniq)
@@ -271,7 +272,7 @@ ${green}3${NC}. List Active Accounts
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-read -p "Input option: " inrere
+read -p "Input option: " inrere || exit 0
 case $inrere in
 1|01) clear ; create ;;
 2|02) clear ; delete ;;

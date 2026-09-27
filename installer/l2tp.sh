@@ -12,7 +12,8 @@
     # Fungsi menghitung sisa waktu
     calculate_remaining_days() {
         local today=$(date +%s)
-        local expired_date=$(date -d "$1" +%s 2>/dev/null)
+        local expired_date
+        expired_date=$(date -d "$1" +%s 2>/dev/null)
         if [ $? -ne 0 ]; then
             echo "Invalid expiration date."
             exit 1
@@ -280,14 +281,9 @@ EOF
 fi
 
 # Create VPN credentials
-cat > /etc/ppp/chap-secrets <<EOF
-"$VPN_USER" l2tpd "$VPN_PASSWORD" *
-EOF
+: > /etc/ppp/chap-secrets
 
-VPN_PASSWORD_ENC=$(openssl passwd -1 "$VPN_PASSWORD")
-cat > /etc/ipsec.d/passwd <<EOF
-$VPN_USER:$VPN_PASSWORD_ENC:xauth-psk
-EOF
+true  # no default account: xl2tp.sh appends the real ones
 
 # Create PPTP config
 cat >/etc/pptpd.conf <<END

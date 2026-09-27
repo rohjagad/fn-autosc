@@ -7,10 +7,12 @@ date=$(date)
 domain=$(cat /etc/xray/domain)
 cd /root
 # Check both upload and root locations
-if ls /var/www/uploads/*.zip 1>/dev/null 2>&1; then
-    mv /var/www/uploads/*.zip /root/backup.zip
-elif ls /root/*backup*.zip 1>/dev/null 2>&1; then
-    mv /root/*backup*.zip /root/backup.zip
+newest=$(ls -t /var/www/uploads/*.zip 2>/dev/null | head -1)
+if [ -n "$newest" ]; then
+    mv "$newest" /root/backup.zip
+else
+    newest=$(ls -t /root/*backup*.zip 2>/dev/null | head -1)
+    [ -n "$newest" ] && [ "$newest" != "/root/backup.zip" ] && mv "$newest" /root/backup.zip
 fi
 file="backup.zip"
 if [ -f "$file" ]; then

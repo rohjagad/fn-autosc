@@ -11,7 +11,8 @@
     # Fungsi menghitung sisa waktu
     calculate_remaining_days() {
         local today=$(date +%s)
-        local expired_date=$(date -d "$1" +%s 2>/dev/null)
+        local expired_date
+        expired_date=$(date -d "$1" +%s 2>/dev/null)
         if [ $? -ne 0 ]; then
             echo "Invalid expiration date."
             exit 1
@@ -623,7 +624,7 @@ echo -e "
  Press CTRL + C to Exit
 ========================
 "
-read -p "Input Your Routing Protocol: " prot
+read -p "Input Your Routing Protocol: " prot || exit 0
 case $prot in
 1) clear ; vmessjir ;;
 2) clear ; vlessjir ;;
@@ -641,7 +642,7 @@ echo -e "
 1. Add Rules Domain
 ====================
 "
-read -p "Input Option: " op
+read -p "Input Option: " op || exit 0
 case $op in
 1) clear ; nano /root/.rules/domain ;;
 *) clear ; addrules ;;
@@ -663,7 +664,7 @@ echo -e "
 Press CTRL + C to Exit
 ===================
 "
-read -p "Input Option: " aws
+read -p "Input Option: " aws || exit 0
 case $aws in
 1) clear ; addroute ;;
 2) clear ; addrules ;;

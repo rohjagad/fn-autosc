@@ -12,7 +12,8 @@
     # Fungsi menghitung sisa waktu
     calculate_remaining_days() {
         local today=$(date +%s)
-        local expired_date=$(date -d "$1" +%s 2>/dev/null)
+        local expired_date
+        expired_date=$(date -d "$1" +%s 2>/dev/null)
         if [ $? -ne 0 ]; then
             echo "Invalid expiration date."
             exit 1
@@ -150,7 +151,7 @@ date=$(date)
 domain=$(cat /etc/xray/domain)
 clear
 cd /root
-mv /root/*.zip /root/backup.zip
+newest=$(ls -t /root/*.zip 2>/dev/null | head -1); [ -n "$newest" ] && mv "$newest" /root/backup.zip
 file="backup.zip"
 if [ -f "$file" ]; then
 echo "$file found, continuing..."
@@ -372,7 +373,7 @@ ${green}4${NC}. Restore Legacy Backup (< v1.23)
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-read -p "Input option: " opa
+read -p "Input option: " opa || exit 0
 case $opa in
 1) clear ; backup ;;
 2) clear ; restore ;;

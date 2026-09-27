@@ -11,7 +11,8 @@
     # Fungsi menghitung sisa waktu
     calculate_remaining_days() {
         local today=$(date +%s)
-        local expired_date=$(date -d "$1" +%s 2>/dev/null)
+        local expired_date
+        expired_date=$(date -d "$1" +%s 2>/dev/null)
         if [ $? -ne 0 ]; then
             echo "Invalid expiration date."
             exit 1
@@ -240,7 +241,7 @@ rm -f /var/log/create/ssh/${username}.log
 systemctl daemon-reload
 systemctl restart ssh
 systemctl restart sshd
-systemctl restart ws
+systemctl restart ws 2>/dev/null || true
 exp="$tgl $bulantahun"
 TEKS="
 ====================

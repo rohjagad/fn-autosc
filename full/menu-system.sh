@@ -12,7 +12,8 @@
     # Fungsi menghitung sisa waktu
     calculate_remaining_days() {
         local today=$(date +%s)
-        local expired_date=$(date -d "$1" +%s 2>/dev/null)
+        local expired_date
+        expired_date=$(date -d "$1" +%s 2>/dev/null)
         if [ $? -ne 0 ]; then
             echo "Invalid expiration date."
             exit 1
@@ -523,7 +524,7 @@ ${green}3${NC}. OpenEuler 24.03
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-read -p "Input Option: " opn
+read -p "Input Option: " opn || exit 0
 case $opn in
 1) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh openeuler 20.03 && reboot  ;;
 2) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh openeuler 22.03 && reboot  ;;
@@ -543,7 +544,7 @@ ${green}3${NC}. OpenSuse tumbleweed
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-read -p "Input Option: " osu
+read -p "Input Option: " osu || exit 0
 case $osu in
 1) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh opensuse 16.0 && reboot  ;;
 2) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh opensuse tumbleweed && reboot  ;;
@@ -564,7 +565,7 @@ ${green}4${NC}. Debian 12
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-read -p "Input Option: " db
+read -p "Input Option: " db || exit 0
 case $db in
 1) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh debian 9 && reboot  ;;
 2) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh debian 10 && reboot  ;;
@@ -587,7 +588,7 @@ ${green}5${NC}. Ubuntu 24.04
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-read -p "Input Option: " wq
+read -p "Input Option: " wq || exit 0
 case $wq in
 1) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh ubuntu 26.04 && reboot ;;
 2) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh ubuntu 18.04 && reboot ;;
@@ -610,7 +611,7 @@ ${green}4${NC}. Alpine 3.24
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-read -p "Input Option: " ap
+read -p "Input Option: " ap || exit 0
 case $ap in
 1) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh alpine 3.21 && reboot ;;
 2) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh alpine 3.22 && reboot ;;
@@ -629,7 +630,7 @@ ${green}2${NC}. Rocky Linux 9
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-read -p "Input Options: " opw
+read -p "Input Options: " opw || exit 0
 case $opw in
 1) clear ; cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh rocky 8 && reboot ;;
 2) clear ; cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh rocky 9 && reboot ;;
@@ -720,7 +721,7 @@ echo -e "
 ==========================
   Autoscript FN AutoSC
 "
-read -p "Input option: " ws
+read -p "Input option: " ws || exit 0
 case $ws in
 1) clear ; os ;; #information ;; #os ;;
 2) menu ;;
@@ -747,7 +748,7 @@ ${green}8${NC}. Change SSH Banner
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-read -p "Input option: " asu
+read -p "Input option: " asu || exit 0
 case $asu in
 1) clear ; change_timezone ;;
 2) clear ; resall ;;

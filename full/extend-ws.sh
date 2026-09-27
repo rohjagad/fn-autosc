@@ -11,7 +11,8 @@
     # Fungsi menghitung sisa waktu
     calculate_remaining_days() {
         local today=$(date +%s)
-        local expired_date=$(date -d "$1" +%s 2>/dev/null)
+        local expired_date
+        expired_date=$(date -d "$1" +%s 2>/dev/null)
         if [ $? -ne 0 ]; then
             echo "Invalid expiration date."
             exit 1
@@ -101,7 +102,7 @@ echo ""
 echo -e "${YB}Tap enter to go back${NC}"
 echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 read -rp "Input Username : " user
-if [ -z $user ]; then
+if [ -z "$user" ]; then
     x-ws
 else
     echo ""
@@ -113,7 +114,12 @@ else
     done
     exp=$(grep -wE "^### $user" "/etc/xray/json/ws.json" | cut -d ' ' -f 3 | sort | uniq)
     now=$(date +%y-%m-%d) # Format tahun 2 digit
-    d1=$(date -d "$exp" +%s)
+    d1=$(date -d "$exp" +%s 2>/dev/null)
+    if [ -z "$d1" ]; then
+        echo -e "\033[0;31mUnparseable expiry for this account - leaving it unchanged.\033[0m"
+        sleep 2
+        x-ws
+    fi
     d2=$(date -d "$now" +%s)
     exp2=$(( (d1 - d2) / 86400 ))
     exp3=$(($exp2 + $masaaktif))

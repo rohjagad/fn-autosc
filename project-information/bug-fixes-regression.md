@@ -465,3 +465,26 @@ references' lines.
 This is section 25's lesson in a new key: before adding a mechanism, check whether the source already
 solves the problem. The IP limit works through Cloudflare with no range list and no header rewriting,
 so a new Cloudflare range is a non-issue.
+
+## 34. Eleventh Pass: What This Sweep Found That the Earlier Ones Did Not (September 27, 2026)
+
+A full read of both editions plus the installer, website and configs produced ten defects (Found
+152-162 / fixes 160-170) that the previous passes had not surfaced. Two are worth naming as lessons:
+
+- **The last pass's own work had a hole (Found 160).** Fix 133 added streaming timeouts to the
+  SplitHTTP locations only; WS and HTTPUpgrade kept nginx's 60-second default. The lesson from
+  section 29 applies to more than ports: when a fix touches one member of a family - here four
+  transports - check the other members in the same pass.
+- **A guard that cannot fire is worse than no guard (Found 157).** `calculate_remaining_days` looked
+  like it validated the licence date, but `$?` after `local` made the branch dead; the gate only
+  blocked because the callers happened to re-check. It was safe, but it was not doing what it said.
+
+The sweep also confirmed **three suspected defects are not real**, which is worth recording so they
+are not "fixed" later: `udp-custom` and `udp-request` do **not** collide on 36711 (live they bind
+36711 and 8989; only the request config's unused `listen` key is misleading); `fix/fix.sh`'s
+conntrack keys do apply on the tested host; and `fix/fix-decrypted-original.sh` is a retained audit
+artefact that no installer ships, so its internal inconsistency is intentional.
+
+Two sub-audits read every file and were checked against the running services before anything was
+changed - the same rule as section 25: a file-level suspicion is not a finding until it is
+reproduced.

@@ -12,7 +12,8 @@
     # Fungsi menghitung sisa waktu
     calculate_remaining_days() {
         local today=$(date +%s)
-        local expired_date=$(date -d "$1" +%s 2>/dev/null)
+        local expired_date
+        expired_date=$(date -d "$1" +%s 2>/dev/null)
         if [ $? -ne 0 ]; then
             echo "Invalid expiration date."
             exit 1
@@ -137,6 +138,7 @@ netinfo=$(ip -o -4 route show to default | awk '{print $5}')
 echo -e "ip=${ip}
 server_priv_key=${server_priv_key}
 server_pub_key=${server_pub_key}" > /etc/wireguard/params
+chmod 600 /etc/wireguard/params
 source /etc/wireguard/params
 systemctl stop wg-quick@wg0 2>/dev/null || true
 echo -e "[Interface]

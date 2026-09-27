@@ -11,7 +11,8 @@
     # Fungsi menghitung sisa waktu
     calculate_remaining_days() {
         local today=$(date +%s)
-        local expired_date=$(date -d "$1" +%s 2>/dev/null)
+        local expired_date
+        expired_date=$(date -d "$1" +%s 2>/dev/null)
         if [ $? -ne 0 ]; then
             echo "Invalid expiration date."
             exit 1
@@ -105,7 +106,7 @@ do
         limip=$(grep "Limit IP:" /var/log/create/xray/split/${user}.log | awk '{print $3}')
         top=$(cat /etc/xray/quota/split/${user} 2>/dev/null || echo 0)
         quota=$(bytes "$top")
-        uid=$(grep "${user}" /etc/xray/json/split.json | awk -F'"id": "' '{print $2}' | awk -F'"' '{print $1}' | sort | uniq)
+        uid=$(grep -F "\"email\": \"${user}\"" /etc/xray/json/split.json | sed -nE 's/.*"(id|password)": "([^"]+)".*/\2/p' | sort -u | head -1)
         protokol=$(grep "Protokol:" /var/log/create/xray/split/${user}.log | awk '{print $2}')
         exp=$(grep "Expired" /var/log/create/xray/split/${user}.log | awk '{print $3}')
         

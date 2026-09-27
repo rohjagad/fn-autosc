@@ -1507,3 +1507,28 @@ equivalents), and Xray takes the first entry of the chain, which Cloudflare make
 All three configs and the live host are back to the references' lines, the map is log-only again, and
 `installer/cf-realip.sh` plus its cron are gone. Verified live with the references' form: through
 Cloudflare the access log records the real client and the online count is correct.
+
+## Eleventh Pass - Fixes 160-170 (September 27, 2026)
+
+| Fix | Found | Change |
+| :-- | :-- | :-- |
+| 160 | 152 | `list-xray-{ws,http,split,grpc}.sh` (full + lite): anchor the credential lookup on the account's `"email"` and accept `"id"` or `"password"` - the form `change-id-*` already uses. |
+| 161 | 153 | `extend-{ws,http,split,grpc}.sh` (full + lite) and `menu-wg.sh`: guard the stored-expiry parse like `xp.sh`; an unreadable date now leaves the account unchanged and says so. |
+| 162 | 154 | Menu prompts that feed a `case` now exit on a failed read (`read ... || exit 0`, 57 sites in `full/` and `lite/`). |
+| 163 | 155 | `website/restore-ftp.sh`, `full/restore-ftp.sh`, `lite/restore-ftp.sh`, `full/bmenu.sh`, `lite/bmenu.sh`: move the single newest archive instead of a glob. |
+| 164 | 156 | `installer/wg.sh`: `chmod 600 /etc/wireguard/params`. |
+| 165 | 157 | ~191 copies of `calculate_remaining_days`: split `local` from the assignment so the invalid-date guard actually fires. |
+| 166 | 158 | `installer/lite.sh` stops/disables haproxy; `lite/menu-system.sh` and `lite/xp.sh` no longer restart the full-only `ws` unit and no longer re-enable dropbear. |
+| 167 | 159 | `installer/l2tp.sh`: create `chap-secrets`/`ipsec.d/passwd` empty; `xl2tp.sh` owns the accounts. |
+| 168 | 160 | `config/4.conf`, `6.conf`, `dual.conf`: `proxy_read_timeout 300s`, `proxy_send_timeout 300s` and `proxy_connect_timeout 60s` at the `http` level, so WS and HTTPUpgrade match SplitHTTP. |
+| 169 | 161 | `menu-argo.sh` (full + lite): drop the `/etc/xray/domssh` read. |
+| 170 | 162 | `dm-menu.sh` (full + lite), `dmsl`: rebuild `/etc/haproxy/funny.pem`, remove the correct path, restart haproxy. |
+
+All shell changes were repacked into `menu/full.zip` (97 script entries) and `menu/lite.zip` (86),
+keeping the compiled Go entries byte-identical; the archive-vs-source sweep is 0 diffs. The updated
+archive was unpacked over `/usr/bin` on the test host and nginx reloaded (`nginx -t` clean).
+
+Verified live for fixes 160/161: listing `lbob` now prints **its own** UUID (no `lbobby` collision),
+a trojan account's stored `"password"` is what the field shows, and `extend-ws` on an account whose
+date reads `GARBAGE-DATE` leaves the marker unchanged and prints "Unparseable expiry for this
+account - leaving it unchanged." instead of rewriting it to `70-01-07`.

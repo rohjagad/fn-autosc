@@ -12,7 +12,8 @@
     # Fungsi menghitung sisa waktu
     calculate_remaining_days() {
         local today=$(date +%s)
-        local expired_date=$(date -d "$1" +%s 2>/dev/null)
+        local expired_date
+        expired_date=$(date -d "$1" +%s 2>/dev/null)
         if [ $? -ne 0 ]; then
             echo "Invalid expiration date."
             exit 1
@@ -217,7 +218,7 @@ ${green}0${NC}. Back to Main Menu
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-read -p "Input option: " opw
+read -p "Input option: " opw || exit 0
 case $opw in
 1) clear ; install ;;
 2) clear ; hapus ;;
@@ -395,7 +396,7 @@ ${green}5${NC}. Report Script Bug
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-read -p "Input option: " apws
+read -p "Input option: " apws || exit 0
 case $apws in
 1) clear ; creds ;;
 2) clear ; notif ;;

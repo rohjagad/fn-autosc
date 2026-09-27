@@ -1510,3 +1510,54 @@ were re-verified first (MD5/SHA match `original-source-do-not-edit/README.md`).
 - **My own shipped Cloudflare list from fix 154 had a wrong CIDR** - `2c0f:f248::/29` where Cloudflare
   publishes `2c0f:f248::/32`. A /29 trusts addresses Cloudflare does not own. The three configs are
   re-synced to Cloudflare's exact published lists and a refresher now keeps them current. Fixes 156/157.
+
+## Eleventh Pass - Thorough Sweep of Every File (September 27, 2026)
+
+Both archives re-verified (MD5/SHA match the README). Two independent reads covered every shell
+script in `full/` and `lite/` plus `install.sh`, `installer/`, `fix/`, `website/`, `config/`,
+`json/`, `other/` and `udp/`; every candidate below was then driven live on the test VPS or checked
+against the running services before it was recorded. Ten defects, all fixed; the inherited ones are
+noted, and the source was checked first each time.
+
+Found 152. **`list-xray-*` showed other accounts and an empty credential** (`full/list-xray-{ws,http,split,grpc}.sh`, and `lite/`) - the extraction was `grep "${user}" ... | awk -F'"id": "' ...`, an **unanchored** grep over the whole config, so listing `bob` also matched `bobby`'s marker and client, and only `"id"` was read, so a **trojan** account (which stores `"password"`) printed nothing.
+- **Confirmed live:** listing `lbob` showed `lbob` *and* `lbobby`, and the credential field came out empty; a trojan account's real `"password"` was never printed.
+- **Inherited:** both references have the same line (V23's reads `/etc/v2ray/config.json` and appends `| strings`, which ours dropped in the migration). Fixed by mirroring the anchored form `change-id-*` already uses.
+
+Found 153. **`extend-*` rewrote an expiry it could not parse, destroying the account** (`full/extend-{ws,http,split,grpc}.sh`, `lite/`, and the WireGuard extend in `menu-wg.sh`) - `d1=$(date -d "$exp" +%s)` prints nothing for an unreadable date, bash treats empty as 0, and the new date is computed from 1970.
+- **Confirmed live:** with an account whose stored date was `GARBAGE-DATE`, `extend-ws` rewrote the marker to `### ext1 70-01-07` - a past date, so the next `xp` sweep deletes the account.
+- **Inherited:** both references parse without a guard; `xp.sh` got exactly this guard in fix 110 and `extend-*` did not. Fixed with the same guard.
+
+Found 154. **A menu prompt that reads EOF recursed until the stack overflowed** (every menu that answers an invalid option by re-entering itself, e.g. `full/menu-bot.sh`'s `mna`, `lite/`, `bmenu.sh`, `dm-menu.sh`, `menu-*`, `xl2tp.sh`) - `read -p "Input option: " opt` with stdin at EOF yields an empty option, the `*)` branch calls the menu again, the next read also fails, and so on.
+- **Confirmed live:** `printf 'x\n' | menu-bot` never returned (killed by a timeout) and the kernel log recorded `menu-bot[...]: segfault ... error 6` at a stack address - an overflow, not a script error. It does not happen on a tty, only when stdin ends (piped input, a dropped terminal).
+- **Inherited:** both references recurse the same way. Fixed by making the menu prompt exit on a failed read (`read ... || exit 0`, 57 sites).
+
+Found 155. **Restore moved a glob of archives** (`website/restore-ftp.sh`, `full/restore-ftp.sh`, `lite/restore-ftp.sh`, `full/bmenu.sh`, `lite/bmenu.sh`) - `mv /var/www/uploads/*.zip /root/backup.zip` fails with two or more archives ("target is not a directory"), no `backup.zip` is produced, and every web restore stays broken until the directory is cleaned by hand. `upload.php` names each upload uniquely and never prunes.
+- **Inherited:** both references use the same glob. Fixed: move the single newest archive.
+
+Found 156. **`/etc/wireguard/params` is world-readable and holds the server private key** (`installer/wg.sh`) - it is written with the default umask, so any local user can read the WireGuard private key, and `backup.sh` archives it.
+- **Confirmed live:** `644 root:root`, containing `server_priv_key`. **Inherited.** Fixed with `chmod 600`.
+
+Found 157. **The invalid-date guard in `calculate_remaining_days` is dead code** (every copy, ~191 files) - `local expired_date=$(date ...)` makes `$?` the status of `local`, not of `date`, so the branch can never run; an unparseable date becomes a large negative and the gate blocks through the caller's `< 0` check instead.
+- **Inherited.** Behaviour was already fail-closed, so this is a correctness fix, not a hole: `local expired_date` and the assignment are now separate statements, and the guard fires as intended.
+
+Found 158. **The lite edition restarts services it does not ship and keeps a dead TLS frontend** (`lite/menu-system.sh`, `lite/xp.sh`, `installer/lite.sh`) - `ws.service` is created only by `installer/ssh.sh`, which lite never runs, yet the menus restart it; the same menus `systemctl restart dropbear`, re-enabling the service `lite.sh` had just disabled because it cannot bind port 22; and `diamond.sh` still runs `stunnel5.sh`, so every lite install gets HAProxy on `:777` forwarding to `dropbear:109` - a port with no listener.
+- **Inherited** (both references' lite runs `diamond.sh` with stunnel5). Fixed: guard the `ws` restarts, do not restart dropbear in lite, and stop/disable haproxy in lite.
+
+Found 159. **The L2TP installer wrote empty-credential accounts** (`installer/l2tp.sh`) - `VPN_USER` and `VPN_PASSWORD` are never assigned, so it wrote `"" l2tpd "" *` into `/etc/ppp/chap-secrets` and `:<hash of "">:xauth-psk` into `/etc/ipsec.d/passwd`, i.e. a valid empty username/password pair next to the public PSK `myvpn`.
+- **Confirmed live earlier** (`"$VPN_USER" l2tpd "$VPN_PASSWORD" *` present). **Inherited** from both references. Fixed: the files are created empty and `xl2tp.sh`, which already owns them, appends the real accounts.
+
+Found 160. **The WS and HTTPUpgrade nginx locations lack the streaming timeouts SplitHTTP has** (`config/4.conf`, `6.conf`, `dual.conf`) - an idle WebSocket or HTTPUpgrade tunnel is cut at nginx's 60-second default while the SplitHTTP locations carry `proxy_read_timeout/send_timeout 300s`.
+- **Ours to fix:** the SplitHTTP timeouts came from fix 133, so this was an incomplete fix rather than an inherited defect (the references set none). The three `proxy_*_timeout`s are now set once at the `http` level.
+
+Found 161. **Argo "Details" reads a file nothing writes** (`full/menu-argo.sh`, `lite/menu-argo.sh`) - `doms=$(cat /etc/xray/domssh)` on a path no script creates, printing `cat: ... No such file or directory` and leaving the value unused.
+- **Inherited** (both references have the read). Fixed by dropping the line.
+
+Found 162. **The self-signed certificate path does not refresh the HAProxy bundle** (`full/dm-menu.sh`, `lite/dm-menu.sh`, `dmsl`) - HAProxy serves `/etc/haproxy/funny.pem`, and every other issuance path in the file rebuilds it, but `dmsl` does not; it also removes `/etc/xray/funny.pem`, which never exists. Port 777 keeps the previous certificate after a re-issue.
+- Fixed: rebuild `/etc/haproxy/funny.pem`, remove the right path, and restart haproxy.
+
+### Checked and found clean, or recorded as not-a-defect
+
+- **`udp-custom` and `udp-request` no longer conflict.** Both config.json files say `listen: :36711`, but live they bind **36711** and **8989** respectively, both services active with zero restarts; the request config's `listen` key is simply unused/misleading. Recorded, not changed.
+- **`fix/fix.sh` conntrack keys** are applied on the tested host (module loaded, `nf_conntrack_max` = the configured value); the boot-ordering concern is recorded only.
+- **`fix/fix-decrypted-original.sh`** is a retained audit artefact (the decrypted original payload), not shipped by any installer; it is deliberately left byte-for-byte.
+- Ports/paths across all 12 nginx locations vs the JSON inbounds vs the card links; every unit restarted vs the units the installers create; the `###` markers; trojan `password` vs vless/vmess `id`; `upload.php`'s token auth and filename handling; the cron entries; and the archive-vs-source sweep (0 diffs after repacking) - all clean.
