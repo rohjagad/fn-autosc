@@ -130,7 +130,7 @@ The full installer runs these stages, in order:
 2. Install base packages, directories, Node.js 20, and vnStat (`package.sh`).
 3. Download and unpack the menu suite into `/usr/bin`.
 4. Install the terminal display formatter (`/etc/funny/format.sh`).
-5. Install SSH, Dropbear, and SSH WebSocket (`ssh.sh`).
+5. Install SSH, Dropbear (pinned to 2019.78 — see decision 25), and SSH WebSocket (`ssh.sh`).
 6. Install Xray (`xray.sh`) — WebSocket, HTTP Upgrade, SplitHTTP, gRPC (all four transports).
 7. Install the web restore interface (`website/install.sh`).
 8. Install Nginx and obtain SSL certificates (`diamond.sh`).

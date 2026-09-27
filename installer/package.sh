@@ -76,7 +76,7 @@ apt install -y screen curl jq bzip2 gzip coreutils rsyslog iftop \
  bc  apt-transport-https build-essential dirmngr libxml-parser-perl neofetch screenfetch git lsof \
  openssl openvpn easy-rsa fail2ban tmux \
  stunnel4 vnstat squid \
- dropbear  libsqlite3-dev \
+ dropbear  zlib1g-dev libsqlite3-dev \
  socat cron bash-completion ntpdate xz-utils  apt-transport-https \
  gnupg2 dnsutils lsb-release chrony
 

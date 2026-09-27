@@ -74,7 +74,50 @@ systemctl restart ssh
 systemctl restart sshd
 
 # Installasi Dropbear
+#
+# The panel's default is Dropbear 2019.78, not the distribution's build (Debian
+# 12 ships 2022.83). Both references install whatever apt provides; the pin is a
+# deliberate choice recorded in project-information/is-decision.md 25. apt still
+# supplies the plumbing - the init script, the systemd unit and the host keys -
+# then the upstream 2019.78 binaries are built from the vendored tarball and
+# installed over the package's. dropbear-bin is held so a later apt upgrade
+# cannot put the distribution build back.
 apt install dropbear -y
+apt install -y zlib1g-dev >/dev/null 2>&1 || true
+apt-mark hold dropbear-bin >/dev/null 2>&1 || true
+if ! /usr/sbin/dropbear -V 2>&1 | grep -q 'v2019\.78'; then
+    echo "Building Dropbear 2019.78 (the pinned default)..."
+    (
+        set -e
+        cd /tmp || exit 1
+        db_tbz=dropbear-2019.78.tar.bz2
+        db_sha=525965971272270995364a0eb01f35180d793182e63dd0b0c3eb0292291644a4
+        wget --no-check-certificate -q -O "$db_tbz" \
+            "https://github.com/rohjagad/fn-autosc-miscellaneous/releases/download/v1.23/$db_tbz" || \
+        wget --no-check-certificate -q -O "$db_tbz" \
+            "https://raw.githubusercontent.com/rohjagad/fn-autosc-miscellaneous/main/$db_tbz" || \
+        wget --no-check-certificate -q -O "$db_tbz" \
+            "https://matt.ucc.asn.au/dropbear/releases/$db_tbz"
+        if [ "$(sha256sum "$db_tbz" | awk '{print $1}')" != "$db_sha" ]; then
+            echo "Dropbear source checksum mismatch - keeping the installed build."
+        else
+            rm -rf dropbear-2019.78
+            tar -xjf "$db_tbz"
+            cd dropbear-2019.78
+            ./configure --prefix=/usr --sysconfdir=/etc >/dev/null 2>&1
+            make -j"$(nproc)" >/dev/null 2>&1
+            # Rename over the running binary; install(1) would fail with
+            # "Text file busy" because dropbear is executing from that path.
+            install -m 0755 dropbear /usr/sbin/dropbear.new && \
+                mv -f /usr/sbin/dropbear.new /usr/sbin/dropbear
+            install -m 0755 dropbearkey /usr/bin/dropbearkey
+            install -m 0755 dropbearconvert /usr/bin/dropbearconvert
+        fi
+        cd /tmp || exit 1
+        rm -rf dropbear-2019.78 "$db_tbz"
+    ) || echo "Dropbear 2019.78 build failed - keeping the installed build."
+    systemctl daemon-reload
+fi
 rm /etc/default/dropbear
 rm /etc/issue.net
 cat> /etc/issue.net << END

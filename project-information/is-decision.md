@@ -306,3 +306,45 @@ keep the reference's solution.**
 Verified live with the references' form: a client through Cloudflare is recorded as
 `from 202.155.17.126` (the real address, not the edge) and `statsonline` counts it. A brand-new
 Cloudflare range changes nothing, because no range list is involved.
+
+## 25. The Panel's Default Dropbear Is 2019.78, Not the Distribution's Build
+
+**The owner's decision is that Dropbear 2019.78 is the default**, and it is a divergence from both
+references on purpose: their `installer/ssh.sh` runs `apt install dropbear -y` and takes whatever the
+distribution ships - 2022.83 on Debian 12, 2020.81 on Debian 11, 2022.83 on Ubuntu 22.04 - so the
+serving binary changed with the base image. The panel now pins one version on every base.
+
+**How the pin is applied.** apt is still what installs Dropbear, because the service plumbing - the
+`/etc/init.d/dropbear` script, the `dropbear.service` unit, the `dropbear` user and the host keys -
+comes from the distribution and the panel's own tooling assumes it. `installer/ssh.sh` then builds the
+2019.78 binaries from the upstream source tarball and installs them over the package's
+(`/usr/sbin/dropbear`, `/usr/bin/dropbearkey`, `/usr/bin/dropbearconvert`). The tarball is vendored in
+`rohjagad/fn-autosc-miscellaneous` (`main` and the `v1.23` release) and is checked against
+`sha256 525965971272270995364a0eb01f35180d793182e63dd0b0c3eb0292291644a4` before it is compiled, with
+`matt.ucc.asn.au` as the last fallback. The build is skipped when `dropbear -V` already reports
+`v2019.78`, so re-running the installer is idempotent. `dropbear-bin` is set on `apt-mark hold`, so a
+later `apt upgrade` cannot quietly put 2022.83 back; the `dropbear` package itself (the plumbing) is
+not held. `zlib1g-dev` is installed for the build (`package.sh` and, defensively, `ssh.sh`).
+
+**What to expect from the older build.** 2019.78 predates ed25519 host keys and the RSA-SHA2
+signatures, but it still negotiates with current clients over its **ECDSA** host key, so password
+authentication is unaffected. The Debian package generates no DSS host key, so 2019.78 logs one
+harmless `Failed loading .../dropbear_dss_host_key` warning on start; no DSS key is fabricated, because
+DSA is weak and current clients do not need it. It is also built **without PAM**, exactly like the
+Debian package (which is why `expire-ssh.sh` writes to the shadow file directly, bug 72), so account
+ageing behaves the same. The panel's SSH tooling reads the journal for
+`Password auth succeeded for '<user>'` lines, and 2019.78 emits the identical line - `limit-ip-ssh.sh`
+and `cek-login-ssh.sh` need no change.
+
+**Verified live** on the Debian 12 test VPS: the installer's Dropbear section built and installed the
+binary (`Dropbear v2019.78`, `dropbear-bin` shown as held), the service came up `active` on 111, 109
+and 69, the ident changed to `SSH-2.0-dropbear_2019.78`, a real password login through 2019.78 on port
+109 succeeded (journal `Password auth succeeded for 'dbtest'`), and the same account with a wrong
+password was refused with exit 5. The test VPS now runs 2019.78.
+
+**Scope:** the full edition only. Lite never runs `installer/ssh.sh` and disables the Dropbear service
+(fix 149), so its binary version is irrelevant.
+
+**Rule for future changes:** the Dropbear version is one value, held by this pin - do not let one base
+image's apt version decide it, and if the pin is ever raised, change the tarball, its sha256 and this
+section together.
