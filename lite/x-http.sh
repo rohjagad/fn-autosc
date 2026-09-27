@@ -134,7 +134,7 @@ ${separator}
 ${orange}Press [Ctrl + C] to exit${NC}"
 
     # Input pilihan dari pengguna
-    read -p "Input option: " ophttp
+    read -p "Input option: " ophttp || exit 0
 
     # Menangani pilihan berdasarkan input pengguna
     case $ophttp in

@@ -134,7 +134,7 @@ ${separator}
 ${orange}Press [Ctrl + C] to exit${NC}"
 
     # Input pilihan dari pengguna
-    read -p "Input option: " opsplit
+    read -p "Input option: " opsplit || exit 0
 
     # Menangani pilihan berdasarkan input pengguna
     case $opsplit in

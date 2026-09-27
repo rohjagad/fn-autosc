@@ -132,7 +132,7 @@ ${green}17${NC}. Lock WS Account
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
-    read -p "Input option: " opws
+    read -p "Input option: " opws || exit 0
 
     # Menangani pilihan berdasarkan input pengguna
     case $opws in

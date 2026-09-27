@@ -134,7 +134,7 @@ ${separator}
 ${orange}Press [Ctrl + C] to exit${NC}"
 
     # Input pilihan dari pengguna
-    read -p "Input option: " opgrpc
+    read -p "Input option: " opgrpc || exit 0
 
     # Menangani pilihan berdasarkan input pengguna
     case $opgrpc in
