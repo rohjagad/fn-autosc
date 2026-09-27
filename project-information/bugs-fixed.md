@@ -1616,3 +1616,13 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - `Dropbear v2019.78` held;
 - `nginx -t` passed;
 - All four Xray configs reported `Configuration OK.`.
+
+### Fix 177 - WireGuard restart on account expiration (Found 171)
+
+- **Fix 177 (Found 171):** `full/xp.sh` and `lite/xp.sh` now set `wg_restarted=1` when any expired WireGuard peer is pruned from `/etc/wireguard/wg0.conf`, and execute `systemctl daemon-reload; systemctl restart wg-quick@wg0 2>/dev/null || true` once after the cleanup loop.
+- **Verified live:** created client `wgexp2`, confirmed tunnel ping (0% loss) and egress. Expired date to `2020-01-01` and ran `/usr/bin/xp`: `Kernel wireguard peers count: 0`, ping from expired client resulted in `100% packet loss`, and egress timed out.
+
+### Fix 178 - non-interactive unzip and deduplicated restart in restore scripts (Found 172)
+
+- **Fix 178 (Found 172):** all 9 restore unzippers across `full/restore-ftp.sh`, `lite/restore-ftp.sh`, `website/restore-ftp.sh`, `full/bmenu.sh`, and `lite/bmenu.sh` now use `unzip -o backup.zip` to overwrite existing files cleanly without prompting. The 3 back-to-back duplicated `systemctl restart xray@ws` lines in `full/bmenu.sh` and `lite/bmenu.sh` were deduplicated to a single restart. Repacked both menu archives (`menu/full.zip` and `menu/lite.zip`) with 0 non-755 entries and 0 diffs.
+- **Verified:** `bash -n` clean across all touched files; non-interactive `unzip -o` replaces existing staging files without hanging.

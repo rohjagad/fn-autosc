@@ -106,7 +106,7 @@ read -rp "Input Link Database: " url
 
 cd /root
 wget -O backup.zip "$url"
-unzip backup.zip
+unzip -o backup.zip
 rm -f backup.zip
 sleep 1
 echo "Backing up data"
@@ -128,7 +128,6 @@ cp ipsec.secrets /etc/ 2>/dev/null || true
 
 systemctl daemon-reload
 systemctl restart ssh
-systemctl restart xray@ws
 systemctl restart xray@ws
 systemctl restart xray@grpc
 systemctl restart xray@split
@@ -164,7 +163,7 @@ if [ -f "$file" ]; then
 echo "$file found, continuing..."
 sleep 2
 clear
-unzip backup.zip
+unzip -o backup.zip
 rm -f backup.zip
 sleep 1
 echo "Backing up data"
@@ -186,7 +185,6 @@ cp ipsec.secrets /etc/ 2>/dev/null || true
 
 systemctl daemon-reload
 systemctl restart ssh
-systemctl restart xray@ws
 systemctl restart xray@ws
 systemctl restart xray@grpc
 systemctl restart xray@split
@@ -222,7 +220,7 @@ read -rp "Backup URL: " url
 
 cd /root
 wget -O backup.zip "$url"
-unzip backup.zip
+unzip -o backup.zip
 rm -f backup.zip
 sleep 1
 echo "Restoring backup data..."
@@ -347,7 +345,6 @@ echo "$TEXT" >> "$XRAY_CONFIG"
 # Memulai Service
 systemctl daemon-reload
 systemctl restart ssh
-systemctl restart xray@ws
 systemctl restart xray@ws
 systemctl restart xray@grpc
 systemctl restart xray@split

@@ -19,7 +19,7 @@ if [ -f "$file" ]; then
 echo "$file found, continuing..."
 sleep 2
 clear
-unzip backup.zip
+unzip -o backup.zip
 rm -f backup.zip
 sleep 1
 echo "Backing up data"

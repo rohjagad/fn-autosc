@@ -592,3 +592,14 @@ Section 35's four-check rule applied across the two fresh-reinstall cycles and t
 | **Over-strictness** | Audited all menu input loops and gates. Anchoring `extend-*` to `^### $user ` protects against neighbour-account corruption without restricting valid usernames. Quantity fields reject 0 per Decision 4, failing safe with exit on EOF. WARP refusal only triggers on date licenses, preserving license validity. |
 | **Over-engineering** | Audited all patches: no new daemon, no external library, no complex abstraction added. The tree remains minimal shell scripts and Go binaries. Dead-code and unneeded abstractions were omitted. |
 | **vs the source** | Both reference archives (`Autoscript New 1.20.zip` and `V23 Linux Ubuntu, Debian, Kali.zip`) verified byte-for-byte in `original-source-do-not-edit/` (MD5 and SHA-256 match README exactly). Divergences (Dropbear 2019.78 pin, WS on Xray, license lifetime, WARP guard, canonical transport paths) are documented in `is-decision.md` as intentional architecture choices. |
+
+## 41. WireGuard Expiry Restart and Non-Interactive Restore - Four Checks (September 28, 2026)
+
+Section 35's four-check rule applied to Fixes 177 and 178:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Fix 177 executes `systemctl restart wg-quick@wg0` only when `wg_restarted=1` (at least one peer actually expired), so an idle `xp` run does not restart active WireGuard interfaces. Fix 178 only adds `-o` (force overwrite) to `unzip` and removes an identical redundant restart line; all restore operations extract and start identical services. `bash -n` clean on all 7 files. |
+| **Over-strictness** | Neither fix restricts any valid user operation. Pruning expired WireGuard peers matches the documented lifecycle of every other protocol in `xp.sh`. |
+| **Over-engineering** | Fix 177: 4 lines of shell logic using existing systemd units. Fix 178: standard `-o` flag on already-used `unzip` command. No new daemon, script, or configuration file. |
+| **vs the source** | Both references omitted restarting `wg-quick@wg0` in `xp.sh`, allowing expired clients to tunnel indefinitely. Both references ran `unzip` without `-o` and duplicated `systemctl restart xray@ws`. Divergence is necessary to stop data leakage from expired accounts and prevent stdin hangs. |

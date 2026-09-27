@@ -306,6 +306,7 @@ done
 
 # WIREGUARD
 if [[ -f /etc/funny/.wireguard ]]; then
+wg_restarted=0
 while read expired; do
 	user=$(echo $expired | awk '{print $1}')
 	exp=$(echo $expired | awk '{print $2}')
@@ -335,8 +336,13 @@ while read expired; do
         TIME="10"
         URL="https://api.telegram.org/bot$KEY/sendMessage"
         curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL
+        wg_restarted=1
 	fi
 done < /etc/funny/.wireguard
+if [ "$wg_restarted" = "1" ]; then
+    systemctl daemon-reload
+    systemctl restart wg-quick@wg0 2>/dev/null || true
+fi
 fi
 
 # Noobz
