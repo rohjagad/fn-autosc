@@ -1722,3 +1722,13 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 196 (Found 190):** in `full/menu-argo.sh` and `lite/menu-argo.sh`, added `read -n 1 -s -r -p "Press any key to return..."` to `detail()`, guarded `/etc/xray/domargo` with `2>/dev/null || echo "Not configured"`, and updated case options 1 and 3 in `tamp()` to return to `tamp` after completion. In `full/menu-dnstt.sh`, added pauses and recursive `mna89` returns across options 1, 2, and 3 so confirmation notices remain visible on screen until acknowledged. Repacked both menu archives (`menu/full.zip` and `menu/lite.zip`) with 0 diffs and all entries at 0755.
 - **Verified live on VPS:** tested option 3 in `menu-argo` and option 3 in `menu-dnstt`: both pause for user keypress and loop back cleanly to their respective menus.
+
+### Fix 197 - NoobzVPN menu pauses, command modernization, and loop returns (Found 191)
+
+- **Fix 197 (Found 191):** in `full/menu-noobz.sh`, added `read -n 1 -s -r -p "Press any key to return..."` across `create()`, `delete()`, and `list()`, and updated `main()` case statement to loop back after each action. Modernized `noobz_list_users()` to run `noobzvpns print-all 2>/dev/null`, and fixed `delete()` to return cleanly to `main` on empty input or EOF. Repacked both menu archives (`menu/full.zip` and `menu/lite.zip`) with 0 diffs and all entries at 0755.
+- **Verified live on VPS:** tested option 3 in `menu-noobz` from `menu.sh`: renders account details without argument error, displays `Total Users: 0`, and pauses for user input before returning.
+
+### Fix 198 - comprehensive service restarts in all backup restore routines (Found 192)
+
+- **Fix 198 (Found 192):** across all restore routines (`restore-ftp.sh` and `bmenu.sh` in `full/`, `lite/`, and `website/`), added `systemctl restart` for all restored daemons: `wg-quick@wg0`, `dnstt`, `noobzvpns`, `xl2tpd`, `ipsec`, `dropbear`, `ws`, and `quota-*`. Repacked both menu archives (`menu/full.zip` and `menu/lite.zip`) with 0 diffs and all entries at 0755.
+- **Verified live on VPS:** executed full restore cycle: all restored VPN daemons and quota services restarted cleanly with 0 failed units.

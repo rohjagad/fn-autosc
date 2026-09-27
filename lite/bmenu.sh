@@ -134,6 +134,10 @@ systemctl restart xray@ws
 systemctl restart xray@grpc
 systemctl restart xray@split
 systemctl restart xray@upgrade
+systemctl restart quota-ws 2>/dev/null || true
+systemctl restart quota-http 2>/dev/null || true
+systemctl restart quota-split 2>/dev/null || true
+systemctl restart quota-grpc 2>/dev/null || true
 systemctl restart nginx
 systemctl restart cron
 clear
@@ -193,6 +197,10 @@ systemctl restart xray@ws
 systemctl restart xray@grpc
 systemctl restart xray@split
 systemctl restart xray@upgrade
+systemctl restart quota-ws 2>/dev/null || true
+systemctl restart quota-http 2>/dev/null || true
+systemctl restart quota-split 2>/dev/null || true
+systemctl restart quota-grpc 2>/dev/null || true
 systemctl restart nginx
 systemctl restart cron
 clear
@@ -355,6 +363,10 @@ systemctl restart xray@ws
 systemctl restart xray@grpc
 systemctl restart xray@split
 systemctl restart xray@upgrade
+systemctl restart quota-ws 2>/dev/null || true
+systemctl restart quota-http 2>/dev/null || true
+systemctl restart quota-split 2>/dev/null || true
+systemctl restart quota-grpc 2>/dev/null || true
 systemctl restart nginx
 systemctl restart cron
 clear

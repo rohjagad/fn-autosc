@@ -108,12 +108,23 @@ rm -f backup.zip
 clear
 systemctl daemon-reload
 systemctl restart ssh
+systemctl restart dropbear 2>/dev/null || true
+systemctl restart ws 2>/dev/null || true
 systemctl restart xray@ws
 systemctl restart xray@grpc
 systemctl restart xray@split
 systemctl restart xray@upgrade
+systemctl restart quota-ws 2>/dev/null || true
+systemctl restart quota-http 2>/dev/null || true
+systemctl restart quota-split 2>/dev/null || true
+systemctl restart quota-grpc 2>/dev/null || true
 systemctl restart nginx
 systemctl restart cron
+systemctl restart wg-quick@wg0 2>/dev/null || true
+systemctl restart dnstt 2>/dev/null || true
+systemctl restart noobzvpns 2>/dev/null || true
+systemctl restart xl2tpd 2>/dev/null || true
+systemctl restart ipsec 2>/dev/null || true
 clear
 echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo -e "SUCCESSFULL RESTORE YOUR VPS"

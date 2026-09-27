@@ -118,11 +118,7 @@ noobz_remove_user() {
 }
 
 noobz_list_users() {
-    if noobzvpns print-all >/dev/null 2>&1; then
-        noobzvpns print-all
-    else
-        noobzvpns --info-all-user
-    fi
+    noobzvpns print-all 2>/dev/null || noobzvpns --info-all-user 2>/dev/null || true
 }
 
 function create() {
@@ -167,6 +163,8 @@ URL="https://api.telegram.org/bot$KEY/sendMessage"
 curl -s --max-time $TIME -d "chat_id=$CHATID&text=$TEKS" $URL
 clear
 echo "$TEKS"
+read -n 1 -s -r -p "Press any key to return..." || true
+echo ""
 }
 
 function delete() {
@@ -179,9 +177,9 @@ Delete NoobzVPN Account
 $mna
 ════════════════════════════
 "
-read -p "Username: " name
+read -p "Username: " name || return
 if [ -z "$name" ]; then
-menu
+return
 else
 exp=$(grep -we "^### $name" "/etc/funny/.noob" | cut -d ' ' -f 3 | sort | uniq)
 sed -i "/^### $name $exp/d" /etc/funny/.noob
@@ -203,6 +201,8 @@ URL="https://api.telegram.org/bot$KEY/sendMessage"
 curl -s --max-time $TIME -d "chat_id=$CHATID&text=$TEKS" $URL
 clear
 echo "$TEKS"
+read -n 1 -s -r -p "Press any key to return..." || true
+echo ""
 fi
 }
 
@@ -259,6 +259,8 @@ format_output() {
 # Panggil fungsi format_output dengan output dari noobzvpns sebagai argumen
 clear
 format_output "$output"
+read -n 1 -s -r -p "Press any key to return..." || true
+echo ""
 }
 
 function main() {
@@ -281,10 +283,10 @@ ${separator}
 ${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input option: " inrere || exit 0
 case $inrere in
-1|01) clear ; create ;;
-2|02) clear ; delete ;;
-3|03) clear ; list ;;
-x|X) exit ;;
+1|01) clear ; create ; main ;;
+2|02) clear ; delete ; main ;;
+3|03) clear ; list ; main ;;
+x|X) exit 0 ;;
 *) echo "Invalid option" ; main ;;
 esac
 }

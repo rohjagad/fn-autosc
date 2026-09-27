@@ -746,3 +746,14 @@ Section 35's four-check rule applied to Fix 196:
 | **Over-strictness** | Does not restrict options or parameters; strictly enables operators to read service states and status messages. |
 | **Over-engineering** | Standard `read -n 1` pauses and standard case statement recursive calls. No new utilities or files added. |
 | **vs the source** | Both references lacked pauses and loop returns, causing frustrating screen wipes in interactive sessions. Aligning with Fix 194/195 provides consistent UI navigation across the panel. |
+
+## 55. NoobzVPN Menu Usability and Complete Service Restarts on Restore - Four Checks (September 28, 2026)
+
+Section 35's four-check rule applied to Fixes 197 and 198:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Account creation, deletion, and listing execute identically. Full restore now correctly restarts all restored subsystems rather than leaving half the stack running stale state. `bash -n` clean across all 6 touched files. |
+| **Over-strictness** | Does not restrict input; strictly ensures terminal menus pause for reading and restored services load restored configuration data. |
+| **Over-engineering** | Standard prompt pauses, recursive menu loops, and standard `systemctl restart` invocations. No new daemons or scripts. |
+| **vs the source** | Both references lacked pauses, crashed with `--info-all-user`, and omitted restarting VPN services on restore. Aligning service restarts with restored files is required for system correctness. |
