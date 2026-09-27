@@ -145,15 +145,15 @@ ${orange}Press [Ctrl + C] to exit${NC}"
 
     # Menangani pilihan berdasarkan input pengguna
     case $ophttp in
-        1) clearScreen; add-vmess-http ;;
-        2) clearScreen; add-vless-http ;;
-        3) clearScreen; add-trojan-http ;;
-        4) clearScreen; trial-vmess-http ;;
-        5) clearScreen; trial-vless-http ;;
-        6) clearScreen; trial-trojan-http ;;
-        7) clearScreen; cek-xray-http ;;
-        8) clearScreen; delete-http ;;
-        9) clearScreen; extend-http ;;
+        1|01) clearScreen; add-vmess-http ;;
+        2|02) clearScreen; add-vless-http ;;
+        3|03) clearScreen; add-trojan-http ;;
+        4|04) clearScreen; trial-vmess-http ;;
+        5|05) clearScreen; trial-vless-http ;;
+        6|06) clearScreen; trial-trojan-http ;;
+        7|07) clearScreen; cek-xray-http ;;
+        8|08) clearScreen; delete-http ;;
+        9|09) clearScreen; extend-http ;;
         10) clearScreen; log-database-xray-http ;;
         11) clearScreen; list-xray-http ;;
         12) clearScreen; change-id-http ;;

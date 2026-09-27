@@ -614,3 +614,14 @@ Section 35's four-check rule applied to Fixes 179 and 180:
 | **Over-strictness** | Neither fix alters account validation or deletion criteria; both strictly prevent unwarranted process disruptions and log bloat. |
 | **Over-engineering** | Fix 179: moved 2 existing lines inside an existing `if` block. Fix 180: removed 1 noisy `echo` line. Zero new dependencies or files. |
 | **vs the source** | Both references restarted Xray unconditionally on every 5-minute cron run and spammed the journal every 30 seconds for idle accounts. Pruning both inherited defects is necessary for operational server stability. |
+
+## 43. Leading-Zero Option Matching in Transport Menus - Four Checks (September 28, 2026)
+
+Section 35's four-check rule applied to Fix 181:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Existing single-digit inputs (`1`, `2`, ..., `9`) continue to match identically; only the zero-padded alternatives (`01`, `02`, ..., `09`) matching the on-screen display labels are added as alternate patterns. `bash -n` clean across all 8 files. |
+| **Over-strictness** | Eliminates strict rejection of user inputs that match on-screen prompt labels; fails safe to default loop for non-numeric/out-of-bounds input. |
+| **Over-engineering** | Simple pattern expansion `1|01)` within existing bash `case` statements. No new flags, variables, or functions added. |
+| **vs the source** | Both references carried the mismatch between display `01` and case `1)`. Aligning input matching with on-screen text resolves operator confusion and broken script dispatch. |

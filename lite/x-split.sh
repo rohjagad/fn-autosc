@@ -145,15 +145,15 @@ ${orange}Press [Ctrl + C] to exit${NC}"
 
     # Menangani pilihan berdasarkan input pengguna
     case $opsplit in
-        1) clearScreen; add-vmess-split ;;
-        2) clearScreen; add-vless-split ;;
-        3) clearScreen; add-trojan-split ;;
-        4) clearScreen; trial-vmess-split ;;
-        5) clearScreen; trial-vless-split ;;
-        6) clearScreen; trial-trojan-split ;;
-        7) clearScreen; cek-xray-split ;;
-        8) clearScreen; delete-split ;;
-        9) clearScreen; extend-split ;;
+        1|01) clearScreen; add-vmess-split ;;
+        2|02) clearScreen; add-vless-split ;;
+        3|03) clearScreen; add-trojan-split ;;
+        4|04) clearScreen; trial-vmess-split ;;
+        5|05) clearScreen; trial-vless-split ;;
+        6|06) clearScreen; trial-trojan-split ;;
+        7|07) clearScreen; cek-xray-split ;;
+        8|08) clearScreen; delete-split ;;
+        9|09) clearScreen; extend-split ;;
         10) clearScreen; log-database-xray-split ;;
         11) clearScreen; list-xray-split ;;
         12) clearScreen; change-id-split ;;

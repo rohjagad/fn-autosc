@@ -145,15 +145,15 @@ ${orange}Press [Ctrl + C] to exit${NC}"
 
     # Menangani pilihan berdasarkan input pengguna
     case $opgrpc in
-        1) clearScreen; add-vmess-grpc ;;
-        2) clearScreen; add-vless-grpc ;;
-        3) clearScreen; add-trojan-grpc ;;
-        4) clearScreen; trial-vmess-grpc ;;
-        5) clearScreen; trial-vless-grpc ;;
-        6) clearScreen; trial-trojan-grpc ;;
-        7) clearScreen; cek-xray-grpc ;;
-        8) clearScreen; delete-grpc ;;
-        9) clearScreen; extend-grpc ;;
+        1|01) clearScreen; add-vmess-grpc ;;
+        2|02) clearScreen; add-vless-grpc ;;
+        3|03) clearScreen; add-trojan-grpc ;;
+        4|04) clearScreen; trial-vmess-grpc ;;
+        5|05) clearScreen; trial-vless-grpc ;;
+        6|06) clearScreen; trial-trojan-grpc ;;
+        7|07) clearScreen; cek-xray-grpc ;;
+        8|08) clearScreen; delete-grpc ;;
+        9|09) clearScreen; extend-grpc ;;
         10) clearScreen; log-database-xray-grpc ;;
         11) clearScreen; list-xray-grpc ;;
         12) clearScreen; change-id-grpc ;;

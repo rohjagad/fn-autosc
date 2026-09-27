@@ -1636,3 +1636,8 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 180 (Found 174):** replaced `echo "Data usage for user $user is incomplete. Skipping."` with `continue` in `full/quota-{grpc,http,split}.sh` and `lite/quota-{grpc,http,split}.sh` (6 files), extending Fix 115 across all transports. Repacked both menu archives (`menu/full.zip` and `menu/lite.zip`) with 0 diffs and all entries at 0755.
 - **Verified live:** deployed to `/usr/bin/quota-grpc`, restarted service, created `testidle` on gRPC, and waited 35 seconds: 0 noise lines logged to the systemd journal.
+
+### Fix 181 - match leading-zero option inputs in transport menus (Found 175)
+
+- **Fix 181 (Found 175):** updated the case branches for options 1 through 9 to `1|01)`, `2|02)`, ..., `9|09)` across all 8 transport menus (`full/x-{ws,grpc,split,http}.sh` and `lite/x-{ws,grpc,split,http}.sh`), allowing users to input either the single digit or the zero-padded number displayed on the screen. Repacked both menu archives (`menu/full.zip` and `menu/lite.zip`) with 0 diffs and all entries at 0755.
+- **Verified live:** deployed to `/usr/bin/x-ws`; verified `01` and `1` both launch `add-vmess-ws`, and `07` launches `cek-xray-ws`.

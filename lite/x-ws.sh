@@ -143,15 +143,15 @@ ${orange}Press [Ctrl + C] to exit${NC}"
 
     # Menangani pilihan berdasarkan input pengguna
     case $opws in
-        1) clearScreen; add-vmess-ws ;;
-        2) clearScreen; add-vless-ws ;;
-        3) clearScreen; add-trojan-ws ;;
-        4) clearScreen; trial-vmess-ws ;;
-        5) clearScreen; trial-vless-ws ;;
-        6) clearScreen; trial-trojan-ws ;;
-        7) clearScreen; cek-xray-ws ;;
-        8) clearScreen; delete-ws ;;
-        9) clearScreen; extend-ws ;;
+        1|01) clearScreen; add-vmess-ws ;;
+        2|02) clearScreen; add-vless-ws ;;
+        3|03) clearScreen; add-trojan-ws ;;
+        4|04) clearScreen; trial-vmess-ws ;;
+        5|05) clearScreen; trial-vless-ws ;;
+        6|06) clearScreen; trial-trojan-ws ;;
+        7|07) clearScreen; cek-xray-ws ;;
+        8|08) clearScreen; delete-ws ;;
+        9|09) clearScreen; extend-ws ;;
         10) clearScreen; log-database-xray-ws ;;
         11) clearScreen; list-xray-ws ;;
         12) clearScreen; change-id-ws ;;
