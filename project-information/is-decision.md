@@ -261,3 +261,29 @@ Section 18 says nothing fetches or modifies `rohjagad/FN-API`. `menu-bot` still 
 editions fetch it from there (fix 155), so the section holds without exception. The rule for future
 changes is the same one section 14 uses for credentials: nothing the panel installs at runtime may
 depend on a repository kept only as a reference.
+
+## 24. The IP Limit Trusts the Address Chain; Forging It Is Out of Scope
+
+The per-account IP limit counts the address the panel hands the upstreams, and that value is the
+panel's own `$clientRealIp` map: the **last** address the request chain carries, falling back to the
+connection peer. Behind Cloudflare that is the real client - Cloudflare appends it after anything the
+client sent - and for a direct connection it is the peer. The map's two fallbacks (`""` and `default`)
+both yield `$remote_addr`, so it can never come out empty and nginx can never drop the header.
+
+An earlier hardening replaced this with `set_real_ip_from <Cloudflare ranges>` plus
+`real_ip_header CF-Connecting-IP`, so that a client could not choose the counted address by sending
+its own `X-Forwarded-For`. **That was reverted, deliberately.** The owner's rule is the deciding one:
+the limit has to work for a **regular user**, and a regular user does not forge headers. The hardened
+form made the everyday case depend on a list of Cloudflare ranges that has to be kept current - a
+range Cloudflare adds after an install would not be trusted, the new edge address would be counted
+instead, and accounts would be locked for no reason. The map has no such list: a brand-new Cloudflare
+range changes nothing, because Cloudflare's chaining rule is what it relies on.
+
+So the trade is: a determined client can still send a header that changes what the limit counts, and
+that is accepted; the limiter failing for ordinary traffic is not. Verified live after the revert -
+one client through Cloudflare with a junk `X-Forwarded-For` and the same client connected directly
+with a junk header were both recorded as `from 157.15.139.236`, and `xray api statsonline` counted
+the two real addresses (value 2).
+
+**Rule for future changes:** do not put a trusted-proxy range list on the IP-limit path, and keep both
+fallbacks in the `$clientRealIp` map. The nginx config carries a short note pointing here.

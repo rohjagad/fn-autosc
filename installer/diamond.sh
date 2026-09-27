@@ -190,14 +190,4 @@ wget ${hosting}/installer/stunnel5.sh
 chmod +x stunnel5.sh
 ./stunnel5.sh
 
-# Keep the Cloudflare ranges in set_real_ip_from current. The IP limit trusts
-# CF-Connecting-IP only for peers inside those ranges: a range Cloudflare adds
-# after this install would not be trusted, and the limit would count the new edge
-# instead of clients. Refresh now, and weekly via cron.
-wget -q -O /usr/local/bin/cf-realip-refresh "${hosting}/installer/cf-realip.sh" >> /dev/null 2>&1
-chmod +x /usr/local/bin/cf-realip-refresh 2>/dev/null
-/usr/local/bin/cf-realip-refresh >/dev/null 2>&1 || true
-grep -q 'cf-realip-refresh' /etc/crontab 2>/dev/null || \
-    echo '0 4 * * 0 root /usr/local/bin/cf-realip-refresh' >> /etc/crontab
-
 rm -f /root/diamond.sh

@@ -434,3 +434,20 @@ result; the details are in the tenth pass of `bugs-fixed.md`.
   invalid-date branch and the empty-`LOCAL_IP` gate (both fail safe), `unlock-ws`'s missing
   confirmation and the menus' unused `output()` (both match the references' behaviour when compared
   file by file).
+
+## 32. Section 30/31 Reversed: the Cloudflare Range Hardening Is Gone (September 27, 2026)
+
+Sections 30 and 31 recorded the Cloudflare range list as a fragility and then "fixed" it with a
+refresher. The owner's follow-up reframed the trade correctly, and it is worth recording against those
+two sections: **the IP limit exists to work for ordinary users, not to resist a client that forges a
+header.** The hardened form (`set_real_ip_from` + `CF-Connecting-IP`) made the everyday case depend on
+a list that must be kept current - a range Cloudflare adds between refreshes would not be trusted, the
+new edge would be counted, and ordinary accounts would be locked. The map the panel already had
+(`$clientRealIp`: the last address in the chain, with `""` and `default` falling back to the peer) has
+no such dependency, and Cloudflare's own chaining rule is what makes it correct behind the CDN.
+
+So fix 154's hardening, and the refresher from 156/157, are reverted: the configs and the live host
+send `$clientRealIp` again, `installer/cf-realip.sh`, its `diamond.sh` wiring and the weekly cron are
+removed, and the reasoning is `is-decision.md` section 24. This is the same lesson as section 25 in a
+new place - a change that is "more secure" than the original can still be the wrong change when it
+moves the failure onto normal traffic. Forged headers are explicitly out of scope.

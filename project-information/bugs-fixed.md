@@ -1479,3 +1479,20 @@ repository was correct throughout. What fix 157 changed on a live host is theref
 the refresher replaced the hand-written list with Cloudflare's published one. Fix 156 and the two
 correction notes can be read together as: repository correct; live apply off by one CIDR; refresher
 delivers the authoritative list at install and weekly.
+
+### Reversal of the fix-153/154 hardening - the limiter must work, not resist forgery
+
+The strictness delivered by fix 154 (and its refresher, fixes 156/157) - `set_real_ip_from` plus
+`real_ip_header CF-Connecting-IP`, so that a client could not choose the counted address - has been
+**reverted** on the owner's instruction: the limit has to work for a regular user, and a regular user
+does not forge headers, while the range list made the everyday case depend on being kept current (a
+new Cloudflare range would have counted the edge and locked accounts). The three configs and the live
+host now send the panel's own `$clientRealIp` map again, with both fallbacks kept so the value is
+never empty; `installer/cf-realip.sh`, its `diamond.sh` wiring and the weekly cron are removed. The
+trade is recorded as `is-decision.md` section 24.
+
+Verified live after the revert, all from one client (157.15.139.236): through Cloudflare with a junk
+`X-Forwarded-For` -> recorded as the real client; directly with a junk header -> the real client (the
+map's `default` fallback, which is the case that used to come out `127.0.0.1`); and `statsonline`
+reported 2 for the two real addresses, so the limiter counts clients, not edges. A brand-new
+Cloudflare range now changes nothing, because no range list is involved.
