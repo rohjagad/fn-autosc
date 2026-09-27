@@ -636,3 +636,14 @@ Section 35's four-check rule applied to Fix 182:
 | **Over-strictness** | Eliminates unwarranted rejection of lifetime licensed servers attempting to run or install the API management menu. |
 | **Over-engineering** | 10 lines of standard shell conditionals mirroring the existing gate stanza from `fn-autosc` Decision 28. No new flags, endpoints, or dependencies. |
 | **vs the source** | FN-API reference repository had no licensing gate at all. The gate was added during our fork's layer restoration; bringing it into alignment with Decision 28 maintains consistency across both repositories. |
+
+## 45. Bandwidth Scale Precision and Lite Edition HAProxy Suppression - Four Checks (September 28, 2026)
+
+Section 35's four-check rule applied to Fixes 183 and 184:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Fix 183 only adds `scale=2` to the `bc` string for values >= 1024; values < 1024 continue to display MB values identically. Fix 184 only removes restarts of services that do not exist or are disabled in the lite edition; full edition services remain completely untouched. `bash -n` clean across all 5 touched files. |
+| **Over-strictness** | Does not restrict or validate user input; strictly improves displayed precision of traffic data and prevents dead listening ports. |
+| **Over-engineering** | Fix 183: 8 characters (`scale=2; `) in two files. Fix 184: one moved cleanup line and removal of redundant restart calls. No new files or helper functions. |
+| **vs the source** | Both references truncated gigabyte bandwidth to whole integers and resurrected dead HAProxy frontends in lite. Aligning traffic calculation with real bytes and removing dead listeners is necessary for correctness. |

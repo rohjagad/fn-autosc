@@ -159,6 +159,11 @@ chmod +x diamond.sh
 cd
 rm -f /root/diamond.sh
 
+# HAProxy was started by diamond.sh -> stunnel5.sh on port 777 forwarding to
+# dropbear:109. Lite does not run dropbear, so the frontend has no backend;
+# disable it as intended by Fix 166.
+systemctl disable --now haproxy >/dev/null 2>&1 || true
+
 # Fix Xray setelah seluruh instalasi selesai.
 wget --no-check-certificate ${hosting}/fix/fix.sh >> /dev/null 2>&1
 chmod +x fix.sh

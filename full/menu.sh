@@ -171,7 +171,7 @@ done
 format_usage() {
   local value=$1
   if (( $(echo "$value >= 1024" | bc -l) )); then
-    echo "$(printf "%.2f" $(echo "$value / 1024" | bc)) GB"
+    echo "$(printf "%.2f" $(echo "scale=2; $value / 1024" | bc)) GB"
   else
     echo "$(printf "%.2f" $value) MB"
   fi

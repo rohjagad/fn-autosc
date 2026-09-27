@@ -1646,3 +1646,13 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 182 (Found 176):** in `fn-autosc-api` (`8165cb2`), updated `gate()` in `menu-api` to check `EXPIRED_DATE = "lifetime"` first, skipping the expiry subtraction and printing `Expired: lifetime` per Decision 28. Marked all handlers in `handlers/` and the `server` script as `0755` executable in git.
 - **Verified:** unit evaluation confirms `lifetime` passes with exit code 0, future dates pass, and expired dates reject. Pushed to `fn-autosc-api` repository.
+
+### Fix 183 - decimal precision in gigabyte bandwidth formatting (Found 177)
+
+- **Fix 183 (Found 177):** in `full/menu.sh` and `lite/menu.sh`, updated `format_usage()` to use `echo "scale=2; $value / 1024" | bc` so fractional usage is preserved.
+- **Verified live:** deployed to `/usr/bin/menu` on VPS; today's traffic rendered accurately as `Today: 1.09 GB` instead of truncated `1.00 GB`.
+
+### Fix 184 - complete HAProxy suppression and clean service restart in lite edition (Found 178)
+
+- **Fix 184 (Found 178):** in `installer/lite.sh`, placed `systemctl disable --now haproxy` after `diamond.sh` execution so the unit remains disabled on completed lite installs. In `lite/menu-system.sh`, removed the dead `ws` and `haproxy` restarts from `resall()`. In `lite/dm-menu.sh`, removed `systemctl restart haproxy` from the certificate installation branches so renewals do not bring port 777 back up. Repacked both menu archives (`menu/full.zip` and `menu/lite.zip`) with 0 diffs and all entries at 0755.
+- **Verified:** `bash -n` clean across all 4 touched files; archive entries byte-synchronized.

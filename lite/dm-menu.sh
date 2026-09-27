@@ -133,7 +133,6 @@ if [[ $ip_version == "4" ]]; then
     cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem
     chmod 644 /etc/xray/xray* /etc/haproxy/funny.pem
     systemctl start nginx
-    systemctl restart haproxy 2>/dev/null || true
     echo "Cert installed for IPv4."
 elif [[ $ip_version == "6" ]]; then
     systemctl stop nginx
@@ -158,7 +157,6 @@ elif [[ $ip_version == "6" ]]; then
     cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem
     chmod 644 /etc/xray/xray* /etc/haproxy/funny.pem
     systemctl start nginx
-    systemctl restart haproxy 2>/dev/null || true
     echo "Cert installed for IPv6."
 else
     echo "Invalid IP version. Please choose '4' for IPv4 or '6' for IPv6."
@@ -399,7 +397,6 @@ openssl req -new -x509 -key /etc/xray/xray.key -out /etc/xray/xray.crt -days 109
 cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem 2>/dev/null
 chmod 644 /etc/xray/xray.crt /etc/xray/xray.key /etc/haproxy/funny.pem 2>/dev/null
 systemctl daemon-reload
-systemctl restart haproxy 2>/dev/null || true
 service nginx restart
 echo -e "Self-signed certificate generated successfully"
 }
