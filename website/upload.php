@@ -79,9 +79,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $target_file = $target_dir . uniqid('backup_', true) . '.zip';
 
             if (move_uploaded_file($file_tmp, $target_file)) {
-                chmod($target_file, 0644);
+                chmod($target_file, 0600);
 
                 $output = shell_exec("sudo /usr/bin/restore-ftp 2>&1");
+
+                if (file_exists($target_file)) {
+                    @unlink($target_file);
+                }
 
                 if (strpos($output, "SUCCESSFULL RESTORE YOUR VPS") !== false) {
                     echo "SUCCESSFULLY RESTORED YOUR VPS\n";

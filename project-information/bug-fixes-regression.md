@@ -702,3 +702,14 @@ Section 35's four-check rule applied to Fixes 190 and 191:
 | **Over-strictness** | Does not restrict shell configurations or package selections; strictly prevents configuration file bloat and false-positive install verifications. |
 | **Over-engineering** | Standard one-line `grep -qs || echo` idempotency guards and standard command existence checks. Zero new packages or files. |
 | **vs the source** | Both references stacked duplicate entries in `/etc/shells` and `.bashrc` on every reinstall and checked `$?` of the wrong command in `wg.sh`. Rectifying both delivers clean, reliable idempotency. |
+
+## 51. Client Web Config Backup/Restore and Upload Staging Permissions - Four Checks (September 28, 2026)
+
+Section 35's four-check rule applied to Fixes 192 and 193:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Existing backup/restore targets (`/etc/passwd`, `/etc/shadow`, `/etc/xray`, `/etc/wireguard`, etc.) are archived and restored identically. Restoring older backup archives without an `html/` directory continues to succeed with `|| true`. `bash -n` and `php -l` clean on all touched files. |
+| **Over-strictness** | Does not restrict upload file sizes or backup contents; strictly protects staged shadow hashes and ensures restored accounts function immediately. |
+| **Over-engineering** | Simple targeted `cp` statements into existing archive structure and standard `0600` permissions. No new helper binaries or dependencies. |
+| **vs the source** | Both references omitted `/var/www/html/` client configs and printed misleading status messages during restore. Preserving complete client state across migrations is essential for server restore integrity. |

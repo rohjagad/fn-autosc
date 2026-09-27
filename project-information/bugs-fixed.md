@@ -1691,3 +1691,13 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 191 (Found 185):** in `installer/wg.sh`, rewrote `check_install()` to check `command -v "$1"`, `which "$1"`, or `dpkg-query` instead of testing `$?` of the preceding `qrencode` command.
 - **Verified:** `bash -n` clean; verified `check_install wireguard` correctly verifies `wg` binary presence on live VPS.
+
+### Fix 192 - archive and restore client web configs and fix restore console message (Found 186)
+
+- **Fix 192 (Found 186):** in `full/backup.sh`, added `/var/www/html/wireguard-*.conf` and `/var/www/html/*.ovpn` archiving into `backup/html/`. In `full/restore-ftp.sh`, `lite/restore-ftp.sh`, `full/bmenu.sh`, `lite/bmenu.sh`, and `website/restore-ftp.sh`, added extraction of `html/*` into `/var/www/html/`. Corrected copy-pasted `echo "Backing up data"` to `echo "Restoring backup data..."` across all restore routines. Repacked both menu archives (`menu/full.zip` and `menu/lite.zip`) with 0 diffs and all entries at 0755.
+- **Verified live on VPS:** created WireGuard account `wgbaklive`, ran `backup`, verified `wireguard-wgbaklive.conf` archived into `backup/html/`. Deleted file from `/var/www/html/`, ran `restore-ftp`, verified `wireguard-wgbaklive.conf` cleanly restored to `/var/www/html/`.
+
+### Fix 193 - secure upload archive permissions and failure cleanup in upload.php (Found 187)
+
+- **Fix 193 (Found 187):** in `website/upload.php`, changed upload archive mode from `0644` to `0600` (`chmod($target_file, 0600)`) so sensitive files like `/etc/shadow` are never world-readable while staged. Added post-execution cleanup `if (file_exists($target_file)) { @unlink($target_file); }` to guarantee failed or unprocessed archives are pruned immediately.
+- **Verified:** `php -l` clean; verified live on VPS.

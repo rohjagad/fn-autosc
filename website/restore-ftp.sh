@@ -22,7 +22,7 @@ clear
 unzip -o backup.zip
 rm -f backup.zip
 sleep 1
-echo "Backing up data"
+echo "Restoring backup data..."
 cd /root/backup
 cp passwd /etc/ >/dev/null 2>&1
 cp group /etc/ >/dev/null 2>&1
@@ -38,6 +38,8 @@ cp -r noobzvpns /etc/ >/dev/null 2>&1 || true
 cp -r ppp /etc/ >/dev/null 2>&1 || true
 cp -r ipsec.d /etc/ >/dev/null 2>&1 || true
 cp ipsec.secrets /etc/ >/dev/null 2>&1 || true
+mkdir -p /var/www/html
+cp -r html/* /var/www/html/ >/dev/null 2>&1 || true
 clear
 cd
 rm -rf /root/backup

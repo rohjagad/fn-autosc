@@ -109,7 +109,7 @@ wget -O backup.zip "$url"
 unzip -o backup.zip
 rm -f backup.zip
 sleep 1
-echo "Backing up data"
+echo "Restoring backup data..."
 cd /root/backup
 cp passwd /etc/
 cp group /etc/
@@ -125,6 +125,8 @@ cp -r noobzvpns /etc/ 2>/dev/null || true
 cp -r ppp /etc/ 2>/dev/null || true
 cp -r ipsec.d /etc/ 2>/dev/null || true
 cp ipsec.secrets /etc/ 2>/dev/null || true
+mkdir -p /var/www/html
+cp -r html/* /var/www/html/ 2>/dev/null || true
 
 systemctl daemon-reload
 systemctl restart ssh
@@ -166,7 +168,7 @@ clear
 unzip -o backup.zip
 rm -f backup.zip
 sleep 1
-echo "Backing up data"
+echo "Restoring backup data..."
 cd /root/backup
 cp passwd /etc/
 cp group /etc/
@@ -182,6 +184,8 @@ cp -r noobzvpns /etc/ 2>/dev/null || true
 cp -r ppp /etc/ 2>/dev/null || true
 cp -r ipsec.d /etc/ 2>/dev/null || true
 cp ipsec.secrets /etc/ 2>/dev/null || true
+mkdir -p /var/www/html
+cp -r html/* /var/www/html/ 2>/dev/null || true
 
 systemctl daemon-reload
 systemctl restart ssh
@@ -239,6 +243,8 @@ cp -r noobzvpns /etc/ 2>/dev/null || true
 cp -r ppp /etc/ 2>/dev/null || true
 cp -r ipsec.d /etc/ 2>/dev/null || true
 cp ipsec.secrets /etc/ 2>/dev/null || true
+mkdir -p /var/www/html
+cp -r html/* /var/www/html/ 2>/dev/null || true
 
 # Repair the WS config a legacy backup has restored: replace the UUID
 # placeholder, then re-append the standard outbounds/routing/stats block below.

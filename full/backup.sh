@@ -89,6 +89,8 @@ cp -r /etc/noobzvpns /root/backup/noobzvpns 2>/dev/null || true
 cp -r /etc/ppp /root/backup/ppp 2>/dev/null || true
 cp -r /etc/ipsec.d /root/backup/ipsec.d 2>/dev/null || true
 cp /etc/ipsec.secrets /root/backup/ 2>/dev/null || true
+mkdir -p /root/backup/html
+cp /var/www/html/wireguard-*.conf /var/www/html/*.ovpn /root/backup/html/ 2>/dev/null || true
 
 # Membuat file ZIP dari backup
 cd /root
