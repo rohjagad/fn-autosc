@@ -1411,3 +1411,36 @@ still reported 2 for two real concurrent addresses, so counting is unchanged and
 behind Cloudflare. The map and log format were left exactly as they were (the map already produced
 the trusted value), and the same substitution also gives the SSH-WebSocket (`location /`) and API
 locations the true client address when the panel is behind Cloudflare, instead of the edge address.
+
+### Correction to fix 153 - the value must be *trustworthy*, not just "the panel's map"
+
+Fix 153 originally sent `$clientRealIp` (the map over `X-Forwarded-For`) to the upstreams. Driving
+the edge cases showed that was too fragile, so the configs now trust Cloudflare's own
+`CF-Connecting-IP` only when the peer is inside Cloudflare's published ranges and pass only
+`$remote_addr` upstream:
+
+```
+set_real_ip_from <each Cloudflare ipv4/ipv6 range>;
+real_ip_header CF-Connecting-IP;
+real_ip_recursive on;
+...
+proxy_set_header X-Real-IP $remote_addr;
+proxy_set_header X-Forwarded-For $remote_addr;
+```
+
+`$remote_addr` is then the real client behind Cloudflare and the true TCP peer otherwise, and the
+map gained `default $remote_addr` so it can never come out empty.
+
+All four cases driven live from one client (157.15.139.236):
+
+| request | fix 153 alone | hardened |
+| :-- | :-- | :-- |
+| via Cloudflare, `X-Forwarded-For: junk` | real client | real client |
+| direct, `X-Forwarded-For: junk` | `127.0.0.1` (map empty, header dropped) | real client |
+| direct, `X-Forwarded-For: 9.9.9.9` | `9.9.9.9` (spoofed) | real client |
+| direct, `CF-Connecting-IP: 7.7.7.7` | - | real client (header ignored: peer is not Cloudflare) |
+
+Cost: Cloudflare's ranges are listed in the three configs and should be refreshed if Cloudflare
+changes them (they publish `https://www.cloudflare.com/ips-v4` and `/ips-v6`). A different
+proxy/CDN in front would need its own `set_real_ip_from` entries; with no proxy at all the list is
+inert and `$remote_addr` is the true peer. The map and log format are still the panel's own.
