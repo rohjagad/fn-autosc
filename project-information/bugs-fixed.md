@@ -1666,3 +1666,8 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 186 (Found 180):** in `installer/vpn.sh` and `installer/wg.sh`, added fallback chains (`wget -4 ... || cat /etc/.ip || echo "$LOCAL_IP"` and `curl -4 ... || cat /etc/.ip || echo "$LOCAL_IP"`) to ensure `MYIP`, `MYIP1`, and WireGuard's `ip=` never resolve to empty strings.
 - **Verified:** `bash -n` clean on both installers; tested on live VPS: `/etc/squid/squid.conf` and `/etc/wireguard/params` populate with valid IP `202.155.17.126`.
+
+### Fix 187 - remove leftover port-80 redirect block in 4.conf (Found 181)
+
+- **Fix 187 (Found 181):** removed the 5-line `# IGNORE THIS` server block from `config/4.conf`, eliminating spurious 301 redirects on IPv4 NoneTLS connections and bringing `4.conf` into complete structural alignment with `6.conf` and `dual.conf`.
+- **Verified:** `nginx -t` passes with zero errors on the live VPS; all 15 location directives verified identical across `4.conf`, `6.conf`, and `dual.conf`.

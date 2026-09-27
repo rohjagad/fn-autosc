@@ -669,3 +669,14 @@ Section 35's four-check rule applied to Fix 186:
 | **Over-strictness** | Does not restrict network environments; directly prevents invalid syntax in generated daemon configuration files. |
 | **Over-engineering** | 2-stage fallback `|| cat /etc/.ip || echo "$LOCAL_IP"` using existing filesystem state. No new dependencies or tools. |
 | **vs the source** | Both references made un-guarded remote calls during installation. Preventing configuration corruption when third-party lookup services fail is necessary for resilient unattended deployment. |
+
+## 48. Removal of Obsolete Port-80 301 Redirect from 4.conf - Four Checks (September 28, 2026)
+
+Section 35's four-check rule applied to Fix 187:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Port 80 continues to listen in the primary server block, serving all NoneTLS transports and HTTP challenges. Removing the dummy block restores direct NoneTLS connectivity on IPv4 installs. `nginx -t` clean. |
+| **Over-strictness** | Eliminates strict redirection of direct-IP NoneTLS connections; clients on port 80 are routed directly to their requested paths. |
+| **Over-engineering** | Deletion of 6 dead lines. No new configuration, directives, or abstractions added. |
+| **vs the source** | V23 carried this commented `# IGNORE THIS` developer snippet, while 1.20 and both sibling configurations (`6.conf`, `dual.conf`) omitted it. Deleting it restores consistent multi-transport behavior. |

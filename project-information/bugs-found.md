@@ -1643,3 +1643,15 @@ Found 179. **Submenus and restore confirmation loops spun indefinitely on EOF** 
 Found 180. **Unguarded IP lookups during OpenVPN/Squid and WireGuard installation corrupted configs on network failure** (`installer/vpn.sh:75,233`, `installer/wg.sh:143`) - `installer/vpn.sh` fetched `MYIP1` via `wget -qO- ipv4.icanhazip.com` without `-4` or fallback. If `icanhazip.com` timed out or failed, `MYIP1` was empty, turning `s/rerechan/$MYIP1/g` into `s/rerechan//g`, which mutated `rerechan-rerechan/255.255.255.255` into `-/255.255.255.255` in `/etc/squid/squid.conf`. Squid cannot parse this invalid ACL range and crashes on startup. Similarly, `installer/wg.sh` fetched `curl -4 -s ipinfo.io/ip` with no fallback, writing `ip=` into `/etc/wireguard/params` and producing broken client endpoints (`:51820`).
 - **Confirmed by inspection:** `installer/vpn.sh` and `installer/wg.sh` already possess `$LOCAL_IP` from the auth gate and `/etc/.ip` from `installer/full.sh:93`, but neither fallback was utilized.
 - **Inherited from both references** (both V23 and 1.20 use raw single-lookup `wget`/`curl` with no error fallback).
+
+Found 181. **`config/4.conf` carried a leftover port-80 301 redirect block that broke NoneTLS connections on IPv4 installs** (`config/4.conf:79-84`) - `config/4.conf` contained an obsolete test block immediately preceding the primary server block:
+```nginx
+    # IGNORE THIS
+    server {
+        listen 80;
+        return 301 https://$host$request_uri;
+    }
+```
+Because this block was declared first on port 80 without a `server_name`, Nginx treated it as the `default_server` for port 80. Any NoneTLS request connecting via direct IP address or non-matching Host header received an HTTP 301 redirect to HTTPS rather than reaching the transport location blocks (`/vmws`, `/vlws`, `/trws`, `/vlhu`, `/trspl`, `/`). Neither `6.conf` nor `dual.conf` carried this block; both handled port 80 directly inside the main server block alongside port 443.
+- **Confirmed by inspection and verification:** `config/6.conf` and `config/dual.conf` have 0 redirect blocks; removing the snippet aligns all 15 location directives across `4.conf`, `6.conf`, and `dual.conf`. `nginx -t` verifies syntax OK.
+- **Inherited from V23** (V23 `config/4.conf:69-73` carried this snippet; 1.20 did not).
