@@ -513,3 +513,14 @@ edits failed the check and are repaired in the same commit**.
 Net: no over-strictness and no over-engineering in the set, one fix completed a previous one (168), one
 is a narrowing rather than a new mechanism (170's chmod), and the two genuine mistakes were mine, not
 the references' - recorded here rather than quietly amended.
+
+### Rule added - the four checks belong in this file
+
+To answer "is it documented?" for the process and not only for these instances: **every fix from now
+on is re-checked for regression, over-strictness that could bite later, over-engineering, and
+agreement with both reference archives, and the result is written here** - one row per fix in a
+section like 27 or 35. Reproduction is necessary but not sufficient: sections 25, 26 and 35 all
+found defects in changes that had already been verified live. The archives must be MD5/SHA-verified
+against `original-source-do-not-edit/README.md` before they are used as the reference, and when a
+suspected defect turns out to be the references' own behaviour, that is recorded too (section 28),
+so it is not "fixed" into a divergence later.
