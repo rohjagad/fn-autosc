@@ -54,6 +54,7 @@
 red='\033[0;31m'
 green='\033[0;32m'
 blue='\033[1;34m'
+purple='\033[1;35m'
 orange='\033[38;5;208m'
 NC='\033[0m'
 
@@ -84,15 +85,34 @@ rainbow_sep() {
 separator=$(rainbow_sep '===================================')
 blue_sep="${blue}-----------------------------------${NC}"
 
-# Dropbear version (the panel pins 2019.78 - see is-decision.md 25)
-dver=$(dropbear -V 2>&1 | awk '{print $2}' | head -n 1)
+# Versions of every service an SSH account uses. The account card advertises
+# them all: OpenSSH, Dropbear, the SSH WebSocket, the 777 TLS front-end and the
+# HTTP proxies, OVPN and UDPGW. Each falls back to n/a when its binary is
+# absent, so the menu still renders on a partial install (see is-decision.md 27).
+# SlowDNS has its own menu, and UDP Custom/Request report no version, so they
+# are not listed here.
+v_openssh=$(ssh -V 2>&1 | awk '{print $1}' | sed 's/^OpenSSH_//')
+v_dropbear=$(dropbear -V 2>&1 | awk '{print $2}')
+v_ws=$(timeout 5 ws version 2>/dev/null | head -n 1 | grep -oE 'v[0-9.]+' | head -n 1)
+v_stunnel=$(stunnel -version 2>&1 | grep -oE 'stunnel [0-9.]+' | head -n 1 | awk '{print $2}')
+v_haproxy=$(haproxy -v 2>/dev/null | head -n 1 | grep -oE 'version [0-9.]+' | awk '{print $2}')
+v_squid=$(squid -v 2>/dev/null | grep -oE 'Version [0-9.]+' | head -n 1 | awk '{print $2}')
+v_ohp=$(fnohp --version 2>/dev/null | grep -oE 'Version: .*' | head -n 1 | cut -d' ' -f2-)
+v_openvpn=$(openvpn --version 2>/dev/null | head -n 1 | awk '{print $2}')
+v_badvpn=$(badvpn-udpgw --version 2>&1 | grep -oE 'udpgw [0-9.]+' | head -n 1 | awk '{print $2}')
 
 clear
 echo -e "${NC}${separator}
              SSH MENU
 ${separator}
-Dropbear Ver : ${dver:-unknown}
-${blue_sep}
+${purple}SSH SERVICES${NC}"
+printf '%-12s%-18s%-12s%s\n' \
+  "OpenSSH   :" "${v_openssh:-n/a}"  "OpenVPN   :" "${v_openvpn:-n/a}" \
+  "Dropbear  :" "${v_dropbear:-n/a}" "Stunnel5  :" "${v_stunnel:-n/a}" \
+  "WS ePro   :" "${v_ws:-n/a}"       "HAProxy   :" "${v_haproxy:-n/a}" \
+  "Squid     :" "${v_squid:-n/a}"    "OHP       :" "${v_ohp:-n/a}" \
+  "BadVPN    :" "${v_badvpn:-n/a}"
+echo -e "${blue_sep}
 ${green}1${NC}. Create SSH Account
 ${green}2${NC}. Trial SSH Account
 ${green}3${NC}. Delete SSH Account

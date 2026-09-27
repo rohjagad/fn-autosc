@@ -196,7 +196,9 @@ counts per protocol, service status, and recent traffic.
 ### SSH Menu — `menu-ssh`
 
 Create, trial, delete, extend, and list SSH accounts; check who is online;
-view account logs; change passwords; change IP limits.
+view account logs; change passwords; change IP limits. The header lists the
+version of every service an SSH account uses — OpenSSH, Dropbear, the SSH
+WebSocket (`ws`), Stunnel5, HAProxy, Squid, OHP, OpenVPN and BadVPN (decision 27).
 
 ### XTLS Menu — `menu-x`
 

@@ -542,3 +542,14 @@ current clients over its ECDSA host key, so password auth is unaffected (verifie
 harmless `Failed loading .../dropbear_dss_host_key` on start because it supports DSS and the Debian
 package no longer generates that key - no DSS key is created, since DSA is weak and unnecessary. Lite
 is unaffected (it never runs `ssh.sh` and disables Dropbear, fix 149).
+
+## 37. SSH Services Version Block - the Four Checks (September 27, 2026)
+
+Decision 27 adds the SSH-family version block. Section 35's rule applied to it:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Display-only: the SSH menu's nine options and their case branches are untouched, and every probe is a read-only `--version`-style flag. `udp-request` is deliberately not probed because an unknown flag starts its daemon - that is why it is excluded rather than run. |
+| **Over-strictness** | None: each value falls back to `n/a`, so a partial install (no OpenVPN, no Squid, absent `ws`) still renders the menu. Nothing depends on the versions being present. |
+| **Over-engineering** | One block of nine `command | grep | awk` lines and a `printf`; it reuses each tool's own version output, adds no dependency, no helper function and no caching. |
+| **vs the source** | Neither reference shows service versions anywhere (their menus print only the main-menu XTLS line), so this is owner-requested, recorded as decision 27 - not invented logic replacing a reference behaviour. |

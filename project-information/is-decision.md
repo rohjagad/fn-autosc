@@ -373,3 +373,38 @@ longer prints a version line, the XTLS menu shows `XTLS Version : 25.3.6`, the S
 
 **Rule for future changes:** status/version strings belong on the menu they describe; keep the main
 menu to server identity, counts, service state and the menu list.
+
+## 27. The SSH Menu Lists the Version of Every Service an SSH Account Uses
+
+**The owner asked that the SSH menu show all the SSH-associated services, not only Dropbear** -
+OpenSSH and OpenVPN being the examples - because the account card advertises a whole stack and the
+menu should reflect it. Neither reference shows any service version (their menus print only the
+main-menu XTLS line), so this is a new, owner-requested display, not inherited behaviour. It replaces
+the single `Dropbear Ver` line added in decision 26.
+
+Each value comes from the tool's own `--version`-style output and falls back to `n/a` when the binary
+is absent, so the menu still renders on a partial install:
+
+| Menu label | Account-card line | Command |
+| :-- | :-- | :-- |
+| `OpenSSH` | `OpenSSH : 22, 3303` | `ssh -V` (prefix trimmed) |
+| `Dropbear` | `Dropbear : 111, 109` | `dropbear -V` |
+| `WS ePro` | NonTLS/TLS ports | `ws version` |
+| `Stunnel5` | `STUNNEL5 : 777` | `stunnel -version` |
+| `HAProxy` | `STUNNEL5 : 777` | `haproxy -v` |
+| `Squid` | `HTTP Proxy : 3128` | `squid -v` |
+| `OHP` | `OHP : 9088` | `fnohp --version` |
+| `OpenVPN` | `OVPN TCP/UDP : 1194 / 2200` | `openvpn --version` |
+| `BadVPN` | `BadVpn/Udpgw : 7300` | `badvpn-udpgw --version` |
+
+**Deliberately not listed:** SlowDNS/DNSTT, because it has its own menu (`menu-dnstt`); and UDP Custom
+and UDP Request, which are advertised on the card but report no version at all - `udp-request` has no
+`--version` flag and treats an unknown one as a start command, so it is never invoked from a menu.
+
+**Verified live** on the Debian 12 test VPS: the header renders `OpenSSH 9.2p1`, `Dropbear v2019.78`,
+`WS ePro v1.2.3`, `Stunnel5 5.68`, `HAProxy 2.6.12`, `Squid 5.7`, `OHP 0.1 beta`, `OpenVPN 2.6.14`,
+`BadVPN 1.999.130`, in two columns inside the SSH menu.
+
+**Rule:** this block mirrors the account card's service list - when a service is added to the card,
+add its version here too - and a menu must never invoke a daemon merely to read a version (only a flag
+that prints and exits).
