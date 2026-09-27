@@ -151,7 +151,7 @@ date=$(date)
 domain=$(cat /etc/xray/domain)
 clear
 cd /root
-newest=$(ls -t /root/*.zip 2>/dev/null | head -1); [ -n "$newest" ] && mv "$newest" /root/backup.zip
+newest=$(ls -t /root/*.zip 2>/dev/null | head -1); [ -n "$newest" ] && [ "$newest" != "/root/backup.zip" ] && mv "$newest" /root/backup.zip
 file="backup.zip"
 if [ -f "$file" ]; then
 echo "$file found, continuing..."

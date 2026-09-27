@@ -92,7 +92,6 @@ read -p "Input Your Banner" bns
 echo -e "$bns" > /etc/issue.net
 systemctl daemon-reload
 systemctl restart ws 2>/dev/null || true
-systemctl restart ws
 clear
 echo -e "
 =====================

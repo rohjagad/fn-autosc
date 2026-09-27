@@ -1532,3 +1532,13 @@ Verified live for fixes 160/161: listing `lbob` now prints **its own** UUID (no 
 a trojan account's stored `"password"` is what the field shows, and `extend-ws` on an account whose
 date reads `GARBAGE-DATE` leaves the marker unchanged and prints "Unparseable expiry for this
 account - leaving it unchanged." instead of rewriting it to `70-01-07`.
+
+### Repairs to fixes 163 and 166 (found by re-checking the eleventh pass)
+
+- **166:** the lite `bnnr` replacement left **two** `systemctl restart ws` lines (the guarded one and
+  the original). The duplicate is removed; lite's banner step now restarts only the guarded no-op.
+- **163:** `full/bmenu.sh` and `lite/bmenu.sh` could `mv /root/backup.zip` onto itself when the
+  archive was already named `backup.zip`; the same `!= "/root/backup.zip"` guard the website copy has
+  is now present there too.
+
+Both were introduced by the eleventh pass and are the reason the re-check was worth doing.

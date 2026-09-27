@@ -488,3 +488,28 @@ artefact that no installer ships, so its internal inconsistency is intentional.
 Two sub-audits read every file and were checked against the running services before anything was
 changed - the same rule as section 25: a file-level suspicion is not a finding until it is
 reproduced.
+
+## 35. The Eleven Fixes Re-Checked: Regression, Over-Strictness, Over-Engineering, and the Source (September 27, 2026)
+
+The owner asked whether the ten new fixes had themselves been put through the same four checks as the
+older ones. They had **not** - each was reproduced live, but none had been re-read for regression
+risk, over-strictness, over-engineering, or against the archives. They have now, and **two of my own
+edits failed the check and are repaired in the same commit**.
+
+| Fix | Regression | Over-strict / over-engineered | Source |
+| :-- | :-- | :-- | :-- |
+| 160 `list-xray` anchor | none - the value only labels a row, and `change-id-*` already used this exact form on the same data | no | refs carry the same unanchored grep plus a trailing `| strings` we dropped; anchoring is a deliberate improvement, not invented logic |
+| 161 `extend` guard | none - every marker the panel writes is `%y-%m-%d`; only a corrupted one is refused | refuses rather than writing 1970, i.e. the safe side | refs have no guard; the model is `xp.sh`'s guard from fix 110, ours |
+| 162 `read \|\| exit 0` | **checked:** all 57 guarded reads are immediately followed by `case`, so they are menu prompts; none is a prompt where EOF could mean "use the default" | no | refs recurse the same way (inherited bug) |
+| 163 newest archive | none - the newest upload is the one just made | no | refs move the glob (inherited bug). **Repaired:** `bmenu` could `mv /root/backup.zip` onto itself |
+| 164 wg `chmod 600` | none - only root sources the file | no | refs apply no mode (inherited) |
+| 165 invalid-date guard | none - both the old and new paths end in `exit 1`, and the caller's `<0` check is untouched | 191 files is churn, but it is one mechanical change that makes dead code live rather than new behaviour | refs carry the same dead guard (inherited) |
+| 166 lite | none - lite advertises no SSH, so 777/`ws`/dropbear serve nothing there | no | refs' lite also runs `diamond.sh`+`stunnel5.sh` (inherited). **Repaired:** my edit left a duplicate `ws` restart in `bnnr` |
+| 167 l2tp empty files | none - `xl2tp.sh` creates `ipsec.d/passwd` with `>>` on the first account, and `chap-secrets` is created empty | no | refs write the same empty entries (inherited) |
+| 168 http-level timeouts | holds idle sockets for 300 s instead of 60 s on every proxied location; the SplitHTTP locations already used 300 s | three directives at `http` level rather than six copies in locations | refs set none; fix 133 (ours) covered SplitHTTP only - this completes it |
+| 169 `domssh` | none - the value was unused | no | refs write only `domargo` and read `domssh`; dead there too (inherited) |
+| 170 `dmsl` HAProxy bundle | haproxy restart is guarded (`|| true`) for lite | also narrows `chmod 644 /etc/xray/*`, which had been chmod-ing the API token as well, to the two certificate files | the other issuance paths in the same file already rebuilt the bundle |
+
+Net: no over-strictness and no over-engineering in the set, one fix completed a previous one (168), one
+is a narrowing rather than a new mechanism (170's chmod), and the two genuine mistakes were mine, not
+the references' - recorded here rather than quietly amended.
