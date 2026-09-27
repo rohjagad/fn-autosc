@@ -1681,3 +1681,13 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 189 (Found 183):** added `2>/dev/null` to all unguarded `cat /etc/funny/.chatid` and `cat /etc/funny/.keybot` reads across 136 scripts in `full/`, `lite/`, and `installer/`. Repacked both menu archives (`menu/full.zip` and `menu/lite.zip`) with 0 diffs and all entries at 0755.
 - **Verified live on VPS:** executed `add-vmess-ws` without configured bot: 0 errors leaked to stdout/stderr.
+
+### Fix 190 - idempotent /etc/shells and .bashrc appends in installers (Found 184)
+
+- **Fix 190 (Found 184):** in `installer/ssh.sh` and `installer/slowdns.sh`, added `grep -qs` existence guards before appending `/bin/false` and `/usr/sbin/nologin` to `/etc/shells`, and before appending `PS1` and Go's `export PATH` to `/root/.bashrc`. Fixed quoting to export `export PATH="/usr/local/go/bin:$PATH"` verbatim.
+- **Verified:** re-running the lines on VPS leaves `/etc/shells` and `/root/.bashrc` completely clean without duplicate entries.
+
+### Fix 191 - authentic package installation verification in wg.sh (Found 185)
+
+- **Fix 191 (Found 185):** in `installer/wg.sh`, rewrote `check_install()` to check `command -v "$1"`, `which "$1"`, or `dpkg-query` instead of testing `$?` of the preceding `qrencode` command.
+- **Verified:** `bash -n` clean; verified `check_install wireguard` correctly verifies `wg` binary presence on live VPS.

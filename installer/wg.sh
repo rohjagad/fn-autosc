@@ -119,7 +119,7 @@ check_screen() {
 }
 
 check_install() {
-        if [[ 0 -eq $? ]]; then
+        if command -v "$1" >/dev/null 2>&1 || which "$1" >/dev/null 2>&1 || dpkg-query -W --showformat='${Status}\n' "$1" 2>/dev/null | grep -q "ok installed"; then
                 ok "$1 is installed"
                 sleep 1
         else

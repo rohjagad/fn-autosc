@@ -162,8 +162,8 @@ DROPBEAR_BANNER="/etc/issue.net"
 # network performance
 DROPBEAR_RECEIVE_WINDOW=65536
 END
-echo "/bin/false" >> /etc/shells
-echo "/usr/sbin/nologin" >> /etc/shells
+grep -qs "^/bin/false$" /etc/shells || echo "/bin/false" >> /etc/shells
+grep -qs "^/usr/sbin/nologin$" /etc/shells || echo "/usr/sbin/nologin" >> /etc/shells
 #dd=$(ps aux | grep dropbear | awk '{print $2}')
 #kill $dd
 clear
@@ -233,7 +233,7 @@ systemctl daemon-reload
 systemctl enable --now badvpn-udpgw >> /dev/null 2>&1
 
 # Konfigurasi prompt shell
-echo -e "PS1='\033[1;34m\]╭───\[\033[1;31m\]≼\[\033[1;33m\]FN AutoSC\[\033[1;34m\]•\[\033[1;30m\]\w\[\033[1;31m\]≽
+grep -q "FN AutoSC" /root/.bashrc 2>/dev/null || echo -e "PS1='\033[1;34m\]╭───\[\033[1;31m\]≼\[\033[1;33m\]FN AutoSC\[\033[1;34m\]•\[\033[1;30m\]\w\[\033[1;31m\]≽
 \[\033[1;34m\]╰──╼\[\033[1;31m\]✠\[\033[1;32m\] \033[0m'" >> /root/.bashrc
 
 # Menghapus File Tidak Penting

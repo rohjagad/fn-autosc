@@ -691,3 +691,14 @@ Section 35's four-check rule applied to Fixes 188 and 189:
 | **Over-strictness** | Eliminates unwanted error noise on clean installs; does not restrict any functionality or input. |
 | **Over-engineering** | Standard Unix `2>/dev/null` stderr suppression on existing `cat` calls. Zero new files, dependencies, or daemons. |
 | **vs the source** | Both references lacked error suppression, causing constant stderr noise in CLI menus and API payloads when optional bot integration was unused. Aligning with clean Unix conventions is necessary for production reliability. |
+
+## 50. Installer Idempotency Guards and Package Verification - Four Checks (September 28, 2026)
+
+Section 35's four-check rule applied to Fixes 190 and 191:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Required shells and environment paths are still added when absent; existing entries are preserved. `check_install` continues to report `[OK]` for valid installations. `bash -n` clean across all 3 files. |
+| **Over-strictness** | Does not restrict shell configurations or package selections; strictly prevents configuration file bloat and false-positive install verifications. |
+| **Over-engineering** | Standard one-line `grep -qs || echo` idempotency guards and standard command existence checks. Zero new packages or files. |
+| **vs the source** | Both references stacked duplicate entries in `/etc/shells` and `.bashrc` on every reinstall and checked `$?` of the wrong command in `wg.sh`. Rectifying both delivers clean, reliable idempotency. |
