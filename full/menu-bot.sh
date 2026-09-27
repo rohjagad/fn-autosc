@@ -91,7 +91,10 @@ blue_sep="${blue}-----------------------------------${NC}"
 termbot() {
 install() {
 # [ Repository Bot Telegram ]
-link="https://raw.githubusercontent.com/rohjagad/FN-API/main/bot.zip"
+# The bot bundle is vendored in this repository (other/bot.zip), not fetched
+# from rohjagad/FN-API: that repository is the provider's own package and is kept
+# as a reference only (is-decision.md section 18).
+link="https://raw.githubusercontent.com/rohjagad/fn-autosc/main/other/bot.zip"
 
 # [ Membersihkan layar ]
 clear

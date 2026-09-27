@@ -1475,3 +1475,38 @@ the number `limit-ip-*.sh` enforces - is counted against.
   reaches the limit.
 - **Inherited:** both references ship the same `map $http_x_forwarded_for $clientRealIp` and the
   same `$proxy_add_x_forwarded_for` proxy headers; only the log format used the trusted value.
+
+## Closure of Earlier Recordings (September 27, 2026)
+
+The owner asked for everything still open in this file to be fixed, and for the recorded
+regression/strictness/over-engineering items outside `is-decision.md` to be fixed too. Both archives
+were re-verified first (MD5/SHA match `original-source-do-not-edit/README.md`).
+
+- **The `rohjagad/FN-API/main/bot.zip` fetch contradicted decision 18** ("nothing fetches or
+  modifies FN-API"). `full/menu-bot.sh` and `lite/menu-bot.sh` did exactly that. The bundle is now
+  vendored in this repository as `other/bot.zip` (24,845 bytes, sha256 `a0bc5bf758abd5df9b1ba8847cb6e5d8a085568af2b76d96a46ceb69ca9393c3`) and both menus fetch
+  it from `.../fn-autosc/main/other/bot.zip`; the menu archives were updated in place (only the
+  `menu-bot` member changed, +166 bytes, every other member byte-identical). Fix 155.
+- **The stale Fastly hosts entry in `installer/v2ray.sh`** ("still reachable, not changed") is moot:
+  that script no longer exists - it went with the remaining V2Ray residue - so the entry is gone.
+- **The "dead" `restore-ftp.sh`** is not dead and needs no change: the live `/usr/bin/restore-ftp`
+  is the 1978-byte `website/restore-ftp.sh` installed by `website/install.sh`, and the 3345-byte
+  `full/restore-ftp.sh` / `lite/restore-ftp.sh` in the menu archives are the fallback for when that
+  fetch fails. Kept; the earlier "dead" wording was imprecise and is corrected here.
+- **The empty `rclone.conf` (early finding 21) and `rclone-install.sh`** were removed from
+  `rohjagad/fn-autosc-miscellaneous` (misc `4dd9424`): decision 11 says the committed rclone remote
+  must not survive, and the panel references rclone nowhere. Fix 159.
+- **`calculate_remaining_days`'s invalid-date branch is dead in every copy** (`local x=$(date ...)`
+  captures the status of `local`). Confirmed harmless - the caller's `REMAINING_DAYS < 0` check still
+  refuses - and left as is: repairing it across ~190 copies would be churn for no behavioural change.
+- **`unlock-ws` has no confirmation** while its siblings do; this matches both references exactly and
+  is left under decision 21. **The licence gate's empty-`LOCAL_IP` case** still fails closed through
+  the `# Format:` comment; decision 21 already covers not adding the guard to ~190 files.
+- **The README's arbitrary-paths section** already describes the single SSH-WebSocket backend (no
+  `:977` mention remains), so there was nothing to close.
+- **The menus define `output()` but never call it** while the installers do (both references call it
+  in the menus). Recorded as a divergence, not changed: it only omits the licence banner, the gate
+  itself still runs, and inserting the call into every menu is cosmetic churn.
+- **My own shipped Cloudflare list from fix 154 had a wrong CIDR** - `2c0f:f248::/29` where Cloudflare
+  publishes `2c0f:f248::/32`. A /29 trusts addresses Cloudflare does not own. The three configs are
+  re-synced to Cloudflare's exact published lists and a refresher now keeps them current. Fixes 156/157.

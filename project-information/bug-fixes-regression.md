@@ -405,3 +405,32 @@ review (sections 25-29, which end at fix ~142) was checked against both versions
 - Additions present in neither archive are still only the ones this review can justify: the
   `set_real_ip_from` block, `udp-request-fixnet` and `keyexchange=ikev1` are count-0 in both V23 and
   1.20, and each traces to a defect reproduced on the test host.
+
+## 31. The Recorded Fragility Is Now Delivered, and the Open Recordings Are Closed (September 27, 2026)
+
+Section 30 left one item recorded rather than fixed - the Cloudflare range list behind
+`set_real_ip_from` - and the owner asked for everything open to be fixed instead. This records the
+result; the details are in the tenth pass of `bugs-fixed.md`.
+
+- **The ranges are now self-refreshing (fix 157).** `installer/cf-realip.sh` rewrites
+  `set_real_ip_from` from `https://www.cloudflare.com/ips-v4` and `/ips-v6`, guarded so a failed
+  fetch, a malformed list or a failing `nginx -t` leaves the configuration exactly as it was, and
+  `installer/diamond.sh` installs it as `/usr/local/bin/cf-realip-refresh` and schedules it weekly
+  (`0 4 * * 0`). So a range Cloudflare adds later is trusted on the next run instead of being counted
+  as a client. Verified live: a no-op when current (byte-identical config, no backup left), and a
+  clean restore-and-reload after two ranges were deleted by hand.
+- **The list itself was wrong (fix 156).** Fix 154 shipped `2c0f:f248::/29`; Cloudflare publishes
+  `2c0f:f248::/32`. The broader /29 trusted addresses Cloudflare does not own. All three configs now
+  match Cloudflare's published lists exactly, which the refresher also proves at install time.
+- **The vendored bot bundle closes decision 18's exception (fix 155).** `menu-bot` fetched
+  `rohjagad/FN-API/main/bot.zip`; the bundle (24,845 bytes) is now committed as `other/bot.zip` and
+  both menus read it from this repository. The menu archives were updated in place with a single
+  changed member (+166 bytes; every other member byte-identical), not rebuilt from source.
+- **Tidies delivered elsewhere:** `fn-autosc-api` strips escape sequences from `panel_reason` so a
+  refusal is readable (API `f89dc34`), and `fn-autosc-miscellaneous` dropped the dead committed
+  `rclone.conf` and `rclone-install.sh` that decision 11 says must not survive (misc `4dd9424`).
+- **Confirmed to need no change**, with the reasons in `bugs-found.md`: the `v2ray.sh` Fastly entry
+  (that script is gone), the `restore-ftp.sh` "dead file" (it is the fallback copy), the dead
+  invalid-date branch and the empty-`LOCAL_IP` gate (both fail safe), `unlock-ws`'s missing
+  confirmation and the menus' unused `output()` (both match the references' behaviour when compared
+  file by file).

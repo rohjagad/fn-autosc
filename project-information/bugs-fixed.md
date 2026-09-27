@@ -1444,3 +1444,17 @@ Cost: Cloudflare's ranges are listed in the three configs and should be refreshe
 changes them (they publish `https://www.cloudflare.com/ips-v4` and `/ips-v6`). A different
 proxy/CDN in front would need its own `set_real_ip_from` entries; with no proxy at all the list is
 inert and `$remote_addr` is the true peer. The map and log format are still the panel's own.
+
+## Tenth Pass - Closing the Open Recordings (September 27, 2026)
+
+| Fix | Closes | Change |
+| :-- | :-- | :-- |
+| 155 | the FN-API fetch observation | `other/bot.zip` vendored (sha256 `a0bc5bf758abd5df9b1ba8847cb6e5d8a085568af2b76d96a46ceb69ca9393c3`); `full/menu-bot.sh` and `lite/menu-bot.sh` fetch `${hosting}/other/bot.zip`; both menu archives updated in place (only the `menu-bot` member). |
+| 156 | my own wrong CIDR in fix 154 | `config/4.conf`, `config/6.conf`, `config/dual.conf`: `set_real_ip_from` re-synced to Cloudflare's published lists (`2c0f:f248::/29` -> `/32`). |
+| 157 | the fix-154 fragility (section 30) | `installer/cf-realip.sh` refreshes `set_real_ip_from` from Cloudflare's lists, `nginx -t`-guarded and fully best-effort; `installer/diamond.sh` installs it to `/usr/local/bin/cf-realip-refresh` and schedules it weekly. |
+| 158 | (fn-autosc-api) | `lib.sh`: `panel_reason` strips escape sequences, so a refusal reason is readable instead of embedding `ESC[2J` and friends. |
+| 159 | early finding 21 | `rohjagad/fn-autosc-miscellaneous` drops the dead committed `rclone.conf` and `rclone-install.sh`. |
+
+Verified live for fix 157: running the refresher when the list was current left `nginx.conf`
+byte-identical (no reload, no backup left behind); after deleting two ranges by hand it restored the
+full published set and reloaded cleanly (`nginx -t` OK, `https://.../web/tcp.ovpn` = 200).

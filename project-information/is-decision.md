@@ -245,3 +245,19 @@ explicit `level`; `policy.levels."0".statsUserUplink/Downlink` alone is not enou
 daemons had nothing to read. The panel's clients now all carry `"level": 0`. The default level is 0
 anyway, so this changes no routing or policy behaviour - it only makes Xray emit the counters the
 panel has always assumed it emitted.
+
+### Addendum to section 8 - the miscellaneous repository's rclone assets are gone
+
+Section 8's list of raw configs in `rohjagad/fn-autosc-miscellaneous` included `rclone.conf` and
+`rclone-install.sh`. Decision 11 removed the Google Drive backup path and states that the committed
+remote must not survive, so both files were deleted from that repository (misc `4dd9424`); the panel
+has referenced rclone nowhere since decision 11. The pinned release assets listed alongside them are
+unchanged.
+
+### Addendum to section 18 - the bot bundle is vendored here
+
+Section 18 says nothing fetches or modifies `rohjagad/FN-API`. `menu-bot` still fetched
+`main/bot.zip` from it. The bundle is now committed as `other/bot.zip` in this repository and both
+editions fetch it from there (fix 155), so the section holds without exception. The rule for future
+changes is the same one section 14 uses for credentials: nothing the panel installs at runtime may
+depend on a repository kept only as a reference.
