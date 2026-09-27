@@ -1584,3 +1584,5 @@ Found 166. **The SlowDNS tunnel opens a session but its data phase stalls** (Slo
 - **System menu:** `Restart All Services` leaves every service active; `Change SSH Banner` writes the file (restored to the shipped banner afterwards); `View Service & Port Details` prints; `Reinstall OS` only opens its own submenu (1. Reinstall OS / 2. Back) and nothing starts; `Cloudflare WARP` and `Cloudflare Argo Tunnel` submenus render (Argo's list is `1/3/0` in the source, not a gap).
 - **Domain menu:** `dm-menu > 4` writes a self-signed cert; `dm-menu > 2 > 1 > 4` (acme.sh, IPv4) issued and installed a real **ZeroSSL** certificate with `Verify return code: 0 (ok)`, and `https://<domain>/web/tcp.ovpn` returns 200 afterwards. `curl https://<domain>/` alone still fails by design - `/` is the SSH-WebSocket catch-all.
 - **Backup menu** starts a backup and lists the collected directories (`xray`, `wireguard`, `slowdns`).
+
+Found 165 - update: fixed as Fix 173. `userdel` is now `userdel -f` and its error is checked, so the menu no longer claims success when the account survives (verified live with a session holding the account).

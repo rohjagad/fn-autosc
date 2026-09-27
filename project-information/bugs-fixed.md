@@ -1553,3 +1553,9 @@ Both were introduced by the eleventh pass and are the reason the re-check was wo
 
 - **Fix 172 (Found 164):** `|| exit 0` added to the option read in `full/x-{ws,http,split,grpc}.sh` and `lite/x-{ws,http,split,grpc}.sh` (8 files), and to the `Username:` read inside the `until` loop of every `full/add-*.sh` and `lite/add-*.sh` (24 files). Repacked both archives (archive-vs-source 0 diffs, 0 non-755 entries) and deployed to the test VPS.
 - **Verified live:** `printf '0\n' | x-ws` now renders twice and exits (was 393 renders in 3 s); `printf '1\n' | x-ws` exits 0 with no repeated `Username cannot be empty.`.
+
+### Fix 173 - delete-ssh checks userdel and forces removal (Found 165)
+
+- **Fix 173 (Found 165):** `full/delete-ssh.go` discarded `userdel`'s error and printed "successfully deleted" unconditionally. It now runs `userdel -f` (so an account that still has a session, a lingering `systemd --user` or a running process is removed rather than left behind - the previous `userdel` exited 8 in exactly that case), returns the error, and `main` prints `Failure: User <name> could not be deleted: <err>` with a hint instead of claiming success. The limit file and creation log are only removed once the account is actually gone. Full edition only - lite ships no `delete-ssh`.
+- **Built** with the VPS's Go 1.22.0 and the resulting binary installed as the `delete-ssh` entry in `menu/full.zip` (mode 0755).
+- **Verified live:** created `clidel`, held an authenticated session against port 3303 from the KVM client, then deleted it through `menu-ssh` - the menu now reports success and `id clidel` returns nothing, where the old tool left the account in `/etc/passwd`.

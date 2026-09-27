@@ -51,9 +51,14 @@ func main() {
     clearScreen()
 
     if userExists(user) {
-        deleteUser(user)
-        clearScreen()
-        fmt.Printf("User %s has been successfully deleted.\n", user)
+        if err := deleteUser(user); err != nil {
+            clearScreen()
+            fmt.Printf("Failure: User %s could not be deleted: %v\n", user, err)
+            fmt.Println("The account still exists; remove its running processes and retry.")
+        } else {
+            clearScreen()
+            fmt.Printf("User %s has been successfully deleted.\n", user)
+        }
     } else {
         clearScreen()
         fmt.Printf("Failure: User %s not found.\n", user)
@@ -89,10 +94,16 @@ func getAccountLockStatus(username string) string {
     return "UNLOCKED"
 }
 
-func deleteUser(username string) {
-    exec.Command("userdel", username).Run()
+func deleteUser(username string) error {
+    // -f forces removal even when the account still has a session or a lingering
+    // systemd --user; without it userdel exits 8 ("currently used by process"),
+    // the account survives, and the menu used to claim success anyway.
+    if err := exec.Command("userdel", "-f", username).Run(); err != nil {
+        return err
+    }
     exec.Command("rm", "-fr", fmt.Sprintf("/etc/xray/limit/ip/ssh/%s", username)).Run()
     exec.Command("rm", "-fr", fmt.Sprintf("/var/log/create/ssh/%s.log", username)).Run()
     exec.Command("systemctl", "restart", "dropbear", "ssh", "sshd").Run()
     exec.Command("systemctl", "restart", "ws").Run()
+    return nil
 }
