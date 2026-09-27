@@ -205,15 +205,28 @@ status() {
 }
 
 enable() {
-    warp-cli connect
+    # install() sets WARP up with P3TERX warp.sh ("warp.sh wgd"), i.e. the
+    # wg-quick@wgcf interface, and restart() drives that same unit - so enable
+    # must drive it too. warp-cli is not the control path here: on a warp.sh
+    # install it has no registration, so connect/disconnect change nothing.
+    systemctl enable --now wg-quick@wgcf >/dev/null 2>&1
     clear
-    echo -e "Done Enable Warp"
+    if ip link show wgcf >/dev/null 2>&1; then
+        echo -e "Done Enable Warp"
+    else
+        echo -e "WARP is not running"
+    fi
 }
 
 disable() {
-    warp-cli disconnect
+    systemctl disable --now wg-quick@wgcf >/dev/null 2>&1
+    wg-quick down wgcf >/dev/null 2>&1
     clear
-    echo -e "success disable warp"
+    if ip link show wgcf >/dev/null 2>&1; then
+        echo -e "WARP is still running"
+    else
+        echo -e "success disable warp"
+    fi
 }
 
 restart() {
