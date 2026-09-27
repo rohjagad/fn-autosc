@@ -1443,3 +1443,35 @@ proposal** and every client was answered with `NO_PROPOSAL_CHOSEN`.
   path adds the Debian **unstable** repository and runs `apt install linux-headers-$(uname -r)`,
   which pulled a new kernel and a large dependency set; that is inherited behaviour, recorded here,
   and the test host was cleaned back up (WARP removed, unstable repo deleted, extra kernel purged).
+
+## Ninth Pass - The Xray IP Limit (September 27, 2026)
+
+Asked to verify that the per-account "limit IP" works for vmess/vless/trojan with the client
+connecting through Cloudflare (a Cloudflare edge IP, SNI/host = the panel domain).
+
+### The limit itself works
+
+With an account at `Limit IP: 1` and two concurrent clients from two different real addresses
+(157.15.139.236 through Cloudflare and 202.155.17.126), `xray api statsonline` reported
+`value: 2`, and running the limiter exactly as cron does
+(`flock -n /tmp/limit-ip-ws.lock limit-ip-ws`) removed the account from `ws.json` and moved its card
+to `.locked`. Xray's access log showed the real client address (`from 157.15.139.236:0 accepted ...
+email: ipl_vm`), so behind Cloudflare the panel still sees the true client. The count is
+concurrent-IP based - a client that goes idle stops counting - which matches the "multilogin"
+intent.
+
+Found 151. **The Xray IP limit trusted a client-supplied `X-Forwarded-For`** (`config/4.conf`,
+`config/6.conf`, `config/dual.conf`) - the Xray-serving nginx locations forwarded
+`X-Forwarded-For $proxy_add_x_forwarded_for`, which keeps whatever the client sent and appends
+nginx's peer, and Xray (vmess/vless/trojan over ws/grpc/splithttp/httpupgrade) takes the first entry
+as the client address. A client could therefore choose the address that the "online" statistic -
+the number `limit-ip-*.sh` enforces - is counted against.
+- **Confirmed live** through Cloudflare (client -> 104.17.2.81, SNI/host autosc.rohcuan.dpdns.org):
+  a vmess client that sent `X-Forwarded-For: 9.9.9.9` was recorded by Xray as
+  `from 9.9.9.9:0 accepted tcp:ifconfig.me:443 email: ipl_sp`, and `statsonline` counted it, while
+  nginx's own access log (which uses the trusted `$clientRealIp` map) still showed the real client
+  157.15.139.236 and the Cloudflare edge separately. That defeats the device limit: one person can
+  run many devices against one account, all sending the same forged address, and the count never
+  reaches the limit.
+- **Inherited:** both references ship the same `map $http_x_forwarded_for $clientRealIp` and the
+  same `$proxy_add_x_forwarded_for` proxy headers; only the log format used the trusted value.

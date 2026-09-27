@@ -1397,3 +1397,17 @@ successfully` (previously `NO_PROPOSAL_CHOSEN`), and the server's xl2tpd logged
 `Call established with 157.15.139.236`. The IPsec SA and the L2TP control connection are the two
 things the defect broke; the PPP session itself could not be finished in the test guest because its
 Debian cloud kernel carries no `ppp` modules.
+
+## Ninth Pass - Fix 153 (September 27, 2026)
+
+| Fix | Found | Change |
+| :-- | :-- | :-- |
+| 153 | 151 | `config/4.conf`, `config/6.conf`, `config/dual.conf`: send the panel's own trusted `$clientRealIp` map value as `X-Real-IP` and `X-Forwarded-For` to the upstreams instead of `$remote_addr` / `$proxy_add_x_forwarded_for`, so the address the IP limit counts cannot be chosen by the client. |
+
+Verified live for fix 153: after editing the installed `nginx.conf` the same way, `nginx -t` passed
+and nginx reloaded; the client that forged `X-Forwarded-For: 9.9.9.9` was then recorded as
+`from 157.15.139.236:0` - exactly like a client that sent no such header - while `statsonline`
+still reported 2 for two real concurrent addresses, so counting is unchanged and is now unforgeable
+behind Cloudflare. The map and log format were left exactly as they were (the map already produced
+the trusted value), and the same substitution also gives the SSH-WebSocket (`location /`) and API
+locations the true client address when the panel is behind Cloudflare, instead of the edge address.
