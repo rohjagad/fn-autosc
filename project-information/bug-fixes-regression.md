@@ -553,3 +553,10 @@ Decision 27 adds the SSH-family version block. Section 35's rule applied to it:
 | **Over-strictness** | None: each value falls back to `n/a`, so a partial install (no OpenVPN, no Squid, absent `ws`) still renders the menu. Nothing depends on the versions being present. |
 | **Over-engineering** | One block of nine `command | grep | awk` lines and a `printf`; it reuses each tool's own version output, adds no dependency, no helper function and no caching. |
 | **vs the source** | Neither reference shows service versions anywhere (their menus print only the main-menu XTLS line), so this is owner-requested, recorded as decision 27 - not invented logic replacing a reference behaviour. |
+
+### Correction to section 37 - four probes, not nine
+
+Section 37 counted nine `command | grep | awk` lines. Decision 27's correction narrowed the menu block
+to the four SSH front-ends (OpenSSH, Dropbear, WS ePro, Stunnel5), so it is four probes in a single
+column. The four checks themselves are unchanged: display-only, `n/a` fallback, no new dependency, and
+still an owner-requested divergence (the references show no service version at all).

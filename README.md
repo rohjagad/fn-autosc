@@ -197,8 +197,8 @@ counts per protocol, service status, and recent traffic.
 
 Create, trial, delete, extend, and list SSH accounts; check who is online;
 view account logs; change passwords; change IP limits. The header lists the
-version of every service an SSH account uses — OpenSSH, Dropbear, the SSH
-WebSocket (`ws`), Stunnel5, HAProxy, Squid, OHP, OpenVPN and BadVPN (decision 27).
+version of the SSH front-ends a client connects through — OpenSSH, Dropbear,
+the SSH WebSocket (`ws`), and Stunnel5 (decision 27).
 
 ### XTLS Menu — `menu-x`
 

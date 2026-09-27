@@ -408,3 +408,14 @@ and UDP Request, which are advertised on the card but report no version at all -
 **Rule:** this block mirrors the account card's service list - when a service is added to the card,
 add its version here too - and a menu must never invoke a daemon merely to read a version (only a flag
 that prints and exits).
+
+### Correction to section 27 - the block is the four SSH front-ends, not the whole stack
+
+Section 27 listed nine services. The owner narrowed it to **the services a client actually connects
+through** - the SSH front-ends the account card shows as connection methods: **OpenSSH, Dropbear,
+WS ePro (the SSH WebSocket) and Stunnel5 (777)**. HAProxy (the implementation behind 777), Squid, OHP,
+OpenVPN and BadVPN are associated with SSH but are not SSH front-ends, so they are no longer shown.
+The block is four lines in a single column, which also removes the two-column `printf`.
+
+Verified live after the change: `OpenSSH 9.2p1`, `Dropbear v2019.78`, `WS ePro v1.2.3`, `Stunnel5 5.68`,
+in the SSH menu's existing layout.
