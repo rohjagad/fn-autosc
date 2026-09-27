@@ -724,3 +724,14 @@ Section 35's four-check rule applied to Fix 194:
 | **Over-strictness** | Eliminates confusing error spew and screen flashing; operators can now read status traces and configuration details. |
 | **Over-engineering** | Standard existence checks (`command -v`, `[[ -f ]]`) and standard bash pause prompt (`read -n 1`). Removed 1 redundant wildcard permission line. Zero new dependencies. |
 | **vs the source** | Both references inherited broken flags from mixing up P3TERX and Fscarmen WARP scripts, lacked terminal pauses, and ran `chmod +x /usr/bin/*`. Fixing these aligns the submenu with the actual installed software stack. |
+
+## 53. System Menu Confirmation Pauses and Lite Port Display - Four Checks (September 28, 2026)
+
+Section 35's four-check rule applied to Fix 195:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Service restarts and banner updates execute identically; only a standard user-prompt pause is added before returning to the caller. `bash -n` clean across both files. |
+| **Over-strictness** | Does not restrict commands or input; strictly allows terminal operators to view the results of requested actions before screens are cleared. |
+| **Over-engineering** | Standard `read -n 1` pauses and cleanup of inaccurate display text. No new files or external dependencies. |
+| **vs the source** | Both references lacked pauses, causing confusing screen wiping when submenus were run from the main menu. Adding standard prompt returns resolves terminal usability. |

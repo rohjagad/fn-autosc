@@ -95,17 +95,19 @@ separator=$(rainbow_sep '===================================')
 blue_sep="${blue}-----------------------------------${NC}"
 
 bnnr() {
-read -p "Input Your Banner" bns
+read -p "Input Your Banner: " bns || return
 echo -e "$bns" > /etc/issue.net
 systemctl daemon-reload
-systemctl restart dropbear
-systemctl restart ws
+systemctl restart dropbear 2>/dev/null || true
+systemctl restart ws 2>/dev/null || true
 clear
 echo -e "
 =====================
 Success Change Banner
 =====================
 "
+read -n 1 -s -r -p "Press any key to return..." || true
+echo ""
 }
 
 resall() {
@@ -141,6 +143,8 @@ clear
 echo -e "
 \n
 Success Restart All Service Server\n\n"
+read -n 1 -s -r -p "Press any key to return..." || true
+echo ""
 }
 
 menu-warp() {
@@ -588,6 +592,8 @@ Feature:
 - Auto Backup & Full Notif Telegram
 ===============================
 \n"
+read -n 1 -s -r -p "Press any key to return..." || true
+echo ""
 }
 
 

@@ -1712,3 +1712,8 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
   5. Scoped `install()` to `chmod +x /usr/bin/warp.sh`, deleting the dangerous system-wide `chmod +x /usr/bin/*`.
   Repacked both menu archives (`menu/full.zip` and `menu/lite.zip`) with 0 diffs and all entries at 0755.
 - **Verified live on VPS:** tested option 2 (Status), option 7->1 (Account), and option 6 (Token): all display clean, actionable output and pause for operator keypress without error.
+
+### Fix 195 - interactive pauses for System menu actions and accurate lite details (Found 189)
+
+- **Fix 195 (Found 189):** in `full/menu-system.sh` and `lite/menu-system.sh`, added `read -n 1 -s -r -p "Press any key to return..."` across `detail()`, `resall()`, and `bnnr()` so the output remains visible on screen until acknowledged. In `lite/menu-system.sh`, trimmed the SSH port listings from `detail()` so the displayed ports match the actual services installed in the lite edition. Repacked both menu archives (`menu/full.zip` and `menu/lite.zip`) with 0 diffs and all entries at 0755.
+- **Verified live on VPS:** verified that `detail()` and `bnnr()` pause for operator input and display cleanly before returning.

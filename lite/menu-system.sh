@@ -95,7 +95,7 @@ separator=$(rainbow_sep '===================================')
 blue_sep="${blue}-----------------------------------${NC}"
 
 bnnr() {
-read -p "Input Your Banner" bns
+read -p "Input Your Banner: " bns || return
 echo -e "$bns" > /etc/issue.net
 systemctl daemon-reload
 systemctl restart ws 2>/dev/null || true
@@ -105,6 +105,8 @@ echo -e "
 Success Change Banner
 =====================
 "
+read -n 1 -s -r -p "Press any key to return..." || true
+echo ""
 }
 
 resall() {
@@ -127,6 +129,8 @@ clear
 echo -e "
 \n
 Success Restart All Service Server\n\n"
+read -n 1 -s -r -p "Press any key to return..." || true
+echo ""
 }
 
 menu-warp() {
@@ -553,11 +557,6 @@ echo -e "\n
 Autoscript Management Panel VPN
 ===============================
 
-SSH WEBSOCKET: 80, 443, 2080
-SSH DROPBEAR : 109, 111
-SSH OPENSSH  : 22
-SSH SLOWDNS  : 53, 5300
-
 XTLS:
 - WEBSOCKET
 - HTTP UPGRADE
@@ -573,6 +572,8 @@ Feature:
 - Auto Backup & Full Notif Telegram
 ===============================
 \n"
+read -n 1 -s -r -p "Press any key to return..." || true
+echo ""
 }
 
 

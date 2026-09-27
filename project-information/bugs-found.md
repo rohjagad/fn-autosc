@@ -1687,3 +1687,7 @@ Found 188. **WARP submenu invoked non-existent commands (`warp -4/-6/-T`), wiped
 4. Line 226 in `install()` executed `chmod +x /usr/bin/*`, modifying permissions across all 1500+ system binaries in `/usr/bin/`.
 - **Confirmed live on VPS:** running status or account creation printed `command not found` and was instantly wiped by the menu loop.
 - **Inherited from both references** (both V23 and 1.20 carried these identical broken calls, lack of pauses, and `chmod +x /usr/bin/*`).
+
+Found 189. **System menu actions (`detail`, `resall`, `bnnr`) exited without pausing, wiping output immediately in main menu** (`full/menu-system.sh`, `lite/menu-system.sh`, lines 95-145, 570-605) - when `menu-system` was invoked from `menu.sh` (option 10), selecting option 5 (View Service & Port Details), option 2 (Restart All Services), or option 8 (Change SSH Banner) executed the action and exited immediately without waiting for user input. `menu.sh` immediately caught the return, cleared the terminal, and re-rendered the main menu. The operator was unable to view the service/port details or see confirmation of service restart. Furthermore, `lite/menu-system.sh`'s `detail()` displayed SSH ports (22, 109, 111, 2080, 53, 5300) that the lite edition does not ship.
+- **Confirmed live on VPS:** pressing `10 -> 5` from `menu` rendered the main menu immediately without allowing the operator to read the port details.
+- **Inherited from both references** (both V23 and 1.20 omitted pauses on these functions and carried the copy-pasted SSH port list in lite).
