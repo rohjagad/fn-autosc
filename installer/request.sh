@@ -88,7 +88,7 @@ JSON
 # Permision
 cd /root/udp-request
 chmod +x udp-request-linux-amd64
-chmod +x config.json
+chmod 600 config.json
 cd
 
 # Detail Information

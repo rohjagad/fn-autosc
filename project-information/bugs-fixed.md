@@ -2010,3 +2010,20 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 257 (Found 251):** removed `+ 1` from `duration=$(expr $diff + $extend + 1)`. WireGuard extend now grants exactly the requested number of additional days, consistent with all other transports.
 - **Verified live on VPS:** `duration=$(expr $diff + $extend)` in deployed `menu-wg`.
+
+### Fix 258 - menu-dnstt.sh: unquote heredoc delimiter so $nsdomen expands (Found 253)
+
+- **Fix 258 (Found 253):** changed `<< 'SVCEOF'` to `<< SVCEOF` in `full/menu-dnstt.sh`. `$nsdomen` now expands correctly inside the heredoc. The body contains no other shell-special characters that need escaping.
+- **Verified:** `bash -n` clean.
+
+### Fix 259 - menu-wg.sh: anchor grep-c with /32 suffix to prevent partial IP matches (Found 254)
+
+- **Fix 259 (Found 254):** changed `grep -c "10.66.66.${dot_ip}"` to `grep -cF "10.66.66.${dot_ip}/"` in `full/menu-wg.sh`. The `AllowedIPs = 10.66.66.X/32` line always has `/` after the IP, so `-F "X/"` is an exact token match with no false positives for shorter IPs.
+
+### Fix 260 - menu-system.sh: align OS display labels with install commands (Found 255)
+
+- **Fix 260 (Found 255):** in both `full/menu-system.sh` and `lite/menu-system.sh`, corrected display labels to match actual install commands — Ubuntu option 1 label "26.04"→"16.04"; Alpine options 2/3/4 labels "3.22/3.23/3.24"→"3.20/3.19/3.18".
+
+### Fix 261 - installer/request.sh: chmod 600 on config.json (Found 256)
+
+- **Fix 261 (Found 256):** changed `chmod +x config.json` to `chmod 600 config.json` in `installer/request.sh`.

@@ -647,7 +647,7 @@ clear
 echo -e "${NC}${separator}
            UBUNTU LINUX
 ${separator}
-${green}1${NC}. Ubuntu 26.04
+${green}1${NC}. Ubuntu 16.04
 ${green}2${NC}. Ubuntu 18.04
 ${green}3${NC}. Ubuntu 20.04
 ${green}4${NC}. Ubuntu 22.04
@@ -672,9 +672,9 @@ echo -e "${NC}${separator}
            ALPINE LINUX
 ${separator}
 ${green}1${NC}. Alpine 3.21
-${green}2${NC}. Alpine 3.22
-${green}3${NC}. Alpine 3.23
-${green}4${NC}. Alpine 3.24
+${green}2${NC}. Alpine 3.20
+${green}3${NC}. Alpine 3.19
+${green}4${NC}. Alpine 3.18
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"

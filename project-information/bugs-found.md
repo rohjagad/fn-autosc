@@ -1888,3 +1888,18 @@ Found 250. **`installer/noobz.sh`: `chmod +x` on JSON and TOML config files** (l
 
 Found 251. **`full/menu-wg.sh`: WireGuard `extend()` adds +1 extra day — systematic off-by-one** (line 329) — `duration=$(expr $diff + $extend + 1)` gives WireGuard accounts one extra day compared to every other transport's renewal. The `xl2tp.sh` extend function (line 243) uses `expr $diff + $extend` without `+1`. An operator extending by 30 days gives 31 days to WireGuard users only.
 - **Inherited from V23.**
+
+Found 252. **`full/auto-delete-{ws,http,split,grpc}.sh`: removes ancillary files for orphaned users but never edits the Xray JSON** (lines 105–111 in all 4) — the trigger is "user has a log file but is NOT in the JSON config". The script correctly deletes `.log`, quota, and limit files for such orphans — but never removes the user's Xray inbound entry from `ws.json`/`upgrade.json`/etc. if the reverse is true (user in JSON but no log file). Orphaned JSON entries accumulate indefinitely.
+- **Inherited from V23.** (This is how auto-delete was designed — it cleans stale log files, not stale JSON entries. Not a destructive bug, but the function name and Telegram message are misleading.)
+
+Found 253. **`full/menu-dnstt.sh`: quoted heredoc delimiter `'SVCEOF'` prevents `$nsdomen` from expanding in the systemd unit file** (line 138) — after Fix 255 (heredoc to remove leading spaces), the delimiter was single-quoted, which suppresses all variable expansion inside the heredoc. `$nsdomen` is written literally as the string `$nsdomen` into the `ExecStart` line. The `dns-server` process starts with the literal argument `$nsdomen` and connects to no nameserver.
+- **Regression introduced by Fix 255** (quoted delimiter was used to avoid needing to escape the heredoc body).
+
+Found 254. **`full/menu-wg.sh`: `grep -c "10.66.66.X"` matches partial IPs — `.2` matches `.20`, `.200`, `.22`, etc.** (line 172) — when allocating the next free WireGuard IP, `grep -c "10.66.66.2"` matches any line containing that substring, including `10.66.66.20/32`, `10.66.66.200/32`, `10.66.66.22/32`. IP `.2` appears "occupied" whenever `.20`–`.29` or `.200`–`.209` or `.220`–`.229` exist. Many valid IPs are permanently skipped, compressing the usable pool from 253 to far fewer slots on a busy server.
+- **Inherited from V23.**
+
+Found 255. **`full/menu-system.sh` and `lite/menu-system.sh`: OS reinstall menu display labels don't match the install commands** — Ubuntu option 1 displays "Ubuntu 26.04" but installs `ubuntu 16.04`. Alpine options 2–4 display versions 2 higher than what actually gets installed (display 3.22/3.23/3.24, install 3.20/3.19/3.18). An operator who selects based on the displayed version gets a different OS. These are destructive reinstall operations.
+- **Regression introduced by our R72-C fix** (we corrected the install commands to valid versions but forgot to update the display labels).
+
+Found 256. **`installer/request.sh`: `chmod +x config.json` sets execute bit on a JSON config file** (line 91) — should be `chmod 600`.
+- **Inherited from V23.**

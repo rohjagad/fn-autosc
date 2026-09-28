@@ -135,7 +135,7 @@ ${orange}Press [Ctrl + C] to exit${NC}"
                 systemctl disable dnstt.service
                 clear
                 
-                cat > /etc/systemd/system/dnstt.service << 'SVCEOF'
+                cat > /etc/systemd/system/dnstt.service << SVCEOF
 [Unit]
 Description=SlowDNS FN AutoSC Autoscript Service
 Documentation=https://t.me/rohcuan

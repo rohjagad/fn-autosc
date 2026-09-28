@@ -169,7 +169,7 @@ function create() {
 	expired=$(date -d "${exp}" +"%d %b %Y")
 
 	for dot_ip in {2..254}; do
-		dot_exists=$(grep -c "10.66.66.${dot_ip}" /etc/wireguard/wg0.conf)
+		dot_exists=$(grep -cF "10.66.66.${dot_ip}/" /etc/wireguard/wg0.conf)
 		if [[ ${dot_exists} == '0' ]]; then
 			break
 		fi

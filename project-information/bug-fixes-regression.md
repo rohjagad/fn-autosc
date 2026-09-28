@@ -1014,3 +1014,14 @@ Section 35's four-check rule applied to Fixes 254–257:
 | **Over-strictness** | Fix 256: `600` means only root can read/write — correct for a service running as root. |
 | **Over-engineering** | Four flag lines, four `if` blocks (Fix 254). One heredoc replacing one `echo -e` (Fix 255). One permission word (Fix 256). Removal of `+ 1` (Fix 257). |
 | **vs the source** | Found 248: regression from Fix 250. Found 249/250/251: inherited from V23. |
+
+## 76. menu-dnstt unquote SVCEOF; menu-wg IP grep anchor; menu-system labels; request chmod - Four Checks (September 29, 2026)
+
+Section 35's four-check rule applied to Fixes 258–261:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Fix 258: unquoted heredoc expands `$nsdomen` — the only variable in the body; no other variables present that might expand unexpectedly. Fix 259: `grep -cF "X/"` matches `AllowedIPs = 10.66.66.X/32`; the `/` is always present in this file format. Fix 260: label-only change; no install command modified. Fix 261: `600` means only root reads it; `request.sh` runs as root and reads it. All files pass `bash -n`. |
+| **Over-strictness** | Fix 261: config.json is read by the udp-request binary (also root) — `600` is correct and not over-strict. |
+| **Over-engineering** | One quote removed. One letter added (`F` flag + `/`). Four string replacements. One permission word. |
+| **vs the source** | Found 253: regression from Fix 255. Found 254/256: inherited from V23. Found 255: regression from R72-C. |
