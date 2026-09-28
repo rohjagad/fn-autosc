@@ -119,6 +119,10 @@ systemctl restart quota-http 2>/dev/null || true
 systemctl restart quota-split 2>/dev/null || true
 systemctl restart quota-grpc 2>/dev/null || true
 systemctl restart nginx
+mkdir -p /etc/haproxy
+cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem 2>/dev/null
+chmod 644 /etc/haproxy/funny.pem 2>/dev/null
+systemctl restart haproxy 2>/dev/null || true
 systemctl restart cron
 systemctl restart wg-quick@wg0 2>/dev/null || true
 systemctl restart dnstt 2>/dev/null || true

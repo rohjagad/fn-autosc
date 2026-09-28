@@ -1857,3 +1857,8 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 223 (Found 217):** added `ipv6only=on` to all `listen [::]:port` directives in `config/dual.conf`. This tells the kernel to create a separate IPv6-only socket, allowing the IPv4 listener on the same port to coexist without "Address already in use" errors.
 - **Verified:** directive present on all 10 IPv6 listen lines.
+
+### Fix 224 - restore-ftp.sh: rebuild HAProxy PEM and restart after restore (Found 218)
+
+- **Fix 224 (Found 218):** in all 3 `restore-ftp.sh` variants (full, lite, website), added `mkdir -p /etc/haproxy && cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem && chmod 644 /etc/haproxy/funny.pem` and `systemctl restart haproxy 2>/dev/null || true` between the nginx and cron restarts. HAProxy now picks up the restored certificate.
+- **Verified:** `bash -n` clean on all 3 files.

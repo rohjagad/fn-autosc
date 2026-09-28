@@ -890,3 +890,14 @@ Section 35's four-check rule applied to Fixes 222-223:
 | **Over-strictness** | Fix 222: no new restrictions — the script already shows an error message and calls the menu. The only change is that it doesn't fall through to corrupt the date. Fix 223: no restriction — both IPv4 and IPv6 traffic still reach the server. |
 | **Over-engineering** | One `return` keyword (×8 files). One `ipv6only=on` directive (×10 listen lines). |
 | **vs the source** | Both inherited from V23. |
+
+## 67. restore-ftp HAProxy PEM rebuild - Four Checks (September 28, 2026)
+
+Section 35's four-check rule applied to Fix 224:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | The PEM rebuild is a no-op if `/etc/xray/xray.crt` or `/etc/xray/xray.key` doesn't exist (stderr suppressed, `chmod` suppressed). The `systemctl restart haproxy` uses `2>/dev/null || true`, no-op if haproxy isn't installed. No change to any other restart. |
+| **Over-strictness** | No new restrictions. |
+| **Over-engineering** | Three lines: `mkdir`, `cat > pem`, `chmod`. One `systemctl restart`. Matches the pattern used in every other cert-touching operation. |
+| **vs the source** | Inherited from V23 and 1.20 — neither rebuilds the PEM on restore. |

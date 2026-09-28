@@ -1786,3 +1786,6 @@ Found 216. **`full/extend-{ws,http,split,grpc}.sh` and `lite/extend-{ws,http,spl
 
 Found 217. **`config/dual.conf`: duplicate IPv4+IPv6 listeners on same ports without `ipv6only=on` — nginx fails to start on default Debian 12** (lines 82-92 vs 95-102) — `listen [::]:2053 ssl http2 reuseport;` and `listen 2053 ssl http2 reuseport;` both bind to the same port. On Debian 12 with default `net.ipv6.bindv6only=0`, the `[::]` socket already accepts IPv4 connections, so the explicit IPv4 listener fails with "Address already in use". Affects ports 2053, 2083, 2087, 2096, 80, 8880, 2052, 2082, 2095, and 443.
 - **Inherited from V23.**
+
+Found 218. **`full/restore-ftp.sh`, `lite/restore-ftp.sh`, `website/restore-ftp.sh`: restore never rebuilds `/etc/haproxy/funny.pem` — HAProxy serves wrong certificate after restore** — the restore scripts overwrite `/etc/xray/xray.crt` and `/etc/xray/xray.key` from the backup archive but never rebuild the HAProxy PEM bundle (`/etc/haproxy/funny.pem = crt + key`), and never restart HAProxy. After a backup restore, HAProxy (serving port 777/Stunnel5) continues using the pre-restore certificate, which may belong to a different domain or be expired. Every other cert-touching operation in the codebase (`dm-menu.sh`, `cert2()`, `dmsl()`) rebuilds `funny.pem` and restarts haproxy.
+- **Inherited from both V23 and 1.20.**
