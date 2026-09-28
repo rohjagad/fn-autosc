@@ -93,7 +93,7 @@ until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/creat
 
     client_exists=$(grep -w $user /etc/xray/json/grpc.json | wc -l)
 
-    if [[ ${client_exists} == '1' ]]; then
+    if [[ ${client_exists} -gt 0 ]]; then
         clear
         echo -e "\033[0;31mUsername already exists.\033[0m"
         continue

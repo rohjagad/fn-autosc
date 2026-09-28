@@ -93,9 +93,11 @@ create_ssh_user() {
     local password="$2"
     local expiration_date="$3"
 
-    useradd -e "$expiration_date" -s /bin/false -M "$username"
-    echo -e "${password}\n${password}" | passwd "$username"
-    echo "$username:$password" | sudo chpasswd
+    useradd -e "$expiration_date" -s /bin/false -M "$username" || {
+        echo -e "\033[0;31mFailed to create user '$username'.\033[0m"
+        return 1
+    }
+    echo "$username:$password" | chpasswd
 }
 
 main() {
@@ -111,6 +113,18 @@ main() {
     echo -e "\033[1;33m Create SSH Account \033[0m"
     echo -e "\033[38;2;255;0;0m-\033[38;2;255;80;0m-\033[38;2;255;161;0m-\033[38;2;255;241;0m-\033[38;2;188;255;0m-\033[38;2;108;255;0m-\033[38;2;27;255;0m-\033[38;2;0;255;53m-\033[38;2;0;255;134m-\033[38;2;0;255;214m-\033[38;2;0;215;255m-\033[38;2;0;135;255m-\033[38;2;0;54;255m-\033[38;2;26;0;255m-\033[38;2;107;0;255m-\033[38;2;187;0;255m-\033[38;2;255;0;242m-\033[38;2;255;0;162m-\033[38;2;255;0;81m-\033[38;2;255;0;0m-\033[0m"
     read -p "Username: " username
+    if ! [[ "$username" =~ ^[a-z][a-z0-9_]{0,31}$ ]]; then
+        echo -e "\033[0;31mUsername must be lowercase alphanumeric/underscore, start with a letter, max 32 chars.\033[0m"
+        read -n 1 -s -r -p "Press any key to return"
+        add_ssh
+        return
+    fi
+    if id "$username" &>/dev/null; then
+        echo -e "\033[0;31mUser '$username' already exists.\033[0m"
+        read -n 1 -s -r -p "Press any key to return"
+        add_ssh
+        return
+    fi
     read -p "Password: " password
     echo ""
     echo -e "\033[38;5;208m0 not allowed\033[0m"

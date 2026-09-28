@@ -1832,3 +1832,18 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 218 (Found 212):** in `installer/slowdns.sh`, added `saved_privkey` and `saved_pubkey` local variables that capture the existing key contents before `rm -rf /etc/slowdns`. After rebuild, if keys were saved, they are restored from the variables; only if no keys existed (fresh install) does `-gen-key` run. Follows the same pattern already used for `nsdomain` preservation.
 - **Verified:** `bash -n` clean.
+
+### Fix 219 - addssh.sh: username validation + useradd error check + remove redundant passwd (Found 213)
+
+- **Fix 219 (Found 213):** added username validation (`^[a-z][a-z0-9_]{0,31}$`) and `id` existence check before account creation. Wrapped `useradd` in `|| { error; return 1; }` to abort on failure. Removed redundant `passwd` call, keeping only `chpasswd` (silent, correct hash algorithm).
+- **Verified live on VPS:** validation regex and useradd guard present.
+
+### Fix 220 - add-*.sh: duplicate detection uses -gt 0 instead of == '1' (Found 214)
+
+- **Fix 220 (Found 214):** in all 24 `add-*.sh` files (full + lite), changed `if [[ ${client_exists} == '1' ]]` to `if [[ ${client_exists} -gt 0 ]]`. Correctly rejects usernames with any existing entries, not just exactly one.
+- **Verified live on VPS:** `-gt 0` check present in deployed `add-vmess-ws`.
+
+### Fix 221 - lite/dm-menu.sh: add missing haproxy restart after cert issuance (Found 215)
+
+- **Fix 221 (Found 215):** added `systemctl restart haproxy 2>/dev/null || true` at all 3 certificate issuance points in `lite/dm-menu.sh` (IPv4, IPv6, and self-signed), matching the pattern in `full/dm-menu.sh`.
+- **Verified live on VPS:** 3 haproxy restart lines present in deployed `dm-menu`.

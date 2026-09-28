@@ -1771,3 +1771,12 @@ Found 211. **`full/limit-ip-{ws,http,split,grpc}.sh` and `lite/limit-ip-{ws,http
 
 Found 212. **`installer/slowdns.sh`: keypair regenerated on every reinstall, disconnecting all SlowDNS clients** (line 98) — the installer preserves `nsdomain` across reinstalls (saved before `rm -rf /etc/slowdns`, restored after) but does not preserve the server keypair (`server.key`, `server.pub`). Line 98 unconditionally runs `-gen-key`, producing a new keypair. Existing clients configured with the old public key can no longer connect.
 - **Inherited from both V23 and 1.20** (neither preserves keys).
+
+Found 213. **`full/addssh.sh`: no username validation — accepts spaces, slashes, empty strings, existing system accounts** (line 113) — unlike the xray `add-*.sh` scripts which validate `^[a-z0-9_]+$`, `addssh.sh` accepts any input as the SSH username. A username containing `/` causes path traversal in the limit file write (`echo "$iplimit" > "/etc/xray/limit/ip/ssh/${username}"`). A username matching an existing system account (e.g., `www-data`) causes `useradd` to fail silently but the script continues and sets a new password on the existing system user via `chpasswd`. Additionally, the `passwd` call on line 97 is redundant with `chpasswd` on line 98 and leaks interactive prompts to stdout.
+- **Inherited from both V23 and 1.20.**
+
+Found 214. **All 24 `add-*.sh` scripts: duplicate detection uses `== '1'` instead of `-gt 0`** (line 96 in each) — `client_exists=$(grep -w $user ... | wc -l)` counts matches. The check `if [[ ${client_exists} == '1' ]]` only rejects when exactly 1 match exists. If 2+ entries already exist (from concurrent adds, botched restores, or manual edits), the check passes and a third duplicate entry is injected.
+- **Inherited from both V23 and 1.20.**
+
+Found 215. **`lite/dm-menu.sh`: missing `systemctl restart haproxy` after certificate issuance** (IPv4 path ~line 136, IPv6 path ~line 162, self-signed ~line 407) — `full/dm-menu.sh` restarts haproxy at all 3 certificate issuance points because haproxy reads its own PEM bundle (`/etc/haproxy/funny.pem`). `lite/dm-menu.sh` writes the same PEM but never restarts haproxy, so it continues serving the old certificate until reboot.
+- **Inherited from both V23 and 1.20** (lite editions never had the haproxy restart).

@@ -868,3 +868,14 @@ Section 35's four-check rule applied to Fix 218:
 | **Over-strictness** | Only prevents key regeneration when keys already exist. An operator who wants new keys can delete them manually before reinstalling. |
 | **Over-engineering** | Two `local` variables, one `if/else`. Same pattern as the existing `saved_nsdomain` code. |
 | **vs the source** | Inherited from V23 and 1.20 — neither preserves keys on reinstall. |
+
+## 65. addssh validation, add-*.sh duplicate fix, lite haproxy restart - Four Checks (September 28, 2026)
+
+Section 35's four-check rule applied to Fixes 219-221:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Fix 219: valid lowercase-starting usernames that match `^[a-z][a-z0-9_]{0,31}$` pass — this is stricter than before (no uppercase, no spaces), which is intentional. The `chpasswd` replacement produces the same result as `passwd` + `chpasswd` combined. Fix 220: `== '1'` previously rejected exactly-one-match; `-gt 0` is a superset that also rejects 2+ matches. Single-match case still rejected. Fix 221: `2>/dev/null || true` means the restart is a no-op if haproxy isn't installed. All files pass `bash -n`. |
+| **Over-strictness** | Fix 219: rejects uppercase usernames that Linux technically allows. This matches the xray scripts' validation and is appropriate for this VPN panel context where usernames should be simple. Fix 220: no over-strictness. Fix 221: no over-strictness. |
+| **Over-engineering** | One regex + one `id` check + one `|| return` guard. One string change `== '1'` → `-gt 0` (×24). One `systemctl restart` line (×3). |
+| **vs the source** | All three inherited from V23 and 1.20. |
