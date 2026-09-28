@@ -96,6 +96,7 @@ cp -r create /var/log/
 cp -r wireguard /etc/ 2>/dev/null || true
 cp -r slowdns /etc/ 2>/dev/null || true
 cp -r noobzvpns /etc/ 2>/dev/null || true
+cp -r haproxy /etc/ 2>/dev/null || true
 cp -r ppp /etc/ 2>/dev/null || true
 cp -r ipsec.d /etc/ 2>/dev/null || true
 cp ipsec.secrets /etc/ 2>/dev/null || true

@@ -112,8 +112,7 @@ curl ipinfo.io/org | cut -d ' ' -f 2-10 > /root/.isp
 systemctl start nginx
 
 # Mematikan Port 80 / Disable HTTP PORT
-portd=$(lsof -i:80 | awk '{print $1}')
-[[ -n "$portd" ]] && pkill -f "${portd}" || true
+fuser -k 80/tcp 2>/dev/null || true
 systemctl stop nginx
 
 issue_certificate() {
@@ -190,7 +189,7 @@ clear
 systemctl daemon-reload
 systemctl enable nginx
 systemctl start nginx
-systemctl restart apache2
+systemctl restart apache2 2>/dev/null || true
 
 # Menginstall Stunnel5
 cd

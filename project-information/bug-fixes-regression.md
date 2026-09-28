@@ -934,3 +934,14 @@ Section 35's four-check rule applied to Fix 232:
 | **Over-strictness** | None. |
 | **Over-engineering** | One `openssl rand` substitution. One `grep -oP` with fallback. |
 | **vs the source** | Inherited from V23 and 1.20. |
+
+## 71. diamond pkill/apache2, git.io warp, information() password, backup haproxy - Four Checks (September 28, 2026)
+
+Section 35's four-check rule applied to Fixes 233-237:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Fix 233: `fuser -k 80/tcp` is more precise than `pkill` by name. If port 80 is free, `fuser` exits 1, suppressed by `|| true`. Fix 234: `|| true` makes apache2 restart a no-op without apache — nginx/stunnel unaffected. Fix 235: new URL resolves to the same warp.sh installer, same behaviour. Fix 236: random password is newly generated each call — consistent with the function's purpose (never called in current code anyway). Fix 237: haproxy dir copy uses `2>/dev/null || true` so missing haproxy install is a no-op. All files pass `bash -n`. |
+| **Over-strictness** | None for any fix. |
+| **Over-engineering** | Fix 233: one-liner. Fix 234: three words. Fix 235: `-O warp.sh` + new URL. Fix 236: one `openssl rand` pipeline. Fix 237: one `cp -r` per file (×5 files). |
+| **vs the source** | All inherited from V23 and 1.20. |

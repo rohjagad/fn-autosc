@@ -35,6 +35,7 @@ cp -r create /var/log/ >/dev/null 2>&1
 cp -r wireguard /etc/ >/dev/null 2>&1 || true
 cp -r slowdns /etc/ >/dev/null 2>&1 || true
 cp -r noobzvpns /etc/ >/dev/null 2>&1 || true
+cp -r haproxy /etc/ >/dev/null 2>&1 || true
 cp -r ppp /etc/ >/dev/null 2>&1 || true
 cp -r ipsec.d /etc/ >/dev/null 2>&1 || true
 cp ipsec.secrets /etc/ >/dev/null 2>&1 || true

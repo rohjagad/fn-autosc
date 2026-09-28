@@ -1813,3 +1813,18 @@ Found 225. **`website/script.js`: hardcoded `backup.zip` filename check prevents
 
 Found 226. **`installer/l2tp.sh`: hardcoded IPsec PSK `'myvpn'` — every installation uses the same well-known shared secret** (line 77) — `VPN_IPSEC_PSK='myvpn'` is written to `/etc/ipsec.secrets` on every install. An attacker who knows the PSK can impersonate the VPN server. Additionally, `full/xl2tp.sh` (the menu that displays credentials to the operator) has the PSK hardcoded as a display literal rather than reading from ipsec.secrets, so even if the PSK were manually changed the display would still show `myvpn`.
 - **Inherited from both V23 and 1.20.**
+
+Found 227. **`installer/diamond.sh`: `pkill -f "${portd}"` — `$portd` is a command name column from `lsof`, not a PID; multi-line value and COMMAND header produce wrong or unsafe kill** (line 115-116) — `lsof -i:80 | awk '{print $1}'` returns the COMMAND column including the header line `COMMAND`. `pkill -f "$portd"` then uses the multi-line string as a regex pattern, matching unintended processes or nothing useful. The correct tool is `fuser -k 80/tcp`.
+- **Inherited from V23** (V23 used `pkill ${portd}` without `-f`).
+
+Found 228. **`installer/diamond.sh`: `systemctl restart apache2` with no error suppression — always fails on non-Apache servers** (line 193) — Apache is not installed by this stack; the bare `restart` prints an error and can abort callers that check exit codes.
+- **Inherited from V23.**
+
+Found 229. **`full/menu-system.sh` and `lite/menu-system.sh`: WARP installation uses dead `git.io/warp.sh` URL** (line 225 full, line 210 lite) — `git.io` was shut down by GitHub in January 2023. `wget git.io/warp.sh` always returns a 404 HTML page; `bash warp.sh install` then fails or installs nothing. WARP installation has been silently broken since 2023.
+- **Inherited from V23.**
+
+Found 230. **`full/menu-system.sh` and `lite/menu-system.sh`: `information()` OS-reinstall function shows hardcoded placeholder `123@@@` as the root password** (line 729 full, line 709 lite) — the function is meant to display the new root password before wiping. The placeholder is never replaced with a real value, so the operator is shown `123@@@` and would not know their actual new root password.
+- **Inherited from V23.**
+
+Found 231. **`full/backup.sh` and `lite/backup.sh`: `/etc/haproxy/` not included in backup** — HAProxy's TLS PEM bundle (`funny.pem`) and any custom HAProxy config are excluded. If `/etc/xray/xray.crt`/`xray.key` are also absent from a backup (e.g. cert not yet issued at backup time), `restore-ftp.sh`'s PEM rebuild also fails, leaving HAProxy with no valid certificate after restore.
+- **Inherited from V23.**

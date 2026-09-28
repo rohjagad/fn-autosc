@@ -222,7 +222,7 @@ if [[ -e /usr/bin/warp.sh ]]; then
  echo -e "${Info} Warp already Install,."
 else
 cd /usr/bin
-wget git.io/warp.sh
+wget -O warp.sh https://raw.githubusercontent.com/P3TERX/warp.sh/main/warp.sh
 bash warp.sh install
 bash warp.sh wgd
 fi
@@ -726,7 +726,7 @@ esac
 }
 
 information() {
-uuid="123@@@"
+uuid=$(openssl rand -base64 12 | tr -dc 'a-zA-Z0-9' | head -c 16)
 clear
 echo -e "
 [ New Data Your VPS ]

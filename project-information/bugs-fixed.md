@@ -1901,3 +1901,26 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 232 (Found 226):** in `installer/l2tp.sh`, replaced `VPN_IPSEC_PSK='myvpn'` with `VPN_IPSEC_PSK="$(openssl rand -base64 16)"` so each install generates a unique 16-byte PSK. In `full/xl2tp.sh`, replaced the hardcoded `myvpn` display string with `PSK=$(grep -oP '(?<=: PSK ")\S+(?=")' /etc/ipsec.secrets 2>/dev/null || echo "myvpn")` so the operator sees the actual installed PSK.
 - **Verified live on VPS:** `xl2tp` reads PSK from ipsec.secrets.
+
+### Fix 233 - diamond.sh: fuser -k 80/tcp instead of pkill portd (Found 227)
+
+- **Fix 233 (Found 227):** replaced `portd=$(lsof ... | awk '{print $1}') && pkill -f "${portd}"` with `fuser -k 80/tcp 2>/dev/null || true`. Correctly kills only the process holding port 80.
+
+### Fix 234 - diamond.sh: suppress apache2 restart error (Found 228)
+
+- **Fix 234 (Found 228):** appended `2>/dev/null || true` to `systemctl restart apache2` so it silently no-ops on servers without Apache.
+
+### Fix 235 - menu-system.sh: fix dead git.io/warp.sh URL (Found 229)
+
+- **Fix 235 (Found 229):** in both `full/menu-system.sh` and `lite/menu-system.sh`, replaced `wget git.io/warp.sh` with `wget -O warp.sh https://raw.githubusercontent.com/P3TERX/warp.sh/main/warp.sh`.
+- **Verified live on VPS:** correct URL in deployed `menu-system`.
+
+### Fix 236 - menu-system.sh: generate random password in information() (Found 230)
+
+- **Fix 236 (Found 230):** replaced `uuid="123@@@"` with `uuid=$(openssl rand -base64 12 | tr -dc 'a-zA-Z0-9' | head -c 16)` in both `full/menu-system.sh` and `lite/menu-system.sh`.
+- **Verified live on VPS:** `openssl rand` call present in deployed `menu-system`.
+
+### Fix 237 - backup.sh: include /etc/haproxy in backup; restore-ftp.sh restore it (Found 231)
+
+- **Fix 237 (Found 231):** added `cp -r /etc/haproxy /root/backup/haproxy 2>/dev/null || true` to `full/backup.sh` and `lite/backup.sh`. Added `cp -r haproxy /etc/ 2>/dev/null || true` to all three `restore-ftp.sh` variants (full, lite, website).
+- **Verified live on VPS:** haproxy backup line present in deployed `backup`.

@@ -83,6 +83,7 @@ cp -r /etc/xray /root/backup/xray
 cp -r /var/log/create /root/backup/create
 cp -r /etc/funny /root/backup/funny
 cp /etc/crontab /root/backup/
+cp -r /etc/haproxy /root/backup/haproxy 2>/dev/null || true
 
 # Membuat file ZIP dari backup
 cd /root

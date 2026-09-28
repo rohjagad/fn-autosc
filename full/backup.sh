@@ -85,6 +85,7 @@ cp -r /etc/funny /root/backup/funny
 cp /etc/crontab /root/backup/
 cp -r /etc/wireguard /root/backup/wireguard 2>/dev/null || true
 cp -r /etc/slowdns /root/backup/slowdns 2>/dev/null || true
+cp -r /etc/haproxy /root/backup/haproxy 2>/dev/null || true
 cp -r /etc/noobzvpns /root/backup/noobzvpns 2>/dev/null || true
 cp -r /etc/ppp /root/backup/ppp 2>/dev/null || true
 cp -r /etc/ipsec.d /root/backup/ipsec.d 2>/dev/null || true
