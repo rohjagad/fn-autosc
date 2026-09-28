@@ -824,3 +824,14 @@ Debian 12 reinstalled via `bin456789/reinstall` on VPS 202.155.17.126. Script in
 | nginx -t | syntax ok, test successful |
 
 Note: `full.zip` download failed silently during install (transient network issue, wget stderr suppressed). Manual extraction recovered all menu scripts. This is a pre-existing design fragility (inherited from V23/1.20 — all wget calls use `>> /dev/null 2>&1`).
+
+## 61. xp.sh $exp ordering, Go source fixes - Four Checks (September 28, 2026)
+
+Section 35's four-check rule applied to Fixes 208-211:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Fix 208: only reorders two lines; all other behavior unchanged. Fix 209: `time.Sleep` is more accurate than `exec.Command("sleep")` — no regression. File close is explicit instead of deferred — same effect, no leak. Fix 210: only adds an early return for "never" — non-never accounts are unchanged. Fix 211: only adds a `continue` guard — valid passwd lines are unchanged. All Go files compile. `bash -n` clean on shell files. |
+| **Over-strictness** | Fix 208: no new restrictions. Fix 209: sleep duration is now correct (500ms) instead of 0ms. Fix 210: "never" accounts get a clear error instead of a panic. Fix 211: malformed lines are skipped instead of panicking. |
+| **Over-engineering** | One-line reorder, one `time.Sleep`, one explicit `Close()`, one `if` check, two `len(fields)` guards. |
+| **vs the source** | All four bugs inherited from V23 and 1.20. Fix 208 was introduced by our Fix 204 (added xp_log without noticing variable ordering). |

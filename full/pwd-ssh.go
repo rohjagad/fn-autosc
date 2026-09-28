@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 func main() {
@@ -139,7 +140,6 @@ func updateLogPassword(logFilePath, newPassword string) error {
 	if err != nil {
 		return fmt.Errorf("could not open log file: %v", err)
 	}
-	defer file.Close()
 
 	var lines []string
 	scanner := bufio.NewScanner(file)
@@ -151,8 +151,10 @@ func updateLogPassword(logFilePath, newPassword string) error {
 		lines = append(lines, line)
 	}
 	if err := scanner.Err(); err != nil {
+		file.Close()
 		return fmt.Errorf("error reading log file: %v", err)
 	}
+	file.Close()
 
 	file, err = os.Create(logFilePath)
 	if err != nil {
@@ -171,6 +173,5 @@ func updateLogPassword(logFilePath, newPassword string) error {
 }
 
 func sleep(ms int) {
-	cmd := exec.Command("sleep", fmt.Sprintf("%d", ms/1000))
-	cmd.Run()
+	time.Sleep(time.Duration(ms) * time.Millisecond)
 }

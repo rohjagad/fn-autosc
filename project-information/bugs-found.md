@@ -1737,3 +1737,16 @@ Found 200. **`quota-{ws,http,split,grpc}.sh`: non-numeric `previous_usage` from 
 
 Found 201. **`full/xl2tp.sh`: L2TP password read has no EOF guard and `CLIENT_NUMBER` is used uninitialized** (`full/xl2tp.sh`) - `read -p "Password : " VPN_PASSWORD` at line 113 has no `|| exit 0`, so Ctrl+D produces an empty password and the script creates an L2TP account with a blank password in `/etc/ppp/chap-secrets`. Additionally, the `until [[ ${CLIENT_NUMBER} -ge 1 ...]]` loop (delete function) evaluates `${CLIENT_NUMBER}` before any assignment, producing a stderr error `integer expression expected` on the first iteration.
 - **Inherited from both V23 and 1.20** (V23/1.20 lines 113 and 129 — same pattern).
+
+Found 202. **`full/xp.sh` and `lite/xp.sh`: SSH expiry section logs wrong `$exp` — uses stale value from previous xray-grpc loop** (`full/xp.sh` line 248, `lite/xp.sh` line 248) - the `xp_log "deleted $username (expiry $exp)"` call in the SSH expiry section executes before `exp="$tgl $bulantahun"` (the SSH account's actual expiry). At that point, `$exp` still holds the value from the last iteration of the xray-grpc expiry loop (line ~189). The audit log records the wrong protocol's expiry date for every SSH deletion.
+- **Inherited from both V23 and 1.20** (same variable ordering).
+- **Introduced to our code by Fix 204** which added `xp_log` to the SSH section without noticing `$exp` was set after the log call.
+
+Found 203. **`full/pwd-ssh.go`: `sleep()` function produces zero-second sleeps due to integer division** (`full/pwd-ssh.go` line 174) - `sleep(500)` calls `exec.Command("sleep", fmt.Sprintf("%d", 500/1000))` which evaluates to `sleep 0` (Go integer division). The "Connecting..." and "Generating..." status messages flash invisible. Also, the `updateLogPassword` function has a double `defer file.Close()` on the same variable — when `file` is reassigned from `os.Open` to `os.Create`, the first defer closes the second file (captures variable, not value), leaking the original file descriptor.
+- **Inherited from both V23 and 1.20** (same `sleep` function and `updateLogPassword` pattern).
+
+Found 204. **`full/extend-ssh.go`: panics on accounts with "never" expiry** (`full/extend-ssh.go` line 106) - `chage -l` returns `Account expires : never` for accounts without expiry. The code does `time.Parse("Jan 02, 2006", "never")` which returns a parse error, causing the program to exit with "Error retrieving expiration date" and no user-friendly explanation.
+- **Inherited from both V23 and 1.20.**
+
+Found 205. **`full/delete-ssh.go` and `full/list-ssh.go`: index-out-of-range panic on malformed `/etc/passwd` lines** (`full/delete-ssh.go` line 33, `full/list-ssh.go` line 33) - `fields := strings.Split(line, ":")` followed by `fields[0]` and `fields[2]` without checking `len(fields) >= 3`. A malformed passwd line with fewer than 3 colon-separated fields causes a Go panic. `limit-ip.go` has this guard but these two files don't.
+- **Inherited from both V23 and 1.20.**

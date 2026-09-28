@@ -1776,3 +1776,23 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 207 (Found 201):** in `full/xl2tp.sh`, added `|| exit 0` and `[ -z "$VPN_PASSWORD" ] && exit 0` after the password read. Added `2>/dev/null` to the `until [[ ${CLIENT_NUMBER} ... ]]` condition to suppress the stderr error on uninitialized first evaluation (the loop still enters correctly and prompts the user).
 - **Verified live on VPS:** VPN_PASSWORD EOF guard present. All xl2tp tests pass.
+
+### Fix 208 - xp.sh: set SSH $exp before xp_log call (Found 202)
+
+- **Fix 208 (Found 202):** in both `full/xp.sh` and `lite/xp.sh`, moved `exp="$tgl $bulantahun"` before `xp_log "deleted $username (expiry $exp)"` in the SSH expiry section. This ensures the audit log records the SSH account's actual expiry date, not a stale value from the previous xray-grpc loop.
+- **Verified live on VPS:** `exp=` now at line 248, `xp_log` at line 249.
+
+### Fix 209 - pwd-ssh.go: fix zero-sleep and file descriptor leak (Found 203)
+
+- **Fix 209 (Found 203):** replaced the shell-out `sleep()` function with `time.Sleep(time.Duration(ms) * time.Millisecond)` for correct sub-second delays. Fixed the `updateLogPassword` double-defer by closing the read file explicitly before reassigning the variable to `os.Create`.
+- **Verified live on VPS:** `pwd-ssh` compiled and runs. `time.Sleep` present in source.
+
+### Fix 210 - extend-ssh.go: handle "never" account expiry (Found 204)
+
+- **Fix 210 (Found 204):** added a check for `dateStr == "never"` before `time.Parse`. Returns a clear error message `"account has no expiry (never)"` instead of a cryptic parse error.
+- **Verified live on VPS:** `extend-ssh` compiled. "never" check present in source.
+
+### Fix 211 - delete-ssh.go and list-ssh.go: guard passwd field access (Found 205)
+
+- **Fix 211 (Found 205):** added `if len(fields) < 3 { continue }` before accessing `fields[0]` and `fields[2]` in both `delete-ssh.go` and `list-ssh.go`, matching the guard already present in `limit-ip.go`.
+- **Verified live on VPS:** both programs compiled and run. `delete-ssh` shows SSH member list without panic.

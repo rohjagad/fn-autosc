@@ -30,6 +30,9 @@ func main() {
     for scanner.Scan() {
         line := scanner.Text()
         fields := strings.Split(line, ":")
+        if len(fields) < 3 {
+            continue
+        }
         username := fields[0]
         uid := fields[2]
 
