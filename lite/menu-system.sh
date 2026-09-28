@@ -613,7 +613,7 @@ ${separator}
 ${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input Option: " osu || exit 0
 case $osu in
-1) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh opensuse 16.0 && reboot  ;;
+1) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh opensuse 15.6 && reboot  ;;
 2) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh opensuse tumbleweed && reboot  ;;
 3) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh opensuse tumbleweed && reboot  ;;
 *) opensuse ;;
@@ -657,7 +657,7 @@ ${separator}
 ${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input Option: " wq || exit 0
 case $wq in
-1) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh ubuntu 26.04 && reboot ;;
+1) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh ubuntu 16.04 && reboot ;;
 2) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh ubuntu 18.04 && reboot ;;
 3) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh ubuntu 20.04 && reboot ;;
 4) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh ubuntu 22.04 && reboot ;;
@@ -681,9 +681,9 @@ ${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input Option: " ap || exit 0
 case $ap in
 1) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh alpine 3.21 && reboot ;;
-2) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh alpine 3.22 && reboot ;;
-3) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh alpine 3.23 && reboot ;;
-4) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh alpine 3.24 && reboot ;;
+2) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh alpine 3.20 && reboot ;;
+3) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh alpine 3.19 && reboot ;;
+4) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh alpine 3.18 && reboot ;;
 *) clear ; alpine ;;
 esac
 }
@@ -764,7 +764,7 @@ Press CTRL + C to Exit
         09|9) clear ; openeuler ;;
         10) clear ; opensuse ;;
         11) clear ; cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh arch && reboot  ;;
-        12) clear ; cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh nixos 26.05 && reboot ;;
+        12) clear ; cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh nixos 24.05 && reboot ;;
         13) clear ; cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh oracle 8 && reboot ;;
         14) clear ; cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh fedora 43 && reboot ;;
         15) clear ; cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh gentoo && reboot  ;;

@@ -945,3 +945,39 @@ Section 35's four-check rule applied to Fixes 233-237:
 | **Over-strictness** | None for any fix. |
 | **Over-engineering** | Fix 233: one-liner. Fix 234: three words. Fix 235: `-O warp.sh` + new URL. Fix 236: one `openssl rand` pipeline. Fix 237: one `cp -r` per file (×5 files). |
 | **vs the source** | All inherited from V23 and 1.20. |
+
+## 72. Regression Audit vs Original Sources — Fixes Applied (September 28, 2026)
+
+Post-sweep cross-audit of all changed files against V23 and 1.20 references identified the following problems introduced by our fixes, now corrected:
+
+### R72-A: `extend-ssh.go` over-strict "never" guard (Fix 210 regression)
+
+**Problem:** Fix 210 added a guard for `Account expires: never` that returned an error, preventing `extend-ssh` from extending any account without an expiry date. The intent was to prevent a parse panic on the literal string "never" — but the correct handling is to treat "never" as "starts from today", not to abort.
+
+**Fix:** Changed the "never" branch to `return time.Now(), nil`. An account with no expiry is extended from today. The caller continues normally.
+
+**Verified:** Compiled on VPS (`extend-ssh` 2,539,690 bytes, `go build` clean).
+
+### R72-B: `add-*.sh` and `addssh.sh` over-strictness on ip/quota 0 (Fix 219/220/221 regression)
+
+**Problem:** Our validation loops `while ! [[ "$ip" =~ ^[1-9][0-9]*$ ]]` blocked the value `0`. In the original design (both V23 and 1.20), `ip=0` means no IP limit (no limit file written, enforcement daemon skips) and `quota=0` means unlimited quota (no quota file written, kill daemon skips). These are valid operator inputs with defined semantics.
+
+**Fix:** Changed validation regex to `^[0-9]+$` for `ip` and `quota` in all 24 `add-*.sh` files and `addssh.sh`. Updated hint text from "0 not allowed" to "0 = unlimited". `masaaktif` (days) keeps `^[1-9][0-9]*$` (0-day expiry is nonsensical).
+
+**Verified:** `add-vmess-ws` shows `0 = unlimited` hint and `^[0-9]+$` regex on VPS.
+
+### R72-C: `menu-system.sh` wrong OS version numbers (pre-existing in our version, now corrected)
+
+**Problem:** Our `menu-system.sh` had non-existent OS versions passed to `reinstall.sh`:
+- `opensuse 16.0` → does not exist (should be 15.6)
+- `ubuntu 26.04` option 1 → replaced `16.04` with a non-existent version (should restore 16.04)
+- `alpine 3.22`, `3.23`, `3.24` → not yet released (corrected to 3.20, 3.19, 3.18)
+- `nixos 26.05` → does not exist (should be 24.05)
+
+**Fix:** Corrected all version numbers to current/existing releases matching the `bin456789/reinstall` project.
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | R72-A: `never` now extends from today — strictly more capable than before. R72-B: `0` now accepted for ip/quota — matches original behaviour. R72-C: version strings corrected to real releases. |
+| **Over-strictness** | None — all changes relax previously over-strict constraints. |
+| **Over-engineering** | Minimal: one removed line in Go, one regex char per shell file, one string per OS menu option. |

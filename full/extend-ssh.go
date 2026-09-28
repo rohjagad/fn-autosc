@@ -104,9 +104,13 @@ func getUserExpirationDate(username string) (time.Time, error) {
 		if strings.Contains(line, "Account expires") {
 			dateStr := strings.TrimSpace(strings.SplitN(line, ": ", 2)[1])
 			if dateStr == "never" {
-				return time.Time{}, fmt.Errorf("account has no expiry (never)")
+				return time.Now(), nil
 			}
-			return time.Parse("Jan 02, 2006", dateStr)
+			parsed, parseErr := time.Parse("Jan 02, 2006", dateStr)
+			if parseErr != nil {
+				return time.Time{}, parseErr
+			}
+			return parsed, nil
 		}
 	}
 	return time.Time{}, fmt.Errorf("expiration date not found")
