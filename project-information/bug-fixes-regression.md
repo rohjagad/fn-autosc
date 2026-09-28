@@ -801,3 +801,26 @@ Section 35's four-check rule applied to Fixes 205, 206, 207:
 | **Over-strictness** | Fix 205: removed the dead-code block but no functional restriction added. Fix 206: only gates on `^[0-9]+$`, same as what a working file always contains. Fix 207: prevents blank passwords only. |
 | **Over-engineering** | Fix 205: reorder two code sections, delete dead block. Fix 206: one-line regex guard. Fix 207: two-line EOF guard + one `2>/dev/null`. |
 | **vs the source** | V23 and 1.20 both have the restart-before-write bug (inherited). V23 used `bc` for quota arithmetic (tolerates non-numeric); we switched to bash `$((...))` — this guard compensates. V23/1.20 both have blank password risk and uninitialized CLIENT_NUMBER. |
+
+## 60. Fresh OS reinstall acceptance cycle - September 28, 2026
+
+Debian 12 reinstalled via `bin456789/reinstall` on VPS 202.155.17.126. Script installed via `install.sh` with `full` edition, domain `autosc.rohcuan.dpdns.org`.
+
+| Item | Result |
+| :-- | :-- |
+| OS | Debian GNU/Linux 12 (bookworm), kernel 6.1.0-50 |
+| Services | 17/17 active (ssh, dropbear, nginx, xray@{ws,grpc,split,upgrade}, quota-{ws,http,split,grpc}, noobzvpns, wg-quick@wg0, dnstt, ws, xl2tpd, ipsec) |
+| Failed units | 0 |
+| Cert | CN=autosc.rohcuan.dpdns.org via ZeroSSL; NoobzVPN serves domain cert via symlink |
+| TLS | TLSv1.2 + TLSv1.3; no TLSv1.1, no 3DES |
+| xray.key | 644 (Fix 203 verified) |
+| xp_log | 9 calls including SSH expiry (Fix 204 verified) |
+| Quota write-before-restart | write at line 212, restart at line 218 (Fix 205 verified) |
+| Quota numeric guard | regex guard present (Fix 206 verified) |
+| xl2tp EOF guard | 8 exit guards (Fix 207 verified) |
+| Cron | 16 panel entries with flock |
+| SSH ports | 22 + 3303 |
+| WireGuard | active, wg0 interface up |
+| nginx -t | syntax ok, test successful |
+
+Note: `full.zip` download failed silently during install (transient network issue, wget stderr suppressed). Manual extraction recovered all menu scripts. This is a pre-existing design fragility (inherited from V23/1.20 — all wget calls use `>> /dev/null 2>&1`).
