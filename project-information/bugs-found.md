@@ -1768,3 +1768,6 @@ Found 210. **Tree-wide unanchored `sed -i "/### $user $exp/"` in 50 files (delet
 
 Found 211. **`full/limit-ip-{ws,http,split,grpc}.sh` and `lite/limit-ip-{ws,http,split,grpc}.sh`: IP limit read from `.log` file instead of authoritative limit file** (line 99 in all 8 files) — `limit=$(grep "Limit IP:" /var/log/create/xray/<transport>/${user}.log | awk '{print $3}')` reads the IP limit from the account creation log. The authoritative source is `/etc/xray/limit/ip/xray/<transport>/$user` (written by `add-*.sh`, read by `cek-xray-*.sh` for display). If the limit is changed after creation (by `change-limit-ip-*.go`), enforcement still uses the stale creation-time value.
 - **Inherited from both V23 and 1.20.**
+
+Found 212. **`installer/slowdns.sh`: keypair regenerated on every reinstall, disconnecting all SlowDNS clients** (line 98) — the installer preserves `nsdomain` across reinstalls (saved before `rm -rf /etc/slowdns`, restored after) but does not preserve the server keypair (`server.key`, `server.pub`). Line 98 unconditionally runs `-gen-key`, producing a new keypair. Existing clients configured with the old public key can no longer connect.
+- **Inherited from both V23 and 1.20** (neither preserves keys).

@@ -1827,3 +1827,8 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 217 (Found 211):** in all 8 `limit-ip-{ws,http,split,grpc}.sh` files (full + lite), replaced `grep "Limit IP:" ...log | awk` with `cat "/etc/xray/limit/ip/xray/<transport>/${user}" 2>/dev/null`. This reads the same source of truth that `cek-xray-*.sh` displays and that `change-limit-ip-*.go` updates, ensuring enforcement reflects limit changes.
 - **Verified live on VPS:** `limit-ip-ws` reads from `/etc/xray/limit/ip/xray/ws/`.
+
+### Fix 218 - slowdns.sh: preserve keypair across reinstalls (Found 212)
+
+- **Fix 218 (Found 212):** in `installer/slowdns.sh`, added `saved_privkey` and `saved_pubkey` local variables that capture the existing key contents before `rm -rf /etc/slowdns`. After rebuild, if keys were saved, they are restored from the variables; only if no keys existed (fresh install) does `-gen-key` run. Follows the same pattern already used for `nsdomain` preservation.
+- **Verified:** `bash -n` clean.

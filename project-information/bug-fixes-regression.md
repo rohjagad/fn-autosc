@@ -857,3 +857,14 @@ Section 35's four-check rule applied to Fixes 216-217:
 | **Over-strictness** | Fix 216: only prevents substring false positives; exact matches still work. Fix 217: limit file is the authoritative source — no valid scenario where it's missing but the log file has the value (both are created by `add-*.sh` at the same time). |
 | **Over-engineering** | One `^` character per sed pattern (×58). One `cat` replacing one `grep|awk` pipeline (×8). |
 | **vs the source** | Both inherited from V23 and 1.20. Fix 216 extends Fix 176 (which covered only extend-*.sh). |
+
+## 64. SlowDNS keypair preservation - Four Checks (September 28, 2026)
+
+Section 35's four-check rule applied to Fix 218:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Fresh installs still generate new keys (the `else` branch runs `-gen-key`). Reinstalls now preserve existing keys. No other behavior changes. |
+| **Over-strictness** | Only prevents key regeneration when keys already exist. An operator who wants new keys can delete them manually before reinstalling. |
+| **Over-engineering** | Two `local` variables, one `if/else`. Same pattern as the existing `saved_nsdomain` code. |
+| **vs the source** | Inherited from V23 and 1.20 — neither preserves keys on reinstall. |
