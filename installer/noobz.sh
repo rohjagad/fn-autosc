@@ -122,8 +122,9 @@ TOML
 
 # [ wget ambil file ]
 wget -q -O /usr/bin/noobzvpns "https://raw.githubusercontent.com/rohjagad/noobzvpns/master/noobzvpns.x86-64"
-wget -q -O /etc/noobzvpns/cert.pem "https://raw.githubusercontent.com/rohjagad/noobzvpns/master/cert.pem"
-wget -q -O /etc/noobzvpns/key.pem "https://raw.githubusercontent.com/rohjagad/noobzvpns/master/key.pem"
+# Use the domain certificate issued by diamond.sh instead of generic GitHub certs
+ln -sf /etc/xray/xray.crt /etc/noobzvpns/cert.pem
+ln -sf /etc/xray/xray.key /etc/noobzvpns/key.pem
 
 
 # [ memberi izin pada file json & cert + key ]

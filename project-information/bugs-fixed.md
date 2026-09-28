@@ -1732,3 +1732,17 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 198 (Found 192):** across all restore routines (`restore-ftp.sh` and `bmenu.sh` in `full/`, `lite/`, and `website/`), added `systemctl restart` for all restored daemons: `wg-quick@wg0`, `dnstt`, `noobzvpns`, `xl2tpd`, `ipsec`, `dropbear`, `ws`, and `quota-*`. Repacked both menu archives (`menu/full.zip` and `menu/lite.zip`) with 0 diffs and all entries at 0755.
 - **Verified live on VPS:** executed full restore cycle: all restored VPN daemons and quota services restarted cleanly with 0 failed units.
+
+### Fix 199 - Drop TLSv1.1 and 3DES from nginx TLS config (Found 193)
+
+- **Fix 199 (Found 193):** in `config/4.conf`, `config/6.conf`, and `config/dual.conf`, changed `ssl_protocols TLSv1.1 TLSv1.2 TLSv1.3;` to `ssl_protocols TLSv1.2 TLSv1.3;` and replaced 3DES cipher entries with `!3DES` exclusion. Repacked both menu archives.
+- **Verified live on VPS:** deployed updated config, `nginx -t` passed, `systemctl reload nginx` succeeded, `openssl s_client -tls1_2` and `-tls1_3` both negotiate successfully with strong ciphers (ECDHE-ECDSA-AES256-GCM-SHA384 / TLS_AES_256_GCM_SHA384). 0 failed units.
+
+### Fix 200 - EOF and empty-name guards in lock/unlock scripts (Found 194)
+
+- **Fix 200 (Found 194):** across all 16 lock/unlock scripts (`locked-xray-{ws,grpc,http,split}.sh` and `unlock-{ws,grpc,http,split}.sh` in both `full/` and `lite/`), added `|| exit 0` to the `read -p` call and `[ -z "$name" ] && exit 0` after it, preventing empty-username sed corruption of Xray JSON configs. Repacked both menu archives (0 diffs, all 0755).
+
+### Fix 201 - NoobzVPN uses domain ACME certificate via symlinks (Found 195)
+
+- **Fix 201 (Found 195):** in `installer/noobz.sh`, replaced `wget` of generic GitHub certificates with `ln -sf /etc/xray/xray.crt /etc/noobzvpns/cert.pem` and `ln -sf /etc/xray/xray.key /etc/noobzvpns/key.pem`, so NoobzVPN TLS uses the same ACME-issued domain certificate as all other services.
+- **Verified live on VPS:** applied symlinks, restarted noobzvpns, `openssl s_client -connect 127.0.0.1:8443` now shows `subject=CN = autosc.rohcuan.dpdns.org` issued by `ZeroSSL ECC DV SSL CA 2`.

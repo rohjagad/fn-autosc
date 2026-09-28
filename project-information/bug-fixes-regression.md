@@ -757,3 +757,14 @@ Section 35's four-check rule applied to Fixes 197 and 198:
 | **Over-strictness** | Does not restrict input; strictly ensures terminal menus pause for reading and restored services load restored configuration data. |
 | **Over-engineering** | Standard prompt pauses, recursive menu loops, and standard `systemctl restart` invocations. No new daemons or scripts. |
 | **vs the source** | Both references lacked pauses, crashed with `--info-all-user`, and omitted restarting VPN services on restore. Aligning service restarts with restored files is required for system correctness. |
+
+## 56. TLS Hardening, Lock/Unlock EOF Guards, and NoobzVPN Certificate Fix - Four Checks (September 28, 2026)
+
+Section 35's four-check rule applied to Fixes 199, 200, and 201:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | TLS 1.2 and 1.3 both negotiate correctly with strong ciphers; no cipher suite breakage. Lock/unlock scripts exit cleanly on EOF instead of corrupting JSON configs. NoobzVPN serves the domain cert and starts without errors. `bash -n` clean across all 19 touched shell files. `nginx -t` passes. |
+| **Over-strictness** | TLSv1.1 is universally deprecated (RFC 8996); no legitimate client requires it. Lock/unlock exit on empty input is safe—user can re-enter. Symlink keeps cert in sync automatically across renewals. |
+| **Over-engineering** | Minimal changes: one-line protocol/cipher fix, two-line guard per script, two symlinks replacing two wget calls. No new config options or abstractions. |
+| **vs the source** | Both references had TLSv1.1+3DES, unguarded lock/unlock reads, and separate generic NoobzVPN certs. All three fixes align with modern security practice and eliminate real failure modes. |
