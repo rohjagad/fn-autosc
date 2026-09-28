@@ -768,3 +768,14 @@ Section 35's four-check rule applied to Fixes 199, 200, and 201:
 | **Over-strictness** | TLSv1.1 is universally deprecated (RFC 8996); no legitimate client requires it. Lock/unlock exit on empty input is safe—user can re-enter. Symlink keeps cert in sync automatically across renewals. |
 | **Over-engineering** | Minimal changes: one-line protocol/cipher fix, two-line guard per script, two symlinks replacing two wget calls. No new config options or abstractions. |
 | **vs the source** | Both references had TLSv1.1+3DES, unguarded lock/unlock reads, and separate generic NoobzVPN certs. All three fixes align with modern security practice and eliminate real failure modes. |
+
+## 57. NoobzVPN Certificate Reload After Domain Menu Cert Renewal - Four Checks (September 28, 2026)
+
+Section 35's four-check rule applied to Fix 202:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Cert renewal functions continue to restart nginx and haproxy as before; noobzvpns restart is additive. `bash -n` clean for both files. 0 failed units after deployment. |
+| **Over-strictness** | Restart uses `2>/dev/null || true` so NoobzVPN not being installed doesn't fail the cert renewal. |
+| **Over-engineering** | One additional `systemctl restart` line per cert renewal function. No new abstractions. |
+| **vs the source** | References never restarted NoobzVPN because it had independent certs. Fix 201 introduced the symlink dependency, making this restart necessary for correctness. |

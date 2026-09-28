@@ -134,6 +134,7 @@ if [[ $ip_version == "4" ]]; then
     chmod 644 /etc/xray/xray* /etc/haproxy/funny.pem
     systemctl start nginx
     systemctl restart haproxy 2>/dev/null || true
+    systemctl restart noobzvpns 2>/dev/null || true
     echo "Cert installed for IPv4."
 elif [[ $ip_version == "6" ]]; then
     systemctl stop nginx
@@ -159,6 +160,7 @@ elif [[ $ip_version == "6" ]]; then
     chmod 644 /etc/xray/xray* /etc/haproxy/funny.pem
     systemctl start nginx
     systemctl restart haproxy 2>/dev/null || true
+    systemctl restart noobzvpns 2>/dev/null || true
     echo "Cert installed for IPv6."
 else
     echo "Invalid IP version. Please choose '4' for IPv4 or '6' for IPv6."
@@ -220,6 +222,7 @@ if [[ $ip_version == "4" || $ip_version == "6" ]]; then
         echo "Certificate renewal failed - the previously installed certificate was kept."
     fi
     start_services
+    systemctl restart noobzvpns 2>/dev/null || true
 else
     echo "Invalid IP version. Please choose '4' for IPv4 or '6' for IPv6."
     sleep 3
@@ -356,6 +359,7 @@ else
 fi
 cd /etc/xray
 systemctl start nginx
+systemctl restart noobzvpns 2>/dev/null || true
 }
 
 cert() {
@@ -400,6 +404,7 @@ cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem 2>/dev/null
 chmod 644 /etc/xray/xray.crt /etc/xray/xray.key /etc/haproxy/funny.pem 2>/dev/null
 systemctl daemon-reload
 systemctl restart haproxy 2>/dev/null || true
+systemctl restart noobzvpns 2>/dev/null || true
 service nginx restart
 echo -e "Self-signed certificate generated successfully"
 }

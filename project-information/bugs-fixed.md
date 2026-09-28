@@ -1746,3 +1746,8 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 201 (Found 195):** in `installer/noobz.sh`, replaced `wget` of generic GitHub certificates with `ln -sf /etc/xray/xray.crt /etc/noobzvpns/cert.pem` and `ln -sf /etc/xray/xray.key /etc/noobzvpns/key.pem`, so NoobzVPN TLS uses the same ACME-issued domain certificate as all other services.
 - **Verified live on VPS:** applied symlinks, restarted noobzvpns, `openssl s_client -connect 127.0.0.1:8443` now shows `subject=CN = autosc.rohcuan.dpdns.org` issued by `ZeroSSL ECC DV SSL CA 2`.
+
+### Fix 202 - Restart NoobzVPN after certificate renewal in domain menu (Found 196)
+
+- **Fix 202 (Found 196):** in both `full/dm-menu.sh` and `lite/dm-menu.sh`, added `systemctl restart noobzvpns 2>/dev/null || true` after every certificate deployment point: `acme()` IPv4, `acme()` IPv6, `cert2()`, `fn()`, and `dmsl()` — 5 restart points in each file. Repacked both menu archives (0 diffs, all 0755).
+- **Verified live on VPS:** deployed `dm-menu`, confirmed 5 noobzvpns restart points and 0 failed units.
