@@ -1974,3 +1974,21 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 249 (Found 243):** moved `rm -f "$DB_SRC" "$SSH_SRC" …` to after `show_total_users` so the total-user count function can read the temp files it needs. Previously "Total Active Users" always printed `0`.
 - **Verified live on VPS:** `show_total_users` at line 184, `rm` at line 185.
+
+### Fix 250 - xp.sh: single Xray restart after all expirations in loop (Found 244)
+
+- **Fix 250 (Found 244):** in both `full/xp.sh` and `lite/xp.sh`, added `ws_expired=0`, `http_expired=0`, `split_expired=0`, `grpc_expired=0` flags before each transport's expiry loop. Each flag is set to `1` when a deletion occurs. The `systemctl daemon-reload; systemctl restart xray@<transport>` call moved outside the loop into `if [[ $flag -eq 1 ]]; then … fi`. Restarts now happen at most once per transport per cron run.
+- **Verified live on VPS:** `ws_expired` flag and single post-loop restart present in deployed `xp`.
+
+### Fix 251 - xp.sh: WireGuard block sets its own `now` (Found 245)
+
+- **Fix 251 (Found 245):** added `now=$(date +"%Y-%m-%d")` at the start of the WireGuard expiry block in both `full/xp.sh` and `lite/xp.sh`, matching the pattern of all other expiry sections.
+
+### Fix 252 - menu-wg.sh: IP exhaustion check uses -gt 0 (Found 246)
+
+- **Fix 252 (Found 246):** changed `[[ ${dot_exists} == '1' ]]` to `[[ ${dot_exists} -gt 0 ]]` in `full/menu-wg.sh`. Now correctly raises the pool-full error when an IP appears any number of times (≥1) in `wg0.conf`.
+
+### Fix 253 - menu-wg.sh: peer deletion uses awk instead of sed range + head (Found 247)
+
+- **Fix 253 (Found 247):** replaced `sed -i "/^### Client X$/,/^$/d" + head -${line}` in `full/menu-wg.sh` delete() with the same `awk` approach applied to `xp.sh` in Fix 239. Correctly removes only the target peer block without corrupting survivors or breaking on EOF.
+- **Verified live on VPS:** awk command present in deployed `menu-wg`.

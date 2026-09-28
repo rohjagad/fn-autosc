@@ -174,7 +174,7 @@ function create() {
 			break
 		fi
 	done
-	if [[ ${dot_exists} == '1' ]]; then
+	if [[ ${dot_exists} -gt 0 ]]; then
 		newline
 		error "The subnet configured only supports 253 clients"
 		newline
@@ -283,15 +283,8 @@ function delete() {
 	echo -e " Username: \c"
 	read user
 	if grep -qw "^### Client ${user}\$" /etc/wireguard/wg0.conf; then
-		sed -i "/^### Client ${user}\$/,/^$/d" /etc/wireguard/wg0.conf
-		if grep -q "### Client" /etc/wireguard/wg0.conf; then
-			line=$(grep -n AllowedIPs /etc/wireguard/wg0.conf | tail -1 | awk -F: '{print $1}')
-			head -${line} /etc/wireguard/wg0.conf > /tmp/wg0.conf
-			mv /tmp/wg0.conf /etc/wireguard/wg0.conf
-		else
-			head -6 /etc/wireguard/wg0.conf > /tmp/wg0.conf
-			mv /tmp/wg0.conf /etc/wireguard/wg0.conf
-		fi
+		awk "/^### Client ${user}$/{found=1} found && /^$/{found=0; next} !found{print} found{next}" \
+			/etc/wireguard/wg0.conf > /tmp/wg0.conf && mv /tmp/wg0.conf /etc/wireguard/wg0.conf
 		rm -f /var/www/html/wireguard-${user}.conf
 		sed -i "/\b$user\b/d" /etc/funny/.wireguard
 		systemctl daemon-reload

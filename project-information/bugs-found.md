@@ -1864,3 +1864,15 @@ Found 242. **`website/upload.php`: PHP upload size error returns a generic unhel
 
 Found 243. **`full/cek-login-ssh.sh`: `show_total_users` reads temp files after they are deleted** (line 184–185) — `rm -f "$DB_SRC" "$SSH_SRC"` runs before `show_total_users`, which re-reads those files with `sed`. Both `uniq_db` and `uniq_ssh` are always 0, so "Total Active Users" always prints `0` regardless of actual login activity.
 - **Introduced in our Fix 225** (added `show_total_users` without checking call order).
+
+Found 244. **`full/xp.sh` and `lite/xp.sh`: `systemctl restart xray@<transport>` called inside the per-user expiry loop — N restarts for N expired users** (lines 104/142/180/218 in full) — every expired account triggers its own `daemon-reload` + `restart`. With N expired accounts: N service disruptions, N clearings of in-memory Xray stats, N dropped live connections for non-expired users. The WireGuard, L2TP, SSH, and NoobzVPN sections in the same file all correctly restart once after the loop using a flag. Only the four Xray sections (WS, HTTP, split, gRPC) had this defect.
+- **Inherited from both V23 and 1.20.**
+
+Found 245. **`full/xp.sh` and `lite/xp.sh`: WireGuard expiry block reads `$now` from a prior section — never sets its own** (line 315/314) — `now` is last set by the L2TP section (line 281/280). If any earlier section calls `exit` or the script is refactored, `now` is unset and the WireGuard comparison silently skips all accounts. All other expiry sections (`now=\`date +"%Y-%m-%d"\``) set `now` at the start of their block.
+- **Inherited from V23.**
+
+Found 246. **`full/menu-wg.sh`: IP pool exhaustion check `dot_exists == '1'` fails if `grep -c` returns >1** (line 177) — `grep -c "10.66.66.X"` returns the count of matching lines. If an IP appears in the file more than once (duplicate entry from a partial write), the exhaustion check `== '1'` is false and the IP is assigned to a new client that shares it with an existing one, causing non-deterministic routing.
+- **Inherited from V23.**
+
+Found 247. **`full/menu-wg.sh`: WireGuard peer `delete()` uses same broken `sed range + head` pattern** (lines 286–294) — same as the `xp.sh` WireGuard deletion bug (Found 233): `sed -i "/^### Client X$/,/^$/d"` open-ended range at EOF, followed by `head -${line}` truncation that drops `PersistentKeepalive` and other post-`AllowedIPs` lines in surviving peers.
+- **Inherited from V23.**

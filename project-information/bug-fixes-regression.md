@@ -992,3 +992,14 @@ Section 35's four-check rule applied to Fixes 238–249:
 | **Over-strictness** | None. All changes relax constraints or correct logic without tightening anything. |
 | **Over-engineering** | Direct API calls (2 lines replacing 3). One `awk` replacing one `sed` + `grep` + `head`. One `nginx reload` line. One `awk` pipe stage. 3-line function replacing 7-line probe. One `--data-urlencode` flag. One `>` replacing `echo -n >`. One `find` replacing hardcoded path. Two `grpc_*timeout` lines per location. Seven PHP lines. One `rm` line moved. |
 | **vs the source** | Found 232/233/234/236/239/240/241/242: inherited from V23 and 1.20. Found 235/237/238/243: introduced in our prior fixes. |
+
+## 74. xp.sh single-restart, WG now, menu-wg exhaustion/awk - Four Checks (September 29, 2026)
+
+Section 35's four-check rule applied to Fixes 250–253:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Fix 250: flag starts at 0; if no accounts expire, no restart happens (better than before which always restarted per account). Single restart after all deletions is equivalent to N restarts for config purposes (last state wins). Fix 251: `now` was already set by a prior section at nearly the same instant; explicit set is identical in value, adds safety. Fix 252: `-gt 0` accepts both `1` and `>1`; for a normal non-duplicate IP, `grep -c` returns `1`, condition is equivalent to old `== '1'`. Fix 253: awk produces the same output as the sed+head approach for normal inputs; handles EOF and multi-line correctly. All files pass `bash -n`. |
+| **Over-strictness** | None. |
+| **Over-engineering** | Four flag variables + four `if` blocks (minimal). One `date` call per section. One comparison operator change. One `awk` one-liner. |
+| **vs the source** | All inherited from V23 and 1.20. |

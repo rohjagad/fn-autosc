@@ -106,6 +106,7 @@ fi
 done
 
 ##----- Auto Remove Xray HTTP UPGRADE
+http_expired=0
 data=( `cat /etc/xray/json/upgrade.json | grep '^###' | cut -d ' ' -f 2 | sort | uniq`);
 now=`date +"%Y-%m-%d"`
 for user in "${data[@]}"
@@ -137,13 +138,16 @@ KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL
-clear
-systemctl daemon-reload
-systemctl restart xray@upgrade
+http_expired=1
 fi
 done
+if [[ $http_expired -eq 1 ]]; then
+    systemctl daemon-reload
+    systemctl restart xray@upgrade
+fi
 
 ##----- Auto Remove Xray Split HTTP
+split_expired=0
 data=( `cat /etc/xray/json/split.json | grep '^###' | cut -d ' ' -f 2 | sort | uniq`);
 now=`date +"%Y-%m-%d"`
 for user in "${data[@]}"
@@ -306,6 +310,7 @@ done
 
 # WIREGUARD
 if [[ -f /etc/funny/.wireguard ]]; then
+    now=$(date +"%Y-%m-%d")
 wg_restarted=0
 while read expired; do
 	user=$(echo $expired | awk '{print $1}')
