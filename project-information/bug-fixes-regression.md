@@ -790,3 +790,14 @@ Section 35's four-check rule applied to Fixes 203 and 204 (found by regression a
 | **Over-strictness** | Fix 203 only prevents chmod from following symlinks into cert files; the explicit targets (config.json, config.toml) are still made executable. Fix 204 only adds logging, not new restrictions. |
 | **Over-engineering** | One-line explicit chmod, one-line xp_log addition, one-line dropbear guard. |
 | **vs the source** | V23 and 1.20 both use `chmod +x /etc/noobzvpns/*` on real files (not symlinks) — no issue. Our Fix 201 (symlinks) introduced the risk. Neither ref has xp_log (we added it consistently). Neither ref has dropbear in SSH expiry (we added dropbear restart in 68c4068; guarded now). |
+
+## 59. change-quota restart order, quota guard, xl2tp EOF - Four Checks (September 28, 2026)
+
+Section 35's four-check rule applied to Fixes 205, 206, 207:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Fix 205: quota write now happens before restart — the value that the restarted service reads from disk is the NEW value. The display output, log update, and Telegram notification are all unchanged. Fix 206: adds a regex guard; if previous_usage is numeric (the normal case), behavior is identical. If corrupt, the usage from this cycle is used alone instead of crashing. Fix 207: adds exit on empty password; old behavior was to create a blank-password account. `bash -n` clean on all files. |
+| **Over-strictness** | Fix 205: removed the dead-code block but no functional restriction added. Fix 206: only gates on `^[0-9]+$`, same as what a working file always contains. Fix 207: prevents blank passwords only. |
+| **Over-engineering** | Fix 205: reorder two code sections, delete dead block. Fix 206: one-line regex guard. Fix 207: two-line EOF guard + one `2>/dev/null`. |
+| **vs the source** | V23 and 1.20 both have the restart-before-write bug (inherited). V23 used `bc` for quota arithmetic (tolerates non-numeric); we switched to bash `$((...))` — this guard compensates. V23/1.20 both have blank password risk and uninitialized CLIENT_NUMBER. |

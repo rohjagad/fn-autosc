@@ -110,7 +110,8 @@ until [[ $VPN_USER =~ ^[a-zA-Z0-9_]+$ && ${CLIENT_EXISTS} == '0' ]]; do
 			exit 1
 		fi
 	done
-read -p "Password : " VPN_PASSWORD
+read -p "Password : " VPN_PASSWORD || exit 0
+[ -z "$VPN_PASSWORD" ] && exit 0
 echo ""
 echo -e "\033[38;5;208m0 not allowed\033[0m"
 read -p "Duration (Days) : " masaaktif
@@ -171,7 +172,7 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/funny/.l2tp")
 	echo " ==============================="
 	echo "     No  Expired   User"
 	grep -E "^### " "/etc/funny/.l2tp" | cut -d ' ' -f 2-3 | nl -s ') '
-	until [[ ${CLIENT_NUMBER} -ge 1 && ${CLIENT_NUMBER} -le ${NUMBER_OF_CLIENTS} ]]; do
+	until [[ ${CLIENT_NUMBER} -ge 1 && ${CLIENT_NUMBER} -le ${NUMBER_OF_CLIENTS} ]] 2>/dev/null; do
 		if [[ ${CLIENT_NUMBER} == '1' ]]; then
 			read -rp "Select One Client[1]: " CLIENT_NUMBER || exit 0
 		else
@@ -218,7 +219,7 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/funny/.l2tp")
 	echo " Press CTRL+C to return"
 	echo -e "==============================="
 	grep -E "^### " "/etc/funny/.l2tp" | cut -d ' ' -f 2-3 | nl -s ') '
-	until [[ ${CLIENT_NUMBER} -ge 1 && ${CLIENT_NUMBER} -le ${NUMBER_OF_CLIENTS} ]]; do
+	until [[ ${CLIENT_NUMBER} -ge 1 && ${CLIENT_NUMBER} -le ${NUMBER_OF_CLIENTS} ]] 2>/dev/null; do
 		if [[ ${CLIENT_NUMBER} == '1' ]]; then
 			read -rp "Select one client [1]: " CLIENT_NUMBER || exit 0
 		else

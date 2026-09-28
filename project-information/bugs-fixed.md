@@ -1761,3 +1761,18 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 204 (Found 198):** in both `full/xp.sh` and `lite/xp.sh`, added `xp_log "deleted $username (expiry $exp)"` to the SSH expiry block, making it consistent with all other protocol expiry sections. In `full/xp.sh`, added `2>/dev/null || true` to the `systemctl restart dropbear` line. Repacked both menu archives (0 diffs, all 0755).
 - **Verified live on VPS:** `xp` shows 8 `xp_log` calls, dropbear guard present, 0 failed units.
+
+### Fix 205 - change-quota: write quota before restart, remove dead validation (Found 199)
+
+- **Fix 205 (Found 199):** in all 8 `change-quota-{ws,http,split,grpc}.sh` (full + lite), moved the quota byte calculation and file write (`echo "${new_quota_bytes}" > "${quota_file}"`) and log update (`sed -i "s/Quota   : .../..."`) **before** the `systemctl daemon-reload` + `systemctl restart` block. Removed the unreachable dead-code validation block (`if [[ -z "$new_quota"...]]`) since the `while` loop above already guarantees valid numeric input.
+- **Verified live on VPS:** `change-quota-ws` shows write at line 212 before restart at line 217. All quota services restarted successfully. 0 failed units.
+
+### Fix 206 - quota daemons: guard non-numeric previous_usage (Found 200)
+
+- **Fix 206 (Found 200):** in all 8 `quota-{ws,http,split,grpc}.sh` (full + lite), added `[[ "$previous_usage" =~ ^[0-9]+$ ]] &&` guard before the arithmetic `quota_used=$((quota_used + previous_usage))`. If the usage file is corrupt, the accumulated usage from the current log parse is used alone instead of crashing.
+- **Verified live on VPS:** quota daemons restarted, 0 failed units.
+
+### Fix 207 - xl2tp.sh: password EOF guard and CLIENT_NUMBER initialization (Found 201)
+
+- **Fix 207 (Found 201):** in `full/xl2tp.sh`, added `|| exit 0` and `[ -z "$VPN_PASSWORD" ] && exit 0` after the password read. Added `2>/dev/null` to the `until [[ ${CLIENT_NUMBER} ... ]]` condition to suppress the stderr error on uninitialized first evaluation (the loop still enters correctly and prompts the user).
+- **Verified live on VPS:** VPN_PASSWORD EOF guard present. All xl2tp tests pass.

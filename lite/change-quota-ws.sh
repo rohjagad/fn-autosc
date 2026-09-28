@@ -207,23 +207,18 @@ function change_quota() {
         else
             quota_status="No"
         fi
+        # Konversi kuota baru ke byte (write before restart so services read new value)
+        new_quota_bytes=$((new_quota * 1024 * 1024 * 1024))
+        echo "${new_quota_bytes}" > "${quota_file}"
+
+        # Perbarui kuota di dalam file log
+        sed -i "s/Quota   : ${old_quota} GB/Quota   : ${new_quota} GB/" "$log_file"
+
         systemctl daemon-reload
         systemctl restart xray@ws
         systemctl restart quota-ws
         Loading_Animasi
         Loading_Succes
-
-        # Validasi jika input kuota kosong atau tidak valid
-        if [[ -z "$new_quota" || ! "$new_quota" =~ ^[1-9][0-9]*$ ]]; then
-            echo -e "${Red} Invalid quota input. No changes made. ${Xark}"
-            return 1
-        else
-            # Konversi kuota baru ke byte
-            new_quota_bytes=$((new_quota * 1024 * 1024 * 1024))
-            echo "${new_quota_bytes}" > "${quota_file}"
-
-            # Perbarui kuota di dalam file log
-            sed -i "s/Quota   : ${old_quota} GB/Quota   : ${new_quota} GB/" "$log_file"
 
             FN_Banner
             echo -e "${GreenBe} Successfully updated quota ${Xark}"
@@ -236,7 +231,6 @@ function change_quota() {
  #           baris_panjang
 	    send_log
             Sc_Credit
-        fi
     else
         FN_Banner
         echo ""

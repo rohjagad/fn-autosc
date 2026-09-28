@@ -121,7 +121,7 @@ function cekhttp() {
 
         if [ -f "$usage_file" ]; then
             previous_usage=$(cat "$usage_file")
-            quota_used=$((quota_used + previous_usage))
+            [[ "$previous_usage" =~ ^[0-9]+$ ]] && quota_used=$((quota_used + previous_usage))
         fi
         echo "$quota_used" > "$usage_file"
 
