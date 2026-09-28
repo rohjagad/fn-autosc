@@ -1847,3 +1847,13 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 221 (Found 215):** added `systemctl restart haproxy 2>/dev/null || true` at all 3 certificate issuance points in `lite/dm-menu.sh` (IPv4, IPv6, and self-signed), matching the pattern in `full/dm-menu.sh`.
 - **Verified live on VPS:** 3 haproxy restart lines present in deployed `dm-menu`.
+
+### Fix 222 - extend-*.sh: add return after unparseable-expiry fallback (Found 216)
+
+- **Fix 222 (Found 216):** in all 8 `extend-{ws,http,split,grpc}.sh` files (full + lite), added `return` after the menu call (`x-ws` etc.) inside the `if [ -z "$d1" ]` block. Prevents fallthrough to the date calculation with empty `$d1`.
+- **Verified live on VPS:** `return` at line 129 in deployed `extend-ws`.
+
+### Fix 223 - config/dual.conf: add ipv6only=on to all IPv6 listeners (Found 217)
+
+- **Fix 223 (Found 217):** added `ipv6only=on` to all `listen [::]:port` directives in `config/dual.conf`. This tells the kernel to create a separate IPv6-only socket, allowing the IPv4 listener on the same port to coexist without "Address already in use" errors.
+- **Verified:** directive present on all 10 IPv6 listen lines.

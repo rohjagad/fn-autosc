@@ -879,3 +879,14 @@ Section 35's four-check rule applied to Fixes 219-221:
 | **Over-strictness** | Fix 219: rejects uppercase usernames that Linux technically allows. This matches the xray scripts' validation and is appropriate for this VPN panel context where usernames should be simple. Fix 220: no over-strictness. Fix 221: no over-strictness. |
 | **Over-engineering** | One regex + one `id` check + one `|| return` guard. One string change `== '1'` → `-gt 0` (×24). One `systemctl restart` line (×3). |
 | **vs the source** | All three inherited from V23 and 1.20. |
+
+## 66. extend-*.sh return, dual.conf ipv6only - Four Checks (September 28, 2026)
+
+Section 35's four-check rule applied to Fixes 222-223:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Fix 222: `return` only executes when `$d1` is empty (unparseable expiry). Normal accounts with valid expiry dates never enter the `if` block. Fix 223: `ipv6only=on` separates IPv4 and IPv6 sockets. Each listens on its respective address family. Dual-stack clients can still connect via either protocol. |
+| **Over-strictness** | Fix 222: no new restrictions — the script already shows an error message and calls the menu. The only change is that it doesn't fall through to corrupt the date. Fix 223: no restriction — both IPv4 and IPv6 traffic still reach the server. |
+| **Over-engineering** | One `return` keyword (×8 files). One `ipv6only=on` directive (×10 listen lines). |
+| **vs the source** | Both inherited from V23. |

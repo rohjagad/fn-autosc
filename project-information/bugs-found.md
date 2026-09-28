@@ -1780,3 +1780,9 @@ Found 214. **All 24 `add-*.sh` scripts: duplicate detection uses `== '1'` instea
 
 Found 215. **`lite/dm-menu.sh`: missing `systemctl restart haproxy` after certificate issuance** (IPv4 path ~line 136, IPv6 path ~line 162, self-signed ~line 407) — `full/dm-menu.sh` restarts haproxy at all 3 certificate issuance points because haproxy reads its own PEM bundle (`/etc/haproxy/funny.pem`). `lite/dm-menu.sh` writes the same PEM but never restarts haproxy, so it continues serving the old certificate until reboot.
 - **Inherited from both V23 and 1.20** (lite editions never had the haproxy restart).
+
+Found 216. **`full/extend-{ws,http,split,grpc}.sh` and `lite/extend-{ws,http,split,grpc}.sh`: missing `return` after unparseable-expiry fallback — falls through to corrupt date calculation** (line 128 in all 8 files) — when `$exp` cannot be parsed to a timestamp (`$d1` is empty), the script calls the menu function (`x-ws` etc.) but does not `return`. If the menu command returns normally (user navigates back), execution falls through to `d2=$(date -d "$now" +%s)` and `exp2=$(( (d1 - d2) / 86400 ))` with empty `d1`, producing `exp2 = negative number` → `exp3 = negative + masaaktif` → wrong expiry date written to JSON and log file.
+- **Inherited from both V23 and 1.20.**
+
+Found 217. **`config/dual.conf`: duplicate IPv4+IPv6 listeners on same ports without `ipv6only=on` — nginx fails to start on default Debian 12** (lines 82-92 vs 95-102) — `listen [::]:2053 ssl http2 reuseport;` and `listen 2053 ssl http2 reuseport;` both bind to the same port. On Debian 12 with default `net.ipv6.bindv6only=0`, the `[::]` socket already accepts IPv4 connections, so the explicit IPv4 listener fails with "Address already in use". Affects ports 2053, 2083, 2087, 2096, 80, 8880, 2052, 2082, 2095, and 443.
+- **Inherited from V23.**

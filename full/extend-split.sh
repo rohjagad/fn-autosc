@@ -126,6 +126,7 @@ else
         echo -e "\033[0;31mUnparseable expiry for this account - leaving it unchanged.\033[0m"
         sleep 2
         x-split
+        return
     fi
     d2=$(date -d "$now" +%s)
     exp2=$(( (d1 - d2) / 86400 ))
