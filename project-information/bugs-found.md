@@ -1804,3 +1804,9 @@ Found 222. **`full/cek-xray-ws.sh`: display tool truncates live xray access log,
 
 Found 223. **`full/trial-ssh.sh`: username collision — no existence check before using generated name** (line 99) — `username="trial$(shuf -i 100-999 -n 1)"` picks from 900 values with no check for existing accounts. If a previous uncleaned trial happens to have the same number, `create_ssh_user` returns non-zero and the script exits with no account created and no retry.
 - **Inherited from both V23 and 1.20.**
+
+Found 224. **`full/menu-bot.sh` and `lite/menu-bot.sh`: Telegram Chat ID accepted without numeric validation — non-numeric input produces invalid JSON** (line 125 and ~291) — `"owner": $itd` in the config.json heredoc is not quoted. If the operator enters a non-numeric string (e.g., a username handle or accidental text), the resulting JSON is malformed and the Node.js bot crashes on startup with a parse error.
+- **Inherited from both V23 and 1.20.**
+
+Found 225. **`website/script.js`: hardcoded `backup.zip` filename check prevents uploading renamed backups** (line 15) — `file.name !== 'backup.zip'` rejects any backup file not named exactly `backup.zip`. The server-side (`upload.php`, `restore-ftp.sh`) accepts any `.zip` file. Operators cannot upload `backup-2026-09-28.zip` or any renamed backup.
+- **Inherited from V23.**

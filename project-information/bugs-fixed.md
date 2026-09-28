@@ -1887,3 +1887,12 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 229 (Found 223):** replaced the single `shuf` call with a loop (up to 10 attempts) that checks `id "$username"` before accepting the name. Exits with a clear error only if all 10 attempts collide (probability ≈ 10^-27 in practice).
 - **Verified live on VPS:** retry loop present.
+
+### Fix 230 - menu-bot.sh: validate Chat ID is numeric (Found 224)
+
+- **Fix 230 (Found 224):** in both `full/menu-bot.sh` and `lite/menu-bot.sh`, added `[[ "$itd" =~ ^-?[0-9]+$ ]]` validation at the two points where Chat ID is read (initial setup and `creds()` update). Rejects non-numeric input before it reaches the JSON template. Negative integers (group chats) are allowed.
+- **Verified:** `bash -n` clean on both files.
+
+### Fix 231 - website/script.js: accept any .zip backup filename (Found 225)
+
+- **Fix 231 (Found 225):** changed `file.name !== 'backup.zip'` to `!file.name.endsWith('.zip')`. Accepts any ZIP backup file regardless of name, matching the server-side behaviour.

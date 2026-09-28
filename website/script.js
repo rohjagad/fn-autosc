@@ -12,8 +12,8 @@ form.addEventListener('submit', async (event) => {
         return;
     }
 
-    if (!file || file.name !== 'backup.zip') {
-        showMessage('Error: Please upload a file named "backup.zip".', 'error');
+    if (!file || !file.name.endsWith('.zip')) {
+        showMessage('Error: Please upload a .zip backup file.', 'error');
         return;
     }
 

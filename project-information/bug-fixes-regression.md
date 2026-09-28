@@ -912,3 +912,14 @@ Section 35's four-check rule applied to Fixes 225-229:
 | **Over-strictness** | Fix 227: no new read restrictions. Fix 229: only 10 retries — extremely unlikely to exhaust (probability of collision is < 1% per attempt with 900 values). |
 | **Over-engineering** | One `grep -c` per loop iteration (×2). One `sed -i` global replace. Two `chmod` keyword changes. One line removed. One `for` loop (10 lines). |
 | **vs the source** | Found 219: introduced in our code (V23 had correct per-user accounting). Found 220/221/223: inherited from V23 and 1.20. Found 222: introduced in our code (truncation not in V23). |
+
+## 69. menu-bot Chat ID validation, script.js filename - Four Checks (September 28, 2026)
+
+Section 35's four-check rule applied to Fixes 230-231:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Fix 230: valid numeric chat IDs (positive and negative integers) pass the regex unchanged. Only non-numeric strings (which already produced broken JSON) are rejected with an error. Fix 231: `endsWith('.zip')` is a superset of `=== 'backup.zip'` — files named `backup.zip` still pass. |
+| **Over-strictness** | Fix 230: allows `-100...` group IDs. Fix 231: allows any `.zip` name. |
+| **Over-engineering** | One `[[ =~ ]]` check (×2 files ×2 sites). One `endsWith` replacing one `!==`. |
+| **vs the source** | Both inherited from V23 and 1.20. |

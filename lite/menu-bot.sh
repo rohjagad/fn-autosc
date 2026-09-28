@@ -123,6 +123,10 @@ else
 "
     read -p "API Key Bot: " api
     read -p "Your Chat ID: " itd
+    if ! [[ "$itd" =~ ^-?[0-9]+$ ]]; then
+        echo "Chat ID must be a numeric value (e.g. 123456789 or -100123456789)."
+        exit 1
+    fi
     
     # [ Menyimpan API Key dan Chat ID ke file ]
     echo "$api" > "$api_file"
@@ -291,6 +295,10 @@ echo -e "
 read -p "Telegram Chat ID: " itd || return
 read -p "Bot API Key     : " api || return
 [ -z "$itd" ] && itd="$cur_id"
+if [ -n "$itd" ] && ! [[ "$itd" =~ ^-?[0-9]+$ ]]; then
+    echo "Chat ID must be numeric. Aborting."
+    return 1
+fi
 [ -z "$api" ] && api="$cur_key"
 if [ -z "$itd" ] || [ -z "$api" ]; then
     clear
