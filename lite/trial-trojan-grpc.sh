@@ -74,7 +74,7 @@ clear
 
 # Limit Quota
 if [[ $quota -gt 0 ]]; then
-echo -e "$[$quota * 1024 * 1024 * 1024]" > /etc/xray/quota/grpc/$user
+echo -e "$(($quota * 1024 * 1024 * 1024))" > /etc/xray/quota/grpc/$user
 else
 echo > /dev/null
 fi

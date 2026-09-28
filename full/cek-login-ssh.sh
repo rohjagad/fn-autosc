@@ -106,13 +106,16 @@ function show_dropbear_logins {
         # Mendapatkan limit IP dari file terkait
         LIMIT_IP=$(get_limit_ip "$user")
 
+        # Per-user login count from dropbear source
+        user_count=$(grep -c "for '$user' from" "$DB_SRC" 2>/dev/null || echo 0)
+
         # PID dari tag dropbear[PID]
         PID=$(sed -n "s/.*dropbear\[\([0-9][0-9]*\)\].*/\1/p" <<< "$line")
 
         if [ -z "$PID" ]; then
-            printf "%-20s| %-20s| %-12s| %-8s| %-8s\n" "$user" "$hostport" "$countdb" "N/A" "$LIMIT_IP"
+            printf "%-20s| %-20s| %-12s| %-8s| %-8s\n" "$user" "$hostport" "$user_count" "N/A" "$LIMIT_IP"
         else
-            printf "%-20s| %-20s| %-12s| %-8s| %-8s\n" "$user" "$hostport" "$countdb" "$PID" "$LIMIT_IP"
+            printf "%-20s| %-20s| %-12s| %-8s| %-8s\n" "$user" "$hostport" "$user_count" "$PID" "$LIMIT_IP"
         fi
     done < "$DB_SRC"
     echo ""
@@ -132,13 +135,16 @@ function show_openssh_logins {
         # Mendapatkan limit IP dari file terkait
         LIMIT_IP=$(get_limit_ip "$user")
 
+        # Per-user login count from openssh source
+        user_count=$(grep -c "for $user from" "$SSH_SRC" 2>/dev/null || echo 0)
+
         # PID dari tag sshd[PID]
         PID=$(sed -n "s/.*sshd\[\([0-9][0-9]*\)\].*/\1/p" <<< "$line")
 
         if [ -z "$PID" ]; then
-            printf "%-20s| %-20s| %-12s| %-8s| %-8s\n" "$user" "$ip" "$countsh" "N/A" "$LIMIT_IP"
+            printf "%-20s| %-20s| %-12s| %-8s| %-8s\n" "$user" "$ip" "$user_count" "N/A" "$LIMIT_IP"
         else
-            printf "%-20s| %-20s| %-12s| %-8s| %-8s\n" "$user" "$ip" "$countsh" "$PID" "$LIMIT_IP"
+            printf "%-20s| %-20s| %-12s| %-8s| %-8s\n" "$user" "$ip" "$user_count" "$PID" "$LIMIT_IP"
         fi
     done < "$SSH_SRC"
     echo ""
@@ -163,7 +169,10 @@ function get_limit_ip {
 
 # Fungsi untuk menampilkan total aktif user
 function show_total_users {
-    total_users=$((countdb + countsh))
+    local uniq_db uniq_ssh
+    uniq_db=$(sed -n "s/.*Password auth succeeded for '\([^']*\)' from.*/\1/p" "$DB_SRC" 2>/dev/null | sort -u | wc -l)
+    uniq_ssh=$(sed -n "s/.*Accepted password for \([^ ]*\) from .*/\1/p" "$SSH_SRC" 2>/dev/null | sort -u | wc -l)
+    total_users=$((uniq_db + uniq_ssh))
     print_color "═══════════════════════════════════════════════"
     print_color "Total Active Users: $total_users"
     print_color "═══════════════════════════════════════════════"

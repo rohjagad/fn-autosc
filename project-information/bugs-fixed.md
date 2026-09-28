@@ -1862,3 +1862,28 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 224 (Found 218):** in all 3 `restore-ftp.sh` variants (full, lite, website), added `mkdir -p /etc/haproxy && cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem && chmod 644 /etc/haproxy/funny.pem` and `systemctl restart haproxy 2>/dev/null || true` between the nginx and cron restarts. HAProxy now picks up the restored certificate.
 - **Verified:** `bash -n` clean on all 3 files.
+
+### Fix 225 - cek-login-ssh.sh: per-user login count instead of global total (Found 219)
+
+- **Fix 225 (Found 219):** in `full/cek-login-ssh.sh`, compute `user_count` inside each display loop by grepping the source file for the specific user's login string. Fixed `show_total_users` to count unique user names rather than raw line counts.
+- **Verified live on VPS:** `user_count` grep present; `show_total_users` uses `sed | sort -u | wc -l`.
+
+### Fix 226 - add-*.sh and trial-*.sh: replace deprecated $[...] arithmetic (Found 220)
+
+- **Fix 226 (Found 220):** replaced all `$[expr]` with `$((expr))` across all 48 add-*.sh and trial-*.sh files (full + lite). POSIX-correct, works on all shells, no 32-bit overflow risk.
+- **Verified live on VPS:** `$(($quota * 1024 * 1024 * 1024))` in deployed `add-vmess-ws`.
+
+### Fix 227 - installer/xray.sh: chmod 644 on data files instead of chmod +x (Found 221)
+
+- **Fix 227 (Found 221):** changed `chmod +x` to `chmod 644` for all 4 JSON config files and 6 log files in `installer/xray.sh`.
+- **Verified:** `bash -n` clean.
+
+### Fix 228 - cek-xray-ws.sh: remove log truncation from display tool (Found 222)
+
+- **Fix 228 (Found 222):** removed `echo -n > /var/log/xray/ws.log` from `full/cek-xray-ws.sh`. The log is already truncated by `kill-ws` (the enforcement daemon, every 5 min). The display tool should read-only.
+- **Verified live on VPS:** no truncation line present.
+
+### Fix 229 - trial-ssh.sh: retry loop for username collision (Found 223)
+
+- **Fix 229 (Found 223):** replaced the single `shuf` call with a loop (up to 10 attempts) that checks `id "$username"` before accepting the name. Exits with a clear error only if all 10 attempts collide (probability ≈ 10^-27 in practice).
+- **Verified live on VPS:** retry loop present.

@@ -901,3 +901,14 @@ Section 35's four-check rule applied to Fix 224:
 | **Over-strictness** | No new restrictions. |
 | **Over-engineering** | Three lines: `mkdir`, `cat > pem`, `chmod`. One `systemctl restart`. Matches the pattern used in every other cert-touching operation. |
 | **vs the source** | Inherited from V23 and 1.20 — neither rebuilds the PEM on restore. |
+
+## 68. cek-login-ssh count, arithmetic, chmod, truncation, trial collision - Four Checks (September 28, 2026)
+
+Section 35's four-check rule applied to Fixes 225-229:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Fix 225: per-user count is ≤ global count — display changes but no functional change. Fix 226: `$((...))` is identical to `$[...]` in result on 64-bit bash; quotas already on disk are unaffected. Fix 227: `644` allows read for all users, same as `+x` minus execute bit — xray reads these files correctly. Fix 228: `kill-ws` continues to truncate every 5 min; removing the extra truncation only means stale data persists longer between daemon ticks. Fix 229: retry loop always terminates (max 10 iterations); existing collision-free path behaves identically. All files pass `bash -n`. |
+| **Over-strictness** | Fix 227: no new read restrictions. Fix 229: only 10 retries — extremely unlikely to exhaust (probability of collision is < 1% per attempt with 900 values). |
+| **Over-engineering** | One `grep -c` per loop iteration (×2). One `sed -i` global replace. Two `chmod` keyword changes. One line removed. One `for` loop (10 lines). |
+| **vs the source** | Found 219: introduced in our code (V23 had correct per-user accounting). Found 220/221/223: inherited from V23 and 1.20. Found 222: introduced in our code (truncation not in V23). |

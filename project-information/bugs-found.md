@@ -1789,3 +1789,18 @@ Found 217. **`config/dual.conf`: duplicate IPv4+IPv6 listeners on same ports wit
 
 Found 218. **`full/restore-ftp.sh`, `lite/restore-ftp.sh`, `website/restore-ftp.sh`: restore never rebuilds `/etc/haproxy/funny.pem` — HAProxy serves wrong certificate after restore** — the restore scripts overwrite `/etc/xray/xray.crt` and `/etc/xray/xray.key` from the backup archive but never rebuild the HAProxy PEM bundle (`/etc/haproxy/funny.pem = crt + key`), and never restart HAProxy. After a backup restore, HAProxy (serving port 777/Stunnel5) continues using the pre-restore certificate, which may belong to a different domain or be expired. Every other cert-touching operation in the codebase (`dm-menu.sh`, `cert2()`, `dmsl()`) rebuilds `funny.pem` and restarts haproxy.
 - **Inherited from both V23 and 1.20.**
+
+Found 219. **`full/cek-login-ssh.sh`: global login count shown per row instead of per-user count** (lines 92-93, 113, 115, 139, 141) — `countdb=$(wc -l < "$DB_SRC")` counts total login events across all users. The value is printed in the "Login Count" column for every row, so all users show the same total. V23 correctly used `sort | uniq | wc -l` over temporary per-user files. `show_total_users` adds `countdb + countsh` (total events) and labels the result "Total Active Users" — also wrong.
+- **Introduced in our code; V23 had per-user accounting.**
+
+Found 220. **All 48 `add-*.sh` and `trial-*.sh` scripts (full + lite): deprecated `$[expr]` arithmetic syntax for quota calculation** — `echo -e "$[$quota * 1024 * 1024 * 1024]"` uses `$[...]` which is undocumented, removed in some shells, and exhibits signed 32-bit overflow on 32-bit systems for quotas ≥ 2 GB.
+- **Inherited from both V23 and 1.20.**
+
+Found 221. **`installer/xray.sh`: JSON config files and xray log files created with `chmod +x` (755) instead of `chmod 644`** (lines 106-109, 142-147) — data files should not be executable. An executable `*.json` or `*.log` can be accidentally invoked by shell globs or wrapper scripts, and security scanners flag it.
+- **Inherited from both V23 and 1.20.**
+
+Found 222. **`full/cek-xray-ws.sh`: display tool truncates live xray access log, breaking IP-limit enforcement between cron ticks** (line 96, `echo -n > /var/log/xray/ws.log`) — every invocation of the "check online users" display erases the log that `limit-ip-ws` (every 5 min) and `kill-ws` (every 5 min) rely on. Running it between two daemon ticks causes the enforcer to see 0 connections, potentially missing over-limit users for one cycle. V23 does not truncate in `cek-xray-ws.sh`.
+- **Introduced in our code; not present in V23.**
+
+Found 223. **`full/trial-ssh.sh`: username collision — no existence check before using generated name** (line 99) — `username="trial$(shuf -i 100-999 -n 1)"` picks from 900 values with no check for existing accounts. If a previous uncleaned trial happens to have the same number, `create_ssh_user` returns non-zero and the script exits with no account created and no retry.
+- **Inherited from both V23 and 1.20.**

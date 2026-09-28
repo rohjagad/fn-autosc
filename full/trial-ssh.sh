@@ -95,7 +95,16 @@ done
 clear
 
 # Buat username dan password otomatis
-username="trial$(shuf -i 100-999 -n 1)"
+# Retry up to 10 times to avoid collision with active trial accounts
+for _i in $(seq 1 10); do
+    username="trial$(shuf -i 100-999 -n 1)"
+    id "$username" &>/dev/null || break
+    username=""
+done
+if [ -z "$username" ]; then
+    echo "Failed to generate unique trial username after 10 attempts."
+    exit 1
+fi
 password="1"
 
 # Buat pengguna SSH

@@ -142,7 +142,7 @@ clear
 
 # Limit Quota
 if [[ $quota -gt 0 ]]; then
-echo -e "$[$quota * 1024 * 1024 * 1024]" > /etc/xray/quota/split/$user
+echo -e "$(($quota * 1024 * 1024 * 1024))" > /etc/xray/quota/split/$user
 else
 echo > /dev/null
 fi

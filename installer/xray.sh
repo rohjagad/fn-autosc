@@ -103,10 +103,10 @@ wget --no-check-certificate ${hosting}/json/split.json >> /dev/null 2>&1
 wget --no-check-certificate ${hosting}/json/grpc.json >> /dev/null 2>&1
 
 # Mengubah Permision Json
-chmod +x ws.json
-chmod +x upgrade.json
-chmod +x split.json
-chmod +x grpc.json
+chmod 644 ws.json
+chmod 644 upgrade.json
+chmod 644 split.json
+chmod 644 grpc.json
 
 # Every template ships publicly-known default credentials and the repository is
 # public, while the account scripts only ADD clients - the shipped defaults stay
@@ -139,12 +139,12 @@ touch /var/log/xray/grpc.log
 touch /etc/xray/.quota.logs
 
 # Mengubah Permision Log File
-chmod +x ws.log
-chmod +x split.log
-chmod +x upgrade.log
-chmod +x http.log
-chmod +x grpc.log
-chmod +x /etc/xray/.quota.logs
+chmod 644 ws.log
+chmod 644 split.log
+chmod 644 upgrade.log
+chmod 644 http.log
+chmod 644 grpc.log
+chmod 644 /etc/xray/.quota.logs
 
 # Menginstall Cron
 apt install cron -y

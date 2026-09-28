@@ -92,5 +92,3 @@ for user in "${users[@]}"; do
 
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 done
-
-echo -n > /var/log/xray/ws.log
