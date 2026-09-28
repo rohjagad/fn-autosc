@@ -1003,3 +1003,14 @@ Section 35's four-check rule applied to Fixes 250–253:
 | **Over-strictness** | None. |
 | **Over-engineering** | Four flag variables + four `if` blocks (minimal). One `date` call per section. One comparison operator change. One `awk` one-liner. |
 | **vs the source** | All inherited from V23 and 1.20. |
+
+## 75. xp.sh split/grpc single-restart; menu-dnstt heredoc; noobz chmod 600; WG extend -1 - Four Checks (September 29, 2026)
+
+Section 35's four-check rule applied to Fixes 254–257:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Fix 254: split/grpc behaviour now matches WS/HTTP (restart once after all deletions); no account is missed. Fix 255: heredoc produces identical file content, now without leading spaces; systemd parses it correctly. Fix 256: `600` is more restrictive — service still reads the file as root. Fix 257: removing `+1` gives the exact duration requested; no account expires sooner. All files pass `bash -n`. |
+| **Over-strictness** | Fix 256: `600` means only root can read/write — correct for a service running as root. |
+| **Over-engineering** | Four flag lines, four `if` blocks (Fix 254). One heredoc replacing one `echo -e` (Fix 255). One permission word (Fix 256). Removal of `+ 1` (Fix 257). |
+| **vs the source** | Found 248: regression from Fix 250. Found 249/250/251: inherited from V23. |

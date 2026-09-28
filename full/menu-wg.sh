@@ -326,7 +326,7 @@ function extend() {
 
 	exp_old=$(cat /etc/funny/.wireguard | grep -w $user | awk '{print $2}')
 	diff=$((($(date -d "${exp_old}" +%s)-$(date +%s))/(86400)))
-	duration=$(expr $diff + $extend + 1)
+	duration=$(expr $diff + $extend)
 	exp_new=$(date -d +${duration}days +%Y-%m-%d)
 	exp=$(date -d "${exp_new}" +"%d %b %Y")
 

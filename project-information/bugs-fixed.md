@@ -1992,3 +1992,21 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 253 (Found 247):** replaced `sed -i "/^### Client X$/,/^$/d" + head -${line}` in `full/menu-wg.sh` delete() with the same `awk` approach applied to `xp.sh` in Fix 239. Correctly removes only the target peer block without corrupting survivors or breaking on EOF.
 - **Verified live on VPS:** awk command present in deployed `menu-wg`.
+
+### Fix 254 - xp.sh: complete the split and gRPC single-restart fix (Found 248)
+
+- **Fix 254 (Found 248):** completed Fix 250 — moved `systemctl daemon-reload; systemctl restart xray@split` and `systemctl restart xray@grpc` outside their respective expiry loops using `split_expired` and `grpc_expired` flags, matching the WS and HTTP sections. Applied to both `full/xp.sh` and `lite/xp.sh`.
+- **Verified live on VPS:** `grpc_expired` flag and post-loop restart at lines 225/228/230.
+
+### Fix 255 - menu-dnstt.sh: use heredoc for service file (no leading spaces) (Found 249)
+
+- **Fix 255 (Found 249):** replaced `echo -e "..."` with a `cat > /etc/systemd/system/dnstt.service << 'SVCEOF' … SVCEOF` heredoc in `full/menu-dnstt.sh`. Section headers `[Unit]`, `[Service]`, `[Install]` now have no leading whitespace.
+
+### Fix 256 - installer/noobz.sh: chmod 600 on config files (Found 250)
+
+- **Fix 256 (Found 250):** changed `chmod +x /etc/noobzvpns/config.json /etc/noobzvpns/config.toml` to `chmod 600 …`. Config files are no longer world-readable or executable.
+
+### Fix 257 - menu-wg.sh: remove +1 from WireGuard extend (Found 251)
+
+- **Fix 257 (Found 251):** removed `+ 1` from `duration=$(expr $diff + $extend + 1)`. WireGuard extend now grants exactly the requested number of additional days, consistent with all other transports.
+- **Verified live on VPS:** `duration=$(expr $diff + $extend)` in deployed `menu-wg`.

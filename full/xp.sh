@@ -182,11 +182,13 @@ KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL
-clear
-systemctl daemon-reload
-systemctl restart xray@split
+split_expired=1
 fi
 done
+if [[ $split_expired -eq 1 ]]; then
+    systemctl daemon-reload
+    systemctl restart xray@split
+fi
 
 ##----- Auto Remove Xray grpc HTTP
 data=( `cat /etc/xray/json/grpc.json | grep '^###' | cut -d ' ' -f 2 | sort | uniq`);
@@ -220,12 +222,13 @@ KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL
-clear
-systemctl daemon-reload
-systemctl restart xray@grpc
+grpc_expired=1
 fi
 done
-
+if [[ $grpc_expired -eq 1 ]]; then
+    systemctl daemon-reload
+    systemctl restart xray@grpc
+fi
 
 ##------ Auto Remove SSH
 hariini=`date +%d-%m-%Y`

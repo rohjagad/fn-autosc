@@ -1876,3 +1876,15 @@ Found 246. **`full/menu-wg.sh`: IP pool exhaustion check `dot_exists == '1'` fai
 
 Found 247. **`full/menu-wg.sh`: WireGuard peer `delete()` uses same broken `sed range + head` pattern** (lines 286–294) — same as the `xp.sh` WireGuard deletion bug (Found 233): `sed -i "/^### Client X$/,/^$/d"` open-ended range at EOF, followed by `head -${line}` truncation that drops `PersistentKeepalive` and other post-`AllowedIPs` lines in surviving peers.
 - **Inherited from V23.**
+
+Found 248. **`full/xp.sh` and `lite/xp.sh`: split and gRPC expiry loops still restart Xray per-user inside the loop** (lines 187/225 full, equivalent lite) — Fix 250 (commit 2c14275) correctly moved the WS and HTTP restarts outside their loops using flags, but the Python replacement for split and gRPC missed the correct pattern (differing blank-line count before the next section comment). Both `xray@split` and `xray@grpc` were still being restarted once per expired user inside the loop.
+- **Regression introduced by incomplete Fix 250.**
+
+Found 249. **`full/menu-dnstt.sh`: indented `echo -e` writes `[Service]` and `[Install]` with leading spaces into the systemd unit file — systemd ignores them, service never starts** (lines 138–153) — the `echo -e "..."` block generating `/etc/systemd/system/dnstt.service` is indented with 16 spaces inside the script. Those spaces are literal in the output file. systemd does not recognise `"                [Service]"` as a section header; the `[Service]` and `[Install]` blocks are silently dropped, so `ExecStart` and `WantedBy` are lost. The service installs but never starts after a nameserver change.
+- **Inherited from V23.**
+
+Found 250. **`installer/noobz.sh`: `chmod +x` on JSON and TOML config files** (line 131) — `chmod +x /etc/noobzvpns/config.json /etc/noobzvpns/config.toml` marks config files as executable. With default umask they become mode 755 (world-readable and executable). These files may contain sensitive paths and service configuration. Correct permission is 600.
+- **Inherited from V23.**
+
+Found 251. **`full/menu-wg.sh`: WireGuard `extend()` adds +1 extra day — systematic off-by-one** (line 329) — `duration=$(expr $diff + $extend + 1)` gives WireGuard accounts one extra day compared to every other transport's renewal. The `xl2tp.sh` extend function (line 243) uses `expr $diff + $extend` without `+1`. An operator extending by 30 days gives 31 days to WireGuard users only.
+- **Inherited from V23.**

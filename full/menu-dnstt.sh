@@ -135,22 +135,24 @@ ${orange}Press [Ctrl + C] to exit${NC}"
                 systemctl disable dnstt.service
                 clear
                 
-                echo -e "[Unit]
-                Description=SlowDNS FN AutoSC Autoscript Service
-                Documentation=https://t.me/rohcuan
-                After=network.target nss-lookup.target
+                cat > /etc/systemd/system/dnstt.service << 'SVCEOF'
+[Unit]
+Description=SlowDNS FN AutoSC Autoscript Service
+Documentation=https://t.me/rohcuan
+After=network.target nss-lookup.target
 
-                [Service]
-                Type=simple
-                User=root
-                CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
-                AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
-                NoNewPrivileges=true
-                ExecStart=/etc/slowdns/dns-server -udp :5300 -privkey-file /etc/slowdns/server.key $nsdomen 127.0.0.1:22
-                Restart=on-failure
+[Service]
+Type=simple
+User=root
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
+NoNewPrivileges=true
+ExecStart=/etc/slowdns/dns-server -udp :5300 -privkey-file /etc/slowdns/server.key $nsdomen 127.0.0.1:22
+Restart=on-failure
 
-                [Install]
-                WantedBy=multi-user.target" > /etc/systemd/system/dnstt.service
+[Install]
+WantedBy=multi-user.target
+SVCEOF
                 systemctl daemon-reload
                 systemctl enable dnstt
                 systemctl start dnstt
