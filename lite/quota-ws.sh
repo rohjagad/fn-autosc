@@ -132,7 +132,7 @@ cekws() {
         if [[ "$quota_used" -gt "$quota_limit" ]]; then
             echo "$(date '+%F %T') quota-ws: deleted $user (usage $quota_used > quota $quota_limit)" >> /etc/xray/.quota.logs
             exp=$(grep -w "^### $user" "/etc/xray/json/ws.json" | awk '{print $3}' | sort -u)
-            sed -i "/### $user $exp/ {N;d}" /etc/xray/json/ws.json
+            sed -i "/^### $user $exp/ {N;d}" /etc/xray/json/ws.json
             sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/ws.json
             total_usage=$(con "$quota_used")
             total_limit=$(con "$quota_limit")

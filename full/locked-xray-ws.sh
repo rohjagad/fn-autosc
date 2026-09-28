@@ -172,7 +172,7 @@ Status   : ${red}Locked${NC}
 ${separator}"
 
     exp=$(grep -wE "^### $name" "/etc/xray/json/ws.json" | cut -d ' ' -f 3 | sort | uniq)
-    sed -i "/### $name $exp/ {N;d}" /etc/xray/json/ws.json
+    sed -i "/^### $name $exp/ {N;d}" /etc/xray/json/ws.json
     sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/ws.json
 mv /var/log/create/xray/ws/${name}.log /var/log/create/xray/ws/${name}.locked
 systemctl daemon-reload

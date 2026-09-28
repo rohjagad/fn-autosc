@@ -130,7 +130,7 @@ function cekhttp() {
         if [[ "$quota_used" -gt "$quota_limit" ]]; then
             echo "$(date '+%F %T') quota-http: deleted $user (usage $quota_used > quota $quota_limit)" >> /etc/xray/.quota.logs
             exp=$(grep -w "^### $user" "/etc/xray/json/upgrade.json" | cut -d ' ' -f 3 | sort | uniq)
-            sed -i "/### $user $exp/ {N;d}" /etc/xray/json/upgrade.json
+            sed -i "/^### $user $exp/ {N;d}" /etc/xray/json/upgrade.json
             sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/upgrade.json
             total_usage=$(con "$quota_used")
             total_limit=$(con "$quota_limit")

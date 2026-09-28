@@ -96,7 +96,7 @@ fi
 
 for user in $username; do
     # Get the limit and current online stats for each user
-    limit=$(grep "Limit IP:" /var/log/create/xray/split/${user}.log | awk '{print $3}')
+    limit=$(cat "/etc/xray/limit/ip/xray/split/${user}" 2>/dev/null)
     # Bug 68 guard: 0 / missing / malformed limit = unlimited, never enforced
     if ! [[ "$limit" =~ ^[1-9][0-9]*$ ]]; then
         continue

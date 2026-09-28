@@ -1816,3 +1816,14 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 215 (Found 209):** changed "X-RAY DELETED ACOUNT" to "X-RAY SPLIT UNLOCK ACOUNT" in `full/unlock-split.sh` line 109, matching the pattern used by `unlock-ws.sh` and `unlock-grpc.sh`.
 - **Verified live on VPS:** correct text in deployed `unlock-split`.
+
+### Fix 216 - Tree-wide: anchor all `sed "/### "` patterns with `^` (Found 210)
+
+- **Fix 216 (Found 210):** anchored all 58 remaining unanchored `sed -i "/### $user $exp/ {N;d}"` patterns across 50 files (delete-*, kill-*, quota-*, trial-*, xp.sh, locked-xray-*) in both full/ and lite/ editions. Changed `/### ` to `/^### ` so substring usernames no longer match. Extends the same fix applied in Fix 176 (extend-*.sh only) to the entire codebase.
+- **Files modified:** 50 (full: 25, lite: 25).
+- **Verified live on VPS:** all deployed scripts show `^###` in sed patterns.
+
+### Fix 217 - limit-ip-*: read IP limit from authoritative file (Found 211)
+
+- **Fix 217 (Found 211):** in all 8 `limit-ip-{ws,http,split,grpc}.sh` files (full + lite), replaced `grep "Limit IP:" ...log | awk` with `cat "/etc/xray/limit/ip/xray/<transport>/${user}" 2>/dev/null`. This reads the same source of truth that `cek-xray-*.sh` displays and that `change-limit-ip-*.go` updates, ensuring enforcement reflects limit changes.
+- **Verified live on VPS:** `limit-ip-ws` reads from `/etc/xray/limit/ip/xray/ws/`.

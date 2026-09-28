@@ -82,7 +82,7 @@ d2=$(date -d "$now" +%s)
 exp2=$(( (d1 - d2) / 86400 ))
 if [[ "$exp2" -le "0" ]]; then
     xp_log "deleted $user (expiry $exp)"
-sed -i "/### $user $exp/ {N;d}" /etc/xray/json/ws.json
+sed -i "/^### $user $exp/ {N;d}" /etc/xray/json/ws.json
 sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/ws.json
         rm -f /var/log/create/xray/ws/${user}.log
         rm -f /etc/xray/quota/ws/$user /etc/xray/quota/ws/${user}_usage
@@ -120,7 +120,7 @@ d2=$(date -d "$now" +%s)
 exp2=$(( (d1 - d2) / 86400 ))
 if [[ "$exp2" -le "0" ]]; then
     xp_log "deleted $user (expiry $exp)"
-sed -i "/### $user $exp/ {N;d}" /etc/xray/json/upgrade.json
+sed -i "/^### $user $exp/ {N;d}" /etc/xray/json/upgrade.json
 sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/upgrade.json
         rm -f /var/log/create/xray/http/${user}.log
         rm -f /etc/xray/quota/http/$user /etc/xray/quota/http/${user}_usage
@@ -158,7 +158,7 @@ d2=$(date -d "$now" +%s)
 exp2=$(( (d1 - d2) / 86400 ))
 if [[ "$exp2" -le "0" ]]; then
     xp_log "deleted $user (expiry $exp)"
-sed -i "/### $user $exp/ {N;d}" /etc/xray/json/split.json
+sed -i "/^### $user $exp/ {N;d}" /etc/xray/json/split.json
 sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/split.json
         rm -f /var/log/create/xray/split/${user}.log
         rm -f /etc/xray/quota/split/$user /etc/xray/quota/split/${user}_usage
@@ -196,7 +196,7 @@ d2=$(date -d "$now" +%s)
 exp2=$(( (d1 - d2) / 86400 ))
 if [[ "$exp2" -le "0" ]]; then
     xp_log "deleted $user (expiry $exp)"
-sed -i "/### $user $exp/ {N;d}" /etc/xray/json/grpc.json
+sed -i "/^### $user $exp/ {N;d}" /etc/xray/json/grpc.json
 sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/grpc.json
         rm -f /var/log/create/xray/grpc/${user}.log
         rm -f /etc/xray/quota/grpc/$user /etc/xray/quota/grpc/${user}_usage

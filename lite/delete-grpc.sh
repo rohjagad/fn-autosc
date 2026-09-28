@@ -125,7 +125,7 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/grpc.json")
         exp=$(grep -wE "^### $user" "/etc/xray/json/grpc.json" | cut -d ' ' -f 3 | sort | uniq)
 
     if [ -n "$exp" ]; then
-        sed -i "/### $user $exp/ {N;d}" /etc/xray/json/grpc.json
+        sed -i "/^### $user $exp/ {N;d}" /etc/xray/json/grpc.json
         sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/grpc.json
     else
         echo "User not found in config.json!"

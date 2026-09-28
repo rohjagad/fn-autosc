@@ -110,7 +110,7 @@ function check_quota() {
         fi
         exp=$(grep -w "^### $user" "/etc/xray/json/ws.json" | awk '{print $3}' | sort | uniq)
         if [[ -n "$exp" ]]; then
-            sed -i "/### $user $exp/ {N;d}" /etc/xray/json/ws.json
+            sed -i "/^### $user $exp/ {N;d}" /etc/xray/json/ws.json
             sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/ws.json
             systemctl daemon-reload
             systemctl restart xray@ws
@@ -137,7 +137,7 @@ function check_quota() {
         if [[ $usage -ge $quota_limit ]]; then
             exp=$(grep -w "^### $user" "/etc/xray/json/ws.json" | awk '{print $3}' | sort | uniq)
             if [[ -n "$exp" ]]; then
-                sed -i "/### $user $exp/ {N;d}" /etc/xray/json/ws.json
+                sed -i "/^### $user $exp/ {N;d}" /etc/xray/json/ws.json
                 sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/ws.json
                 systemctl daemon-reload
                 systemctl restart xray@ws

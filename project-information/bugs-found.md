@@ -1762,3 +1762,9 @@ Found 208. **`full/unlock-{ws,http,split,grpc}.sh`: no validation that typed use
 
 Found 209. **`full/unlock-split.sh`: Telegram notification says "X-RAY DELETED ACOUNT" instead of unlock message** (line 109) — copy-paste error from `delete-split.sh`. The operator sees a deletion notification when the action was actually an unlock.
 - **Inherited from V23.**
+
+Found 210. **Tree-wide unanchored `sed -i "/### $user $exp/"` in 50 files (delete-*, kill-*, quota-*, trial-*, xp.sh, locked-xray-*)** — the `sed` pattern `/### $user $exp/` lacks a `^` anchor. User `ali` matches `alice`'s comment line `### alice 2026-10-01` because `### ali` is a substring. Locking, deleting, or quota-killing user `ali` silently destroys user `alice`'s config entry too. Found 170 fixed only `extend-*.sh`; the remaining 50 files across full/ and lite/ were not addressed.
+- **Inherited from both V23 and 1.20.**
+
+Found 211. **`full/limit-ip-{ws,http,split,grpc}.sh` and `lite/limit-ip-{ws,http,split,grpc}.sh`: IP limit read from `.log` file instead of authoritative limit file** (line 99 in all 8 files) — `limit=$(grep "Limit IP:" /var/log/create/xray/<transport>/${user}.log | awk '{print $3}')` reads the IP limit from the account creation log. The authoritative source is `/etc/xray/limit/ip/xray/<transport>/$user` (written by `add-*.sh`, read by `cek-xray-*.sh` for display). If the limit is changed after creation (by `change-limit-ip-*.go`), enforcement still uses the stale creation-time value.
+- **Inherited from both V23 and 1.20.**

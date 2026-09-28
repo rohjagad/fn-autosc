@@ -846,3 +846,14 @@ Section 35's four-check rule applied to Fixes 212-215:
 | **Over-strictness** | Fix 212: users with valid `$exp` are deleted as before. Fix 213: routing functions with valid outbounds sections proceed as before. Fix 214: valid locked usernames proceed as before. Fix 215: no behavior change. |
 | **Over-engineering** | One `if` guard (×6 files), one `[[ -z ]]` guard (×16 sites), one `[ ! -f ]` guard (×4 files), one string change. |
 | **vs the source** | All four bugs inherited from V23 (and 1.20 where applicable). |
+
+## 63. Tree-wide sed anchor, limit-ip source of truth - Four Checks (September 28, 2026)
+
+Section 35's four-check rule applied to Fixes 216-217:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Fix 216: `^` anchor only adds a start-of-line constraint to an existing pattern. Comment lines in xray JSON always start at column 0 with `### `. No valid line is missed. Fix 217: the limit file contains only the numeric limit value, same as what `grep "Limit IP:"` extracted from the log — just without parsing overhead. The existing `^[1-9][0-9]*$` guard on the next line handles empty/invalid content. All 58 files pass `bash -n`. |
+| **Over-strictness** | Fix 216: only prevents substring false positives; exact matches still work. Fix 217: limit file is the authoritative source — no valid scenario where it's missing but the log file has the value (both are created by `add-*.sh` at the same time). |
+| **Over-engineering** | One `^` character per sed pattern (×58). One `cat` replacing one `grep|awk` pipeline (×8). |
+| **vs the source** | Both inherited from V23 and 1.20. Fix 216 extends Fix 176 (which covered only extend-*.sh). |
