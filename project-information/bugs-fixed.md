@@ -1751,3 +1751,13 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 202 (Found 196):** in both `full/dm-menu.sh` and `lite/dm-menu.sh`, added `systemctl restart noobzvpns 2>/dev/null || true` after every certificate deployment point: `acme()` IPv4, `acme()` IPv6, `cert2()`, `fn()`, and `dmsl()` — 5 restart points in each file. Repacked both menu archives (0 diffs, all 0755).
 - **Verified live on VPS:** deployed `dm-menu`, confirmed 5 noobzvpns restart points and 0 failed units.
+
+### Fix 203 - noobz.sh: explicit chmod instead of glob to avoid following cert symlinks (Found 197)
+
+- **Fix 203 (Found 197):** in `installer/noobz.sh`, replaced `chmod +x /etc/noobzvpns/*` with explicit `chmod +x /etc/noobzvpns/config.json /etc/noobzvpns/config.toml 2>/dev/null || true` and a comment noting the cert/key symlinks must not be chmodded. This prevents the `+x` from following the `cert.pem → /etc/xray/xray.crt` and `key.pem → /etc/xray/xray.key` symlinks and making the private key world-executable.
+- **Verified live on VPS:** `/etc/xray/xray.key` remains `0644` after the fix. `bash -n` clean.
+
+### Fix 204 - xp.sh: add xp_log to SSH expiry and guard dropbear restart (Found 198)
+
+- **Fix 204 (Found 198):** in both `full/xp.sh` and `lite/xp.sh`, added `xp_log "deleted $username (expiry $exp)"` to the SSH expiry block, making it consistent with all other protocol expiry sections. In `full/xp.sh`, added `2>/dev/null || true` to the `systemctl restart dropbear` line. Repacked both menu archives (0 diffs, all 0755).
+- **Verified live on VPS:** `xp` shows 8 `xp_log` calls, dropbear guard present, 0 failed units.

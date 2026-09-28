@@ -779,3 +779,14 @@ Section 35's four-check rule applied to Fix 202:
 | **Over-strictness** | Restart uses `2>/dev/null || true` so NoobzVPN not being installed doesn't fail the cert renewal. |
 | **Over-engineering** | One additional `systemctl restart` line per cert renewal function. No new abstractions. |
 | **vs the source** | References never restarted NoobzVPN because it had independent certs. Fix 201 introduced the symlink dependency, making this restart necessary for correctness. |
+
+## 58. noobz.sh chmod glob fix and xp.sh SSH expiry audit - Four Checks (September 28, 2026)
+
+Section 35's four-check rule applied to Fixes 203 and 204 (found by regression audit):
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | noobz.sh chmod is now explicit (config.json, config.toml only), same effective result as before since those were the only non-cert files. xp.sh SSH expiry behavior is unchanged: user is deleted, restarts fire, Telegram notified; xp_log is additive. dropbear guard follows the same pattern as ws. `bash -n` clean across all touched files. |
+| **Over-strictness** | Fix 203 only prevents chmod from following symlinks into cert files; the explicit targets (config.json, config.toml) are still made executable. Fix 204 only adds logging, not new restrictions. |
+| **Over-engineering** | One-line explicit chmod, one-line xp_log addition, one-line dropbear guard. |
+| **vs the source** | V23 and 1.20 both use `chmod +x /etc/noobzvpns/*` on real files (not symlinks) — no issue. Our Fix 201 (symlinks) introduced the risk. Neither ref has xp_log (we added it consistently). Neither ref has dropbear in SSH expiry (we added dropbear restart in 68c4068; guarded now). |

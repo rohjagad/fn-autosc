@@ -245,11 +245,12 @@ else
 userdel --force $username
 rm -fr /etc/xray/limit/ip/ssh/$username
 rm -f /var/log/create/ssh/${username}.log
+xp_log "deleted $username (expiry $exp)"
 systemctl daemon-reload
 systemctl restart ssh
 systemctl restart sshd
 systemctl restart ws
-systemctl restart dropbear
+systemctl restart dropbear 2>/dev/null || true
 exp="$tgl $bulantahun"
 TEKS="
 ====================
