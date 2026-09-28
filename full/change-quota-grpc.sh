@@ -202,7 +202,7 @@ function change_quota() {
         echo -e "\n${YellowBe}Reset total usage quota? (y/n):${Xark}"
         read -rp "Input: " reset_quota
         if [[ $reset_quota == "y" || $reset_quota == "Y" ]]; then
-            echo -n > /etc/xray/quota/grpc/${user}_usage
+            > /etc/xray/quota/grpc/${user}_usage
             quota_status="Reset"
         else
             quota_status="No"

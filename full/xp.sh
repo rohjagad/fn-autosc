@@ -312,17 +312,10 @@ while read expired; do
 	user=$(echo $expired | awk '{print $1}')
 	exp=$(echo $expired | awk '{print $2}')
 
-	if [ -n "$exp" ] && [[ "$exp" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] && [[ $exp < $now ]]; then
+	if [ -n "$exp" ] && [[ "$exp" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] && [[ ! $now < $exp ]]; then
 	xp_log "deleted wireguard client $user (expiry $exp)"
-		sed -i "/^### Client ${user}\$/,/^$/d" /etc/wireguard/wg0.conf
-		if grep -q "### Client" /etc/wireguard/wg0.conf; then
-			line=$(grep -n AllowedIPs /etc/wireguard/wg0.conf | tail -1 | awk -F: '{print $1}')
-			head -${line} /etc/wireguard/wg0.conf > /tmp/wg0.conf
-			mv /tmp/wg0.conf /etc/wireguard/wg0.conf
-		else
-			head -6 /etc/wireguard/wg0.conf > /tmp/wg0.conf
-			mv /tmp/wg0.conf /etc/wireguard/wg0.conf
-		fi
+		awk "/^### Client ${user}$/{found=1} found && /^$/{found=0; next} !found{print} found{next}" \
+			/etc/wireguard/wg0.conf > /tmp/wg0.conf && mv /tmp/wg0.conf /etc/wireguard/wg0.conf
 		rm -f /var/www/html/wireguard-${user}.conf
 		sed -i "/\b$user\b/d" /etc/funny/.wireguard
         TEKS="
@@ -399,7 +392,7 @@ Exp : $exp
         URL="https://api.telegram.org/bot$KEY/sendMessage"
 
         # Mengirim notifikasi ke Telegram
-        response=$(curl -s --max-time $TIME -d "chat_id=$CHATID&text=$TEKS" $URL)
+        response=$(curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL)
         systemctl restart noobzvpns
         # Memeriksa apakah pengiriman berhasil
         if [[ $(echo "$response" | jq -r '.ok') == "true" ]]; then

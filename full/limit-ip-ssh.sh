@@ -277,7 +277,7 @@ do
         iplimit=2
         echo "$iplimit" > "$file_path"
     fi
-    cekcek=$(echo -e "$mulog" | grep -F " - $user - " | wc -l)
+    cekcek=$(echo -e "$mulog" | grep -F " - $user - " | awk '{print $5}' | sort -u | wc -l)
 
     # Mendapatkan daftar IP untuk pengguna
     # Bug 75: the log line format is "PID - USER - IP - TIME", so the IP is

@@ -70,6 +70,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         mkdir($target_dir, 0755, true);
     }
 
+    if (isset($_FILES['backup'])) {
+        $upload_err = $_FILES['backup']['error'];
+        if ($upload_err === UPLOAD_ERR_INI_SIZE || $upload_err === UPLOAD_ERR_FORM_SIZE) {
+            echo "Error: File exceeds maximum upload size. Increase upload_max_filesize and post_max_size in php.ini.\n";
+        } elseif ($upload_err !== UPLOAD_ERR_OK) {
+            echo "Error: Upload failed with code $upload_err.\n";
+        }
+    }
     if (isset($_FILES['backup']) && $_FILES['backup']['error'] === UPLOAD_ERR_OK) {
         $file_name = $_FILES['backup']['name'];
         $file_tmp = $_FILES['backup']['tmp_name'];

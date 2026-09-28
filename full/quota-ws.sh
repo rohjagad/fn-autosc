@@ -103,9 +103,8 @@ cekws() {
         # migration kept V2Ray's `api stats` call, but Xray's `stats` needs an
         # explicit -name and errors without one, so use the same statsquery +
         # inb/outb + reset pattern as quota-grpc/http/split.
-        usage_data=$(xray api statsquery --server=127.0.0.1:10080 | grep -C 2 "$user" | grep value | awk '{print $2}' | sed 's/,//g; s/"//g')
-        inb=$(echo "$usage_data" | sed -n 1p)
-        outb=$(echo "$usage_data" | sed -n 2p)
+        inb=$(xray api stats --server=127.0.0.1:10080 -name "user>>>${user}>>>traffic>>>uplink" 2>/dev/null | grep value | awk '{gsub(/[",]/,"",$2); print $2}')
+        outb=$(xray api stats --server=127.0.0.1:10080 -name "user>>>${user}>>>traffic>>>downlink" 2>/dev/null | grep value | awk '{gsub(/[",]/,"",$2); print $2}')
 
         # Validasi data inb dan outb
         if [[ -z "$inb" || -z "$outb" ]]; then

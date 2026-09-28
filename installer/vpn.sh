@@ -98,7 +98,8 @@ sed -i 's/^dev tun$/dev tun3/' /etc/openvpn/server/server-udp-2200.conf
 
 cd
 mkdir -p /usr/lib/openvpn/
-cp /usr/lib/x86_64-linux-gnu/openvpn/plugins/openvpn-plugin-auth-pam.so /usr/lib/openvpn/openvpn-plugin-auth-pam.so
+PAM_PLUGIN=$(find /usr/lib -name "openvpn-plugin-auth-pam.so" 2>/dev/null | head -1)
+[ -n "$PAM_PLUGIN" ] && cp "$PAM_PLUGIN" /usr/lib/openvpn/openvpn-plugin-auth-pam.so
 
 # nano /etc/default/openvpn
 sed -i 's/#AUTOSTART="all"/AUTOSTART="all"/g' /etc/default/openvpn

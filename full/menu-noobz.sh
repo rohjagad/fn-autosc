@@ -100,21 +100,12 @@ clear
 
 noobz_add_user() {
     local u="$1" p="$2" e="$3"
-    if noobzvpns add --help >/dev/null 2>&1; then
-        noobzvpns add --password "$p" --expired "$e" "$u"
-    else
-        noobzvpns --add-user "$u" "$p"
-        noobzvpns --expired-user "$u" "$e"
-    fi
+    noobzvpns add --password "$p" --expired "$e" "$u"
 }
 
 noobz_remove_user() {
     local u="$1"
-    if noobzvpns remove --help >/dev/null 2>&1; then
-        noobzvpns remove "$u"
-    else
-        noobzvpns --remove-user "$u"
-    fi
+    noobzvpns remove "$u"
 }
 
 noobz_list_users() {

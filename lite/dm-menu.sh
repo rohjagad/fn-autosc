@@ -316,6 +316,7 @@ dm() {
             cert
         else
             cert_status="Tidak diperbarui"
+            systemctl reload nginx 2>/dev/null || systemctl restart nginx 2>/dev/null || true
         fi
 
         # Log untuk pembaruan sertifikat

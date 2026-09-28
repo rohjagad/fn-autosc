@@ -103,9 +103,8 @@ function cekhttp() {
 
     for user in $users; do
         # Ambil statistik penggunaan dari Xray API
-        usage_data=$(xray api statsquery --server=127.0.0.1:10081 | grep -C 2 "$user" | grep value | awk '{print $2}' | sed 's/,//g; s/"//g')
-        inb=$(echo "$usage_data" | sed -n 1p)
-        outb=$(echo "$usage_data" | sed -n 2p)
+        inb=$(xray api stats --server=127.0.0.1:10081 -name "user>>>${user}>>>traffic>>>uplink" 2>/dev/null | grep value | awk '{gsub(/[",]/,"",$2); print $2}')
+        outb=$(xray api stats --server=127.0.0.1:10081 -name "user>>>${user}>>>traffic>>>downlink" 2>/dev/null | grep value | awk '{gsub(/[",]/,"",$2); print $2}')
 
         # Validasi data inb dan outb
         if [[ -z "$inb" || -z "$outb" ]]; then

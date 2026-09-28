@@ -181,5 +181,5 @@ function show_total_users {
 # Bug 70/71: count both daemons' events (dropbear logins were invisible)
 show_dropbear_logins
 show_openssh_logins
-rm -f "$DB_SRC" "$SSH_SRC" /tmp/login-ssh.txt /tmp/login-db.txt
 show_total_users
+rm -f "$DB_SRC" "$SSH_SRC" /tmp/login-ssh.txt /tmp/login-db.txt

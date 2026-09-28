@@ -981,3 +981,14 @@ Post-sweep cross-audit of all changed files against V23 and 1.20 references iden
 | **Regression** | R72-A: `never` now extends from today — strictly more capable than before. R72-B: `0` now accepted for ip/quota — matches original behaviour. R72-C: version strings corrected to real releases. |
 | **Over-strictness** | None — all changes relax previously over-strict constraints. |
 | **Over-engineering** | Minimal: one removed line in Go, one regex char per shell file, one string per OS menu option. |
+
+## 73. quota grep-C-2, WireGuard awk/<=, dm-menu nginx reload, limit-ip-ssh unique IPs, noobz probe, Telegram urlencode, echo-n, PAM path, grpc timeouts, upload size, cek-login rm order — Four Checks (September 29, 2026)
+
+Section 35's four-check rule applied to Fixes 238–249:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Fix 238: direct `stats -name` calls are the same API the reset lines already use; behaviour for valid users unchanged. Fix 239 (awk): processes every non-blank line not inside the deleted block; surviving peers unaffected. Fix 240 (`<=`): WireGuard accounts now deleted on expiry day (same as Xray); no account is deleted before its time. Fix 241: nginx reload fires only when cert renewal is skipped; cert-renewal path unchanged. Fix 242: unique-IP count is ≤ event count; enforcing against IP-limit is now correct. Fix 243: direct `noobzvpns` call matches what `xp.sh` already does. Fix 244: `--data-urlencode` is safer than `-d`; valid ASCII payloads produce identical HTTP bodies. Fix 245: `> file` is a pure truncation; behaviour under bash unchanged. Fix 246: `find` locates the same file; adds ARM64 support. Fix 247: `grpc_read_timeout 1d` is permissive; existing connections not dropped sooner. Fix 248: new error branch only fires on UPLOAD_ERR_INI_SIZE/FORM_SIZE; success path unchanged. Fix 249: reordering `rm` after `show_total_users` means the function reads the files it needs; display of logins unaffected. All files pass `bash -n`. |
+| **Over-strictness** | None. All changes relax constraints or correct logic without tightening anything. |
+| **Over-engineering** | Direct API calls (2 lines replacing 3). One `awk` replacing one `sed` + `grep` + `head`. One `nginx reload` line. One `awk` pipe stage. 3-line function replacing 7-line probe. One `--data-urlencode` flag. One `>` replacing `echo -n >`. One `find` replacing hardcoded path. Two `grpc_*timeout` lines per location. Seven PHP lines. One `rm` line moved. |
+| **vs the source** | Found 232/233/234/236/239/240/241/242: inherited from V23 and 1.20. Found 235/237/238/243: introduced in our prior fixes. |

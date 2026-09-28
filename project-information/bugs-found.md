@@ -1828,3 +1828,39 @@ Found 230. **`full/menu-system.sh` and `lite/menu-system.sh`: `information()` OS
 
 Found 231. **`full/backup.sh` and `lite/backup.sh`: `/etc/haproxy/` not included in backup** — HAProxy's TLS PEM bundle (`funny.pem`) and any custom HAProxy config are excluded. If `/etc/xray/xray.crt`/`xray.key` are also absent from a backup (e.g. cert not yet issued at backup time), `restore-ftp.sh`'s PEM rebuild also fails, leaving HAProxy with no valid certificate after restore.
 - **Inherited from V23.**
+
+Found 232. **`full/quota-{ws,http,split,grpc}.sh` and `lite/quota-{ws,http,split,grpc}.sh`: `grep -C 2 "$user"` cross-user substring match corrupts quota accounting** (line 106 in all 8 files) — `xray api statsquery` returns all users' stats as a flat text blob. `grep -C 2 "$user"` matches any line containing `$user` as a substring, so user `alice` matches `alice2`'s stat lines. Context window overlap also bleeds adjacent values. When a username is a prefix of another, the daemon charges the wrong bytes to the wrong account, causing false quota-exceeded deletions or silent under-charging.
+- **Inherited from V23.**
+
+Found 233. **`full/xp.sh` and `lite/xp.sh`: WireGuard peer deletion uses `sed "/^### Client X$/,/^$/d"` — open-ended range wipes all subsequent peers when last block has no trailing blank line** (line 317 full, line 316 lite) — `sed` range `/start/,/end/` never closes when there is no blank line at EOF; it deletes from the matched marker to end of file, wiping all remaining peer configurations. The subsequent `head -${line}` truncation also drops `PersistentKeepalive` and other lines after `AllowedIPs` in surviving peer blocks.
+- **Inherited from both V23 and 1.20.**
+
+Found 234. **`full/xp.sh` and `lite/xp.sh`: WireGuard expiry uses strict `<` — accounts live one extra day past expiry** (line 315/314) — `[[ $exp < $now ]]` is false when `$exp == $now` (expiry day). Xray accounts use `[[ "$exp2" -le "0" ]]` (≤ 0 days remaining = delete today). WireGuard accounts survive one extra day, inconsistent with all other transports.
+- **Inherited from both V23 and 1.20.**
+
+Found 235. **`full/dm-menu.sh` and `lite/dm-menu.sh`: nginx never reloaded when domain is changed but cert renewal is declined** — `dm()` updates `nginx.conf` server_name, then asks to renew the cert. If the operator answers `n`, the function returns without reloading nginx. The new `server_name` is not active until a manual restart; connections using the new domain as SNI continue to fail.
+- **Introduced in our code** (references restarted nginx unconditionally).
+
+Found 236. **`full/limit-ip-ssh.sh`: `cekcek` counts total login events, not unique source IPs** (line 280) — `cekcek=$(… | wc -l)` counts all log lines for the user. The limit file stores a maximum number of concurrent source IPs, but the enforcement compares event-count against IP-limit. A single IP making 3 connections triggers the lock (correct count, wrong metric); 5 different IPs each connecting once bypass the lock until `iplimit < 5`.
+- **Inherited from V23.**
+
+Found 237. **`full/menu-noobz.sh`: `noobzvpns remove --help` probe is unreliable — may silently call wrong subcommand** (lines 103, 113) — the probe tests `noobzvpns add --help` and `noobzvpns remove --help`. If the binary treats `--help` as an unrecognised argument and exits non-zero, the probe falls through to the legacy `--remove-user`/`--add-user` path even on a current binary that only understands `remove`/`add`. The account is then not removed from the daemon while the `.noob` record is deleted, orphaning it.
+- **Introduced in our code** (references called the commands directly with no probe).
+
+Found 238. **`full/xp.sh` and `lite/xp.sh`: NoobzVPN Telegram notification uses bare `-d` instead of `--data-urlencode`** (line 395/394) — all other Telegram calls in `xp.sh` use `--data-urlencode`. The NoobzVPN block uses `curl … -d "chat_id=$CHATID&text=$TEKS"`. If `$TEKS` contains `&`, `=`, or `+` (possible in expiry dates or usernames), the Telegram API receives a malformed message body.
+- **Inherited from V23** (NoobzVPN section was absent; introduced when we added it).
+
+Found 239. **`full/change-quota-{ws,http,split,grpc}.sh` and lite variants: `echo -n > file` is non-portable — writes literal `-n` under dash/sh** (line 205 in all 8 files) — under `/bin/sh` (dash), `echo -n` prints the literal string `-n\n`, leaving `-n` in the usage file instead of an empty file. The correct POSIX truncation is `> file`.
+- **Inherited from V23.**
+
+Found 240. **`installer/vpn.sh`: hardcoded `x86_64-linux-gnu` path for `openvpn-plugin-auth-pam.so` fails on ARM64** (line 101) — `cp /usr/lib/x86_64-linux-gnu/openvpn/plugins/openvpn-plugin-auth-pam.so …` fails silently on ARM64 (aarch64) where the path is `aarch64-linux-gnu`. OpenVPN PAM authentication is silently broken on non-x86 installs.
+- **Inherited from both V23 and 1.20.**
+
+Found 241. **`config/4.conf`, `config/6.conf`, `config/dual.conf`: gRPC locations missing `grpc_read_timeout`/`grpc_send_timeout`** — without these directives nginx uses its 60-second compiled-in default for gRPC streams, killing idle-but-alive gRPC connections. The `proxy_read_timeout 300s` set elsewhere does not apply to `grpc_pass` backends.
+- **Inherited from V23.**
+
+Found 242. **`website/upload.php`: PHP upload size error returns a generic unhelpful message** — when the backup zip exceeds `upload_max_filesize` (typically 2MB default), `$_FILES['backup']['error']` is `UPLOAD_ERR_INI_SIZE`. The code only checks for `UPLOAD_ERR_OK`, so size failures fall through to the generic "No file uploaded or an error occurred" message with no actionable feedback.
+- **Inherited from V23.**
+
+Found 243. **`full/cek-login-ssh.sh`: `show_total_users` reads temp files after they are deleted** (line 184–185) — `rm -f "$DB_SRC" "$SSH_SRC"` runs before `show_total_users`, which re-reads those files with `sed`. Both `uniq_db` and `uniq_ssh` are always 0, so "Total Active Users" always prints `0` regardless of actual login activity.
+- **Introduced in our Fix 225** (added `show_total_users` without checking call order).

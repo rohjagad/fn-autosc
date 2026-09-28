@@ -1924,3 +1924,53 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 237 (Found 231):** added `cp -r /etc/haproxy /root/backup/haproxy 2>/dev/null || true` to `full/backup.sh` and `lite/backup.sh`. Added `cp -r haproxy /etc/ 2>/dev/null || true` to all three `restore-ftp.sh` variants (full, lite, website).
 - **Verified live on VPS:** haproxy backup line present in deployed `backup`.
+
+### Fix 238 - quota-*.sh: replace grep -C 2 with direct xray api stats per-user (Found 232)
+
+- **Fix 238 (Found 232):** in all 8 quota daemons (full + lite), replaced `xray api statsquery | grep -C 2 "$user" | grep value | awk` with two direct `xray api stats --server=… -name "user>>>${user}>>>traffic>>>uplink"` and `…downlink` calls. Each call fetches exactly one user's counter — no grep, no context window, no substring collision.
+- **Verified live on VPS:** `quota-ws` uses `xray api stats … -name "user>>>…>>>uplink"`.
+
+### Fix 239 - xp.sh: WireGuard peer deletion uses awk instead of sed range; <= expiry (Found 233, 234)
+
+- **Fix 239 (Found 233):** replaced `sed -i "/^### Client X$/,/^$/d"` + `head -${line}` truncation with `awk "/^### Client ${user}$/{found=1} found && /^$/{found=0; next} !found{print} found{next}"`. awk handles EOF correctly (no open-ended range), and the `head` truncation that destroyed `PersistentKeepalive` lines is removed entirely. Applied to both `full/xp.sh` and `lite/xp.sh`.
+- **Fix 240 (Found 234):** changed `[[ $exp < $now ]]` to `[[ ! $now < $exp ]]` (equivalent to `<=` for ISO date strings), so WireGuard accounts are deleted on their expiry day, consistent with Xray's `[[ exp2 -le 0 ]]` logic.
+- **Verified live on VPS:** awk command and `! $now < $exp` present in deployed `xp`.
+
+### Fix 241 - dm-menu.sh: reload nginx when domain changed without cert renewal (Found 235)
+
+- **Fix 241 (Found 235):** in both `full/dm-menu.sh` and `lite/dm-menu.sh`, added `systemctl reload nginx 2>/dev/null || systemctl restart nginx 2>/dev/null || true` in the `else` (no cert renewal) branch of `dm()`. The new `server_name` is now active immediately regardless of the cert choice.
+
+### Fix 242 - limit-ip-ssh.sh: count unique IPs, not login events (Found 236)
+
+- **Fix 242 (Found 236):** changed `cekcek=$(… | wc -l)` to `cekcek=$(… | awk '{print $5}' | sort -u | wc -l)` so the lock fires when the number of **unique source IPs** exceeds the limit, matching the semantics of `limit-ip-ws.sh` and the limit file documentation.
+- **Verified live on VPS:** `sort -u` present in `limit-ip-ssh` cekcek line.
+
+### Fix 243 - menu-noobz.sh: remove unreliable --help probe (Found 237)
+
+- **Fix 243 (Found 237):** replaced `noobz_add_user()` and `noobz_remove_user()` probe wrappers with direct `noobzvpns add …` and `noobzvpns remove "$u"` calls, matching `xp.sh` which calls them directly without a probe.
+
+### Fix 244 - xp.sh: Noobz Telegram uses --data-urlencode (Found 238)
+
+- **Fix 244 (Found 238):** changed `curl … -d "chat_id=$CHATID&text=$TEKS"` to `curl … --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS"` in the NoobzVPN Telegram block in both `full/xp.sh` and `lite/xp.sh`.
+- **Verified live on VPS:** `--data-urlencode "text=$TEKS"` present in deployed `xp`.
+
+### Fix 245 - change-quota-*.sh: plain truncation instead of echo -n (Found 239)
+
+- **Fix 245 (Found 239):** replaced `echo -n > /etc/xray/quota/…/${user}_usage` with `> /etc/xray/quota/…/${user}_usage` (plain POSIX truncation) in all 8 change-quota files (full + lite).
+
+### Fix 246 - vpn.sh: arch-independent openvpn PAM plugin path (Found 240)
+
+- **Fix 246 (Found 240):** replaced hardcoded `cp /usr/lib/x86_64-linux-gnu/openvpn/plugins/openvpn-plugin-auth-pam.so …` with `PAM_PLUGIN=$(find /usr/lib -name "openvpn-plugin-auth-pam.so" 2>/dev/null | head -1); [ -n "$PAM_PLUGIN" ] && cp "$PAM_PLUGIN" …`. Works on x86_64, ARM64, and any other architecture.
+
+### Fix 247 - nginx configs: add grpc_read_timeout and grpc_send_timeout (Found 241)
+
+- **Fix 247 (Found 241):** added `grpc_read_timeout 1d; grpc_send_timeout 1d;` before each `grpc_pass` directive in `config/4.conf`, `config/6.conf`, and `config/dual.conf` (3 locations × 3 files = 9 additions). Prevents nginx from killing idle-but-alive gRPC streams at the 60-second compiled-in default.
+
+### Fix 248 - upload.php: actionable size-exceeded error message (Found 242)
+
+- **Fix 248 (Found 242):** added a pre-check for `UPLOAD_ERR_INI_SIZE` and `UPLOAD_ERR_FORM_SIZE` before the main upload handler in `website/upload.php`, printing a clear "File exceeds maximum upload size" message with the php.ini directive names to fix.
+
+### Fix 249 - cek-login-ssh.sh: move rm after show_total_users (Found 243)
+
+- **Fix 249 (Found 243):** moved `rm -f "$DB_SRC" "$SSH_SRC" …` to after `show_total_users` so the total-user count function can read the temp files it needs. Previously "Total Active Users" always printed `0`.
+- **Verified live on VPS:** `show_total_users` at line 184, `rm` at line 185.
