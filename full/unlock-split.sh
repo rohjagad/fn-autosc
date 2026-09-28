@@ -106,7 +106,7 @@ DATE=$(date +"%Y-%m-%d %H:%M:%S")
 
         TEXT="
 <b>━━━━━━━━━━━━━━━━━━━━━━━</b>
-<b>⚠️ X-RAY DELETED ACOUNT ⚠️</b>
+<b>⚠️ X-RAY SPLIT UNLOCK ACOUNT ⚠️</b>
 <b>━━━━━━━━━━━━━━━━━━━━━━━</b>
 <b>🗓️  Date     :</b> <code>$DATE</code>
 <b>👤 Username :</b> <code>$name</code>
@@ -147,6 +147,10 @@ ${separator}"
 
     read -p "Input Username to Unlock: " name || exit 0
     [ -z "$name" ] && exit 0
+    if [ ! -f "/var/log/create/xray/split/${name}.locked" ]; then
+        echo "User '$name' has no locked account file."
+        exit 1
+    fi
 else
     clear
     echo "No locked accounts found to unlock."

@@ -1796,3 +1796,23 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 211 (Found 205):** added `if len(fields) < 3 { continue }` before accessing `fields[0]` and `fields[2]` in both `delete-ssh.go` and `list-ssh.go`, matching the guard already present in `limit-ip.go`.
 - **Verified live on VPS:** both programs compiled and run. `delete-ssh` shows SSH member list without panic.
+
+### Fix 212 - kill-{http,split,grpc}: guard $exp before sed (Found 206)
+
+- **Fix 212 (Found 206):** in all 6 files (`full/kill-{http,split,grpc}.sh`, `lite/kill-{http,split,grpc}.sh`), wrapped the `sed -i "/### $user $exp/"` call in `if [[ -n "$exp" ]]`, matching the existing guard in `kill-ws.sh`. Prevents empty `$exp` from matching and deleting unrelated user entries.
+- **Verified live on VPS:** guard present in deployed `kill-http`.
+
+### Fix 213 - routing-{ws,http,split,grpc}: guard empty $line (Found 207)
+
+- **Fix 213 (Found 207):** in all 4 routing scripts, added `[[ -z "$line" ]] && { echo "outbounds section not found in config"; return 2>/dev/null || exit 1; }` after each `line=$(grep -n '"outbounds":' ...)` assignment (16 guards total). Prevents sed from running with an empty line number and corrupting the JSON config.
+- **Verified live on VPS:** guard present in deployed `routing-ws`.
+
+### Fix 214 - unlock-{ws,http,split,grpc}: validate .locked file exists (Found 208)
+
+- **Fix 214 (Found 208):** in all 4 unlock scripts, added `if [ ! -f ".../${name}.locked" ]; then echo "User '$name' has no locked account file."; exit 1; fi` after the username read and empty check. Prevents injecting malformed JSON from empty grep results.
+- **Verified live on VPS:** validation present in deployed `unlock-ws`.
+
+### Fix 215 - unlock-split.sh: fix copy-paste Telegram text (Found 209)
+
+- **Fix 215 (Found 209):** changed "X-RAY DELETED ACOUNT" to "X-RAY SPLIT UNLOCK ACOUNT" in `full/unlock-split.sh` line 109, matching the pattern used by `unlock-ws.sh` and `unlock-grpc.sh`.
+- **Verified live on VPS:** correct text in deployed `unlock-split`.

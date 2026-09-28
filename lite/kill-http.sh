@@ -108,10 +108,12 @@ function check_quota() {
 
         if [[ $usage -ge $quota_limit ]]; then
             exp=$(grep -w "^### $user" "/etc/xray/json/upgrade.json" | cut -d ' ' -f 3 | sort | uniq)
-            sed -i "/### $user $exp/ {N;d}" /etc/xray/json/upgrade.json
-            sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/upgrade.json
-            systemctl daemon-reload
-            systemctl restart xray@upgrade
+            if [[ -n "$exp" ]]; then
+                sed -i "/### $user $exp/ {N;d}" /etc/xray/json/upgrade.json
+                sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/upgrade.json
+                systemctl daemon-reload
+                systemctl restart xray@upgrade
+            fi
 
             readable_limit=$(human_readable "$quota_limit")
             readable_usage=$(human_readable "$usage")

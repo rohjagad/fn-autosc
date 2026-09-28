@@ -1750,3 +1750,15 @@ Found 204. **`full/extend-ssh.go`: panics on accounts with "never" expiry** (`fu
 
 Found 205. **`full/delete-ssh.go` and `full/list-ssh.go`: index-out-of-range panic on malformed `/etc/passwd` lines** (`full/delete-ssh.go` line 33, `full/list-ssh.go` line 33) - `fields := strings.Split(line, ":")` followed by `fields[0]` and `fields[2]` without checking `len(fields) >= 3`. A malformed passwd line with fewer than 3 colon-separated fields causes a Go panic. `limit-ip.go` has this guard but these two files don't.
 - **Inherited from both V23 and 1.20.**
+
+Found 206. **`full/kill-{http,split,grpc}.sh` and `lite/kill-{http,split,grpc}.sh`: unguarded `$exp` before sed deletes wrong JSON entries** (line 110-111 in all 6 files) — when a user's quota is exceeded, the kill script extracts `$exp` via `grep -w "^### $user"`. If the user's comment line is missing or malformed, `$exp` is empty and `sed -i "/### $user / {N;d}"` matches any comment containing that username, potentially deleting unrelated users' entries from the xray JSON config. `kill-ws.sh` already has `if [[ -n "$exp" ]]` guard; the other three transports (http, split, grpc) do not, in both full and lite editions.
+- **Inherited from both V23 and 1.20.**
+
+Found 207. **`full/routing-{ws,http,split,grpc}.sh`: empty `$line` from missing `"outbounds":` corrupts xray JSON** (4 occurrences per file, 16 total) — `line=$(grep -n '"outbounds":' ... | head -1)` followed by `sed -i "${line},$d"`. If `"outbounds":` is not found, `$line` is empty. GNU sed errors on `,\$d` with empty start → sed fails, but script continues (no `set -e`) and appends a new outbounds section to the untouched file, producing duplicate outbounds → invalid JSON → xray fails to start.
+- **Inherited from both V23 and 1.20.**
+
+Found 208. **`full/unlock-{ws,http,split,grpc}.sh`: no validation that typed username has a `.locked` file** (line 148-149 in ws/split/grpc, line 150-151 in http) — after listing locked accounts, the script accepts any typed username. If the user types a non-locked or non-existent name, `uuid`, `exp2`, and `protokol2` are all empty. The script injects malformed JSON (empty UUID/expiry) into the xray config, then `mv` on a non-existent `.locked` file fails silently. Xray restarts with broken config.
+- **Inherited from V23.**
+
+Found 209. **`full/unlock-split.sh`: Telegram notification says "X-RAY DELETED ACOUNT" instead of unlock message** (line 109) — copy-paste error from `delete-split.sh`. The operator sees a deletion notification when the action was actually an unlock.
+- **Inherited from V23.**

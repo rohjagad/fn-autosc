@@ -835,3 +835,14 @@ Section 35's four-check rule applied to Fixes 208-211:
 | **Over-strictness** | Fix 208: no new restrictions. Fix 209: sleep duration is now correct (500ms) instead of 0ms. Fix 210: "never" accounts get a clear error instead of a panic. Fix 211: malformed lines are skipped instead of panicking. |
 | **Over-engineering** | One-line reorder, one `time.Sleep`, one explicit `Close()`, one `if` check, two `len(fields)` guards. |
 | **vs the source** | All four bugs inherited from V23 and 1.20. Fix 208 was introduced by our Fix 204 (added xp_log without noticing variable ordering). |
+
+## 62. kill-* $exp guard, routing-* $line guard, unlock-* validation, unlock-split text - Four Checks (September 28, 2026)
+
+Section 35's four-check rule applied to Fixes 212-215:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Fix 212: only adds an `if` guard around existing sed/restart — when `$exp` is non-empty, behavior is identical. Fix 213: only adds early-exit when `$line` is empty — when `$line` is non-empty, behavior is identical. Fix 214: only adds a file-existence check — when the user types a valid locked account name, behavior is identical. Fix 215: only changes a string literal in HTML notification. All files pass `bash -n`. |
+| **Over-strictness** | Fix 212: users with valid `$exp` are deleted as before. Fix 213: routing functions with valid outbounds sections proceed as before. Fix 214: valid locked usernames proceed as before. Fix 215: no behavior change. |
+| **Over-engineering** | One `if` guard (×6 files), one `[[ -z ]]` guard (×16 sites), one `[ ! -f ]` guard (×4 files), one string change. |
+| **vs the source** | All four bugs inherited from V23 (and 1.20 where applicable). |

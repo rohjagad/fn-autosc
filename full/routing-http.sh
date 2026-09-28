@@ -88,6 +88,7 @@ fi
 
 # Mendapatkan nomor baris untuk bagian "outbounds"
 line=$(cat /etc/xray/json/upgrade.json | grep -n '"outbounds":' | awk -F: '{print $1}' | head -1)
+[[ -z "$line" ]] && { echo "outbounds section not found in config"; return 2>/dev/null || exit 1; }
 
 # Menghapus bagian setelah "outbounds"
 sed -i "${line},\$d" /etc/xray/json/upgrade.json
@@ -233,6 +234,7 @@ fi
 
 # Mendapatkan nomor baris untuk bagian "outbounds"
 line=$(cat /etc/xray/json/upgrade.json | grep -n '"outbounds":' | awk -F: '{print $1}' | head -1)
+[[ -z "$line" ]] && { echo "outbounds section not found in config"; return 2>/dev/null || exit 1; }
 
 # Menghapus bagian setelah "outbounds"
 sed -i "${line},\$d" /etc/xray/json/upgrade.json
@@ -383,6 +385,7 @@ fi
 
 # Mendapatkan nomor baris untuk bagian "outbounds"
 line=$(cat /etc/xray/json/upgrade.json | grep -n '"outbounds":' | awk -F: '{print $1}' | head -1)
+[[ -z "$line" ]] && { echo "outbounds section not found in config"; return 2>/dev/null || exit 1; }
 
 # Menghapus bagian setelah "outbounds"
 sed -i "${line},\$d" /etc/xray/json/upgrade.json
@@ -510,6 +513,7 @@ XRAY_CONFIG="/etc/xray/json/upgrade.json"
 
 # Mendapatkan nomor baris untuk bagian "outbounds"
 line=$(cat /etc/xray/json/upgrade.json | grep -n '"outbounds":' | awk -F: '{print $1}' | head -1)
+[[ -z "$line" ]] && { echo "outbounds section not found in config"; return 2>/dev/null || exit 1; }
 
 # Menghapus bagian setelah "outbounds"
 sed -i "${line},\$d" /etc/xray/json/upgrade.json
