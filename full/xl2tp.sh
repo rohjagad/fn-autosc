@@ -140,13 +140,14 @@ systemctl daemon-reload
 systemctl restart ipsec
 systemctl restart xl2tpd
 clear
+PSK=$(grep -oP '(?<=: PSK ")\S+(?=")' /etc/ipsec.secrets 2>/dev/null || echo "myvpn")
 cat <<EOF
 
 ============================
 L2TP/IPSEC XAuth PSK VPN
 ============================
 Domain     : $domain
-IPsec PSK  : myvpn
+IPsec PSK  : $PSK
 Username   : $VPN_USER
 Password   : $VPN_PASSWORD
 Expired    : $exp

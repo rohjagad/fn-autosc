@@ -1896,3 +1896,8 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 ### Fix 231 - website/script.js: accept any .zip backup filename (Found 225)
 
 - **Fix 231 (Found 225):** changed `file.name !== 'backup.zip'` to `!file.name.endsWith('.zip')`. Accepts any ZIP backup file regardless of name, matching the server-side behaviour.
+
+### Fix 232 - l2tp.sh: random IPsec PSK at install time; xl2tp.sh reads from ipsec.secrets (Found 226)
+
+- **Fix 232 (Found 226):** in `installer/l2tp.sh`, replaced `VPN_IPSEC_PSK='myvpn'` with `VPN_IPSEC_PSK="$(openssl rand -base64 16)"` so each install generates a unique 16-byte PSK. In `full/xl2tp.sh`, replaced the hardcoded `myvpn` display string with `PSK=$(grep -oP '(?<=: PSK ")\S+(?=")' /etc/ipsec.secrets 2>/dev/null || echo "myvpn")` so the operator sees the actual installed PSK.
+- **Verified live on VPS:** `xl2tp` reads PSK from ipsec.secrets.

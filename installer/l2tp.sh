@@ -74,7 +74,7 @@ chmod +x /etc/funny/.l2tp
 chmod +x /etc/funny/.l2tp
 
 # Installasi
-VPN_IPSEC_PSK='myvpn'
+VPN_IPSEC_PSK="$(openssl rand -base64 16)"
 NET_IFACE=$(ip -o $NET_IFACE -4 route show to default | awk '{print $5}');
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 source /etc/os-release

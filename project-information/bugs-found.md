@@ -1810,3 +1810,6 @@ Found 224. **`full/menu-bot.sh` and `lite/menu-bot.sh`: Telegram Chat ID accepte
 
 Found 225. **`website/script.js`: hardcoded `backup.zip` filename check prevents uploading renamed backups** (line 15) — `file.name !== 'backup.zip'` rejects any backup file not named exactly `backup.zip`. The server-side (`upload.php`, `restore-ftp.sh`) accepts any `.zip` file. Operators cannot upload `backup-2026-09-28.zip` or any renamed backup.
 - **Inherited from V23.**
+
+Found 226. **`installer/l2tp.sh`: hardcoded IPsec PSK `'myvpn'` — every installation uses the same well-known shared secret** (line 77) — `VPN_IPSEC_PSK='myvpn'` is written to `/etc/ipsec.secrets` on every install. An attacker who knows the PSK can impersonate the VPN server. Additionally, `full/xl2tp.sh` (the menu that displays credentials to the operator) has the PSK hardcoded as a display literal rather than reading from ipsec.secrets, so even if the PSK were manually changed the display would still show `myvpn`.
+- **Inherited from both V23 and 1.20.**

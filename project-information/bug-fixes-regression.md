@@ -923,3 +923,14 @@ Section 35's four-check rule applied to Fixes 230-231:
 | **Over-strictness** | Fix 230: allows `-100...` group IDs. Fix 231: allows any `.zip` name. |
 | **Over-engineering** | One `[[ =~ ]]` check (×2 files ×2 sites). One `endsWith` replacing one `!==`. |
 | **vs the source** | Both inherited from V23 and 1.20. |
+
+## 70. l2tp.sh random PSK, xl2tp.sh live PSK display - Four Checks (September 28, 2026)
+
+Section 35's four-check rule applied to Fix 232:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | `openssl rand -base64 16` produces a valid ASCII string with no shell-special characters that would break the ipsec.secrets `PSK "..."` format. The grep in `xl2tp.sh` falls back to `myvpn` if ipsec.secrets is missing, preserving old-install compatibility. |
+| **Over-strictness** | None. |
+| **Over-engineering** | One `openssl rand` substitution. One `grep -oP` with fallback. |
+| **vs the source** | Inherited from V23 and 1.20. |
