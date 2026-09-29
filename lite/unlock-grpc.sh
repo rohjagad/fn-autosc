@@ -147,6 +147,10 @@ ${separator}"
 
     read -p "Input Username to Unlock: " name || exit 0
     [ -z "$name" ] && exit 0
+    if [ ! -f "/var/log/create/xray/grpc/${name}.locked" ]; then
+        echo "User '$name' has no locked account file."
+        exit 1
+    fi
 else
     clear
     echo "No locked accounts found to unlock."

@@ -1903,3 +1903,21 @@ Found 255. **`full/menu-system.sh` and `lite/menu-system.sh`: OS reinstall menu 
 
 Found 256. **`installer/request.sh`: `chmod +x config.json` sets execute bit on a JSON config file** (line 91) — should be `chmod 600`.
 - **Inherited from V23.**
+
+Found 257. **`full/xp.sh` and `lite/xp.sh`: `grpc_expired` flag never initialized to `0` before the gRPC expiry loop** (line 194 full, 191 lite) — Fix 250/254 added batched-restart flags for all 4 Xray transports. `ws_expired=0`, `http_expired=0`, and `split_expired=0` are all initialized before their loops, but `grpc_expired=0` was omitted. When no gRPC user expires, `$grpc_expired` is unset; `[[ "" -eq 1 ]]` evaluates to false by luck in bash but errors under `set -u` or non-bash shells.
+- **Regression introduced by Fix 250/254** (incomplete flag initialization).
+
+Found 258. **`lite/xp.sh`: WS expiry loop still restarts `xray@ws` per-user inside the loop — Fix 250 was never applied to lite WS** (lines 102–104) — Fix 250 moved WS/HTTP/split/grpc restarts outside loops using flags in `full/xp.sh`. The same fix was applied to lite for HTTP/split/grpc but the lite WS section was missed. It still has `clear; systemctl daemon-reload; systemctl restart xray@ws` inside the `if [[ "$exp2" -le "0" ]]; then` block. N expired WS users → N xray@ws restarts.
+- **Regression introduced by incomplete Fix 250.**
+
+Found 259. **`lite/dm-menu.sh` (3 locations) and `lite/restore-ftp.sh` (1 location): `systemctl restart haproxy` revives port 777 with no backend on lite edition** — Fix 184 (Found 178) removed haproxy restarts from `lite/menu-system.sh` but missed `lite/dm-menu.sh` (lines 136, 162, 408) and `lite/restore-ftp.sh` (line 124). Every certificate renewal or backup restore on lite starts HAProxy on port 777 forwarding to Dropbear port 109 which lite doesn't run.
+- **Residual from incomplete Fix 184.**
+
+Found 260. **`lite/unlock-{ws,http,split,grpc}.sh`: missing `.locked` file existence validation — Fix 214 only applied to full/ (4 files)** — Fix 214 added `if [ ! -f ".../${name}.locked" ]; then echo ...; exit 1; fi` to all 4 full/ unlock scripts. The identical check was never applied to the 4 lite/ copies. Typing a non-existent username in lite injects empty UUID/expiry into the xray config.
+- **Regression from incomplete Fix 214.**
+
+Found 261. **`full/menu-wg.sh`: WireGuard extend has no guard for unparseable stored expiry** (line 327–328) — Fix 161 (Found 153) claimed to guard `menu-wg.sh` extend, but the guard was never applied. `date -d "${exp_old}" +%s` with an empty or corrupted `exp_old` produces empty output, arithmetic treats it as 0, and the new expiry date is computed from epoch 1970.
+- **Residual from incomplete Fix 161.**
+
+Found 262. **`installer/l2tp.sh`: `$NET_IFACE` self-reference on first assignment** (line 78) — `NET_IFACE=$(ip -o $NET_IFACE -4 route show to default | awk '{print $5}')` references `$NET_IFACE` before it is set. Expands to empty, making the command `ip -o -4 route show to default` which works by accident because the stray empty argument is ignored.
+- **Inherited from V23.**

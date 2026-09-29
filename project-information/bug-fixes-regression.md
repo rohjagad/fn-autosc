@@ -1025,3 +1025,14 @@ Section 35's four-check rule applied to Fixes 258–261:
 | **Over-strictness** | Fix 261: config.json is read by the udp-request binary (also root) — `600` is correct and not over-strict. |
 | **Over-engineering** | One quote removed. One letter added (`F` flag + `/`). Four string replacements. One permission word. |
 | **vs the source** | Found 253: regression from Fix 255. Found 254/256: inherited from V23. Found 255: regression from R72-C. |
+
+## 77. grpc_expired init; lite WS restart; lite haproxy; lite unlock; menu-wg guard; l2tp iface — Four Checks (September 29, 2026)
+
+Section 35's four-check rule applied to Fixes 262–267:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Fix 262: adding `grpc_expired=0` is pure initialization; no behavior change when variable was unset (bash defaults to 0 for arithmetic on empty). Prevents errors under `set -u`. Fix 263: lite WS now restarts once instead of N times per cron; identical pattern to full/. Fix 264: haproxy restart was the only thing bringing up port 777 on lite; removing it closes the port. PEM file creation preserved for potential full-edition switch. Fix 265: identical guard to full/ Fix 214; non-existent usernames now rejected instead of corrupting config. Fix 266: guard exits extend early on bad date; account left unchanged. Fix 267: empty `$NET_IFACE` was ignored by `ip`; explicit removal produces identical command. All files pass `bash -n`. |
+| **Over-strictness** | None. All changes prevent errors or match existing patterns. |
+| **Over-engineering** | One flag init. One flag+if block (existing pattern). Four comment replacements. Four 3-line file-existence checks. One 4-line date guard. One word removal. |
+| **vs the source** | Found 257/258/259/260/261: regressions from our incomplete fixes. Found 262: inherited from V23. |

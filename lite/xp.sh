@@ -68,6 +68,7 @@ clear
 xp_log() { echo "$(date '+%F %T') xp: $*" >> /etc/xray/.quota.logs; }
 
 ##----- Auto Remove Xray Websocket
+ws_expired=0
 data=( `cat /etc/xray/json/ws.json | grep '^###' | cut -d ' ' -f 2 | sort | uniq`);
 now=`date +"%Y-%m-%d"`
 for user in "${data[@]}"
@@ -99,11 +100,13 @@ KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL
-clear
-systemctl daemon-reload
-systemctl restart xray@ws
+ws_expired=1
 fi
 done
+if [[ $ws_expired -eq 1 ]]; then
+    systemctl daemon-reload
+    systemctl restart xray@ws
+fi
 
 ##----- Auto Remove Xray HTTP UPGRADE
 http_expired=0
@@ -188,6 +191,7 @@ if [[ $split_expired -eq 1 ]]; then
 fi
 
 ##----- Auto Remove Xray grpc HTTP
+grpc_expired=0
 data=( `cat /etc/xray/json/grpc.json | grep '^###' | cut -d ' ' -f 2 | sort | uniq`);
 now=`date +"%Y-%m-%d"`
 for user in "${data[@]}"

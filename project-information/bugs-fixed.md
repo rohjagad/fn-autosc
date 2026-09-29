@@ -2030,3 +2030,29 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 ### Fix 261 - installer/request.sh: chmod 600 on config.json (Found 256)
 
 - **Fix 261 (Found 256):** changed `chmod +x config.json` to `chmod 600 config.json` in `installer/request.sh`.
+
+### Fix 262 - xp.sh: initialize grpc_expired=0 before gRPC loop (Found 257)
+
+- **Fix 262 (Found 257):** added `grpc_expired=0` before the gRPC expiry loop in both `full/xp.sh` and `lite/xp.sh`, matching `ws_expired=0`, `http_expired=0`, and `split_expired=0`. All 4 transport flags now initialized.
+- **Verified live on VPS:** all 4 `_expired=0` flags present in deployed `xp`.
+
+### Fix 263 - lite/xp.sh: apply WS batched-restart pattern (Found 258)
+
+- **Fix 263 (Found 258):** added `ws_expired=0` before the WS loop, replaced per-user `systemctl restart xray@ws` with `ws_expired=1` inside the loop, and added the post-loop `if [[ $ws_expired -eq 1 ]]; then systemctl daemon-reload; systemctl restart xray@ws; fi` block. Lite WS now matches the full/ pattern.
+
+### Fix 264 - lite/dm-menu.sh and lite/restore-ftp.sh: remove haproxy restarts (Found 259)
+
+- **Fix 264 (Found 259):** replaced `systemctl restart haproxy 2>/dev/null || true` with `# haproxy not used in lite edition` at all 4 locations (lite/dm-menu.sh lines 136, 162, 408; lite/restore-ftp.sh line 124). Port 777 is no longer revived on lite edition during cert operations or restores.
+
+### Fix 265 - lite/unlock-*.sh: add .locked file existence check (Found 260)
+
+- **Fix 265 (Found 260):** added the same `.locked` file existence validation from full/ to all 4 lite/ unlock scripts (unlock-ws.sh, unlock-http.sh, unlock-split.sh, unlock-grpc.sh). Typing a non-existent username now prints an error and exits instead of injecting empty values.
+
+### Fix 266 - menu-wg.sh: add unparseable-expiry guard to extend (Found 261)
+
+- **Fix 266 (Found 261):** added `d1_check=$(date -d "${exp_old}" +%s 2>/dev/null); if [ -z "$d1_check" ]; then echo ...; return; fi` before the arithmetic in `full/menu-wg.sh` extend function. Matches the guard pattern used by `extend-ws.sh` and the other transport extend scripts.
+- **Verified live on VPS:** guard present in deployed `menu-wg`.
+
+### Fix 267 - l2tp.sh: remove $NET_IFACE self-reference (Found 262)
+
+- **Fix 267 (Found 262):** changed `ip -o $NET_IFACE -4 route show to default` to `ip -o -4 route show to default` in `installer/l2tp.sh`. The stray self-reference is removed.

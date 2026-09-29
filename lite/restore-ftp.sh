@@ -121,7 +121,7 @@ systemctl restart nginx
 mkdir -p /etc/haproxy
 cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem 2>/dev/null
 chmod 644 /etc/haproxy/funny.pem 2>/dev/null
-systemctl restart haproxy 2>/dev/null || true
+# haproxy not used in lite edition
 systemctl restart cron
 clear
 echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━"

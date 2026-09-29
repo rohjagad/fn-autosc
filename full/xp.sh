@@ -191,6 +191,7 @@ if [[ $split_expired -eq 1 ]]; then
 fi
 
 ##----- Auto Remove Xray grpc HTTP
+grpc_expired=0
 data=( `cat /etc/xray/json/grpc.json | grep '^###' | cut -d ' ' -f 2 | sort | uniq`);
 now=`date +"%Y-%m-%d"`
 for user in "${data[@]}"

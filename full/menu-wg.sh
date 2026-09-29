@@ -325,6 +325,12 @@ function extend() {
 	done
 
 	exp_old=$(cat /etc/funny/.wireguard | grep -w $user | awk '{print $2}')
+	d1_check=$(date -d "${exp_old}" +%s 2>/dev/null)
+	if [ -z "$d1_check" ]; then
+		echo -e "\033[0;31mUnparseable expiry for this account - leaving it unchanged.\033[0m"
+		sleep 2
+		return
+	fi
 	diff=$((($(date -d "${exp_old}" +%s)-$(date +%s))/(86400)))
 	duration=$(expr $diff + $extend)
 	exp_new=$(date -d +${duration}days +%Y-%m-%d)
