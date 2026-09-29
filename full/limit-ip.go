@@ -238,50 +238,44 @@ func main() {
 		return
 	}
 
-	if _, err := os.Stat(limitFile); err == nil {
-		currentIPLimit := getIPLimit(user)
-		rerechanBanner()
-		barisPanjang()
-		fmt.Println(Yellow + " Before " + Xark)
-		fmt.Printf(" Username   : %s\n", user)
-		fmt.Printf(" Ip Limit   : %s\n", currentIPLimit)
-		expiryDate := getAccountExpiry(user)
-		fmt.Printf(" Expiry     : %s\n", expiryDate)
-		barisPanjang()
+	currentIPLimit := getIPLimit(user)
+	rerechanBanner()
+	barisPanjang()
+	fmt.Println(Yellow + " Before " + Xark)
+	fmt.Printf(" Username   : %s\n", user)
+	fmt.Printf(" Ip Limit   : %s\n", currentIPLimit)
+	expiryDate := getAccountExpiry(user)
+	fmt.Printf(" Expiry     : %s\n", expiryDate)
+	barisPanjang()
 
-		fmt.Println()
-		fmt.Println("\033[38;5;208m0 not allowed\033[0m")
-		fmt.Print("Input New IP   : ")
-		var newIPLimit string
-		fmt.Scanln(&newIPLimit)
+	fmt.Println()
+	fmt.Println("\033[38;5;208m0 not allowed\033[0m")
+	fmt.Print("Input New IP   : ")
+	var newIPLimit string
+	fmt.Scanln(&newIPLimit)
 
-		loadingAnimasi()
+	loadingAnimasi()
+
+	if !isPositiveInt(newIPLimit) {
+		fmt.Println(Red + "Invalid input!" + Xark)
+		Credit()
+	} else {
 		loadingSucces()
-
-		if !isPositiveInt(newIPLimit) {
-			fmt.Println(Red + "Invalid input!" + Xark)
-		} else {
-			if err := os.WriteFile(limitFile, []byte(newIPLimit), 0644); err != nil {
-				fmt.Println("Error memperbarui file limit IP:", err)
-			}
-			updateLog(logFile, newIPLimit)
-
-			rerechanBanner()
-			barisPanjang()
-			fmt.Println(Green + " Successfully updated " + Xark)
-			fmt.Println()
-			fmt.Println(Yellow + " After " + Xark)
-			fmt.Printf(" New IP   : %s\n", newIPLimit)
-			fmt.Printf(" Username : %s\n", user)
-			fmt.Printf(" Expiry   : %s\n", expiryDate)
-
-			sendTelegramNotification(user, currentIPLimit, newIPLimit, expiryDate)
-			Credit()
+		if err := os.WriteFile(limitFile, []byte(newIPLimit), 0644); err != nil {
+			fmt.Println("Error memperbarui file limit IP:", err)
 		}
-	} else
-    {
+		updateLog(logFile, newIPLimit)
+
 		rerechanBanner()
-		fmt.Println(Red + "Error: Limit IP untuk username " + user + " tidak ditemukan!" + Xark)
+		barisPanjang()
+		fmt.Println(Green + " Successfully updated " + Xark)
+		fmt.Println()
+		fmt.Println(Yellow + " After " + Xark)
+		fmt.Printf(" New IP   : %s\n", newIPLimit)
+		fmt.Printf(" Username : %s\n", user)
+		fmt.Printf(" Expiry   : %s\n", expiryDate)
+
+		sendTelegramNotification(user, currentIPLimit, newIPLimit, expiryDate)
 		Credit()
 	}
 }

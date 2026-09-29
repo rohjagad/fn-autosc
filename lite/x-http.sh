@@ -151,11 +151,11 @@ ${orange}Press [Ctrl + C] to exit${NC}"
         4|04) clearScreen; trial-vmess-http ;;
         5|05) clearScreen; trial-vless-http ;;
         6|06) clearScreen; trial-trojan-http ;;
-        7|07) clearScreen; cek-xray-http ;;
+        7|07) clearScreen; cek-xray-http  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ;;
         8|08) clearScreen; delete-http ;;
         9|09) clearScreen; extend-http ;;
-        10) clearScreen; log-database-xray-http ;;
-        11) clearScreen; list-xray-http ;;
+        10) clearScreen; log-database-xray-http  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ;;
+        11) clearScreen; list-xray-http  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ;;
         12) clearScreen; change-id-http ;;
         13) clearScreen; unlock-http ;;
         14) clearScreen; routing-http ;;

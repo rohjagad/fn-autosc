@@ -128,10 +128,10 @@ read -p "Input option: " aws || exit 0
     1) clear ; addssh ;;
     2) clear ; trial-ssh ;;
     3) clear ; delete-ssh ;;
-    4) clear ; cek-login-ssh ;;
-    5) clear ; log-acc-ssh ;;
+    4) clear ; cek-login-ssh ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ;;
+    5) clear ; log-acc-ssh ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ;;
     6) clear ; extend-ssh ;;
-    7) clear ; list-ssh ;;
+    7) clear ; list-ssh ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ;;
     8) clear ; pwd-ssh ;;
     9) clear ; limit-ip ;;
     esac

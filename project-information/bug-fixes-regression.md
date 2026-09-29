@@ -1069,3 +1069,14 @@ Section 35's four-check rule applied to Fixes 273–279:
 | **Over-strictness** | None. All changes prevent silent failures, infinite loops, or encoding corruption. |
 | **Over-engineering** | Standard bash `|| exit 1` idiom; standard Go compiler build flags; one URL fallback chain; standard curl `--data-urlencode` flag. Minimal diff footprint. |
 | **vs the source** | Found 268: inherited from V23 (unclosed loop). Found 269: packaging gap. Found 270: regression from Fix 271. Found 271: Decision 8 alignment. Found 272: introduced in our code. Found 273: inherited from V23. Found 274: inherited from V23. |
+
+## 81. Argo ingress/restart, L2TP pauses & date guard, IPsec sed, limit-ip file check, informative display pauses — Four Checks (September 29, 2026)
+
+Section 35's four-check rule applied to Fixes 280–285:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Fix 280: Single ingress rule to port 80 preserves all routing via nginx; `systemctl enable --now cloudflared` ensures the service actually runs; option 2 restores V23's restart intent. Fix 281: Pauses allow reading credentials before clear; interactive exit preserved via `\|\| true`. Fix 282: Date guard prevents epoch corruption; anchored sed prevents cross-user corruption; extending expired accounts from today matches R72-A. Fix 283: `^$user:` matches the same user line, removing algorithm-specific fragility. Fix 284: Allows setting limit where none existed; creates file cleanly; validation precedes success display. Fix 285: Display screens pause until keypress, eliminating 0-millisecond screen wipes. All files pass `bash -n`. |
+| **Over-strictness** | Fix 284 explicitly removes over-strict file existence check. Fix 283 relaxes MD5 pattern to generic colon delimiter. Fix 282 allows expired accounts to renew without penalty. |
+| **Over-engineering** | Standard bash pauses (`read -n 1`); one-line regex relaxations; standard cloudflared ingress syntax. Minimal diff. |
+| **vs the source** | Found 275/276/277/278/279/280: all inherited from V23 defects and omissions. |

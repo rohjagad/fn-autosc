@@ -151,11 +151,11 @@ ${orange}Press [Ctrl + C] to exit${NC}"
         4|04) clearScreen; trial-vmess-grpc ;;
         5|05) clearScreen; trial-vless-grpc ;;
         6|06) clearScreen; trial-trojan-grpc ;;
-        7|07) clearScreen; cek-xray-grpc ;;
+        7|07) clearScreen; cek-xray-grpc  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ;;
         8|08) clearScreen; delete-grpc ;;
         9|09) clearScreen; extend-grpc ;;
-        10) clearScreen; log-database-xray-grpc ;;
-        11) clearScreen; list-xray-grpc ;;
+        10) clearScreen; log-database-xray-grpc  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ;;
+        11) clearScreen; list-xray-grpc  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ;;
         12) clearScreen; change-id-grpc ;;
         13) clearScreen; unlock-grpc ;;
         14) clearScreen; routing-grpc ;;

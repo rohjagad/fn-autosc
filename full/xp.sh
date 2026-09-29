@@ -297,7 +297,7 @@ if [[ "$exp2" -le "0" ]]; then
     xp_log "deleted $user (expiry $exp)"
 sed -i "/^### $user $exp/d" "/etc/funny/.l2tp"
 sed -i '/^"'"$user"'" l2tpd/d' /etc/ppp/chap-secrets
-sed -i '/^'"$user"':\$1\$/d' /etc/ipsec.d/passwd
+sed -i '/^'"$user"':/d' /etc/ipsec.d/passwd
 TEKS="
 ====================
 L2TP Account Expired

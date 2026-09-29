@@ -149,11 +149,11 @@ ${orange}Press [Ctrl + C] to exit${NC}"
         4|04) clearScreen; trial-vmess-ws ;;
         5|05) clearScreen; trial-vless-ws ;;
         6|06) clearScreen; trial-trojan-ws ;;
-        7|07) clearScreen; cek-xray-ws ;;
+        7|07) clearScreen; cek-xray-ws  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ;;
         8|08) clearScreen; delete-ws ;;
         9|09) clearScreen; extend-ws ;;
-        10) clearScreen; log-database-xray-ws ;;
-        11) clearScreen; list-xray-ws ;;
+        10) clearScreen; log-database-xray-ws  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ;;
+        11) clearScreen; list-xray-ws  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ;;
         12) clearScreen; change-id-ws ;;
         13) clearScreen; unlock-ws ;;
         14) clearScreen; routing-ws ;;

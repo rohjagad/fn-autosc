@@ -151,11 +151,11 @@ ${orange}Press [Ctrl + C] to exit${NC}"
         4|04) clearScreen; trial-vmess-split ;;
         5|05) clearScreen; trial-vless-split ;;
         6|06) clearScreen; trial-trojan-split ;;
-        7|07) clearScreen; cek-xray-split ;;
+        7|07) clearScreen; cek-xray-split  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ;;
         8|08) clearScreen; delete-split ;;
         9|09) clearScreen; extend-split ;;
-        10) clearScreen; log-database-xray-split ;;
-        11) clearScreen; list-xray-split ;;
+        10) clearScreen; log-database-xray-split  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ;;
+        11) clearScreen; list-xray-split  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ;;
         12) clearScreen; change-id-split ;;
         13) clearScreen; unlock-split ;;
         14) clearScreen; routing-split ;;

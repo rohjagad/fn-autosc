@@ -151,21 +151,23 @@ credentials-file: /root/.cloudflared/$id.json
 ingress:
   - hostname: $domargo
     service: http://localhost:80
-  - hostname: $domargo
-    service: http://localhost:2080
-    originRequest:
-      httpHostHeader: $domargo
-      headers:
-        Upgrade: websocket
-        Connection: Upgrade
   - service: http_status:404
 END
 # Menyimpan Domain
 #echo "$domargo" > /etc/xray/domargo
 
-# Menjalankan Servixe
-sudo cloudflared service uninstall
+# Menjalankan Service
+sudo cloudflared service uninstall 2>/dev/null || true
 sudo cloudflared service install
+systemctl daemon-reload
+systemctl enable --now cloudflared
+}
+
+restart_argo() {
+clear
+echo "Restarting Cloudflare Argo Tunnel..."
+systemctl restart cloudflared
+sleep 2
 }
 
 detail() {
@@ -226,6 +228,7 @@ ${separator}
 Status       : $ssws
 ${blue_sep}
 ${green}1${NC}. Install Argo Tunnel
+${green}2${NC}. Restart Argo Tunnel
 ${green}3${NC}. Argo Tunnel Details
 ${green}0${NC}. Back to Main Menu
 ${separator}
@@ -234,6 +237,7 @@ ${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input option: " opws || exit 0
 case $opws in
 1) clear ; setup ; tamp ;;
+2) clear ; restart_argo ; tamp ;;
 3) clear ; detail ; tamp ;;
 0) clear ; menu ;;
 *) clear ; tamp ;;

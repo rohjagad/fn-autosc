@@ -1957,3 +1957,21 @@ Found 273. **`full/trial-ssh.sh`: `send_telegram_notification` used bare `-d`, l
 
 Found 274. **80 scripts across `full/` and `lite/`: Telegram notifications passed multi-line HTML text via bare `-d` instead of `--data-urlencode`** — all `auto-delete-*`, `change-id-*`, `change-quota-*`, `delete-*`, `dm-menu.sh`, `limit-ip-*`, `locked-xray-*`, `quota-*`, and `unlock-*` scripts used `-d "...text=$TEXT&parse_mode=html"`. curl's `-d` flag expects already-URL-encoded data; passing raw multi-line strings with HTML tags (`<b>`, `<code>`, `⚠️`), newlines, and potential `&` characters in account fields risks truncation or malformed POST bodies.
 - **Inherited from V23.**
+
+Found 275. **`full/menu-argo.sh` and `lite/menu-argo.sh`: duplicate `hostname: $domargo` in cloudflared ingress; setup() never starts service; option 2 missing** (lines 151-168, 228-238) — in `config.yml`, rule 1 matches all traffic for `$domargo` to port 80, completely shadowing rule 2 (`service: http://localhost:2080`) with the identical hostname. Modern `cloudflared` rejects this or logs that rule 2 will never be executed. Furthermore, `setup()` ran `cloudflared service install` but never started or enabled the service (`systemctl enable --now cloudflared`), leaving the tunnel dead after setup. Option 2 ("Restart Argo Tunnel") was missing from the menu, leaving a gap (`1, 3, 0`).
+- **Inherited from V23.**
+
+Found 276. **`full/xl2tp.sh`: `create()`, `delete()`, `extend()` exit immediately without pausing, wiping credentials in `menu.sh`** (lines 156, 205, 260) — after printing account credentials (`Domain`, `IPsec PSK`, `Username`, `Password`, `Expired`), the functions return to `main()` which exits. When called from `menu.sh` option 7, `menu.sh` immediately calls `clear` and redraws the main menu. The operator never gets to see or copy the generated L2TP VPN credentials.
+- **Inherited from V23.**
+
+Found 277. **`full/xl2tp.sh`: `extend()` lacks unparseable date guard, unanchored sed corrupts prefix usernames, past expiry subtracts days** (lines 240-249) — `d1=$(date -d "$exp" +%s)` has no validation; a corrupted date produces empty output and bash arithmetic computes epoch 1970 (same bug as Found 153). `sed -i "s/### $user $exp/..."` is unanchored at line start, corrupting prefix-sharing usernames like `ali` and `alice` (Found 170). If an account is already expired (`exp2 < 0`), `exp3=$((exp2 + masaaktif))` subtracts the elapsed days instead of extending from today (R72-A class).
+- **Inherited from V23.**
+
+Found 278. **`full/xl2tp.sh` and `full/xp.sh` / `lite/xp.sh`: IPsec user deletion hardcodes `$1$` MD5 hash format in sed pattern** (lines 189 in xl2tp.sh, 300 in full/xp.sh, 299 in lite/xp.sh) — `sed -i '/^'"$user"':\$1\$/d' /etc/ipsec.d/passwd` strictly matches `$1$`. If the password was hashed with SHA-256 (`$5$`), SHA-512 (`$6$`), or any non-MD5 format, the user line is never deleted from `/etc/ipsec.d/passwd`, leaving orphaned credentials active in IPsec.
+- **Inherited from V23.**
+
+Found 279. **`full/limit-ip.go`: strictly refuses to set IP limit on accounts with no existing limit file, and prints "Success" before validation** (lines 241, 258-262) — `if _, err := os.Stat(limitFile); err == nil` checks whether `/etc/xray/limit/ip/ssh/<user>` exists before prompting. If an SSH account was created with `ip=0` (unlimited, no file created per R72-B) or the file was deleted, `limit-ip` prints `Error: Limit IP ... tidak ditemukan!` and exits, preventing the operator from adding an IP limit. Furthermore, `loadingSucces()` (displaying "Success" in green) was called before `if !isPositiveInt(newIPLimit)` input validation.
+- **Inherited from V23** (over-strict file existence gate).
+
+Found 280. **`full/menu-ssh.sh` (options 4, 5, 7) and `full/x-*.sh` / `lite/x-*.sh` (options 7, 10, 11 across all 8 files): informative display tools wipe output immediately without pause** — `cek-login-ssh` (active logins), `log-acc-ssh` (account card), `list-ssh` (member table), `cek-xray-*` (online users/traffic), `log-database-xray-*` (Xray account cards), and `list-xray-*` (account listings) printed to stdout and exited immediately. The parent menu scripts exited back to `menu.sh`, which immediately cleared the terminal and redrew the main menu, making all informative output unreadable (Found 189 class).
+- **Inherited from V23.**

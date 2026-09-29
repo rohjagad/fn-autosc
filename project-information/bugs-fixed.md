@@ -2104,3 +2104,27 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 ### Fix 279 - full/ and lite/: --data-urlencode across 80 Telegram notification scripts (Found 274)
 
 - **Fix 279 (Found 274):** updated all 80 `auto-delete-*`, `change-id-*`, `change-quota-*`, `delete-*`, `dm-menu.sh`, `limit-ip-*`, `locked-xray-*`, `quota-*`, and `unlock-*` scripts across both `full/` and `lite/` to pass `text` via `--data-urlencode "text=$TEXT"` (or `--data-urlencode "text=$log_message"`) while retaining query parameters via `-d "chat_id=...&parse_mode=html"`. Multi-line HTML strings are safely encoded. Repacked both `menu/full.zip` (114 entries) and `menu/lite.zip` (97 entries). All files pass `bash -n`.
+
+### Fix 280 - menu-argo.sh: fix duplicate ingress, start service, restore option 2 (Found 275)
+
+- **Fix 280 (Found 275):** in both `full/menu-argo.sh` and `lite/menu-argo.sh`: removed shadowed duplicate `hostname: $domargo` rule in `config.yml` (nginx on port 80 already handles all paths); added `systemctl daemon-reload && systemctl enable --now cloudflared` to `setup()`; restored option 2 (`restart_argo`) to cleanly restart cloudflared and eliminate the menu numbering gap (`1, 2, 3, 0`).
+
+### Fix 281 - xl2tp.sh: add interactive pause to create, delete, extend (Found 276)
+
+- **Fix 281 (Found 276):** added `read -n 1 -s -r -p "Press any key to return..." || true` and `echo ""` to `create()`, `delete()`, and `extend()` in `full/xl2tp.sh`. Generated credentials, deletion notices, and renewal cards remain visible on screen until the operator presses a key.
+
+### Fix 282 - xl2tp.sh: date guard, anchored sed, extend from today if expired (Found 277)
+
+- **Fix 282 (Found 277):** in `full/xl2tp.sh` `extend()`: added `d1=$(date -d "$exp" +%s 2>/dev/null)` error guard (aborts cleanly on corrupt dates); anchored sed replacement to `s/^### $user $exp/### $user $exp4/`; and added `if (( exp2 < 0 )); then exp2=0; fi` so accounts expired in the past extend forward from today instead of subtracting days.
+
+### Fix 283 - xl2tp.sh and xp.sh: delete IPsec users regardless of hash algorithm (Found 278)
+
+- **Fix 283 (Found 278):** changed `sed -i '/^'"$user"':\$1\$/d' /etc/ipsec.d/passwd` to `sed -i '/^'"$user"':/d' /etc/ipsec.d/passwd` in `full/xl2tp.sh` line 189, `full/xp.sh` line 300, and `lite/xp.sh` line 299. Cleans IPsec user entries regardless of whether MD5, SHA-256, SHA-512, or plaintext was used.
+
+### Fix 284 - limit-ip.go: allow setting limits on accounts with no file; fix success order (Found 279)
+
+- **Fix 284 (Found 279):** in `full/limit-ip.go`: removed `os.Stat(limitFile)` pre-check so operators can set IP limits on SSH accounts that currently have "No Limit Set" (or `ip=0`); moved `loadingSucces()` inside the `else` block after `isPositiveInt()` validation passes. Compiled fresh binary on Debian 12 amd64 with `-ldflags="-s -w"` (5,034,244 bytes) and updated `menu/full.zip`.
+
+### Fix 285 - menu-ssh.sh and x-*.sh (8 files): add pause to informative display actions (Found 280)
+
+- **Fix 285 (Found 280):** added `; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ;;` to options 4 (`cek-login-ssh`), 5 (`log-acc-ssh`), and 7 (`list-ssh`) in `full/menu-ssh.sh`, and to options 7 (`cek-xray-*`), 10 (`log-database-xray-*`), and 11 (`list-xray-*`) across all 8 transport menus (`full/x-{ws,http,split,grpc}.sh` and `lite/x-{ws,http,split,grpc}.sh`). Operators can now read account details, member lists, and active login tables before returning to the menu. Repacked `menu/full.zip` and `menu/lite.zip`.

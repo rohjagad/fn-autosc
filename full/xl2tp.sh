@@ -153,6 +153,8 @@ Password   : $VPN_PASSWORD
 Expired    : $exp
 ============================
 EOF
+read -n 1 -s -r -p "Press any key to return..." || true
+echo ""
 }
 
 
@@ -186,7 +188,7 @@ exp=$(grep -E "^### " "/etc/funny/.l2tp" | cut -d ' ' -f 3 | sed -n "${CLIENT_NU
 # Delete VPN user
 sed -i '/^"'"$VPN_USER"'" l2tpd/d' /etc/ppp/chap-secrets
 # shellcheck disable=SC2016
-sed -i '/^'"$VPN_USER"':\$1\$/d' /etc/ipsec.d/passwd
+sed -i '/^'"$VPN_USER"':/d' /etc/ipsec.d/passwd
 sed -i "/^### $VPN_USER $exp/d" /etc/funny/.l2tp
 # Update file attributes
 chmod 600 /etc/ppp/chap-secrets* /etc/ipsec.d/passwd*
@@ -202,6 +204,8 @@ echo "=========================="
 echo "Username  : $VPN_USER"
 echo "Expired   : $exp"
 echo "=========================="
+read -n 1 -s -r -p "Press any key to return..." || true
+echo ""
 }
 
 function extend() {
@@ -237,12 +241,20 @@ done
 user=$(grep -E "^### " "/etc/funny/.l2tp" | cut -d ' ' -f 2 | sed -n "${CLIENT_NUMBER}"p)
 exp=$(grep -E "^### " "/etc/funny/.l2tp" | cut -d ' ' -f 3 | sed -n "${CLIENT_NUMBER}"p)
 now=$(date +%Y-%m-%d)
-d1=$(date -d "$exp" +%s)
+d1=$(date -d "$exp" +%s 2>/dev/null)
+if [ -z "$d1" ]; then
+    echo -e "\033[0;31mUnparseable expiry for this account - leaving it unchanged.\033[0m"
+    sleep 2
+    return
+fi
 d2=$(date -d "$now" +%s)
 exp2=$(( (d1 - d2) / 86400 ))
+if (( exp2 < 0 )); then
+    exp2=0
+fi
 exp3=$(($exp2 + $masaaktif))
-exp4=`date -d "$exp3 days" +"%Y-%m-%d"`
-sed -i "s/### $user $exp/### $user $exp4/g" /etc/funny/.l2tp
+exp4=$(date -d "$exp3 days" +"%Y-%m-%d")
+sed -i "s/^### $user $exp/### $user $exp4/" /etc/funny/.l2tp
 systemctl daemon-reload
 systemctl restart ipsec
 systemctl restart xl2tpd
@@ -254,7 +266,8 @@ echo "=========================="
 echo "Username  : $user"
 echo "Expired   : $exp4"
 echo "=========================="
-
+read -n 1 -s -r -p "Press any key to return..." || true
+echo ""
 }
 
 
