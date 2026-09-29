@@ -2128,3 +2128,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 ### Fix 285 - menu-ssh.sh and x-*.sh (8 files): add pause to informative display actions (Found 280)
 
 - **Fix 285 (Found 280):** added `; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ;;` to options 4 (`cek-login-ssh`), 5 (`log-acc-ssh`), and 7 (`list-ssh`) in `full/menu-ssh.sh`, and to options 7 (`cek-xray-*`), 10 (`log-database-xray-*`), and 11 (`list-xray-*`) across all 8 transport menus (`full/x-{ws,http,split,grpc}.sh` and `lite/x-{ws,http,split,grpc}.sh`). Operators can now read account details, member lists, and active login tables before returning to the menu. Repacked `menu/full.zip` and `menu/lite.zip`.
+
+### Fix 286 - menu-system.sh: pass --username root to all 31 reinstall.sh invocations (Found 281)
+
+- **Fix 286 (Found 281):** added `--username root` to all 31 `bash reinstall.sh` invocations across `full/menu-system.sh` and `lite/menu-system.sh`. Prevents the installer from prompting on stdin, ensuring unattended and menu-driven OS reinstallations cleanly configure the root account. Repacked `menu/full.zip` and `menu/lite.zip`.

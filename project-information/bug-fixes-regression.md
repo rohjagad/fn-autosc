@@ -1080,3 +1080,14 @@ Section 35's four-check rule applied to Fixes 280–285:
 | **Over-strictness** | Fix 284 explicitly removes over-strict file existence check. Fix 283 relaxes MD5 pattern to generic colon delimiter. Fix 282 allows expired accounts to renew without penalty. |
 | **Over-engineering** | Standard bash pauses (`read -n 1`); one-line regex relaxations; standard cloudflared ingress syntax. Minimal diff. |
 | **vs the source** | Found 275/276/277/278/279/280: all inherited from V23 defects and omissions. |
+
+## 82. menu-system.sh --username root in reinstall.sh calls — Four Checks (September 29, 2026)
+
+Section 35's four-check rule applied to Fix 286:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | `--username root` sets the exact default username `reinstall.sh` would otherwise prompt for; root retains administrative access; password configuration is preserved. Both files pass `bash -n`. |
+| **Over-strictness** | None. Root is the standard VPS administrative account required by all downstream autoscripts. |
+| **Over-engineering** | Flag addition only (`--username root`). No structural changes. |
+| **vs the source** | Inherited from V23 (unattended invocation omission). |

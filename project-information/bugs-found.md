@@ -1975,3 +1975,6 @@ Found 279. **`full/limit-ip.go`: strictly refuses to set IP limit on accounts wi
 
 Found 280. **`full/menu-ssh.sh` (options 4, 5, 7) and `full/x-*.sh` / `lite/x-*.sh` (options 7, 10, 11 across all 8 files): informative display tools wipe output immediately without pause** — `cek-login-ssh` (active logins), `log-acc-ssh` (account card), `list-ssh` (member table), `cek-xray-*` (online users/traffic), `log-database-xray-*` (Xray account cards), and `list-xray-*` (account listings) printed to stdout and exited immediately. The parent menu scripts exited back to `menu.sh`, which immediately cleared the terminal and redrew the main menu, making all informative output unreadable (Found 189 class).
 - **Inherited from V23.**
+
+Found 281. **`full/menu-system.sh` and `lite/menu-system.sh`: all 31 `reinstall.sh` invocations omit `--username root` — causes interactive prompt that breaks redirected execution** (lines 616-792 full, 596-772 lite) — `reinstall.sh` prompts for username on standard input when `--username` is not specified. When invoked non-interactively or with residual standard input from pipes/subshells, the input prompt consumes whatever line follows on stdin as the username (e.g., creating a user named `sleep` instead of `root`).
+- **Inherited from V23** (where all reinstall commands were added without username flags).
