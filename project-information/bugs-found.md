@@ -1921,3 +1921,6 @@ Found 261. **`full/menu-wg.sh`: WireGuard extend has no guard for unparseable st
 
 Found 262. **`installer/l2tp.sh`: `$NET_IFACE` self-reference on first assignment** (line 78) — `NET_IFACE=$(ip -o $NET_IFACE -4 route show to default | awk '{print $5}')` references `$NET_IFACE` before it is set. Expands to empty, making the command `ip -o -4 route show to default` which works by accident because the stray empty argument is ignored.
 - **Inherited from V23.**
+
+Found 263. **19 remaining `echo -n >` instances across `list-xray-*.sh`, `kill-ws.sh`, `extend-*.sh`, and `cek-xray-ws.sh` (full + lite)** — Fix 245 (Found 239) replaced `echo -n > file` with `> file` only in the 8 `change-quota-*.sh` files. The same non-portable pattern survived in 19 other locations: 4 `list-xray-*.sh` (both editions), 1 `kill-ws.sh` (both editions), 4 `extend-*.sh` (both editions), and 1 `cek-xray-ws.sh` (lite). Under dash/sh, `echo -n` writes literal `-n\n` to the file instead of truncating it.
+- **Inherited from V23.** Fix 245 was incomplete.

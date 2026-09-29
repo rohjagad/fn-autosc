@@ -2056,3 +2056,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 ### Fix 267 - l2tp.sh: remove $NET_IFACE self-reference (Found 262)
 
 - **Fix 267 (Found 262):** changed `ip -o $NET_IFACE -4 route show to default` to `ip -o -4 route show to default` in `installer/l2tp.sh`. The stray self-reference is removed.
+
+### Fix 268 - all remaining echo -n > replaced with plain > (Found 263)
+
+- **Fix 268 (Found 263):** replaced all 19 remaining `echo -n > file` instances with `> file` across `full/list-xray-{ws,http,split,grpc}.sh`, `full/kill-ws.sh`, `full/extend-{ws,http,split,grpc}.sh`, `lite/cek-xray-ws.sh`, `lite/list-xray-{ws,http,split,grpc}.sh`, `lite/kill-ws.sh`, and `lite/extend-{ws,http,split,grpc}.sh`. Total `echo -n >` in full/ and lite/ is now 0.

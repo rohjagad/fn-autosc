@@ -84,7 +84,7 @@ clear
 echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 echo -e "=[ Member XTLS WebSocket Account ]=         "
 echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-echo -n > /var/log/xray/accsess.log
+> /var/log/xray/accsess.log
 > /root/.system
 
 # Mendapatkan daftar username tanpa duplikasi dan hanya memperhitungkan status

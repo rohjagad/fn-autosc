@@ -1036,3 +1036,14 @@ Section 35's four-check rule applied to Fixes 262–267:
 | **Over-strictness** | None. All changes prevent errors or match existing patterns. |
 | **Over-engineering** | One flag init. One flag+if block (existing pattern). Four comment replacements. Four 3-line file-existence checks. One 4-line date guard. One word removal. |
 | **vs the source** | Found 257/258/259/260/261: regressions from our incomplete fixes. Found 262: inherited from V23. |
+
+## 78. Remaining echo -n > replaced — Four Checks (September 29, 2026)
+
+Section 35's four-check rule applied to Fix 268:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | `> file` is identical to `echo -n > file` under bash (both produce an empty file). Behavior unchanged. Under dash/sh, `> file` is now correct instead of writing `-n`. All 19 files pass `bash -n`. |
+| **Over-strictness** | None. |
+| **Over-engineering** | One sed replacement per file. |
+| **vs the source** | Inherited from V23. Fix 245 was incomplete — fixed only `change-quota-*.sh` (8 files), missed 19 others. |

@@ -172,4 +172,4 @@ function process_quota() {
 }
 
 process_quota
-echo -n > /var/log/xray/ws.log
+> /var/log/xray/ws.log
