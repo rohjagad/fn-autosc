@@ -106,6 +106,12 @@ read -rp "Input Link Database: " url
 
 cd /root
 wget -O backup.zip "$url"
+if [ ! -f backup.zip ] || ! unzip -tq backup.zip >/dev/null 2>&1; then
+    echo "Error: Download failed or file is not a valid zip archive."
+    rm -f backup.zip
+    sleep 2
+    return
+fi
 unzip -o backup.zip
 rm -f backup.zip
 sleep 1
@@ -125,8 +131,12 @@ cp -r noobzvpns /etc/ 2>/dev/null || true
 cp -r ppp /etc/ 2>/dev/null || true
 cp -r ipsec.d /etc/ 2>/dev/null || true
 cp ipsec.secrets /etc/ 2>/dev/null || true
+cp -r haproxy /etc/ 2>/dev/null || true
 mkdir -p /var/www/html
 cp -r html/* /var/www/html/ 2>/dev/null || true
+mkdir -p /etc/haproxy
+cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem 2>/dev/null
+chmod 644 /etc/haproxy/funny.pem 2>/dev/null
 
 systemctl daemon-reload
 systemctl restart ssh
@@ -141,6 +151,7 @@ systemctl restart quota-http 2>/dev/null || true
 systemctl restart quota-split 2>/dev/null || true
 systemctl restart quota-grpc 2>/dev/null || true
 systemctl restart nginx
+systemctl restart haproxy 2>/dev/null || true
 systemctl restart cron
 systemctl restart wg-quick@wg0 2>/dev/null || true
 systemctl restart dnstt 2>/dev/null || true
@@ -195,8 +206,12 @@ cp -r noobzvpns /etc/ 2>/dev/null || true
 cp -r ppp /etc/ 2>/dev/null || true
 cp -r ipsec.d /etc/ 2>/dev/null || true
 cp ipsec.secrets /etc/ 2>/dev/null || true
+cp -r haproxy /etc/ 2>/dev/null || true
 mkdir -p /var/www/html
 cp -r html/* /var/www/html/ 2>/dev/null || true
+mkdir -p /etc/haproxy
+cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem 2>/dev/null
+chmod 644 /etc/haproxy/funny.pem 2>/dev/null
 
 systemctl daemon-reload
 systemctl restart ssh
@@ -211,6 +226,7 @@ systemctl restart quota-http 2>/dev/null || true
 systemctl restart quota-split 2>/dev/null || true
 systemctl restart quota-grpc 2>/dev/null || true
 systemctl restart nginx
+systemctl restart haproxy 2>/dev/null || true
 systemctl restart cron
 systemctl restart wg-quick@wg0 2>/dev/null || true
 systemctl restart dnstt 2>/dev/null || true
@@ -246,6 +262,12 @@ read -rp "Backup URL: " url
 
 cd /root
 wget -O backup.zip "$url"
+if [ ! -f backup.zip ] || ! unzip -tq backup.zip >/dev/null 2>&1; then
+    echo "Error: Download failed or file is not a valid zip archive."
+    rm -f backup.zip
+    sleep 2
+    return
+fi
 unzip -o backup.zip
 rm -f backup.zip
 sleep 1
@@ -265,8 +287,12 @@ cp -r noobzvpns /etc/ 2>/dev/null || true
 cp -r ppp /etc/ 2>/dev/null || true
 cp -r ipsec.d /etc/ 2>/dev/null || true
 cp ipsec.secrets /etc/ 2>/dev/null || true
+cp -r haproxy /etc/ 2>/dev/null || true
 mkdir -p /var/www/html
 cp -r html/* /var/www/html/ 2>/dev/null || true
+mkdir -p /etc/haproxy
+cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem 2>/dev/null
+chmod 644 /etc/haproxy/funny.pem 2>/dev/null
 
 # Repair the WS config a legacy backup has restored: replace the UUID
 # placeholder, then re-append the standard outbounds/routing/stats block below.
@@ -384,6 +410,7 @@ systemctl restart quota-http 2>/dev/null || true
 systemctl restart quota-split 2>/dev/null || true
 systemctl restart quota-grpc 2>/dev/null || true
 systemctl restart nginx
+systemctl restart haproxy 2>/dev/null || true
 systemctl restart cron
 systemctl restart wg-quick@wg0 2>/dev/null || true
 systemctl restart dnstt 2>/dev/null || true

@@ -1047,3 +1047,14 @@ Section 35's four-check rule applied to Fix 268:
 | **Over-strictness** | None. |
 | **Over-engineering** | One sed replacement per file. |
 | **vs the source** | Inherited from V23. Fix 245 was incomplete — fixed only `change-quota-*.sh` (8 files), missed 19 others. |
+
+## 79. bmenu haproxy restore; wget guard; Node 20; Go arch — Four Checks (September 29, 2026)
+
+Section 35's four-check rule applied to Fixes 269–272:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Fix 269: haproxy restore mirrors what `restore-ftp.sh` already does; no new behavior. Lite gets file restoration but no restart (consistent with Fix 264). Fix 270: unzip -tq validates the archive before extraction; valid archives proceed normally. Fix 271: Node 20 is backward-compatible LTS; bot.zip uses basic APIs. Fix 272: `go.dev/dl` is the canonical download source; `dpkg --print-architecture` returns `amd64` on x86_64, so behavior is identical on current servers. All files pass `bash -n`. |
+| **Over-strictness** | Fix 270: only blocks on missing or invalid zip — download errors that produce HTML are caught. |
+| **Over-engineering** | 3 lines per restore function (haproxy cp + pem rebuild). One if-block per wget call. One URL version bump. One `GOARCH` variable. |
+| **vs the source** | Found 264: inherited gap (V23 didn't archive haproxy). Found 265: inherited (restore) + introduced (resold). Found 266: inherited from V23. Found 267: introduced by our code. |

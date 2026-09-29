@@ -1924,3 +1924,15 @@ Found 262. **`installer/l2tp.sh`: `$NET_IFACE` self-reference on first assignmen
 
 Found 263. **19 remaining `echo -n >` instances across `list-xray-*.sh`, `kill-ws.sh`, `extend-*.sh`, and `cek-xray-ws.sh` (full + lite)** — Fix 245 (Found 239) replaced `echo -n > file` with `> file` only in the 8 `change-quota-*.sh` files. The same non-portable pattern survived in 19 other locations: 4 `list-xray-*.sh` (both editions), 1 `kill-ws.sh` (both editions), 4 `extend-*.sh` (both editions), and 1 `cek-xray-ws.sh` (lite). Under dash/sh, `echo -n` writes literal `-n\n` to the file instead of truncating it.
 - **Inherited from V23.** Fix 245 was incomplete.
+
+Found 264. **`full/bmenu.sh` and `lite/bmenu.sh`: all 3 restore functions (`restore`, `restf`, `resold`) never restore `/etc/haproxy/` from backup or rebuild `funny.pem`** — `backup.sh` archives `/etc/haproxy` (Fix 237), but bmenu's 3 restore paths only copy xray, funny, wireguard, slowdns, noobzvpns, ppp, ipsec — never haproxy. After any bmenu restore, HAProxy serves a stale or missing PEM; port 777 SSH-over-SSL breaks. `full/restore-ftp.sh` and `website/restore-ftp.sh` do restore haproxy correctly.
+- **Inherited from V23** (V23 didn't archive haproxy at all; gap introduced when backup.sh started saving it).
+
+Found 265. **`full/bmenu.sh` and `lite/bmenu.sh`: `restore()` and `resold()` have no error check on wget/unzip — a failed download corrupts system files** — if wget fails or returns HTML error page, `unzip` fails, `cd /root/backup` succeeds on a stale directory, and `cp passwd /etc/` overwrites the current passwd with stale data. `restf()` has an `if [ -f "$file" ]` guard but `restore()` and `resold()` do not.
+- **Inherited from V23** (restore). `resold()` is new code.
+
+Found 266. **`installer/package.sh`: Node.js 16 setup URL is EOL — `nodesource.com/setup_16.x` returns 404** (line 92) — Node 16 reached end of life on 2023-09-11. NodeSource has removed the setup script. The Telegram terminal bot (`bot.zip`) depends on Node.js.
+- **Inherited from V23.**
+
+Found 267. **`installer/slowdns.sh`: Go download URL points to private GitHub release, not official `go.dev`** (line 75) — `https://github.com/rohjagad/fn-autosc-miscellaneous/releases/download/v1.23/go1.22.0.linux-amd64.tar.gz` depends on the release asset existing in that repo. Also hardcodes `amd64`, failing on ARM64.
+- **Introduced by our code** (V23 used a different hosting URL).

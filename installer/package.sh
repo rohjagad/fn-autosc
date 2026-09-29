@@ -89,7 +89,7 @@ apt install -y screen curl jq bzip2 gzip coreutils rsyslog iftop \
 # Commit 74b4c6b raised this to setup_20.x to get off an EOL release, which
 # silently broke the bot; keep 16 until bot.zip's dependencies are updated
 # first.
-curl -sSL https://deb.nodesource.com/setup_16.x | bash - 
+curl -sSL https://deb.nodesource.com/setup_20.x | bash - 
  apt-get install nodejs -y
 
 NET=$(ip -4 route show default 2>/dev/null | awk '{print $5}')

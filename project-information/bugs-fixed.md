@@ -2060,3 +2060,19 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 ### Fix 268 - all remaining echo -n > replaced with plain > (Found 263)
 
 - **Fix 268 (Found 263):** replaced all 19 remaining `echo -n > file` instances with `> file` across `full/list-xray-{ws,http,split,grpc}.sh`, `full/kill-ws.sh`, `full/extend-{ws,http,split,grpc}.sh`, `lite/cek-xray-ws.sh`, `lite/list-xray-{ws,http,split,grpc}.sh`, `lite/kill-ws.sh`, and `lite/extend-{ws,http,split,grpc}.sh`. Total `echo -n >` in full/ and lite/ is now 0.
+
+### Fix 269 - bmenu.sh: restore haproxy from backup and rebuild funny.pem (Found 264)
+
+- **Fix 269 (Found 264):** added `cp -r haproxy /etc/` + `mkdir -p /etc/haproxy; cat cert+key > funny.pem` + `systemctl restart haproxy` to all 3 restore functions in `full/bmenu.sh`. For `lite/bmenu.sh`, same file restoration but no haproxy restart (lite doesn't use haproxy).
+
+### Fix 270 - bmenu.sh: wget/unzip error check in restore() and resold() (Found 265)
+
+- **Fix 270 (Found 265):** added `if [ ! -f backup.zip ] || ! unzip -tq backup.zip; then echo error; return; fi` after wget in both `restore()` and `resold()` across `full/bmenu.sh` and `lite/bmenu.sh`. A failed download now returns to the menu instead of overwriting system files.
+
+### Fix 271 - package.sh: Node.js 16 → Node.js 20 LTS (Found 266)
+
+- **Fix 271 (Found 266):** changed `setup_16.x` to `setup_20.x` in `installer/package.sh`. Node 20 is the current LTS release.
+
+### Fix 272 - slowdns.sh: Go download from go.dev with arch detection (Found 267)
+
+- **Fix 272 (Found 267):** replaced private GitHub release URL with official `https://go.dev/dl/go1.22.0.linux-${GOARCH}.tar.gz` using `GOARCH=$(dpkg --print-architecture)`. Works on both x86_64 and ARM64.
