@@ -1930,9 +1930,12 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Fix 238 (Found 232):** in all 8 quota daemons (full + lite), replaced `xray api statsquery | grep -C 2 "$user" | grep value | awk` with two direct `xray api stats --server=… -name "user>>>${user}>>>traffic>>>uplink"` and `…downlink` calls. Each call fetches exactly one user's counter — no grep, no context window, no substring collision.
 - **Verified live on VPS:** `quota-ws` uses `xray api stats … -name "user>>>…>>>uplink"`.
 
-### Fix 239 - xp.sh: WireGuard peer deletion uses awk instead of sed range; <= expiry (Found 233, 234)
+### Fix 239 - xp.sh: WireGuard peer deletion uses awk instead of sed range (Found 233)
 
 - **Fix 239 (Found 233):** replaced `sed -i "/^### Client X$/,/^$/d"` + `head -${line}` truncation with `awk "/^### Client ${user}$/{found=1} found && /^$/{found=0; next} !found{print} found{next}"`. awk handles EOF correctly (no open-ended range), and the `head` truncation that destroyed `PersistentKeepalive` lines is removed entirely. Applied to both `full/xp.sh` and `lite/xp.sh`.
+
+### Fix 240 - xp.sh: WireGuard <= expiry (Found 234)
+
 - **Fix 240 (Found 234):** changed `[[ $exp < $now ]]` to `[[ ! $now < $exp ]]` (equivalent to `<=` for ISO date strings), so WireGuard accounts are deleted on their expiry day, consistent with Xray's `[[ exp2 -le 0 ]]` logic.
 - **Verified live on VPS:** awk command and `! $now < $exp` present in deployed `xp`.
 
