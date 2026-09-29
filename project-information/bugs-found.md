@@ -1936,3 +1936,24 @@ Found 266. **`installer/package.sh`: Node.js 16 setup URL is EOL — `nodesource
 
 Found 267. **`installer/slowdns.sh`: Go download URL points to private GitHub release, not official `go.dev`** (line 75) — `https://github.com/rohjagad/fn-autosc-miscellaneous/releases/download/v1.23/go1.22.0.linux-amd64.tar.gz` depends on the release asset existing in that repo. Also hardcodes `amd64`, failing on ARM64.
 - **Introduced by our code** (V23 used a different hosting URL).
+
+Found 268. **`installer/full.sh`, `installer/lite.sh`, `install.sh`: unguarded `read` in `while true` loop spins infinitely on EOF, filling disk with gigabytes of log output** (lines 75-95 full/lite, 154-165 install) — if `read -p "Input Domain: "` hits EOF (closed stdin, interrupted connection, or non-interactive execution), `read` fails with exit code 1, leaving the variable empty. The loop prints "Domain cannot be empty" and immediately `continue`s, looping millions of times per second. Verified live on the VPS: PID 3865 spun for over a day, writing a 17.7 GB `/tmp/install.log` that consumed 100% of the 20 GB root partition and caused multiple systemd units to fail (`certbot`, `logrotate`, `man-db`, `plocate`, `vnstat`).
+- **Inherited from V23.** (Menus were guarded in Fix 162/172; installer entry points were missed).
+
+Found 269. **`menu/full.zip`: compiled Go binaries `extend-ssh`, `pwd-ssh`, `list-ssh`, `delete-ssh` were stale — repack only updated `.sh` files** — `menu/full.zip` contained binaries dated Sept 24 (or Sept 23 for `list-ssh`). Subsequent source fixes in `full/*.go` (Fix 209: `pwd-ssh` integer division sleep and double-defer fd leak; Fix 210: `extend-ssh` never-expiry panic; Fix 211: `list-ssh`/`delete-ssh` malformed passwd field guard; R72-A: `extend-ssh` never-expiry extend from today) were compiled locally on the VPS but never re-archived into `menu/full.zip`. Fresh installs from `installer/full.sh` extracted the pre-fix binaries from the zip into `/usr/bin/`.
+- **Packaging/repack pipeline gap.**
+
+Found 270. **`installer/package.sh`: Fix 271 changed Node.js from 16 to 20, re-introducing Found 145** (line 92) — Fix 271 bumped `setup_16.x` to `setup_20.x` based on EOL status. However, Found 145 explicitly documents that the Telegram terminal bot (`bot.zip`) pins `node-pty ^0.9.0` and `node-termios 0.0.13`, native C++ addons that fail to build against Node 20 (`NODE_MODULE(pty, init) Error 1`). NodeSource still serves `setup_16.x` (verified 200 HTTP OK). Bumping to Node 20 silently broke the bot installation.
+- **Regression introduced by Fix 271** (reverted to `setup_16.x`).
+
+Found 271. **`installer/slowdns.sh`: Go download bypassed pinned repository asset (Decision 8)** (line 75) — Fix 272 replaced the pinned release URL from `fn-autosc-miscellaneous` with a direct call to `go.dev/dl/go1.22.0.linux-${GOARCH}.tar.gz`. Decision 8 mandates that pinned dependencies stay on our fork/release infrastructure first, with canonical upstream as fallback.
+- **Decision 8 alignment.**
+
+Found 272. **`full/menu-noobz.sh`: Telegram notifications on user add and delete used bare `-d "chat_id=$CHATID&text=$TEKS"`** (lines 154, 192) — identical to Found 238 in `xp.sh`. Multi-line account cards sent via bare `-d` without `--data-urlencode` are not URL-encoded, causing Telegram API failures or malformed messages when account data contains special characters (`&`, `+`, `=`, etc.). Output was also not suppressed to `/dev/null 2>&1`, leaking curl output onto the operator's screen.
+- **Introduced in our code** (when Noobz Telegram notification was added).
+
+Found 273. **`full/trial-ssh.sh`: `send_telegram_notification` used bare `-d`, lacked timeout and stderr suppression** (lines 25-28) — `curl -s -X POST ... -d "chat_id=${chat_id}" -d "text=${message}" > /dev/null` omitted `--max-time 10` (hangs indefinitely on network stall), omitted `--data-urlencode` for the multi-line card message, and only redirected stdout (`> /dev/null`), leaking curl error messages to the terminal.
+- **Inherited from V23.**
+
+Found 274. **80 scripts across `full/` and `lite/`: Telegram notifications passed multi-line HTML text via bare `-d` instead of `--data-urlencode`** — all `auto-delete-*`, `change-id-*`, `change-quota-*`, `delete-*`, `dm-menu.sh`, `limit-ip-*`, `locked-xray-*`, `quota-*`, and `unlock-*` scripts used `-d "...text=$TEXT&parse_mode=html"`. curl's `-d` flag expects already-URL-encoded data; passing raw multi-line strings with HTML tags (`<b>`, `<code>`, `⚠️`), newlines, and potential `&` characters in account fields risks truncation or malformed POST bodies.
+- **Inherited from V23.**

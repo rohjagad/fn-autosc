@@ -2076,3 +2076,31 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 ### Fix 272 - slowdns.sh: Go download from go.dev with arch detection (Found 267)
 
 - **Fix 272 (Found 267):** replaced private GitHub release URL with official `https://go.dev/dl/go1.22.0.linux-${GOARCH}.tar.gz` using `GOARCH=$(dpkg --print-architecture)`. Works on both x86_64 and ARM64.
+
+### Fix 273 - installer/full.sh, lite.sh, install.sh: guard read loops against EOF (Found 268)
+
+- **Fix 273 (Found 268):** added `|| exit 1` to `read` statements in `installer/full.sh` and `installer/lite.sh` setup loops; added `|| { domain="lite"; break; }` to `install.sh`. On closed stdin or EOF, the scripts exit cleanly or select default instead of looping infinitely. Killed stale PID 3865 on VPS, removed 17.7 GB log file, restored root partition from 100% full (0 bytes avail) to 17% (16 GB avail), and restarted failed system units (0 failed units).
+
+### Fix 274 - menu/full.zip: recompile and package all updated Go binaries (Found 269)
+
+- **Fix 274 (Found 269):** compiled fresh `extend-ssh` (1,667,224 bytes), `pwd-ssh` (1,745,048 bytes), `list-ssh` (1,630,360 bytes), and `delete-ssh` (1,716,376 bytes) using `/usr/local/go/bin/go build -ldflags="-s -w"` on Debian 12 amd64. Repacked `menu/full.zip` with all four updated binaries replacing the stale Sept 24 versions. All 114 entries verified mode 0755.
+
+### Fix 275 - installer/package.sh: revert Node.js 20 to Node.js 16 (Found 270)
+
+- **Fix 275 (Found 270):** reverted line 92 of `installer/package.sh` back to `setup_16.x`. Protects `menu-bot`'s pinned native addons (`node-pty ^0.9.0`, `node-termios 0.0.13`) from build failure under Node 20, preserving Decision 8 and Found 145. Verified `setup_16.x` returns 200 HTTP OK from NodeSource.
+
+### Fix 276 - installer/slowdns.sh: pinned asset download with go.dev fallback (Found 271)
+
+- **Fix 276 (Found 271):** updated line 75 in `installer/slowdns.sh` to download from pinned `rohjagad/fn-autosc-miscellaneous/releases/download/v1.23/` asset first (per Decision 8), falling back to canonical `go.dev/dl/` if the asset is missing, and using `dpkg --print-architecture` for multi-arch support.
+
+### Fix 277 - menu-noobz.sh: --data-urlencode and quiet curl for Telegram (Found 272)
+
+- **Fix 277 (Found 272):** in `full/menu-noobz.sh` lines 154 and 192, changed `curl -s --max-time $TIME -d "chat_id=$CHATID&text=$TEKS" $URL` to `curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL >/dev/null 2>&1`. Encodes special characters and suppresses output.
+
+### Fix 278 - trial-ssh.sh: --data-urlencode, timeout, and stderr redirect (Found 273)
+
+- **Fix 278 (Found 273):** updated `send_telegram_notification` in `full/trial-ssh.sh` to include `--max-time 10`, `--data-urlencode "chat_id=$chat_id"` and `--data-urlencode "text=$message"`, with `>/dev/null 2>&1`. Aligns with `full/addssh.sh`.
+
+### Fix 279 - full/ and lite/: --data-urlencode across 80 Telegram notification scripts (Found 274)
+
+- **Fix 279 (Found 274):** updated all 80 `auto-delete-*`, `change-id-*`, `change-quota-*`, `delete-*`, `dm-menu.sh`, `limit-ip-*`, `locked-xray-*`, `quota-*`, and `unlock-*` scripts across both `full/` and `lite/` to pass `text` via `--data-urlencode "text=$TEXT"` (or `--data-urlencode "text=$log_message"`) while retaining query parameters via `-d "chat_id=...&parse_mode=html"`. Multi-line HTML strings are safely encoded. Repacked both `menu/full.zip` (114 entries) and `menu/lite.zip` (97 entries). All files pass `bash -n`.

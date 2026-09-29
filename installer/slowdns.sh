@@ -72,7 +72,7 @@ for package in "${REQUIRED_PACKAGES[@]}"; do
   fi
 done
 clear
-GOARCH=$(dpkg --print-architecture 2>/dev/null || echo amd64) ; rm -fr /usr/bin/go /usr/local/go ; wget -q https://go.dev/dl/go1.22.0.linux-${GOARCH}.tar.gz ; sudo tar -C /usr/local -xzf go1.22.0.linux-${GOARCH}.tar.gz ; rm -f go1.22.0.linux-${GOARCH}.tar.gz ; grep -q "/usr/local/go/bin" /root/.bashrc 2>/dev/null || echo 'export PATH="/usr/local/go/bin:$PATH"' >> /root/.bashrc ; cd ; source .bashrc ; go version
+GOARCH=$(dpkg --print-architecture 2>/dev/null || echo amd64) ; rm -fr /usr/bin/go /usr/local/go ; { wget -q -O "go1.22.0.linux-${GOARCH}.tar.gz" "https://github.com/rohjagad/fn-autosc-miscellaneous/releases/download/v1.23/go1.22.0.linux-${GOARCH}.tar.gz" || wget -q -O "go1.22.0.linux-${GOARCH}.tar.gz" "https://go.dev/dl/go1.22.0.linux-${GOARCH}.tar.gz" ; } ; sudo tar -C /usr/local -xzf "go1.22.0.linux-${GOARCH}.tar.gz" ; rm -f "go1.22.0.linux-${GOARCH}.tar.gz" ; grep -q "/usr/local/go/bin" /root/.bashrc 2>/dev/null || echo 'export PATH="/usr/local/go/bin:$PATH"' >> /root/.bashrc ; cd ; source .bashrc ; go version
 
 install_slowdns() {
   export PATH="/usr/local/go/bin:$PATH"

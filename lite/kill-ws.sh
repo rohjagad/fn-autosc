@@ -77,7 +77,7 @@ function send_log() {
 <code>Status    : </code><code>Deleted</code>
 <code>────────────────────</code>
 "
-    curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&text=$TEXT&parse_mode=html" "https://api.telegram.org/bot$KEY/sendMessage" >/dev/null
+    curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$TEXT" "https://api.telegram.org/bot$KEY/sendMessage" >/dev/null
 }
 
 function human_readable() {

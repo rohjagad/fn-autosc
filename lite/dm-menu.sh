@@ -252,7 +252,7 @@ dm() {
     log_message+="</pre>"
     log_message+="<b>Status:</b> Menampilkan Domain saat ini... 🔍"
 
-    curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&text=$log_message&parse_mode=html" $URL >/dev/null
+    curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$log_message" $URL >/dev/null
 
     echo -e "\e[33m===================================\033[0m"
     echo -e "Current Domain:"
@@ -275,7 +275,7 @@ dm() {
         log_message+="</pre>"
         log_message+="<b>Status:</b> Tidak ada perubahan dilakukan. ❌"
 
-        curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&text=$log_message&parse_mode=html" $URL >/dev/null
+        curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$log_message" $URL >/dev/null
 
         echo -e "\e[33m===================================\033[0m"
         read -n 1 -s -r -p "Press any key to return to menu"
@@ -306,7 +306,7 @@ dm() {
         log_message+="</pre>"
         log_message+="<b>Status:</b> Domain berhasil diperbarui ✅"
 
-        curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&text=$log_message&parse_mode=html" $URL >/dev/null
+        curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$log_message" $URL >/dev/null
 
         # Konfirmasi untuk memperbarui sertifikat
         read -rp "Renew SSL certificate? (y/n): " cert_choice
@@ -330,7 +330,7 @@ dm() {
         log_message+="</pre>"
         log_message+="<b>Status:</b> Sertifikat diperbarui: $cert_status"
 
-        curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&text=$log_message&parse_mode=html" $URL >/dev/null
+        curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$log_message" $URL >/dev/null
 
         echo -e "\e[33m===================================\033[0m"
         echo "Notification sent to Telegram."

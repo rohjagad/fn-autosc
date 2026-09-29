@@ -152,7 +152,7 @@ echo -e "${BlueCyan} ———————————————————�
 
 
 while true; do
-    read -p "Input Type Script (full / lite) : " domain
+    read -p "Input Type Script (full / lite) : " domain || { domain="lite"; break; }
     # Cek jika input kosong
     if [[ -z "$domain" ]]; then
         echo "Tipe tidak boleh kosong. Silakan coba lagi."

@@ -73,9 +73,9 @@ echo -e "${ungu}            FN AutoSC      ${Xark} "
 echo -e "${BlueCyan} ——————————————————————————————————— ${Xark} "
 
 while true; do
-    read -p "Input Domain: " domain
-    read -p "Input Email : " email
-    read -p "Input Type IP VPS (4/6/dual): " ips
+    read -p "Input Domain: " domain || exit 1
+    read -p "Input Email : " email || exit 1
+    read -p "Input Type IP VPS (4/6/dual): " ips || exit 1
     # Cek jika input kosong
     if [[ -z "$domain" ]]; then
         echo "Domain tidak boleh kosong. Silakan coba lagi."

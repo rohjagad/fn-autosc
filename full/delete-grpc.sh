@@ -76,7 +76,7 @@ DATE=$(date +"%Y-%m-%d %H:%M:%S")
 <b>📌 Expired  :</b> <b>$exp</b>
 <b>━━━━━━━━━━━━━━━━━━━━━━━</b>
 <i>Note:</i> Account delete success. Modification has been reflected in the database."
-        curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&text=$TEXT&parse_mode=html" $URL >/dev/null
+        curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$TEXT" $URL >/dev/null
 }
 
 dateFromServer=$(curl -v --insecure --silent https://google.com/ 2>&1 | grep Date | sed -e 's/< Date: //')

@@ -82,7 +82,7 @@ send_log() {
 <b>📌 Status Quota :</b> <b>$quota_status</b>
 <b>━━━━━━━━━━━━━━━━━━━━━━━</b>
 <i>Note:</i> The account's active period has been extended. Modification has been reflected in the database."
-    curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&text=$TEXT&parse_mode=html" $URL >/dev/null
+    curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$TEXT" $URL >/dev/null
 }
 
 clear

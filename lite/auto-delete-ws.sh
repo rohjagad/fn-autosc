@@ -130,7 +130,7 @@ if [ -n "$deleted_users" ]; then
 <i>Catatan:</i> Menghapus Log Semua akun yang tidak tersedia didalam database Server.
 "
     # Kirim notifikasi ke Telegram
-    curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&text=$TEXT&parse_mode=html" $URL >/dev/null
+    curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$TEXT" $URL >/dev/null
 else
     echo "Tidak ada pengguna yang dihapus. Notifikasi tidak dikirim."
 fi

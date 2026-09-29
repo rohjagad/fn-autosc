@@ -1058,3 +1058,14 @@ Section 35's four-check rule applied to Fixes 269–272:
 | **Over-strictness** | Fix 270: only blocks on missing or invalid zip — download errors that produce HTML are caught. |
 | **Over-engineering** | 3 lines per restore function (haproxy cp + pem rebuild). One if-block per wget call. One URL version bump. One `GOARCH` variable. |
 | **vs the source** | Found 264: inherited gap (V23 didn't archive haproxy). Found 265: inherited (restore) + introduced (resold). Found 266: inherited from V23. Found 267: introduced by our code. |
+
+## 80. EOF read loops, stale Go zip binaries, Node 16 revert, slowdns Go URL, Telegram urlencode (7 scripts + 80 files) — Four Checks (September 29, 2026)
+
+Section 35's four-check rule applied to Fixes 273–279:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Fix 273: `|| exit 1` only fires when `read` fails (EOF/stdin closed); interactive input is completely unchanged. Prevents infinite loop that consumed 17.7 GB disk. Fix 274: Go binaries are compiled directly from the current repository sources (`full/*.go`); they contain the exact fixes already audited and verified. Fix 275: Reverts Fix 271's regression; Node 16 is required by `menu-bot`'s native modules (Found 145). Fix 276: Pinned repo asset used first (per Decision 8); upstream `go.dev` used as fallback. Fix 277/278/279: `--data-urlencode` ensures proper encoding of newlines, `<tags>`, and `&` characters in Telegram messages; valid payloads produce clean HTTP POST bodies. All files pass `bash -n`. |
+| **Over-strictness** | None. All changes prevent silent failures, infinite loops, or encoding corruption. |
+| **Over-engineering** | Standard bash `|| exit 1` idiom; standard Go compiler build flags; one URL fallback chain; standard curl `--data-urlencode` flag. Minimal diff footprint. |
+| **vs the source** | Found 268: inherited from V23 (unclosed loop). Found 269: packaging gap. Found 270: regression from Fix 271. Found 271: Decision 8 alignment. Found 272: introduced in our code. Found 273: inherited from V23. Found 274: inherited from V23. |

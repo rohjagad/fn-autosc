@@ -151,7 +151,7 @@ CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
-curl -s --max-time $TIME -d "chat_id=$CHATID&text=$TEKS" $URL
+curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL >/dev/null 2>&1
 clear
 echo "$TEKS"
 read -n 1 -s -r -p "Press any key to return..." || true
@@ -189,7 +189,7 @@ CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
-curl -s --max-time $TIME -d "chat_id=$CHATID&text=$TEKS" $URL
+curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL >/dev/null 2>&1
 clear
 echo "$TEKS"
 read -n 1 -s -r -p "Press any key to return..." || true

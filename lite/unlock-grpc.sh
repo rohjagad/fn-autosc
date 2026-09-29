@@ -114,7 +114,7 @@ DATE=$(date +"%Y-%m-%d %H:%M:%S")
 <b>🛡️  Protokol :</b> <b>$protokol2</b>
 <b>━━━━━━━━━━━━━━━━━━━━━━━</b>
 <i>Catatan:</i> Akun Pengguna Telah di unlock oleh owner dan dapat digunakan kembali."
-        curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&text=$TEXT&parse_mode=html" $URL >/dev/null
+        curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$TEXT" $URL >/dev/null
 }
 
 # Menampilkan daftar akun terkunci
