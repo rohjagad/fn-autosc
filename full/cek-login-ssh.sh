@@ -163,7 +163,7 @@ function get_limit_ip {
             echo "$LIMIT"
         fi
     else
-        echo "2"  # Default limit
+        echo "No Limit"
     fi
 }
 

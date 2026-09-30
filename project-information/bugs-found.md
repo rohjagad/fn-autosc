@@ -1990,3 +1990,9 @@ Found 284. **`full/menu-wg.sh`: empty username in `delete()`, `extend()`, `show(
 
 Found 285. **`full/menu-noobz.sh`: `create()` allows empty/invalid usernames and duplicate records; `delete()` operates on nonexistent users** (lines 121, 171) — `create()` read username and password without validation or checking `/etc/funny/.noob` for existing records, writing malformed `###  <exp>` entries or duplicate users into the database. `delete()` only checked `[ -z "$name" ]`; if the typed username was not in `/etc/funny/.noob`, it executed deletion commands on `noobzvpns`, cleared the screen, and sent a false "Account Deleted" Telegram notification.
 - **Inherited from V23.**
+
+Found 286. **`full/cek-login-ssh.sh`: `get_limit_ip()` returns hardcoded `"2"` as default when no limit file exists** (line 166) — system accounts without a limit file (including `root`, operator accounts, and SSH accounts created with `ip=0`) display `Limit IP: 2` in the live login table. This is misleading: an operator seeing `root ... Limit IP: 2` might believe root has an enforced 2-IP limit when there is none. The default should be `"No Limit"`.
+- **Inherited from V23** (verified live: `root` showed `Limit IP: 2` in `cek-login-ssh` output despite no `/etc/xray/limit/ip/ssh/root` file existing).
+
+Found 287. **`full/menu-wg.sh`: `create()` displays `Domain: autosc.rohcuan.dpdns.org / bug.com.autosc.rohcuan.dpdns.org`** (line 212) — the domain display line contains a literal `bug.com.` prefix: `echo -e " Domain\t: $domain / bug.com.${domain}"`. The `bug.com.` segment was a placeholder test string that was committed to V23 and propagated forward.
+- **Inherited from V23** (verified live: created WG account showed domain `autosc.rohcuan.dpdns.org / bug.com.autosc.rohcuan.dpdns.org`).

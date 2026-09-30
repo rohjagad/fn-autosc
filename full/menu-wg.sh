@@ -209,10 +209,10 @@ AllowedIPs = ${client_ipv4}/32" >> /etc/wireguard/wg0.conf
 	newline
 	echo -e "WireGuard User Information"
 	echo -e "=========================="
-        echo -e " Domain\t: $domain /  bug.com.${domain}"
+	echo -e " Domain\t: $domain"
 	echo -e " Username\t: $user"
 	echo -e " Expired Date\t: $expired"
-        echo -e "=========================="
+	echo -e "=========================="
         echo -e "Wireguard Detail"
 	echo -e "Port Wireguard\t: 51820"
 	echo -e "Private Key\t: ${client_priv_key}"

@@ -2148,3 +2148,13 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 ### Fix 290 - menu-noobz.sh: validate username, reject duplicates, verify user exists on delete (Found 285)
 
 - **Fix 290 (Found 285):** in `full/menu-noobz.sh`: added `^[a-zA-Z0-9_]+$` validation loop and `grep -qw "^### $user" /etc/funny/.noob` duplicate check to `create()`; required non-empty password; and added `if ! grep -qw "^### $name" "/etc/funny/.noob"; then echo "User not found"; return; fi` to `delete()`.
+
+### Fix 291 - cek-login-ssh.sh: default Limit IP "No Limit" for accounts without file (Found 286)
+
+- **Fix 291 (Found 286):** changed the `else` branch of `get_limit_ip()` from `echo "2"` to `echo "No Limit"` in `full/cek-login-ssh.sh`. System accounts and SSH accounts without limit files now correctly display `No Limit` instead of a misleading `2`.
+- **Verified live on VPS:** `root` now shows `Limit IP: No Limit` in `cek-login-ssh` output.
+
+### Fix 292 - menu-wg.sh: remove "bug.com." prefix from domain display in create() (Found 287)
+
+- **Fix 292 (Found 287):** changed `echo -e " Domain\t: $domain / bug.com.${domain}"` to `echo -e " Domain\t: $domain"` in `full/menu-wg.sh` `create()`. Removed the accidental `bug.com.` test string that was committed in V23.
+- **Verified live on VPS:** WireGuard account creation now shows only the correct domain.

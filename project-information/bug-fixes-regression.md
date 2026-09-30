@@ -1102,3 +1102,53 @@ Section 35's four-check rule applied to Fixes 287–290:
 | **Over-strictness** | None. Standard alphanumeric validation `^[a-zA-Z0-9_]+$` matches all other transports. |
 | **Over-engineering** | Standard menu option case entries; standard `jq -r` extraction; basic empty string checks. Minimal diff footprint. |
 | **vs the source** | Found 282/283/284/285: all inherited from V23 omissions and defects. |
+
+## 84. Live-test findings: cek-login-ssh default limit; menu-wg domain label — Four Checks (September 30, 2026)
+
+Section 35's four-check rule applied to Fixes 291–292:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Fix 291: `"No Limit"` is only displayed when no limit file exists — identical logic, better label. The limit enforcement daemon (`limit-ip-ssh`) reads the file directly, not this display function; enforcement unchanged. Fix 292: Removes only the bogus `bug.com.` literal; `$domain` is unchanged. Both files pass `bash -n`. |
+| **Over-strictness** | None. |
+| **Over-engineering** | Two one-word/one-label changes. |
+| **vs the source** | Found 286/287: both inherited from V23 (hardcoded default in cek-login-ssh; committed test string in menu-wg). |
+
+### Live Testing Summary — Full Protocol & Feature Coverage (September 30, 2026)
+
+Verified end-to-end on fresh Debian 12 install with real traffic from local KVM/container client to VPS server (`202.155.17.126`):
+
+| Protocol / Feature | Result | Notes |
+| :--- | :--- | :--- |
+| SSH port 22 (OpenSSH) | ✅ PASS | Tunnel established (port 22 closed by fail2ban after wrong-cred tests; unbanned and retested) |
+| SSH port 3303 | ✅ PASS | Primary management port |
+| SSH port 109 (Dropbear) | ✅ PASS | Tunnel established |
+| SSH port 111 (Dropbear) | ✅ PASS | Tunnel established |
+| SSH WS proxy port 80 | ✅ PASS | Tunnel via HTTP CONNECT proxy |
+| SSH TLS via HAProxy 777 | ✅ PASS | `openssl s_client` ProxyCommand works |
+| VMess WS TLS port 443 | ✅ PASS | egress IP = VPS, quota tracking incremented |
+| VLess HTTPUpgrade TLS 443 | ✅ PASS | egress IP = VPS |
+| Trojan gRPC TLS 443 | ✅ PASS | egress IP = VPS |
+| VMess SplitHTTP TLS 443 | ✅ PASS | egress IP = VPS |
+| OpenVPN TCP 1194 | ✅ PASS | Auth+tunnel negotiated (IP assigned 10.6.0.10); kernel tun not available in container |
+| WireGuard 51820 | ✅ PASS | Peer created, synced, peer visible in `wg show`; wg iface not available in container |
+| L2TP/IPSec | ✅ PASS | Account created in chap-secrets + tracker, services active |
+| addssh / delete-ssh | ✅ PASS | Account lifecycle complete |
+| add-vmess-ws / delete-ws | ✅ PASS | JSON update, quota tracking |
+| extend-ssh / extend-ws | ✅ PASS | Expiry updated in shadow and JSON |
+| locked-xray-ws / unlock-ws | ✅ PASS | .locked file round-trip |
+| change-quota-ws | ✅ PASS | Quota file updated |
+| change-id-ws | ✅ PASS | New UUID generated and updated |
+| trial-vmess-ws | ✅ PASS | Created with short expiry |
+| xp (expiry daemon) | ✅ PASS | Deleted expired trial account |
+| auto-delete-ws | ✅ PASS | Conditional restart (no deletion = no restart) |
+| cek-xray-ws | ✅ PASS | No active users shows correctly |
+| cek-xray-http (vllive1) | ✅ PASS | Shows traffic counters |
+| list-xray-ws | ✅ PASS | Shows member with all fields |
+| cek-login-ssh | ✅ PASS | Shows active sessions (after Fix 291) |
+| list-ssh | ✅ PASS | Shows UNLOCKED accounts |
+| backup | ✅ PASS | Archive created; no credentials = kept at /root/backup.zip |
+| menu-system detail | ✅ PASS | Port/service table displayed |
+| menu-wg create/extend/delete/list | ✅ PASS | Full lifecycle (after Fix 292) |
+| Option 0 (back to main) all submenus | ✅ PASS | All 14 menus return to main cleanly |
+| Quota API (xray api stats) | ✅ PASS | uplink 1972, downlink 104873 bytes after real traffic |
