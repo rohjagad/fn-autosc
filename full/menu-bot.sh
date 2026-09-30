@@ -225,16 +225,16 @@ ${blue_sep}
 ${green}1${NC}. Install Terminal Bot
 ${green}2${NC}. Uninstall Terminal Bot
 ${green}3${NC}. Restart Terminal Bot
-${green}0${NC}. Back to Main Menu
+${green}0${NC}. Back to Bot Menu
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input option: " opw || exit 0
 case $opw in
-1) clear ; install ;;
-2) clear ; hapus ;;
-3) restart ;;
-0) menu ;;
+1) clear ; install ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; menubot ;;
+2) clear ; hapus ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; menubot ;;
+3) restart ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; menubot ;;
+0|00) clear ; mna ;;
 *) menubot ;;
 esac
 }
@@ -361,6 +361,8 @@ else
 =========================================
 "
 fi
+read -n 1 -s -r -p "Press any key to return..." || true
+echo ""
 }
 
 setbotup() {
@@ -379,6 +381,8 @@ echo -e "
  Delivery : Telegram document
 =========================================
 "
+read -n 1 -s -r -p "Press any key to return..." || true
+echo ""
 }
 
 rpot() {
@@ -386,16 +390,12 @@ echo -e "${NC}${separator}
           REPORT SCRIPT BUG
 ${separator}
 Telegram:
-- FN AutoSC
-- @farell_aditya_ardian
-- @PR_Aiman
+- FN AutoSC: https://t.me/rohcuan
 ${blue_sep}
-Email:
-- widyabakti02@gmail.com
-${separator}
-
 Thanks for using this script
 "
+read -n 1 -s -r -p "Press any key to return..." || true
+echo ""
 }
 
 mna() {
@@ -408,16 +408,18 @@ ${green}2${NC}. Set Up Bot Notifications
 ${green}3${NC}. Set Up Bot Auto Backup
 ${green}4${NC}. Terminal Bot Menu
 ${green}5${NC}. Report Script Bug
+${green}0${NC}. Back to Main Menu
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input option: " apws || exit 0
 case $apws in
-1) clear ; creds ;;
-2) clear ; notif ;;
-3) clear ; setbotup ;;
-4) clear ; termbot ;;
-5) clear ; rpot ;;
+1) clear ; creds ; mna ;;
+2) clear ; notif ; mna ;;
+3) clear ; setbotup ; mna ;;
+4) clear ; termbot ; mna ;;
+5) clear ; rpot ; mna ;;
+0|00) clear ; menu ;;
 *) clear ; mna ;;
 esac
 }

@@ -1996,3 +1996,24 @@ Found 286. **`full/cek-login-ssh.sh`: `get_limit_ip()` returns hardcoded `"2"` a
 
 Found 287. **`full/menu-wg.sh`: `create()` displays `Domain: autosc.rohcuan.dpdns.org / bug.com.autosc.rohcuan.dpdns.org`** (line 212) — the domain display line contains a literal `bug.com.` prefix: `echo -e " Domain\t: $domain / bug.com.${domain}"`. The `bug.com.` segment was a placeholder test string that was committed to V23 and propagated forward.
 - **Inherited from V23** (verified live: created WG account showed domain `autosc.rohcuan.dpdns.org / bug.com.autosc.rohcuan.dpdns.org`).
+
+Found 288. **`config/format.sh`: Account cards across all 50 `add-*`, `trial-*`, `addssh` scripts in `full/` and `lite/` immediately clear terminal on creation because `format_display()` lacks a pause** (line 76) — after formatting and printing the account card, `format_display` returned without pausing. The invoking script exited, returning to the transport submenu which exited to `menu.sh`, which immediately cleared the terminal and redrew the main menu. The operator never got to view or copy generated credentials, UUIDs, or configuration links.
+- **Inherited from V23 / formatting restyle** (verified live: account creation in menu wiped credentials within milliseconds).
+
+Found 289. **`full/limit-ip.go`: `Credit()` calls `os.Exit(1)` unconditionally on success; `readFile()` prints errors for missing optional bot files; unconfigured bot attempts failed Telegram POST** (lines 47, 121-166) — `Credit()` executed `os.Exit(1)` upon completion, causing `limit-ip` to exit with failure status 1 even when an IP limit was updated successfully. `readFile` printed red error text when optional `/etc/funny/.chatid` or `/etc/funny/.keybot` were absent. `sendTelegramNotification` made an unauthenticated POST request to `api.telegram.org/bot/sendMessage`, displaying `404 Not Found`.
+- **Inherited from V23.**
+
+Found 290. **`full/change-quota-*.sh` and `lite/change-quota-*.sh` (8 files): `Sc_Credit()` calls `exit 1` unconditionally on successful quota change** (line 117) — in `change-quota-ws.sh`, `change-quota-http.sh`, `change-quota-split.sh`, `change-quota-grpc.sh` across both editions, `Sc_Credit()` contained an unconditional `exit 1`. Whenever an operator updated an account quota, the script exited with failure code 1 instead of 0.
+- **Inherited from V23.**
+
+Found 291. **`full/menu-system.sh` and `lite/menu-system.sh`: Missing Option 0 (Back to Main Menu) in `systemd()` traps operator; submenus exit on action instead of staying in menu** (lines 370-410, 820-850) — in `systemd()`, options only listed 1-8 without a "Back to Main Menu" (Option 0). Typing 0 or invalid input looped `systemd`, trapping the operator. Submenu options 1, 2, 3, 5, 6, 7, 8 did not re-call `systemd`, ejecting the operator from the system menu after any action. In `menu-warp()`, options 1-7 failed to loop back to `menuwg`.
+- **Inherited from V23.**
+
+Found 292. **`full/menu-bot.sh` and `lite/menu-bot.sh`: Missing Option 0 (Back to Main Menu) in `mna()`; options 1-5 exit immediately without pausing or returning to menu** (lines 200-240, 360-425) — `mna()` lacked Option 0 to return to the main menu. Options 1-5 exited immediately on completion, and options 2 (`notif`), 3 (`setbotup`), and 5 (`rpot`) had no pause, causing confirmation cards and bug report information to be wiped immediately by `menu.sh`.
+- **Inherited from V23.**
+
+Found 293. **`full/bmenu.sh` and `lite/bmenu.sh`: options 1-4 eject operator from menu on action; `restore()`, `restf()`, `resold()`, and `backup.sh` lack pause before returning** — in `bmenu()`, options 1-4 did not re-call `bmenu`. In `restore()`, `restf()`, `resold()`, and `backup.sh`, output was printed and the script exited immediately without pausing, so `menu.sh` immediately cleared the screen and wiped the restore confirmation or backup status before the operator could read it.
+- **Inherited from V23.**
+
+Found 294. **`full/xl2tp.sh`, `full/menu-ssh.sh`, `full/menu-x.sh`, and 8 transport menus `x-*.sh`: submenu options eject operator on completion instead of returning to submenu** — in `xl2tp.sh` `main()`, cases 1-3 exited without calling `main`. In `menu-ssh.sh`, cases 1-9 exited without calling `menu-ssh`. In `menu-x.sh`, cases 1-4 exited without calling `menu-x`. In `full/x-*.sh` and `lite/x-*.sh`, cases 1-17 exited without re-calling their menu functions (`xws`, `xhttp`, `xsplit`, `xgrpc`), kicking the operator out after every operation.
+- **Inherited from V23.**

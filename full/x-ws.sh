@@ -144,23 +144,23 @@ ${orange}Press [Ctrl + C] to exit${NC}"
 
     # Menangani pilihan berdasarkan input pengguna
     case $opws in
-        1|01) clearScreen; add-vmess-ws ;;
-        2|02) clearScreen; add-vless-ws ;;
-        3|03) clearScreen; add-trojan-ws ;;
-        4|04) clearScreen; trial-vmess-ws ;;
-        5|05) clearScreen; trial-vless-ws ;;
-        6|06) clearScreen; trial-trojan-ws ;;
-        7|07) clearScreen; cek-xray-ws  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ;;
-        8|08) clearScreen; delete-ws ;;
-        9|09) clearScreen; extend-ws ;;
-        10) clearScreen; log-database-xray-ws  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ;;
-        11) clearScreen; list-xray-ws  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ;;
-        12) clearScreen; change-id-ws ;;
-        13) clearScreen; unlock-ws ;;
-        14) clearScreen; routing-ws ;;
-        15) clearScreen; change-limit-ip-ws ;;
-        16) clearScreen; change-quota-ws;;
-        17) clearScreen; locked-xray-ws;;
+        1|01) clearScreen; add-vmess-ws ; xws ;;
+        2|02) clearScreen; add-vless-ws ; xws ;;
+        3|03) clearScreen; add-trojan-ws ; xws ;;
+        4|04) clearScreen; trial-vmess-ws ; xws ;;
+        5|05) clearScreen; trial-vless-ws ; xws ;;
+        6|06) clearScreen; trial-trojan-ws ; xws ;;
+        7|07) clearScreen; cek-xray-ws  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xws ;;
+        8|08) clearScreen; delete-ws ; xws ;;
+        9|09) clearScreen; extend-ws ; xws ;;
+        10) clearScreen; log-database-xray-ws  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xws ;;
+        11) clearScreen; list-xray-ws  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xws ;;
+        12) clearScreen; change-id-ws ; xws ;;
+        13) clearScreen; unlock-ws ; xws ;;
+        14) clearScreen; routing-ws ; xws ;;
+        15) clearScreen; change-limit-ip-ws ; xws ;;
+        16) clearScreen; change-quota-ws ; xws ;;
+        17) clearScreen; locked-xray-ws ; xws ;;
         0|00) clearScreen; menu ;;
         *) clearScreen; xws ;;  # Jika input tidak valid, ulangi menu
     esac

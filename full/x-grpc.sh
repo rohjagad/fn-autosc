@@ -146,23 +146,23 @@ ${orange}Press [Ctrl + C] to exit${NC}"
 
     # Menangani pilihan berdasarkan input pengguna
     case $opgrpc in
-        1|01) clearScreen; add-vmess-grpc ;;
-        2|02) clearScreen; add-vless-grpc ;;
-        3|03) clearScreen; add-trojan-grpc ;;
-        4|04) clearScreen; trial-vmess-grpc ;;
-        5|05) clearScreen; trial-vless-grpc ;;
-        6|06) clearScreen; trial-trojan-grpc ;;
-        7|07) clearScreen; cek-xray-grpc  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ;;
-        8|08) clearScreen; delete-grpc ;;
-        9|09) clearScreen; extend-grpc ;;
-        10) clearScreen; log-database-xray-grpc  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ;;
-        11) clearScreen; list-xray-grpc  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ;;
-        12) clearScreen; change-id-grpc ;;
-        13) clearScreen; unlock-grpc ;;
-        14) clearScreen; routing-grpc ;;
-        15) clearScreen; change-limit-ip-grpc ;;
-        16) clearScreen; change-quota-grpc ;;
-	17) clearScreen; locked-xray-grpc ;;
+        1|01) clearScreen; add-vmess-grpc ; xgrpc ;;
+        2|02) clearScreen; add-vless-grpc ; xgrpc ;;
+        3|03) clearScreen; add-trojan-grpc ; xgrpc ;;
+        4|04) clearScreen; trial-vmess-grpc ; xgrpc ;;
+        5|05) clearScreen; trial-vless-grpc ; xgrpc ;;
+        6|06) clearScreen; trial-trojan-grpc ; xgrpc ;;
+        7|07) clearScreen; cek-xray-grpc  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xgrpc ;;
+        8|08) clearScreen; delete-grpc ; xgrpc ;;
+        9|09) clearScreen; extend-grpc ; xgrpc ;;
+        10) clearScreen; log-database-xray-grpc  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xgrpc ;;
+        11) clearScreen; list-xray-grpc  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xgrpc ;;
+        12) clearScreen; change-id-grpc ; xgrpc ;;
+        13) clearScreen; unlock-grpc ; xgrpc ;;
+        14) clearScreen; routing-grpc ; xgrpc ;;
+        15) clearScreen; change-limit-ip-grpc ; xgrpc ;;
+        16) clearScreen; change-quota-grpc ; xgrpc ;;
+	17) clearScreen; locked-xray-grpc ; xgrpc ;;
         0|00) clearScreen; menu ;;
         *) clearScreen; xgrpc ;;  # Jika input tidak valid, ulangi menu
     esac

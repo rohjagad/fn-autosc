@@ -114,7 +114,7 @@ function Sc_Credit(){
   echo -e "${ungu}             Script  Credit ${Xark}"
   echo -e "${ungu}               FN AutoSC ${Xark}"
   baris_panjang
-  exit 1
+  exit 0
 }
 
 # Animasi Loading

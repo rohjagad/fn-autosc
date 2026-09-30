@@ -169,6 +169,8 @@ clear
     echo -e "DOMAIN      : $domain"
     echo -e "DATE        : $date"
     echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━"
+read -n 1 -s -r -p "Press any key to return..." || true
+echo ""
 rm -fr /root/backup*
 }
 
@@ -244,8 +246,12 @@ clear
     echo -e "DOMAIN      : $domain"
     echo -e "DATE        : $date"
     echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━"
+read -n 1 -s -r -p "Press any key to return..." || true
+echo ""
 else
     echo "Error: File $file not found"
+    read -n 1 -s -r -p "Press any key to return..." || true
+    echo ""
 fi
 rm -fr /root/backup*
 }
@@ -428,6 +434,8 @@ clear
     echo -e "DOMAIN      : $domain"
     echo -e "DATE        : $date"
     echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━"
+read -n 1 -s -r -p "Press any key to return..." || true
+echo ""
 rm -fr /root/backup*
 }
 
@@ -446,11 +454,11 @@ ${separator}
 ${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input option: " opa || exit 0
 case $opa in
-1) clear ; backup ;;
-2) clear ; restore ;;
-3) clear ; restf ;;
-4) clear ; resold ;;
-0) clear ; menu ;;
+1) clear ; backup ; bmenu ;;
+2) clear ; restore ; bmenu ;;
+3) clear ; restf ; bmenu ;;
+4) clear ; resold ; bmenu ;;
+0|00) clear ; menu ;;
 *) clear ; bmenu ;;
 esac
 }

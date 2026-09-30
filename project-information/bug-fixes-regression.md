@@ -1152,3 +1152,15 @@ Verified end-to-end on fresh Debian 12 install with real traffic from local KVM/
 | menu-wg create/extend/delete/list | ✅ PASS | Full lifecycle (after Fix 292) |
 | Option 0 (back to main) all submenus | ✅ PASS | All 14 menus return to main cleanly |
 | Quota API (xray api stats) | ✅ PASS | uplink 1972, downlink 104873 bytes after real traffic |
+
+## 85. Live-test findings: Creation card pauses, limit-ip exit/bot guards, quota exit 0, system & bot menu loops & Option 0, bmenu/xl2tp/transport loops — Four Checks (September 30, 2026)
+
+Section 35's four-check rule applied to Fixes 293–299:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Fix 293: `format_display()` pause only triggers when printing formatted cards; automated scripts or non-interactive execution with closed stdin return immediately without hanging (`\|\| true`). Fix 294: `limit-ip` exits 0 on success; missing `.chatid`/`.keybot` return empty strings instead of printing stderr errors; unconfigured bot skips Telegram POST instead of failing with 404. Fix 295: `Sc_Credit()` exits 0 on success across all 8 quota changers; valid quota modifications report success. Fix 296: Option 0 added to `menu-system.sh`; options 1-8 loop back to `systemd` instead of ejecting operator. Fix 297: Option 0 added to `menu-bot.sh`; options 1-5 loop back to `mna`; pauses added to `notif`/`setbotup`/`rpot`. Fix 298: `bmenu.sh` loops back to menu; pauses added before backup cleanup so restore messages are readable. Fix 299: Submenus in `xl2tp.sh`, `menu-ssh.sh`, `menu-x.sh`, and all 8 `x-*.sh` transport menus re-call their menu functions after actions instead of kicking operator out. All files pass `bash -n`. |
+| **Over-strictness** | None. All changes prevent abrupt exits, terminal screen wipes, or false failure exit codes. |
+| **Over-engineering** | Standard bash pause (`read -n 1 -s -r -p ... \|\| true`); recursive menu function re-calls matching `menu-noobz.sh`/`menu-wg.sh`; one Go `os.Exit(0)` replacement. |
+| **vs the source** | Found 288–294: all inherited from V23 omissions and defects (missing pauses on card display, missing recursive menu loops, `exit 1` on success in `Sc_Credit`/`Credit`, missing Option 0 in `menu-system` and `menu-bot`). |
+

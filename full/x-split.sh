@@ -146,23 +146,23 @@ ${orange}Press [Ctrl + C] to exit${NC}"
 
     # Menangani pilihan berdasarkan input pengguna
     case $opsplit in
-        1|01) clearScreen; add-vmess-split ;;
-        2|02) clearScreen; add-vless-split ;;
-        3|03) clearScreen; add-trojan-split ;;
-        4|04) clearScreen; trial-vmess-split ;;
-        5|05) clearScreen; trial-vless-split ;;
-        6|06) clearScreen; trial-trojan-split ;;
-        7|07) clearScreen; cek-xray-split  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ;;
-        8|08) clearScreen; delete-split ;;
-        9|09) clearScreen; extend-split ;;
-        10) clearScreen; log-database-xray-split  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ;;
-        11) clearScreen; list-xray-split  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ;;
-        12) clearScreen; change-id-split ;;
-        13) clearScreen; unlock-split ;;
-        14) clearScreen; routing-split ;;
-        15) clearScreen; change-limit-ip-split ;;
-        16) clearScreen; change-quota-split;;
-        17) clearScreen; locked-xray-split;;
+        1|01) clearScreen; add-vmess-split ; xsplit ;;
+        2|02) clearScreen; add-vless-split ; xsplit ;;
+        3|03) clearScreen; add-trojan-split ; xsplit ;;
+        4|04) clearScreen; trial-vmess-split ; xsplit ;;
+        5|05) clearScreen; trial-vless-split ; xsplit ;;
+        6|06) clearScreen; trial-trojan-split ; xsplit ;;
+        7|07) clearScreen; cek-xray-split  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xsplit ;;
+        8|08) clearScreen; delete-split ; xsplit ;;
+        9|09) clearScreen; extend-split ; xsplit ;;
+        10) clearScreen; log-database-xray-split  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xsplit ;;
+        11) clearScreen; list-xray-split  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xsplit ;;
+        12) clearScreen; change-id-split ; xsplit ;;
+        13) clearScreen; unlock-split ; xsplit ;;
+        14) clearScreen; routing-split ; xsplit ;;
+        15) clearScreen; change-limit-ip-split ; xsplit ;;
+        16) clearScreen; change-quota-split ; xsplit ;;
+        17) clearScreen; locked-xray-split ; xsplit ;;
         0|00) clearScreen; menu ;;
         *) clearScreen; xsplit ;;  # Jika input tidak valid, ulangi menu
     esac

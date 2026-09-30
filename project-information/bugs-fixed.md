@@ -2158,3 +2158,38 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 292 (Found 287):** changed `echo -e " Domain\t: $domain / bug.com.${domain}"` to `echo -e " Domain\t: $domain"` in `full/menu-wg.sh` `create()`. Removed the accidental `bug.com.` test string that was committed in V23.
 - **Verified live on VPS:** WireGuard account creation now shows only the correct domain.
+
+### Fix 293 - format.sh: add interactive pause to format_display() for all 50 creation cards (Found 288)
+
+- **Fix 293 (Found 288):** added `echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; echo ""` to the end of `format_display()` in `config/format.sh`. Prevents parent menus (`x-*`, `menu-ssh`, `menu`) from immediately wiping newly generated credentials, UUIDs, and links upon account creation.
+- **Verified live on VPS:** account creation in menu now cleanly displays the account card and pauses for operator acknowledgement before returning.
+
+### Fix 294 - limit-ip.go: fix success exit code, suppress optional file errors, guard Telegram POST (Found 289)
+
+- **Fix 294 (Found 289):** in `full/limit-ip.go`: changed `Credit()` to `os.Exit(0)` instead of `os.Exit(1)`; silenced error prints in `readFile()` when optional `/etc/funny/.chatid` or `/etc/funny/.keybot` are absent; added `if CHATID == "" || KEY == "" { return }` in `sendTelegramNotification()`. Recompiled binary on Linux amd64 with `-ldflags="-s -w"` and updated `menu/full.zip`.
+- **Verified live on VPS:** `limit-ip` updates limit without spurious file or Telegram errors, and exits with code 0.
+
+### Fix 295 - change-quota-*.sh (8 files): change Sc_Credit() exit 1 to exit 0 on success (Found 290)
+
+- **Fix 295 (Found 290):** changed `exit 1` to `exit 0` in `function Sc_Credit()` across all 8 `change-quota-*.sh` files in `full/` and `lite/`. Prevents successful quota adjustments from reporting failure status to callers.
+- **Verified live on VPS:** updating quota with `change-quota-ws` now returns exit code 0.
+
+### Fix 296 - menu-system.sh: add Option 0, preserve submenu navigation on action (Found 291)
+
+- **Fix 296 (Found 291):** in `full/menu-system.sh` and `lite/menu-system.sh`: added `${green}0${NC}. Back to Main Menu` and `0|00) clear ; menu ;;` dispatcher handling in `systemd()`; added `systemd` calls to options 1, 2, 3, 5, 6, 7, 8 so operators remain in the system menu after actions; added `menuwg` calls to options 1-7 in `menuwg()` and `0) systemd ;;` to return to system menu; added `0) menuwg ;;` in `add()`.
+- **Verified live on VPS:** option 5 (`detail`) displays details, pauses on keypress, and returns to system menu; option 0 returns to main menu.
+
+### Fix 297 - menu-bot.sh: add Option 0, add pauses to notifications/backup/bug report (Found 292)
+
+- **Fix 297 (Found 292):** in `full/menu-bot.sh` and `lite/menu-bot.sh`: added `${green}0${NC}. Back to Main Menu` and `0|00) clear ; menu ;;` in `mna()`; added `mna` calls to options 1-5; added `read -n 1 -s -r -p "Press any key to return..." || true` to `notif()`, `setbotup()`, and `rpot()`; aligned bug report contact with Decision 9 (`https://t.me/rohcuan`); added loop and pause to `menubot()` in `termbot()`.
+- **Verified live on VPS:** bug report and bot setup menus now pause for reading and loop cleanly back to the bot menu.
+
+### Fix 298 - bmenu.sh & backup.sh: loop on actions and pause before returning (Found 293)
+
+- **Fix 298 (Found 293):** in `full/bmenu.sh` and `lite/bmenu.sh`: added `read -n 1 -s -r -p "Press any key to return..." || true` to `restore()`, `restf()`, and `resold()`; re-called `bmenu` in cases 1-4; in `full/backup.sh` and `lite/backup.sh`, added pause before returning on credentials missing or failure.
+- **Verified live on VPS:** backup and restore workflows now keep status output visible and loop back to the backup menu.
+
+### Fix 299 - xl2tp.sh, menu-ssh.sh, menu-x.sh, x-*.sh (8 files): loop submenus on action (Found 294)
+
+- **Fix 299 (Found 294):** in `full/xl2tp.sh`: re-called `main` in cases 1, 2, 3 so operators return to L2TP menu; in `full/menu-ssh.sh`: re-called `menu-ssh` in cases 1-9; in `full/menu-x.sh`: re-called `menu-x` in cases 1-4; in all 8 transport menus (`full/x-*.sh` and `lite/x-*.sh`): re-called menu functions (`xws`, `xhttp`, `xsplit`, `xgrpc`) in cases 1-17. Repacked `menu/full.zip` and `menu/lite.zip`.
+- **Verified live on VPS:** creating, extending, or deleting accounts in L2TP and transport menus now smoothly returns to the submenu.

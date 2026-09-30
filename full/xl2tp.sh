@@ -289,12 +289,15 @@ echo -e ""
 case $menu in
 1)
 create
+main
 ;;
 2)
 delete
+main
 ;;
 3)
 extend
+main
 ;;
 0|4)
 clear

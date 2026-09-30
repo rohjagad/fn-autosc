@@ -369,8 +369,9 @@ add() {
     Press [Ctrl + C] to exit"
     read -p "Input option: " aws || exit 0
     case $aws in
-    1) akun4 ;;
-    2) akun6 ;;
+    1) akun4 ; menuwg ;;
+    2) akun6 ; menuwg ;;
+    0) menuwg ;;
     *) add ;;
     esac
 }
@@ -396,15 +397,16 @@ menuwg() {
     Press [Ctrl + C] to exit"
     read -p "Input option: " opt || exit 0
     case $opt in
-    1) install ;;
-    2) status ;;
-    3) restart ;;
-    4) enable ;;
-    5) disable ;;
-    6) token ;;
-    7) add ;;
+    1) install ; menuwg ;;
+    2) status ; menuwg ;;
+    3) restart ; menuwg ;;
+    4) enable ; menuwg ;;
+    5) disable ; menuwg ;;
+    6) token ; menuwg ;;
+    7) add ; menuwg ;;
     8) menu ;;
     9) exit ;;
+    0) systemd ;;
     *) menuwg ;;
     esac
 }
@@ -832,19 +834,21 @@ ${green}5${NC}. View Service & Port Details
 ${green}6${NC}. System Resource Monitor (htop)
 ${green}7${NC}. Cloudflare Argo Tunnel Menu
 ${green}8${NC}. Change SSH Banner
+${green}0${NC}. Back to Main Menu
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input option: " asu || exit 0
 case $asu in
-1) clear ; change_timezone ;;
-2) clear ; resall ;;
-3) clear ; menu-warp ;;
+1) clear ; change_timezone ; systemd ;;
+2) clear ; resall ; systemd ;;
+3) clear ; menu-warp ; systemd ;;
 4) clear ; uninstall ;;
-5) clear ; detail ;;
-6) clear ; htop ;;
-7) clear ; menu-argo ;;
-8) clear ; bnnr ;;
+5) clear ; detail ; systemd ;;
+6) clear ; htop ; systemd ;;
+7) clear ; menu-argo ; systemd ;;
+8) clear ; bnnr ; systemd ;;
+0|00) clear ; menu ;;
 *) systemd ;;
 esac
 }

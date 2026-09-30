@@ -137,10 +137,10 @@ ${separator}
 ${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input option: " opws || exit 0
 case $opws in
-1) clear ; x-ws ;;
-2) clear ; x-http ;;
-3) clear ; x-split ;;
-4) clear ; x-grpc ;;
+1) clear ; x-ws ; menu-x ;;
+2) clear ; x-http ; menu-x ;;
+3) clear ; x-split ; menu-x ;;
+4) clear ; x-grpc ; menu-x ;;
 0) clear ; menu ;;
 *) clear ; menu-x ;;
 esac

@@ -44,7 +44,7 @@ func Credit() {
 	fmt.Println(Yellow + "          Script Credit" + Xark)
 	fmt.Println(Yellow + "    FN AutoSC Autoscript AIO" + Xark)
 	barisPanjang()
-	os.Exit(1)
+	os.Exit(0)
 }
 
 func loadingAnimasi() {
@@ -121,6 +121,9 @@ func getCurrentIPLimit(content string) string {
 func sendTelegramNotification(username, oldLimit, newLimit, expiry string) {
 	CHATID := string(readFile("/etc/funny/.chatid"))
 	KEY := string(readFile("/etc/funny/.keybot"))
+	if CHATID == "" || KEY == "" {
+		return
+	}
 	URL := "https://api.telegram.org/bot" + KEY + "/sendMessage"
 
 	date := time.Now().Format("2006-01-02")
@@ -159,7 +162,6 @@ func sendTelegramNotification(username, oldLimit, newLimit, expiry string) {
 func readFile(filePath string) string {
 	content, err := os.ReadFile(filePath)
 	if err != nil {
-		fmt.Println(Red + "Error reading file: " + filePath + Xark)
 		return ""
 	}
 	return strings.TrimSpace(string(content))

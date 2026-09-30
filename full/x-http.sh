@@ -146,23 +146,23 @@ ${orange}Press [Ctrl + C] to exit${NC}"
 
     # Menangani pilihan berdasarkan input pengguna
     case $ophttp in
-        1|01) clearScreen; add-vmess-http ;;
-        2|02) clearScreen; add-vless-http ;;
-        3|03) clearScreen; add-trojan-http ;;
-        4|04) clearScreen; trial-vmess-http ;;
-        5|05) clearScreen; trial-vless-http ;;
-        6|06) clearScreen; trial-trojan-http ;;
-        7|07) clearScreen; cek-xray-http  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ;;
-        8|08) clearScreen; delete-http ;;
-        9|09) clearScreen; extend-http ;;
-        10) clearScreen; log-database-xray-http  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ;;
-        11) clearScreen; list-xray-http  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ;;
-        12) clearScreen; change-id-http ;;
-        13) clearScreen; unlock-http ;;
-        14) clearScreen; routing-http ;;
-        15) clearScreen; change-limit-ip-http ;;
-        16) clearScreen; change-quota-http;;
-	17) clearScreen; locked-xray-http;;
+        1|01) clearScreen; add-vmess-http ; xhttp ;;
+        2|02) clearScreen; add-vless-http ; xhttp ;;
+        3|03) clearScreen; add-trojan-http ; xhttp ;;
+        4|04) clearScreen; trial-vmess-http ; xhttp ;;
+        5|05) clearScreen; trial-vless-http ; xhttp ;;
+        6|06) clearScreen; trial-trojan-http ; xhttp ;;
+        7|07) clearScreen; cek-xray-http  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xhttp ;;
+        8|08) clearScreen; delete-http ; xhttp ;;
+        9|09) clearScreen; extend-http ; xhttp ;;
+        10) clearScreen; log-database-xray-http  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xhttp ;;
+        11) clearScreen; list-xray-http  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xhttp ;;
+        12) clearScreen; change-id-http ; xhttp ;;
+        13) clearScreen; unlock-http ; xhttp ;;
+        14) clearScreen; routing-http ; xhttp ;;
+        15) clearScreen; change-limit-ip-http ; xhttp ;;
+        16) clearScreen; change-quota-http ; xhttp ;;
+	17) clearScreen; locked-xray-http ; xhttp ;;
         0|00) clearScreen; menu ;;
         *) clearScreen; xhttp ;;  # Jika input tidak valid, ulangi menu
     esac

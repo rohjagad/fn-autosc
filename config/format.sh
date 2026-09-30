@@ -73,4 +73,7 @@ format_display() {
             fi
         fi
     done
+    echo ""
+    read -n 1 -s -r -p "Press any key to return..." || true
+    echo ""
 }

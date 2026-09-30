@@ -134,6 +134,8 @@ if [ -z "$CHATID" ] || [ -z "$KEY" ]; then
     echo "$TEKS"
     echo "Telegram credentials are not configured (/etc/funny/.chatid, /etc/funny/.keybot)."
     echo "The backup archive was KEPT at $file_path"
+    read -n 1 -s -r -p "Press any key to return..." || true
+    echo ""
     exit 1
 fi
 # Kirim file backup ke Telegram (sebagai lampiran)
@@ -147,11 +149,15 @@ if echo "$RESP" | grep -q '"ok":true'; then
     clear
     echo "$TEKS"
     echo "Backup sent to Telegram"
+    read -n 1 -s -r -p "Press any key to return..." || true
+    echo ""
 else
     clear
     echo "$TEKS"
     echo "Telegram upload FAILED - the backup archive was KEPT at $file_path"
     echo "$RESP" | head -c 300
+    read -n 1 -s -r -p "Press any key to return..." || true
+    echo ""
     exit 1
 fi
 
