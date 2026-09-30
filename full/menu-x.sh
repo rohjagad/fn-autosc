@@ -131,6 +131,7 @@ ${green}1${NC}. WebSocket (WS)
 ${green}2${NC}. HTTP Upgrade
 ${green}3${NC}. Split HTTP
 ${green}4${NC}. gRPC (XTLS)
+${green}0${NC}. Back to Main Menu
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
@@ -140,6 +141,7 @@ case $opws in
 2) clear ; x-http ;;
 3) clear ; x-split ;;
 4) clear ; x-grpc ;;
+0) clear ; menu ;;
 *) clear ; menu-x ;;
 esac
 }

@@ -120,6 +120,7 @@ ${green}6${NC}. Extend SSH Account
 ${green}7${NC}. List SSH Accounts
 ${green}8${NC}. Change SSH Password
 ${green}9${NC}. Change SSH IP Limit
+${green}0${NC}. Back to Main Menu
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
@@ -134,4 +135,6 @@ read -p "Input option: " aws || exit 0
     7) clear ; list-ssh ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ;;
     8) clear ; pwd-ssh ;;
     9) clear ; limit-ip ;;
+    0) clear ; menu ;;
+    *) clear ; menu-ssh ;;
     esac

@@ -136,6 +136,7 @@ ${green}14${NC}. Xray Routing Config
 ${green}15${NC}. Change HTTP IP Limit
 ${green}16${NC}. Change HTTP Quota Limit
 ${green}17${NC}. Lock HTTP Account
+${green}00${NC}. Back to Main Menu
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
@@ -162,6 +163,7 @@ ${orange}Press [Ctrl + C] to exit${NC}"
         15) clearScreen; change-limit-ip-http ;;
         16) clearScreen; change-quota-http;;
 	17) clearScreen; locked-xray-http;;
+        0|00) clearScreen; menu ;;
         *) clearScreen; xhttp ;;  # Jika input tidak valid, ulangi menu
     esac
 }

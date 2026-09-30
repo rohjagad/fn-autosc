@@ -296,7 +296,7 @@ delete
 3)
 extend
 ;;
-4)
+0|4)
 clear
 menu
 ;;

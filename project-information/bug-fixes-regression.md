@@ -1091,3 +1091,14 @@ Section 35's four-check rule applied to Fix 286:
 | **Over-strictness** | None. Root is the standard VPS administrative account required by all downstream autoscripts. |
 | **Over-engineering** | Flag addition only (`--username root`). No structural changes. |
 | **vs the source** | Inherited from V23 (unattended invocation omission). |
+
+## 83. Submenu Option 0 parity, WireGuard WARP key extraction, WG empty user guard, NoobzVPN validation — Four Checks (September 30, 2026)
+
+Section 35's four-check rule applied to Fixes 287–290:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Fix 287: Option 0 routes to `menu` (the main menu); existing option numbers (1-17) are completely unchanged. Eliminates trap where users were forced to terminate sessions. Fix 288: `$CLOUDFLAREKEY` is parsed from the JSON response, fixing the empty key error; auto-key generation only triggers when inputs are empty, preserving manual key entry. Fix 289: Guards only catch empty input strings; valid usernames proceed normally. Fix 290: Aligns Noobz validation with `addssh.sh` and `xl2tp.sh`; existing valid account flows unchanged. All 18 touched files pass `bash -n`. |
+| **Over-strictness** | None. Standard alphanumeric validation `^[a-zA-Z0-9_]+$` matches all other transports. |
+| **Over-engineering** | Standard menu option case entries; standard `jq -r` extraction; basic empty string checks. Minimal diff footprint. |
+| **vs the source** | Found 282/283/284/285: all inherited from V23 omissions and defects. |

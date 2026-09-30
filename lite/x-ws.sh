@@ -136,6 +136,7 @@ ${green}14${NC}. Xray Routing Config
 ${green}15${NC}. Change WS IP Limit
 ${green}16${NC}. Change WS Quota Limit
 ${green}17${NC}. Lock WS Account
+${green}00${NC}. Back to Main Menu
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
@@ -160,6 +161,7 @@ ${orange}Press [Ctrl + C] to exit${NC}"
         15) clearScreen; change-limit-ip-ws ;;
         16) clearScreen; change-quota-ws;;
         17) clearScreen; locked-xray-ws;;
+        0|00) clearScreen; menu ;;
         *) clearScreen; xws ;;  # Jika input tidak valid, ulangi menu
     esac
 }

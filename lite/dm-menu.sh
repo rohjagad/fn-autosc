@@ -419,6 +419,7 @@ ${green}1${NC}. Change Server Domain
 ${green}2${NC}. Renew Certificate (Acme: IPv4/IPv6)
 ${green}3${NC}. Renew Certificate (Certbot: IPv4 Only)
 ${green}4${NC}. Generate Self-Signed Certificate
+${green}0${NC}. Back to Main Menu
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
@@ -428,6 +429,7 @@ case $apw in
 2) clear ; cert ;;
 3) clear ; fn ;;
 4) clear ; dmsl ;;
+0) clear ; menu ;;
 *) clear ; dm1 ;;
 esac
 }

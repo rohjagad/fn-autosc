@@ -2132,3 +2132,19 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 ### Fix 286 - menu-system.sh: pass --username root to all 31 reinstall.sh invocations (Found 281)
 
 - **Fix 286 (Found 281):** added `--username root` to all 31 `bash reinstall.sh` invocations across `full/menu-system.sh` and `lite/menu-system.sh`. Prevents the installer from prompting on stdin, ensuring unattended and menu-driven OS reinstallations cleanly configure the root account. Repacked `menu/full.zip` and `menu/lite.zip`.
+
+### Fix 287 - submenus: add Option 0 (Back to Main Menu) across 14 menu scripts (Found 282)
+
+- **Fix 287 (Found 282):** added `${green}0${NC}. Back to Main Menu` (or `00` where options reach double digits) and `0|00) clear ; menu ;;` dispatcher handling across 14 submenu files: `full/menu-ssh.sh`, `full/menu-x.sh`, `full/x-{ws,http,split,grpc}.sh` (and all 4 `lite/` equivalents), `full/bmenu.sh` and `lite/bmenu.sh`, `full/dm-menu.sh` and `lite/dm-menu.sh`, and `full/menu-noobz.sh`. Also aligned `full/menu-wg.sh` (accepts `0|7)`) and `full/xl2tp.sh` (accepts `0|4)`). Verified live on VPS: typing `0` in every single submenu cleanly returns to `VPN MANAGEMENT PANEL`.
+
+### Fix 288 - menu-wg.sh: extract $CLOUDFLAREKEY from warp.json and auto-generate keypair (Found 283)
+
+- **Fix 288 (Found 283):** in `full/menu-wg.sh` `warp()`: added `CLOUDFLAREKEY=$(jq -r '.config.peers[0].public_key // empty' warp.json 2>/dev/null)` with validation error exit so the peer key is properly bound; and added auto-generation via `wg genkey` and `wg pubkey` when `PRIVATEKEY`/`PUBLICKEY` prompts are left empty.
+
+### Fix 289 - menu-wg.sh: guard against empty username in delete, extend, show (Found 284)
+
+- **Fix 289 (Found 284):** added `[ -z "$user" ] && { goback; return; }` immediately after reading username in `delete()`, `extend()`, and `show()` in `full/menu-wg.sh`. Prevents `grep -qw ""` from matching every client line in `/etc/funny/.wireguard` and corrupting the configuration.
+
+### Fix 290 - menu-noobz.sh: validate username, reject duplicates, verify user exists on delete (Found 285)
+
+- **Fix 290 (Found 285):** in `full/menu-noobz.sh`: added `^[a-zA-Z0-9_]+$` validation loop and `grep -qw "^### $user" /etc/funny/.noob` duplicate check to `create()`; required non-empty password; and added `if ! grep -qw "^### $name" "/etc/funny/.noob"; then echo "User not found"; return; fi` to `delete()`.

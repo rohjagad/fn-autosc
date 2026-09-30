@@ -228,16 +228,30 @@ function warp() {
 source /etc/wireguard/params
 #ip=$(curl -sS curl -sS ipv4.icanhazip.com)
 clear
-echo -n "Enter your generated PRIVATE KEY: "
+echo -n "Enter your generated PRIVATE KEY (leave blank to auto-generate): "
 read PRIVATEKEY
-echo -n "Enter your generated PUBLIC KEY: "
+echo -n "Enter your generated PUBLIC KEY (leave blank to auto-generate): "
 read PUBLICKEY
+
+if [ -z "$PRIVATEKEY" ]; then
+    PRIVATEKEY=$(wg genkey)
+    PUBLICKEY=$(echo "$PRIVATEKEY" | wg pubkey)
+    echo "Generated PrivateKey: $PRIVATEKEY"
+    echo "Generated PublicKey : $PUBLICKEY"
+fi
 
 echo ""
 echo "This will take 3-5 minutes, wait until the process is finished..."
 echo ""
 
 curl -d '{"key":"'$PUBLICKEY'", "install_id":"", "warp_enabled":true, "tos":"2019-11-17T00:00:00.000+01:00", "type":"Android", "locale":"en_GB"}' https://api.cloudflareclient.com/v0a2169/reg | tee warp.json > /dev/null
+CLOUDFLAREKEY=$(jq -r '.config.peers[0].public_key // empty' warp.json 2>/dev/null)
+if [ -z "$CLOUDFLAREKEY" ]; then
+    echo "Failed to register with Cloudflare WARP API."
+    rm -f warp.json
+    goback
+    return
+fi
 sudo wg set wg0 peer "$CLOUDFLAREKEY" endpoint engage.cloudflareclient.com:51820 allowed-ips 172.16.0.0/24 > out.log 2> /dev/null
 wg-quick down wg0 > out.log 2> /dev/null
 wg-quick up wg0 > out.log 2> /dev/null
@@ -282,6 +296,7 @@ function delete() {
 	echo -e "====================="
 	echo -e " Username: \c"
 	read user
+	[ -z "$user" ] && { goback; return; }
 	if grep -qw "^### Client ${user}\$" /etc/wireguard/wg0.conf; then
 		awk "/^### Client ${user}$/{found=1} found && /^$/{found=0; next} !found{print} found{next}" \
 			/etc/wireguard/wg0.conf > /tmp/wg0.conf && mv /tmp/wg0.conf /etc/wireguard/wg0.conf
@@ -308,6 +323,7 @@ function extend() {
 	echo -e "====================="
 	echo -e " Username: \c"
 	read user
+	[ -z "$user" ] && { goback; return; }
 	if ! grep -qw "$user" /etc/funny/.wireguard; then
 		newline
 		error "$user does not exist"
@@ -377,6 +393,7 @@ function show() {
 	echo -e "======================="
 	echo -e " Username\t: \c"
 	read user
+	[ -z "$user" ] && { goback; return; }
 	if grep -qw "^### Client ${user}\$" /etc/wireguard/wg0.conf; then
 		exp=$(cat /etc/funny/.wireguard | grep -w "$user" | awk '{print $2}')
 		exp_date=$(date -d"${exp}" "+%d %b %Y")
@@ -409,7 +426,7 @@ ${green}3${NC}. Extend WireGuard Account
 ${green}4${NC}. List WireGuard Accounts
 ${green}5${NC}. Show WireGuard Config
 ${green}6${NC}. Add Cloudflare WARP
-${green}7${NC}. Back to Main Menu
+${green}0${NC}. Back to Main Menu
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
@@ -439,7 +456,7 @@ case $menu in
 	warp
 	goback
 	;;
-7)
+0|7)
 	menu
 	;;
 *) 

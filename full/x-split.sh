@@ -136,6 +136,7 @@ ${green}14${NC}. Xray Routing Config
 ${green}15${NC}. Change Split IP Limit
 ${green}16${NC}. Change Split Quota Limit
 ${green}17${NC}. Lock Split HTTP Account
+${green}00${NC}. Back to Main Menu
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
@@ -162,6 +163,7 @@ ${orange}Press [Ctrl + C] to exit${NC}"
         15) clearScreen; change-limit-ip-split ;;
         16) clearScreen; change-quota-split;;
         17) clearScreen; locked-xray-split;;
+        0|00) clearScreen; menu ;;
         *) clearScreen; xsplit ;;  # Jika input tidak valid, ulangi menu
     esac
 }

@@ -440,6 +440,7 @@ ${green}1${NC}. Backup to Telegram
 ${green}2${NC}. Restore Backup via URL
 ${green}3${NC}. Restore Backup via File
 ${green}4${NC}. Restore Legacy Backup (< v1.23)
+${green}0${NC}. Back to Main Menu
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
@@ -449,6 +450,7 @@ case $opa in
 2) clear ; restore ;;
 3) clear ; restf ;;
 4) clear ; resold ;;
+0) clear ; menu ;;
 *) clear ; bmenu ;;
 esac
 }

@@ -136,6 +136,7 @@ ${green}14${NC}. Xray Routing Config
 ${green}15${NC}. Change gRPC IP Limit
 ${green}16${NC}. Change gRPC Quota Limit
 ${green}17${NC}. Lock gRPC Account
+${green}00${NC}. Back to Main Menu
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
@@ -162,6 +163,7 @@ ${orange}Press [Ctrl + C] to exit${NC}"
         15) clearScreen; change-limit-ip-grpc ;;
         16) clearScreen; change-quota-grpc ;;
 	17) clearScreen; locked-xray-grpc ;;
+        0|00) clearScreen; menu ;;
         *) clearScreen; xgrpc ;;  # Jika input tidak valid, ulangi menu
     esac
 }

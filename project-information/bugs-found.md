@@ -1978,3 +1978,15 @@ Found 280. **`full/menu-ssh.sh` (options 4, 5, 7) and `full/x-*.sh` / `lite/x-*.
 
 Found 281. **`full/menu-system.sh` and `lite/menu-system.sh`: all 31 `reinstall.sh` invocations omit `--username root` — causes interactive prompt that breaks redirected execution** (lines 616-792 full, 596-772 lite) — `reinstall.sh` prompts for username on standard input when `--username` is not specified. When invoked non-interactively or with residual standard input from pipes/subshells, the input prompt consumes whatever line follows on stdin as the username (e.g., creating a user named `sleep` instead of `root`).
 - **Inherited from V23** (where all reinstall commands were added without username flags).
+
+Found 282. **14 submenu scripts across `full/` and `lite/`: missing "Back to Main Menu" (Option 0) traps operator in submenus** — `menu-ssh.sh` (options 1-9), `menu-x.sh` (options 1-4), all 8 transport menus `x-{ws,http,split,grpc}.sh` (options 1-17 in full and lite), `bmenu.sh` (options 1-4 in full and lite), `dm-menu.sh` (options 1-4 in full and lite), and `menu-noobz.sh` (options 1-3) lacked a "Back to Main Menu" option. Typing `0` or an invalid option either trapped the user in the submenu by redrawing it, or exited the shell session (`exit 0` in menu-noobz). The operator was unable to return to the main menu without terminating the session or sending SIGINT.
+- **Inherited from V23.**
+
+Found 283. **`full/menu-wg.sh`: `warp()` never extracts `$CLOUDFLAREKEY` from `warp.json`, causing `wg set peer ""` failure; keys require manual entry** (lines 231-241) — in `warp()`, the Cloudflare API response was piped to `tee warp.json` but `$CLOUDFLAREKEY` was never parsed from `warp.json`. `sudo wg set wg0 peer "$CLOUDFLAREKEY"` executed with an empty peer key, silently failing to attach the WARP peer. Additionally, the script prompted the operator to manually generate and input both private and public keys instead of auto-generating them via `wg genkey` and `wg pubkey` when left blank.
+- **Inherited from V23** (where V23 used unexpanded single quotes `'$CLOUDFLAREKEY'`).
+
+Found 284. **`full/menu-wg.sh`: empty username in `delete()`, `extend()`, `show()` matches all entries via unanchored `grep -qw ""`** (lines 285, 311, 380) — if the operator presses Enter without typing a username, `grep -qw ""` matches every line in `/etc/funny/.wireguard` and `wg0.conf`. In `extend()`, this returned the expiry of the first client in the file, prompted for duration, and corrupted `/etc/funny/.wireguard` for an empty user.
+- **Inherited from V23.**
+
+Found 285. **`full/menu-noobz.sh`: `create()` allows empty/invalid usernames and duplicate records; `delete()` operates on nonexistent users** (lines 121, 171) — `create()` read username and password without validation or checking `/etc/funny/.noob` for existing records, writing malformed `###  <exp>` entries or duplicate users into the database. `delete()` only checked `[ -z "$name" ]`; if the typed username was not in `/etc/funny/.noob`, it executed deletion commands on `noobzvpns`, cleared the screen, and sent a false "Account Deleted" Telegram notification.
+- **Inherited from V23.**

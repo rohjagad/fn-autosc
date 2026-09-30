@@ -129,6 +129,12 @@ ${orange}Press [Ctrl + C] to exit${NC}"
                 Nameserver: $nsd
                 "
                 read -p "Input Nameserver: " nsdomen
+                if [ -z "$nsdomen" ]; then
+                    echo "Nameserver cannot be empty."
+                    sleep 2
+                    mna89
+                    return
+                fi
                 clear
                 echo "${nsdomen}" > /etc/slowdns/nsdomain
                 systemctl stop dnstt.service
@@ -205,7 +211,7 @@ Public Key   : ${green}$pubkey${NC}
 Port Target  : 5300 (DNS -> 22 OpenSSH)
 Service      : $stat_msg
 ${separator}"
-                read -n 1 -s -r -p "Press any key to return..."
+                read -n 1 -s -r -p "Press any key to return..." || true
                 mna89
                 ;;
             0)

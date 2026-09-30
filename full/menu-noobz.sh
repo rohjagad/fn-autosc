@@ -118,8 +118,22 @@ echo -e "
 ════════════════════════════
 Create NoobzVPN Account
 ════════════════════════════"
-read -p "Username  : " user
-read -p "Password  : " pass
+read -p "Username  : " user || return
+while ! [[ "$user" =~ ^[a-zA-Z0-9_]+$ ]]; do
+    [ -z "$user" ] && return
+    echo "Invalid username. Use only alphanumeric characters and underscore."
+    read -p "Username  : " user || return
+done
+if grep -qw "^### $user" /etc/funny/.noob 2>/dev/null; then
+    echo "User $user already exists."
+    sleep 2
+    return
+fi
+read -p "Password  : " pass || return
+while [ -z "$pass" ]; do
+    echo "Password cannot be empty."
+    read -p "Password  : " pass || return
+done
 echo ""
 echo -e "\033[38;5;208m0 not allowed\033[0m"
 read -p "Duration (Days): " masaaktif
@@ -171,7 +185,12 @@ $mna
 read -p "Username: " name || return
 if [ -z "$name" ]; then
 return
-else
+fi
+if ! grep -qw "^### $name" "/etc/funny/.noob" 2>/dev/null; then
+    echo "User $name not found."
+    sleep 2
+    return
+fi
 exp=$(grep -we "^### $name" "/etc/funny/.noob" | cut -d ' ' -f 3 | sort | uniq)
 sed -i "/^### $name $exp/d" /etc/funny/.noob
 noobz_remove_user "$name"
@@ -194,7 +213,6 @@ clear
 echo "$TEKS"
 read -n 1 -s -r -p "Press any key to return..." || true
 echo ""
-fi
 }
 
 function list() {
@@ -269,6 +287,7 @@ ${blue_sep}
 ${green}1${NC}. Create Account
 ${green}2${NC}. Delete Account
 ${green}3${NC}. List Active Accounts
+${green}0${NC}. Back to Main Menu
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
@@ -277,6 +296,7 @@ case $inrere in
 1|01) clear ; create ; main ;;
 2|02) clear ; delete ; main ;;
 3|03) clear ; list ; main ;;
+0|00) clear ; menu ;;
 x|X) exit 0 ;;
 *) echo "Invalid option" ; main ;;
 esac
