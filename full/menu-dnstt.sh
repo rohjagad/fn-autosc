@@ -222,7 +222,8 @@ ${separator}"
                 read -n 1 -s -r -p "Press any key to return..." || true
                 mna89
                 ;;
-            0)
+            0|00)
+                clear
                 menu
                 ;;
             *)

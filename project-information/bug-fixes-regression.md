@@ -1384,6 +1384,18 @@ Section 35's four-check rule applied to Fix 319:
 | **Over-engineering** | Minimal POSIX `chmod 600`, single-loop retry in `xl2tp.sh`, and `if [ -n "$CHATID" ]` guard. |
 | **vs the source** | V23 left renewed SlowDNS keys at default umask, aborted L2TP abruptly on duplicate username, and made blind curl calls in Noobz. The fix aligns with project security and usability standards. |
 
+## 106. Phase 10: TUI Menu Navigation and Retention — Four Checks (October 1, 2026)
+
+Section 35's four-check rule applied to Fix 320:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | All menu actions, submenu selections, and exit commands continue to work identically. Chained menu re-invocations ensure operators are never dumped to the shell prompt unexpectedly. All 16 core services verified active. `bash -n` clean across all modified scripts. |
+| **Over-strictness** | No input restriction added. Both `0` and `00` return to the main menu. |
+| **Over-engineering** | Simple `; menu` and `; menu-x` additions in case branches. Replaced outer `menu` jump with inner `main` loop in WireGuard. Zero new dependencies. |
+| **vs the source** | V23 and 1.20 lacked retention loops and ejected operators from menus. The fix provides smooth, continuous CLI navigation. |
+
+
 
 
 

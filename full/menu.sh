@@ -315,15 +315,15 @@ ${separator}
 ${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input option: " opw || exit 0
 case $opw in
-1) clear ; menu-ssh ;;
-2) clear ; menu-x ;;
-3) clear ; dm-menu ;;
-4) clear ; menu-dnstt ;;
-5) clear ; bmenu ;;
-6) clear ; menu-bot ;;
-7) clear ; xl2tp ;;
-8) clear ; menu-wg ;;
-9) clear ; menu-noobz ;;
-10) clear ; menu-system ;;
+1) clear ; menu-ssh ; menu ;;
+2) clear ; menu-x ; menu ;;
+3) clear ; dm-menu ; menu ;;
+4) clear ; menu-dnstt ; menu ;;
+5) clear ; bmenu ; menu ;;
+6) clear ; menu-bot ; menu ;;
+7) clear ; xl2tp ; menu ;;
+8) clear ; menu-wg ; menu ;;
+9) clear ; menu-noobz ; menu ;;
+10) clear ; menu-system ; menu ;;
 *) menu ;;
 esac

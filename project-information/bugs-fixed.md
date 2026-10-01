@@ -2343,6 +2343,16 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Verified live:** deployed to `/usr/bin/` on VPS; all 16 core services verified active with 0 failed units.
 - **Archives rebuilt:** `menu/full.zip` repacked and verified at mode `0755`.
 
+### Fix 320 - Phase 10: TUI menu retention, WireGuard submenu goback, and option 00 handling (Found 320)
+
+- **Fix 320 (Found 320):**
+  1. In `full/menu.sh` and `lite/menu.sh`: chained re-invocation of the parent menu after each submenu case execution to prevent dropping out to the shell.
+  2. In `full/menu-wg.sh`: modified `goback()` to return to `main` (the WireGuard submenu) instead of the main menu, and removed redundant `goback` calls in the dispatcher.
+  3. In `full/menu-dnstt.sh`: added `00` support to Option 0 handling.
+- **Verified live:** deployed to `/usr/bin/` on VPS; verified menu retention across all actions; all 16 core services verified active with 0 failed units.
+- **Archives rebuilt:** `menu/full.zip` and `menu/lite.zip` repacked and verified at mode `0755`.
+
+
 
 
 

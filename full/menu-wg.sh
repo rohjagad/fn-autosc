@@ -134,11 +134,7 @@ newline() {
 goback() {
   echo -e "Press any key to return \c" 
 	read back
-	case $back in
-	  *)
-	    menu
-      ;;
-	esac
+	main
 }
 
 function create() {
@@ -447,37 +443,32 @@ read -p "Input option: " menu || exit 0
 case $menu in
 1)
 	create
-	goback
 	;;
 2)
 	delete 
-	goback
 	;;
 3)
 	extend 
-	goback
 	;;
 4)
 	list 
-	goback
 	;;
 5)
 	show 
-	goback
 	;;
 6)
 	warp
-	goback
 	;;
-0|7)
+0|00|7)
+	clear
 	menu
 	;;
 *) 
 	clear 
 	newline
 	error "Invalid option"
-	newline
-	goback
+	sleep 1
+	main
 	;;
 esac
 }

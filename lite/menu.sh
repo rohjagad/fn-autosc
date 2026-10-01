@@ -228,14 +228,14 @@ ${separator}
 ${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input option: " opws || exit 0
 case $opws in
-1) clear ; x-ws ;;
-2) clear ; x-http ;;
-3) clear ; x-grpc ;;
-4) clear ; x-split ;;
-5) clear ; menu-system ;;
-6) clear ; dm-menu ;;
-7) clear ; bmenu ;;
-8) clear ; menu-bot ;;
+1) clear ; x-ws ; menu-x ;;
+2) clear ; x-http ; menu-x ;;
+3) clear ; x-grpc ; menu-x ;;
+4) clear ; x-split ; menu-x ;;
+5) clear ; menu-system ; menu-x ;;
+6) clear ; dm-menu ; menu-x ;;
+7) clear ; bmenu ; menu-x ;;
+8) clear ; menu-bot ; menu-x ;;
 *) clear ; menu-x ;;
 esac
 }
