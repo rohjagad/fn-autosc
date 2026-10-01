@@ -21,6 +21,7 @@ send_telegram_notification() {
     local chat_id="$1"
     local key="$2"
     local message="$3"
+    [ -z "$chat_id" ] || [ -z "$key" ] && return 0
     local api_url="https://api.telegram.org/bot${key}/sendMessage"
     local TIME="${TIME:-10}"
 

@@ -2305,6 +2305,16 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Verified live:** `/usr/bin/quota-*` and `/usr/bin/kill-*` deployed to VPS; `/usr/bin/kill-ws` ran clean; all 16 core services verified active.
 - **Archives rebuilt:** `menu/full.zip` and `menu/lite.zip` repacked and verified at mode `0755`.
 
+### Fix 316 - Phase 7: Account creation Telegram alerts guard and validated Xray service restarts (Found 316)
+
+- **Fix 316 (Found 316):**
+  1. In all 48 `add-*` and `trial-*` scripts (`full/` and `lite/`): guarded Telegram notifications with `if [ -n "$CHATID" ] && [ -n "$KEY" ]`.
+  2. In all 48 `add-*` and `trial-*` scripts: guarded `xray@<transport>` and `quota-<transport>` service restarts with `xray run -test -config`.
+  3. In `full/addssh.sh` and `full/trial-ssh.sh`: guarded `send_telegram_notification()` with `[ -z "$chat_id" ] || [ -z "$key" ] && return 0`.
+- **Verified live:** all 50 updated tools deployed to `/usr/bin/`; all 16 core services verified active.
+- **Archives rebuilt:** `menu/full.zip` and `menu/lite.zip` repacked and verified at mode `0755`.
+
+
 
 
 

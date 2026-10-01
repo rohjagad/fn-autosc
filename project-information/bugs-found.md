@@ -2065,13 +2065,13 @@ Found 310. **Phase 1 cryptographic credentials and private keys exposed or leake
 - **Confirmed live on the VPS:** `/etc/wireguard/wg0.conf` had mode `0644` (world-readable) while `params` was `0600`. Changing `wg0.conf` to `0600` left `wg-quick@wg0` active.
 - **Inherited from both V23 and Autoscript New 1.20:** both reference archives omitted `0600` on restored keys, WireGuard configs, and bot credentials.
 
-Found 315. **Phase 6: Quota/kill daemon orphaned IP limit files, unauthenticated Telegram requests, and unvalidated Xray restart** (`full/quota-*.sh`, `lite/quota-*.sh`, `full/kill-*.sh`, `lite/kill-*.sh`) —
-1. `quota-*` and `kill-*` deleted expired quota accounts by removing the client JSON, quota file, usage file, and account log card, but left `/etc/xray/limit/ip/xray/<proto>/${user}` orphaned on disk. Under Decision 16, a quota breach must delete all account artifacts completely.
-2. In all 8 `quota-*` and 8 `kill-*` scripts across `full/` and `lite/`, `send_log()` attempted to POST to Telegram without verifying if `/etc/funny/.chatid` or `/etc/funny/.keybot` were non-empty, leading to repeated HTTP 404/401 connection timeouts when bot alerts were not configured.
-3. Transport services were restarted immediately following quota deletion without running `xray run -test -config`, creating a service crash risk if JSON formatting was invalid.
-4. Expiry date extraction in `quota-*` and `kill-*` lacked `head -n 1`.
-- **Confirmed live on the VPS:** `kill-ws` ran clean; all 16 core services verified active.
-- **Inherited from V23 and Autoscript New 1.20:** both references omitted the IP limit cleanup on quota deletion and lacked bot token / config test guards.
+Found 316. **Phase 7: Account creation unauthenticated Telegram notifications and unvalidated service restarts** (`full/add-*`, `lite/add-*`, `full/trial-*`, `lite/trial-*`, `full/addssh.sh`, `full/trial-ssh.sh`) —
+1. All 48 Xray account creation and trial scripts (`full/` and `lite/`) posted Telegram notifications without verifying if `/etc/funny/.chatid` and `/etc/funny/.keybot` were non-empty, triggering unauthenticated network requests that failed with timeouts when bot integration was unconfigured.
+2. In all 48 scripts, `xray@<transport>` and `quota-<transport>` were restarted unconditionally after modifying transport JSON configs without checking syntax with `xray run -test -config`.
+3. In `full/addssh.sh` and `full/trial-ssh.sh`, `send_telegram_notification()` attempted to contact Telegram without checking whether `chat_id` and `key` arguments were non-empty.
+- **Confirmed live on the VPS:** all 50 updated tools deployed to `/usr/bin/`; all 16 core services verified active.
+- **Inherited from V23 and Autoscript New 1.20:** both references restarted daemons without syntax checks and fired Telegram curl requests unconditionally.
+
 
 
 

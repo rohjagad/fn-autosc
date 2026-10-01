@@ -95,9 +95,11 @@ uuid=$(xray uuid)
 sed -i '/#vmess$/{n;s/}/},\n### '"$user $exp"'\n{"id": "'""$uuid""'","alterid": 0,"email": "'""$user""'","level": 0}/}' /etc/xray/json/ws.json
 
 # Me Restart Service
-systemctl daemon-reload
-systemctl restart xray@ws
-systemctl restart quota-ws
+if xray run -test -config /etc/xray/json/ws.json >/dev/null 2>&1; then
+    systemctl daemon-reload
+    systemctl restart xray@ws
+    systemctl restart quota-ws
+fi
 
 # Konfigurasi Json WS TLS
 acs=`cat<<eof
@@ -170,7 +172,9 @@ Link TLS : $vmesslink1
 Link None: $vmesslink2
 =======================
 "
-curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's/\\033\[[0-9;]*m//g' -e 's/\x1b\[[0-9;]*m//g')" $URL >/dev/null 2>&1
+if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
+    curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's/\\033\[[0-9;]*m//g' -e 's/\x1b\[[0-9;]*m//g')" $URL >/dev/null 2>&1
+fi
 echo -e "$TEKS" > /var/log/create/xray/ws/${user}.log
 echo 'sed -i "/^### '"$user"' '"$exp"'/ {N;d}" /etc/xray/json/ws.json && sed -i -z '"'"'s/},\n *\]/}\n        ]/g'"'"' /etc/xray/json/ws.json && systemctl restart xray@ws && systemctl restart quota-ws && rm -fr /var/log/create/xray/ws/'"$user"'.log && rm -fr /etc/xray/limit/ip/xray/ws/'"$user"' && rm -fr /etc/xray/quota/ws/'"$user"' /etc/xray/quota/ws/'"$user"'_usage' | at now + 60 minutes >/dev/null 2>&1
 clear

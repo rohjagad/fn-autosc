@@ -1340,6 +1340,18 @@ Section 35's four-check rule applied to Fix 315:
 | **Over-engineering** | Standard POSIX `rm -f` and conditional `xray run -test -config`. No external helpers or dependencies. |
 | **vs the source** | V23 and 1.20 left orphaned IP limit files on disk when quota was exhausted. The fix fulfills Decision 16 by cleanly removing all account records. |
 
+## 102. Phase 7: Account Creation Alert Guards and Restart Safety — Four Checks (October 1, 2026)
+
+Section 35's four-check rule applied to Fix 316:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Account creation logic, credential generation, client configuration appending, and terminal card displays function identically. Input validation rules (`^[a-z0-9_]+$` username, `^[0-9]+$` for `ip` and `quota` per R72-B, `^[1-9][0-9]*$` for duration) are completely preserved. All 16 core services verified active. `bash -n` clean across all 50 modified scripts. |
+| **Over-strictness** | Does not add arbitrary password complexity or restrict valid usernames. `0 = unlimited` on IP and quota remains supported per Decision 4 and R72-B. |
+| **Over-engineering** | Standard bash conditional wrapping on curl and `xray run -test -config`. No external scripts or wrappers. |
+| **vs the source** | V23 and 1.20 sent blind curl requests without token verification and restarted Xray services without checking config validity. The fix secures runtime behavior. |
+
+
 
 
 

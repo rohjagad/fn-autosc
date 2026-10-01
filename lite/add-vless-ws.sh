@@ -160,9 +160,11 @@ exp=`date -d "$masaaktif days" +"%y-%m-%d"`
 sed -i '/#vless$/{n;s/}/},\n### '"$user $exp"'\n{"id": "'""$uuid""'","email": "'""$user""'","level": 0}/}' /etc/xray/json/ws.json
 
 # Restart Service
-systemctl daemon-reload
-systemctl restart xray@ws
-systemctl restart quota-ws
+if xray run -test -config /etc/xray/json/ws.json >/dev/null 2>&1; then
+    systemctl daemon-reload
+    systemctl restart xray@ws
+    systemctl restart quota-ws
+fi
 
 # Konfigurasi Vless WS TLS
 vlesslink1="vless://${uuid}@${domain}:443?path=/vlws&security=tls&encryption=none&host=${domain}&type=ws&sni=${domain}#${user}"
@@ -197,7 +199,9 @@ Link TLS : $vlesslink1
 Link None: $vlesslink2
 =======================
 "
-curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's/\\033\[[0-9;]*m//g' -e 's/\x1b\[[0-9;]*m//g')" $URL >/dev/null 2>&1
+if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
+    curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's/\\033\[[0-9;]*m//g' -e 's/\x1b\[[0-9;]*m//g')" $URL >/dev/null 2>&1
+fi
 echo -e "$TEKS" > /var/log/create/xray/ws/${user}.log
 clear
 source /etc/funny/format.sh

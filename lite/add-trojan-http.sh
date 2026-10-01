@@ -160,9 +160,11 @@ exp=`date -d "$masaaktif days" +"%y-%m-%d"`
 sed -i '/#trojan$/{n;s/}/},\n### '"$user $exp"'\n{"password": "'""$uuid""'","email": "'""$user""'","level": 0}/}' /etc/xray/json/upgrade.json
 
 # Restart Service
-systemctl daemon-reload
-systemctl restart xray@upgrade
-systemctl restart quota-http
+if xray run -test -config /etc/xray/json/upgrade.json >/dev/null 2>&1; then
+    systemctl daemon-reload
+    systemctl restart xray@upgrade
+    systemctl restart quota-http
+fi
 
 # Konfigurasi Trojan http TLS
 link1="trojan://${uuid}@${domain}:443?path=/trhu&security=tls&host=${domain}&type=httpupgrade&sni=${domain}#${user}"
@@ -194,7 +196,9 @@ Link TLS : $link1
 Link None: $link2
 =========================
 "
-curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's/\\033\[[0-9;]*m//g' -e 's/\x1b\[[0-9;]*m//g')" $URL >/dev/null 2>&1
+if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
+    curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's/\\033\[[0-9;]*m//g' -e 's/\x1b\[[0-9;]*m//g')" $URL >/dev/null 2>&1
+fi
 echo -e "$TEKS" > /var/log/create/xray/http/${user}.log
 clear
 source /etc/funny/format.sh

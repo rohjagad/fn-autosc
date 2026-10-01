@@ -96,9 +96,11 @@ uuid=$(xray uuid)
 sed -i '/#vless$/{n;s/}/},\n### '"$user $exp"'\n{"id": "'""$uuid""'","email": "'""$user""'","level": 0}/}' /etc/xray/json/split.json
 
 # Restart Service
-systemctl daemon-reload
-systemctl restart xray@split
-systemctl restart quota-split
+if xray run -test -config /etc/xray/json/split.json >/dev/null 2>&1; then
+    systemctl daemon-reload
+    systemctl restart xray@split
+    systemctl restart quota-split
+fi
 
 # Konfigurasi Vless WS TLS
 vlesslink1="vless://${uuid}@${domain}:443?path=/vlspl&security=tls&encryption=none&host=${domain}&type=splithttp&sni=${domain}#${user}"
@@ -133,7 +135,9 @@ Link TLS : $vlesslink1
 Link None: $vlesslink2
 =======================
 "
-curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's/\\033\[[0-9;]*m//g' -e 's/\x1b\[[0-9;]*m//g')" $URL >/dev/null 2>&1
+if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
+    curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's/\\033\[[0-9;]*m//g' -e 's/\x1b\[[0-9;]*m//g')" $URL >/dev/null 2>&1
+fi
 echo -e "$TEKS" > /var/log/create/xray/split/${user}.log
 echo 'sed -i "/^### '"$user"' '"$exp"'/ {N;d}" /etc/xray/json/split.json && sed -i -z '"'"'s/},\n *\]/}\n        ]/g'"'"' /etc/xray/json/split.json && systemctl restart xray@split && systemctl restart quota-split && rm -fr /var/log/create/xray/split/'"$user"'.log && rm -fr /etc/xray/limit/ip/xray/split/'"$user"' && rm -fr /etc/xray/quota/split/'"$user"' /etc/xray/quota/split/'"$user"'_usage' | at now + 60 minutes >/dev/null 2>&1
 clear

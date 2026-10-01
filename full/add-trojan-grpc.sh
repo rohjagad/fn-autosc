@@ -161,9 +161,11 @@ exp=`date -d "$masaaktif days" +"%y-%m-%d"`
 sed -i '/#trojan$/{n;s/}/},\n### '"$user $exp"'\n{"password": "'""$uuid""'","email": "'""$user""'","level": 0}/}' /etc/xray/json/grpc.json
 
 # Restart Service
-systemctl daemon-reload
-systemctl restart xray@grpc
-systemctl restart quota-grpc
+if xray run -test -config /etc/xray/json/grpc.json >/dev/null 2>&1; then
+    systemctl daemon-reload
+    systemctl restart xray@grpc
+    systemctl restart quota-grpc
+fi
 
 # Konfigurasi Trojan gRPC TLS
 link1="trojan://${uuid}@${domain}:443?mode=gun&security=tls&authority=${domain}&type=grpc&serviceName=trgr&sni=${domain}#${user}"
@@ -189,7 +191,9 @@ Port gRPC: 443, 2053, 2083, 2087, 2096
 Link TLS : $link1
 =======================
 "
-curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's/\\033\[[0-9;]*m//g' -e 's/\x1b\[[0-9;]*m//g')" $URL >/dev/null 2>&1
+if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
+    curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's/\\033\[[0-9;]*m//g' -e 's/\x1b\[[0-9;]*m//g')" $URL >/dev/null 2>&1
+fi
 echo -e "$TEKS" > /var/log/create/xray/grpc/${user}.log
 clear
 source /etc/funny/format.sh

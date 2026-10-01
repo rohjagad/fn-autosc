@@ -160,9 +160,11 @@ exp=`date -d "$masaaktif days" +"%y-%m-%d"`
 sed -i '/#trojan$/{n;s/}/},\n### '"$user $exp"'\n{"password": "'""$uuid""'","email": "'""$user""'","level": 0}/}' /etc/xray/json/split.json
 
 # Restart Service
-systemctl daemon-reload
-systemctl restart xray@split
-systemctl restart quota-split
+if xray run -test -config /etc/xray/json/split.json >/dev/null 2>&1; then
+    systemctl daemon-reload
+    systemctl restart xray@split
+    systemctl restart quota-split
+fi
 
 # Konfigurasi Trojan split TLS
 link1="trojan://${uuid}@${domain}:443?path=/trspl&security=tls&host=${domain}&type=splithttp&sni=${domain}#${user}"
@@ -194,7 +196,9 @@ Link TLS : $link1
 Link None: $link2
 ======================
 "
-curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's/\\033\[[0-9;]*m//g' -e 's/\x1b\[[0-9;]*m//g')" $URL >/dev/null 2>&1
+if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
+    curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's/\\033\[[0-9;]*m//g' -e 's/\x1b\[[0-9;]*m//g')" $URL >/dev/null 2>&1
+fi
 echo -e "$TEKS" > /var/log/create/xray/split/${user}.log
 clear
 source /etc/funny/format.sh
