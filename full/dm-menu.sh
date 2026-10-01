@@ -131,7 +131,8 @@ if [[ $ip_version == "4" ]]; then
     fi
     mkdir -p /etc/haproxy
     cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem
-    chmod 644 /etc/xray/xray* /etc/haproxy/funny.pem
+    chmod 644 /etc/xray/xray.crt
+    chmod 600 /etc/xray/xray.key /etc/haproxy/funny.pem
     systemctl start nginx
     systemctl restart haproxy 2>/dev/null || true
     systemctl restart noobzvpns 2>/dev/null || true
@@ -157,7 +158,8 @@ elif [[ $ip_version == "6" ]]; then
     fi
     mkdir -p /etc/haproxy
     cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem
-    chmod 644 /etc/xray/xray* /etc/haproxy/funny.pem
+    chmod 644 /etc/xray/xray.crt
+    chmod 600 /etc/xray/xray.key /etc/haproxy/funny.pem
     systemctl start nginx
     systemctl restart haproxy 2>/dev/null || true
     systemctl restart noobzvpns 2>/dev/null || true
@@ -205,7 +207,8 @@ copy_certificates() {
     cp /etc/letsencrypt/live/$domain/privkey.pem /etc/xray/xray.key
     mkdir -p /etc/haproxy
     cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem
-    chmod 644 /etc/xray/xray* /etc/haproxy/funny.pem
+    chmod 644 /etc/xray/xray.crt
+    chmod 600 /etc/xray/xray.key /etc/haproxy/funny.pem
 }
 
 if [[ $ip_version == "4" || $ip_version == "6" ]]; then
@@ -358,7 +361,8 @@ if [[ -s /etc/letsencrypt/live/$domain/fullchain.pem && -s /etc/letsencrypt/live
     cp /etc/letsencrypt/live/$domain/privkey.pem /etc/xray/xray.key
     mkdir -p /etc/haproxy
     cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem
-    chmod 644 /etc/xray/xray* /etc/haproxy/funny.pem
+    chmod 644 /etc/xray/xray.crt
+    chmod 600 /etc/xray/xray.key /etc/haproxy/funny.pem
 else
     echo "certbot failed - keeping the existing certificate."
 fi
@@ -406,7 +410,8 @@ openssl genrsa -out /etc/xray/xray.key 2048
 openssl req -new -x509 -key /etc/xray/xray.key -out /etc/xray/xray.crt -days 1095 \
 -subj "/C=$country/ST=$state/L=$locality/O=$organization/OU=$organizationalunit/CN=$commonname/emailAddress=$email"
 cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem 2>/dev/null
-chmod 644 /etc/xray/xray.crt /etc/xray/xray.key /etc/haproxy/funny.pem 2>/dev/null
+chmod 644 /etc/xray/xray.crt 2>/dev/null
+chmod 600 /etc/xray/xray.key /etc/haproxy/funny.pem 2>/dev/null
 systemctl daemon-reload
 systemctl restart haproxy 2>/dev/null || true
 systemctl restart noobzvpns 2>/dev/null || true

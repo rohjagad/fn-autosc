@@ -136,7 +136,7 @@ mkdir -p /var/www/html
 cp -r html/* /var/www/html/ 2>/dev/null || true
 mkdir -p /etc/haproxy
 cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem 2>/dev/null
-chmod 644 /etc/haproxy/funny.pem 2>/dev/null
+    chmod 600 /etc/haproxy/funny.pem 2>/dev/null
 
 systemctl daemon-reload
 systemctl restart ssh
@@ -205,7 +205,7 @@ mkdir -p /var/www/html
 cp -r html/* /var/www/html/ 2>/dev/null || true
 mkdir -p /etc/haproxy
 cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem 2>/dev/null
-chmod 644 /etc/haproxy/funny.pem 2>/dev/null
+    chmod 600 /etc/haproxy/funny.pem 2>/dev/null
 
 systemctl daemon-reload
 systemctl restart ssh
@@ -282,7 +282,7 @@ mkdir -p /var/www/html
 cp -r html/* /var/www/html/ 2>/dev/null || true
 mkdir -p /etc/haproxy
 cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem 2>/dev/null
-chmod 644 /etc/haproxy/funny.pem 2>/dev/null
+    chmod 600 /etc/haproxy/funny.pem 2>/dev/null
 
 # Repair the WS config a legacy backup has restored: replace the UUID
 # placeholder, then re-append the standard outbounds/routing/stats block below.

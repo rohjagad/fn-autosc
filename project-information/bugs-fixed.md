@@ -2219,3 +2219,8 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 304 (Found 304):** in full and lite domain menus, require a valid dot-separated DNS hostname before changing the current domain, nginx `server_name`, or saved account cards. Invalid input displays an error and returns to the main menu without writes.
 - **Verified live:** before the fix, `bad domain` changed all three state groups. After deployment, the same input leaves the domain file, nginx configuration, and account cards unchanged; the deployed valid domain remains served by active nginx.
+
+### Fix 305 - certificate and restore paths: protect Xray private key and HAProxy bundle (Found 305)
+
+- **Fix 305 (Found 305):** all certificate issue, renewal, self-signed, menu restore, and FTP/web restore paths now set `/etc/xray/xray.crt` to `0644` but `/etc/xray/xray.key` and `/etc/haproxy/funny.pem` to `0600`. The HAProxy bundle receives the same protection because it embeds the private key.
+- **Verified live:** after changing the deployed key to `0600`, nginx, HAProxy, NoobzVPN, `xray@ws`, `xray@grpc`, `xray@upgrade`, and `xray@split` all restarted active. The updated full domain menu is deployed; installer source protects fresh installations.

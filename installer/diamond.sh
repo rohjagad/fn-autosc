@@ -154,19 +154,21 @@ fi
 if [[ $ips == "4" ]]; then
     systemctl stop nginx
     issue_certificate "" "/etc/xray/xray.crt" "/etc/xray/xray.key"
-    chmod 644 /etc/xray/xray.*
+    chmod 644 /etc/xray/xray.crt
+    chmod 600 /etc/xray/xray.key
     mkdir -p /etc/haproxy
     cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem
-    chmod 644 /etc/haproxy/funny.pem
+    chmod 600 /etc/haproxy/funny.pem
     systemctl start nginx
     echo "Cert installed for IPv4."
 elif [[ $ips == "6" ]]; then
     systemctl stop nginx
     issue_certificate "--listen-v6" "/etc/xray/xray.crt" "/etc/xray/xray.key"
-    chmod 644 /etc/xray/xray.*
+    chmod 644 /etc/xray/xray.crt
+    chmod 600 /etc/xray/xray.key
     mkdir -p /etc/haproxy
     cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem
-    chmod 644 /etc/haproxy/funny.pem
+    chmod 600 /etc/haproxy/funny.pem
     systemctl start nginx
     echo "Cert installed for IPv6."
 elif [[ $ips == "dual" ]]; then
@@ -176,10 +178,11 @@ elif [[ $ips == "dual" ]]; then
     cat /etc/xray/xray4.crt /etc/xray/xray6.crt > /etc/xray/xray.crt
     cat /etc/xray/xray4.key /etc/xray/xray6.key > /etc/xray/xray.key
     rm -f /etc/xray/xray4.crt /etc/xray/xray6.crt /etc/xray/xray4.key /etc/xray/xray6.key
-    chmod 644 /etc/xray/xray.*
+    chmod 644 /etc/xray/xray.crt
+    chmod 600 /etc/xray/xray.key
     mkdir -p /etc/haproxy
     cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem
-    chmod 644 /etc/haproxy/funny.pem
+    chmod 600 /etc/haproxy/funny.pem
     systemctl start nginx
     echo "Success Install Certificate Dual Stack"
 fi

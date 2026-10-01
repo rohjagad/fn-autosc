@@ -1218,3 +1218,14 @@ Section 35's four-check rule applied to Fix 304:
 | **Over-strictness** | The panel needs a public DNS hostname for certificate issuance, nginx SNI, Xray clients, and all generated links. The check permits standard multi-label hyphenated domains while excluding spaces, shell/sed metacharacters, empty labels, and IP/single-label values that cannot satisfy this workflow. |
 | **Over-engineering** | One Bash regex branch in each existing variant. No DNS lookup, external validator, configuration option, or duplicated helper. |
 | **vs the source** | V23 and 1.20 persist raw input. The divergence prevents corrupt advertised endpoints and unsafe substitution input at the configuration boundary. |
+
+## 91. TLS Private-Key File Permissions — Four Checks (October 1, 2026)
+
+Section 35's four-check rule applied to Fix 305:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Live service restart verification with `xray.key=0600` passed for nginx, HAProxy, NoobzVPN, and every Xray transport. Public certificate remains readable at `0644`; the chain/key contents and certificate flow are unchanged. |
+| **Over-strictness** | These services read their keys as root during startup. Unprivileged local users do not need a TLS private key. The HAProxy bundle contains the same key and therefore requires the same restriction. |
+| **Over-engineering** | Targeted standard `chmod` modes replace broad globs; no daemon configuration, ACL, account, or dependency is added. |
+| **vs the source** | V23 and 1.20 both use `0644` on private key material. The intentional divergence closes a direct local secret disclosure and is documented in README. |

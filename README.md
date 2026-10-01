@@ -525,12 +525,13 @@ service can never be caused by a missing certificate:
 2. **ZeroSSL** if Let's Encrypt fails — typically a `429` rate limit.
 3. **Self-signed** EC certificate if both fail.
 
-Certificates land in `/etc/xray/xray.crt` and `/etc/xray/xray.key`. For
-dual-stack servers the two chains are concatenated.
+Certificates land in `/etc/xray/xray.crt` (`0644`) and `/etc/xray/xray.key`
+(`0600`). For dual-stack servers the two chains are concatenated.
 
 Nginx reads the pair directly. HAProxy instead needs a single file containing
 the chain followed by the key, so the pair is concatenated to
-`/etc/haproxy/funny.pem` after every issuance.
+`/etc/haproxy/funny.pem` after every issuance; the bundle contains the private
+key and is mode `0600`.
 
 ### Domain Menu — `dm-menu`
 
