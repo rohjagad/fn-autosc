@@ -1351,6 +1351,18 @@ Section 35's four-check rule applied to Fix 316:
 | **Over-engineering** | Standard bash conditional wrapping on curl and `xray run -test -config`. No external scripts or wrappers. |
 | **vs the source** | V23 and 1.20 sent blind curl requests without token verification and restarted Xray services without checking config validity. The fix secures runtime behavior. |
 
+## 103. Strict Enforcement of Decision 4: Reject `0` on Quantity Prompts — Four Checks (October 1, 2026)
+
+Section 35's four-check rule applied to Fix 317:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Valid positive whole numbers (`1`, `2`, `100`, etc.) pass through completely unchanged. Operator who wants an unconstrained limit can enter a large value (e.g. `999999`) as explicitly envisioned in Decision 4. All 16 core services verified active. `bash -n` clean across all 25 modified scripts. |
+| **Over-strictness** | Enforces the documented project policy: `0` is ambiguous across daemons (quota deletion vs first-login lock vs skipping limits). Rejecting `0` ensures predictability. |
+| **Over-engineering** | Uniform regex `^[1-9][0-9]*$` and standardized single notice `0 not allowed`. Zero added dependencies. |
+| **vs the source** | Decision 4 explicitly overrides upstream V23/1.20 ambiguity by rejecting 0 at the user boundary. |
+
+
 
 
 

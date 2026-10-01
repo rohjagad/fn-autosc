@@ -2065,12 +2065,10 @@ Found 310. **Phase 1 cryptographic credentials and private keys exposed or leake
 - **Confirmed live on the VPS:** `/etc/wireguard/wg0.conf` had mode `0644` (world-readable) while `params` was `0600`. Changing `wg0.conf` to `0600` left `wg-quick@wg0` active.
 - **Inherited from both V23 and Autoscript New 1.20:** both reference archives omitted `0600` on restored keys, WireGuard configs, and bot credentials.
 
-Found 316. **Phase 7: Account creation unauthenticated Telegram notifications and unvalidated service restarts** (`full/add-*`, `lite/add-*`, `full/trial-*`, `lite/trial-*`, `full/addssh.sh`, `full/trial-ssh.sh`) —
-1. All 48 Xray account creation and trial scripts (`full/` and `lite/`) posted Telegram notifications without verifying if `/etc/funny/.chatid` and `/etc/funny/.keybot` were non-empty, triggering unauthenticated network requests that failed with timeouts when bot integration was unconfigured.
-2. In all 48 scripts, `xray@<transport>` and `quota-<transport>` were restarted unconditionally after modifying transport JSON configs without checking syntax with `xray run -test -config`.
-3. In `full/addssh.sh` and `full/trial-ssh.sh`, `send_telegram_notification()` attempted to contact Telegram without checking whether `chat_id` and `key` arguments were non-empty.
-- **Confirmed live on the VPS:** all 50 updated tools deployed to `/usr/bin/`; all 16 core services verified active.
-- **Inherited from V23 and Autoscript New 1.20:** both references restarted daemons without syntax checks and fired Telegram curl requests unconditionally.
+Found 317. **Account creation scripts allowed `0` in quantity prompts despite Decision 4** (`full/add-*`, `lite/add-*`, `full/addssh.sh`) — 24 Xray account creation scripts and `addssh.sh` advertised `0 = unlimited` and accepted `0` (`^[0-9]+$`) for IP limit and quota. Under Decision 4, all quantity fields must strictly reject `0` (`^[1-9][0-9]*$`) with the single notice `0 not allowed` to eliminate ambiguity and prevent unmonitored accounts.
+- **Confirmed live on the VPS:** `add-vmess-ws` and `addssh` now show `0 not allowed` and enforce `^[1-9][0-9]*$`; all 16 core services verified active.
+- **Inherited from earlier regression patch R72-B:** R72-B had temporarily reverted Decision 4; this fix aligns all creation scripts strictly with Decision 4.
+
 
 
 

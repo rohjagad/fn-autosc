@@ -112,15 +112,15 @@ until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/creat
     fi
 done
     echo ""
-    echo -e "\033[38;5;208m0 = unlimited\033[0m"
+    echo -e "\033[38;5;208m0 not allowed\033[0m"
     read -p "Limit Ip: " ip
-    while ! [[ "$ip" =~ ^[0-9]+$ ]]; do
-        echo -e "\033[0;31mValue must be a whole number (0 = unlimited).\033[0m"
+    while ! [[ "$ip" =~ ^[1-9][0-9]*$ ]]; do
+        echo -e "\033[0;31mValue must be a whole number greater than 0.\033[0m"
         read -p "Limit Ip: " ip || exit 1
     done
     read -p "Limit Quota (GBs): " quota
-    while ! [[ "$quota" =~ ^[0-9]+$ ]]; do
-        echo -e "\033[0;31mValue must be a whole number (0 = unlimited).\033[0m"
+    while ! [[ "$quota" =~ ^[1-9][0-9]*$ ]]; do
+        echo -e "\033[0;31mValue must be a whole number greater than 0.\033[0m"
         read -p "Limit Quota (GBs): " quota || exit 1
     done
     read -p "Active Time (days): " masaaktif

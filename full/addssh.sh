@@ -132,10 +132,10 @@ main() {
         read -p "Password: " password || exit 1
     done
     echo ""
-    echo -e "\033[38;5;208m0 = unlimited\033[0m"
+    echo -e "\033[38;5;208m0 not allowed\033[0m"
     read -p "Limit IP: " iplimit
-    while ! [[ "$iplimit" =~ ^[0-9]+$ ]]; do
-        echo -e "\033[0;31mValue must be a whole number (0 = unlimited).\033[0m"
+    while ! [[ "$iplimit" =~ ^[1-9][0-9]*$ ]]; do
+        echo -e "\033[0;31mValue must be a whole number greater than 0.\033[0m"
         read -p "Limit IP: " iplimit || exit 1
     done
     read -p "Expired (days): " masaaktif

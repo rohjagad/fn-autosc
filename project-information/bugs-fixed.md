@@ -2314,6 +2314,16 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Verified live:** all 50 updated tools deployed to `/usr/bin/`; all 16 core services verified active.
 - **Archives rebuilt:** `menu/full.zip` and `menu/lite.zip` repacked and verified at mode `0755`.
 
+### Fix 317 - Reject `0` on IP and quota prompts per Decision 4 (Found 317)
+
+- **Fix 317 (Found 317):**
+  1. In all 24 `add-*.sh` scripts (`full/` and `lite/`) and `full/addssh.sh`: changed prompt notice from `0 = unlimited` to `0 not allowed`.
+  2. Enforced regex `^[1-9][0-9]*$` for IP limit and quota prompts, rejecting `0` across all account creation scripts.
+  3. Updated error prompt to `Value must be a whole number greater than 0.`.
+- **Verified live:** deployed to `/usr/bin/` on VPS; verified prompt displays `0 not allowed` and rejects `0`; all 16 core services verified active.
+- **Archives rebuilt:** `menu/full.zip` and `menu/lite.zip` repacked and verified at mode `0755`.
+
+
 
 
 
