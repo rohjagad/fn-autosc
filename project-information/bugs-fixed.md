@@ -2276,5 +2276,16 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Verified live:** `xp`, `menu-dnstt`, `menu-bot` deployed to VPS `/usr/bin/`; `RestartSec=3s` applied across all 10 live unit files and `daemon-reload` run; all 16 core services verified active with 0 failed units.
 - **Archives rebuilt:** `menu/full.zip` and `menu/lite.zip` repacked and verified at mode `0755`.
 
+### Fix 313 - Phase 4: Cron cleanup verification, Noobz batching, and WireGuard permission persistence (Found 313)
+
+- **Fix 313 (Found 313):**
+  1. In `full/xp.sh` and `lite/xp.sh`: verified Xray JSON configuration with `xray run -test -config` before performing service restarts for each transport (`ws`, `upgrade`, `split`, `grpc`).
+  2. In `full/xp.sh` and `lite/xp.sh`: batched NoobzVPN service restarts outside the loop using `noobz_restarted=1`.
+  3. In `full/xp.sh`, `lite/xp.sh`, and `full/menu-wg.sh`: enforced `chmod 600 /etc/wireguard/wg0.conf` immediately after updating the file from `/tmp/wg0.conf`.
+  4. In `full/xp.sh` and `lite/xp.sh`: added `head -n 1` to single-line expiry date extraction across all transports.
+- **Verified live:** `/usr/bin/xp` and `/usr/bin/menu-wg` deployed to VPS; `/usr/bin/xp` executed clean; all 16 core services verified active.
+- **Archives rebuilt:** `menu/full.zip` and `menu/lite.zip` repacked and verified at mode `0755`.
+
+
 
 

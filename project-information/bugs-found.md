@@ -2065,12 +2065,14 @@ Found 310. **Phase 1 cryptographic credentials and private keys exposed or leake
 - **Confirmed live on the VPS:** `/etc/wireguard/wg0.conf` had mode `0644` (world-readable) while `params` was `0600`. Changing `wg0.conf` to `0600` left `wg-quick@wg0` active.
 - **Inherited from both V23 and Autoscript New 1.20:** both reference archives omitted `0600` on restored keys, WireGuard configs, and bot credentials.
 
-Found 312. **Phase 3: Systemd restart storms in daily cron and missing backoff delays across custom units** (`full/xp.sh`, `lite/xp.sh`, `installer/ssh.sh`, `installer/xray.sh`, `installer/slowdns.sh`, `full/menu-dnstt.sh`, `installer/vpn.sh`, `full/menu-bot.sh`, `lite/menu-bot.sh`, `installer/udp.sh`) —
-1. `full/xp.sh` and `lite/xp.sh` restarted SSH (`ssh`, `sshd`, `ws`, `dropbear`) and L2TP (`ipsec`, `xl2tpd`) inside the user iteration loops. If multiple accounts expired simultaneously, the daemons were restarted consecutively once per account, causing SSH connection churn and potential service flap.
-2. Custom services (`ws.service`, `badvpn-udpgw.service`, `dnstt.service`, `xray@.service`, all four `quota-*.service`, `fn-ohp.service`, `opn.service`, `bot.service`) omitted `RestartSec=`, causing rapid, zero-delay restart loops on startup/config failures that risk CPU spin and hitting systemd's restart rate-limit burst.
-3. `installer/udp.sh` configured `WantedBy=default.target` instead of standard `WantedBy=multi-user.target`.
-- **Confirmed live on the VPS:** 10 custom units lacked `RestartSec=3s`. Added `RestartSec=3s` to all units and ran `daemon-reload`. Verified active status across all 16 core services.
-- **Inherited from V23 and Autoscript New 1.20:** both references restarted daemons inside cleanup loops and lacked `RestartSec` backoff in custom service units.
+Found 313. **Phase 4: Daemon cleanup safety, unvalidated Xray restart, Noobz restart storm, and WireGuard permission regression** (`full/xp.sh`, `lite/xp.sh`, `full/menu-wg.sh`) —
+1. `full/xp.sh` and `lite/xp.sh` restarted Xray transports without testing JSON syntax via `xray run -test`, risking daemon boot failure if a deletion corrupted JSON.
+2. In `full/xp.sh` and `lite/xp.sh`, NoobzVPN restart (`systemctl restart noobzvpns`) ran inside the expired user iteration loop rather than batching outside the loop.
+3. In `full/xp.sh`, `lite/xp.sh`, and `full/menu-wg.sh`, deleting a WireGuard peer wrote to `/tmp/wg0.conf` and `mv`'d it over `/etc/wireguard/wg0.conf` without `chmod 600`, regressing the file to world-readable `0644`.
+4. In `full/xp.sh` and `lite/xp.sh`, expiry date lookups (`cut -d ' ' -f 3 | sort | uniq`) lacked `head -n 1`, which could cause `date -d` evaluation failures if multiple lines existed.
+- **Confirmed live on the VPS:** `xp` ran cleanly; all 16 core services verified active.
+- **Inherited from V23 and Autoscript New 1.20:** V23 also restarted Noobz inside the loop and lacked `chmod 600` on rebuilt `wg0.conf`.
+
 
 
 

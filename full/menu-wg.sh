@@ -309,6 +309,7 @@ function delete() {
 	if grep -qw "^### Client ${user}\$" /etc/wireguard/wg0.conf; then
 		awk "/^### Client ${user}$/{found=1} found && /^$/{found=0; next} !found{print} found{next}" \
 			/etc/wireguard/wg0.conf > /tmp/wg0.conf && mv /tmp/wg0.conf /etc/wireguard/wg0.conf
+		chmod 600 /etc/wireguard/wg0.conf 2>/dev/null || true
 		rm -f /var/www/html/wireguard-${user}.conf
 		sed -i "/\b$user\b/d" /etc/funny/.wireguard
 		systemctl daemon-reload

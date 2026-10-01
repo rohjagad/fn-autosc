@@ -73,7 +73,7 @@ now=`date +"%Y-%m-%d"`
 ws_expired=0
 for user in "${data[@]}"
 do
-exp=$(grep -w "^### $user" "/etc/xray/json/ws.json" | cut -d ' ' -f 3 | sort | uniq)
+exp=$(grep -w "^### $user" "/etc/xray/json/ws.json" | cut -d ' ' -f 3 | sort | uniq | head -n 1)
 d1=$(date -d "$exp" +%s 2>/dev/null)
 if [ -z "$d1" ]; then
     echo "Skipping $user: unparseable expiry '$exp'"
@@ -104,8 +104,10 @@ ws_expired=1
 fi
 done
 if [[ $ws_expired -eq 1 ]]; then
-    systemctl daemon-reload
-    systemctl restart xray@ws
+    if xray run -test -config /etc/xray/json/ws.json >/dev/null 2>&1; then
+        systemctl daemon-reload
+        systemctl restart xray@ws
+    fi
 fi
 
 ##----- Auto Remove Xray HTTP UPGRADE
@@ -114,7 +116,7 @@ data=( `cat /etc/xray/json/upgrade.json | grep '^###' | cut -d ' ' -f 2 | sort |
 now=`date +"%Y-%m-%d"`
 for user in "${data[@]}"
 do
-exp=$(grep -w "^### $user" "/etc/xray/json/upgrade.json" | cut -d ' ' -f 3 | sort | uniq)
+exp=$(grep -w "^### $user" "/etc/xray/json/upgrade.json" | cut -d ' ' -f 3 | sort | uniq | head -n 1)
 d1=$(date -d "$exp" +%s 2>/dev/null)
 if [ -z "$d1" ]; then
     echo "Skipping $user: unparseable expiry '$exp'"
@@ -145,8 +147,10 @@ http_expired=1
 fi
 done
 if [[ $http_expired -eq 1 ]]; then
-    systemctl daemon-reload
-    systemctl restart xray@upgrade
+    if xray run -test -config /etc/xray/json/upgrade.json >/dev/null 2>&1; then
+        systemctl daemon-reload
+        systemctl restart xray@upgrade
+    fi
 fi
 
 ##----- Auto Remove Xray Split HTTP
@@ -155,7 +159,7 @@ data=( `cat /etc/xray/json/split.json | grep '^###' | cut -d ' ' -f 2 | sort | u
 now=`date +"%Y-%m-%d"`
 for user in "${data[@]}"
 do
-exp=$(grep -w "^### $user" "/etc/xray/json/split.json" | cut -d ' ' -f 3 | sort | uniq)
+exp=$(grep -w "^### $user" "/etc/xray/json/split.json" | cut -d ' ' -f 3 | sort | uniq | head -n 1)
 d1=$(date -d "$exp" +%s 2>/dev/null)
 if [ -z "$d1" ]; then
     echo "Skipping $user: unparseable expiry '$exp'"
@@ -186,8 +190,10 @@ split_expired=1
 fi
 done
 if [[ $split_expired -eq 1 ]]; then
-    systemctl daemon-reload
-    systemctl restart xray@split
+    if xray run -test -config /etc/xray/json/split.json >/dev/null 2>&1; then
+        systemctl daemon-reload
+        systemctl restart xray@split
+    fi
 fi
 
 ##----- Auto Remove Xray grpc HTTP
@@ -196,7 +202,7 @@ data=( `cat /etc/xray/json/grpc.json | grep '^###' | cut -d ' ' -f 2 | sort | un
 now=`date +"%Y-%m-%d"`
 for user in "${data[@]}"
 do
-exp=$(grep -w "^### $user" "/etc/xray/json/grpc.json" | cut -d ' ' -f 3 | sort | uniq)
+exp=$(grep -w "^### $user" "/etc/xray/json/grpc.json" | cut -d ' ' -f 3 | sort | uniq | head -n 1)
 d1=$(date -d "$exp" +%s 2>/dev/null)
 if [ -z "$d1" ]; then
     echo "Skipping $user: unparseable expiry '$exp'"
@@ -227,8 +233,10 @@ grpc_expired=1
 fi
 done
 if [[ $grpc_expired -eq 1 ]]; then
-    systemctl daemon-reload
-    systemctl restart xray@grpc
+    if xray run -test -config /etc/xray/json/grpc.json >/dev/null 2>&1; then
+        systemctl daemon-reload
+        systemctl restart xray@grpc
+    fi
 fi
 
 ##------ Auto Remove SSH
@@ -336,6 +344,7 @@ while read expired; do
 	xp_log "deleted wireguard client $user (expiry $exp)"
 		awk "/^### Client ${user}$/{found=1} found && /^$/{found=0; next} !found{print} found{next}" \
 			/etc/wireguard/wg0.conf > /tmp/wg0.conf && mv /tmp/wg0.conf /etc/wireguard/wg0.conf
+		chmod 600 /etc/wireguard/wg0.conf 2>/dev/null || true
 		rm -f /var/www/html/wireguard-${user}.conf
 		sed -i "/\b$user\b/d" /etc/funny/.wireguard
         TEKS="
@@ -371,11 +380,12 @@ data=($(grep '^###' /etc/funny/.noob | awk '{print $2}' | sort | uniq))
 
 # Tahun-Bulan-Tanggal hari ini
 now=$(date +"%Y-%m-%d")
+noobz_restarted=0
 
 # Mendefinisikan Bahwa user = data
 for user in "${data[@]}"; do
     # Membaca Masa Aktif Username
-    exp=$(grep -w "^### $user" /etc/funny/.noob | awk '{print $3}' | sort | uniq) 
+    exp=$(grep -w "^### $user" /etc/funny/.noob | awk '{print $3}' | sort | uniq | head -n 1) 
     
     # Menampilkan Masa Aktif Sesuai Username
     d1=$(date -d "$exp" +%s 2>/dev/null)
@@ -413,7 +423,7 @@ Exp : $exp
 
         # Mengirim notifikasi ke Telegram
         response=$(curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL)
-        systemctl restart noobzvpns
+        noobz_restarted=1
         # Memeriksa apakah pengiriman berhasil
         if [[ $(echo "$response" | jq -r '.ok') == "true" ]]; then
             clear
@@ -424,3 +434,7 @@ Exp : $exp
         fi
     fi
 done
+if [ "$noobz_restarted" -eq 1 ]; then
+    systemctl daemon-reload
+    systemctl restart noobzvpns 2>/dev/null || true
+fi

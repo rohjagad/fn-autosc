@@ -1307,5 +1307,17 @@ Section 35's four-check rule applied to Fix 312:
 | **Over-engineering** | Simple boolean flag (`ssh_expired=1`, `l2tp_expired=1`) identical to the existing WireGuard and Noobz pattern in the same file. One-line `RestartSec=3s` in unit files. |
 | **vs the source** | V23 and 1.20 restarted services on every loop step and omitted restart backoffs. The fix stabilizes systemd operation and eliminates redundant process churn. |
 
+## 99. Phase 4: Cron Cleanup Safety and Permission Persistence — Four Checks (October 1, 2026)
+
+Section 35's four-check rule applied to Fix 313:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Expired accounts across all transports (Xray, SSH, L2TP, WireGuard, Noobz) continue to be purged identically. `xray run -test -config` prevents restarting dead or invalid configurations. `chmod 600` keeps `/etc/wireguard/wg0.conf` secured. All 16 core services verified active. `bash -n` clean across all modified scripts. |
+| **Over-strictness** | `xray run -test` only checks valid JSON structure against Xray core parser. Does not reject valid configurations. `head -n 1` picks the first clean date if multiple duplicates exist. |
+| **Over-engineering** | Native `xray run -test -config` command provided by Xray binary itself; no additional parsers or dependencies. Single-line `chmod 600` after file move. |
+| **vs the source** | V23 and 1.20 lacked pre-restart validation and left `wg0.conf` at default permissions after peer deletion. The fix preserves reliable automated cleanup. |
+
+
 
 
