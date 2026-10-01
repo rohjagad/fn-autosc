@@ -2065,12 +2065,12 @@ Found 310. **Phase 1 cryptographic credentials and private keys exposed or leake
 - **Confirmed live on the VPS:** `/etc/wireguard/wg0.conf` had mode `0644` (world-readable) while `params` was `0600`. Changing `wg0.conf` to `0600` left `wg-quick@wg0` active.
 - **Inherited from both V23 and Autoscript New 1.20:** both reference archives omitted `0600` on restored keys, WireGuard configs, and bot credentials.
 
-Found 320. **Phase 10: Submenu action dropouts to shell, WireGuard goback ejection, and Option 00 handling** (`full/menu.sh`, `lite/menu.sh`, `full/menu-wg.sh`, `full/menu-dnstt.sh`) —
-1. `full/menu.sh` and `lite/menu.sh` invoked submenus without chaining a re-invocation of the parent menu on submenu return, dropping the operator out to the shell prompt whenever a submenu command finished.
-2. `full/menu-wg.sh`: `goback()` called `menu` (main menu) instead of `main` (WireGuard submenu), kicking the operator out of the WireGuard menu after every action and after invalid option inputs. In addition, `main()` called `goback` redundantly after action functions that already called `goback` internally.
-3. `full/menu-dnstt.sh` lacked support for `00` in Option 0 handling.
-- **Confirmed live on the VPS:** deployed to `/usr/bin/`; verified menu retention and WireGuard submenu looping; all 16 core services verified active.
-- **Inherited from V23 and Autoscript New 1.20:** both references lacked menu return loops and kicked users out of WireGuard on each action.
+Found 321. **Phase 11: Argo tunnel setup completion and restart instant wipeout without read pause, Option 00 handling** (`full/menu-argo.sh`, `lite/menu-argo.sh`) —
+1. `setup()` and `restart_argo()` in `menu-argo.sh` finished their systemctl operations and immediately returned to `tamp()`, which cleared the terminal screen without pausing, wiping installation and restart status output before the operator could inspect it.
+2. In `full/menu-argo.sh` and `lite/menu-argo.sh`, the Option 0 dispatcher only handled single digit `0` and did not accept `00`.
+- **Confirmed live on the VPS:** deployed to `/usr/bin/menu-argo`; verified pause notices after setup/restart and clean `0|00` return; all 16 core services verified active.
+- **Inherited from V23 and Autoscript New 1.20:** both references lacked pause notices and `00` dispatching in `menu-argo.sh`.
+
 
 
 

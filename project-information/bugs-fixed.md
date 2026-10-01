@@ -2352,6 +2352,15 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Verified live:** deployed to `/usr/bin/` on VPS; verified menu retention across all actions; all 16 core services verified active with 0 failed units.
 - **Archives rebuilt:** `menu/full.zip` and `menu/lite.zip` repacked and verified at mode `0755`.
 
+### Fix 321 - Phase 11: Argo tunnel read pauses and option 00 handling (Found 321)
+
+- **Fix 321 (Found 321):**
+  1. In `full/menu-argo.sh` and `lite/menu-argo.sh`: added completion status and `read -n 1 -s -r -p` pauses after `setup()` and `restart_argo()`.
+  2. In `full/menu-argo.sh` and `lite/menu-argo.sh`: expanded Option 0 dispatcher to accept `0|00)`.
+- **Verified live:** deployed to `/usr/bin/menu-argo` on VPS; verified pause behavior and menu return; all 16 core services verified active with 0 failed units.
+- **Archives rebuilt:** `menu/full.zip` and `menu/lite.zip` repacked and verified at mode `0755`.
+
+
 
 
 

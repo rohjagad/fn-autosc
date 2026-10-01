@@ -166,13 +166,18 @@ sudo cloudflared service uninstall 2>/dev/null || true
 sudo cloudflared service install
 systemctl daemon-reload
 systemctl enable --now cloudflared
+echo -e "\n\033[0;32mArgo Tunnel setup complete and service started.\033[0m"
+read -n 1 -s -r -p "Press any key to return..." || true
+echo ""
 }
 
 restart_argo() {
 clear
 echo "Restarting Cloudflare Argo Tunnel..."
 systemctl restart cloudflared
-sleep 2
+echo -e "\033[0;32mCloudflare Argo Tunnel restarted successfully.\033[0m"
+read -n 1 -s -r -p "Press any key to return..." || true
+echo ""
 }
 
 detail() {
@@ -244,7 +249,7 @@ case $opws in
 1) clear ; setup ; tamp ;;
 2) clear ; restart_argo ; tamp ;;
 3) clear ; detail ; tamp ;;
-0) clear ; menu ;;
+0|00) clear ; menu ;;
 *) clear ; tamp ;;
 esac
 }

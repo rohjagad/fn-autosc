@@ -1395,6 +1395,18 @@ Section 35's four-check rule applied to Fix 320:
 | **Over-engineering** | Simple `; menu` and `; menu-x` additions in case branches. Replaced outer `menu` jump with inner `main` loop in WireGuard. Zero new dependencies. |
 | **vs the source** | V23 and 1.20 lacked retention loops and ejected operators from menus. The fix provides smooth, continuous CLI navigation. |
 
+## 107. Phase 11: Argo Tunnel Read Pauses and Option 00 Handling — Four Checks (October 1, 2026)
+
+Section 35's four-check rule applied to Fix 321:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Installing and restarting Cloudflare Argo tunnel continue to function identically. Adding read pauses allows operator inspection before screen clearing. All 16 core services verified active. `bash -n` clean across modified scripts. |
+| **Over-strictness** | No validation rules changed; FQDN validation from Fix 307 preserved. Option 0 now accepts both `0` and `00`. |
+| **Over-engineering** | Standard `echo` + `read -n 1 -s -r -p` pattern matching the rest of the codebase. |
+| **vs the source** | V23 and 1.20 cleared the screen immediately on setup. The fix gives immediate visual feedback. |
+
+
 
 
 
