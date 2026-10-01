@@ -1207,3 +1207,14 @@ Section 35's four-check rule applied to Fix 303:
 | **Over-strictness** | SlowDNS's configured nameserver is a DNS hostname, not an IP address or arbitrary command arguments. The expression permits standard hyphenated labels and normal multi-label domains; it intentionally excludes whitespace, underscores, empty labels, and one-label/non-DNS values. |
 | **Over-engineering** | A single Bash regex guard at the existing input boundary. No parser, dependency, retry, or separate validation framework. |
 | **vs the source** | V23 accepts and persists arbitrary text. The divergence prevents malformed systemd configuration and matches the service's documented hostname input. |
+
+## 90. Domain-Change Hostname Validation — Four Checks (October 1, 2026)
+
+Section 35's four-check rule applied to Fix 304:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Valid FQDN domain changes retain the existing files, card substitutions, optional certificate renewal, and nginx reload path. Invalid domains return before the first write; live testing verifies exact state preservation and nginx active. |
+| **Over-strictness** | The panel needs a public DNS hostname for certificate issuance, nginx SNI, Xray clients, and all generated links. The check permits standard multi-label hyphenated domains while excluding spaces, shell/sed metacharacters, empty labels, and IP/single-label values that cannot satisfy this workflow. |
+| **Over-engineering** | One Bash regex branch in each existing variant. No DNS lookup, external validator, configuration option, or duplicated helper. |
+| **vs the source** | V23 and 1.20 persist raw input. The divergence prevents corrupt advertised endpoints and unsafe substitution input at the configuration boundary. |

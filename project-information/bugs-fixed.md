@@ -2214,3 +2214,8 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 303 (Found 303):** require a dot-separated DNS hostname with valid alphanumeric/hyphen labels and a 2–63-letter top-level domain before updating `nsdomain` or generating the dnstt unit. EOF also returns without changes.
 - **Verified live:** before the fix, `bad name` was written directly into both persisted locations. After deployment, it is rejected and leaves the nameserver file and unit byte-state unchanged; the current valid hostname is accepted and `dnstt` remains active.
+
+### Fix 304 - dm-menu.sh: validate changed server domains (Found 304)
+
+- **Fix 304 (Found 304):** in full and lite domain menus, require a valid dot-separated DNS hostname before changing the current domain, nginx `server_name`, or saved account cards. Invalid input displays an error and returns to the main menu without writes.
+- **Verified live:** before the fix, `bad domain` changed all three state groups. After deployment, the same input leaves the domain file, nginx configuration, and account cards unchanged; the deployed valid domain remains served by active nginx.

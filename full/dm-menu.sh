@@ -280,6 +280,10 @@ dm() {
         echo -e "\e[33m===================================\033[0m"
         read -n 1 -s -r -p "Press any key to return to menu"
         menu
+    elif ! [[ "$host" =~ ^([[:alnum:]]([[:alnum:]-]{0,61}[[:alnum:]])?\.)+[[:alpha:]]{2,63}$ ]]; then
+        echo "Domain must be a valid DNS hostname."
+        read -n 1 -s -r -p "Press any key to return to menu"
+        menu
     else
         # Simpan domain lama dan ganti dengan domain baru
         mv /etc/xray/domain /etc/xray/domain.old
