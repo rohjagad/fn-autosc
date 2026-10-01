@@ -2209,3 +2209,8 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 302 (Found 302):** limited NoobzVPN menu usernames to its existing safe alphabet and the server's 1–16-character limit. The panel now appends `/etc/funny/.noob` only after `noobzvpns add` succeeds; a command failure reports the error and leaves panel state untouched.
 - **Verified live:** a 20-character test username was rejected by the pre-fix server but written to `.noob` by the menu. After deployment, the same input creates no panel record and no NoobzVPN account; the service remains active.
+
+### Fix 303 - menu-dnstt.sh: validate SlowDNS nameserver hostnames (Found 303)
+
+- **Fix 303 (Found 303):** require a dot-separated DNS hostname with valid alphanumeric/hyphen labels and a 2–63-letter top-level domain before updating `nsdomain` or generating the dnstt unit. EOF also returns without changes.
+- **Verified live:** before the fix, `bad name` was written directly into both persisted locations. After deployment, it is rejected and leaves the nameserver file and unit byte-state unchanged; the current valid hostname is accepted and `dnstt` remains active.

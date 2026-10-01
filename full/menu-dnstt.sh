@@ -128,9 +128,15 @@ ${orange}Press [Ctrl + C] to exit${NC}"
                 =================
                 Nameserver: $nsd
                 "
-                read -p "Input Nameserver: " nsdomen
+                read -p "Input Nameserver: " nsdomen || return
                 if [ -z "$nsdomen" ]; then
                     echo "Nameserver cannot be empty."
+                    sleep 2
+                    mna89
+                    return
+                fi
+                if ! [[ "$nsdomen" =~ ^([[:alnum:]]([[:alnum:]-]{0,61}[[:alnum:]])?\.)+[[:alpha:]]{2,63}$ ]]; then
+                    echo "Nameserver must be a valid DNS hostname."
                     sleep 2
                     mna89
                     return

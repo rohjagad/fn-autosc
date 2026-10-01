@@ -1196,3 +1196,14 @@ Section 35's four-check rule applied to Fix 302:
 | **Over-strictness** | The 16-character ceiling is imposed by the installed server, not the UI. The menu retains its previous safe, more restrictive letters/numbers/underscore alphabet rather than silently expanding accepted punctuation. |
 | **Over-engineering** | One regex quantifier and one existing-command exit-status guard. No new storage, retry scheme, or dependency. |
 | **vs the source** | V23 has neither the server-compatible length check nor command-result guard, and writes a false panel record. The divergence repairs state consistency while retaining the fork's existing username policy. |
+
+## 89. SlowDNS Nameserver Configuration Validation — Four Checks (October 1, 2026)
+
+Section 35's four-check rule applied to Fix 303:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Valid FQDN nameservers continue through the existing unit-generation and service-restart path unchanged. Invalid or EOF input returns before touching either file; live checks confirm byte-identical state and active `dnstt`. |
+| **Over-strictness** | SlowDNS's configured nameserver is a DNS hostname, not an IP address or arbitrary command arguments. The expression permits standard hyphenated labels and normal multi-label domains; it intentionally excludes whitespace, underscores, empty labels, and one-label/non-DNS values. |
+| **Over-engineering** | A single Bash regex guard at the existing input boundary. No parser, dependency, retry, or separate validation framework. |
+| **vs the source** | V23 accepts and persists arbitrary text. The divergence prevents malformed systemd configuration and matches the service's documented hostname input. |
