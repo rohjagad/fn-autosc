@@ -2370,6 +2370,16 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Verified live:** deployed to `/usr/bin/dm-menu` on VPS; verified clean navigation and menu retention; all 16 core services verified active with 0 failed units.
 - **Archives rebuilt:** `menu/full.zip` and `menu/lite.zip` repacked and verified at mode `0755`.
 
+### Fix 323 - Phase 13: Enforce mode 0600 on backup zip and validate Xray restart across all restore paths (Found 323)
+
+- **Fix 323 (Found 323):**
+  1. In `full/backup.sh` and `lite/backup.sh`: added `chmod 600 /root/backup.zip` immediately after archive creation to protect private keys and shadow hashes.
+  2. In `full/bmenu.sh`, `lite/bmenu.sh`, `full/restore-ftp.sh`, `lite/restore-ftp.sh`, and `website/restore-ftp.sh`: guarded `xray@<transport>` service restarts with `xray run -test -config`.
+  3. In `full/bmenu.sh` and `lite/bmenu.sh`: added empty-URL and EOF checks in `restore()` and `resold()`, and ensured `chmod 600 backup.zip` after download.
+- **Verified live:** deployed to `/usr/bin/` on VPS; verified 0600 mode and clean services; all 16 core services verified active with 0 failed units.
+- **Archives rebuilt:** `menu/full.zip` and `menu/lite.zip` repacked and verified at mode `0755`.
+
+
 
 
 

@@ -1417,6 +1417,18 @@ Section 35's four-check rule applied to Fix 322:
 | **Over-engineering** | Standard `; dm1` loop chaining and `read -n 1 -s -r -p` pauses. Zero external dependencies. |
 | **vs the source** | V23 and 1.20 dropped out to shell on cert renewals and lacked pause notices. The fix secures menu flow. |
 
+## 109. Phase 13: Backup Permission Hardening and Restore Restart Validation — Four Checks (October 1, 2026)
+
+Section 35's four-check rule applied to Fix 323:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Backup archive creation, Telegram delivery, and restoration across all 3 channels (URL, file, web) function identically. `chmod 600` ensures sensitive archive contents remain private. All 16 core services verified active. `bash -n` clean across all modified scripts. |
+| **Over-strictness** | No functionality restricted. Root and daemons read 0600 backups cleanly; web restore retains 0640 key access. |
+| **Over-engineering** | Standard `chmod 600` and conditional `xray run -test -config`. Zero external dependencies. |
+| **vs the source** | V23 and 1.20 left backup archives at default 0644 and blindly restarted daemons. The fix secures backup pipelines against privilege escalation. |
+
+
 
 
 

@@ -96,6 +96,7 @@ cp /var/www/html/wireguard-*.conf /var/www/html/*.ovpn /root/backup/html/ 2>/dev
 # Membuat file ZIP dari backup
 cd /root
 zip -r backup.zip backup > /dev/null 2>&1
+chmod 600 /root/backup.zip 2>/dev/null || true
 
 file_path="/root/backup.zip"
 

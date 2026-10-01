@@ -102,10 +102,12 @@ ip="$ip4 / $ip6"
 date=$(date)
 domain=$(cat /etc/xray/domain)
 clear
-read -rp "Input Link Database: " url
+read -rp "Input Link Database: " url || return
+[ -z "$url" ] && return
 
 cd /root
 wget -O backup.zip "$url"
+chmod 600 backup.zip 2>/dev/null || true
 if [ ! -f backup.zip ] || ! unzip -tq backup.zip >/dev/null 2>&1; then
     echo "Error: Download failed or file is not a valid zip archive."
     rm -f backup.zip
@@ -143,10 +145,10 @@ chmod 640 /etc/funny/.restore.key 2>/dev/null || true
 
 systemctl daemon-reload
 systemctl restart ssh
-systemctl restart xray@ws
-systemctl restart xray@grpc
-systemctl restart xray@split
-systemctl restart xray@upgrade
+if xray run -test -config /etc/xray/json/ws.json >/dev/null 2>&1; then systemctl restart xray@ws; fi
+if xray run -test -config /etc/xray/json/grpc.json >/dev/null 2>&1; then systemctl restart xray@grpc; fi
+if xray run -test -config /etc/xray/json/split.json >/dev/null 2>&1; then systemctl restart xray@split; fi
+if xray run -test -config /etc/xray/json/upgrade.json >/dev/null 2>&1; then systemctl restart xray@upgrade; fi
 systemctl restart quota-ws 2>/dev/null || true
 systemctl restart quota-http 2>/dev/null || true
 systemctl restart quota-split 2>/dev/null || true
@@ -215,10 +217,10 @@ chmod 640 /etc/funny/.restore.key 2>/dev/null || true
 
 systemctl daemon-reload
 systemctl restart ssh
-systemctl restart xray@ws
-systemctl restart xray@grpc
-systemctl restart xray@split
-systemctl restart xray@upgrade
+if xray run -test -config /etc/xray/json/ws.json >/dev/null 2>&1; then systemctl restart xray@ws; fi
+if xray run -test -config /etc/xray/json/grpc.json >/dev/null 2>&1; then systemctl restart xray@grpc; fi
+if xray run -test -config /etc/xray/json/split.json >/dev/null 2>&1; then systemctl restart xray@split; fi
+if xray run -test -config /etc/xray/json/upgrade.json >/dev/null 2>&1; then systemctl restart xray@upgrade; fi
 systemctl restart quota-ws 2>/dev/null || true
 systemctl restart quota-http 2>/dev/null || true
 systemctl restart quota-split 2>/dev/null || true
@@ -254,10 +256,12 @@ ip="$ip4 / $ip6"
 date=$(date)
 domain=$(cat /etc/xray/domain)
 clear
-read -rp "Backup URL: " url
+read -rp "Backup URL: " url || return
+[ -z "$url" ] && return
 
 cd /root
 wget -O backup.zip "$url"
+chmod 600 backup.zip 2>/dev/null || true
 if [ ! -f backup.zip ] || ! unzip -tq backup.zip >/dev/null 2>&1; then
     echo "Error: Download failed or file is not a valid zip archive."
     rm -f backup.zip
@@ -398,10 +402,10 @@ echo "$TEXT" >> "$XRAY_CONFIG"
 # Memulai Service
 systemctl daemon-reload
 systemctl restart ssh
-systemctl restart xray@ws
-systemctl restart xray@grpc
-systemctl restart xray@split
-systemctl restart xray@upgrade
+if xray run -test -config /etc/xray/json/ws.json >/dev/null 2>&1; then systemctl restart xray@ws; fi
+if xray run -test -config /etc/xray/json/grpc.json >/dev/null 2>&1; then systemctl restart xray@grpc; fi
+if xray run -test -config /etc/xray/json/split.json >/dev/null 2>&1; then systemctl restart xray@split; fi
+if xray run -test -config /etc/xray/json/upgrade.json >/dev/null 2>&1; then systemctl restart xray@upgrade; fi
 systemctl restart quota-ws 2>/dev/null || true
 systemctl restart quota-http 2>/dev/null || true
 systemctl restart quota-split 2>/dev/null || true

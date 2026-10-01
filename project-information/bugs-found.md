@@ -2065,13 +2065,13 @@ Found 310. **Phase 1 cryptographic credentials and private keys exposed or leake
 - **Confirmed live on the VPS:** `/etc/wireguard/wg0.conf` had mode `0644` (world-readable) while `params` was `0600`. Changing `wg0.conf` to `0600` left `wg-quick@wg0` active.
 - **Inherited from both V23 and Autoscript New 1.20:** both reference archives omitted `0600` on restored keys, WireGuard configs, and bot credentials.
 
-Found 322. **Phase 12: Certificate issuance dropout to shell, missing Option 0 in cert generator, and unauthenticated Telegram requests** (`full/dm-menu.sh`, `lite/dm-menu.sh`) —
-1. `dm1()` in `dm-menu.sh` invoked `cert`, `fn`, and `dmsl` without chaining a loop back to `dm1`, dropping the operator to the shell prompt after renewing certificates.
-2. `cert()` lacked Option 0 (Back to Domain Menu), trapping the operator in a loop on `0` input.
-3. Certificate actions (`acme`, `cert2`, `fn`, `dmsl`) printed completion notices but exited without pause, causing immediate screen clearing.
-4. `dm()` executed multiple Telegram curl requests without checking whether `/etc/funny/.chatid` and `/etc/funny/.keybot` were configured, hanging for 10 seconds per request when bot tokens were empty.
-- **Confirmed live on the VPS:** deployed to `/usr/bin/dm-menu`; verified Option 0 in `cert()`, pause behavior across renewals, and menu retention; all 16 core services verified active.
-- **Inherited from V23 and Autoscript New 1.20:** both references lacked pause notices, Option 0 in `cert()`, and Telegram token guards in `dm-menu.sh`.
+Found 323. **Phase 13: Temporary backup zip created with world-readable permissions, restore paths missing Xray syntax tests, and unhandled empty URL input** (`full/backup.sh`, `lite/backup.sh`, `full/bmenu.sh`, `lite/bmenu.sh`, `full/restore-ftp.sh`, `lite/restore-ftp.sh`, `website/restore-ftp.sh`) —
+1. `backup.sh` created `/root/backup.zip` with default umask (`0644`), leaving system shadow hashes, private keys, and account cards world-readable while the file resided in `/root`.
+2. All 5 restore scripts (`bmenu.sh` and `restore-ftp.sh` across full/lite/website) restarted all four Xray transports without testing the restored configuration with `xray run -test -config`. If an older or corrupted backup was restored, the Xray services failed silently on startup.
+3. In `full/bmenu.sh` and `lite/bmenu.sh`, entering an empty string or EOF on the database URL prompt attempted `wget -O backup.zip ""` instead of returning cleanly.
+- **Confirmed live on the VPS:** deployed to `/usr/bin/`; verified `chmod 600` on `/root/backup.zip` and safe Xray restart checks; all 16 core services verified active.
+- **Inherited from V23 and Autoscript New 1.20:** both references created world-readable backup archives and blindly restarted daemons after restore.
+
 
 
 
