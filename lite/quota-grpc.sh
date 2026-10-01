@@ -64,6 +64,7 @@ clear
 function send_log() {
     CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
     KEY=$(cat /etc/funny/.keybot 2>/dev/null)
+    [ -z "$CHATID" ] || [ -z "$KEY" ] && return 0
     URL="https://api.telegram.org/bot${KEY}/sendMessage"
 
     TEXT="
@@ -128,7 +129,7 @@ function cekgrpc() {
         quota_limit=$(cat "$quota_file")
         if [[ "$quota_used" -gt "$quota_limit" ]]; then
             echo "$(date '+%F %T') quota-grpc: deleted $user (usage $quota_used > quota $quota_limit)" >> /etc/xray/.quota.logs
-            exp=$(grep -w "^### $user" "/etc/xray/json/grpc.json" | cut -d ' ' -f 3 | sort | uniq)
+            exp=$(grep -w "^### $user" "/etc/xray/json/grpc.json" | cut -d ' ' -f 3 | sort | uniq | head -n 1)
             sed -i "/^### $user $exp/ {N;d}" /etc/xray/json/grpc.json
             sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/grpc.json
             total_usage=$(con "$quota_used")
@@ -136,7 +137,10 @@ function cekgrpc() {
             send_log
             rm -f "$usage_file" "$quota_file"
             rm -f /var/log/create/xray/grpc/${user}.log
-            systemctl restart xray@grpc
+            rm -f /etc/xray/limit/ip/xray/grpc/${user}
+            if xray run -test -config /etc/xray/json/grpc.json >/dev/null 2>&1; then
+                systemctl restart xray@grpc
+            fi
             echo "User $user reached quota limit and has been deleted."
         fi
         fi

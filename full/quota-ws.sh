@@ -63,6 +63,7 @@ clear
 send_log() {
     CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
     KEY=$(cat /etc/funny/.keybot 2>/dev/null)
+    [ -z "$CHATID" ] || [ -z "$KEY" ] && return 0
     URL="https://api.telegram.org/bot${KEY}/sendMessage"
 
     TEXT="
@@ -130,7 +131,7 @@ cekws() {
         quota_limit=$(cat "$quota_file")
         if [[ "$quota_used" -gt "$quota_limit" ]]; then
             echo "$(date '+%F %T') quota-ws: deleted $user (usage $quota_used > quota $quota_limit)" >> /etc/xray/.quota.logs
-            exp=$(grep -w "^### $user" "/etc/xray/json/ws.json" | awk '{print $3}' | sort -u)
+            exp=$(grep -w "^### $user" "/etc/xray/json/ws.json" | awk '{print $3}' | sort -u | head -n 1)
             sed -i "/^### $user $exp/ {N;d}" /etc/xray/json/ws.json
             sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/ws.json
             total_usage=$(con "$quota_used")
@@ -138,7 +139,10 @@ cekws() {
             send_log
             rm -f "$usage_file" "$quota_file"
             rm -f /var/log/create/xray/ws/${user}.log
-            systemctl restart xray@ws
+            rm -f /etc/xray/limit/ip/xray/ws/${user}
+            if xray run -test -config /etc/xray/json/ws.json >/dev/null 2>&1; then
+                systemctl restart xray@ws
+            fi
             echo "User $user reached quota limit and has been deleted."
         fi
         fi

@@ -1329,6 +1329,18 @@ Section 35's four-check rule applied to Fix 314:
 | **Over-engineering** | Simple non-empty check `[ -z "$CHATID" ] || [ -z "$KEY" ] && return 0` and standard `xray run -test -config` guard. |
 | **vs the source** | V23 and 1.20 fired blind curl requests without token checks and restarted Xray blindly. The fix eliminates network timeouts and service downtime hazards. |
 
+## 101. Phase 6: Quota Daemon Artifact Cleanup and Restart Validation — Four Checks (October 1, 2026)
+
+Section 35's four-check rule applied to Fix 315:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Traffic accounting and quota breach enforcement function identically. User traffic continues to be queried via Xray API and reset. When an account exceeds quota, complete deletion is enforced. All 16 core services verified active. `bash -n` clean across all modified scripts. |
+| **Over-strictness** | No alteration to quota threshold checks (`quota_used > quota_limit`). Only ensures complete cleanup of orphaned IP limit files on hard deletion. |
+| **Over-engineering** | Standard POSIX `rm -f` and conditional `xray run -test -config`. No external helpers or dependencies. |
+| **vs the source** | V23 and 1.20 left orphaned IP limit files on disk when quota was exhausted. The fix fulfills Decision 16 by cleanly removing all account records. |
+
+
 
 
 

@@ -2065,12 +2065,14 @@ Found 310. **Phase 1 cryptographic credentials and private keys exposed or leake
 - **Confirmed live on the VPS:** `/etc/wireguard/wg0.conf` had mode `0644` (world-readable) while `params` was `0600`. Changing `wg0.conf` to `0600` left `wg-quick@wg0` active.
 - **Inherited from both V23 and Autoscript New 1.20:** both reference archives omitted `0600` on restored keys, WireGuard configs, and bot credentials.
 
-Found 314. **Phase 5: Unauthenticated Telegram requests on empty bot tokens and unvalidated Xray restart during limit/lock/unlock** (`full/limit-ip-*.sh`, `lite/limit-ip-*.sh`, `full/unlock-*.sh`, `lite/unlock-*.sh`, `full/locked-xray-*.sh`) —
-1. `send_log()` across all `limit-ip-*`, `unlock-*`, and `locked-xray-*` scripts did not verify if `/etc/funny/.chatid` or `/etc/funny/.keybot` were non-empty. When bot credentials were not configured, every trigger sent an unauthenticated request to `https://api.telegram.org/bot/sendMessage`, causing 10-second request timeouts and error log spam.
-2. In all `limit-ip-*`, `unlock-*`, and `locked-xray-*` handlers, `xray@<transport>` was restarted immediately after modifying the transport JSON without running `xray run -test -config`, risking transport daemon crash if sed pattern replacement produced malformed JSON.
-3. Expiry date extraction in `limit-ip-*` lacked `head -n 1`, which could break date matching if multiple matching lines were returned.
-- **Confirmed live on the VPS:** `limit-ip-ws` ran clean; all 16 core services verified active.
-- **Inherited from V23 and Autoscript New 1.20:** both references lacked token guards in `send_log` and pre-restart config tests.
+Found 315. **Phase 6: Quota/kill daemon orphaned IP limit files, unauthenticated Telegram requests, and unvalidated Xray restart** (`full/quota-*.sh`, `lite/quota-*.sh`, `full/kill-*.sh`, `lite/kill-*.sh`) —
+1. `quota-*` and `kill-*` deleted expired quota accounts by removing the client JSON, quota file, usage file, and account log card, but left `/etc/xray/limit/ip/xray/<proto>/${user}` orphaned on disk. Under Decision 16, a quota breach must delete all account artifacts completely.
+2. In all 8 `quota-*` and 8 `kill-*` scripts across `full/` and `lite/`, `send_log()` attempted to POST to Telegram without verifying if `/etc/funny/.chatid` or `/etc/funny/.keybot` were non-empty, leading to repeated HTTP 404/401 connection timeouts when bot alerts were not configured.
+3. Transport services were restarted immediately following quota deletion without running `xray run -test -config`, creating a service crash risk if JSON formatting was invalid.
+4. Expiry date extraction in `quota-*` and `kill-*` lacked `head -n 1`.
+- **Confirmed live on the VPS:** `kill-ws` ran clean; all 16 core services verified active.
+- **Inherited from V23 and Autoscript New 1.20:** both references omitted the IP limit cleanup on quota deletion and lacked bot token / config test guards.
+
 
 
 

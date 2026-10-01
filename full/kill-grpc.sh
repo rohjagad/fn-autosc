@@ -66,6 +66,7 @@ function send_log() {
     local total=$3
     CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
     KEY=$(cat /etc/funny/.keybot 2>/dev/null)
+    [ -z "$CHATID" ] || [ -z "$KEY" ] && return 0
     TIME="10"
     TEXT="
 <code>────────────────────</code>
@@ -107,12 +108,14 @@ function check_quota() {
         usage=$(cat "$usage_file")
 
         if [[ $usage -ge $quota_limit ]]; then
-            exp=$(grep -w "^### $user" "/etc/xray/json/grpc.json" | cut -d ' ' -f 3 | sort | uniq)
+            exp=$(grep -w "^### $user" "/etc/xray/json/grpc.json" | cut -d ' ' -f 3 | sort | uniq | head -n 1)
             if [[ -n "$exp" ]]; then
                 sed -i "/^### $user $exp/ {N;d}" /etc/xray/json/grpc.json
                 sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/grpc.json
-                systemctl daemon-reload
-                systemctl restart xray@grpc
+                if xray run -test -config /etc/xray/json/grpc.json >/dev/null 2>&1; then
+                    systemctl daemon-reload
+                    systemctl restart xray@grpc
+                fi
             fi
 
             readable_limit=$(human_readable "$quota_limit")
@@ -131,6 +134,7 @@ function check_quota() {
             rm -rf "$quota_file"
             rm -rf "$usage_file"
             rm -fr /var/log/create/xray/grpc/${user}.log
+            rm -f "/etc/xray/limit/ip/xray/grpc/${user}"
         fi
     fi
 }

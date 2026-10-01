@@ -2295,6 +2295,17 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Verified live:** `/usr/bin/limit-ip-*`, `/usr/bin/unlock-*`, and `/usr/bin/locked-xray-*` deployed to VPS; `/usr/bin/limit-ip-ws` ran clean; all 16 core services verified active.
 - **Archives rebuilt:** `menu/full.zip` and `menu/lite.zip` repacked and verified at mode `0755`.
 
+### Fix 315 - Phase 6: Quota/kill complete artifact removal, Telegram guard, and validated restarts (Found 315)
+
+- **Fix 315 (Found 315):**
+  1. In `full/quota-*.sh`, `lite/quota-*.sh`, `full/kill-*.sh`, and `lite/kill-*.sh` (16 files): added `rm -f /etc/xray/limit/ip/xray/<proto>/${user}` on account deletion so no orphaned limit files survive a quota breach per Decision 16.
+  2. In `send_log()` across all 16 scripts: added `[ -z "$CHATID" ] || [ -z "$KEY" ] && return 0` to bypass unauthenticated requests when bot tokens are empty.
+  3. Enforced `xray run -test -config` pre-restart validation on all quota/kill Xray service restarts.
+  4. Added `head -n 1` to expiry date extractions.
+- **Verified live:** `/usr/bin/quota-*` and `/usr/bin/kill-*` deployed to VPS; `/usr/bin/kill-ws` ran clean; all 16 core services verified active.
+- **Archives rebuilt:** `menu/full.zip` and `menu/lite.zip` repacked and verified at mode `0755`.
+
+
 
 
 
