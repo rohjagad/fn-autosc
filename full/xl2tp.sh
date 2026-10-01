@@ -104,10 +104,12 @@ until [[ $VPN_USER =~ ^[a-zA-Z0-9_]+$ && ${CLIENT_EXISTS} == '0' ]]; do
 		read -rp "Username : " -e VPN_USER || exit 0
 		CLIENT_EXISTS=$(grep -w $VPN_USER /etc/funny/.l2tp | wc -l)
 
-		if [[ ${CLIENT_EXISTS} == '1' ]]; then
+		if [[ ${CLIENT_EXISTS} -gt 0 ]]; then
 			echo ""
 			echo -e "Username ${red}${VPN_USER}${NC} already exists, please choose another"
-			exit 1
+			VPN_USER=""
+			CLIENT_EXISTS=0
+			continue
 		fi
 	done
 read -p "Password : " VPN_PASSWORD || exit 0
@@ -255,6 +257,7 @@ fi
 exp3=$(($exp2 + $masaaktif))
 exp4=$(date -d "$exp3 days" +"%Y-%m-%d")
 sed -i "s/^### $user $exp/### $user $exp4/" /etc/funny/.l2tp
+chmod 600 /etc/funny/.l2tp 2>/dev/null || true
 systemctl daemon-reload
 systemctl restart ipsec
 systemctl restart xl2tpd

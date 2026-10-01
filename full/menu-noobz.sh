@@ -169,7 +169,9 @@ CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
-curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL >/dev/null 2>&1
+if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
+    curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL >/dev/null 2>&1
+fi
 clear
 echo "$TEKS"
 read -n 1 -s -r -p "Press any key to return..." || true
@@ -195,7 +197,7 @@ if ! grep -qw "^### $name" "/etc/funny/.noob" 2>/dev/null; then
     sleep 2
     return
 fi
-exp=$(grep -we "^### $name" "/etc/funny/.noob" | cut -d ' ' -f 3 | sort | uniq)
+exp=$(grep -we "^### $name" "/etc/funny/.noob" | cut -d ' ' -f 3 | sort | uniq | head -n 1)
 sed -i "/^### $name $exp/d" /etc/funny/.noob
 noobz_remove_user "$name"
 clear
@@ -212,7 +214,9 @@ CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
-curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL >/dev/null 2>&1
+if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
+    curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL >/dev/null 2>&1
+fi
 clear
 echo "$TEKS"
 read -n 1 -s -r -p "Press any key to return..." || true

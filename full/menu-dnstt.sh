@@ -185,6 +185,7 @@ SVCEOF
                 clear
                 chmod +x /etc/slowdns/dns-server
                 /etc/slowdns/dns-server -gen-key -privkey-file /etc/slowdns/server.key -pubkey-file /etc/slowdns/server.pub
+                chmod 600 /etc/slowdns/server.key 2>/dev/null || true
                 systemctl daemon-reload
                 systemctl enable dnstt.service
                 systemctl start dnstt.service

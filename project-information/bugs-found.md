@@ -2065,13 +2065,14 @@ Found 310. **Phase 1 cryptographic credentials and private keys exposed or leake
 - **Confirmed live on the VPS:** `/etc/wireguard/wg0.conf` had mode `0644` (world-readable) while `params` was `0600`. Changing `wg0.conf` to `0600` left `wg-quick@wg0` active.
 - **Inherited from both V23 and Autoscript New 1.20:** both reference archives omitted `0600` on restored keys, WireGuard configs, and bot credentials.
 
-Found 318. **Phase 8: Modification, extension, and deletion scripts lacked Telegram token checks, pre-restart config tests, and EOF protection** (`full/delete-*`, `lite/delete-*`, `full/extend-*`, `lite/extend-*`, `full/change-id-*`, `lite/change-id-*`, `full/change-quota-*`, `lite/change-quota-*`) —
-1. `send_log()` in all 32 management scripts across `full/` and `lite/` triggered Telegram requests without checking if bot tokens were configured, producing unauthenticated network requests and timeout pauses.
-2. Xray daemon restarts were executed directly without syntax validation (`xray run -test -config`), creating service outage risks on sed errors.
-3. Expiry date lookups lacked `head -n 1`, which could cause errors when multiple duplicate lines existed.
-4. Prompt inputs lacked EOF guard handling.
-- **Confirmed live on the VPS:** `delete-ws nonexistent999` safely printed user-not-found, triggered zero restarts, deleted zero files, and returned to submenu cleanly; all 16 core services verified active.
-- **Inherited from V23 and Autoscript New 1.20:** both references omitted bot token checks, pre-restart config validation, and EOF guards.
+Found 319. **Phase 9: Key renewal permission leak in dnstt, Noobz unauthenticated alerts, WireGuard/L2TP navigation and permission gaps** (`full/menu-dnstt.sh`, `full/menu-noobz.sh`, `full/menu-wg.sh`, `full/xl2tp.sh`) —
+1. `full/menu-dnstt.sh` (option 2, renew server keys) generated `/etc/slowdns/server.key` without running `chmod 600`, leaving newly rotated DNS private keys at default umask permissions.
+2. `full/menu-noobz.sh` sent Telegram creation and deletion notifications without checking if `/etc/funny/.chatid` and `/etc/funny/.keybot` were configured.
+3. `full/menu-wg.sh` wrote to `/etc/wireguard/wg0.conf` on account creation without asserting `chmod 600`, had missing `goback` on unparseable expiry in `extend()`, and used loose word-boundary regex (`/\b$user\b/d`) that could match partial usernames.
+4. `full/xl2tp.sh` aborted with `exit 1` on duplicate username in `create()` rather than letting the input loop retry, and omitted `chmod 600` after modifying `/etc/funny/.l2tp`.
+- **Confirmed live on the VPS:** deployed and verified across all 4 tools; all 16 core services verified active with 0 failed units.
+- **Inherited from V23:** V23 had the same unauthenticated Telegram calls, loose regexes, and omitted key hardening.
+
 
 
 

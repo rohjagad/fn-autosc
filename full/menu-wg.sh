@@ -211,6 +211,7 @@ AllowedIPs = 0.0.0.0/0" >> /var/www/html/wireguard-${user}.conf
 PublicKey = ${client_pub_key}
 PresharedKey = ${client_pre_shared_key}
 AllowedIPs = ${client_ipv4}/32" >> /etc/wireguard/wg0.conf
+	chmod 600 /etc/wireguard/wg0.conf 2>/dev/null || true
 	systemctl daemon-reload
 	systemctl restart wg-quick@wg0
 
@@ -311,7 +312,7 @@ function delete() {
 			/etc/wireguard/wg0.conf > /tmp/wg0.conf && mv /tmp/wg0.conf /etc/wireguard/wg0.conf
 		chmod 600 /etc/wireguard/wg0.conf 2>/dev/null || true
 		rm -f /var/www/html/wireguard-${user}.conf
-		sed -i "/\b$user\b/d" /etc/funny/.wireguard
+		sed -i "/^$user[[:space:]]/d" /etc/funny/.wireguard
 		systemctl daemon-reload
 		systemctl restart wg-quick@wg0
 		newline
@@ -351,11 +352,12 @@ function extend() {
 		read extend || exit 1
 	done
 
-	exp_old=$(cat /etc/funny/.wireguard | grep -w $user | awk '{print $2}')
+	exp_old=$(grep -w "^$user" /etc/funny/.wireguard | awk '{print $2}' | head -n 1)
 	d1_check=$(date -d "${exp_old}" +%s 2>/dev/null)
 	if [ -z "$d1_check" ]; then
 		echo -e "\033[0;31mUnparseable expiry for this account - leaving it unchanged.\033[0m"
 		sleep 2
+		goback
 		return
 	fi
 	diff=$((($(date -d "${exp_old}" +%s)-$(date +%s))/(86400)))
@@ -363,7 +365,7 @@ function extend() {
 	exp_new=$(date -d +${duration}days +%Y-%m-%d)
 	exp=$(date -d "${exp_new}" +"%d %b %Y")
 
-	sed -i "/\b$user\b/d" /etc/funny/.wireguard
+	sed -i "/^$user[[:space:]]/d" /etc/funny/.wireguard
 	echo -e "$user\t$exp_new" >> /etc/funny/.wireguard
 
 	clear

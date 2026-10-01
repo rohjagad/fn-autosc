@@ -1373,6 +1373,18 @@ Section 35's four-check rule applied to Fix 318:
 | **Over-engineering** | Standard bash conditionals on curl, EOF checks, and `xray run -test -config`. |
 | **vs the source** | V23 and 1.20 restarted Xray blindly and made unauthenticated curl calls. The fix prevents outages during day-to-day administrative operations. |
 
+## 105. Phase 9: Additional Protocols Tunnel Hardening — Four Checks (October 1, 2026)
+
+Section 35's four-check rule applied to Fix 319:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | WireGuard, NoobzVPN, L2TP, and SlowDNS operations continue to function identically. Rotated keys are preserved, tunnel accounts are created and cleaned up. All 16 core services verified active. `bash -n` clean across all 4 modified scripts. |
+| **Over-strictness** | No additional constraints on valid inputs. WireGuard and Noobz continue to accept valid names and passwords. |
+| **Over-engineering** | Minimal POSIX `chmod 600`, single-loop retry in `xl2tp.sh`, and `if [ -n "$CHATID" ]` guard. |
+| **vs the source** | V23 left renewed SlowDNS keys at default umask, aborted L2TP abruptly on duplicate username, and made blind curl calls in Noobz. The fix aligns with project security and usability standards. |
+
+
 
 
 

@@ -2333,6 +2333,17 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Verified live:** deployed to `/usr/bin/` on VPS; tested `delete-ws nonexistent999` live; verified 0 unwanted restarts, 0 deleted files, clean return to menu; all 16 core services verified active.
 - **Archives rebuilt:** `menu/full.zip` and `menu/lite.zip` repacked and verified at mode `0755`.
 
+### Fix 319 - Phase 9: Hardening additional protocols (WireGuard, NoobzVPN, L2TP, SlowDNS) (Found 319)
+
+- **Fix 319 (Found 319):**
+  1. In `full/menu-dnstt.sh`: added `chmod 600 /etc/slowdns/server.key` after server key renewal.
+  2. In `full/menu-noobz.sh`: guarded Telegram notifications with `if [ -n "$CHATID" ] && [ -n "$KEY" ]` and added `head -n 1` to expiry lookup.
+  3. In `full/menu-wg.sh`: enforced `chmod 600 /etc/wireguard/wg0.conf` after creating accounts, added missing `goback` in `extend()`, and hardened database line deletion pattern to `^$user[[:space:]]`.
+  4. In `full/xl2tp.sh`: allowed `create()` loop to prompt again on duplicate usernames instead of terminating with `exit 1`, and enforced `chmod 600 /etc/funny/.l2tp` after extending accounts.
+- **Verified live:** deployed to `/usr/bin/` on VPS; all 16 core services verified active with 0 failed units.
+- **Archives rebuilt:** `menu/full.zip` repacked and verified at mode `0755`.
+
+
 
 
 
