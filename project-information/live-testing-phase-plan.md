@@ -41,7 +41,7 @@ Setiap pengujian pada seluruh fase **WAJIB** merujuk dan mencocokkan hasil aktua
 | # | Sumber Referensi | Lokasi / Sumber | Peran dalam Pengujian Live |
 | :- | :--- | :--- | :--- |
 | 1 | **Bugs Fixed** | `project-information/bugs-fixed.md` | Verifikasi bahwa pengujian menguji fungsionalitas yang telah diperbaiki tanpa menyebabkan regresi pada perilaku lama. |
-| 2 | **Original Sources (Both Versions)** | - V23: `/tmp/opencode/original-v23`<br>- 1.20: `/tmp/opencode/original-120` | Tolok ukur perilaku asli (upstream). Membedakan antara anomali yang disengaja dari upstream vs bug nyata. |
+| 2 | **Original Sources (Both Versions)** | - **Arsip Resmi di Repo:**<br>  • `original-source-do-not-edit/V23 Linux Ubuntu, Debian, Kali.zip`<br>  • `original-source-do-not-edit/Autoscript New 1.20.zip`<br>- **Ekstraksi Kerja (Transient):**<br>  • V23: `/tmp/opencode/original-v23`<br>  • 1.20: `/tmp/opencode/original-120`<br>*(Portabel: ekstrak dari zip repo di atas bila `/tmp` tidak ada)* | Tolok ukur perilaku asli (upstream). Membedakan antara anomali yang disengaja dari upstream vs bug nyata. |
 | 3 | **Git Commit History** | `git log --stat` / `git log -p` | Menelusuri riwayat mengapa suatu konfigurasi atau batasan dipasang pada commit sebelumnya. |
 | 4 | **Bug Fixes Regression** | `project-information/bug-fixes-regression.md` | Memvalidasi kriteria Section 35: memastikan pengujian tidak menganggap penolakan input tidak valid sebagai over-strictness atau regresi. |
 | 5 | **Bugs Found** | `project-information/bugs-found.md` | Memastikan skenario uji mencakup kasus reproduksi kegagalan yang pernah terjadi sebelumnya (contoh: bug 300 s.d. 309). |
