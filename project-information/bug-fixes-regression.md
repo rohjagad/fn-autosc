@@ -1318,6 +1318,18 @@ Section 35's four-check rule applied to Fix 313:
 | **Over-engineering** | Native `xray run -test -config` command provided by Xray binary itself; no additional parsers or dependencies. Single-line `chmod 600` after file move. |
 | **vs the source** | V23 and 1.20 lacked pre-restart validation and left `wg0.conf` at default permissions after peer deletion. The fix preserves reliable automated cleanup. |
 
+## 100. Phase 5: IP Limiter Telegram Guard and Restart Safety — Four Checks (October 1, 2026)
+
+Section 35's four-check rule applied to Fix 314:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Multilogin detection and manual account lock/unlock work identically. When credentials exist, Telegram alerts are still sent. Transport services are still reloaded, but with guaranteed JSON syntax validity. All 16 core services verified active. `bash -n` clean across all modified scripts. |
+| **Over-strictness** | Does not modify IP limit threshold calculation (`cek > limit`) or locking mechanics. Bypasses only external Telegram API calls when bot configuration is empty. |
+| **Over-engineering** | Simple non-empty check `[ -z "$CHATID" ] || [ -z "$KEY" ] && return 0` and standard `xray run -test -config` guard. |
+| **vs the source** | V23 and 1.20 fired blind curl requests without token checks and restarted Xray blindly. The fix eliminates network timeouts and service downtime hazards. |
+
+
 
 
 

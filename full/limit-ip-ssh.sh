@@ -168,6 +168,7 @@ The account will be locked for 15 minutes and will be unlocked automatically.
 "
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
+[ -z "$CHATID" ] || [ -z "$KEY" ] && return 0
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL >/dev/null 2>&1

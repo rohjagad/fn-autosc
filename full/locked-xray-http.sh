@@ -100,6 +100,7 @@ blue_sep="${blue}-----------------------------------${NC}"
 send_log() {
     CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
     KEY=$(cat /etc/funny/.keybot 2>/dev/null)
+    [ -z "$CHATID" ] || [ -z "$KEY" ] && return 0
     URL="https://api.telegram.org/bot$KEY/sendMessage"
     TIME="10"
     DATE=$(date +"%Y-%m-%d %H:%M:%S")
@@ -171,11 +172,13 @@ Protocol : $protokol2
 Status   : ${red}Locked${NC}
 ${separator}"
 
-    exp=$(grep -wE "^### $name" "/etc/xray/json/upgrade.json" | cut -d ' ' -f 3 | sort | uniq)
+    exp=$(grep -wE "^### $name" "/etc/xray/json/upgrade.json" | cut -d ' ' -f 3 | sort | uniq | head -n 1)
     sed -i "/^### $name $exp/ {N;d}" /etc/xray/json/upgrade.json
     sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/upgrade.json
-mv /var/log/create/xray/http/${name}.log /var/log/create/xray/http/${name}.locked
-systemctl daemon-reload
-systemctl restart xray@upgrade
-# Send Notif Telegram
-send_log
+    if xray run -test -config /etc/xray/json/upgrade.json >/dev/null 2>&1; then
+        mv /var/log/create/xray/http/${name}.log /var/log/create/xray/http/${name}.locked
+        systemctl daemon-reload
+        systemctl restart xray@upgrade
+        # Send Notif Telegram
+        send_log
+    fi

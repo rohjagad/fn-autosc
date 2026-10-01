@@ -102,6 +102,7 @@ blue_sep="${blue}-----------------------------------${NC}"
 send_log() {
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
+[ -z "$CHATID" ] || [ -z "$KEY" ] && return 0
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 TIME="10"
 DATE=$(date +"%Y-%m-%d %H:%M:%S")
@@ -192,11 +193,13 @@ if [[ "$confirm" == "y" || "$confirm" == "Y" ]]; then
         echo "Protokol tidak dikenal"
     fi
 
-    mv /var/log/create/xray/http/${name}.locked /var/log/create/xray/http/${name}.log
-     systemctl daemon-reload
-     systemctl restart xray@upgrade
-    # Send Notif Telegram
-    send_log
+    if xray run -test -config /etc/xray/json/upgrade.json >/dev/null 2>&1; then
+        mv /var/log/create/xray/http/${name}.locked /var/log/create/xray/http/${name}.log
+        systemctl daemon-reload
+        systemctl restart xray@upgrade
+        # Send Notif Telegram
+        send_log
+    fi
 
 else
     echo "Proses unlock dibatalkan."

@@ -64,6 +64,7 @@ clear
 send_log() {
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
+[ -z "$CHATID" ] || [ -z "$KEY" ] && return 0
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 TIME="10"
 DATE=$(date +"%Y-%m-%d %H:%M:%S")
@@ -117,11 +118,13 @@ for user in $username; do
         # matched its end address (no line starts with "},{") while $exp was
         # undefined, so a triggered limit deleted the account block plus
         # everything after it to the end of the file. Remove only the account.
-        exp=$(grep -wE "^### $user" "/etc/xray/json/upgrade.json" | cut -d ' ' -f 3 | sort | uniq)
+        exp=$(grep -wE "^### $user" "/etc/xray/json/upgrade.json" | cut -d ' ' -f 3 | sort | uniq | head -n 1)
         if [[ -n "$exp" ]]; then
             sed -i "/^### $user $exp/ {N;d}" /etc/xray/json/upgrade.json
             sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/upgrade.json
-            systemctl restart xray@upgrade >> /dev/null 2>&1
+            if xray run -test -config /etc/xray/json/upgrade.json >/dev/null 2>&1; then
+                systemctl restart xray@upgrade >> /dev/null 2>&1
+            fi
             send_log
             mv /var/log/create/xray/http/${user}.log /var/log/create/xray/http/${user}.locked
         fi

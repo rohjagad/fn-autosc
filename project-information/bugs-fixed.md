@@ -2286,6 +2286,16 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Verified live:** `/usr/bin/xp` and `/usr/bin/menu-wg` deployed to VPS; `/usr/bin/xp` executed clean; all 16 core services verified active.
 - **Archives rebuilt:** `menu/full.zip` and `menu/lite.zip` repacked and verified at mode `0755`.
 
+### Fix 314 - Phase 5: IP limiter Telegram guard and validated Xray restarts during locking/unlocking (Found 314)
+
+- **Fix 314 (Found 314):**
+  1. In `full/limit-ip-*.sh`, `lite/limit-ip-*.sh`, `full/unlock-*.sh`, `lite/unlock-*.sh`, and `full/locked-xray-*.sh`: added `[ -z "$CHATID" ] || [ -z "$KEY" ] && return 0` to `send_log()` to prevent unauthenticated HTTP requests when bot tokens are empty.
+  2. In all `limit-ip-*`, `unlock-*`, and `locked-xray-*` scripts: verified Xray JSON syntax with `xray run -test -config` before executing service restarts.
+  3. Added `head -n 1` to single-line expiry date lookups in `limit-ip-*` and `locked-xray-*`.
+- **Verified live:** `/usr/bin/limit-ip-*`, `/usr/bin/unlock-*`, and `/usr/bin/locked-xray-*` deployed to VPS; `/usr/bin/limit-ip-ws` ran clean; all 16 core services verified active.
+- **Archives rebuilt:** `menu/full.zip` and `menu/lite.zip` repacked and verified at mode `0755`.
+
+
 
 
 
