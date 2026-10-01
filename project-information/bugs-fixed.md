@@ -2267,4 +2267,14 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
   4. In `installer/request.sh`: resolved default route network interface via `ip -o -4 route show to default` to reliably obtain host public interface instead of grabbing virtual tunnel adapters.
 - **Verified live:** `/root/udp-custom/config.json` set to `0600`; updated `fix.sh` ran clean on VPS; verified sysctl values (`net.ipv4.ip_forward = 1`, `fs.file-max = 1000000`, `net.netfilter.nf_conntrack_max = 262144`); all 16 core services verified active.
 
+### Fix 312 - Phase 3: Systemd restart storm prevention and RestartSec backoff (Found 312)
+
+- **Fix 312 (Found 312):**
+  1. In `full/xp.sh` and `lite/xp.sh`: batched SSH daemon restarts (`ssh`, `sshd`, `ws`, `dropbear`) and L2TP daemon restarts (`ipsec`, `xl2tpd`) to run once after account deletion loops instead of restarting repeatedly per expired user.
+  2. In `installer/ssh.sh` (`ws.service`, `badvpn-udpgw.service`), `installer/xray.sh` (`xray@.service`, `quota-ws`, `quota-split`, `quota-http`, `quota-grpc`), `installer/slowdns.sh` (`dnstt.service`), `full/menu-dnstt.sh` (`dnstt.service`), `installer/vpn.sh` (`fn-ohp.service`, `opn.service`), and `full/menu-bot.sh` / `lite/menu-bot.sh` (`bot.service`): added `RestartSec=3s` backoff delay to prevent CPU spinning and rate-limit bursts.
+  3. In `installer/udp.sh`: aligned `WantedBy` to `multi-user.target`.
+- **Verified live:** `xp`, `menu-dnstt`, `menu-bot` deployed to VPS `/usr/bin/`; `RestartSec=3s` applied across all 10 live unit files and `daemon-reload` run; all 16 core services verified active with 0 failed units.
+- **Archives rebuilt:** `menu/full.zip` and `menu/lite.zip` repacked and verified at mode `0755`.
+
+
 

@@ -192,6 +192,7 @@ User=root
 NoNewPrivileges=true
 ExecStart=/usr/bin/ws -f /usr/bin/config.yaml
 Restart=on-failure
+RestartSec=3s
 RestartPreventExitStatus=23
 LimitNPROC=10000
 LimitNOFILE=1000000
@@ -222,6 +223,7 @@ User=root
 NoNewPrivileges=true
 ExecStart=/usr/bin/badvpn-udpgw --listen-addr 127.0.0.1:7300 --max-clients 1000 --max-connections-for-client 10 --client-socket-sndbuf 100000
 Restart=on-failure
+RestartSec=3s
 LimitNPROC=10000
 LimitNOFILE=1000000
 

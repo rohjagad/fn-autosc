@@ -225,6 +225,7 @@ After=network.target
 Type=simple
 ExecStart=/usr/sbin/fnohp -port 9088 -proxy 127.0.0.1:3128 -tunnel 127.0.0.1:1194
 Restart=always
+RestartSec=3s
 User=root
 
 [Install]
@@ -268,6 +269,7 @@ AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 NoNewPrivileges=true
 ExecStart=/usr/bin/python3 -O /usr/local/bin/dinda
 Restart=on-failure
+RestartSec=3s
 
 [Install]
 WantedBy=multi-user.target

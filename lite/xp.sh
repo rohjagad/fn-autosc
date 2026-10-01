@@ -235,6 +235,7 @@ fi
 hariini=`date +%d-%m-%Y`
 cat /etc/shadow | cut -d: -f1,8 | sed /:$/d > /tmp/expirelist.txt
 totalaccounts=`cat /tmp/expirelist.txt | wc -l`
+ssh_expired=0
 for((i=1; i<=$totalaccounts; i++ ))
 do
 tuserval=`head -n $i /tmp/expirelist.txt | tail -n 1`
@@ -258,10 +259,7 @@ rm -fr /etc/xray/limit/ip/ssh/$username
 rm -f /var/log/create/ssh/${username}.log
 exp="$tgl $bulantahun"
 xp_log "deleted $username (expiry $exp)"
-systemctl daemon-reload
-systemctl restart ssh
-systemctl restart sshd
-systemctl restart ws 2>/dev/null || true
+ssh_expired=1
 TEKS="
 ====================
 SSH Account Expired
@@ -277,9 +275,16 @@ curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "te
 clear
 fi
 done
+if [[ $ssh_expired -eq 1 ]]; then
+    systemctl daemon-reload
+    systemctl restart ssh
+    systemctl restart sshd
+    systemctl restart ws 2>/dev/null || true
+fi
 
 # L2TP
 clear
+l2tp_expired=0
 data=( `cat /etc/funny/.l2tp | grep '^###' | cut -d ' ' -f 2`);
 now=`date +"%Y-%m-%d"`
 for user in "${data[@]}"
@@ -309,11 +314,14 @@ KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL
-systemctl restart ipsec
-systemctl restart xl2tpd
-chmod 600 /etc/ppp/chap-secrets* /etc/ipsec.d/passwd* /etc/funny/.l2tp 2>/dev/null || true
+l2tp_expired=1
 fi
 done
+if [[ $l2tp_expired -eq 1 ]]; then
+    systemctl restart ipsec 2>/dev/null || true
+    systemctl restart xl2tpd 2>/dev/null || true
+    chmod 600 /etc/ppp/chap-secrets* /etc/ipsec.d/passwd* /etc/funny/.l2tp 2>/dev/null || true
+fi
 
 # WIREGUARD
 if [[ -f /etc/funny/.wireguard ]]; then

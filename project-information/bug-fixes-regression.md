@@ -1296,4 +1296,16 @@ Section 35's four-check rule applied to Fix 311:
 | **Over-engineering** | Shortest working POSIX sed and grep checks. Replaces brittle grep pipeline with standard route lookup. |
 | **vs the source** | V23 and 1.20 left sysctl variables undefined or half-configured. The fix completes the intended configuration idempotently. |
 
+## 98. Phase 3: Systemd Restart Storm Prevention & Backoff Delays — Four Checks (October 1, 2026)
+
+Section 35's four-check rule applied to Fix 312:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Expired accounts continue to be removed from shadow, credentials files, and quota tracking. Daemons are still restarted whenever accounts are purged, but exactly once at loop exit. `RestartSec=3s` preserves auto-restart capability while preventing restart bursts. All 16 core services verified active. `bash -n` clean across all modified scripts. |
+| **Over-strictness** | Does not alter service dependencies or exit status evaluation. Only adds standard systemd 3-second delay on failure. |
+| **Over-engineering** | Simple boolean flag (`ssh_expired=1`, `l2tp_expired=1`) identical to the existing WireGuard and Noobz pattern in the same file. One-line `RestartSec=3s` in unit files. |
+| **vs the source** | V23 and 1.20 restarted services on every loop step and omitted restart backoffs. The fix stabilizes systemd operation and eliminates redundant process churn. |
+
+
 

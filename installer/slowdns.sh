@@ -141,6 +141,7 @@ AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 NoNewPrivileges=true
 ExecStart=/etc/slowdns/dns-server -udp :5300 -privkey-file /etc/slowdns/server.key $Nameserver 127.0.0.1:22
 Restart=on-failure
+RestartSec=3s
 
 [Install]
 WantedBy=multi-user.target

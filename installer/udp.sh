@@ -108,7 +108,7 @@ Restart=always
 RestartSec=2s
 
 [Install]
-WantedBy=default.target
+WantedBy=multi-user.target
 SERV
 
 # Menyalakan Service

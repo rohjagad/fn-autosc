@@ -161,6 +161,7 @@ After=network.target
 ExecStart=/usr/bin/node /usr/bin/bot/server.js
 WorkingDirectory=/usr/bin/bot
 Restart=always
+RestartSec=3s
 User=root
 
 [Install]

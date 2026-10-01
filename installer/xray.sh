@@ -84,6 +84,7 @@ AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE
 NoNewPrivileges=true
 ExecStart=/usr/local/bin/xray run -config /etc/xray/json/%i.json
 Restart=on-failure
+RestartSec=3s
 RestartPreventExitStatus=23
 LimitNPROC=10000
 LimitNOFILE=1000000
@@ -215,6 +216,7 @@ After=network.target
 Type=simple
 ExecStart=/usr/bin/quota-ws
 Restart=on-failure
+RestartSec=3s
 User=root
 
 [Install]
@@ -230,6 +232,7 @@ After=network.target
 Type=simple
 ExecStart=/usr/bin/quota-split
 Restart=on-failure
+RestartSec=3s
 User=root
 
 [Install]
@@ -245,6 +248,7 @@ After=network.target
 Type=simple
 ExecStart=/usr/bin/quota-http
 Restart=on-failure
+RestartSec=3s
 User=root
 
 [Install]
@@ -260,6 +264,7 @@ After=network.target
 Type=simple
 ExecStart=/usr/bin/quota-grpc
 Restart=on-failure
+RestartSec=3s
 User=root
 
 [Install]
