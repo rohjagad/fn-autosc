@@ -2244,3 +2244,17 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 309 (Found 309):** in all 8 routing scripts (full/lite × ws/grpc/http/split), all 3 invocation sites per file now guard with `|| return` on each read and a combined empty-string check before any Xray config is written.
 - **Archives rebuilt and verified byte-identical, mode 755.**
+
+### Fix 310 - Phase 1: Cryptographic key and credential permissions audit (Found 310)
+
+- **Fix 310 (Found 310):**
+  1. In `installer/stunnel5.sh`: replaced `cat ... | tee` with `>` and added `chmod 600 /etc/haproxy/funny.pem` to prevent stdout key leakage and world-readable bundle.
+  2. In `installer/wg.sh`: added `chmod 600 /etc/wireguard/wg0.conf`.
+  3. In `installer/slowdns.sh`: added `chmod 600 /etc/slowdns/server.key`.
+  4. In `installer/l2tp.sh`: replaced `chmod +x` with `chmod 600 /etc/funny/.l2tp`.
+  5. In `full/bmenu.sh` and `lite/bmenu.sh` (all 3 restore functions) and all `restore-ftp.sh` variants (`full`, `lite`, `website`): enforced `chmod 644 /etc/xray/xray.crt`, `chmod 600 /etc/xray/xray.key /etc/haproxy/funny.pem`, and `chmod 600 /etc/wireguard/wg0.conf /etc/wireguard/params /etc/ipsec.secrets* /etc/ppp/chap-secrets* /etc/ipsec.d/passwd* /etc/funny/.keybot /etc/funny/.chatid /etc/funny/.l2tp`, plus `chmod 640 /etc/funny/.restore.key`.
+  6. In `full/menu-bot.sh` and `lite/menu-bot.sh`: added `chmod 600 /etc/funny/.keybot /etc/funny/.chatid` after writing bot credentials.
+  7. In `full/xl2tp.sh`, `full/xp.sh`, and `lite/xp.sh`: added `/etc/funny/.l2tp` to `chmod 600`.
+- **Verified live:** `/usr/bin/bmenu`, `menu-bot`, `restore-ftp`, `xl2tp`, `xp` deployed to VPS; live file permissions on `/etc/wireguard/wg0.conf`, `/etc/haproxy/funny.pem`, `/etc/xray/xray.key`, `/etc/funny/.l2tp` all verified `0600`; `/etc/funny/.restore.key` verified `0640`; all 16 core services verified active with 0 failed units.
+- **Archives rebuilt:** `menu/full.zip` and `menu/lite.zip` repacked and verified at mode `0755`.
+

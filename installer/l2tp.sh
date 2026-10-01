@@ -67,11 +67,9 @@ apt install xl2tpd -y
 
 # Membuat File
 touch /etc/funny/.l2tp
-touch /etc/funny/.l2tp
 
 # Permsion
-chmod +x /etc/funny/.l2tp
-chmod +x /etc/funny/.l2tp
+chmod 600 /etc/funny/.l2tp
 
 # Installasi
 VPN_IPSEC_PSK="$(openssl rand -base64 16)"

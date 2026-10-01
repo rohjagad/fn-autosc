@@ -2054,3 +2054,14 @@ Found 308. **`full/addssh.sh` allowed creating SSH accounts with empty passwords
 
 Found 309. **`full/routing-{ws,grpc,http,split}.sh` and lite variants embedded empty strings into live Xray outbound config** (`trojanjir()`, `vlessjir()`, `vmessjir()`) — all three routing invocation sites in each file read Name, Domain, Port, Password/UUID, and Path with no empty-string guards or EOF protection. Any empty field was interpolated into `sed` operations that overwrote the live `outbounds` and `routing` sections of `/etc/xray/json/*.json`, producing invalid JSON or an Xray config with blank server address, empty credentials, or port `""`.
 - **Inherited from both V23 and Autoscript New 1.20:** same unguarded reads across all routing functions.
+
+Found 310. **Phase 1 cryptographic credentials and private keys exposed or leaked across installers and restore paths** (`installer/stunnel5.sh`, `installer/wg.sh`, `installer/slowdns.sh`, `installer/l2tp.sh`, `full/bmenu.sh`, `lite/bmenu.sh`, all `restore-ftp.sh` variants, `full/menu-bot.sh`, `lite/menu-bot.sh`, `full/xl2tp.sh`, `full/xp.sh`, `lite/xp.sh`) — multiple file paths handling TLS keys, WireGuard keys, L2TP credentials, or bot API secrets lacked `0600` protection or leaked keys:
+1. `installer/stunnel5.sh` piped the certificate and private key via `tee /etc/haproxy/funny.pem`, leaking the TLS private key to stdout and omitting `chmod 600`.
+2. `installer/wg.sh` wrote `/etc/wireguard/wg0.conf` containing the server's private key but never set `chmod 600 /etc/wireguard/wg0.conf`, leaving it world-readable `0644`.
+3. `installer/slowdns.sh` wrote `/etc/slowdns/server.key` without ensuring `chmod 600`.
+4. `installer/l2tp.sh` marked `/etc/funny/.l2tp` executable (`chmod +x`).
+5. `full/bmenu.sh`, `lite/bmenu.sh`, and all 3 `restore-ftp.sh` variants (`full`, `lite`, `website`) restored `/etc/xray/xray.key`, `/etc/wireguard/wg0.conf`, `/etc/wireguard/params`, `/etc/ipsec.secrets`, `/etc/ppp/chap-secrets`, `/etc/ipsec.d/passwd`, `/etc/funny/.keybot`, and `/etc/funny/.chatid` without enforcing `chmod 600`, leaving restored keys world-readable if the backup archive had `0644` permissions.
+6. `full/menu-bot.sh` and `lite/menu-bot.sh` wrote Telegram credentials (`/etc/funny/.keybot` and `.chatid`) with default umask `0644` without `chmod 600`.
+- **Confirmed live on the VPS:** `/etc/wireguard/wg0.conf` had mode `0644` (world-readable) while `params` was `0600`. Changing `wg0.conf` to `0600` left `wg-quick@wg0` active.
+- **Inherited from both V23 and Autoscript New 1.20:** both reference archives omitted `0600` on restored keys, WireGuard configs, and bot credentials.
+

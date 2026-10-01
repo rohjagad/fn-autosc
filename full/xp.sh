@@ -312,7 +312,7 @@ URL="https://api.telegram.org/bot$KEY/sendMessage"
 curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL
 systemctl restart ipsec
 systemctl restart xl2tpd
-chmod 600 /etc/ppp/chap-secrets* /etc/ipsec.d/passwd*
+chmod 600 /etc/ppp/chap-secrets* /etc/ipsec.d/passwd* /etc/funny/.l2tp 2>/dev/null || true
 fi
 done
 

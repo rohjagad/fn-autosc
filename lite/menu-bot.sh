@@ -249,6 +249,7 @@ rm -fr /etc/funny/.chatid
 rm -fr /etc/funny/.keybot
 echo "$api" > /etc/funny/.keybot
 echo "$itd" > /etc/funny/.chatid
+chmod 600 /etc/funny/.keybot /etc/funny/.chatid 2>/dev/null || true
 clear
 echo -e "
 Telegram Bot Configuration

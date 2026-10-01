@@ -107,6 +107,7 @@ install_slowdns() {
   else
     /etc/slowdns/dns-server -gen-key -privkey-file /etc/slowdns/server.key -pubkey-file /etc/slowdns/server.pub
   fi
+  chmod 600 /etc/slowdns/server.key 2>/dev/null || true
   rm -rf /root/dnstt
 
   clear

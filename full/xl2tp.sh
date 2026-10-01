@@ -134,7 +134,7 @@ $VPN_USER:$VPN_PASSWORD_ENC:xauth-psk
 EOF
 
 # Update file attributes
-chmod 600 /etc/ppp/chap-secrets* /etc/ipsec.d/passwd*
+chmod 600 /etc/ppp/chap-secrets* /etc/ipsec.d/passwd* /etc/funny/.l2tp 2>/dev/null || true
 echo -e "### $VPN_USER $exp">>"/etc/funny/.l2tp"
 systemctl daemon-reload
 systemctl restart ipsec
@@ -191,7 +191,7 @@ sed -i '/^"'"$VPN_USER"'" l2tpd/d' /etc/ppp/chap-secrets
 sed -i '/^'"$VPN_USER"':/d' /etc/ipsec.d/passwd
 sed -i "/^### $VPN_USER $exp/d" /etc/funny/.l2tp
 # Update file attributes
-chmod 600 /etc/ppp/chap-secrets* /etc/ipsec.d/passwd*
+chmod 600 /etc/ppp/chap-secrets* /etc/ipsec.d/passwd* /etc/funny/.l2tp 2>/dev/null || true
 
 systemctl daemon-reload
 systemctl restart ipsec

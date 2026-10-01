@@ -61,7 +61,10 @@ systemctl restart quota-grpc 2>/dev/null || true
 systemctl restart nginx
 mkdir -p /etc/haproxy
 cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem 2>/dev/null
-chmod 600 /etc/haproxy/funny.pem 2>/dev/null
+chmod 644 /etc/xray/xray.crt 2>/dev/null || true
+chmod 600 /etc/xray/xray.key /etc/haproxy/funny.pem 2>/dev/null || true
+chmod 600 /etc/wireguard/wg0.conf /etc/wireguard/params /etc/ipsec.secrets* /etc/ppp/chap-secrets* /etc/ipsec.d/passwd* /etc/funny/.keybot /etc/funny/.chatid /etc/funny/.l2tp 2>/dev/null || true
+chmod 640 /etc/funny/.restore.key 2>/dev/null || true
 systemctl restart haproxy 2>/dev/null || true
 systemctl restart cron
 systemctl restart wg-quick@wg0 2>/dev/null || true

@@ -129,7 +129,7 @@ ln -sf /etc/xray/xray.key /etc/noobzvpns/key.pem
 
 # [ memberi izin pada file json & cert + key ]
 chmod 600 /etc/noobzvpns/config.json /etc/noobzvpns/config.toml 2>/dev/null || true
-# Do not chmod the cert.pem/key.pem symlinks - they point to /etc/xray/xray.{crt,key} (0644)
+# Do not chmod the cert.pem/key.pem symlinks - they point to /etc/xray/xray.{crt,key} (0644/0600)
 
 # [ Memberi Izin Exec pada file biner ]
 chmod +x /usr/bin/noobzvpns

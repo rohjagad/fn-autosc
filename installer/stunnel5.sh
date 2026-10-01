@@ -3,7 +3,8 @@
 #install haproxy ssl
 apt install haproxy -y
 rm -fr /etc/haproxy/haproxy.cfg
-cat /etc/xray/xray.crt /etc/xray/xray.key | tee /etc/haproxy/funny.pem
+cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem
+chmod 600 /etc/haproxy/funny.pem
 cat >/etc/haproxy/haproxy.cfg <<HAH
 global
     daemon

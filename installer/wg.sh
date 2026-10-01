@@ -154,6 +154,7 @@ ListenPort = 51820
 PrivateKey = ${server_priv_key}
 PostUp = sleep 1; iptables -A FORWARD -i ${netinfo} -o wg0 -j ACCEPT; iptables -A FORWARD -i wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o ${netinfo} -j MASQUERADE
 PostDown = iptables -D FORWARD -i ${netinfo} -o wg0 -j ACCEPT; iptables -D FORWARD -i wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o ${netinfo} -j MASQUERADE" > /etc/wireguard/wg0.conf
+chmod 600 /etc/wireguard/wg0.conf
 systemctl start wg-quick@wg0
 systemctl enable wg-quick@wg0
 mkdir -p /metavpn/wireguard

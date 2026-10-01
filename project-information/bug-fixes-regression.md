@@ -1273,3 +1273,15 @@ Section 35's four-check rule applied to Fix 309:
 | **Over-strictness** | Only guards against empty strings and EOF. Whitespace-only values (e.g. a single space) could still produce bad config, but that is an operator error on a privileged admin action; this fix closes the blank-field category. |
 | **Over-engineering** | One `|| return` suffix per read and one early-return block per invocation site. No helper, dependency, or config change. |
 | **vs the source** | V23 and 1.20 share the same unguarded reads. |
+
+## 96. Phase 1: Cryptographic Key & Credential Permissions Audit — Four Checks (October 1, 2026)
+
+Section 35's four-check rule applied to Fix 310:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Daemons running as root (`haproxy`, `nginx`, `wg-quick`, `xray`, `xl2tpd`, `dnstt`, `cron`, python/cron jobs) read `0600` files without issue. Web-restore retains `0640 root:www-data` on `/etc/funny/.restore.key`. All 16 core services verified active. `bash -n` clean across all modified scripts. |
+| **Over-strictness** | Public certificate `/etc/xray/xray.crt` remains `0644` (world-readable). Only private keys (`xray.key`, `funny.pem`, `wg0.conf`, `params`, `server.key`, `chap-secrets`, `ipsec.secrets`, `passwd`, `.keybot`, `.chatid`, `.l2tp`) are restricted to `0600`. No legitimate access is blocked. |
+| **Over-engineering** | Minimal POSIX `chmod 600` additions directly after file creation/restore. Replaces stdout leak `tee` in `stunnel5.sh` with `>` redirection. |
+| **vs the source** | V23 and 1.20 used `chmod 644` or umask defaults (`0644`) on private keys and credentials. Hardening to `0600` aligns with Decision 19 and security best practices without breaking functionality. |
+
