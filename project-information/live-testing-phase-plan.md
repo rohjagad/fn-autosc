@@ -1,234 +1,207 @@
 # Live-Testing Phase Plan
 
-This document establishes the end-to-end live testing phase plan for validating `fn-autosc` against the live VPS and external client environment. It provides executable test matrices, safety protocols, verification criteria, and rollback procedures.
+Dokumen ini memecah alur pengujian live sistem `fn-autosc` ke dalam 16 fase pengujian bertahap dari client KVM lokal Debian 12 (`/dev/kvm`) ke server target VPS `202.155.17.126` (domain: `autosc.rohcuan.dpdns.org`, port SSH: `3303`).
 
 ---
 
-## 1. Test Environment Architecture
+## 1. Topologi & Protokol Keselamatan
 
-Testing relies on real network traffic and real client execution rather than source inspection or local mock harnesses:
+```
+┌───────────────────────────────┐                  ┌───────────────────────────────┐
+│     Client KVM Debian 12      │                  │       Target VPS Server       │
+│          (/dev/kvm)           ├─(IPv4 Publik /)──►        202.155.17.126         │
+│  Real Traffic: curl, xray,    │  (Port 3303,  )  │   Nginx, HAProxy, Xray Core,  │
+│  ssh, wg-quick, noobz, dnstt  │  (80, 443, dll)  │   Daemons, Services, Systemd  │
+└───────────────────────────────┘                  └───────────────────────────────┘
+```
 
-| Component | Specification | Details |
-| :--- | :--- | :--- |
-| **External Client** | Local Debian 12 KVM (`/dev/kvm`) | Isolated virtual guest executing real clients (`curl`, `xray-core`, `ssh`, `wireguard-tools`, `strongswan`, `dnstt-client`) |
-| **Target Server** | VPS `202.155.17.126` | Debian 12 host running `fn-autosc` stack |
-| **SSH Management** | Port `3303` | Non-standard port per Decision 22 |
-| **Public FQDN** | `autosc.rohcuan.dpdns.org` | Target for TLS certificates, SNI, and client configs |
-| **Credentials** | Stored securely | Remote execution via authenticated non-interactive SSH (`sshpass`) |
+1. **Aturan Penamaan Akun Uji:**
+   - Seluruh akun pengujian wajib menggunakan awalan `testcard*` atau `livetest*`.
+   - Dilarang memodifikasi akun operasional persisten (`wgtest1`, `wglive1`).
 
----
-
-## 2. Safety & Zero-Side-Effect Protocol
-
-Live testing interacts with active system state and production daemons. All tests must follow this safety protocol:
-
-1. **Temporary Account Names:**
-   - All test accounts must use the prefix `testcard*` or `livetest*`.
-   - Never modify or delete persistent operational accounts (e.g., `wgtest1`, `wglive1`).
-
-2. **Pre-Test State Snapshots:**
-   - Before executing mutating tests, snapshot affected configuration files:
+2. **Snapshot Sebelum Pengujian:**
+   - Sebelum menjalankan pengujian mutasi, buat snapshot file target:
      ```bash
      cp -a /etc/xray/json /tmp/snap-xray-json
      cp -a /etc/funny /tmp/snap-funny
      cp -a /etc/wireguard /tmp/snap-wireguard
-     cp -a /etc/passwd /etc/shadow /tmp/snap-auth/
      ```
 
-3. **Post-Test State Restoration & Cleanup:**
-   - Delete all created temporary accounts using the panel's official deletion tooling or restore snapshots.
-   - Sweep transient log files: `/var/log/create/*/<user>.*`.
-   - Ensure clean JSON syntax with `xray run -test -config <file>`.
-
-4. **Health Check Gate:**
-   - No phase is complete if any systemd service is `failed` or inactive that was previously active.
+3. **Pembersihan Pasca Pengujian:**
+   - Hapus akun uji melalui skrip panel atau restore snapshot.
+   - Bersihkan berkas log sementara di `/var/log/create/` dan berkas `.locked`.
+   - Pastikan konfigurasi Xray valid: `xray run -test -config /etc/xray/json/ws.json`.
 
 ---
 
-## 3. Live-Testing Phases
+## 2. Struktur 16 Fase Pengujian Live
 
 ```
-┌────────────────────────────────────────────────────────┐
-│ Phase 1: Environment Baseline & Security Audit         │
-└───────────────────────────┬────────────────────────────┘
-                            │
-┌───────────────────────────▼────────────────────────────┐
-│ Phase 2: External Protocol Connectivity Matrix         │
-└───────────────────────────┬────────────────────────────┘
-                            │
-┌───────────────────────────▼────────────────────────────┐
-│ Phase 3: Account Lifecycle & Quota/Limit Verification  │
-└───────────────────────────┬────────────────────────────┘
-                            │
-┌───────────────────────────▼────────────────────────────┐
-│ Phase 4: Interactive TUI Menu & Input Fault Injection  │
-└───────────────────────────┬────────────────────────────┘
-                            │
-┌───────────────────────────▼────────────────────────────┐
-│ Phase 5: Administrative Workflows & Disaster Recovery  │
-└───────────────────────────┬────────────────────────────┘
-                            │
-┌───────────────────────────▼────────────────────────────┐
-│ Phase 6: FN-API Remote Operations & Concurrency        │
-└────────────────────────────────────────────────────────┘
+Fase 1: Baseline Sistem Operasi, Izin Kriptografi & Kernel Sysctl
+   │
+Fase 2: Reverse Proxy Utama Nginx, HAProxy & Inbound TLS
+   │
+Fase 3: Layanan Native SSH, Dropbear 2019.78, SSH-WS & OHP
+   │
+Fase 4: Suite Transport Xray WebSocket (VMess, VLESS, Trojan)
+   │
+Fase 5: Suite Transport Xray gRPC Streaming (vmgr, vlgr, trgr)
+   │
+Fase 6: Suite Transport Xray HTTPUpgrade & SplitHTTP
+   │
+Fase 7: Suite Tunnel VPN (WireGuard, NoobzVPN, SlowDNS, L2TP, OpenVPN)
+   │
+Fase 8: Siklus Pembuatan Akun & Pencegahan Duplikasi
+   │
+Fase 9: Penegakan Konkurensi IP & Penguncian Akun (.locked)
+   │
+Fase 10: Pemutusan Kuota Otomatis & Pembersihan Total Akun
+   │
+Fase 11: Perpanjangan Akun, Ganti Password & Penghapusan Aman
+   │
+Fase 12: Pembersihan Akun Kadaluarsa Otomatis (xp.sh & Cron)
+   │
+Fase 13: Uji TUI Menu Interaktif & Fault Injection Input Operator
+   │
+Fase 14: Migrasi Domain Server & Mekanisme Fallback Sertifikat ACME
+   │
+Fase 15: Pengujian Backup Telegram & Web-Restore Berotentikasi Token
+   │
+Fase 16: Pengujian Suite REST API Headless (FN-API & Concurrency Lock)
 ```
 
 ---
 
-### Phase 1: Environment Baseline & Security Audit
+### Fase 1: Baseline Sistem Operasi, Izin Kriptografi & Kernel Sysctl
+- **Tujuan:** Verifikasi kesehatan awal host VPS, status seluruh unit systemd, dan izin berkas sensitif sebelum pengujian trafik.
+- **Langkah Pengujian:**
+  1. Cek status aktif 16 layanan inti: `nginx`, `haproxy`, `xray@ws`, `xray@grpc`, `xray@upgrade`, `xray@split`, `noobzvpns`, `dnstt`, `wg-quick@wg0`, `openvpn`, `xl2tpd`, `dropbear`, `ws`, `fn-ohp`, `udp-custom`, `udp-request`.
+  2. Pastikan `systemctl --failed` bernilai `0`.
+  3. Verifikasi izin berkas: `/etc/xray/xray.key` (mode `0600`), `/etc/haproxy/funny.pem` (mode `0600`), `/etc/xray/xray.crt` (mode `0644`), `/etc/xray/.key` (mode `0600`), `/etc/funny/.restore.key` (mode `0640`).
+  4. Verifikasi nilai sysctl: `fs.file-max = 1000000`, `net.netfilter.nf_conntrack_max = 262144`.
 
-Verifies host-level system integrity, running processes, open ports, and file permissions before traffic testing.
+### Fase 2: Reverse Proxy Utama Nginx, HAProxy & Inbound TLS
+- **Tujuan:** Memvalidasi listener TLS dan routing multiplexing port 443 dan 80.
+- **Langkah Pengujian:**
+  1. Uji koneksi TLS HTTPS ke `autosc.rohcuan.dpdns.org:443` dari client KVM menggunakan `curl -vI`.
+  2. Pastikan sertifikat SSL valid dan handshake TLS 1.3 berhasil.
+  3. Uji koneksi HTTP port 80; pastikan diarahkan atau dilayani dengan benar tanpa loop redirect.
+  4. Verifikasi HAProxy mentransfer traffic SNI ke backend Nginx (`127.0.0.1:10443`) secara transparan.
 
-#### Verification Matrix
+### Fase 3: Layanan Native SSH, Dropbear 2019.78, SSH-WS & OHP
+- **Tujuan:** Memvalidasi seluruh front-end koneksi SSH dari client KVM.
+- **Langkah Pengujian:**
+  1. OpenSSH: autentikasi password pada port 22 dan 3303. Pastikan port forwarding `-L` berhasil dan shell interaktif ditolak (`/bin/false`).
+  2. Dropbear: autentikasi password pada port 111 dan 109. Pastikan banner identitas `SSH-2.0-dropbear_2019.78` (Decision 25).
+  3. SSH WebSocket: kirim request HTTP Upgrade pada `location /` port 80/443; pastikan mencapai backend `wsEpro` (port 2080).
+  4. OHP: uji proksi OpenVPN/SSH via port 9088.
 
-| Target | Expected State | Validation Command |
-| :--- | :--- | :--- |
-| **System Services** | `active (running)` for all core daemons | `systemctl is-active nginx haproxy xray@ws xray@grpc xray@upgrade xray@split noobzvpns dnstt wg-quick@wg0 openvpn xl2tpd dropbear ws fn-ohp udp-custom udp-request` |
-| **Failed Units** | `0` failed units | `systemctl --failed --no-legend` |
-| **Private Keys** | Mode `0600` owned by `root:root` | `stat -c '%a %n' /etc/xray/xray.key /etc/haproxy/funny.pem` |
-| **Public Certs** | Mode `0644` | `stat -c '%a %n' /etc/xray/xray.crt` |
-| **REST API Token** | Mode `0600` | `stat -c '%a %n' /etc/xray/.key` |
-| **Web Restore Key** | Mode `0640` owned by `root:www-data` | `stat -c '%a %U:%G %n' /etc/funny/.restore.key` |
-| **Kernel Sysctl** | Optimized values active | `sysctl fs.file-max net.netfilter.nf_conntrack_max` |
+### Fase 4: Suite Transport Xray WebSocket (VMess, VLESS, Trojan)
+- **Tujuan:** Verifikasi pengiriman payload trafik data nyata melalui WebSocket.
+- **Langkah Pengujian:**
+  1. Buat akun uji untuk VMess-WS, VLESS-WS, Trojan-WS.
+  2. Eksekusi client `xray-core` pada client KVM menggunakan config JSON yang diarahkan ke path `/vmws`, `/vlws`, `/trws`.
+  3. Unduh payload uji (file 5MB) melalui tunnel; pastikan checksum payload identik dan koneksi stabil.
+  4. Uji konektivitas jalur NonTLS pada port 80.
 
----
+### Fase 5: Suite Transport Xray gRPC Streaming (vmgr, vlgr, trgr)
+- **Tujuan:** Memvalidasi komunikasi dua arah multiplex gRPC di balik Nginx.
+- **Langkah Pengujian:**
+  1. Buat akun uji VMess-gRPC, VLESS-gRPC, Trojan-gRPC.
+  2. Jalankan client Xray dari KVM dengan konfigurasi gRPC service name `vmgr`, `vlgr`, `trgr`.
+  3. Uji streaming data dua arah dan transfer file besar (>3MB) untuk memastikan tidak terbentur `client_max_body_size`.
 
-### Phase 2: External Protocol Connectivity Matrix
+### Fase 6: Suite Transport Xray HTTPUpgrade & SplitHTTP
+- **Tujuan:** Memvalidasi transport HTTP modern Xray v25.3.6.
+- **Langkah Pengujian:**
+  1. HTTPUpgrade: uji koneksi VMess, VLESS, Trojan melalui path `/vmhu`, `/vlhu`, `/trhu`.
+  2. SplitHTTP: uji koneksi upload dan download terpisah pada `/vmspl`.
+  3. Pastikan upload file besar tidak terputus timeout Nginx 12 detik (`client_body_timeout 300s`, Fix 29).
 
-Validates end-to-end data transfer from the external KVM client to the VPS across every supported transport.
+### Fase 7: Suite Tunnel VPN (WireGuard, NoobzVPN, SlowDNS, L2TP, OpenVPN)
+- **Tujuan:** Menguji konektivitas seluruh transport VPN kernel dan userspace.
+- **Langkah Pengujian:**
+  1. WireGuard: pasang file config client di KVM, jalankan `wg-quick up`, lakukan ping ke `10.66.66.1`.
+  2. NoobzVPN: jalankan client noobzvpns ke port 8080/8443, pastikan autentikasi payload berhasil.
+  3. SlowDNS: jalankan `dnstt-client` via UDP port 53 ke domain nameserver; pastikan port forwarding SSH berhasil.
+  4. L2TP/IPsec: hubungkan client L2TP ke port 500/4500/1701; pastikan SA IPsec terbentuk dan IP virtual diberikan.
+  5. OpenVPN: koneksi TCP port 1194 dan UDP port 2200; verifikasi negosiasi cipher TLS.
 
-#### Test Execution Protocol
+### Fase 8: Siklus Pembuatan Akun & Pencegahan Duplikasi
+- **Tujuan:** Memvalidasi integritas pembuatan akun baru di semua protokol.
+- **Langkah Pengujian:**
+  1. Jalankan skrip pembuatan akun (`add-*`, `trial-*`, `addssh`).
+  2. Verifikasi kartu akun dicetak lengkap dan terminal tidak langsung dibersihkan (pause aktif).
+  3. Pastikan atribut `"level": 0` tercantum di dalam konfigurasi JSON Xray (Decision 23).
+  4. Masukkan username yang sama untuk kedua kalinya; pastikan sistem menolak dengan pesan duplikasi yang jelas.
 
-Each protocol is tested by generating a test account, connecting from the KVM client, downloading a known payload, and recording latency/throughput:
+### Fase 9: Penegakan Konkurensi IP & Penguncian Akun (.locked)
+- **Tujuan:** Menguji akurasi pemantauan multi-IP dan proses penguncian akun.
+- **Langkah Pengujian:**
+  1. Buat akun dengan limit IP = 1.
+  2. Sambungkan dua koneksi bersamaan dari dua alamat IP berbeda ke akun tersebut.
+  3. Picu eksekusi daemon `limit-ip-*`.
+  4. Pastikan akun dipindahkan ke `<user>.locked`, dihapus dari konfigurasi aktif, dan koneksi diputus.
+  5. Jalankan `unlock-*`; verifikasi akun dipulihkan kembali ke konfigurasi aktif dengan kredensial yang sama.
 
-```
-[KVM Client] ───(Public IPv4 / DNS)───► [Nginx / HAProxy / Ports] ───► [Backend Daemons] ───► [Internet Egress]
-```
+### Fase 10: Pemutusan Kuota Otomatis & Pembersihan Total Akun
+- **Tujuan:** Memvalidasi penegakan kuota habis sesuai Decision 16.
+- **Langkah Pengujian:**
+  1. Buat akun dengan batas kuota kecil (misal 10 MB).
+  2. Alirkan trafik melalui client KVM hingga melewati batas kuota.
+  3. Jalankan `quota-*` atau `kill-*`.
+  4. Pastikan akun dihapus secara total: entri JSON dihapus, file kuota dan file usage dihapus, dan log akun dibersihkan.
+  5. Pastikan layanan Xray direstart bersih tanpa error JSON.
 
-#### Protocol Test Matrix
+### Fase 11: Perpanjangan Akun, Ganti Password & Penghapusan Aman
+- **Tujuan:** Memvalidasi modifikasi akun aktif dan keamanan penghapusan.
+- **Langkah Pengujian:**
+  1. Perpanjang akun (`extend-*`): verifikasi tanggal kadaluarsa bertambah dan format `YY-MM-DD` tetap valid.
+  2. Ganti password SSH (`pwd-ssh`): verifikasi hash shadow diperbarui dan login menggunakan password baru berhasil.
+  3. Hapus akun yang ada (`delete-*`): pastikan konfigurasi dan file terkait terhapus bersih.
+  4. Hapus akun yang TIDAK ada (`delete-* notarealuser999`): pastikan tidak ada layanan yang direstart, tidak ada file yang terhapus, dan mencetak "User not found" (Fix 306).
 
-| # | Protocol | Inbound Port | Transport / Layer | Client Test Tool | Success Criteria |
-| :- | :--- | :--- | :--- | :--- | :--- |
-| 1 | **OpenSSH** | `22`, `3303` | Direct TCP | `ssh -p <port>` | Authenticates with password; port forward succeeds; interactive shell denied (`/bin/false`) |
-| 2 | **Dropbear** | `111`, `109` | Direct TCP (v2019.78) | `ssh -p <port>` | ECDSA key negotiation; password auth successful |
-| 3 | **SSH-WS** | `80`, `443` | WebSocket / Nginx | `wstunnel` / `curl` | Upgrades HTTP/1.1 to WS on `/`; reaches `wsEpro` (port 2080) |
-| 4 | **VMess-WS** | `443`, `80` | WS on `/vmws` | `xray-core` client | TLS and non-TLS connections establish; HTTP 200 payload returned |
-| 5 | **VLESS-WS** | `443`, `80` | WS on `/vlws` | `xray-core` client | Connection established; HTTP 200 payload returned |
-| 6 | **Trojan-WS** | `443`, `80` | WS on `/trws` | `xray-core` client | Connection established; HTTP 200 payload returned |
-| 7 | **VMess-gRPC** | `443` | gRPC service `vmgr` | `xray-core` client | TLS connection establishes; bidirectional streaming works |
-| 8 | **VLESS-gRPC** | `443` | gRPC service `vlgr` | `xray-core` client | TLS connection establishes; bidirectional streaming works |
-| 9 | **Trojan-gRPC** | `443` | gRPC service `trgr` | `xray-core` client | TLS connection establishes; bidirectional streaming works |
-| 10 | **VMess-HTTPUpgrade** | `443`, `80` | HTTPUpgrade `/vmhu` | `xray-core` client | Connects over standard HTTPUpgrade mechanism |
-| 11 | **VMess-SplitHTTP** | `443` | SplitHTTP `/vmspl` | `xray-core` client | Upload and download streams operate without 12s body timeout |
-| 12 | **WireGuard** | `51820` (UDP) | WireGuard kernel | `wg-quick up` | Handshake established; bidirectional ping to `10.66.66.1` |
-| 13 | **NoobzVPN** | `8080`, `8443` | TCP / Custom Payload | `noobzvpns` client | TCP handshake; authentication completes; proxy functional |
-| 14 | **SlowDNS** | `53` (UDP) | DNSTT tunnel | `dnstt-client` | DNS tunnel resolves nameserver records and tunnels to SSH |
-| 15 | **L2TP / IPsec** | `500`, `4500`, `1701` | StrongSwan + xl2tpd | Native L2TP client | IPsec SA established; PPP chap secrets match; IP assigned |
-| 16 | **OpenVPN** | `1194` (TCP/UDP) | TUN device | `openvpn --config` | TLS handshake completes; routing pushed; traffic passes |
+### Fase 12: Pembersihan Akun Kadaluarsa Otomatis (xp.sh & Cron)
+- **Tujuan:** Menguji pembersihan akun kadaluarsa berkala.
+- **Langkah Pengujian:**
+  1. Tanam akun uji dengan tanggal kadaluarsa kemarin pada file konfigurasi JSON dan database panel.
+  2. Eksekusi `/usr/bin/xp`.
+  3. Verifikasi akun kadaluarsa dihapus dari JSON dan database sistem.
+  4. Pastikan daemon hanya merekapitulasi satu kali restart per transport (pencegahan restart storm).
 
----
+### Fase 13: Uji TUI Menu Interaktif & Fault Injection Input Operator
+- **Tujuan:** Memvalidasi ketahanan seluruh menu TUI terhadap input salah, kosong, atau jebakan navigasi.
+- **Langkah Pengujian:**
+  1. Masuk ke seluruh submenu: `menu`, `menu-x`, `menu-ssh`, `menu-wg`, `menu-noobz`, `menu-dnstt`, `menu-system`, `menu-bot`, `menu-argo`, `bmenu`, `dm-menu`.
+  2. Uji Opsi `0`: pastikan seluruh submenu kembali ke menu induk tanpa keluar ke shell prompt (Fix 287–299).
+  3. Uji input kosong (`Enter` kosong): pastikan prompt tidak mengalami crash atau loop tak terbatas.
+  4. Uji EOF (`Ctrl+D`): pastikan skrip keluar secara anggun (`exit 0`).
+  5. Uji input `0` pada durasi/kuota: pastikan ditolak dengan pesan `0 not allowed` (Decision 4).
+  6. Uji karakter khusus/metakarakter: pastikan input metakarakter ditolak tanpa dievaluasi oleh shell.
 
-### Phase 3: Account Lifecycle & Quota/Limit Verification
+### Fase 14: Migrasi Domain Server & Mekanisme Fallback Sertifikat ACME
+- **Tujuan:** Memvalidasi penggantian nama domain dan sertifikat SSL.
+- **Langkah Pengujian:**
+  1. Masukkan input domain salah pada `dm-menu` (contoh: `bad domain`, `invalid_host`): pastikan ditolak tanpa mengubah file (Fix 304).
+  2. Uji pergantian ke domain valid: pastikan file domain, konfigurasi Nginx, dan kartu akun diperbarui secara konsisten.
+  3. Uji simulasi kegagalan Let's Encrypt (rate limit 429): pastikan sistem otomatis fallback ke ZeroSSL atau self-signed cert tanpa merusak startup Nginx/HAProxy (Fix 140).
 
-Validates state transitions throughout an account's lifetime: creation, usage, concurrency locking, quota deletion, manual extension, auto-expiry, and safe removal.
+### Fase 15: Pengujian Backup Telegram & Web-Restore Berotentikasi Token
+- **Tujuan:** Menguji pencadangan sistem dan pemulihan darurat tanpa celah keamanan.
+- **Langkah Pengujian:**
+  1. Jalankan `backup`: verifikasi file arsip `.zip` terkirim sebagai dokumen ke bot Telegram (Decision 12).
+  2. Pastikan tidak ada kredensial terbuka atau link publik pihak ketiga yang kadaluarsa.
+  3. Uji endpoint web restore `https://<domain>:855/upload.php`:
+     - Upload tanpa token: wajib ditolak HTTP `403 Forbidden`.
+     - Upload dengan token salah: wajib ditolak HTTP `403 Forbidden`.
+     - Upload dengan token valid dari `/etc/funny/.restore.key`: file diterima dan diekstrak dengan benar (Decision 19).
+  4. Pastikan seluruh kunci privat yang dipulihkan disetel kembali ke izin `0600` (Fix 305).
 
-#### Lifecycle Matrix
-
-| Step | Operation | Target Scripts | Validation Test |
-| :--- | :--- | :--- | :--- |
-| **3.1** | **Creation** | `add-*`, `trial-*`, `addssh` | 1. Account created with valid credentials.<br>2. Card displays credentials without clearing screen.<br>3. Config has client entry with `"level": 0`.<br>4. Re-submitting same name rejected as duplicate. |
-| **3.2** | **IP Concurrency Enforcement** | `limit-ip-*`, `limit-ip.go` | 1. Connect two distinct client IPs with limit=1.<br>2. Run `limit-ip-<transport>`.<br>3. Verify account moved to `<user>.locked`.<br>4. Client is removed from config; subsequent logins fail.<br>5. Run `unlock-<transport>`; verify account restored cleanly. |
-| **3.3** | **Quota Limit Enforcement** | `quota-*`, `kill-*` | 1. Generate account with 1 GB quota.<br>2. Simulate traffic above quota threshold.<br>3. Run `quota-<transport>`.<br>4. Verify account is completely deleted (Decision 16); client removed from JSON; log and quota files wiped. |
-| **3.4** | **Extension / Renewal** | `extend-*` | 1. Extend account expiry by 10 days.<br>2. Verify JSON marker updated (`### user YY-MM-DD`).<br>3. Verify system shadow expiration updated for SSH. |
-| **3.5** | **Auto-Expiry Sweeper** | `xp.sh` | 1. Plant account with expiry `yesterday`.<br>2. Run `xp.sh`.<br>3. Verify account deleted; single service restart triggered. |
-| **3.6** | **Safe Deletion** | `delete-*` | 1. Delete existing user: verify clean removal from config and filesystem.<br>2. Delete non-existent user: verify zero file deletions, zero service restarts, exit code 0 (Fix 306). |
-
----
-
-### Phase 4: Interactive TUI Menu & Input Fault Injection
-
-Validates all menu dispatchers, ensuring stability under hostile, invalid, or truncated operator input.
-
-#### Fault Injection Suite
-
-For each menu script (`menu`, `menu-x`, `menu-ssh`, `menu-wg`, `menu-noobz`, `menu-dnstt`, `menu-system`, `menu-bot`, `menu-argo`, `bmenu`, `dm-menu`):
-
-| Test Case | Input Injected | Expected Behavior |
-| :--- | :--- | :--- |
-| **Empty Enter** | `\n` | Prompt repeats or exits cleanly to parent menu; zero mutations executed. |
-| **Immediate EOF** | `Ctrl+D` (EOF) | Exits cleanly (`exit 0` / `return`); no infinite loop; no blank file created. |
-| **Option 0** | `0` | Returns cleanly to the parent menu level. |
-| **Invalid Submenu Option** | `999`, `abc`, `!@#` | Prints invalid option notice and re-shows menu; does not exit or hang. |
-| **Zero Numeric Input** | `0` on quantity | Prints `0 not allowed` warning; prompts again (Decision 4). |
-| **Negative / Float** | `-5`, `3.14`, `1e5` | Rejected by numeric regex; prompt repeats. |
-| **Invalid Domain Input** | `bad domain`, `foo..bar`, `a` | Rejected by FQDN regex; leaves config untouched (Fix 304, 307). |
-| **Submenu Loop** | Valid action completed | After viewing output and pressing any key, returns to current submenu, not main menu. |
-
----
-
-### Phase 5: Administrative Workflows & Disaster Recovery
-
-Validates high-privilege configuration modifications, backups, and restores.
-
-#### Test Protocol
-
-1. **Domain Change & SSL Fallback:**
-   - Execute `dm-menu` with invalid domain: verify refusal.
-   - Execute `dm-menu` with current domain: verify nginx re-links, certificates verified, services reloaded without downtime.
-   - Test ACME fallback logic: verify ZeroSSL and self-signed paths activate when primary CA fails.
-
-2. **Telegram Backup & Restore:**
-   - Run `backup`: verify backup archive sent as document to Telegram bot (Decision 12).
-   - Verify archive contains required configuration directories (`/etc/xray`, `/etc/wireguard`, etc.).
-   - Verify no private tokens or plain credentials leaked in captions.
-   - Run test restore via `bmenu`: verify files restored and key permissions reset to `0600` (Fix 305).
-
-3. **Web Restore Endpoint Security:**
-   - Send `POST` to `https://<domain>:855/upload.php` without token: must return `403 Forbidden` / reject file.
-   - Send `POST` with incorrect token: must return `403 Forbidden`.
-   - Send `POST` with valid token from `/etc/funny/.restore.key`: upload accepted and unpacked securely.
-
----
-
-### Phase 6: FN-API Remote Operations & Concurrency
-
-Validates the headless REST API interface (`rohjagad/fn-autosc-api`) serving `/api/*`.
-
-#### Test Execution Protocol
-
-All API calls executed from the KVM client via `curl` against `https://autosc.rohcuan.dpdns.org/api/<endpoint>`:
-
-```bash
-API_KEY=$(ssh -p 3303 root@202.155.17.126 'cat /etc/xray/.key')
-curl -sk -H "Authorization: $API_KEY" https://autosc.rohcuan.dpdns.org/api/ping
-```
-
-#### API Verification Matrix
-
-| Endpoint | Method | Payload / Test Case | Success Criteria |
-| :--- | :--- | :--- | :--- |
-| **Auth Gate** | Any | No header / Bad token | HTTP `401 Unauthorized` |
-| **Path Traversal** | GET | `/api/..%2f..%2fetc/passwd` | HTTP `404 Script not found` (single path segment rule) |
-| `ping` | GET | None | `{"status":"success","message":"pong"}` |
-| `add-vmess` | POST | `{"username":"apitest1","core":"ws","expired":7,"limit-ip":1,"quota":2}` | Account created; JSON links returned; `status: success` |
-| `list-xray` | GET | None | Account list includes `apitest1`; transport names match (`ws`, `grpc`, `http`, `split`) |
-| `renew-xray` | POST | `{"username":"apitest1","days":7,"core":"ws"}` | Expiry date incremented; returns updated date |
-| `delete-xray` | DELETE | `{"username":"apitest1"}` | Account deleted from `ws.json`; returns `status: success` |
-| `delete-xray` (Regex Injection) | DELETE | `{"username":".*"}` | Rejected; does not match or delete all accounts (Fix 141) |
-| `add-ss` / `add-socks` | POST | None | HTTP 200 with `{"status":"error","message":"unsupported endpoint ..."}` |
-| **Concurrency** | POST | 5 parallel `add-vmess` calls | Serialized by lock; exactly 5 accounts created; 0 JSON corruptions |
-
----
-
-## 4. Runbook & Pass/Fail Criteria
-
-### Execution Order
-1. Phase 1 (Baseline) must pass before opening Phase 2.
-2. Phase 2 (Connectivity) must achieve 100% success on all primary protocols before lifecycle testing.
-3. Mutating tests in Phases 3, 4, 5, and 6 must snapshot state before and verify clean state after.
-
-### Overall Pass Criteria
-- **Zero Failed Units:** `systemctl --failed` returns empty.
-- **Zero Configuration Corruption:** `xray run -test` returns `Configuration OK.` across all four JSON configs.
-- **Zero Orphan State:** No dangling test files in `/var/log/create/` or `/tmp/`.
-- **Zero Security Degradation:** Private keys remain `0600`, web restore remains token-authenticated.
+### Fase 16: Pengujian Suite REST API Headless (FN-API & Concurrency Lock)
+- **Tujuan:** Menguji seluruh endpoint REST API dan keamanan eksekusi konkruen.
+- **Langkah Pengujian:**
+  1. Uji autentikasi: request tanpa header `Authorization` atau token salah wajib menghasilkan HTTP `401`.
+  2. Uji path traversal: request `GET /api/..%2f..%2fetc/passwd` wajib menghasilkan HTTP `404`.
+  3. Uji CRUD endpoint: jalankan `ping`, `add-vmess`, `list-xray`, `renew-xray`, `delete-xray`.
+  4. Uji penolakan endpoint tak didukung: `add-ss` dan `add-socks` wajib menghasilkan respon error eksplisit.
+  5. Uji konkruensi: kirim 5 request `POST /api/add-vmess` secara simultan; pastikan kelima akun terbuat sempurna tanpa korupsi file konfigurasi berkat mekanisme serializing lock.
