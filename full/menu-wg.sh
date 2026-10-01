@@ -149,7 +149,14 @@ function create() {
 	echo -e "Create WireGuard Account"
 	echo -e "========================"
 	echo -e " Username: \c"
-	read user
+	read user || exit 0
+	while ! [[ "$user" =~ ^[a-zA-Z0-9_]+$ ]]; do
+		[ -z "$user" ] && exit 0
+		newline
+		error "Username can only contain letters, numbers, and underscores"
+		echo -e " Username: \c"
+		read user || exit 0
+	done
 	if grep -qw "^### Client ${user}\$" /etc/wireguard/wg0.conf; then
 		newline
 		error "$user already exists"
@@ -470,4 +477,3 @@ esac
 }
 
 main
-

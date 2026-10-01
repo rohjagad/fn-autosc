@@ -2193,3 +2193,9 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 299 (Found 294):** in `full/xl2tp.sh`: re-called `main` in cases 1, 2, 3 so operators return to L2TP menu; in `full/menu-ssh.sh`: re-called `menu-ssh` in cases 1-9; in `full/menu-x.sh`: re-called `menu-x` in cases 1-4; in all 8 transport menus (`full/x-*.sh` and `lite/x-*.sh`): re-called menu functions (`xws`, `xhttp`, `xsplit`, `xgrpc`) in cases 1-17. Repacked `menu/full.zip` and `menu/lite.zip`.
 - **Verified live on VPS:** creating, extending, or deleting accounts in L2TP and transport menus now smoothly returns to the submenu.
+
+### Fix 300 - menu-wg.sh: reject empty and invalid WireGuard usernames (Found 300)
+
+- **Fix 300 (Found 300):** guarded the WireGuard create username read against EOF and required `^[a-zA-Z0-9_]+$`. Empty input exits without changing WireGuard state; invalid names are rejected and the prompt is shown again. Valid names continue through the existing duplicate check and account creation path.
+- **Verified live:** before the fix, an empty username created `### Client `, a blank `.wireguard` record, and `/var/www/html/wireguard-.conf`. After deployment, `printf '1\n\n' | menu-wg` returned 0 with `wg0.conf` and `.wireguard` byte-state unchanged, no blank marker or blank config file, and `wg-quick@wg0` active.
+- **Packaging:** `menu/full.zip` was rebuilt and its `menu-wg` entry verified byte-identical to `full/menu-wg.sh` with mode `0755`. Lite has no WireGuard menu and was not changed.

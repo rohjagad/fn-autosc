@@ -1164,3 +1164,13 @@ Section 35's four-check rule applied to Fixes 293–299:
 | **Over-engineering** | Standard bash pause (`read -n 1 -s -r -p ... \|\| true`); recursive menu function re-calls matching `menu-noobz.sh`/`menu-wg.sh`; one Go `os.Exit(0)` replacement. |
 | **vs the source** | Found 288–294: all inherited from V23 omissions and defects (missing pauses on card display, missing recursive menu loops, `exit 1` on success in `Sc_Credit`/`Credit`, missing Option 0 in `menu-system` and `menu-bot`). |
 
+## 86. WireGuard Empty Username Guard — Four Checks (October 1, 2026)
+
+Section 35's four-check rule applied to Fix 300:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | The existing duplicate check, duration validation, IP allocation, config generation, and service restart are unchanged. Valid usernames still follow the same path. Empty input now exits before writing any state; invalid non-empty names return to the same prompt. `bash -n` passes and the packed `menu-wg` matches the source byte-for-byte. |
+| **Over-strictness** | The accepted set is limited to letters, numbers, and underscore, matching the Xray/Noobz account conventions and avoiding path/config delimiter characters. It does not narrow any previously valid safe username. EOF exits cleanly instead of creating malformed state. |
+| **Over-engineering** | One existing shell prompt gets an EOF guard and one small validation loop. No helper, dependency, daemon, or new configuration was added. |
+| **vs the source** | Both V23 and Autoscript New 1.20 accept the empty value and create the malformed peer. The fix intentionally diverges because both references reproduce data corruption; it uses the project's existing username validation pattern rather than introducing a new policy. |
