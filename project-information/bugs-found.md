@@ -2051,3 +2051,6 @@ Found 307. **`full/menu-argo.sh` and `lite/menu-argo.sh` accepted an invalid Arg
 
 Found 308. **`full/addssh.sh` allowed creating SSH accounts with empty passwords** (`main()` line 128) — `read -p "Password: " password` had no empty-string check. An empty `password` caused `chpasswd` to set a blank password on the system account, enabling passwordless SSH/Dropbear logins.
 - **Inherited from V23 and Autoscript New 1.20:** neither reference validates the SSH password.
+
+Found 309. **`full/routing-{ws,grpc,http,split}.sh` and lite variants embedded empty strings into live Xray outbound config** (`trojanjir()`, `vlessjir()`, `vmessjir()`) — all three routing invocation sites in each file read Name, Domain, Port, Password/UUID, and Path with no empty-string guards or EOF protection. Any empty field was interpolated into `sed` operations that overwrote the live `outbounds` and `routing` sections of `/etc/xray/json/*.json`, producing invalid JSON or an Xray config with blank server address, empty credentials, or port `""`.
+- **Inherited from both V23 and Autoscript New 1.20:** same unguarded reads across all routing functions.

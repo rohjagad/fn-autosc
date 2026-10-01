@@ -1262,3 +1262,14 @@ Section 35's four-check rule applied to Fix 308:
 | **Over-strictness** | Rejects only an empty string. Any non-empty password, including single-character ones, is accepted. |
 | **Over-engineering** | A `while [ -z "$password" ]` loop matching the existing pattern on every other guarded input in the same script. |
 | **vs the source** | V23 and 1.20 both accept empty passwords. The divergence prevents passwordless system accounts. |
+
+## 95. Routing Script Empty-Input Guard — Four Checks (October 1, 2026)
+
+Section 35's four-check rule applied to Fix 309:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | All-filled inputs continue through the same `sed`/JSON append path unchanged. Empty-field inputs return before touching any config. `bash -n` clean on all 8 files. |
+| **Over-strictness** | Only guards against empty strings and EOF. Whitespace-only values (e.g. a single space) could still produce bad config, but that is an operator error on a privileged admin action; this fix closes the blank-field category. |
+| **Over-engineering** | One `|| return` suffix per read and one early-return block per invocation site. No helper, dependency, or config change. |
+| **vs the source** | V23 and 1.20 share the same unguarded reads. |

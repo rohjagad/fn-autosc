@@ -67,11 +67,16 @@ echo -e "
 ==================
 Only X-Ray Trojan WebSocket TLS Routing
 =================="
-read -p "Input Name: " names
-read -p "Input Domain: " domain
-read -p "Input Port: " port
-read -p "Input Password: " password
-read -p "Input Path: " path
+read -p "Input Name: " names || return
+read -p "Input Domain: " domain || return
+read -p "Input Port: " port || return
+read -p "Input Password: " password || return
+read -p "Input Path: " path || return
+if [[ -z "$names" || -z "$domain" || -z "$port" || -z "$password" || -z "$path" ]]; then
+    echo "All fields are required."
+    sleep 2
+    return
+fi
 clear
 DOMAIN_FILE="/root/.rules/domain"
 XRAY_CONFIG="/etc/xray/json/split.json"
@@ -213,11 +218,16 @@ echo -e "
 ==================
 Only X-Ray Vless None TLS
 =================="
-read -p "Input Name: " names
-read -p "Input Domain: " domain
-read -p "Input Port: " port
-read -p "Input UUID: " uid
-read -p "Input Path: " path
+read -p "Input Name: " names || return
+read -p "Input Domain: " domain || return
+read -p "Input Port: " port || return
+read -p "Input UUID: " uid || return
+read -p "Input Path: " path || return
+if [[ -z "$names" || -z "$domain" || -z "$port" || -z "$uid" || -z "$path" ]]; then
+    echo "All fields are required."
+    sleep 2
+    return
+fi
 clear
 DOMAIN_FILE="/root/.rules/domain"
 XRAY_CONFIG="/etc/xray/json/split.json"
@@ -363,11 +373,16 @@ echo -e "
 Only X-Ray VMESS None TLS
 =================="
 
-read -p "Input Name: " names
-read -p "Input Domain: " domain
-read -p "Input Port: " port
-read -p "Input UUID: " uid
-read -p "Input Path: " path
+read -p "Input Name: " names || return
+read -p "Input Domain: " domain || return
+read -p "Input Port: " port || return
+read -p "Input UUID: " uid || return
+read -p "Input Path: " path || return
+if [[ -z "$names" || -z "$domain" || -z "$port" || -z "$uid" || -z "$path" ]]; then
+    echo "All fields are required."
+    sleep 2
+    return
+fi
 clear
 
 DOMAIN_FILE="/root/.rules/domain"

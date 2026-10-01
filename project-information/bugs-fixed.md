@@ -2239,3 +2239,8 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 308 (Found 308):** added an empty-password retry loop in `full/addssh.sh`. EOF exits with code 1 (existing behaviour for other read calls in the same script).
 - **Verified:** deployed to `/usr/bin/addssh`; md5 matches source.
+
+### Fix 309 - routing-*.sh: require all routing fields to be non-empty (Found 309)
+
+- **Fix 309 (Found 309):** in all 8 routing scripts (full/lite × ws/grpc/http/split), all 3 invocation sites per file now guard with `|| return` on each read and a combined empty-string check before any Xray config is written.
+- **Archives rebuilt and verified byte-identical, mode 755.**
