@@ -1229,3 +1229,14 @@ Section 35's four-check rule applied to Fix 305:
 | **Over-strictness** | These services read their keys as root during startup. Unprivileged local users do not need a TLS private key. The HAProxy bundle contains the same key and therefore requires the same restriction. |
 | **Over-engineering** | Targeted standard `chmod` modes replace broad globs; no daemon configuration, ACL, account, or dependency is added. |
 | **vs the source** | V23 and 1.20 both use `0644` on private key material. The intentional divergence closes a direct local secret disclosure and is documented in README. |
+
+## 92. Delete-Transport User-Found Guard — Four Checks (October 1, 2026)
+
+Section 35's four-check rule applied to Fix 306:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Confirmed live: deleting an existing account (testcard99) was not tested with the patched script here (existing account deletion is already covered in section 84's lifecycle check); the guard only changes the not-found code path. Syntax check passes for all 8 files. |
+| **Over-strictness** | No behavior change for the found path. The not-found path previously ran destructive operations; now it doesn't. |
+| **Over-engineering** | Reindentation and reordering of existing shell statements only. No new logic, dependency, or helper. |
+| **vs the source** | V23 and 1.20 share the same out-of-guard pattern. The fix aligns behavior with what the operator expects when a username is not found: nothing changes. |

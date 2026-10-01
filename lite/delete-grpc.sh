@@ -127,20 +127,21 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/grpc.json")
     if [ -n "$exp" ]; then
         sed -i "/^### $user $exp/ {N;d}" /etc/xray/json/grpc.json
         sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/grpc.json
+        rm -f /var/log/create/xray/grpc/${user}.log
+        rm -f /etc/xray/quota/grpc/$user /etc/xray/quota/grpc/${user}_usage
+        rm -f /etc/xray/limit/ip/xray/grpc/$user
+        systemctl restart xray@grpc > /dev/null 2>&1
+        send_log
+        clear
+        echo -e "\033[0;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+        echo " X-Ray gRPC Account Deleted Successfully"
+        echo -e "\033[0;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+        echo " Client Name : $user"
+        echo " Expired On  : $exp"
+        echo -e "\033[0;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+        echo ""
     else
         echo "User not found in config.json!"
+        x-grpc
     fi
-    rm -f /var/log/create/xray/grpc/${user}.log
-    rm -f /etc/xray/quota/grpc/$user /etc/xray/quota/grpc/${user}_usage
-    rm -f /etc/xray/limit/ip/xray/grpc/$user
-    systemctl restart xray@grpc > /dev/null 2>&1
-    send_log
-    clear
-    echo -e "\033[0;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-    echo " X-Ray gRPC Account Deleted Successfully"
-    echo -e "\033[0;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-    echo " Client Name : $user"
-    echo " Expired On  : $exp"
-    echo -e "\033[0;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-    echo ""
     fi

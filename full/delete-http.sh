@@ -127,21 +127,22 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/upgrade.json")
     if [ -n "$exp" ]; then
         sed -i "/^### $user $exp/ {N;d}" /etc/xray/json/upgrade.json
         sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/upgrade.json
+        rm -f /var/log/create/xray/http/${user}.log
+        rm -f /etc/xray/quota/http/$user /etc/xray/quota/http/${user}_usage
+        rm -f /etc/xray/limit/ip/xray/http/$user
+        systemctl restart xray@upgrade > /dev/null 2>&1
+        send_log
+        clear
+        echo -e "\033[0;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+        echo " HTTP Account Deleted Successfully"
+        echo -e "\033[0;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+        echo " Client Name : $user"
+        echo " Expired On  : $exp"
+        echo -e "\033[0;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+        echo ""
     else
         echo "User not found in config.json!"
+        x-http
     fi
-    rm -f /var/log/create/xray/http/${user}.log
-    rm -f /etc/xray/quota/http/$user /etc/xray/quota/http/${user}_usage
-    rm -f /etc/xray/limit/ip/xray/http/$user
-    systemctl restart xray@upgrade > /dev/null 2>&1
-    send_log
-    clear
-    echo -e "\033[0;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-    echo " HTTP Account Deleted Successfully"
-    echo -e "\033[0;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-    echo " Client Name : $user"
-    echo " Expired On  : $exp"
-    echo -e "\033[0;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-    echo ""
     fi
 

@@ -2224,3 +2224,8 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 305 (Found 305):** all certificate issue, renewal, self-signed, menu restore, and FTP/web restore paths now set `/etc/xray/xray.crt` to `0644` but `/etc/xray/xray.key` and `/etc/haproxy/funny.pem` to `0600`. The HAProxy bundle receives the same protection because it embeds the private key.
 - **Verified live:** after changing the deployed key to `0600`, nginx, HAProxy, NoobzVPN, `xray@ws`, `xray@grpc`, `xray@upgrade`, and `xray@split` all restarted active. The updated full domain menu is deployed; installer source protects fresh installations.
+
+### Fix 306 - delete-{ws,grpc,http,split}.sh: gate restart and file ops on user-found (Found 306)
+
+- **Fix 306 (Found 306):** in all 8 delete scripts (full and lite for ws, grpc, http, split): moved `rm -f` (log, quota, limit files), `systemctl restart`, `send_log`, and the success display inside the `if [ -n "$exp" ]` block. The else branch now prints "User not found" and returns to the transport submenu without touching any files or services.
+- **Verified live:** `delete-ws notarealuser999` (post-fix) produced `rc=0 restarted=no config_changed=no` with the not-found message; `xray@ws` remained active with no extra restarts.

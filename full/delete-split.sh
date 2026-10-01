@@ -127,20 +127,21 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/split.json")
     if [ -n "$exp" ]; then
         sed -i "/^### $user $exp/ {N;d}" /etc/xray/json/split.json
         sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/split.json
+        rm -f /var/log/create/xray/split/${user}.log
+        rm -f /etc/xray/quota/split/$user /etc/xray/quota/split/${user}_usage
+        rm -f /etc/xray/limit/ip/xray/split/$user
+        systemctl restart xray@split > /dev/null 2>&1
+        send_log
+        clear
+        echo -e "\033[0;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+        echo " Vmess Account Deleted Successfully"
+        echo -e "\033[0;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+        echo " Client Name : $user"
+        echo " Expired On  : $exp"
+        echo -e "\033[0;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+        echo ""
     else
         echo "User not found in config.json!"
+        x-split
     fi
-    rm -f /var/log/create/xray/split/${user}.log
-    rm -f /etc/xray/quota/split/$user /etc/xray/quota/split/${user}_usage
-    rm -f /etc/xray/limit/ip/xray/split/$user
-    systemctl restart xray@split > /dev/null 2>&1
-    send_log
-    clear
-    echo -e "\033[0;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-    echo " Vmess Account Deleted Successfully"
-    echo -e "\033[0;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-    echo " Client Name : $user"
-    echo " Expired On  : $exp"
-    echo -e "\033[0;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-    echo ""
     fi
