@@ -1,6 +1,6 @@
-# Bug-Fixing Phase Plan
+# Bug-Finding & Fixing Phase Plan
 
-Dokumen ini memecah rencana perbaikan bug dan audit kode `fn-autosc` ke dalam 15 fase terperinci dan berurutan. Setiap fase memiliki fokus komponen spesifik, batas audit, dan kriteria evaluasi regresi sesuai standar proyek.
+Dokumen ini memecah rencana penemuan bug, perbaikan, dan audit kode `fn-autosc` ke dalam 15 fase terperinci dan berurutan. Setiap fase memiliki fokus komponen spesifik, batas audit, dan kriteria evaluasi regresi sesuai standar proyek.
 
 ---
 
