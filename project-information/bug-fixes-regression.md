@@ -1174,3 +1174,14 @@ Section 35's four-check rule applied to Fix 300:
 | **Over-strictness** | The accepted set is limited to letters, numbers, and underscore, matching the Xray/Noobz account conventions and avoiding path/config delimiter characters. It does not narrow any previously valid safe username. EOF exits cleanly instead of creating malformed state. |
 | **Over-engineering** | One existing shell prompt gets an EOF guard and one small validation loop. No helper, dependency, daemon, or new configuration was added. |
 | **vs the source** | Both V23 and Autoscript New 1.20 accept the empty value and create the malformed peer. The fix intentionally diverges because both references reproduce data corruption; it uses the project's existing username validation pattern rather than introducing a new policy. |
+
+## 87. WireGuard Rejected-Operation Returns — Four Checks (October 1, 2026)
+
+Section 35's four-check rule applied to Fix 301:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Only three already-rejected branches change: duplicate create, pool exhausted, and unknown extend. Successful create/extend logic, prompts, config generation, and service restart are untouched. The live test confirms rejected inputs leave the peer config and account database unchanged. |
+| **Over-strictness** | No valid operation is rejected. The change prevents execution after the script has already displayed its own error message. |
+| **Over-engineering** | Three shell `return` statements after existing navigation calls. No helper, dependency, state file, or changed policy. |
+| **vs the source** | V23 and 1.20 share the fall-through. The divergence is necessary because their error path can append duplicate or phantom account state whenever the caller returns. |

@@ -162,6 +162,7 @@ function create() {
 		error "$user already exists"
 		newline
 		goback
+		return
 	fi
 	echo ""
 	echo -e "\033[38;5;208m0 not allowed\033[0m"
@@ -186,6 +187,7 @@ function create() {
 		error "The subnet configured only supports 253 clients"
 		newline
 		goback
+		return
 	fi
 
 	client_ipv4="10.66.66.${dot_ip}"
@@ -336,6 +338,7 @@ function extend() {
 		error "$user does not exist"
 		newline
 		goback
+		return
 	fi 
 	echo ""
 	echo -e "\033[38;5;208m0 not allowed\033[0m"

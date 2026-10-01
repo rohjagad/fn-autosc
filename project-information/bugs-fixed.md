@@ -2199,3 +2199,8 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Fix 300 (Found 300):** guarded the WireGuard create username read against EOF and required `^[a-zA-Z0-9_]+$`. Empty input exits without changing WireGuard state; invalid names are rejected and the prompt is shown again. Valid names continue through the existing duplicate check and account creation path.
 - **Verified live:** before the fix, an empty username created `### Client `, a blank `.wireguard` record, and `/var/www/html/wireguard-.conf`. After deployment, `printf '1\n\n' | menu-wg` returned 0 with `wg0.conf` and `.wireguard` byte-state unchanged, no blank marker or blank config file, and `wg-quick@wg0` active.
 - **Packaging:** `menu/full.zip` was rebuilt and its `menu-wg` entry verified byte-identical to `full/menu-wg.sh` with mode `0755`. Lite has no WireGuard menu and was not changed.
+
+### Fix 301 - menu-wg.sh: stop after rejected WireGuard operations (Found 301)
+
+- **Fix 301 (Found 301):** added `return` after the existing `goback` calls for duplicate usernames, an exhausted WireGuard pool, and a missing username during extension. Rejected operations now return before any config/database write.
+- **Verified live:** the pre-fix duplicate create and nonexistent extend both wrote invalid state after `goback` returned. With the fix deployed, the same inputs leave `/etc/wireguard/wg0.conf` and `/etc/funny/.wireguard` unchanged; `wg-quick@wg0` remains active.
