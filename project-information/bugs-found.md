@@ -2065,12 +2065,16 @@ Found 310. **Phase 1 cryptographic credentials and private keys exposed or leake
 - **Confirmed live on the VPS:** `/etc/wireguard/wg0.conf` had mode `0644` (world-readable) while `params` was `0600`. Changing `wg0.conf` to `0600` left `wg-quick@wg0` active.
 - **Inherited from both V23 and Autoscript New 1.20:** both reference archives omitted `0600` on restored keys, WireGuard configs, and bot credentials.
 
-Found 323. **Phase 13: Temporary backup zip created with world-readable permissions, restore paths missing Xray syntax tests, and unhandled empty URL input** (`full/backup.sh`, `lite/backup.sh`, `full/bmenu.sh`, `lite/bmenu.sh`, `full/restore-ftp.sh`, `lite/restore-ftp.sh`, `website/restore-ftp.sh`) —
-1. `backup.sh` created `/root/backup.zip` with default umask (`0644`), leaving system shadow hashes, private keys, and account cards world-readable while the file resided in `/root`.
-2. All 5 restore scripts (`bmenu.sh` and `restore-ftp.sh` across full/lite/website) restarted all four Xray transports without testing the restored configuration with `xray run -test -config`. If an older or corrupted backup was restored, the Xray services failed silently on startup.
-3. In `full/bmenu.sh` and `lite/bmenu.sh`, entering an empty string or EOF on the database URL prompt attempted `wget -O backup.zip ""` instead of returning cleanly.
-- **Confirmed live on the VPS:** deployed to `/usr/bin/`; verified `chmod 600` on `/root/backup.zip` and safe Xray restart checks; all 16 core services verified active.
-- **Inherited from V23 and Autoscript New 1.20:** both references created world-readable backup archives and blindly restarted daemons after restore.
+Found 324. **Phase 14: Headless REST API verification, unit restart backoff, single path segment enforcement, and token security** (`rohjagad/fn-autosc-api`, `menu-api`, `api.service`) —
+1. `api.service` installed by `menu-api` omitted `RestartSec=3s`, risking rapid crash loops on unhandled server faults.
+2. Verified live on the VPS:
+   - Network interface: `127.0.0.1:9000` bind address strictly enforced (not reachable from external interfaces except via authenticated Nginx `/api/` reverse proxy).
+   - Token security: `/etc/xray/.key` generated with mode `0600 root:root`; unauthenticated requests rejected with HTTP 401.
+   - Path traversal: `GET /..%2fetc/passwd` and `GET /../bin/sh` rejected with HTTP 404 (single segment constraint held).
+   - Concurrency safety: single-threaded synchronous execution in `server` prevents file race conditions across mutating panel scripts.
+   - Unsupported endpoints (`add-ss`, `add-socks`): return explicit JSON error response.
+- **Confirmed live on the VPS:** `api.service` active; HTTPS `/api/ping` via Nginx returned 200 OK; 0 failed units.
+
 
 
 

@@ -1428,6 +1428,18 @@ Section 35's four-check rule applied to Fix 323:
 | **Over-engineering** | Standard `chmod 600` and conditional `xray run -test -config`. Zero external dependencies. |
 | **vs the source** | V23 and 1.20 left backup archives at default 0644 and blindly restarted daemons. The fix secures backup pipelines against privilege escalation. |
 
+## 110. Phase 14: Headless REST API Audit and Unit Backoff — Four Checks (October 1, 2026)
+
+Section 35's four-check rule applied to Fix 324:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | All API endpoints continue to function identically. `location /api/` in Nginx reverse proxies cleanly to local port 9000. All 16 core services verified active. |
+| **Over-strictness** | No valid endpoints or parameters rejected. Rejection is strictly limited to unauthenticated requests (missing/invalid token in `/etc/xray/.key`) and invalid paths containing `/` traversal tokens. |
+| **Over-engineering** | Single-line `RestartSec=3s` in unit file; standard single-threaded Python HTTPServer architecture. |
+| **vs the source** | Original FN-API bound 0.0.0.0 insecurely and lacked traversal protection. The current implementation preserves security without breaking contracts. |
+
+
 
 
 

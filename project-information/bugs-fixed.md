@@ -2379,6 +2379,14 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Verified live:** deployed to `/usr/bin/` on VPS; verified 0600 mode and clean services; all 16 core services verified active with 0 failed units.
 - **Archives rebuilt:** `menu/full.zip` and `menu/lite.zip` repacked and verified at mode `0755`.
 
+### Fix 324 - Phase 14: REST API verification and unit restart backoff (Found 324)
+
+- **Fix 324 (Found 324):**
+  1. Audited `fn-autosc-api` server and handlers: verified default bind to `127.0.0.1:9000`, single path segment rejection of traversal attempts, synchronous execution preventing race conditions on shared JSON/user files, and token enforcement against `/etc/xray/.key` (`0600`).
+  2. Added `RestartSec=3s` backoff delay to `/etc/systemd/system/api.service` on the VPS.
+- **Verified live:** `menu-api install` executed clean; `/api/ping` authenticated request returned 200 OK over HTTPS; traversal `/..%2fetc/passwd` returned 404; unauthenticated request returned 401; all 16 core services verified active with 0 failed units.
+
+
 
 
 
