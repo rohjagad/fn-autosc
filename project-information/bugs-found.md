@@ -2065,3 +2065,12 @@ Found 310. **Phase 1 cryptographic credentials and private keys exposed or leake
 - **Confirmed live on the VPS:** `/etc/wireguard/wg0.conf` had mode `0644` (world-readable) while `params` was `0600`. Changing `wg0.conf` to `0600` left `wg-quick@wg0` active.
 - **Inherited from both V23 and Autoscript New 1.20:** both reference archives omitted `0600` on restored keys, WireGuard configs, and bot credentials.
 
+Found 311. **Phase 2: Sysctl idempotency gaps, executable config in udp-custom, and brittle interface selection in udp-request** (`fix/fix.sh`, `installer/vpn.sh`, `installer/udp.sh`, `installer/request.sh`) —
+1. `fix/fix.sh` did not assert `net.ipv4.ip_forward = 1` and skipped updating `net.netfilter.nf_conntrack_max` / `timeout` if they already existed in `/etc/sysctl.conf` with obsolete or lower values.
+2. `installer/vpn.sh` relied solely on `sed 's/#net.ipv4.ip_forward=1/...'`, failing to ensure IPv4 forwarding if the comment style or whitespace differed.
+3. `installer/udp.sh` set `chmod +x config.json` on a JSON config file instead of restricting it to `0600`.
+4. `installer/request.sh` determined `ip_nat` via arbitrary `sed -n 1p` on `ip -4 addr`, which selects VPN tunnel IPs (`tun0`, `wg0`) rather than the host public management interface if run when tunnels are active.
+- **Confirmed live on the VPS:** `/root/udp-custom/config.json` was `0755` executable. Changed to `0600`. Running updated `fix.sh` successfully asserted `net.ipv4.ip_forward = 1`, `fs.file-max = 1000000`, `net.netfilter.nf_conntrack_max = 262144`, and conntrack timeout.
+- **Inherited from V23 and Autoscript New 1.20:** V23 used `chmod +x config.json` and brittle sed/grep commands.
+
+

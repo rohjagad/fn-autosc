@@ -10,6 +10,14 @@ NF_CONNTRACK_TIMEOUT="net.netfilter.nf_conntrack_tcp_timeout_time_wait = 30"
 fix_sc(){
 SYSCTL_CONF="/etc/sysctl.conf"
 
+# Pastikan net.ipv4.ip_forward = 1 aktif dan persisten
+echo 1 > /proc/sys/net/ipv4/ip_forward 2>/dev/null || true
+if grep -qE '^[#[:space:]]*net\.ipv4\.ip_forward' "$SYSCTL_CONF"; then
+    sed -i -E 's/^[#[:space:]]*net\.ipv4\.ip_forward.*/net.ipv4.ip_forward = 1/' "$SYSCTL_CONF" >/dev/null 2>&1
+else
+    echo "net.ipv4.ip_forward = 1" >> "$SYSCTL_CONF" 2>/dev/null
+fi
+
 # Ambil nilai fs.file-max saat ini
 CURRENT_FILE_MAX=$(grep "^fs.file-max" "$SYSCTL_CONF" | awk '{print $3}' 2>/dev/null)
 
@@ -25,13 +33,17 @@ if [ "$CURRENT_FILE_MAX" != "$NEW_FILE_MAX" ]; then
     fi
 fi
 
-# Cek apakah net.netfilter.nf_conntrack_max sudah ada
-if ! grep -q "^net.netfilter.nf_conntrack_max" "$SYSCTL_CONF"; then
+# net.netfilter.nf_conntrack_max
+if grep -q "^net.netfilter.nf_conntrack_max" "$SYSCTL_CONF"; then
+    sed -i "s/^net.netfilter.nf_conntrack_max.*/$NF_CONNTRACK_MAX/" "$SYSCTL_CONF" >/dev/null 2>&1
+else
     echo "$NF_CONNTRACK_MAX" >> "$SYSCTL_CONF" 2>/dev/null
 fi
 
-# Cek apakah net.netfilter.nf_conntrack_tcp_timeout_time_wait sudah ada
-if ! grep -q "^net.netfilter.nf_conntrack_tcp_timeout_time_wait" "$SYSCTL_CONF"; then
+# net.netfilter.nf_conntrack_tcp_timeout_time_wait
+if grep -q "^net.netfilter.nf_conntrack_tcp_timeout_time_wait" "$SYSCTL_CONF"; then
+    sed -i "s/^net.netfilter.nf_conntrack_tcp_timeout_time_wait.*/$NF_CONNTRACK_TIMEOUT/" "$SYSCTL_CONF" >/dev/null 2>&1
+else
     echo "$NF_CONNTRACK_TIMEOUT" >> "$SYSCTL_CONF" 2>/dev/null
 fi
 

@@ -91,7 +91,7 @@ JSON
 # Permision
 cd /root/udp-custom
 chmod +x udp-custom-linux-amd64
-chmod +x config.json
+chmod 600 config.json
 
 # Membuat Service
 cd /etc/systemd/system

@@ -112,7 +112,11 @@ systemctl enable --now openvpn-server@server-udp-2200
 
 # aktifkan ip4 forwarding
 echo 1 > /proc/sys/net/ipv4/ip_forward
-sed -i 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/g' /etc/sysctl.conf
+if grep -qE '^[#[:space:]]*net\.ipv4\.ip_forward' /etc/sysctl.conf; then
+    sed -i -E 's/^[#[:space:]]*net\.ipv4\.ip_forward.*/net.ipv4.ip_forward=1/' /etc/sysctl.conf
+else
+    echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
+fi
 
 # Buat config client TCP 1194
 cat > /etc/openvpn/client-tcp-1194.ovpn <<-END

@@ -1285,3 +1285,15 @@ Section 35's four-check rule applied to Fix 310:
 | **Over-engineering** | Minimal POSIX `chmod 600` additions directly after file creation/restore. Replaces stdout leak `tee` in `stunnel5.sh` with `>` redirection. |
 | **vs the source** | V23 and 1.20 used `chmod 644` or umask defaults (`0644`) on private keys and credentials. Hardening to `0600` aligns with Decision 19 and security best practices without breaking functionality. |
 
+## 97. Phase 2: Sysctl and Network Routing Hardening — Four Checks (October 1, 2026)
+
+Section 35's four-check rule applied to Fix 311:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | `sysctl -p` loads cleanly without errors. `net.ipv4.ip_forward = 1` remains active for VPN traffic. Network routing and firewall rules remain intact. `bash -n` clean across all modified scripts. |
+| **Over-strictness** | Does not restrict network traffic or interface bindings. Uses standard kernel routing tables to find default interface. |
+| **Over-engineering** | Shortest working POSIX sed and grep checks. Replaces brittle grep pipeline with standard route lookup. |
+| **vs the source** | V23 and 1.20 left sysctl variables undefined or half-configured. The fix completes the intended configuration idempotently. |
+
+

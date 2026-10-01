@@ -2258,3 +2258,13 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Verified live:** `/usr/bin/bmenu`, `menu-bot`, `restore-ftp`, `xl2tp`, `xp` deployed to VPS; live file permissions on `/etc/wireguard/wg0.conf`, `/etc/haproxy/funny.pem`, `/etc/xray/xray.key`, `/etc/funny/.l2tp` all verified `0600`; `/etc/funny/.restore.key` verified `0640`; all 16 core services verified active with 0 failed units.
 - **Archives rebuilt:** `menu/full.zip` and `menu/lite.zip` repacked and verified at mode `0755`.
 
+### Fix 311 - Phase 2: Sysctl and network routing idempotency and permissions (Found 311)
+
+- **Fix 311 (Found 311):**
+  1. In `fix/fix.sh`: added persistent assertion for `net.ipv4.ip_forward = 1` and made `net.netfilter.nf_conntrack_max` / `timeout` replacement update existing values instead of ignoring them.
+  2. In `installer/vpn.sh`: robustly replaced or appended `net.ipv4.ip_forward=1` regardless of comment prefix or spacing.
+  3. In `installer/udp.sh`: changed `chmod +x config.json` to `chmod 600 config.json`.
+  4. In `installer/request.sh`: resolved default route network interface via `ip -o -4 route show to default` to reliably obtain host public interface instead of grabbing virtual tunnel adapters.
+- **Verified live:** `/root/udp-custom/config.json` set to `0600`; updated `fix.sh` ran clean on VPS; verified sysctl values (`net.ipv4.ip_forward = 1`, `fs.file-max = 1000000`, `net.netfilter.nf_conntrack_max = 262144`); all 16 core services verified active.
+
+
