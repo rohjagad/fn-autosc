@@ -2204,3 +2204,8 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 301 (Found 301):** added `return` after the existing `goback` calls for duplicate usernames, an exhausted WireGuard pool, and a missing username during extension. Rejected operations now return before any config/database write.
 - **Verified live:** the pre-fix duplicate create and nonexistent extend both wrote invalid state after `goback` returned. With the fix deployed, the same inputs leave `/etc/wireguard/wg0.conf` and `/etc/funny/.wireguard` unchanged; `wg-quick@wg0` remains active.
+
+### Fix 302 - menu-noobz.sh: match server username limit and record only successful accounts (Found 302)
+
+- **Fix 302 (Found 302):** limited NoobzVPN menu usernames to its existing safe alphabet and the server's 1–16-character limit. The panel now appends `/etc/funny/.noob` only after `noobzvpns add` succeeds; a command failure reports the error and leaves panel state untouched.
+- **Verified live:** a 20-character test username was rejected by the pre-fix server but written to `.noob` by the menu. After deployment, the same input creates no panel record and no NoobzVPN account; the service remains active.

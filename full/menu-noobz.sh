@@ -119,9 +119,9 @@ echo -e "
 Create NoobzVPN Account
 ════════════════════════════"
 read -p "Username  : " user || return
-while ! [[ "$user" =~ ^[a-zA-Z0-9_]+$ ]]; do
+while ! [[ "$user" =~ ^[a-zA-Z0-9_]{1,16}$ ]]; do
     [ -z "$user" ] && return
-    echo "Invalid username. Use only alphanumeric characters and underscore."
+    echo "Invalid username. Use 1-16 letters, numbers, or underscores."
     read -p "Username  : " user || return
 done
 if grep -qw "^### $user" /etc/funny/.noob 2>/dev/null; then
@@ -142,7 +142,11 @@ while ! [[ "$masaaktif" =~ ^[1-9][0-9]*$ ]]; do
     read -p "Duration (Days): " masaaktif || exit 1
 done
 clear
-noobz_add_user "$user" "$pass" "$masaaktif"
+if ! noobz_add_user "$user" "$pass" "$masaaktif"; then
+    echo "Failed to create NoobzVPN account."
+    sleep 2
+    return
+fi
 expi=`date -d "$masaaktif days" +"%Y-%m-%d"`
 echo "### ${user} ${expi}" >>/etc/funny/.noob
 clear

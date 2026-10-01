@@ -1185,3 +1185,14 @@ Section 35's four-check rule applied to Fix 301:
 | **Over-strictness** | No valid operation is rejected. The change prevents execution after the script has already displayed its own error message. |
 | **Over-engineering** | Three shell `return` statements after existing navigation calls. No helper, dependency, state file, or changed policy. |
 | **vs the source** | V23 and 1.20 share the fall-through. The divergence is necessary because their error path can append duplicate or phantom account state whenever the caller returns. |
+
+## 88. NoobzVPN Server-Compatible Account Creation — Four Checks (October 1, 2026)
+
+Section 35's four-check rule applied to Fix 302:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | The valid account path and existing `noobzvpns add` arguments are unchanged. The new status check prevents the panel record from being created when the server rejects an account. Live testing confirms an invalid 20-character username leaves both account stores unchanged. |
+| **Over-strictness** | The 16-character ceiling is imposed by the installed server, not the UI. The menu retains its previous safe, more restrictive letters/numbers/underscore alphabet rather than silently expanding accepted punctuation. |
+| **Over-engineering** | One regex quantifier and one existing-command exit-status guard. No new storage, retry scheme, or dependency. |
+| **vs the source** | V23 has neither the server-compatible length check nor command-result guard, and writes a false panel record. The divergence repairs state consistency while retaining the fork's existing username policy. |
