@@ -137,6 +137,8 @@ if [[ $ip_version == "4" ]]; then
     systemctl restart haproxy 2>/dev/null || true
     systemctl restart noobzvpns 2>/dev/null || true
     echo "Cert installed for IPv4."
+    read -n 1 -s -r -p "Press any key to return..." || true
+    echo ""
 elif [[ $ip_version == "6" ]]; then
     systemctl stop nginx
     mkdir -p /root/.acme.sh
@@ -164,6 +166,8 @@ elif [[ $ip_version == "6" ]]; then
     systemctl restart haproxy 2>/dev/null || true
     systemctl restart noobzvpns 2>/dev/null || true
     echo "Cert installed for IPv6."
+    read -n 1 -s -r -p "Press any key to return..." || true
+    echo ""
 else
     echo "Invalid IP version. Please choose '4' for IPv4 or '6' for IPv6."
     sleep 3
@@ -226,6 +230,8 @@ if [[ $ip_version == "4" || $ip_version == "6" ]]; then
     fi
     start_services
     systemctl restart noobzvpns 2>/dev/null || true
+    read -n 1 -s -r -p "Press any key to return..." || true
+    echo ""
 else
     echo "Invalid IP version. Please choose '4' for IPv4 or '6' for IPv6."
     sleep 3
@@ -255,7 +261,9 @@ dm() {
     log_message+="</pre>"
     log_message+="<b>Status:</b> Menampilkan Domain saat ini... 🔍"
 
-    curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$log_message" $URL >/dev/null
+    if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
+        curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$log_message" $URL >/dev/null
+    fi
 
     echo -e "\e[33m===================================\033[0m"
     echo -e "Current Domain:"
@@ -278,15 +286,17 @@ dm() {
         log_message+="</pre>"
         log_message+="<b>Status:</b> Tidak ada perubahan dilakukan. ❌"
 
+        if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
         curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$log_message" $URL >/dev/null
+    fi
 
         echo -e "\e[33m===================================\033[0m"
-        read -n 1 -s -r -p "Press any key to return to menu"
-        menu
+        read -n 1 -s -r -p "Press any key to return..." || true
+        return 0
     elif ! [[ "$host" =~ ^([[:alnum:]]([[:alnum:]-]{0,61}[[:alnum:]])?\.)+[[:alpha:]]{2,63}$ ]]; then
         echo "Domain must be a valid DNS hostname."
-        read -n 1 -s -r -p "Press any key to return to menu"
-        menu
+        read -n 1 -s -r -p "Press any key to return..." || true
+        return 0
     else
         # Simpan domain lama dan ganti dengan domain baru
         mv /etc/xray/domain /etc/xray/domain.old
@@ -313,7 +323,9 @@ dm() {
         log_message+="</pre>"
         log_message+="<b>Status:</b> Domain berhasil diperbarui ✅"
 
+        if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
         curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$log_message" $URL >/dev/null
+    fi
 
         # Konfirmasi untuk memperbarui sertifikat
         read -rp "Renew SSL certificate? (y/n): " cert_choice
@@ -337,13 +349,17 @@ dm() {
         log_message+="</pre>"
         log_message+="<b>Status:</b> Sertifikat diperbarui: $cert_status"
 
+        if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
         curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$log_message" $URL >/dev/null
+    fi
 
-        echo -e "\e[33m===================================\033[0m"
-        echo "Notification sent to Telegram."
-        echo -e "\e[33m===================================\033[0m"
-        read -n 1 -s -r -p "Press any key to return to menu"
-        menu
+        if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
+            echo -e "\e[33m===================================\033[0m"
+            echo "Notification sent to Telegram."
+            echo -e "\e[33m===================================\033[0m"
+        fi
+        read -n 1 -s -r -p "Press any key to return..." || true
+        return 0
     fi
 }
 
@@ -369,6 +385,8 @@ fi
 cd /etc/xray
 systemctl start nginx
 systemctl restart noobzvpns 2>/dev/null || true
+read -n 1 -s -r -p "Press any key to return..." || true
+echo ""
 }
 
 cert() {
@@ -378,6 +396,7 @@ echo -e "${NC}${separator}
 ${separator}
 ${green}1${NC}. Issue via acme.sh
 ${green}2${NC}. Issue via Certbot
+${green}0${NC}. Back to Domain Menu
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
@@ -385,6 +404,7 @@ read -p "Input option: " akz || exit 0
 case $akz in
 1) clear ; acme ;;
 2) clear ; cert2 ;;
+0|00) clear ; return 0 ;;
 *) clear ; cert ;;
 esac
 }
@@ -417,6 +437,8 @@ systemctl restart haproxy 2>/dev/null || true
 systemctl restart noobzvpns 2>/dev/null || true
 service nginx restart
 echo -e "Self-signed certificate generated successfully"
+read -n 1 -s -r -p "Press any key to return..." || true
+echo ""
 }
 
 dm1() {
@@ -434,11 +456,11 @@ ${separator}
 ${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input option: " apw || exit 0
 case $apw in
-1) clear ; dm ;;
-2) clear ; cert ;;
-3) clear ; fn ;;
-4) clear ; dmsl ;;
-0) clear ; menu ;;
+1) clear ; dm ; dm1 ;;
+2) clear ; cert ; dm1 ;;
+3) clear ; fn ; dm1 ;;
+4) clear ; dmsl ; dm1 ;;
+0|00) clear ; menu ;;
 *) clear ; dm1 ;;
 esac
 }

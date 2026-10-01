@@ -2360,6 +2360,17 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Verified live:** deployed to `/usr/bin/menu-argo` on VPS; verified pause behavior and menu return; all 16 core services verified active with 0 failed units.
 - **Archives rebuilt:** `menu/full.zip` and `menu/lite.zip` repacked and verified at mode `0755`.
 
+### Fix 322 - Phase 12: Domain menu retention, certificate generator Option 0, read pauses, and Telegram guards (Found 322)
+
+- **Fix 322 (Found 322):**
+  1. In `full/dm-menu.sh` and `lite/dm-menu.sh`: chained re-invocation of `dm1` on all action branches in `dm1()` to prevent dropping out to the shell.
+  2. Added Option 0 (Back to Domain Menu) to `cert()` dispatcher.
+  3. Added read pauses after certificate issuance in `acme()`, `cert2()`, `fn()`, and `dmsl()`.
+  4. Guarded all 4 Telegram log curl requests in `dm()` with `if [ -n "$CHATID" ] && [ -n "$KEY" ]`.
+- **Verified live:** deployed to `/usr/bin/dm-menu` on VPS; verified clean navigation and menu retention; all 16 core services verified active with 0 failed units.
+- **Archives rebuilt:** `menu/full.zip` and `menu/lite.zip` repacked and verified at mode `0755`.
+
+
 
 
 

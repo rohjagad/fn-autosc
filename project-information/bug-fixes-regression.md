@@ -1406,6 +1406,18 @@ Section 35's four-check rule applied to Fix 321:
 | **Over-engineering** | Standard `echo` + `read -n 1 -s -r -p` pattern matching the rest of the codebase. |
 | **vs the source** | V23 and 1.20 cleared the screen immediately on setup. The fix gives immediate visual feedback. |
 
+## 108. Phase 12: Domain Menu Retention, Read Pauses, and Telegram Guards — Four Checks (October 1, 2026)
+
+Section 35's four-check rule applied to Fix 322:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Domain modification, ACME, Certbot, and self-signed certificate issuance continue to function identically. Adding read pauses allows operator inspection before screen clearing. All 16 core services verified active. `bash -n` clean across modified scripts. |
+| **Over-strictness** | No validation rules changed; FQDN validation from Fix 304 preserved. Option 0 in `cert()` cleanly returns to `dm1`. |
+| **Over-engineering** | Standard `; dm1` loop chaining and `read -n 1 -s -r -p` pauses. Zero external dependencies. |
+| **vs the source** | V23 and 1.20 dropped out to shell on cert renewals and lacked pause notices. The fix secures menu flow. |
+
+
 
 
 

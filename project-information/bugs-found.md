@@ -2065,11 +2065,14 @@ Found 310. **Phase 1 cryptographic credentials and private keys exposed or leake
 - **Confirmed live on the VPS:** `/etc/wireguard/wg0.conf` had mode `0644` (world-readable) while `params` was `0600`. Changing `wg0.conf` to `0600` left `wg-quick@wg0` active.
 - **Inherited from both V23 and Autoscript New 1.20:** both reference archives omitted `0600` on restored keys, WireGuard configs, and bot credentials.
 
-Found 321. **Phase 11: Argo tunnel setup completion and restart instant wipeout without read pause, Option 00 handling** (`full/menu-argo.sh`, `lite/menu-argo.sh`) —
-1. `setup()` and `restart_argo()` in `menu-argo.sh` finished their systemctl operations and immediately returned to `tamp()`, which cleared the terminal screen without pausing, wiping installation and restart status output before the operator could inspect it.
-2. In `full/menu-argo.sh` and `lite/menu-argo.sh`, the Option 0 dispatcher only handled single digit `0` and did not accept `00`.
-- **Confirmed live on the VPS:** deployed to `/usr/bin/menu-argo`; verified pause notices after setup/restart and clean `0|00` return; all 16 core services verified active.
-- **Inherited from V23 and Autoscript New 1.20:** both references lacked pause notices and `00` dispatching in `menu-argo.sh`.
+Found 322. **Phase 12: Certificate issuance dropout to shell, missing Option 0 in cert generator, and unauthenticated Telegram requests** (`full/dm-menu.sh`, `lite/dm-menu.sh`) —
+1. `dm1()` in `dm-menu.sh` invoked `cert`, `fn`, and `dmsl` without chaining a loop back to `dm1`, dropping the operator to the shell prompt after renewing certificates.
+2. `cert()` lacked Option 0 (Back to Domain Menu), trapping the operator in a loop on `0` input.
+3. Certificate actions (`acme`, `cert2`, `fn`, `dmsl`) printed completion notices but exited without pause, causing immediate screen clearing.
+4. `dm()` executed multiple Telegram curl requests without checking whether `/etc/funny/.chatid` and `/etc/funny/.keybot` were configured, hanging for 10 seconds per request when bot tokens were empty.
+- **Confirmed live on the VPS:** deployed to `/usr/bin/dm-menu`; verified Option 0 in `cert()`, pause behavior across renewals, and menu retention; all 16 core services verified active.
+- **Inherited from V23 and Autoscript New 1.20:** both references lacked pause notices, Option 0 in `cert()`, and Telegram token guards in `dm-menu.sh`.
+
 
 
 
