@@ -1240,3 +1240,14 @@ Section 35's four-check rule applied to Fix 306:
 | **Over-strictness** | No behavior change for the found path. The not-found path previously ran destructive operations; now it doesn't. |
 | **Over-engineering** | Reindentation and reordering of existing shell statements only. No new logic, dependency, or helper. |
 | **vs the source** | V23 and 1.20 share the same out-of-guard pattern. The fix aligns behavior with what the operator expects when a username is not found: nothing changes. |
+
+## 93. Argo Tunnel Domain Validation — Four Checks (October 1, 2026)
+
+Section 35's four-check rule applied to Fix 307:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | A valid FQDN continues through `cloudflared tunnel route dns` and file writes unchanged. Invalid input returns before touching cloudflared or the YAML file. `bash -n` clean. |
+| **Over-strictness** | The same regex accepted for domain-change (Fix 304) and SlowDNS (Fix 303); standard hyphenated multi-label FQDNs pass. |
+| **Over-engineering** | One regex guard and return. Identical in structure to the other two domain-boundary fixes. |
+| **vs the source** | V23 and 1.20 accept raw text. The divergence prevents broken cloudflared configuration at the same boundary pattern as Fix 303 and Fix 304. |

@@ -2229,3 +2229,8 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 306 (Found 306):** in all 8 delete scripts (full and lite for ws, grpc, http, split): moved `rm -f` (log, quota, limit files), `systemctl restart`, `send_log`, and the success display inside the `if [ -n "$exp" ]` block. The else branch now prints "User not found" and returns to the transport submenu without touching any files or services.
 - **Verified live:** `delete-ws notarealuser999` (post-fix) produced `rc=0 restarted=no config_changed=no` with the not-found message; `xray@ws` remained active with no extra restarts.
+
+### Fix 307 - menu-argo.sh: validate Argo tunnel domain (Found 307)
+
+- **Fix 307 (Found 307):** in full and lite `menu-argo.sh`, required a valid FQDN before running `cloudflared tunnel route dns` or writing to `/etc/xray/domargo` and `config.yml`. Invalid input prints an error and returns from `setup()` without any changes.
+- **Verified live:** deployed to `/usr/bin/menu-argo`; md5 matches source.

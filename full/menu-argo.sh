@@ -140,6 +140,11 @@ Replace mysubdom with your subdomain and myvpn.com with your Cloudflare domain.
 =========================
 "
 read -p "New Domain: " opws
+if ! [[ "$opws" =~ ^([[:alnum:]]([[:alnum:]-]{0,61}[[:alnum:]])?\.)+[[:alpha:]]{2,63}$ ]]; then
+    echo "Domain must be a valid DNS hostname."
+    sleep 2
+    return
+fi
 cloudflared tunnel route dns $rcs $opws
 echo "$opws" > /etc/xray/domargo
 domargo="$opws"
