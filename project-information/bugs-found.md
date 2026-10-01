@@ -2048,3 +2048,6 @@ Found 306. **`full/delete-{ws,grpc,http,split}.sh` and lite variants restarted t
 
 Found 307. **`full/menu-argo.sh` and `lite/menu-argo.sh` accepted an invalid Argo tunnel domain and persisted it to config and YAML** (setup, option 1) — the setup function read the tunnel subdomain with no validation, wrote it directly to `/etc/xray/domargo` and the cloudflared ingress `hostname:` field in `/etc/cloudflared/config.yml`. Whitespace or any non-FQDN value would produce a broken cloudflared ingress.
 - **Inherited from V23 and Autoscript New 1.20:** both accept the same raw prompt. The fix applies the same FQDN regex as the domain change (Fix 304) and SlowDNS (Fix 303) boundaries.
+
+Found 308. **`full/addssh.sh` allowed creating SSH accounts with empty passwords** (`main()` line 128) — `read -p "Password: " password` had no empty-string check. An empty `password` caused `chpasswd` to set a blank password on the system account, enabling passwordless SSH/Dropbear logins.
+- **Inherited from V23 and Autoscript New 1.20:** neither reference validates the SSH password.

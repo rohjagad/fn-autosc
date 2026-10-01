@@ -2234,3 +2234,8 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 307 (Found 307):** in full and lite `menu-argo.sh`, required a valid FQDN before running `cloudflared tunnel route dns` or writing to `/etc/xray/domargo` and `config.yml`. Invalid input prints an error and returns from `setup()` without any changes.
 - **Verified live:** deployed to `/usr/bin/menu-argo`; md5 matches source.
+
+### Fix 308 - addssh.sh: require non-empty SSH password (Found 308)
+
+- **Fix 308 (Found 308):** added an empty-password retry loop in `full/addssh.sh`. EOF exits with code 1 (existing behaviour for other read calls in the same script).
+- **Verified:** deployed to `/usr/bin/addssh`; md5 matches source.

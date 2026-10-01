@@ -126,6 +126,10 @@ main() {
         return
     fi
     read -p "Password: " password
+    while [ -z "$password" ]; do
+        echo -e "\033[0;31mPassword cannot be empty.\033[0m"
+        read -p "Password: " password || exit 1
+    done
     echo ""
     echo -e "\033[38;5;208m0 = unlimited\033[0m"
     read -p "Limit IP: " iplimit

@@ -1251,3 +1251,14 @@ Section 35's four-check rule applied to Fix 307:
 | **Over-strictness** | The same regex accepted for domain-change (Fix 304) and SlowDNS (Fix 303); standard hyphenated multi-label FQDNs pass. |
 | **Over-engineering** | One regex guard and return. Identical in structure to the other two domain-boundary fixes. |
 | **vs the source** | V23 and 1.20 accept raw text. The divergence prevents broken cloudflared configuration at the same boundary pattern as Fix 303 and Fix 304. |
+
+## 94. SSH Account Empty-Password Guard — Four Checks (October 1, 2026)
+
+Section 35's four-check rule applied to Fix 308:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Non-empty passwords go through `chpasswd` unchanged. Valid username/expiry/IP-limit logic is untouched. |
+| **Over-strictness** | Rejects only an empty string. Any non-empty password, including single-character ones, is accepted. |
+| **Over-engineering** | A `while [ -z "$password" ]` loop matching the existing pattern on every other guarded input in the same script. |
+| **vs the source** | V23 and 1.20 both accept empty passwords. The divergence prevents passwordless system accounts. |
