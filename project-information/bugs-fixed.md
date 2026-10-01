@@ -2386,6 +2386,15 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
   2. Added `RestartSec=3s` backoff delay to `/etc/systemd/system/api.service` on the VPS.
 - **Verified live:** `menu-api install` executed clean; `/api/ping` authenticated request returned 200 OK over HTTPS; traversal `/..%2fetc/passwd` returned 404; unauthenticated request returned 401; all 16 core services verified active with 0 failed units.
 
+### Fix 325 - Phase 15: Dual-edition package synchronization and binary build verification (Found 325)
+
+- **Fix 325 (Found 325):**
+  1. Synchronized all 114 entries in `menu/full.zip` and all 97 entries in `menu/lite.zip` with source trees; verified exact byte parity across all script files.
+  2. Verified all entries in both archives have external attribute `0755`.
+  3. Verified all 28 Go source files in `full/` and `lite/` compile cleanly with 0 errors.
+- **Verified live:** deployed `full.zip` directly to `/usr/bin/` on the VPS; verified mode `0755` across all panel binaries; all 16 core services verified active with 0 failed units.
+
+
 
 
 

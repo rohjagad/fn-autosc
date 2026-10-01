@@ -1439,6 +1439,18 @@ Section 35's four-check rule applied to Fix 324:
 | **Over-engineering** | Single-line `RestartSec=3s` in unit file; standard single-threaded Python HTTPServer architecture. |
 | **vs the source** | Original FN-API bound 0.0.0.0 insecurely and lacked traversal protection. The current implementation preserves security without breaking contracts. |
 
+## 111. Phase 15: Dual-Edition Package Parity and Binary Build — Four Checks (October 1, 2026)
+
+Section 35's four-check rule applied to Fix 325:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Every panel tool, CLI script, daemon handler, and Go binary verified identical between archive and source trees. Clean archive extraction on VPS preserves all functional improvements from Fixes 310–324. All 16 core services verified active. |
+| **Over-strictness** | No permission or packaging restrictions added. Standard 0755 mode maintained. |
+| **Over-engineering** | Idempotent Python packaging script ensuring deterministic timestamp and permissions. Zero external dependencies. |
+| **vs the source** | V23 and 1.20 shipped drifted binaries and inconsistent permissions. The fix ensures complete byte-level integrity. |
+
+
 
 
 

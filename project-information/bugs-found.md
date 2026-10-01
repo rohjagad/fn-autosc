@@ -2065,15 +2065,12 @@ Found 310. **Phase 1 cryptographic credentials and private keys exposed or leake
 - **Confirmed live on the VPS:** `/etc/wireguard/wg0.conf` had mode `0644` (world-readable) while `params` was `0600`. Changing `wg0.conf` to `0600` left `wg-quick@wg0` active.
 - **Inherited from both V23 and Autoscript New 1.20:** both reference archives omitted `0600` on restored keys, WireGuard configs, and bot credentials.
 
-Found 324. **Phase 14: Headless REST API verification, unit restart backoff, single path segment enforcement, and token security** (`rohjagad/fn-autosc-api`, `menu-api`, `api.service`) —
-1. `api.service` installed by `menu-api` omitted `RestartSec=3s`, risking rapid crash loops on unhandled server faults.
-2. Verified live on the VPS:
-   - Network interface: `127.0.0.1:9000` bind address strictly enforced (not reachable from external interfaces except via authenticated Nginx `/api/` reverse proxy).
-   - Token security: `/etc/xray/.key` generated with mode `0600 root:root`; unauthenticated requests rejected with HTTP 401.
-   - Path traversal: `GET /..%2fetc/passwd` and `GET /../bin/sh` rejected with HTTP 404 (single segment constraint held).
-   - Concurrency safety: single-threaded synchronous execution in `server` prevents file race conditions across mutating panel scripts.
-   - Unsupported endpoints (`add-ss`, `add-socks`): return explicit JSON error response.
-- **Confirmed live on the VPS:** `api.service` active; HTTPS `/api/ping` via Nginx returned 200 OK; 0 failed units.
+Found 325. **Phase 15: Dual-edition package synchronization and binary build verification** (`menu/full.zip`, `menu/lite.zip`, `full/`, `lite/`) —
+1. Package parity audit: verified byte-for-byte matching between all 114 entries in `menu/full.zip` and `full/`, and all 97 entries in `menu/lite.zip` and `lite/`.
+2. Permission audit: verified all entries in both `full.zip` and `lite.zip` have external attribute `0755` (executable).
+3. Go binary compilation audit: verified all 28 Go source files across `full/` and `lite/` compile cleanly with zero errors under `go build`.
+- **Confirmed live on the VPS:** deployed `full.zip` to `/usr/bin/`; verified mode `0755` across all installed panel binaries; all 16 core services verified active with 0 failed units.
+
 
 
 
