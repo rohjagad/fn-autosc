@@ -4,7 +4,23 @@ Dokumen ini memecah rencana perbaikan bug dan audit kode `fn-autosc` ke dalam 15
 
 ---
 
-## 1. Prinsip & Standar Teknis
+## 1. Dokumen & Sumber Referensi Wajib (Mandatory References)
+
+Setiap langkah dalam seluruh fase perbaikan bug **WAJIB** membaca dan mengacu pada 7 sumber referensi utama berikut sebelum melakukan analisis, perubahan kode, atau evaluasi regresi:
+
+| # | Sumber Referensi | Lokasi / Perintah | Kegunaan & Batas Kepatuhan |
+| :- | :--- | :--- | :--- |
+| 1 | **Bugs Fixed** | `project-information/bugs-fixed.md` | Daftar seluruh perbaikan yang telah diverifikasi (Fix 1 s.d. 309). Wajib diperiksa agar perbaikan baru tidak membatalkan atau mengulang perbaikan sebelumnya. |
+| 2 | **Original Sources (Both Versions)** | - V23: `/tmp/opencode/original-v23`<br>- 1.20: `/tmp/opencode/original-120` | Sumber rujukan asli (upstream). Wajib dicompare sebelum mengubah logika: jika referensi sudah menyelesaikan masalah, pertahankan solusi referensi. Divergensi hanya diizinkan untuk keamanan & stabilitas yang terbukti. |
+| 3 | **Git Commit History** | `git log --stat` / `git log -p` | Catatan riwayat commit atomik repositori. Memahami konteks perubahan sebelumnya, alasan teknis patch masa lalu, dan evolusi setiap script. |
+| 4 | **Bug Fixes Regression** | `project-information/bug-fixes-regression.md` | Rekam evaluasi 4-Check Rule (Regression, Over-Strictness, Over-Engineering, Source Alignment). Setiap perubahan baru wajib lulus 4 kriteria ini. |
+| 5 | **Bugs Found** | `project-information/bugs-found.md` | Rekam jejak temuan bug historis (append-only, Found 1 s.d. 309). Memastikan akar penyebab terdokumentasi akurat sebelum patch diterapkan. |
+| 6 | **FN-API Specification** | `project-information/fn-api.md` | Kontrak spesifikasi headless REST API, arsitektur handler `/usr/bin/rere`, penanganan single path segment, otentikasi token `/etc/xray/.key`, dan serializing lock. |
+| 7 | **Architectural Decisions** | `project-information/is-decision.md` | Daftar 28 keputusan desain arsitektural yang disengaja (bukan bug). Wajib dibaca agar tidak "memperbaiki" perilaku yang sengaja dirancang demikian (contoh: Xray 25.3.6 pin, Dropbear 2019.78 pin, auth lifetime vs date, penolakan angka 0, penghapusan total pada kuota habis). |
+
+---
+
+## 2. Prinsip & Standar Teknis
 
 1. **Shortest Working Diff Wins:**
    - Gunakan fitur native shell POSIX dan utility standar Linux.
@@ -29,7 +45,7 @@ Dokumen ini memecah rencana perbaikan bug dan audit kode `fn-autosc` ke dalam 15
 
 ---
 
-## 2. Struktur 15 Fase Bug-Fixing
+## 3. Struktur 15 Fase Bug-Fixing
 
 ```
 Fase 1: Keamanan Izin Berkas & Kriptografi

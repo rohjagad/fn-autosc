@@ -34,7 +34,23 @@ Dokumen ini memecah alur pengujian live sistem `fn-autosc` ke dalam 16 fase peng
 
 ---
 
-## 2. Struktur 16 Fase Pengujian Live
+## 2. Dokumen & Sumber Referensi Wajib (Mandatory References)
+
+Setiap pengujian pada seluruh fase **WAJIB** merujuk dan mencocokkan hasil aktual dengan 7 sumber referensi utama proyek:
+
+| # | Sumber Referensi | Lokasi / Sumber | Peran dalam Pengujian Live |
+| :- | :--- | :--- | :--- |
+| 1 | **Bugs Fixed** | `project-information/bugs-fixed.md` | Verifikasi bahwa pengujian menguji fungsionalitas yang telah diperbaiki tanpa menyebabkan regresi pada perilaku lama. |
+| 2 | **Original Sources (Both Versions)** | - V23: `/tmp/opencode/original-v23`<br>- 1.20: `/tmp/opencode/original-120` | Tolok ukur perilaku asli (upstream). Membedakan antara anomali yang disengaja dari upstream vs bug nyata. |
+| 3 | **Git Commit History** | `git log --stat` / `git log -p` | Menelusuri riwayat mengapa suatu konfigurasi atau batasan dipasang pada commit sebelumnya. |
+| 4 | **Bug Fixes Regression** | `project-information/bug-fixes-regression.md` | Memvalidasi kriteria Section 35: memastikan pengujian tidak menganggap penolakan input tidak valid sebagai over-strictness atau regresi. |
+| 5 | **Bugs Found** | `project-information/bugs-found.md` | Memastikan skenario uji mencakup kasus reproduksi kegagalan yang pernah terjadi sebelumnya (contoh: bug 300 s.d. 309). |
+| 6 | **FN-API Specification** | `project-information/fn-api.md` | Rujukan kontrak request, body JSON, header token, dan kode status pada pengujian API di Fase 16. |
+| 7 | **Architectural Decisions** | `project-information/is-decision.md` | **Kunci Validasi:** Dilarang menganggap tes "gagal" jika perilaku sesuai dengan 28 keputusan arsitektur (misal: Xray 25.3.6, Dropbear 2019.78, akun SSH tanpa shell/home `-s /bin/false -M`, kuota habis = hapus total, quantity `0` ditolak). |
+
+---
+
+## 3. Struktur 16 Fase Pengujian Live
 
 ```
 Fase 1: Baseline Sistem Operasi, Izin Kriptografi & Kernel Sysctl
