@@ -1362,6 +1362,18 @@ Section 35's four-check rule applied to Fix 317:
 | **Over-engineering** | Uniform regex `^[1-9][0-9]*$` and standardized single notice `0 not allowed`. Zero added dependencies. |
 | **vs the source** | Decision 4 explicitly overrides upstream V23/1.20 ambiguity by rejecting 0 at the user boundary. |
 
+## 104. Phase 8: Hardening Account Modification, Extension, and Deletion — Four Checks (October 1, 2026)
+
+Section 35's four-check rule applied to Fix 318:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Deleting existing accounts, extending validity periods, resetting quota usage, and updating UUIDs continue to function identically. Non-existent accounts trigger no service restarts or file removals. All 16 core services verified active. `bash -n` clean across all 32 modified scripts. |
+| **Over-strictness** | Does not restrict valid usernames or operations. Only prevents blind restarts and unauthenticated network requests. |
+| **Over-engineering** | Standard bash conditionals on curl, EOF checks, and `xray run -test -config`. |
+| **vs the source** | V23 and 1.20 restarted Xray blindly and made unauthenticated curl calls. The fix prevents outages during day-to-day administrative operations. |
+
+
 
 
 

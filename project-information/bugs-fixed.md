@@ -2323,6 +2323,17 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Verified live:** deployed to `/usr/bin/` on VPS; verified prompt displays `0 not allowed` and rejects `0`; all 16 core services verified active.
 - **Archives rebuilt:** `menu/full.zip` and `menu/lite.zip` repacked and verified at mode `0755`.
 
+### Fix 318 - Phase 8: Hardening account modification, extension, and deletion handlers (Found 318)
+
+- **Fix 318 (Found 318):**
+  1. In all 32 management scripts across `full/` and `lite/` (`delete-*`, `extend-*`, `change-id-*`, `change-quota-*`): added `[ -z "$CHATID" ] || [ -z "$KEY" ] && return 0` to `send_log()`.
+  2. Added `xray run -test -config` pre-restart validation before restarting `xray@<transport>` and `quota-<transport>`.
+  3. Added `head -n 1` to single-line expiry date lookups.
+  4. Added EOF guard handling to username prompt reads.
+- **Verified live:** deployed to `/usr/bin/` on VPS; tested `delete-ws nonexistent999` live; verified 0 unwanted restarts, 0 deleted files, clean return to menu; all 16 core services verified active.
+- **Archives rebuilt:** `menu/full.zip` and `menu/lite.zip` repacked and verified at mode `0755`.
+
+
 
 
 

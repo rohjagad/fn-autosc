@@ -2065,9 +2065,14 @@ Found 310. **Phase 1 cryptographic credentials and private keys exposed or leake
 - **Confirmed live on the VPS:** `/etc/wireguard/wg0.conf` had mode `0644` (world-readable) while `params` was `0600`. Changing `wg0.conf` to `0600` left `wg-quick@wg0` active.
 - **Inherited from both V23 and Autoscript New 1.20:** both reference archives omitted `0600` on restored keys, WireGuard configs, and bot credentials.
 
-Found 317. **Account creation scripts allowed `0` in quantity prompts despite Decision 4** (`full/add-*`, `lite/add-*`, `full/addssh.sh`) — 24 Xray account creation scripts and `addssh.sh` advertised `0 = unlimited` and accepted `0` (`^[0-9]+$`) for IP limit and quota. Under Decision 4, all quantity fields must strictly reject `0` (`^[1-9][0-9]*$`) with the single notice `0 not allowed` to eliminate ambiguity and prevent unmonitored accounts.
-- **Confirmed live on the VPS:** `add-vmess-ws` and `addssh` now show `0 not allowed` and enforce `^[1-9][0-9]*$`; all 16 core services verified active.
-- **Inherited from earlier regression patch R72-B:** R72-B had temporarily reverted Decision 4; this fix aligns all creation scripts strictly with Decision 4.
+Found 318. **Phase 8: Modification, extension, and deletion scripts lacked Telegram token checks, pre-restart config tests, and EOF protection** (`full/delete-*`, `lite/delete-*`, `full/extend-*`, `lite/extend-*`, `full/change-id-*`, `lite/change-id-*`, `full/change-quota-*`, `lite/change-quota-*`) —
+1. `send_log()` in all 32 management scripts across `full/` and `lite/` triggered Telegram requests without checking if bot tokens were configured, producing unauthenticated network requests and timeout pauses.
+2. Xray daemon restarts were executed directly without syntax validation (`xray run -test -config`), creating service outage risks on sed errors.
+3. Expiry date lookups lacked `head -n 1`, which could cause errors when multiple duplicate lines existed.
+4. Prompt inputs lacked EOF guard handling.
+- **Confirmed live on the VPS:** `delete-ws nonexistent999` safely printed user-not-found, triggered zero restarts, deleted zero files, and returned to submenu cleanly; all 16 core services verified active.
+- **Inherited from V23 and Autoscript New 1.20:** both references omitted bot token checks, pre-restart config validation, and EOF guards.
+
 
 
 

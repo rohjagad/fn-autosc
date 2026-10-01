@@ -67,6 +67,7 @@ YB='\e[33;1m'
 send_log() {
     CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
     KEY=$(cat /etc/funny/.keybot 2>/dev/null)
+    [ -z "$CHATID" ] || [ -z "$KEY" ] && return 0
     URL="https://api.telegram.org/bot$KEY/sendMessage"
     TIME="10"
     DATE=$(date +"%y-%m-%d %H:%M:%S") # Format tahun menjadi 2 digit
@@ -108,7 +109,7 @@ grep -E "^### " "/etc/xray/json/ws.json" | cut -d ' ' -f 2-3 | column -t | sort 
 echo ""
 echo -e "${YB}Tap enter to go back${NC}"
 echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-read -rp "Input Username : " user
+read -rp "Input Username: " user || { clear; return 0; }
 if [ -z "$user" ]; then
     x-ws
 else
@@ -119,7 +120,7 @@ else
         echo -e "\033[0;31mValue must be a whole number greater than 0.\033[0m"
         read -p "Expired (days): " masaaktif || exit 1
     done
-    exp=$(grep -wE "^### $user" "/etc/xray/json/ws.json" | cut -d ' ' -f 3 | sort | uniq)
+    exp=$(grep -wE "^### $user" "/etc/xray/json/ws.json" | cut -d ' ' -f 3 | sort | uniq | head -n 1)
     now=$(date +%y-%m-%d) # Format tahun 2 digit
     d1=$(date -d "$exp" +%s 2>/dev/null)
     if [ -z "$d1" ]; then
@@ -144,7 +145,7 @@ else
         quota_status="No"
     fi
 
-    systemctl restart xray@ws
+    if xray run -test -config /etc/xray/json/ws.json >/dev/null 2>&1; then systemctl restart xray@ws; fi
     send_log
 
     clear

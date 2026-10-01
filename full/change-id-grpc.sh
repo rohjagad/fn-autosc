@@ -64,6 +64,7 @@ clear
 send_log() {
     CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
     KEY=$(cat /etc/funny/.keybot 2>/dev/null)
+    [ -z "$CHATID" ] || [ -z "$KEY" ] && return 0
     URL="https://api.telegram.org/bot$KEY/sendMessage"
     TIME="10"
     DATE=$(date +"%Y-%m-%d %H:%M:%S")

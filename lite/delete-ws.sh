@@ -63,6 +63,7 @@ clear
 send_log() {
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
+    [ -z "$CHATID" ] || [ -z "$KEY" ] && return 0
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 TIME="10"
 DATE=$(date +"%Y-%m-%d %H:%M:%S")
@@ -118,11 +119,11 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/ws.json")
     echo ""
     red "tap enter to go back"
     echo -e "\033[0;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-    read -rp "Input Username: " user
+    read -rp "Input Username: " user || { clear; return 0; }
     if [ -z "$user" ]; then
     x-ws
     else
-        exp=$(grep -wE "^### $user" "/etc/xray/json/ws.json" | cut -d ' ' -f 3 | sort | uniq)
+        exp=$(grep -wE "^### $user" "/etc/xray/json/ws.json" | cut -d ' ' -f 3 | sort | uniq | head -n 1)
 
     if [ -n "$exp" ]; then
         sed -i "/^### $user $exp/ {N;d}" /etc/xray/json/ws.json
@@ -130,7 +131,7 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/ws.json")
         rm -f /var/log/create/xray/ws/${user}.log
         rm -f /etc/xray/quota/ws/$user /etc/xray/quota/ws/${user}_usage
         rm -f /etc/xray/limit/ip/xray/ws/$user
-        systemctl restart xray@ws > /dev/null 2>&1
+        if xray run -test -config /etc/xray/json/ws.json >/dev/null 2>&1; then systemctl restart xray@ws > /dev/null 2>&1; fi
         send_log
         clear
         echo -e "\033[0;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"

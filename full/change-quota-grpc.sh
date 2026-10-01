@@ -76,6 +76,7 @@ BlueBe="\033[5;34m"
 function send_log() {
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
+    [ -z "$CHATID" ] || [ -z "$KEY" ] && return 0
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 TIME="10"
 DATE=$(date +"%Y-%m-%d %H:%M:%S")
@@ -214,9 +215,11 @@ function change_quota() {
         # Perbarui kuota di dalam file log
         sed -i "s/Quota   : ${old_quota} GB/Quota   : ${new_quota} GB/" "$log_file"
 
-        systemctl daemon-reload
-        systemctl restart xray@grpc
-        systemctl restart quota-grpc
+        if xray run -test -config /etc/xray/json/grpc.json >/dev/null 2>&1; then
+            systemctl daemon-reload
+            systemctl restart xray@grpc
+            systemctl restart quota-grpc
+        fi
         Loading_Animasi
         Loading_Succes
 
