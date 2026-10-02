@@ -288,7 +288,7 @@ Fase 15: Sinkronisasi Paket Dual-Edition (full.zip & lite.zip)
   - Uji konkruensi: kirim multiple request modifikasi secara simultan. Periksa apakah terjadi korupsi berkas JSON akibat race condition antar script panel.
   - Uji regex injection pada lookup: kirim request delete dengan nama `".*"` atau karakter wildcard. Pastikan karakter regex diescape sebelum dicocokkan (Revision 2 `fn-api.md`).
 - **Fixing (Standar Perbaikan):**
-  - Pastikan server Python membungkus handler dengan threading lock untuk menserialisasi eksekusi skrip mutasi.
+  - Pertahankan server Python single-threaded seperti referensi (upaya threading + lock sudah direvert karena membuat threading tidak berguna; nginx yang mem-buffer request).
   - Gunakan `re_escape` sebelum menyematkan nama ke pola regex pencarian JSON.
   - Sediakan respons error eksplisit untuk endpoint yang tidak didukung (`add-ss`, `add-socks`).
 

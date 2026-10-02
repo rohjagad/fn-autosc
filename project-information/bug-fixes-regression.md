@@ -1450,6 +1450,17 @@ Section 35's four-check rule applied to Fix 325:
 | **Over-engineering** | Idempotent Python packaging script ensuring deterministic timestamp and permissions. Zero external dependencies. |
 | **vs the source** | V23 and 1.20 shipped drifted binaries and inconsistent permissions. The fix ensures complete byte-level integrity. |
 
+## 112. Documentation Consistency: Non-Append-Only Docs Aligned With Reverted Fixes — Four Checks (October 2, 2026)
+
+Section 35's four-check rule applied to Fix 326:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | No code, permission, or service behaviour changed. Only `README.md`, `project-information/fn-api.md`, `project-information/is-decision.md`, and `project-information/bug-finding-and-fixing-phase-plan.md` wording corrected to match live code (`setup_16.x`, single-threaded `HTTPServer`, `RestartSec=3s`). Append-only history (`bugs-found.md`, `bugs-fixed.md`, this file) extended by append, not edited. |
+| **Over-strictness** | No new restriction. Node stays 16 until `bot.zip` native addons support a newer runtime; API stays single-threaded per the reference design. |
+| **Over-engineering** | In-place text corrections only. No helper, dependency, or config change. |
+| **vs the source** | V23 and 1.20 both install Node 16 and the FN-API reference `core/server` is single-threaded `HTTPServer`; the corrected docs now agree with both references and the live code. |
+
 
 
 

@@ -2071,6 +2071,13 @@ Found 325. **Phase 15: Dual-edition package synchronization and binary build ver
 3. Go binary compilation audit: verified all 28 Go source files across `full/` and `lite/` compile cleanly with zero errors under `go build`.
 - **Confirmed live on the VPS:** deployed `full.zip` to `/usr/bin/`; verified mode `0755` across all installed panel binaries; all 16 core services verified active with 0 failed units.
 
+Found 326. **Documentation drift: non-append-only docs contradicted the reverted fixes** (`README.md`, `project-information/fn-api.md`, `project-information/is-decision.md`) —
+1. `README.md` said `Node.js 20` in the install order (`Install base packages, directories, Node.js 20`) and in the changelog (`Node.js 16 (end of life) updated to Node.js 20 LTS`), while `installer/package.sh:92` runs `setup_16.x` per Fix 275 / Found 145 / Found 270. The variants table (`Base packages + Node.js 16`) was already correct.
+2. `project-information/fn-api.md` hardening table claimed `ThreadingHTTPServer`, and the second-pass note claimed handler execution `serialised by a lock (cheap paths stay parallel)`, while the live `server` in `rohjagad/fn-autosc-api` is single-threaded `HTTPServer` with no lock (verified via `https://raw.githubusercontent.com/rohjagad/fn-autosc-api/main/server`: `from http.server import BaseHTTPRequestHandler, HTTPServer`, `class Server(HTTPServer)`, header comment `The server is single-threaded, like the reference`).
+3. `project-information/is-decision.md` section 18 said the server `threads the server`, contradicting the revert recorded in `bug-fixes-regression.md` sections 26-27.
+4. `project-information/fn-api.md` unit row documented `Restart=always` without the live `RestartSec=3s` hardening from Fix 324.
+- **Resolution rule:** append-only history is kept as-is; the non-append-only docs above are corrected in place to match the reverted code.
+
 
 
 

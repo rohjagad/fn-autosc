@@ -115,7 +115,7 @@ which the panel already has, for the handlers).
 | :-- | :-- |
 | binds `('', 9000)` — all interfaces | binds **`127.0.0.1`** by default (`--bind` to change) |
 | `f'/usr/bin/rere/{path}'` with no checks | one path segment only — `/../etc/passwd` → `404`, so a handler outside `/usr/bin/rere/` cannot be reached |
-| single-threaded `HTTPServer` | `ThreadingHTTPServer` (a slow handler no longer blocks every other call) |
+| single-threaded `HTTPServer` | single-threaded `HTTPServer` (retained — a threaded build lost 4 of 12 concurrent creates, so threading was reverted) |
 | 500 hides the handler's output | 500 includes the handler's stdout |
 
 **Flags**
@@ -227,7 +227,7 @@ It applies the same `izin.txt` authorisation gate as the panel menus.
 | fetch the handlers | `/usr/bin/rere/<name>`, all executable |
 | alias the unsupported endpoints | `add-ss`, `add-socks` → `unsupported` |
 | token | generated (40 random chars, mode `0600`) in `/etc/xray/.key` if absent |
-| unit | `/etc/systemd/system/api.service` — `ExecStart=/usr/bin/python3 /usr/bin/api-server`, `Restart=always`, `User=root` |
+| unit | `/etc/systemd/system/api.service` — `ExecStart=/usr/bin/python3 /usr/bin/api-server`, `Restart=always`, `RestartSec=3s`, `User=root` |
 | start | `systemctl enable --now api` |
 
 Installed footprint: `/usr/bin/api-server`, `/usr/local/lib/fn-api/lib.sh`, `/usr/bin/rere/*`,
@@ -379,10 +379,7 @@ A second pass over this layer, recorded as Found 139-140 / fixes 141-142, found 
   deleted the unrelated account `axb`, and `{"username":".*"}` deleted every account of the
   transport. Names are now escaped with `re_escape` before being embedded in a `^### <name>`
   pattern; the NoobzVPN lookups use `grep -F`.
-- The server's threading let two panel scripts run at once, and they rewrite whole shared files:
-  twelve concurrent `/add-vmess` calls created only eight accounts. Handler execution is now
-  serialised by a lock (the reference was single-threaded, which did the same silently). Cheap paths
-  stay parallel.
+- The server was briefly threaded with a serialising lock, but that made threading pointless for handlers (nginx already buffers requests). It was reverted to single-threaded `HTTPServer` with the lock removed, matching the reference design.
 
 The `client_max_body_size` fix was also scoped down: it now applies only to the gRPC and SplitHTTP
 locations, which carry the tunnel as a request body and stream it, rather than to every location -

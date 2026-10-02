@@ -2394,6 +2394,15 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
   3. Verified all 28 Go source files in `full/` and `lite/` compile cleanly with 0 errors.
 - **Verified live:** deployed `full.zip` directly to `/usr/bin/` on the VPS; verified mode `0755` across all panel binaries; all 16 core services verified active with 0 failed units.
 
+### Fix 326 - Documentation consistency: align non-append-only docs with reverted fixes (Found 326)
+
+- **Fix 326 (Found 326):** corrected in place (non-append-only docs are edited, not appended):
+  1. `README.md`: install order `Node.js 20` → `Node.js 16`; changelog line → `Node.js 16 retained — Node 20 was tried (Fix 271) but reverted (Fix 275)`.
+  2. `project-information/fn-api.md`: hardening table `ThreadingHTTPServer` → single-threaded `HTTPServer` (retained); lock note → reverted to single-threaded with lock removed; unit row gains `RestartSec=3s`.
+  3. `project-information/is-decision.md` section 18: `threads the server` → `stays single-threaded like the reference (a threaded build was tried and reverted)`.
+  4. `project-information/bug-finding-and-fixing-phase-plan.md` Fase 14: `threading lock` → single-threaded retained.
+- **Verified:** `installer/package.sh:92` is `setup_16.x`; live API `server` imports `HTTPServer` (not threading) with single-threaded header comment; append-only history left untouched.
+
 
 
 

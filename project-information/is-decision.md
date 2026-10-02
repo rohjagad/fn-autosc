@@ -160,8 +160,8 @@ is left untouched. The restored layer therefore lives in a dedicated public repo
 - its **own server** (Python 3, standard library only) rather than FN-API's `core/server`. It keeps
   the original contract - tokens in `/etc/xray/.key`, the raw `Authorization` header,
   `<METHOD> /<name>` running `/usr/bin/rere/<name>` with the body on stdin, JSON bodies, logging to
-  `/etc/xray/api.log` - but binds `127.0.0.1` by default, accepts a single path segment only, threads
-  the server, and reports a failing handler's stdout alongside the error;
+  `/etc/xray/api.log` - but binds `127.0.0.1` by default, accepts a single path segment only, stays
+  single-threaded like the reference (a threaded build was tried and reverted), and reports a failing handler's stdout alongside the error;
 - `lib.sh` and one handler per endpoint (documented in `fn-api.md`), plus `menu-api` to install,
   uninstall, report status and rotate the token.
 

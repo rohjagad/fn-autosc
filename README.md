@@ -127,7 +127,7 @@ sent to the configured Telegram chat.
 The full installer runs these stages, in order:
 
 1. Save domain, email, and IP type.
-2. Install base packages, directories, Node.js 20, and vnStat (`package.sh`).
+2. Install base packages, directories, Node.js 16, and vnStat (`package.sh`).
 3. Download and unpack the menu suite into `/usr/bin`.
 4. Install the terminal display formatter (`/etc/funny/format.sh`).
 5. Install SSH, Dropbear (pinned to 2019.78 — see decision 25), and SSH WebSocket (`ssh.sh`).
@@ -768,7 +768,7 @@ Binaries are built with `-ldflags='-s -w'` for a small footprint.
 - **Remaining Indonesian user-facing text** translated to English.
 - **`time.Sleep(1)`** in `limit-ip.go`, which slept one nanosecond instead of
   one second.
-- **Node.js 16 (end of life)** updated to Node.js 20 LTS.
+- **Node.js 16 retained** — Node 20 was tried (Fix 271) but reverted (Fix 275): the terminal bot's pinned native addons (`node-pty ^0.9.0`, `node-termios 0.0.13`) do not build on Node 20.
 - **Menu wording and styling** — grammar fixes across all Full and Lite menus,
   removed `<= ... =>` delimiters, standardized rainbow/blue/green styling, and
   applied matching styling to account creation output.
