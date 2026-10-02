@@ -2086,6 +2086,10 @@ Found 328. **Web-restore sudoers rule never installed: `EDITOR='tee -a' visudo` 
 after raising the cap (Found 327), the valid-token upload reached `sudo /usr/bin/restore-ftp` and died with `sudo: a password is required`. `/etc/sudoers` and `/etc/sudoers.d/*` contain no `restore-ftp` rule: piping `echo ... | EDITOR='tee -a' visudo` runs `tee -a <tmpfile>` with an empty stdin instead of editing sudoers, so the rule was silently never written. Every authenticated web-restore since the key gate (Decision 19) was therefore broken end-to-end.
 - **Confirmed live:** `sudo -U www-data -l` showed no rule; system left intact (restore never executed).
 
+Found 329. **Parallel API deletes killed `xray@ws` via systemd start-limit-hit** (`installer/xray.sh` unit, live `/etc/systemd/system/xray@.service`) —
+after Phase 16, `xray@ws` was found `failed (Result: start-limit-hit)`. The journal shows xray itself started cleanly every time (config OK, all listeners up); something issued ~8 `restart xray@ws` within ~45s at 15:00 (15:00:02 … 15:00:47), tripping the default limiter (5 starts/10s). Root cause: each API `delete-xray`/`add-xray` call runs the panel delete/add script, which restarts the transport **once per call** — 6 parallel Phase-16 deletes fanned out to 6 restarts in seconds (the 5 parallel adds earlier were already borderline). Genuine crash-loops are unaffected (xray exits are still `Restart=on-failure`); only the *external-restart* budget was too tight for API fan-out and the :00 cron batch.
+- **Confirmed live:** `journalctl -u xray@ws` start-limit-hit at 15:00:47; service recovered with `reset-failed + start`; all 4 transports active after.
+
 
 
 

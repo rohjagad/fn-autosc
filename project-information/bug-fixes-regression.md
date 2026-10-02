@@ -1472,6 +1472,17 @@ Section 35's four-check rule applied to Fixes 327-328:
 | **Over-engineering** | Two `sed` lines + one drop-in file. No new dependency, helper, or config surface. |
 | **vs the source** | Neither V23 nor 1.20 tuned PHP upload limits or shipped a working sudoers rule for this path (the key gate itself is our Decision 19 addition); the fixes complete the path the decision opened without altering its contract. |
 
+## 114. Post-Phase-16: xray@ Start-Limiter Widened — Four Checks (October 2, 2026)
+
+Section 35's four-check rule applied to Fix 329:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Genuine crash-loops still trip the limiter eventually (30 bursts/120s is far above any failure mode observed); `Restart=on-failure` + `RestartSec=3s` untouched. Normal single restarts (delete/extend/quota/xp) behave identically. Append-only history extended by append, not edited. |
+| **Over-strictness** | Limit loosened (5/10s → 30/120s), never tightened. No valid operation newly rejected. |
+| **Over-engineering** | Two unit-file lines, installer template + live unit. No new timer, helper, or dependency. |
+| **vs the source** | V23/1.20 ship no `StartLimit*` overrides anywhere (default 5/10s everywhere); the change only widens the budget on the transport most often restarted by automation. |
+
 
 
 

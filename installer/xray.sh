@@ -76,6 +76,12 @@ cat> /etc/systemd/system/xray@.service << MLBB
 Description=Xray Service
 Documentation=https://github.com/xtls
 After=network.target nss-lookup.target
+# Found 329: parallel API deletes (one restart per call) and the :00 cron
+# batch tripped systemd's default start limiter (5 starts/10s), taking the
+# transport down with start-limit-hit even though xray itself always started
+# cleanly. Widen the window so legitimate restart bursts cannot fail the unit.
+StartLimitIntervalSec=120
+StartLimitBurst=30
 
 [Service]
 User=www-data

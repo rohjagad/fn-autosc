@@ -2413,6 +2413,11 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Fix 328 (Found 328):** replaced the no-op `echo ... | sudo EDITOR='tee -a' visudo` block in `website/install.sh` with a `/etc/sudoers.d/restore-ftp` drop-in (`www-data ALL=(ALL) NOPASSWD: /usr/bin/restore-ftp`, mode `0440`), validated with `visudo -c -q -f` (file removed if invalid). Drop-in keeps `/etc/sudoers` itself untouched.
 - **Verified live:** `visudo -c` → `parsed OK`; `sudo -U www-data -l` lists `(ALL) NOPASSWD: /usr/bin/restore-ftp`; valid-token upload of the system's own `backup.zip` returned `SUCCESSFULLY RESTORED YOUR VPS` (HTTP 200); all restored keys at `0600` (`xray.key`, `funny.pem`, `wg0.conf`, `server.key`, `ipsec.secrets`, `chap-secrets`); 7/7 services active, 0 failed units, `xray -test` OK, domain intact.
 
+### Fix 329 - Widen xray@ unit start limiter so restart bursts cannot fail the transport (Found 329)
+
+- **Fix 329 (Found 329):** added `StartLimitIntervalSec=120` + `StartLimitBurst=30` to `[Unit]` in `installer/xray.sh`'s `xray@.service` template (fresh installs inherit it); applied the same two lines live + `daemon-reload`. Crash-loop protection is unchanged (`Restart=on-failure`, `RestartSec=3s`); only the external-restart budget grew. The deeper fix (coalescing one restart per API fan-out) belongs to the `rohjagad/fn-autosc-api` handler layer, a separate repository — noted, not done here.
+- **Verified live:** 8 back-to-back `systemctl restart xray@ws` (fatal under the old 5/10s budget) → unit stays `active`; all 4 transports active.
+
 
 
 
