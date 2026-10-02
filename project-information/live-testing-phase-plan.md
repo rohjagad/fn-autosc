@@ -217,7 +217,7 @@ Fase 16: Pengujian Suite REST API Headless (FN-API & Concurrency Lock)
 - **Tujuan:** Menguji seluruh endpoint REST API dan keamanan eksekusi konkruen.
 - **Langkah Pengujian:**
   1. Uji autentikasi: request tanpa header `Authorization` atau token salah wajib menghasilkan HTTP `401`.
-  2. Uji path traversal: request `GET /api/..%2f..%2fetc/passwd` wajib menghasilkan HTTP `404`.
+  2. Uji path traversal: request `GET /api/..%2f..%2fetc/passwd` wajib ditolak (`404` di api-server, `400` di edge nginx — keduanya deny).
   3. Uji CRUD endpoint: jalankan `ping`, `add-vmess`, `list-xray`, `renew-xray`, `delete-xray`.
   4. Uji penolakan endpoint tak didukung: `add-ss` dan `add-socks` wajib menghasilkan respon error eksplisit.
   5. Uji konkruensi: kirim 5 request `POST /api/add-vmess` secara simultan; pastikan kelima akun terbuat sempurna tanpa korupsi file konfigurasi berkat desain single-threaded (upaya threading+lock sudah direvert, Fix 326).
