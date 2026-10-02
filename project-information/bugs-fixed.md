@@ -2403,6 +2403,16 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
   4. `project-information/bug-finding-and-fixing-phase-plan.md` Fase 14: `threading lock` → single-threaded retained.
 - **Verified:** `installer/package.sh:92` is `setup_16.x`; live API `server` imports `HTTPServer` (not threading) with single-threaded header comment; append-only history left untouched.
 
+### Fix 327 - Web-restore PHP upload cap raised to 64M (Found 327)
+
+- **Fix 327 (Found 327):** `website/install.sh` now sets `upload_max_filesize = 64M` and `post_max_size = 64M` in every `/etc/php/*/apache2/php.ini` before restarting apache2 (version-agnostic glob, idempotent `sed`). 64M mirrors the Telegram Bot API document ceiling so both restore ingress paths accept the same archives.
+- **Verified live:** `/etc/php/8.2/apache2/php.ini` shows `64M / 64M` after `systemctl restart apache2`; the 3699620-byte self-backup passed PHP upload handling and reached `restore-ftp` (proving the cap, which then exposed Found 328).
+
+### Fix 328 - Web-restore sudoers rule via drop-in instead of broken visudo idiom (Found 328)
+
+- **Fix 328 (Found 328):** replaced the no-op `echo ... | sudo EDITOR='tee -a' visudo` block in `website/install.sh` with a `/etc/sudoers.d/restore-ftp` drop-in (`www-data ALL=(ALL) NOPASSWD: /usr/bin/restore-ftp`, mode `0440`), validated with `visudo -c -q -f` (file removed if invalid). Drop-in keeps `/etc/sudoers` itself untouched.
+- **Verified live:** `visudo -c` → `parsed OK`; `sudo -U www-data -l` lists `(ALL) NOPASSWD: /usr/bin/restore-ftp`; valid-token upload of the system's own `backup.zip` returned `SUCCESSFULLY RESTORED YOUR VPS` (HTTP 200); all restored keys at `0600` (`xray.key`, `funny.pem`, `wg0.conf`, `server.key`, `ipsec.secrets`, `chap-secrets`); 7/7 services active, 0 failed units, `xray -test` OK, domain intact.
+
 
 
 

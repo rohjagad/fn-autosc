@@ -1461,6 +1461,17 @@ Section 35's four-check rule applied to Fix 326:
 | **Over-engineering** | In-place text corrections only. No helper, dependency, or config change. |
 | **vs the source** | V23 and 1.20 both install Node 16 and the FN-API reference `core/server` is single-threaded `HTTPServer`; the corrected docs now agree with both references and the live code. |
 
+## 113. Phase 15 Live: Web-Restore Upload Cap and Sudoers — Four Checks (October 2, 2026)
+
+Section 35's four-check rule applied to Fixes 327-328:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Backup format untouched (`backup.zip` still mode `0600`, same entry set); `upload.php` auth logic untouched (`401` on missing/wrong token, `hash_equals`, fail-closed); no service behaviour changed except apache2 restart to pick up the new PHP limits. Append-only history extended by append, not edited. |
+| **Over-strictness** | Cap raised (2M → 64M), never lowered. Sudoers grants exactly one binary (`/usr/bin/restore-ftp`) to exactly one user (`www-data`), passwordless only there. No new rejection. |
+| **Over-engineering** | Two `sed` lines + one drop-in file. No new dependency, helper, or config surface. |
+| **vs the source** | Neither V23 nor 1.20 tuned PHP upload limits or shipped a working sudoers rule for this path (the key gate itself is our Decision 19 addition); the fixes complete the path the decision opened without altering its contract. |
+
 
 
 

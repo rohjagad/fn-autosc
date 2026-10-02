@@ -2078,6 +2078,14 @@ Found 326. **Documentation drift: non-append-only docs contradicted the reverted
 4. `project-information/fn-api.md` unit row documented `Restart=always` without the live `RestartSec=3s` hardening from Fix 324.
 - **Resolution rule:** append-only history is kept as-is; the non-append-only docs above are corrected in place to match the reverted code.
 
+Found 327. **Web-restore rejects every real backup: PHP `upload_max_filesize = 2M` vs 3.7MB `backup.zip`** (`website/install.sh`, `/etc/php/*/apache2/php.ini`) —
+live Phase 15 test: valid-token upload of the system's own 3.7MB `backup.zip` failed with `UPLOAD_ERR_INI_SIZE` (`Error: File exceeds maximum upload size`). Found 242 had improved the error message but the cap itself (PHP default 2M, `post_max_size = 8M`) was never raised, so no real backup could ever be web-restored. No uploader tuning exists anywhere in the tree (`upload_max_filesize` unreferenced).
+- **Confirmed live:** `php -r ini_get` → `2M / 8M`; 3699620-byte upload rejected before `restore-ftp` ran.
+
+Found 328. **Web-restore sudoers rule never installed: `EDITOR='tee -a' visudo` idiom is a no-op** (`website/install.sh`) —
+after raising the cap (Found 327), the valid-token upload reached `sudo /usr/bin/restore-ftp` and died with `sudo: a password is required`. `/etc/sudoers` and `/etc/sudoers.d/*` contain no `restore-ftp` rule: piping `echo ... | EDITOR='tee -a' visudo` runs `tee -a <tmpfile>` with an empty stdin instead of editing sudoers, so the rule was silently never written. Every authenticated web-restore since the key gate (Decision 19) was therefore broken end-to-end.
+- **Confirmed live:** `sudo -U www-data -l` showed no rule; system left intact (restore never executed).
+
 
 
 

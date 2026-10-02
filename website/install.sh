@@ -29,11 +29,12 @@ chmod +x /usr/bin/restore-ftp
 # Mengkonfigurasi Port HTTP
 echo -e "Listen 855" > /etc/apache2/ports.conf
 
-# Periksa apakah baris sudah ada
-if ! sudo grep -q "^www-data ALL=(ALL) NOPASSWD: /usr/bin/restore-ftp" /etc/sudoers; then
-  # Tambahkan baris ke sudoers menggunakan visudo
-  echo "www-data ALL=(ALL) NOPASSWD: /usr/bin/restore-ftp" | sudo EDITOR='tee -a' visudo
-fi
+# www-data may run only restore-ftp, without a password. Use a sudoers
+# drop-in (Found 328): the old `EDITOR='tee -a' visudo` idiom never wrote the
+# rule, so every authenticated restore died at sudo.
+printf '%s\n' 'www-data ALL=(ALL) NOPASSWD: /usr/bin/restore-ftp' > /etc/sudoers.d/restore-ftp
+chmod 0440 /etc/sudoers.d/restore-ftp
+visudo -c -q -f /etc/sudoers.d/restore-ftp || rm -f /etc/sudoers.d/restore-ftp
 
 # The restore endpoint authenticates with a dedicated key so that the web
 # server user can read it without exposing the 0600 API token in /etc/xray/.key.
@@ -42,6 +43,14 @@ mkdir -p /etc/funny
 [ -s /etc/funny/.restore.key ] || head -c 32 /dev/urandom | base64 | tr -d '/+=\n' | head -c 40 > /etc/funny/.restore.key
 chown root:www-data /etc/funny/.restore.key 2>/dev/null || true
 chmod 640 /etc/funny/.restore.key
+
+# Backup archives are several MB (3.7MB observed); PHP's default 2M upload
+# cap rejects every real backup with UPLOAD_ERR_INI_SIZE (Found 327).
+for _phpini in /etc/php/*/apache2/php.ini; do
+  [ -f "$_phpini" ] || continue
+  sed -i 's/^upload_max_filesize = .*/upload_max_filesize = 64M/' "$_phpini"
+  sed -i 's/^post_max_size = .*/post_max_size = 64M/' "$_phpini"
+done
 
 # Mengaktifkan semuanya
 a2dissite 000-default

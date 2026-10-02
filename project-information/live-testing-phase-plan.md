@@ -102,7 +102,7 @@ Fase 16: Pengujian Suite REST API Headless (FN-API & Concurrency Lock)
   1. Uji koneksi TLS HTTPS ke `autosc.rohcuan.dpdns.org:443` dari client KVM menggunakan `curl -vI`.
   2. Pastikan sertifikat SSL valid dan handshake TLS 1.3 berhasil.
   3. Uji koneksi HTTP port 80; pastikan diarahkan atau dilayani dengan benar tanpa loop redirect.
-  4. Verifikasi HAProxy mentransfer traffic SNI ke backend Nginx (`127.0.0.1:10443`) secara transparan.
+  4. Verifikasi HAProxy hanya fronting port 777 ke backend Dropbear (`127.0.0.1:109`) mode TCP — sesuai `installer/stunnel5.sh` dan V23 upstream; Nginx menerminasi 443 langsung (tidak ada listener `10443`).
 
 ### Fase 3: Layanan Native SSH, Dropbear 2019.78, SSH-WS & OHP
 - **Tujuan:** Memvalidasi seluruh front-end koneksi SSH dari client KVM.
@@ -207,10 +207,10 @@ Fase 16: Pengujian Suite REST API Headless (FN-API & Concurrency Lock)
 - **Langkah Pengujian:**
   1. Jalankan `backup`: verifikasi file arsip `.zip` terkirim sebagai dokumen ke bot Telegram (Decision 12).
   2. Pastikan tidak ada kredensial terbuka atau link publik pihak ketiga yang kadaluarsa.
-  3. Uji endpoint web restore `https://<domain>:855/upload.php`:
-     - Upload tanpa token: wajib ditolak HTTP `403 Forbidden`.
-     - Upload dengan token salah: wajib ditolak HTTP `403 Forbidden`.
-     - Upload dengan token valid dari `/etc/funny/.restore.key`: file diterima dan diekstrak dengan benar (Decision 19).
+  3. Uji endpoint web restore `http://<domain>:855/upload.php` (plain HTTP sesuai `website/install.sh`; PHP `upload_max_filesize/post_max_size = 64M` per Fix 327):
+     - Upload tanpa token: wajib ditolak HTTP `401 Unauthorized`.
+     - Upload dengan token salah: wajib ditolak HTTP `401 Unauthorized`.
+     - Upload dengan token valid dari `/etc/funny/.restore.key`: file diterima dan diekstrak dengan benar (Decision 19; butuh aturan sudoers `/etc/sudoers.d/restore-ftp` per Fix 328).
   4. Pastikan seluruh kunci privat yang dipulihkan disetel kembali ke izin `0600` (Fix 305).
 
 ### Fase 16: Pengujian Suite REST API Headless (FN-API & Concurrency Lock)
@@ -220,4 +220,4 @@ Fase 16: Pengujian Suite REST API Headless (FN-API & Concurrency Lock)
   2. Uji path traversal: request `GET /api/..%2f..%2fetc/passwd` wajib menghasilkan HTTP `404`.
   3. Uji CRUD endpoint: jalankan `ping`, `add-vmess`, `list-xray`, `renew-xray`, `delete-xray`.
   4. Uji penolakan endpoint tak didukung: `add-ss` dan `add-socks` wajib menghasilkan respon error eksplisit.
-  5. Uji konkruensi: kirim 5 request `POST /api/add-vmess` secara simultan; pastikan kelima akun terbuat sempurna tanpa korupsi file konfigurasi berkat mekanisme serializing lock.
+  5. Uji konkruensi: kirim 5 request `POST /api/add-vmess` secara simultan; pastikan kelima akun terbuat sempurna tanpa korupsi file konfigurasi berkat desain single-threaded (upaya threading+lock sudah direvert, Fix 326).
