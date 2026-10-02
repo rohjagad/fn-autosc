@@ -76,6 +76,14 @@ for _port in 22 3303; do
         echo "Port ${_port}" >> /etc/ssh/sshd_config
 done
 unset _port
+# Burst protection for distro units the daemons restart (limit-ip-ssh, xp):
+# drop-ins only, the packaged unit files themselves are never edited.
+for _u in ssh dropbear; do
+    mkdir -p "/etc/systemd/system/${_u}.service.d"
+    printf '[Unit]\nStartLimitIntervalSec=120\nStartLimitBurst=30\n' \
+        > "/etc/systemd/system/${_u}.service.d/fn-burst.conf"
+done
+unset _u
 systemctl daemon-reload
 systemctl restart ssh
 systemctl restart sshd
@@ -186,6 +194,10 @@ cat> /etc/systemd/system/ws.service << END
 Description=WebSocket
 Documentation=https://github.com/rohjagad/fn-autosc
 After=syslog.target network-online.target
+# Same burst protection as xray@ (Found 329/330): limit-ip-ssh and xp restart
+# this unit once per lock/expiry, and cron/API bursts must not fail it.
+StartLimitIntervalSec=120
+StartLimitBurst=30
 
 [Service]
 User=root

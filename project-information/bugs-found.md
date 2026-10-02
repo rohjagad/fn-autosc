@@ -2090,6 +2090,10 @@ Found 329. **Parallel API deletes killed `xray@ws` via systemd start-limit-hit**
 after Phase 16, `xray@ws` was found `failed (Result: start-limit-hit)`. The journal shows xray itself started cleanly every time (config OK, all listeners up); something issued ~8 `restart xray@ws` within ~45s at 15:00 (15:00:02 … 15:00:47), tripping the default limiter (5 starts/10s). Root cause: each API `delete-xray`/`add-xray` call runs the panel delete/add script, which restarts the transport **once per call** — 6 parallel Phase-16 deletes fanned out to 6 restarts in seconds (the 5 parallel adds earlier were already borderline). Genuine crash-loops are unaffected (xray exits are still `Restart=on-failure`); only the *external-restart* budget was too tight for API fan-out and the :00 cron batch.
 - **Confirmed live:** `journalctl -u xray@ws` start-limit-hit at 15:00:47; service recovered with `reset-failed + start`; all 4 transports active after.
 
+Found 330. **Same start-limit-hit exposure on every other automation-restarted unit** (follow-up to Found 329, found by auditing the burst vector) —
+`limit-ip-ssh` restarts `ssh`/`sshd`/`ws` per lock, `xp` restarts `ssh`/`sshd`/`ws`/`dropbear` per expired batch, and every `add-*` restarts its `quota-*` daemon service: all carried systemd's default 5-starts/10s budget, so the same cron-batch/API fan-out that killed `xray@ws` could take down SSH access or the quota daemons next. Panel daemons themselves already batch one restart per run (flags), so the remaining risk is purely multi-process bursts — a unit-budget problem, not a script-loop problem (234 `systemctl restart xray@` sites were counted and deliberately left alone: per-script debounce would skip semantically necessary restarts).
+- **Confirmed live:** `systemctl cat ssh|ws` showed no `StartLimit*` overrides (defaults active).
+
 
 
 

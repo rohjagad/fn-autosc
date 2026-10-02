@@ -1483,6 +1483,17 @@ Section 35's four-check rule applied to Fix 329:
 | **Over-engineering** | Two unit-file lines, installer template + live unit. No new timer, helper, or dependency. |
 | **vs the source** | V23/1.20 ship no `StartLimit*` overrides anywhere (default 5/10s everywhere); the change only widens the budget on the transport most often restarted by automation. |
 
+## 115. Burst Budget Extended to Quota, WS, SSH, Dropbear — Four Checks (October 2, 2026)
+
+Section 35's four-check rule applied to Fix 330:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Only two `[Unit]` lines added per unit; no `ExecStart`/`Restart`/`User` change. Distro units (`ssh`, `dropbear`) touched via drop-ins only. `daemon-reload` applied; all units verified active after. Append-only history extended by append, not edited. |
+| **Over-strictness** | Limits loosened everywhere, none tightened. No operation newly rejected. |
+| **Over-engineering** | Two lines per template + one 3-line drop-in block in `ssh.sh`. The 234 per-site `systemctl restart` calls were deliberately NOT wrapped: each is semantically necessary, and per-script debounce could skip required restarts. |
+| **vs the source** | V23/1.20 use defaults everywhere; the widened budget is a strict improvement for automation-driven panels with no behavior change under normal operation. |
+
 
 
 

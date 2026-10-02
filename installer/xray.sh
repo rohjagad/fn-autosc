@@ -217,6 +217,8 @@ cat> /etc/systemd/system/quota-ws.service << END
 [Unit]
 Description=Xray Quota Management Service By FN AutoSC
 After=network.target
+StartLimitIntervalSec=120
+StartLimitBurst=30
 
 [Service]
 Type=simple
@@ -233,6 +235,8 @@ cat> /etc/systemd/system/quota-split.service << END
 [Unit]
 Description=Xray Quota Management Service By FN AutoSC
 After=network.target
+StartLimitIntervalSec=120
+StartLimitBurst=30
 
 [Service]
 Type=simple
@@ -249,6 +253,8 @@ cat> /etc/systemd/system/quota-http.service << END
 [Unit]
 Description=Xray Quota Management Service By FN AutoSC
 After=network.target
+StartLimitIntervalSec=120
+StartLimitBurst=30
 
 [Service]
 Type=simple
@@ -265,6 +271,8 @@ cat> /etc/systemd/system/quota-grpc.service << END
 [Unit]
 Description=Xray Quota Management Service By FN AutoSC
 After=network.target
+StartLimitIntervalSec=120
+StartLimitBurst=30
 
 [Service]
 Type=simple

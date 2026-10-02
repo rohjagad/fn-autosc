@@ -2418,6 +2418,11 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Fix 329 (Found 329):** added `StartLimitIntervalSec=120` + `StartLimitBurst=30` to `[Unit]` in `installer/xray.sh`'s `xray@.service` template (fresh installs inherit it); applied the same two lines live + `daemon-reload`. Crash-loop protection is unchanged (`Restart=on-failure`, `RestartSec=3s`); only the external-restart budget grew. The deeper fix (coalescing one restart per API fan-out) belongs to the `rohjagad/fn-autosc-api` handler layer, a separate repository — noted, not done here.
 - **Verified live:** 8 back-to-back `systemctl restart xray@ws` (fatal under the old 5/10s budget) → unit stays `active`; all 4 transports active.
 
+### Fix 330 - Same burst budget for quota-*, ws, ssh, dropbear (Found 330)
+
+- **Fix 330 (Found 330):** same two lines (`StartLimitIntervalSec=120` + `StartLimitBurst=30`): direct `[Unit]` addition in the four `quota-*.service` templates and `ws.service` template (`installer/xray.sh`, `installer/ssh.sh`); drop-in files (`/etc/systemd/system/{ssh,dropbear}.service.d/fn-burst.conf`, distro units never edited) created by `installer/ssh.sh`, covering the `sshd` alias through `ssh.service`. Crash behavior untouched everywhere.
+- **Verified live:** 8 back-to-back restarts each of `quota-ws`, `ws`, `ssh`, `dropbear` → all stay `active`; 0 failed units; pre-existing `Restart=`/`RestartSec=` values unchanged (`systemctl cat` diff shows only the two added lines).
+
 
 
 
