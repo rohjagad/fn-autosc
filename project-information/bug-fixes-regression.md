@@ -1615,6 +1615,17 @@ Section 35's four-check rule applied to Fix 341:
 | **Over-engineering** | One branch per installer, shared canonical pattern, no helper. |
 | **vs the source** | V23/1.20 validate less (or nothing) at install; tightening follows the already-accepted Found-304 direction. |
 
+## 127. Phase 13: API Fetch Timeout — Four Checks (October 4, 2026)
+
+Section 35's four-check rule applied to Fix 342:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Download URLs, `-f`/`-L` semantics and the fail-fast messages unchanged; only an upper time bound added; `bash -n` clean. |
+| **Over-strictness** | Nothing rejected; 60s is generous (healthy fetch ~1s) — only stalled connections are cut. |
+| **Over-engineering** | Three flags, same `--max-time` idiom the gate already uses; no retry framework. |
+| **vs the source** | FN-API reference is endpoint-list only; timeouts follow this repo's own gate precedent. |
+
 
 
 

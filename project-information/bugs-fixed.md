@@ -2476,6 +2476,11 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Fix 341 (Found 341):** the canonical FQDN branch in both installer loops (installers are fetched from GitHub, not zipped — no repack). Garbage now re-prompts instead of producing a self-signed-by-default install.
 - **Verified:** `bash -n` clean ×2; accept/reject matrix matches `dm-menu` behavior (`test..com`, spaces, leading/trailing hyphens rejected; multi-level names accepted).
 
+### Fix 342 - Phase 13: bound API installer fetches (Found 342)
+
+- **Fix 342 (Found 342):** `--max-time 60` on the three `install_api` fetch lines in `fn-autosc-api/menu-api` (server, lib.sh, handlers loop). Staging/rollback, checksums and the remaining installer gaps stay in Fase 19 where they are tracked.
+- **Verified:** `bash -n` clean; existing `FAILED to fetch` + `return 1` fail-fast path unchanged, now also time-bounded.
+
 
 
 

@@ -2136,6 +2136,9 @@ Found 340. **Phase 10: four submenus accept `0` but not the displayed `00` spell
 Found 341. **Phase 12: installers accept non-FQDN domains that `dm-menu` would reject** (`installer/full.sh:87-90`, `installer/lite.sh:87-90`) —
 both install loops check only non-empty + no-spaces, then write `/etc/xray/domain` and sed it into nginx/ACME paths — while `dm-menu.sh:298` (Found 304 fix) enforces the full RFC FQDN regex for the same value post-install. A typo like `test..com` sails through install: ACME fails, the box silently runs self-signed until someone notices. Same regex, added as one `elif`-style branch per installer (language-matched messages).
 
+Found 342. **Phase 13: API installer fetches hang unbounded on stalled network** (`fn-autosc-api/menu-api:56,60,63`) —
+the license-gate curls carry `--max-time 15`, but the three `install_api` fetch lines (`server`, `lib.sh`, 19 × handlers) used bare `curl -fsSL`: `-f` fails fast on HTTP errors yet a blackholed/stalled connection hangs per-file with no bound (21 files). Same-class precedent as the gate caps; bounded at 60s per file (generous for binaries, still fail-fast via the existing `FAILED to fetch` + `return 1`). Verified: blackhole fetch aborts at exactly the cap, healthy fetch unaffected (~1.2s).
+
 
 
 
