@@ -1626,6 +1626,17 @@ Section 35's four-check rule applied to Fix 342:
 | **Over-engineering** | Three flags, same `--max-time` idiom the gate already uses; no retry framework. |
 | **vs the source** | FN-API reference is endpoint-list only; timeouts follow this repo's own gate precedent. |
 
+## 129. Phase 16: Handler Input Guards — Four Checks (October 4, 2026)
+
+Section 35's four-check rule applied to Fix 345:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Guards reject only values the panel demonstrably refuses (same regexes, verified across all 12 `add-*`); coerced numbers/valid names flow unchanged; `bash -n` clean. |
+| **Over-strictness** | Mirror-exact: every rejected shape was reproduced failing at the panel; JSON-number `30` and metachar passwords still pass. |
+| **Over-engineering** | One regex line per field, no shared validator, no dependency. |
+| **vs the source** | FN-API reference defines no shapes; rules come from this panel's own scripts (uniform across all 12). |
+
 ## 128. Phase 14: Full-Length API Token — Four Checks (October 4, 2026)
 
 Section 35's four-check rule applied to Fix 343:

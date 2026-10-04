@@ -2147,6 +2147,10 @@ static audit of the handler→panel call chains: `add-xray` = 1 restart/call, `d
 - **Recorded design (trailing-edge, for live implementation):** panel `add-*`/`delete-*`/`extend-*` gain an env gate (`FN_API_BATCH` set → skip internal restart, touch `/run/fn-api/dirty-<transport>`); handlers set it, then join-or-schedule one `at now + 15s` flush (marker-file dedupe; the single-threaded server makes scheduling race-free); the flusher `xray -test`-gates and restarts each dirty transport once. Schedule-before-touch ordering: a crash costs at most a redundant restart, never a lost one.
 - **Deferral (gate §5.5):** this changes restart *timing* (account-activation latency becomes ≤15s via API) — behavior-visible work that must be proven on the live VPS (`at`-daemon semantics, burst journal counts, single-call latency). Landing it untested from static audit would violate the acceptance gate. Status: design accepted, code pending a live session. Live criteria already in Fase 15 plan (burst 6+6 → grep-verified + 1 restart/transport + active, no `reset-failed`).
 
+Found 345. **Phase 16: handler input shaping verified end-to-end; panel-mirroring guards added** (`fn-autosc-api/handlers/*`) —
+`j()`'s `head -1` already neutralizes embedded newlines (verified: `"30\ninjected"` → `"30"`), but non-string scalars and out-of-panel names flowed into the panel's interactive re-prompts and failed obscurely at EOF. Added exact panel mirrors: `add-xray` (username `^[a-z0-9_]+$`, expired/limit-ip/quota `^[1-9][0-9]*$`), `addssh` (limit-ip/expired numeric; username tightened in Phase 7), `add-noobz` (username `^[a-zA-Z0-9_]{1,16}$`, expired numeric), `renew-*` (days numeric). Panel rules confirmed uniform across all 12 `add-*` scripts before mirroring.
+- **Verified live-locally via stub panel:** valid shape pipes exactly `user|ip|quota|days|` + empty-uuid; 8/8 malformed add-xray inputs, 3/3 addssh, 2/2 add-noobz, 3/3 renew inputs rejected explicitly naming field+rule; valid input with metachar password and JSON-number expiry passes guards (reaches panel, fails only at stub-verify as designed). No false rejects.
+
 
 
 
