@@ -32,6 +32,8 @@ Setiap langkah dalam seluruh fase **WAJIB** membaca dan mengacu pada 7 sumber re
    - Nilai angka `0`, bilangan negatif, atau desimal pada field kuota/durasi.
    - Nama akun atau target yang tidak eksis di konfigurasi/database.
 4. **Verifikasi Terhadap `is-decision.md`:** Memastikan perilaku anomali yang ditemukan bukan salah satu dari 28 keputusan arsitektur resmi sebelum menandainya sebagai bug.
+5. **Audit Dokumen Project-Information:** setiap fase wajib memeriksa seluruh berkas di `project-information/` (plus `README.md`) untuk klaim dalam cakupannya — drift dokumen-vs-kode, kontradiksi dokumen-vs-dokumen, dan verifikasi yang tidak mungkin membuktikan klaimnya (pola false-positive Found 96/98: pola grep yang tak bisa cocok, probe yang lolos dalam keadaan sehat maupun rusak). Dok non-append-only dikoreksi di tempat; riwayat append-only dipertahankan, koreksi dicatat sebagai Found/Fix baru.
+6. **Audit Riwayat Commit:** `git log -p -- <berkas-sentuh>` untuk berkas dalam cakupan — pastikan fix terdahulu benar melakukan klaim commit-nya, deteksi revert/regresi diam-diam, dan mismatch pesan-vs-diff.
 
 ### 2.2 Metodologi Fixing (Perbaikan Bug)
 1. **Shortest Working Diff Wins:** Terapkan perubahan paling minimal yang menyelesaikan masalah secara tepat. Hindari abstraksi berlebih, wrapper yang tidak perlu, atau dependency tambahan.
@@ -456,7 +458,7 @@ Fase 24: Penanganan Error di Tool Go
 
 Untuk setiap siklus penemuan dan perbaikan bug:
 
-1. **Tahap Finding:** Lakukan audit pola statis, uji batas masukan (fault injection), dan komparasi terhadap 2 arsip zip referensi di `original-source-do-not-edit/`.
+1. **Tahap Finding:** Lakukan audit pola statis, uji batas masukan (fault injection), komparasi terhadap 2 arsip zip referensi di `original-source-do-not-edit/`, audit dokumen `project-information/` + `README.md` (langkah 5), dan audit riwayat commit berkas-sentuh (langkah 6).
 2. **Tahap Verifikasi Awal:** Pastikan perilaku yang ditemukan bukan keputusan arsitektur di `is-decision.md` dan belum tercatat di `bugs-fixed.md`.
 3. **Tahap Fixing:** Terapkan shortest working diff. Uji sintaks shell (`bash -n`) atau validasi Go.
 4. **Tahap Repack & Deploy:** Perbarui arsip zip terkait, deploy ke `/usr/bin/` pada VPS uji, dan pastikan izin `0755`.
