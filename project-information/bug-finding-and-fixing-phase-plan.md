@@ -51,7 +51,7 @@ Setiap langkah dalam seluruh fase **WAJIB** membaca dan mengacu pada 7 sumber re
 
 ---
 
-## 3. Struktur 15 Fase Bug-Finding & Fixing
+## 3. Struktur 17 Fase Bug-Finding & Fixing
 
 ```
 Fase 1: Keamanan Izin Berkas & Kriptografi
@@ -83,6 +83,10 @@ Fase 13: Pipeline Backup Telegram & Web-Restore Berotentikasi
 Fase 14: REST API Headless (FN-API & Handlers /usr/bin/rere)
    │
 Fase 15: Sinkronisasi Paket Dual-Edition (full.zip & lite.zip)
+   │
+Fase 16: Inspeksi Migrasi SplitHTTP → XHTTP
+   │
+Fase 17: Inspeksi Fallback URL Otorisasi (Pages + GitHub)
 ```
 
 ---
@@ -305,6 +309,34 @@ Fase 15: Sinkronisasi Paket Dual-Edition (full.zip & lite.zip)
   - Gunakan skrip Python zipfile idempoten untuk meregenerasi entri arsip dengan CRC32, timestamp tetap, dan mode `0755`.
   - Kompilasi ulang biner Go dari kode sumber menggunakan `CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w"`.
   - Pastikan setiap perbaikan fungsi bersama diaplikasikan setara pada kedua edisi (`full` dan `lite`).
+
+---
+
+### Fase 16: Inspeksi Migrasi SplitHTTP → XHTTP
+
+- **Komponen Target:** `json/split.json`, `config/4.conf`, `config/6.conf`, `config/dual.conf`, 12 skrip `add-*-split`/`trial-*-split` (`full/` + `lite/`), string display XHTTP (menu, kartu, Telegram), `menu/full.zip`, `menu/lite.zip`.
+- **Finding (Metodologi Penemuan):**
+  - Pindai sisa wire-visible lama: `splithttp`, `SplitHTTP`, `Split HTTP` (semua varian case/spasi), path `/vmspl`, `/vlspl`, `/trspl`, link `type=splithttp` di seluruh `.sh`/`.json`/`.conf`/`.go` (`grep -rin`). Yang boleh tersisa hanya identifier mesin: nama file `*-split.sh`, service `xray@split`, `split.json`, dir log/kuota/limit, dan API `core=split`.
+  - Verifikasi skema XHTTP terhadap biner pin (`strings xray | grep xhttpSettings`; `xray run -test` pada `json/split.json` hasil migrasi).
+  - Verifikasi konsistensi tiga lapis: path di JSON server == lokasi nginx == path di kartu/link yang dicetak skrip (`/vmxh`, `/vlxh`, `/trxh`).
+  - Verifikasi paritas zip: hash byte tiap entri `*-split*` di `menu/full.zip`/`menu/lite.zip` sama dengan source; biner Go yang display-nya berubah dikompilasi ulang (cek string `XHTTP` di biner).
+- **Fixing (Standar Perbaikan):**
+  - Rename murni tanpa logika: `splithttp`→`xhttp`, display→`XHTTP`, path ke `/vmxh`, `/vlxh`, `/trxh`. Jangan rename identifier mesin (kontrak API/cron/systemd).
+  - Repack zip deterministik (timestamp tetap, mode `0755`) dan catat append-only (Found/Fix + Section regresi).
+
+---
+
+### Fase 17: Inspeksi Fallback URL Otorisasi (Pages + GitHub)
+
+- **Komponen Target:** 193 blok gate (`PERMISSION_PRIMARY`/`PERMISSION_FALLBACK`) di `full/`, `lite/`, `installer/`, `install.sh`, plus `menu-api` di `fn-autosc-api`.
+- **Finding (Metodologi Penemuan):**
+  - Pindai variabel gate lama yang tersisa: `PERMISSION_URL=` (harus 0, kecuali referensi non-kanonis yang disengaja) dan fetch tanpa fallback (`curl -s "$PERMISSION_URL"`).
+  - Verifikasi kesetaraan konten: jumlah baris `###` dari Pages vs GitHub harus sama (sumber berbeda, data sama).
+  - Verifikasi semantik fail-closed: kedua sumber mati → pesan `Failed to download permissions.` + exit non-nol, tanpa lanjut ke mutasi.
+  - Verifikasi tidak ada URL pihak ketiga lain yang menyelinap (contoh pola `cobaizin` hanya boleh di file referensi).
+- **Fixing (Standar Perbaikan):**
+  - Bentuk kanonis dua baris: `PERMISSION_PRIMARY` (Pages) + `PERMISSION_FALLBACK` (GitHub raw); fetch `primary || fallback || { fail }`. Tanpa timeout baru, tanpa helper baru.
+  - Repack zip karena skrip gate ikut berubah; catat append-only.
 
 ---
 

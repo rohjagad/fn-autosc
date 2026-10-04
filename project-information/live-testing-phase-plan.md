@@ -50,7 +50,7 @@ Setiap pengujian pada seluruh fase **WAJIB** merujuk dan mencocokkan hasil aktua
 
 ---
 
-## 3. Struktur 16 Fase Pengujian Live
+## 3. Struktur 18 Fase Pengujian Live
 
 ```
 Fase 1: Baseline Sistem Operasi, Izin Kriptografi & Kernel Sysctl
@@ -84,6 +84,10 @@ Fase 14: Migrasi Domain Server & Mekanisme Fallback Sertifikat ACME
 Fase 15: Pengujian Backup Telegram & Web-Restore Berotentikasi Token
    │
 Fase 16: Pengujian Suite REST API Headless (FN-API & Concurrency Lock)
+   │
+Fase 17: Pengujian Live Migrasi XHTTP (/akun, path & trafik)
+   │
+Fase 18: Pengujian Live Fallback URL Otorisasi
 ```
 
 ---
@@ -221,3 +225,20 @@ Fase 16: Pengujian Suite REST API Headless (FN-API & Concurrency Lock)
   3. Uji CRUD endpoint: jalankan `ping`, `add-vmess`, `list-xray`, `renew-xray`, `delete-xray`.
   4. Uji penolakan endpoint tak didukung: `add-ss` dan `add-socks` wajib menghasilkan respon error eksplisit.
   5. Uji konkruensi: kirim 5 request `POST /api/add-vmess` secara simultan; pastikan kelima akun terbuat sempurna tanpa korupsi file konfigurasi berkat desain single-threaded (upaya threading+lock sudah direvert, Fix 326).
+
+### Fase 17: Pengujian Live Migrasi XHTTP (Akun, Path & Trafik)
+- **Tujuan:** Membuktikan transport XHTTP bekerja ujung-ke-ujung setelah rename dari SplitHTTP.
+- **Langkah Pengujian:**
+  1. Buat akun via `add-vmess-split` (atau varian): kartu wajib menampilkan `Path: /vmxh`, `Network: XHTTP`, dan link mengandung `"net": "xhttp"`, `"path": "/vmxh"`.
+  2. Jalankan client `xray-core` 25.3.6 dengan `network: xhttp` + `xhttpSettings.path: /vmxh` via TLS 443; unduh payload 5MB dan pastikan checksum identik dengan direct.
+  3. Pastikan path lama `/vmspl` tidak lagi di-route (nginx tidak punya lokasi tersebut).
+  4. Hapus akun via `delete-split`; pastikan `split.json` valid dan `xray@split` tetap active. Identifier `core=split` di API tidak berubah.
+
+### Fase 18: Pengujian Live Fallback URL Otorisasi
+- **Tujuan:** Membuktikan gate lisensi tahan terhadap matinya salah satu sumber.
+- **Langkah Pengujian:**
+  1. Verifikasi konten setara: jumlah baris `###` dari Pages dan GitHub sama.
+  2. Uji primer: gate (`menu-api status` atau skrip panel) hijau dengan Pages terjangkau.
+  3. Uji fallback (simulasi): blokir primer sementara (contoh entri `/etc/hosts` atau aturan DROP) lalu jalankan gate — wajib tetap hijau via GitHub, tanpa perubahan perilaku.
+  4. Uji gagal total: blokir keduanya — gate wajib fail-closed (`Failed to download permissions.`, exit non-nol) sebelum mutasi apa pun.
+  5. Kembalikan kondisi jaringan dan pastikan tak ada sisa blokir/patch sementara di VPS.
