@@ -157,6 +157,8 @@ cat > /etc/systemd/system/bot.service << END
 [Unit]
 Description=Service for bot terminal
 After=network.target
+StartLimitIntervalSec=120
+StartLimitBurst=30
 
 [Service]
 ExecStart=/usr/bin/node /usr/bin/bot/server.js

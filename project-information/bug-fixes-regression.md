@@ -1538,6 +1538,17 @@ Section 35's four-check rule applied to Fix 334:
 | **Over-engineering** | Two lines per restore block, no helper/dependency; transient-umask hardening deliberately skipped (single-tenant install window, would add noise for no persistent gain). |
 | **vs the source** | V23/1.20 omitted `0600` on restored keys (Found 305, inherited); this closes the two lines that fix left uncovered (`.key` never chmodded, `.restore.key` never chowned). |
 
+## 120. Phase 3: Burst Budget for Remaining Custom Units — Four Checks (October 4, 2026)
+
+Section 35's four-check rule applied to Fix 335:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Two `[Unit]` lines per template; no `ExecStart`/restart policy/logic touched; `bash -n` clean; `systemd-analyze verify` clean; zips deterministic (same entry lists, `0755`, byte-identical). |
+| **Over-strictness** | Nothing rejected; only the start-limiter budget widened to the Fix 329/330 values. |
+| **Over-engineering** | No helper/dependency; upstream-fetched `noobzvpns.service` and per-user loop batching (Fase 21) deliberately out of scope. |
+| **vs the source** | V23/1.20 carry no `StartLimit*` overrides anywhere (defaults everywhere); widening follows the already-accepted Fix 329/330 direction for burst-tolerance. |
+
 
 
 

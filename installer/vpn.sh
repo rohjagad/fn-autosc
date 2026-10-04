@@ -221,6 +221,8 @@ cat > /etc/systemd/system/fn-ohp.service <<-END
 [Unit]
 Description=FNOHP Service on Port 9088
 After=network.target
+StartLimitIntervalSec=120
+StartLimitBurst=30
 
 [Service]
 Type=simple
@@ -261,6 +263,8 @@ cat> /etc/systemd/system/opn.service << END
 Description=Python Proxy Mod By geovpn
 Documentation=https://t.me/rohcuan
 After=network.target nss-lookup.target
+StartLimitIntervalSec=120
+StartLimitBurst=30
 
 [Service]
 Type=simple

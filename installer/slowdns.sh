@@ -133,6 +133,8 @@ SlowDNS / DNSTT Settings
 Description=SlowDNS FN AutoSC Autoscript Service
 Documentation=https://t.me/rohcuan
 After=network.target nss-lookup.target
+StartLimitIntervalSec=120
+StartLimitBurst=30
 
 [Service]
 Type=simple

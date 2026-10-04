@@ -99,6 +99,8 @@ cd /etc/systemd/system
 cat > udp-custom.service <<-SERV
 [Unit]
 Description=Udp Custom By FN AutoSC
+StartLimitIntervalSec=120
+StartLimitBurst=30
 
 [Service]
 User=root

@@ -2442,6 +2442,11 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Fix 334 (Found 334):** in all 9 restore blocks (`full/bmenu.sh` ×3, `lite/bmenu.sh` ×3, `full/restore-ftp.sh`, `lite/restore-ftp.sh`, `website/restore-ftp.sh`) appended two guarded lines after the existing `chmod 640 /etc/funny/.restore.key`: `chmod 600 /etc/xray/.key` (API token back to Decision-19 `0600 root`) and `chown root:www-data /etc/funny/.restore.key` (web-restore key readable by `www-data` again). Repacked `menu/full.zip` (114 entries) + `menu/lite.zip` (97 entries) deterministically (fixed timestamp, mode `0755`, byte-identical entries).
 - **Verified:** `bash -n` clean on all 5 files; zip entries byte-identical to sources, 0 non-`0755` entries; no logic/input handling touched.
 
+### Fix 335 - Phase 3: burst budget for the remaining seven custom units (Found 335)
+
+- **Fix 335 (Found 335):** added `StartLimitIntervalSec=120` + `StartLimitBurst=30` to the `[Unit]` section of all nine templates (`installer/udp.sh`, `installer/request.sh`, `installer/slowdns.sh`, `full/menu-dnstt.sh`, `installer/ssh.sh` badvpn block, `installer/vpn.sh` ×2, `full/menu-bot.sh`, `lite/menu-bot.sh`) plus `api.service` in `fn-autosc-api/menu-api`; `fn-api.md` unit row updated in place. Repacked `menu/full.zip` (114) + `menu/lite.zip` (97) deterministically. Crash behavior untouched (genuine crash-loops still fail, only later).
+- **Verified:** `bash -n` clean ×9; unit bodies extracted and `systemd-analyze verify` reports no syntax/section errors (only missing-binary warnings from the workstation, absent on target); zip entries byte-identical, 0 non-`0755`.
+
 
 
 

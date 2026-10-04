@@ -230,6 +230,8 @@ cat> /etc/systemd/system/badvpn-udpgw.service << END
 Description=BadVPN UDP Gateway (udpgw)
 Documentation=https://github.com/rohjagad/fn-autosc
 After=syslog.target network-online.target
+StartLimitIntervalSec=120
+StartLimitBurst=30
 
 [Service]
 User=root

@@ -105,6 +105,8 @@ cat > udp-request.service <<-SERV
 [Unit]
 Description=UDP Request By FN AutoSC
 After=network.target
+StartLimitIntervalSec=120
+StartLimitBurst=30
 
 [Service]
 Type=simple

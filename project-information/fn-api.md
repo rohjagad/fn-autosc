@@ -227,7 +227,7 @@ It applies the same `izin.txt` authorisation gate as the panel menus.
 | fetch the handlers | `/usr/bin/rere/<name>`, all executable |
 | alias the unsupported endpoints | `add-ss`, `add-socks` → `unsupported` |
 | token | generated (40 random chars, mode `0600`) in `/etc/xray/.key` if absent |
-| unit | `/etc/systemd/system/api.service` — `ExecStart=/usr/bin/python3 /usr/bin/api-server`, `Restart=always`, `RestartSec=3s`, `User=root` |
+| unit | `/etc/systemd/system/api.service` — `ExecStart=/usr/bin/python3 /usr/bin/api-server`, `Restart=always`, `RestartSec=3s`, `StartLimitIntervalSec=120`, `StartLimitBurst=30`, `User=root` |
 | start | `systemctl enable --now api` |
 
 Installed footprint: `/usr/bin/api-server`, `/usr/local/lib/fn-api/lib.sh`, `/usr/bin/rere/*`,
