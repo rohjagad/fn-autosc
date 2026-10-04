@@ -95,7 +95,7 @@ Fase 18: Pengujian Live Fallback URL Otorisasi
 ### Fase 1: Baseline Sistem Operasi, Izin Kriptografi & Kernel Sysctl
 - **Tujuan:** Verifikasi kesehatan awal host VPS, status seluruh unit systemd, dan izin berkas sensitif sebelum pengujian trafik.
 - **Langkah Pengujian:**
-  1. Cek status aktif 16 layanan inti: `nginx`, `haproxy`, `xray@ws`, `xray@grpc`, `xray@upgrade`, `xray@split`, `noobzvpns`, `dnstt`, `wg-quick@wg0`, `openvpn`, `xl2tpd`, `dropbear`, `ws`, `fn-ohp`, `udp-custom`, `udp-request`.
+  1. Cek status aktif 16 layanan inti: `nginx`, `haproxy`, `xray@ws`, `xray@grpc`, `xray@upgrade`, `xray@xhttp`, `noobzvpns`, `dnstt`, `wg-quick@wg0`, `openvpn`, `xl2tpd`, `dropbear`, `ws`, `fn-ohp`, `udp-custom`, `udp-request`.
   2. Pastikan `systemctl --failed` bernilai `0`.
   3. Verifikasi izin berkas: `/etc/xray/xray.key` (mode `0600`), `/etc/haproxy/funny.pem` (mode `0600`), `/etc/xray/xray.crt` (mode `0644`), `/etc/xray/.key` (mode `0600`), `/etc/funny/.restore.key` (mode `0640`).
   4. Verifikasi nilai sysctl: `fs.file-max = 1000000`, `net.netfilter.nf_conntrack_max = 262144`.
@@ -229,14 +229,14 @@ Fase 18: Pengujian Live Fallback URL Otorisasi
 ### Fase 17: Pengujian Live Migrasi XHTTP (Akun, Path & Trafik)
 - **Tujuan:** Membuktikan transport XHTTP bekerja ujung-ke-ujung setelah rename dari SplitHTTP.
 - **Langkah Pengujian:**
-  1. Buat akun via `add-vmess-split` (atau varian): kartu wajib menampilkan `Path: /vmxh`, `Network: XHTTP`, dan link mengandung `"net": "xhttp"`, `"path": "/vmxh"`.
+  1. Buat akun via `add-vmess-xhttp` (atau varian): kartu wajib menampilkan `Path: /vmxh`, `Network: XHTTP`, dan link mengandung `"net": "xhttp"`, `"path": "/vmxh"`.
   2. Jalankan client `xray-core` 25.3.6 dengan `network: xhttp` + `xhttpSettings.path: /vmxh` via TLS 443; unduh payload 5MB dan pastikan checksum identik dengan direct.
   3. Pastikan path lama `/vmspl` tidak lagi di-route (nginx tidak punya lokasi tersebut).
-  4. Hapus akun via `delete-split`; pastikan `split.json` valid dan `xray@split` tetap active. Identifier `core=split` di API tidak berubah.
+  4. Hapus akun via `delete-xhttp`; pastikan `xhttp.json` valid dan `xray@xhttp` tetap active. API `core=xhttp` (alias legacy `split` tetap diterima).
 - **Uji umum area transport (di luar migrasi):**
-  5. Ulangi Fase 4–6 live-testing untuk core `split` (VMess/VLESS/Trojan): kartu lengkap, duplikat ditolak, kuota/IP/limit tertulis benar.
+  5. Ulangi Fase 4–6 live-testing untuk core `xhttp` (VMess/VLESS/Trojan): kartu lengkap, duplikat ditolak, kuota/IP/limit tertulis benar.
   6. Uji upload besar via XHTTP (verifikasi `client_max_body_size`/`client_body_timeout` scoped masih menahan) dan koneksi idle panjang (timeout 300s).
-  7. Picu `quota-split` dan `limit-ip-split` dengan akun uji (lampaui kuota/IP) lalu `unlock-split`: pastikan hapus-total vs `.locked` sesuai Decision 16 dan kredensial pulih sama.
+  7. Picu `quota-xhttp` dan `limit-ip-xhttp` dengan akun uji (lampaui kuota/IP) lalu `unlock-xhttp`: pastikan hapus-total vs `.locked` sesuai Decision 16 dan kredensial pulih sama.
 
 ### Fase 18: Pengujian Live Fallback URL Otorisasi
 - **Tujuan:** Membuktikan gate lisensi tahan terhadap matinya salah satu sumber.

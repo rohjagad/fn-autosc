@@ -236,7 +236,7 @@ Fase 17: Inspeksi Fallback URL Otorisasi (Pages + GitHub)
   - Periksa lokasi tampilan versi: pastikan versi XTLS dan Dropbear tidak memadati menu utama melainkan tampil di submenunya masing-masing (Decision 26, 27).
 - **Fixing (Standar Perbaikan):**
   - Tambahkan opsi `${green}0${NC}. Back to Main Menu` dan penanganan `0|00) clear ; menu ;;` pada semua dispatcher yang kehilangan opsi 0.
-  - Panggil ulang fungsi submenu (misal: `xws`, `xhttp`, `xsplit`, `xgrpc`, `menu-ssh`) di setiap akhir eksekusi case aksi.
+  - Panggil ulang fungsi submenu (misal: `xws`, `xhttp`, `xxhttp`, `xgrpc`, `menu-ssh`) di setiap akhir eksekusi case aksi.
   - Pertahankan display versi pada submenunya dengan fallback aman `2>/dev/null || echo "n/a"`.
 
 ---
@@ -319,10 +319,10 @@ Fase 17: Inspeksi Fallback URL Otorisasi (Pages + GitHub)
   - Pindai sisa lama: `splithttp`, `SplitHTTP`, `Split HTTP` (semua varian case/spasi), path `/vmspl`, `/vlspl`, `/trspl`, link `type=splithttp`, nama file `*-split.sh`, service `xray@split`, `split.json`, dir log/kuota/limit `split`, dan API `core=split` di seluruh `.sh`/`.json`/`.conf`/`.go` (`grep -rin`). Target akhir: nol token `split` kecuali builtin bahasa (`strings.Split`, awk `split()`) dan arsip history.
   - Verifikasi skema XHTTP terhadap biner pin (`strings xray | grep xhttpSettings`; `xray run -test` pada `json/split.json` hasil migrasi).
   - Verifikasi konsistensi tiga lapis: path di JSON server == lokasi nginx == path di kartu/link yang dicetak skrip (`/vmxh`, `/vlxh`, `/trxh`).
-  - Verifikasi paritas zip: hash byte tiap entri `*-split*` di `menu/full.zip`/`menu/lite.zip` sama dengan source; biner Go yang display-nya berubah dikompilasi ulang (cek string `XHTTP` di biner).
+  - Verifikasi paritas zip: hash byte tiap entri `*-xhttp*` di `menu/full.zip`/`menu/lite.zip` sama dengan source; biner Go yang display-nya berubah dikompilasi ulang (cek string `XHTTP` di biner).
 - **Finding umum area transport (di luar migrasi):**
   - Audit direktif buffering/timeout lokasi xhttp vs ws/grpc/httpupgrade: `proxy_request_buffering off`, `proxy_buffering off`, `client_max_body_size`, dan trio `proxy_*_timeout` + `client_body_timeout` harus setara kebutuhan streaming (regresi pola Found 103/133/160).
-  - Audit daemon transport (`quota-split`, `limit-ip-split`, `auto-delete-split`, `kill-split`): path file kuota/usage/limit benar milik `split/` (pola salah-alamat Found 127), restart hanya bila benar ada penghapusan, dan pola hapus JSON presisi (`/### $user $exp/ {N;d}` + comma cleanup).
+  - Audit daemon transport (`quota-xhttp`, `limit-ip-xhttp`, `auto-delete-xhttp`, `kill-xhttp`): path file kuota/usage/limit benar milik `xhttp/` (pola salah-alamat Found 127), restart hanya bila benar ada penghapusan, dan pola hapus JSON presisi (`/### $user $exp/ {N;d}` + comma cleanup).
   - Uji kartu akun: field lengkap, link decode cocok kredensial, duplikat ditolak sebelum mutasi, `0 not allowed` di kuota/IP/durasi.
   - Uji hapus total: entri JSON, kartu log, file kuota+usage, file limit hilang semua; service restart bersih dan config valid.
 - **Fixing (Standar Perbaikan):**
