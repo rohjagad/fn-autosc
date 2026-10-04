@@ -455,3 +455,17 @@ or after - a pre-existing quirk, out of scope).
 **Rule for future changes:** the licence gate stays one shape in all copies - any new exemption
 goes in the same `if`, and any new feature that moves egress must take the same WARP guard.
 `fn-autosc-auth` itself is only ever read, never written, by this panel.
+
+## 29. The Licence Gate Reads Cloudflare Pages First, GitHub Second
+
+- **Component:** all 193 permission gates (`PERMISSION_PRIMARY` / `PERMISSION_FALLBACK`) across `full/`, `lite/`, `installer/`, plus `menu-api`.
+- **Decision:** every gate fetches `https://fn-autosc-auth.pages.dev/izin.txt` first and falls back to `https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt` (`primary || fallback || { fail }`). Pages has better peering for this region; GitHub stays as the backup. Both sources carry byte-identical content, so the failover changes nothing semantically — and when both are down the gate still fails closed with `Failed to download permissions.` before any mutation.
+- **Reason:** a single source is a single point of failure for all 193 gates; the Pages mirror is the same file over better-peered infrastructure, and keeping the canonical GitHub URL verbatim as fallback means no trust migration, only transport redundancy.
+- **Verified live:** Pages serves 7 `###` entries from the VPS, identical count to GitHub; gate green via Pages.
+
+## 30. The SplitHTTP Transport Is Fully Renamed to XHTTP
+
+- **Component:** every `split` identifier — `*-split.sh` → `*-xhttp.sh`, `split.json` → `xhttp.json`, service `xray@split` → `xray@xhttp`, data dirs, function/var names, menus, cron entries, and API `core=split` → `core=xhttp`.
+- **Decision:** Xray 25.x renamed SplitHTTP to XHTTP, so the panel follows completely rather than keeping a dual vocabulary that would confuse every future change. Wire strings (`network: xhttp`, `xhttpSettings`, paths `/vmxh`, `/vlxh`, `/trxh`, link `type=xhttp`) and all identifiers move together. The single exception is a one-line legacy alias in the API handlers (`split` → `xhttp`) so old API clients keep working; language builtins (`strings.Split`, awk `split()`) are untouched.
+- **Reason:** a half-rename (wire-only, as first done) leaves two names for one thing across scripts, units, JSON, cron and API — precisely the kind of drift that causes future bugs. One name everywhere costs a data-preserving migration once and ends the ambiguity permanently.
+- **Verified live:** migrated account intact, new account card shows `/vmxh` + `XHTTP`, 5 MB traffic checksum-identical, `xray@xhttp` active, 0 failed units.
