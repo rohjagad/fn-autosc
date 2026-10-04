@@ -2142,6 +2142,11 @@ the license-gate curls carry `--max-time 15`, but the three `install_api` fetch 
 Found 343. **Phase 14: API token shorter than the documented 40 chars on 4% of installs** (`fn-autosc-api/menu-api:18`) —
 `token()` drew 32 bytes → 44 base64 chars, then stripped `/+=` and cut to 40: measured 41/1000 draws below 40 (min 36), contradicting the README/live-plan/`fn-api.md` "40 char" claim and weakening the root credential by up to 24 bits on unlucky installs. One-word fix: draw 48 bytes (exact multiple of 3, so zero `=` padding; only `/+` stripped, ~62 chars remain) — 0/2000 short after the change.
 
+Found 344. **Phase 15: API restart fan-out quantified — implementation deferred to a live-VPS session** (design recorded, explicitly NOT implemented here) —
+static audit of the handler→panel call chains: `add-xray` = 1 restart/call, `delete-xray` = up to 4/call (one per transport holding the account), `renew-xray` = 1/call, the other six mutating handlers = 0. A 6+6 burst therefore fans out to ~12–30 `systemctl restart` in seconds; the widened unit budgets (Fix 329/330/335) absorb it, but the fan-out itself remains.
+- **Recorded design (trailing-edge, for live implementation):** panel `add-*`/`delete-*`/`extend-*` gain an env gate (`FN_API_BATCH` set → skip internal restart, touch `/run/fn-api/dirty-<transport>`); handlers set it, then join-or-schedule one `at now + 15s` flush (marker-file dedupe; the single-threaded server makes scheduling race-free); the flusher `xray -test`-gates and restarts each dirty transport once. Schedule-before-touch ordering: a crash costs at most a redundant restart, never a lost one.
+- **Deferral (gate §5.5):** this changes restart *timing* (account-activation latency becomes ≤15s via API) — behavior-visible work that must be proven on the live VPS (`at`-daemon semantics, burst journal counts, single-call latency). Landing it untested from static audit would violate the acceptance gate. Status: design accepted, code pending a live session. Live criteria already in Fase 15 plan (burst 6+6 → grep-verified + 1 restart/transport + active, no `reset-failed`).
+
 
 
 
