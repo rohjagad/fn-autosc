@@ -160,7 +160,7 @@ non-zero exit is reserved for a genuine failure and surfaces as HTTP `500`.
 | `cek-xray` | GET | — | the four `cek-xray-*` | `status`, `text` |
 | `cek-ssh` | GET | — | `cek-login-ssh` | `status`, `text` |
 | `list-noobz` | GET | — | `noobzvpns print-all` | `status`, `text` |
-| `delete-xray` | DELETE | `username` | `delete-ws`/`-http`/`-xhttp`/`-grpc` for every transport that holds it | `status`, `username`, `deleted_from[]` |
+| `delete-xray` | DELETE | `username` | `delete-ws`/`-http`/`-xhttp`/`-grpc` for every transport that holds it | `status`, `username`, `deleted_from[]` (+ `partial:true`, `failed_from[]` when a transport refuses) |
 | `delete-ssh` | DELETE | `username` | `delete-ssh` | `status`, `message` |
 | `delete-noobz` | DELETE | `username` | `noobzvpns remove` | `status`, `message` |
 | `renew-xray` | PUT/POST | `username`, `days`, `core` (default `ws`) | `extend-<core>` (keeps the account's usage) | `status`, `username`, `core`, `previous_expired`, `expired` |
