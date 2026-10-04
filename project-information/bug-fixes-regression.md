@@ -1582,6 +1582,17 @@ Section 35's four-check rule applied to Fix 338:
 | **Over-engineering** | One line; parity with the `full/` sibling, no new wording invented. |
 | **vs the source** | V23/1.20 predate the notification texts (panel-era copy); fix aligns the lite copy with the full copy. |
 
+## 124. Phase 7: addssh Failure Handling — Four Checks (October 4, 2026)
+
+Section 35's four-check rule applied to Fix 339:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Failure path now exits before card/log/Telegram instead of fabricating them; success path byte-identical behavior; `bash -n` clean; zip deterministic. |
+| **Over-strictness** | Nothing newly rejected; valid creates flow unchanged. |
+| **Over-engineering** | Two words (`\|\| return`, `\|\| exit 0`), both mirroring guards already present in `trial-ssh.sh` / the same file's retries. |
+| **vs the source** | V23/1.20 share the unchecked call; guarding it follows the already-accepted `trial-ssh` pattern in this repo. |
+
 
 
 

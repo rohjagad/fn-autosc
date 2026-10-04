@@ -114,7 +114,7 @@ main() {
     echo -e "\033[38;2;255;0;0m-\033[38;2;255;80;0m-\033[38;2;255;161;0m-\033[38;2;255;241;0m-\033[38;2;188;255;0m-\033[38;2;108;255;0m-\033[38;2;27;255;0m-\033[38;2;0;255;53m-\033[38;2;0;255;134m-\033[38;2;0;255;214m-\033[38;2;0;215;255m-\033[38;2;0;135;255m-\033[38;2;0;54;255m-\033[38;2;26;0;255m-\033[38;2;107;0;255m-\033[38;2;187;0;255m-\033[38;2;255;0;242m-\033[38;2;255;0;162m-\033[38;2;255;0;81m-\033[38;2;255;0;0m-\033[0m"
     echo -e "\033[1;33m Create SSH Account \033[0m"
     echo -e "\033[38;2;255;0;0m-\033[38;2;255;80;0m-\033[38;2;255;161;0m-\033[38;2;255;241;0m-\033[38;2;188;255;0m-\033[38;2;108;255;0m-\033[38;2;27;255;0m-\033[38;2;0;255;53m-\033[38;2;0;255;134m-\033[38;2;0;255;214m-\033[38;2;0;215;255m-\033[38;2;0;135;255m-\033[38;2;0;54;255m-\033[38;2;26;0;255m-\033[38;2;107;0;255m-\033[38;2;187;0;255m-\033[38;2;255;0;242m-\033[38;2;255;0;162m-\033[38;2;255;0;81m-\033[38;2;255;0;0m-\033[0m"
-    read -p "Username: " username
+    read -p "Username: " username || exit 0
     if ! [[ "$username" =~ ^[a-z][a-z0-9_]{0,31}$ ]]; then
         echo -e "\033[0;31mUsername must be lowercase alphanumeric/underscore, start with a letter, max 32 chars.\033[0m"
         read -n 1 -s -r -p "Press any key to return"
@@ -154,7 +154,7 @@ main() {
     fi
 
     local expiration_date=$(calculate_expiration_date "$masaaktif")
-    create_ssh_user "$username" "$password" "$expiration_date"
+    create_ssh_user "$username" "$password" "$expiration_date" || return
 
     local expiry=$(chage -l "$username" | grep "Account expires" | awk -F": " '{print $2}' | xargs)
 

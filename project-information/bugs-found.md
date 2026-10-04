@@ -2126,6 +2126,10 @@ the endpoint table and the "named the same everywhere" paragraph list `core` as 
 Found 338. **Phase 5: lite unlock-xhttp Telegram title says the account was DELETED** (`lite/unlock-xhttp.sh:111`) —
 the unlock notification body reads `X-RAY DELETED ACOUNT` while the other seven unlock scripts (all three siblings in `full/`, the other three in `lite/`, both http variants) read `UNLOCK ...` — a copy-paste leftover that tells the operator the exact opposite of the operation that just ran (account restored, `.locked`→`.log`, service restarted). Same notification-text class as Found 85; one line restores full/lite parity (verified via `diff`: empty after fix).
 
+Found 339. **Phase 7: `addssh` ignores a failed `useradd` and reports success anyway** (`full/addssh.sh:157`) —
+`create_ssh_user` returns 1 when `useradd` fails, but the caller discards the status and proceeds to `chage`, card, Telegram, log and display — a phantom success for an account that does not exist (reachable via a double-create race; `trial-ssh.sh` already guards its caller with `exit 1`). One-word fix (`|| return`).
+- **Also Phase 7:** the first `read -p "Username: "` had no EOF guard while every retry carries `|| exit 1` — added the same guard (Fase 20 pattern, in-scope per the Phase 7 `read -p` scan).
+
 
 
 

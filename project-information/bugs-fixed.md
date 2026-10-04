@@ -2461,6 +2461,11 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Fix 338 (Found 338):** one line in `lite/unlock-xhttp.sh:111` (`DELETED` → `XHTTP UNLOCK`), restoring full/lite parity. Repacked `menu/lite.zip` (`unlock-xhttp` entry byte-identical); `menu/full.zip` untouched (no `full/` source changed — verified zero mismatched entries, reverted the no-op rebuild).
 - **Verified:** `bash -n` clean; `diff full/unlock-xhttp.sh lite/unlock-xhttp.sh` empty; zip deterministic.
 
+### Fix 339 - Phase 7: `addssh` honors `useradd` failure + first-prompt EOF guard (Found 339)
+
+- **Fix 339 (Found 339):** `create_ssh_user ... || return` (mirrors `trial-ssh.sh`'s caller guard) and `|| exit 0` on the first username `read` (mirrors every retry in the same file). Repacked `menu/full.zip` (`addssh` entry byte-identical; lite ships no SSH tooling).
+- **Verified:** `bash -n` clean; no prompt/validation logic altered.
+
 
 
 
