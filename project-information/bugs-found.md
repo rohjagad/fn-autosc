@@ -2139,6 +2139,9 @@ both install loops check only non-empty + no-spaces, then write `/etc/xray/domai
 Found 342. **Phase 13: API installer fetches hang unbounded on stalled network** (`fn-autosc-api/menu-api:56,60,63`) —
 the license-gate curls carry `--max-time 15`, but the three `install_api` fetch lines (`server`, `lib.sh`, 19 × handlers) used bare `curl -fsSL`: `-f` fails fast on HTTP errors yet a blackholed/stalled connection hangs per-file with no bound (21 files). Same-class precedent as the gate caps; bounded at 60s per file (generous for binaries, still fail-fast via the existing `FAILED to fetch` + `return 1`). Verified: blackhole fetch aborts at exactly the cap, healthy fetch unaffected (~1.2s).
 
+Found 343. **Phase 14: API token shorter than the documented 40 chars on 4% of installs** (`fn-autosc-api/menu-api:18`) —
+`token()` drew 32 bytes → 44 base64 chars, then stripped `/+=` and cut to 40: measured 41/1000 draws below 40 (min 36), contradicting the README/live-plan/`fn-api.md` "40 char" claim and weakening the root credential by up to 24 bits on unlucky installs. One-word fix: draw 48 bytes (exact multiple of 3, so zero `=` padding; only `/+` stripped, ~62 chars remain) — 0/2000 short after the change.
+
 
 
 

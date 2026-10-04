@@ -1626,6 +1626,17 @@ Section 35's four-check rule applied to Fix 342:
 | **Over-engineering** | Three flags, same `--max-time` idiom the gate already uses; no retry framework. |
 | **vs the source** | FN-API reference is endpoint-list only; timeouts follow this repo's own gate precedent. |
 
+## 128. Phase 14: Full-Length API Token — Four Checks (October 4, 2026)
+
+Section 35's four-check rule applied to Fix 343:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Same pipeline/charset/cut; only input entropy raised; existing tokens unaffected; `bash -n` clean. |
+| **Over-strictness** | Nothing rejected; strictly stronger credential matching the documented claim. |
+| **Over-engineering** | One number (`32`→`48`); no alphabet change, no loop, no dependency. |
+| **vs the source** | FN-API reference says nothing about token shape; fix aligns code with this repo's own README contract. |
+
 
 
 

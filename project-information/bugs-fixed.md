@@ -2481,6 +2481,11 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Fix 342 (Found 342):** `--max-time 60` on the three `install_api` fetch lines in `fn-autosc-api/menu-api` (server, lib.sh, handlers loop). Staging/rollback, checksums and the remaining installer gaps stay in Fase 19 where they are tracked.
 - **Verified:** `bash -n` clean; existing `FAILED to fetch` + `return 1` fail-fast path unchanged, now also time-bounded.
 
+### Fix 343 - Phase 14: full-length API token (Found 343)
+
+- **Fix 343 (Found 343):** `head -c 32` → `head -c 48` in `token()` (`fn-autosc-api/menu-api:18`); charset and 40-char cut unchanged, so existing tokens stay valid and rotation works as before.
+- **Verified:** `bash -n` clean; 2000-draw distribution all exactly 40 (was 41/1000 short, min 36).
+
 
 
 
