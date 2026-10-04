@@ -82,7 +82,7 @@ TIME="10"
 DATE=$(date +"%Y-%m-%d %H:%M:%S")
 TEXT="
 <b>━━━━━━━━━━━━━━━━━━━━━━━</b>
-<b>QUOTA SPLIT HTTP ACOUNT</b>
+<b>QUOTA XHTTP ACOUNT</b>
 <b>━━━━━━━━━━━━━━━━━━━━━━━</b>
 <b>Username    :</b> <code>$user</code>
 <b>Date        :</b> <code>$DATE</code>

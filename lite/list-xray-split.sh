@@ -80,7 +80,7 @@ function bytes() {
 
 clear
 echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-echo -e "=[ Member XTLS SPLIT HTTP Account ]=         "
+echo -e "=[ Member XTLS XHTTP Account ]=         "
 echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 > /var/log/xray/accsess.log
 > /root/.system

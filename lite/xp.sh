@@ -153,7 +153,7 @@ if [[ $http_expired -eq 1 ]]; then
     fi
 fi
 
-##----- Auto Remove Xray Split HTTP
+##----- Auto Remove Xray XHTTP
 split_expired=0
 data=( `cat /etc/xray/json/split.json | grep '^###' | cut -d ' ' -f 2 | sort | uniq`);
 now=`date +"%Y-%m-%d"`

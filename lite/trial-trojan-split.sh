@@ -103,14 +103,14 @@ if xray run -test -config /etc/xray/json/split.json >/dev/null 2>&1; then
 fi
 
 # Konfigurasi Trojan WS TLS
-link1="trojan://${uuid}@${domain}:443?path=/trspl&security=tls&host=${domain}&type=splithttp&sni=${domain}#${user}"
+link1="trojan://${uuid}@${domain}:443?path=/trxh&security=tls&host=${domain}&type=xhttp&sni=${domain}#${user}"
 
 # Konfigurasi Trojan WS NonTLS
-link2="trojan://${uuid}@${domain}:80?path=/trspl&security=none&host=${domain}&type=splithttp#${user}"
+link2="trojan://${uuid}@${domain}:80?path=/trxh&security=none&host=${domain}&type=xhttp#${user}"
 
 TEKS="
 ======================
-   Trojan Split HTTP
+   Trojan XHTTP
 ======================
 
 Remarks : $user
@@ -122,8 +122,8 @@ Quota   : $quota GB
 Protokol: Trojan
 ======================
 
-Path: /trspl
-Network: Split HTTP
+Path: /trxh
+Network: XHTTP
 Port TLS: 443, 2053, 2083, 2087, 2096
 Port None: 80, 8880, 2052, 2082, 2095
 ======================

@@ -63,7 +63,7 @@ Fase 4: Suite Transport Xray WebSocket (VMess, VLESS, Trojan)
    │
 Fase 5: Suite Transport Xray gRPC Streaming (vmgr, vlgr, trgr)
    │
-Fase 6: Suite Transport Xray HTTPUpgrade & SplitHTTP
+Fase 6: Suite Transport Xray HTTPUpgrade & XHTTP
    │
 Fase 7: Suite Tunnel VPN (WireGuard, NoobzVPN, SlowDNS, L2TP, OpenVPN)
    │
@@ -127,11 +127,11 @@ Fase 16: Pengujian Suite REST API Headless (FN-API & Concurrency Lock)
   2. Jalankan client Xray dari KVM dengan konfigurasi gRPC service name `vmgr`, `vlgr`, `trgr`.
   3. Uji streaming data dua arah dan transfer file besar (>3MB) untuk memastikan tidak terbentur `client_max_body_size`.
 
-### Fase 6: Suite Transport Xray HTTPUpgrade & SplitHTTP
+### Fase 6: Suite Transport Xray HTTPUpgrade & XHTTP
 - **Tujuan:** Memvalidasi transport HTTP modern Xray v25.3.6.
 - **Langkah Pengujian:**
   1. HTTPUpgrade: uji koneksi VMess, VLESS, Trojan melalui path `/vmhu`, `/vlhu`, `/trhu`.
-  2. SplitHTTP: uji koneksi upload dan download terpisah pada `/vmspl`.
+  2. XHTTP: uji koneksi upload dan download terpisah pada `/vmxh`.
   3. Pastikan upload file besar tidak terputus timeout Nginx 12 detik (`client_body_timeout 300s`, Fix 29).
 
 ### Fase 7: Suite Tunnel VPN (WireGuard, NoobzVPN, SlowDNS, L2TP, OpenVPN)

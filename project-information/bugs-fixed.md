@@ -2423,6 +2423,11 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Fix 330 (Found 330):** same two lines (`StartLimitIntervalSec=120` + `StartLimitBurst=30`): direct `[Unit]` addition in the four `quota-*.service` templates and `ws.service` template (`installer/xray.sh`, `installer/ssh.sh`); drop-in files (`/etc/systemd/system/{ssh,dropbear}.service.d/fn-burst.conf`, distro units never edited) created by `installer/ssh.sh`, covering the `sshd` alias through `ssh.service`. Crash behavior untouched everywhere.
 - **Verified live:** 8 back-to-back restarts each of `quota-ws`, `ws`, `ssh`, `dropbear` → all stay `active`; 0 failed units; pre-existing `Restart=`/`RestartSec=` values unchanged (`systemctl cat` diff shows only the two added lines).
 
+### Fix 331 - SplitHTTP → XHTTP migration (Found 331)
+
+- **Fix 331 (Found 331):** 43 files, pure renames (150 insertions / 150 deletions, no logic change): protocol + paths + display strings as in Found 331; non-append-only docs updated in place (`is-decision.md` path table, `fn-api.md`, both phase plans, `README.md` transport table/cron/log rows, keeping identifier columns intact).
+- **Verified live:** `xray run -test` OK on new `split.json`; `bash -n` clean on all touched scripts; Go changes are string literals only.
+
 
 
 

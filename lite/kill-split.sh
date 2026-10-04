@@ -70,7 +70,7 @@ function send_log() {
     TIME="10"
     TEXT="
 <code>────────────────────</code>
-<b>⚠️LIMIT QUOTA SPLIT HTTP⚠️</b>
+<b>⚠️LIMIT QUOTA XHTTP⚠️</b>
 <code>────────────────────</code>
 <code>Username  : </code><code>$user</code>
 <code>Limit     : </code><code>$limit</code>

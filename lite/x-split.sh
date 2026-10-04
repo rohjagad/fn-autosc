@@ -110,7 +110,7 @@ xsplit() {
 
     clearScreen
     echo -e "${NC}${separator}
-         XTLS SPLIT HTTP
+         XTLS XHTTP
 ${separator}
 Split        : ${green}$split${NC}
 ${blue_sep}
@@ -131,11 +131,11 @@ ${green}09${NC}. Extend Account
 ${green}10${NC}. Check Database Logs
 ${green}11${NC}. List All Accounts
 ${green}12${NC}. Change UUID / Password
-${green}13${NC}. Unlock Split HTTP Account
+${green}13${NC}. Unlock XHTTP Account
 ${green}14${NC}. Xray Routing Config
 ${green}15${NC}. Change Split IP Limit
 ${green}16${NC}. Change Split Quota Limit
-${green}17${NC}. Lock Split HTTP Account
+${green}17${NC}. Lock XHTTP Account
 ${green}00${NC}. Back to Main Menu
 ${separator}
 

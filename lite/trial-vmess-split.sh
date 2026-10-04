@@ -110,8 +110,8 @@ acs=`cat<<eof
 "port": "443",
 "id": "${uuid}",
 "aid": "0",
-"net": "splithttp",
-"path": "/vmspl",
+"net": "xhttp",
+"path": "/vmxh",
 "type": "none",
 "host": "${domain}",
 "tls": "tls"
@@ -127,8 +127,8 @@ ask=`cat<<eof
 "port": "80",
 "id": "${uuid}",
 "aid": "0",
-"net": "splithttp",
-"path": "/vmspl",
+"net": "xhttp",
+"path": "/vmxh",
 "type": "none",
 "host": "${domain}",
 "tls": "none"
@@ -142,7 +142,7 @@ vmesslink2="vmess://$(echo $ask | base64 -w 0)"
 clear
 TEKS="
 ======================
-   VMess Split HTTP
+   VMess XHTTP
 ======================
 
 Remarks : $user
@@ -162,8 +162,8 @@ TLS: 443, 2053, 2083, 2087, 2096
 NoneTLS: 80, 8880, 2052, 2082, 2095
 ======================
 AlterID: 0
-Path   : /vmspl
-Network: Split HTTP
+Path   : /vmxh
+Network: XHTTP
 Alpn   : - [ None ]
 Decrypt: auto
 ======================

@@ -300,7 +300,7 @@ Two limitations are the panel's own, and the endpoints report them rather than h
   truncated.
 
 The panel's account types and the API surface they map to: SSH/OpenVPN (`addssh`, `list-ssh`,
-`cek-ssh`, `delete-ssh`), Xray VMess/VLESS/Trojan over WebSocket, HTTPUpgrade, SplitHTTP and gRPC
+`cek-ssh`, `delete-ssh`), Xray VMess/VLESS/Trojan over WebSocket, HTTPUpgrade, XHTTP and gRPC
 (`add-vmess`/`add-vless`/`add-trojan`, `list-xray`, `cek-xray`, `delete-xray`), NoobzVPN
 (`add-noobz`, `list-noobz`, `delete-noobz`). WireGuard and L2TP are menu-only and have no endpoint.
 
@@ -381,6 +381,6 @@ A second pass over this layer, recorded as Found 139-140 / fixes 141-142, found 
   pattern; the NoobzVPN lookups use `grep -F`.
 - The server was briefly threaded with a serialising lock, but that made threading pointless for handlers (nginx already buffers requests). It was reverted to single-threaded `HTTPServer` with the lock removed, matching the reference design.
 
-The `client_max_body_size` fix was also scoped down: it now applies only to the gRPC and SplitHTTP
+The `client_max_body_size` fix was also scoped down: it now applies only to the gRPC and XHTTP
 locations, which carry the tunnel as a request body and stream it, rather than to every location -
 the WebSocket/HTTPUpgrade/`/` locations buffer, so an unlimited body there was a disk-fill DoS.

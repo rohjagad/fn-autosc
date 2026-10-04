@@ -120,7 +120,7 @@ func main() {
 	clearScreen()
 
 	fmt.Printf("%s━━━━━━━━━━━━━━━━━━━━━━━%s\n", BLUE, NC)
-	fmt.Println("  Log X-Ray SPLIT HTTP  ")
+	fmt.Println("  Log X-Ray XHTTP  ")
 	fmt.Printf("%s━━━━━━━━━━━━━━━━━━━━━━━%s\n", BLUE, NC)
 
 	// Load user list from config file

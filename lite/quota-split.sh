@@ -69,7 +69,7 @@ function send_log() {
 
     TEXT="
 <code>────────────────────</code>
-<b> NOTIF QUOTA SPLIT HTTP HABIS</b>
+<b> NOTIF QUOTA XHTTP HABIS</b>
 <code>────────────────────</code>
 <code>Username  : </code><code>${user}</code>
 <code>Usage     : </code><code>${total_usage}</code>

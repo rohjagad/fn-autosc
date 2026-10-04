@@ -246,7 +246,7 @@ else
 xhttp="${red}OFF${NC}"
 fi
 
-### Status XTLS SPLIT HTTP
+### Status XTLS XHTTP
 vxsplit=$(service xray@split status | grep active | cut -d ' ' $stat)
 if [ "$vxsplit" = "active" ]; then
 xsplit="${green}ON${NC}"

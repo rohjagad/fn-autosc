@@ -562,7 +562,7 @@ Autoscript Management Panel VPN
 XTLS:
 - WEBSOCKET
 - HTTP UPGRADE
-- SPLIT HTTP
+- XHTTP
 - gRPC
 
 Feature:

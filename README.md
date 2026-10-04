@@ -4,7 +4,7 @@ A menu-driven VPS automation suite for tunnelling protocols, proxy services, and
 Xray account management.
 
 One command installs SSH WebSocket, Xray (VMess / VLESS / Trojan over WebSocket,
-HTTP Upgrade, SplitHTTP, and gRPC), OpenVPN, WireGuard, L2TP/IPsec, NoobzVPN,
+HTTP Upgrade, XHTTP, and gRPC), OpenVPN, WireGuard, L2TP/IPsec, NoobzVPN,
 SlowDNS, Cloudflare Argo, automated backups, and a Telegram control bot.
 
 Supported operating systems: Debian 10–12 and Ubuntu 20.04–24.04.
@@ -131,7 +131,7 @@ The full installer runs these stages, in order:
 3. Download and unpack the menu suite into `/usr/bin`.
 4. Install the terminal display formatter (`/etc/funny/format.sh`).
 5. Install SSH, Dropbear (pinned to 2019.78 — see decision 25), and SSH WebSocket (`ssh.sh`).
-6. Install Xray (`xray.sh`) — WebSocket, HTTP Upgrade, SplitHTTP, gRPC (all four transports).
+6. Install Xray (`xray.sh`) — WebSocket, HTTP Upgrade, XHTTP, gRPC (all four transports).
 7. Install the web restore interface (`website/install.sh`).
 8. Install Nginx and obtain SSL certificates (`diamond.sh`).
 9. Install OpenVPN, Squid, OHP (`vpn.sh`).
@@ -154,7 +154,7 @@ NoobzVPN, and UDP.
 | :--- | :---: | :---: |
 | Base packages + Node.js 16 + vnStat | ✅ | ✅ |
 | SSH / Dropbear / SSH WebSocket | ✅ | ❌ |
-| Xray (HTTP Upgrade, SplitHTTP, gRPC) | ✅ | ✅ |
+| Xray (HTTP Upgrade, XHTTP, gRPC) | ✅ | ✅ |
 | Xray (WebSocket) | ✅ | ✅ |
 | Nginx + SSL certificates | ✅ | ✅ |
 | Web restore interface | ✅ | ✅ |
@@ -206,7 +206,7 @@ Branches into the four protocol submenus:
 
 - `x-ws` — WebSocket
 - `x-http` — HTTP Upgrade
-- `x-split` — SplitHTTP
+- `x-split` — XHTTP
 - `x-grpc` — gRPC
 
 Each submenu offers the same 17 actions: create VMess / VLESS / Trojan,
@@ -293,9 +293,9 @@ to `127.0.0.1` only and are never reachable from outside.
 | VMess HTTP Upgrade | HTTPUpgrade | `/vmhu` | `/vmhu` | `127.0.0.1:8001` |
 | VLESS HTTP Upgrade | HTTPUpgrade | `/vlhu` | `/vlhu` | `127.0.0.1:8003` |
 | Trojan HTTP Upgrade | HTTPUpgrade | `/trhu` | `/trhu` | `127.0.0.1:8002` |
-| VMess SplitHTTP | SplitHTTP | `/vmspl` | `/vmspl` | `127.0.0.1:2019` |
-| VLESS SplitHTTP | SplitHTTP | `/vlspl` | `/vlspl` | `127.0.0.1:2023` |
-| Trojan SplitHTTP | SplitHTTP | `/trspl` | `/trspl` | `127.0.0.1:2020` |
+| VMess XHTTP | XHTTP | `/vmxh` | `/vmxh` | `127.0.0.1:2019` |
+| VLESS XHTTP | XHTTP | `/vlxh` | `/vlxh` | `127.0.0.1:2023` |
+| Trojan XHTTP | XHTTP | `/trxh` | `/trxh` | `127.0.0.1:2020` |
 | VMess gRPC | gRPC | `vmgr` | — | `127.0.0.1:31234` |
 | VLESS gRPC | gRPC | `vlgr` | — | `127.0.0.1:24456` |
 | Trojan gRPC | gRPC | `trgr` | — | `127.0.0.1:33456` |
@@ -432,16 +432,16 @@ These jobs are added to `/etc/crontab` during installation. Each runs under
 | `0,15,30,45 * * * *` | `sleep 300 && xp` | Expiry sweep every 15 min (delayed 5 min) |
 | `*/5 * * * *` | `limit-ip-ssh` | SSH IP limit |
 | `*/5 * * * *` | `limit-ip-ws` | WebSocket IP limit |
-| `*/5 * * * *` | `limit-ip-split` | SplitHTTP IP limit |
+| `*/5 * * * *` | `limit-ip-split` | XHTTP IP limit |
 | `*/5 * * * *` | `limit-ip-http` | HTTP Upgrade IP limit |
 | `*/5 * * * *` | `limit-ip-grpc` | gRPC IP limit |
 | `*/5 * * * *` | `auto-delete-ws` | Remove orphaned WS accounts |
-| `*/5 * * * *` | `auto-delete-split` | Remove orphaned SplitHTTP accounts |
+| `*/5 * * * *` | `auto-delete-split` | Remove orphaned XHTTP accounts |
 | `*/5 * * * *` | `auto-delete-http` | Remove orphaned HTTP Upgrade accounts |
 | `*/5 * * * *` | `auto-delete-grpc` | Remove orphaned gRPC accounts |
 | `*/5 * * * *` | `kill-ws` | Remove WS accounts over quota |
 | `*/5 * * * *` | `kill-http` | Remove HTTP Upgrade accounts over quota |
-| `*/5 * * * *` | `kill-split` | Remove SplitHTTP accounts over quota |
+| `*/5 * * * *` | `kill-split` | Remove XHTTP accounts over quota |
 | `*/5 * * * *` | `kill-grpc` | Remove gRPC accounts over quota |
 
 ---
@@ -662,7 +662,7 @@ terminal only.
 | :--- | :--- |
 | VMess / VLESS / Trojan WebSocket | `/var/log/create/xray/ws/` |
 | VMess / VLESS / Trojan HTTP Upgrade | `/var/log/create/xray/http/` |
-| VMess / VLESS / Trojan SplitHTTP | `/var/log/create/xray/split/` |
+| VMess / VLESS / Trojan XHTTP | `/var/log/create/xray/split/` |
 | VMess / VLESS / Trojan gRPC | `/var/log/create/xray/grpc/` |
 | SSH | `/var/log/create/ssh/` |
 
@@ -674,7 +674,7 @@ Files are named `{username}.log`. Locking renames them to `{username}.locked`.
 | :--- | :--- |
 | Xray WebSocket (WS) | `/var/log/xray/ws.log` |
 | Xray HTTP Upgrade | `/var/log/xray/upgrade.log` |
-| Xray SplitHTTP | `/var/log/xray/split.log` |
+| Xray XHTTP | `/var/log/xray/split.log` |
 | Xray gRPC | `/var/log/xray/grpc.log` |
 
 ### Config Files
@@ -683,7 +683,7 @@ Files are named `{username}.log`. Locking renames them to `{username}.locked`.
 | :--- | :--- |
 | Xray WebSocket (WS) | `/etc/xray/json/ws.json` |
 | Xray HTTP Upgrade | `/etc/xray/json/upgrade.json` |
-| Xray SplitHTTP | `/etc/xray/json/split.json` |
+| Xray XHTTP | `/etc/xray/json/split.json` |
 | Xray gRPC | `/etc/xray/json/grpc.json` |
 | Nginx | `/etc/nginx/nginx.conf` |
 | Domain | `/etc/xray/domain` |
@@ -713,12 +713,12 @@ shell scripts.
 | :--- | :--- | :--- |
 | `log-database-xray-ws` | `log-database-xray-ws.go` | Styled WS account log viewer |
 | `log-database-xray-http` | `log-database-xray-http.go` | Styled HTTP Upgrade log viewer |
-| `log-database-xray-split` | `log-database-xray-split.go` | Styled SplitHTTP log viewer |
+| `log-database-xray-split` | `log-database-xray-split.go` | Styled XHTTP log viewer |
 | `log-database-xray-grpc` | `log-database-xray-grpc.go` | Styled gRPC log viewer |
 | `log-acc-ssh` | `log-acc-ssh.go` | Styled SSH log viewer |
 | `cek-xray-ws` | `cek-xray-ws.sh` (shell, not Go) | WS account status |
 | `cek-xray-http` | `cek-xray-http.go` | HTTP Upgrade account status |
-| `cek-xray-split` | `cek-xray-split.go` | SplitHTTP account status |
+| `cek-xray-split` | `cek-xray-split.go` | XHTTP account status |
 | `cek-xray-grpc` | `cek-xray-grpc.go` | gRPC account status |
 | `limit-ip` | `limit-ip.go` | SSH IP limiter |
 | `delete-ssh` | `delete-ssh.go` | Delete SSH accounts |
@@ -727,7 +727,7 @@ shell scripts.
 | `pwd-ssh` | `pwd-ssh.go` | Show SSH passwords |
 | `change-limit-ip-ws` | `change-limit-ip-ws.go` | Change WS IP limit |
 | `change-limit-ip-http` | `change-limit-ip-http.go` | Change HTTP Upgrade IP limit |
-| `change-limit-ip-split` | `change-limit-ip-split.go` | Change SplitHTTP IP limit |
+| `change-limit-ip-split` | `change-limit-ip-split.go` | Change XHTTP IP limit |
 | `change-limit-ip-grpc` | `change-limit-ip-grpc.go` | Change gRPC IP limit |
 
 Binaries are built with `-ldflags='-s -w'` for a small footprint.
@@ -753,9 +753,9 @@ Binaries are built with `-ldflags='-s -w'` for a small footprint.
 - **`trial-ssh.sh` wrote no log**, so trial SSH accounts were invisible to the
   database viewer.
 - **Missing `cek-xray-ws` binary** that the WS menu called.
-- **Transport path bugs** — a VLESS WS path mismatch, a broken Trojan SplitHTTP
+- **Transport path bugs** — a VLESS WS path mismatch, a broken Trojan XHTTP
   URL, a wrong VMess WS display path, `security=none` on a TLS gRPC link, a
-  literal `#user` fragment, and inconsistent `splithttp` type identifiers.
+  literal `#user` fragment, and inconsistent `xhttp` type identifiers.
 - **Duplicate website install** in `installer/lite.sh`.
 - **Libreswan 3.32 crashes** on Debian 11/12 — replaced with distribution
   `strongswan` + `xl2tpd`.
@@ -779,7 +779,7 @@ Binaries are built with `-ldflags='-s -w'` for a small footprint.
 
 1. **SlowDNS needs manual setup** — `dnstt.service` is inactive until a
    nameserver domain is configured via `menu-dnstt`.
-2. **SplitHTTP and HTTP/2** — some clients expecting plain HTTP/1.1 chunked
+2. **XHTTP and HTTP/2** — some clients expecting plain HTTP/1.1 chunked
    transport may not work through HTTP/2 reverse proxies.
 3. **UDP Request SNAT** — the broad `10.0.0.0/8` SNAT rule can overlap client
    private subnets and may need manual exclusion.

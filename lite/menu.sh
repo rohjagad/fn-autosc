@@ -218,7 +218,7 @@ ${purple}MENU${NC}
 ${green}1${NC}. WebSocket (WS)        ${green}5${NC}. System Menu
 ${green}2${NC}. HTTP Upgrade (HTTP)   ${green}6${NC}. Domain Menu
 ${green}3${NC}. gRPC (XTLS)           ${green}7${NC}. Backup Menu
-${green}4${NC}. Split HTTP (Split)    ${green}8${NC}. Telegram Bot
+${green}4${NC}. XHTTP (Split)    ${green}8${NC}. Telegram Bot
 ${blue_sep}
 Today: ${red}$ttoday${NC} Yesterday: ${red}$tyest${NC} This month: ${red}$tmon${NC}
 ${separator}

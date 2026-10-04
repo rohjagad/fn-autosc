@@ -129,7 +129,7 @@ ${blue_sep}
 ${purple}MENU${NC}
 ${green}1${NC}. WebSocket (WS)
 ${green}2${NC}. HTTP Upgrade
-${green}3${NC}. Split HTTP
+${green}3${NC}. XHTTP
 ${green}4${NC}. gRPC (XTLS)
 ${green}0${NC}. Back to Main Menu
 ${separator}

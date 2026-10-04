@@ -74,7 +74,7 @@ send_log() {
 
     TEXT="
 <b>━━━━━━━━━━━━━━━━━━━━━━━</b>
-<b>X-RAY Extend SPLITHTTP ACCOUNT</b>
+<b>X-RAY Extend XHTTP ACCOUNT</b>
 <b>━━━━━━━━━━━━━━━━━━━━━━━</b>
 <b>🗓️ Date          :</b> <code>$DATE</code>
 <b>👤 Username     :</b> <code>$user</code>
@@ -90,7 +90,7 @@ clear
 NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/split.json")
 if [[ ${NUMBER_OF_CLIENTS} == '0' ]]; then
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-    echo -e "                ${GB}XTLS X-RAY SPLITHTTP${NC}                "
+    echo -e "                ${GB}XTLS X-RAY XHTTP${NC}                "
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
     echo -e "  ${YB}You have no existing clients!${NC}"
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
@@ -101,7 +101,7 @@ fi
 
 clear
 echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-echo -e "                ${GB}XTLS X-RAY SPLITHTTP${NC}                "
+echo -e "                ${GB}XTLS X-RAY XHTTP${NC}                "
 echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 echo -e " ${YB}User  Expired${NC}  "
 echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
@@ -150,7 +150,7 @@ else
 
     clear
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-    echo -e "                ${GB}XTLS X-RAY SPLITHTTP${NC}                "
+    echo -e "                ${GB}XTLS X-RAY XHTTP${NC}                "
     echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
     echo -e " ${YB}Client Name :${NC} $user"
     echo -e " ${YB}Expired On  :${NC} $exp4"

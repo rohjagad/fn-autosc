@@ -27,7 +27,7 @@ func rerechanBanner() {
 	barisPanjang()
 	fmt.Println("                      FN AutoSC")
 	fmt.Println("──────────────────────────────────────────────────")
-	fmt.Println("          Menu Change Limit IP X-Ray Split HTTP")
+	fmt.Println("          Menu Change Limit IP X-Ray XHTTP")
 	fmt.Println("──────────────────────────────────────────────────")
 }
 

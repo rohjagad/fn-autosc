@@ -27,9 +27,9 @@
         ]
       },
       "streamSettings": {
-        "network": "splithttp",
-        "splithttpSettings": {
-          "path": "/vmspl"
+        "network": "xhttp",
+        "xhttpSettings": {
+          "path": "/vmxh"
         }
       },
       "sniffing": {
@@ -56,9 +56,9 @@
         "decryption": "none"
       },
       "streamSettings": {
-        "network": "splithttp",
-        "splithttpSettings": {
-          "path": "/vlspl"
+        "network": "xhttp",
+        "xhttpSettings": {
+          "path": "/vlxh"
         }
       },
       "sniffing": {
@@ -84,9 +84,9 @@
         ]
       },
       "streamSettings": {
-        "network": "splithttp",
-        "splithttpSettings": {
-          "path": "/trspl"
+        "network": "xhttp",
+        "xhttpSettings": {
+          "path": "/trxh"
         }
       },
       "sniffing": {

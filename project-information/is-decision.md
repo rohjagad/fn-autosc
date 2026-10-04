@@ -118,7 +118,7 @@ Verified end to end on a fresh install: the committed values occur 0 times in `/
 
 ## 15. Transport Paths Follow a Fixed Scheme, and Old Paths Are Removed
 
-Every protocol/transport pair carries one short path, `{proto}{transport}`: `vmws`/`vlws`/`trws` for WebSocket, `vmhu`/`vlhu`/`trhu` for HTTPUpgrade, `vmspl`/`vlspl`/`trspl` for SplitHTTP, and `vmgr`/`vlgr`/`trgr` as the gRPC service names. The same path string is used for the TLS and the NoneTLS form of a transport - Xray does not terminate TLS here, nginx does, so the port decides which listener is reached.
+Every protocol/transport pair carries one short path, `{proto}{transport}`: `vmws`/`vlws`/`trws` for WebSocket, `vmhu`/`vlhu`/`trhu` for HTTPUpgrade, `vmxh`/`vlxh`/`trxh` for XHTTP, and `vmgr`/`vlgr`/`trgr` as the gRPC service names. The same path string is used for the TLS and the NoneTLS form of a transport - Xray does not terminate TLS here, nginx does, so the port decides which listener is reached.
 
 **Rule for future changes:** keep the `{vm|vl|tr}{ws|hu|gr|spl}` pattern. When a transport is added, add its path to the four `json/*.json` templates, the three `config/*.conf` nginx configs and the `add-*`/`trial-*` scripts in both editions, then rebuild `menu/*.zip`. Do not keep the previous path as an alias: old links are expected to stop working, which is acceptable because a path is only ever published on the account card at creation time (an existing client keeps working with its stored path only until the operator re-issues it).
 

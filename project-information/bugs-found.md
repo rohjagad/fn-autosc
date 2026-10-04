@@ -2094,6 +2094,10 @@ Found 330. **Same start-limit-hit exposure on every other automation-restarted u
 `limit-ip-ssh` restarts `ssh`/`sshd`/`ws` per lock, `xp` restarts `ssh`/`sshd`/`ws`/`dropbear` per expired batch, and every `add-*` restarts its `quota-*` daemon service: all carried systemd's default 5-starts/10s budget, so the same cron-batch/API fan-out that killed `xray@ws` could take down SSH access or the quota daemons next. Panel daemons themselves already batch one restart per run (flags), so the remaining risk is purely multi-process bursts — a unit-budget problem, not a script-loop problem (234 `systemctl restart xray@` sites were counted and deliberately left alone: per-script debounce would skip semantically necessary restarts).
 - **Confirmed live:** `systemctl cat ssh|ws` showed no `StartLimit*` overrides (defaults active).
 
+Found 331. **Migrate SplitHTTP to XHTTP on Xray 25.3.6: `network: splithttp` + `/vmspl` paths renamed** —
+Xray 25.x renamed the SplitHTTP transport to XHTTP (`json:"xhttpSettings"` confirmed in the 25.3.6 binary; `splithttp` remains only as a deprecated alias). All wire-visible strings migrated: `"network": "xhttp"` + `"xhttpSettings"` in `json/split.json` and the 12 `add-*-split`/`trial-*-split` scripts (full+lite), link `type=splithttp` → `type=xhttp`, nginx locations `/vmspl`→`/vmxh`, `/vlspl`→`/vlxh`, `/trspl`→`/trxh` in `config/4.conf`, `6.conf`, `dual.conf`, and every user-facing `SplitHTTP`/`Split HTTP` display string → `XHTTP` (cards, menus, Telegram texts). Deliberately **kept** machine identifiers: `*-split.sh` filenames, `xray@split` service, `split.json`, log/quota/limit dirs, and API `core=split` (renaming those would break the API contract, cron, and live units for zero wire benefit — same precedent as public `http` vs internal `upgrade.json`).
+- **Confirmed live:** new `split.json` passes `xray run -test` on 25.3.6 (`Configuration OK`).
+
 
 
 

@@ -255,7 +255,7 @@ Fase 15: Sinkronisasi Paket Dual-Edition (full.zip & lite.zip)
 
 - **Komponen Target:** `config/{4,6,dual}.conf`, `installer/diamond.sh`, `full/dm-menu.sh`, `lite/dm-menu.sh`.
 - **Finding (Metodologi Penemuan):**
-  - Audit timeout reverse proxy: periksa direktif timeout pada lokasi streaming Xray (`/vmspl`, `/vmgr`). Pastikan ada perlindungan terhadap body upload besar (Fix 29).
+  - Audit timeout reverse proxy: periksa direktif timeout pada lokasi streaming Xray (`/vmxh`, `/vmgr`). Pastikan ada perlindungan terhadap body upload besar (Fix 29).
   - Uji penggantian nama domain: masukkan domain tidak valid (misal: `bad domain`, `test..com`) pada `dm-menu`. Periksa apakah string salah disubstitusikan ke konfigurasi Nginx dan seluruh kartu akun (Found 304).
   - Audit fallback sertifikat: periksa penanganan kondisi error saat Let's Encrypt mengembalikan HTTP 429 (rate limit). Pastikan skrip tidak membiarkan berkas sertifikat kosong yang menyebabkan Nginx/HAProxy gagal boot (Found 140).
 - **Fixing (Standar Perbaikan):**

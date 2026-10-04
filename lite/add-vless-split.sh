@@ -69,7 +69,7 @@ clear
 until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/create/xray/split/${user}.log ]]; do
     echo -e "
 \033[38;2;255;0;0m-\033[38;2;255;54;0m-\033[38;2;255;109;0m-\033[38;2;255;163;0m-\033[38;2;255;218;0m-\033[38;2;237;255;0m-\033[38;2;183;255;0m-\033[38;2;128;255;0m-\033[38;2;73;255;0m-\033[38;2;19;255;0m-\033[38;2;0;255;36m-\033[38;2;0;255;91m-\033[38;2;0;255;145m-\033[38;2;0;255;200m-\033[38;2;0;255;255m-\033[38;2;0;201;255m-\033[38;2;0;146;255m-\033[38;2;0;92;255m-\033[38;2;0;37;255m-\033[38;2;18;0;255m-\033[38;2;72;0;255m-\033[38;2;127;0;255m-\033[38;2;182;0;255m-\033[38;2;236;0;255m-\033[38;2;255;0;219m-\033[38;2;255;0;164m-\033[38;2;255;0;110m-\033[38;2;255;0;55m-\033[38;2;255;0;0m-\033[0m
-   \033[1;33mCreate VLess Split HTTP\033[0m
+   \033[1;33mCreate VLess XHTTP\033[0m
 \033[38;2;255;0;0m-\033[38;2;255;54;0m-\033[38;2;255;109;0m-\033[38;2;255;163;0m-\033[38;2;255;218;0m-\033[38;2;237;255;0m-\033[38;2;183;255;0m-\033[38;2;128;255;0m-\033[38;2;73;255;0m-\033[38;2;19;255;0m-\033[38;2;0;255;36m-\033[38;2;0;255;91m-\033[38;2;0;255;145m-\033[38;2;0;255;200m-\033[38;2;0;255;255m-\033[38;2;0;201;255m-\033[38;2;0;146;255m-\033[38;2;0;92;255m-\033[38;2;0;37;255m-\033[38;2;18;0;255m-\033[38;2;72;0;255m-\033[38;2;127;0;255m-\033[38;2;182;0;255m-\033[38;2;236;0;255m-\033[38;2;255;0;219m-\033[38;2;255;0;164m-\033[38;2;255;0;110m-\033[38;2;255;0;55m-\033[38;2;255;0;0m-\033[0m
 "
     read -p "Username: " user || exit 0
@@ -167,14 +167,14 @@ if xray run -test -config /etc/xray/json/split.json >/dev/null 2>&1; then
 fi
 
 # Konfigurasi Vless WS TLS
-vlesslink1="vless://${uuid}@${domain}:443?path=/vlspl&security=tls&encryption=none&host=${domain}&type=splithttp&sni=${domain}#${user}"
+vlesslink1="vless://${uuid}@${domain}:443?path=/vlxh&security=tls&encryption=none&host=${domain}&type=xhttp&sni=${domain}#${user}"
 
 # Konfigurasi Vless WS NoneTLS
-vlesslink2="vless://${uuid}@${domain}:80?path=/vlspl&security=none&encryption=none&host=${domain}&type=splithttp#${user}"
+vlesslink2="vless://${uuid}@${domain}:80?path=/vlxh&security=none&encryption=none&host=${domain}&type=xhttp#${user}"
 
 TEKS="
 =======================
-    VLess Split HTTP
+    VLess XHTTP
 =======================
 
 Remarks : $user
@@ -190,9 +190,9 @@ Quota   : $quota GB
 =======================
 
 TLS: 443, 2053, 2083, 2087, 2096
-Path: /vlspl
+Path: /vlxh
 NoneTLS: 80, 8880, 2052, 2082, 2095
-Network: Split HTTP
+Network: XHTTP
 =======================
 Link TLS : $vlesslink1
 =======================

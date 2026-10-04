@@ -1494,6 +1494,17 @@ Section 35's four-check rule applied to Fix 330:
 | **Over-engineering** | Two lines per template + one 3-line drop-in block in `ssh.sh`. The 234 per-site `systemctl restart` calls were deliberately NOT wrapped: each is semantically necessary, and per-script debounce could skip required restarts. |
 | **vs the source** | V23/1.20 use defaults everywhere; the widened budget is a strict improvement for automation-driven panels with no behavior change under normal operation. |
 
+## 116. SplitHTTP → XHTTP Migration — Four Checks (October 4, 2026)
+
+Section 35's four-check rule applied to Fix 331:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | No logic touched: identical sed-shape renames only; `bash -n` clean; `xray -test` OK; identifiers (`xray@split`, `split.json`, `core=split`) intentionally kept so cron/API/systemd keep working. |
+| **Over-strictness** | Nothing rejected; paths only renamed. Old `/vmspl` URLs stop working by design (new canonical paths `/vmxh` etc.). |
+| **Over-engineering** | No new code, no new dependency; Xray 25.3.6 already ships XHTTP support. |
+| **vs the source** | V23/1.20 predate XHTTP (SplitHTTP era); migration follows the upstream Xray rename, verified against the pinned 25.3.6 binary strings. |
+
 
 
 
