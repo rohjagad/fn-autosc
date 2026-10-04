@@ -69,7 +69,8 @@ BlueCyan="\033[5;36m"
 function permision() {
 
     # Konfigurasi URL izin
-    PERMISSION_URL="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt"
+    PERMISSION_PRIMARY="https://fn-autosc-auth.pages.dev/izin.txt"
+    PERMISSION_FALLBACK="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt"
     LOCAL_IP=$(curl -4 -s ifconfig.me 2>/dev/null || wget -qO- -4 ifconfig.me 2>/dev/null) # Mendapatkan IP lokal
     if [ -z "$LOCAL_IP" ]; then
         echo "Could not determine your public IPv4 - check that curl/wget is installed and the network is up."
@@ -90,7 +91,7 @@ function permision() {
 
     # Unduh izin dan validasi
     clear
-    PERMISSION_DATA=$(curl -s "$PERMISSION_URL") || { echo "Failed to download permissions."; exit 1; }
+    PERMISSION_DATA=$(curl -s "$PERMISSION_PRIMARY" || curl -s "$PERMISSION_FALLBACK") || { echo "Failed to download permissions."; exit 1; }
 
     # Mencocokkan data berdasarkan IP lokal
     MATCH=$(echo "$PERMISSION_DATA" | grep "###" | grep "$LOCAL_IP")

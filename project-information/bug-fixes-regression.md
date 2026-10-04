@@ -1505,6 +1505,17 @@ Section 35's four-check rule applied to Fix 331:
 | **Over-engineering** | No new code, no new dependency; Xray 25.3.6 already ships XHTTP support. |
 | **vs the source** | V23/1.20 predate XHTTP (SplitHTTP era); migration follows the upstream Xray rename, verified against the pinned 25.3.6 binary strings. |
 
+## 117. Auth Fetch: Pages Primary, GitHub Fallback — Four Checks (October 4, 2026)
+
+Section 35's four-check rule applied to Fix 332:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Same gate semantics: fail-closed on both sources down; identical `Failed to download permissions.` message; no prompt/logic change. |
+| **Over-strictness** | Nothing newly rejected; strictly more available (two sources instead of one). |
+| **Over-engineering** | One extra variable + one extra `curl` alternative per gate; no helper, no dependency. |
+| **vs the source** | V23/1.20 predate both URLs (dead `permision.rerechanstore.eu.org`); the canonical GitHub URL is kept verbatim as fallback. |
+
 
 
 

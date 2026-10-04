@@ -2098,6 +2098,10 @@ Found 331. **Migrate SplitHTTP to XHTTP on Xray 25.3.6: `network: splithttp` + `
 Xray 25.x renamed the SplitHTTP transport to XHTTP (`json:"xhttpSettings"` confirmed in the 25.3.6 binary; `splithttp` remains only as a deprecated alias). All wire-visible strings migrated: `"network": "xhttp"` + `"xhttpSettings"` in `json/split.json` and the 12 `add-*-split`/`trial-*-split` scripts (full+lite), link `type=splithttp` → `type=xhttp`, nginx locations `/vmspl`→`/vmxh`, `/vlspl`→`/vlxh`, `/trspl`→`/trxh` in `config/4.conf`, `6.conf`, `dual.conf`, and every user-facing `SplitHTTP`/`Split HTTP` display string → `XHTTP` (cards, menus, Telegram texts). Deliberately **kept** machine identifiers: `*-split.sh` filenames, `xray@split` service, `split.json`, log/quota/limit dirs, and API `core=split` (renaming those would break the API contract, cron, and live units for zero wire benefit — same precedent as public `http` vs internal `upgrade.json`).
 - **Confirmed live:** new `split.json` passes `xray run -test` on 25.3.6 (`Configuration OK`).
 
+Found 332. **Auth fetch single-sourced to GitHub raw; Cloudflare Pages is faster for this region** —
+all 193 permission gates fetched `izin.txt` only from `raw.githubusercontent.com`. `https://fn-autosc-auth.pages.dev/izin.txt` serves byte-identical content (7 `###` entries on both) with better peering; GitHub stays as fallback.
+- **Confirmed live:** Pages URL returns 7 entries from the VPS; gate (`menu-api status`) green.
+
 
 
 

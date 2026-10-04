@@ -2428,6 +2428,11 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Fix 331 (Found 331):** 43 files, pure renames (150 insertions / 150 deletions, no logic change): protocol + paths + display strings as in Found 331; non-append-only docs updated in place (`is-decision.md` path table, `fn-api.md`, both phase plans, `README.md` transport table/cron/log rows, keeping identifier columns intact).
 - **Verified live:** `xray run -test` OK on new `split.json`; `bash -n` clean on all touched scripts; Go changes are string literals only.
 
+### Fix 332 - Auth fetch: Cloudflare Pages primary, GitHub fallback (Found 332)
+
+- **Fix 332 (Found 332):** 193 files, same two-line shape everywhere: `PERMISSION_URL=` replaced by `PERMISSION_PRIMARY` (Pages) + `PERMISSION_FALLBACK` (GitHub raw); fetch tries primary then fallback (`curl -s primary || curl -s fallback || { fail }`). The one stray non-canonical URL (`fix/fix-decrypted-original.sh` → `rohmatsb-biz/cobaizin`) deliberately untouched. Same change in `fn-autosc-api/menu-api` gate (keeping its `--max-time 15` caps).
+- **Verified:** 193/193 converted, 0 old-var residuals, `bash -n` clean on all touched scripts; live gate green via Pages.
+
 
 
 
