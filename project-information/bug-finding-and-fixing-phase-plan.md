@@ -6,17 +6,19 @@ Dokumen ini menetapkan rencana kerja sistematis untuk **penemuan bug (Finding)**
 
 ## 1. Dokumen & Sumber Referensi Wajib (Mandatory References)
 
-Setiap langkah dalam seluruh fase **WAJIB** membaca dan mengacu pada 7 sumber referensi utama berikut sebelum melakukan analisis, perubahan kode, atau evaluasi regresi:
+Setiap langkah dalam seluruh fase **WAJIB** membaca dan mengacu pada 9 sumber referensi utama berikut sebelum melakukan analisis, perubahan kode, atau evaluasi regresi:
 
 | # | Sumber Referensi | Lokasi / Perintah | Kegunaan & Batas Kepatuhan |
 | :- | :--- | :--- | :--- |
-| 1 | **Bugs Fixed** | `project-information/bugs-fixed.md` | Daftar seluruh perbaikan yang telah diverifikasi (Fix 1 s.d. 309). Wajib diperiksa agar perbaikan baru tidak membatalkan atau mengulang perbaikan sebelumnya. |
+| 1 | **Bugs Fixed** | `project-information/bugs-fixed.md` | Daftar seluruh perbaikan yang telah diverifikasi (cek nomor Fix tertinggi via `grep -o '^### Fix [0-9]*'`, jangan percaya angka statis). Wajib diperiksa agar perbaikan baru tidak membatalkan atau mengulang perbaikan sebelumnya. |
 | 2 | **Original Sources (Both Versions)** | - **Arsip Resmi di Repo:**<br>  • `original-source-do-not-edit/V23 Linux Ubuntu, Debian, Kali.zip`<br>  • `original-source-do-not-edit/Autoscript New 1.20.zip`<br>- **Ekstraksi Kerja (Transient):**<br>  • V23: `/tmp/opencode/original-v23`<br>  • 1.20: `/tmp/opencode/original-120`<br>*(Jika direktori `/tmp` belum diekstrak, ekstrak dari arsip zip repo di atas atau gunakan `unzip -p <zip> <path>`)* | Sumber rujukan asli (upstream). Wajib dicompare sebelum mengubah logika: jika referensi sudah menyelesaikan masalah, pertahankan solusi referensi. Divergensi hanya diizinkan untuk keamanan & stabilitas yang terbukti. |
-| 3 | **Git Commit History** | `git log --stat` / `git log -p` | Catatan riwayat commit atomik repositori. Memahami konteks perubahan sebelumnya, alasan teknis patch masa lalu, dan evolusi setiap script. |
-| 4 | **Bug Fixes Regression** | `project-information/bug-fixes-regression.md` | Rekam evaluasi 4-Check Rule (Regression, Over-Strictness, Over-Engineering, Source Alignment). Setiap perubahan baru wajib lulus 4 kriteria ini. |
-| 5 | **Bugs Found** | `project-information/bugs-found.md` | Rekam jejak temuan bug historis (append-only, Found 1 s.d. 309). Memastikan akar penyebab terdokumentasi akurat sebelum patch diterapkan. |
+| 3 | **Git Commit History** | `git log --stat` / `git log -p` (`-- <berkas-sentuh>` untuk audit terfokus) | Catatan riwayat commit atomik repositori. Memahami konteks perubahan sebelumnya, alasan teknis patch masa lalu, dan evolusi setiap script. Verifikasi klaim pesan commit terhadap diff-nya; deteksi revert/regresi diam-diam. |
+| 4 | **Bug Fixes Regression** | `project-information/bug-fixes-regression.md` | Rekam evaluasi 4-Check Rule (Regression, Over-Strictness, Over-Engineering, Source Alignment). Setiap perubahan baru wajib lulus 4 kriteria ini. Cek nomor Section tertinggi — tiap Fix wajib punya Section-nya. |
+| 5 | **Bugs Found** | `project-information/bugs-found.md` | Rekam jejak temuan bug historis (append-only; cek nomor Found tertinggi via `grep -o '^Found [0-9]*'`). Memastikan akar penyebab terdokumentasi akurat sebelum patch diterapkan. Tiap Found wajib punya Fix atau catatan deferral eksplisit. |
 | 6 | **FN-API Specification** | `project-information/fn-api.md` | Kontrak spesifikasi headless REST API, arsitektur handler `/usr/bin/rere`, penanganan single path segment, otentikasi token `/etc/xray/.key`, dan serializing lock. |
 | 7 | **Architectural Decisions** | `project-information/is-decision.md` | Daftar 28 keputusan desain arsitektural yang disengaja (bukan bug). Wajib dibaca agar tidak "memperbaiki" perilaku yang sengaja dirancang demikian (contoh: Xray 25.3.6 pin, Dropbear 2019.78 pin, auth lifetime vs date, penolakan angka 0, penghapusan total pada kuota habis). |
+| 8 | **Live Testing Plan** | `project-information/live-testing-phase-plan.md` | Fase verifikasi live per area. Finding yang butuh pembuktian VPS dicatat untuk fase live-nya; klaim "verified live" di `bugs-fixed.md` wajib punya langkah yang sesuai di sini. |
+| 9 | **README** | `README.md` (repo ini) | Tabel port/layanan, caveat yang didokumentasikan (mis. SNAT lebar), dan urutan install. Caveat yang diklaim "terdokumentasi" wajib benar ada di sini; tabel wajib cocok dengan kode. |
 
 ---
 
@@ -34,6 +36,7 @@ Setiap langkah dalam seluruh fase **WAJIB** membaca dan mengacu pada 7 sumber re
 4. **Verifikasi Terhadap `is-decision.md`:** Memastikan perilaku anomali yang ditemukan bukan salah satu dari 28 keputusan arsitektur resmi sebelum menandainya sebagai bug.
 5. **Audit Dokumen Project-Information:** setiap fase wajib memeriksa seluruh berkas di `project-information/` (plus `README.md`) untuk klaim dalam cakupannya — drift dokumen-vs-kode, kontradiksi dokumen-vs-dokumen, dan verifikasi yang tidak mungkin membuktikan klaimnya (pola false-positive Found 96/98: pola grep yang tak bisa cocok, probe yang lolos dalam keadaan sehat maupun rusak). Dok non-append-only dikoreksi di tempat; riwayat append-only dipertahankan, koreksi dicatat sebagai Found/Fix baru.
 6. **Audit Riwayat Commit:** `git log -p -- <berkas-sentuh>` untuk berkas dalam cakupan — pastikan fix terdahulu benar melakukan klaim commit-nya, deteksi revert/regresi diam-diam, dan mismatch pesan-vs-diff.
+7. **Konsistensi Nomor Antar-Berkas Append-Only:** berkas append-only tidak bisa dikoreksi, jadi nomornya disilang-periksa via grep, bukan dibaca dari angka statis di dokumen: nomor Found tertinggi (`bugs-found.md`) vs nomor Fix tertinggi (`bugs-fixed.md`) vs nomor Section regresi (`bug-fixes-regression.md`) wajib selaras di ujungnya (tolak regresi: Section terbaru menutup Fix terbaru). Untuk Fix **baru** berlaku 1 Found → 1 Fix → 1 Section tanpa nomor ganda/lompat; riwayat lama dikecualikan dari keketatan 1:1 karena pernah dikelompokkan (mis. satu entri "Fix 258-261") — dari riwayat hanya diperiksa duplikat nomor. Angka statis ("s.d. 309") di dokumen mana pun adalah drift bila max grep lebih besar.
 
 ### 2.2 Metodologi Fixing (Perbaikan Bug)
 1. **Shortest Working Diff Wins:** Terapkan perubahan paling minimal yang menyelesaikan masalah secara tepat. Hindari abstraksi berlebih, wrapper yang tidak perlu, atau dependency tambahan.
@@ -475,5 +478,6 @@ Setiap fix yang lulus wajib memenuhi gerbang ini (berlaku untuk Fase 1–24):
 4. **Tanpa over-strictness:** tidak menolak input sah yang referensi/panel terima; validasi mengikuti Decision 4 dan batas panel.
 5. **Keamanan tanpa korban reliabilitas:** hardening (izin, fail-closed, timeout) tidak boleh membuat boot/install/cron gagal atau menggantung; tiap penguatan diuji di VPS hidup.
 6. **Klien uji siap:** `/dev/kvm` (KVM Debian 12 lokal) selalu tersedia untuk trafik nyata dan fault injection; uji tuan-rumah saja tidak cukup untuk klaim perilaku jaringan.
+7. **Gerbang konsistensi nomor:** sebelum commit, jalankan silang-nomor langkah 7 (ujung Found/Fix/Section selaras; Found baru tanpa Fix wajib berpasangan dengan deferral; Fix baru tanpa Section tidak lolos). Ketidakcocokan adalah temuan tersendiri, bukan diabaikan.
 
 **Di luar cakupan:** `fn-autosc-auth` tidak berisi kode (hanya `izin.txt` yang dibaca) — tidak ada fase bug-finding untuknya; ia dirujuk hanya sebagai sumber data gate.
