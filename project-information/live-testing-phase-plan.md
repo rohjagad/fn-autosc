@@ -1,285 +1,250 @@
 # Live-Testing Phase Plan
 
-Dokumen ini memecah alur pengujian live sistem `fn-autosc` ke dalam 16 fase pengujian bertahap dari client KVM lokal Debian 12 (`/dev/kvm`) ke server target VPS `202.155.17.126` (domain: `autosc.rohcuan.dpdns.org`, port SSH: `3303`).
+Live test for `fn-autosc` on VPS `202.155.17.126` (domain `autosc.rohcuan.dpdns.org`, SSH port `3303`).
+
+Two test channels. Every phase uses both:
+
+- **Channel K (KVM client):** real traffic from local VM(s). Proves data really flows.
+- **Channel S (SSH TUI):** operator drives only the menus over SSH. Proves the TUI works.
+
+```
+VM-1 ──┐
+VM-2 ──┼──(internet)──► VPS 202.155.17.126 (nginx, haproxy, xray, daemons)
+VM-3 ──┘                      ▲
+                              │ SSH -p 3303, run `menu`, press keys only
+```
 
 ---
 
-## 1. Topologi & Protokol Keselamatan
+## 1. Test Channels
 
-```
-┌───────────────────────────────┐                  ┌───────────────────────────────┐
-│     Client KVM Debian 12      │                  │       Target VPS Server       │
-│          (/dev/kvm)           ├─(IPv4 Publik /)──►        202.155.17.126         │
-│  Real Traffic: curl, xray,    │  (Port 3303,  )  │   Nginx, HAProxy, Xray Core,  │
-│  ssh, wg-quick, noobz, dnstt  │  (80, 443, dll)  │   Daemons, Services, Systemd  │
-└───────────────────────────────┘                  └───────────────────────────────┘
-```
+### Channel K: KVM clients (`/dev/kvm`)
 
-1. **Aturan Penamaan Akun Uji:**
-   - Seluruh akun pengujian wajib menggunakan awalan `testcard*` atau `livetest*`.
-   - Dilarang memodifikasi akun operasional persisten (`wgtest1`, `wglive1`).
+- Host always has `/dev/kvm` ready. Multi-VM allowed (VM-1, VM-2, ...).
+- Simple setup: 1 Debian 12 VM per test role (e.g. VM-1 = xray client, VM-2 = second IP for limit test).
+- Each VM needs: `curl`, `xray-core` (same version as VPS), `ssh`, `wg-quick`, `noobz` client where needed.
+- One VM is enough for most phases. Use 2 VMs only for: IP-limit (Fase 9), concurrency (Fase 16/20).
 
-2. **Snapshot Sebelum Pengujian:**
-   - Sebelum menjalankan pengujian mutasi, buat snapshot file target:
-     ```bash
-     cp -a /etc/xray/json /tmp/snap-xray-json
-     cp -a /etc/funny /tmp/snap-funny
-     cp -a /etc/wireguard /tmp/snap-wireguard
-     ```
+### Channel S: SSH TUI (pure keyboard)
 
-3. **Pembersihan Pasca Pengujian:**
-   - Hapus akun uji melalui skrip panel atau restore snapshot.
-   - Bersihkan berkas log sementara di `/var/log/create/` dan berkas `.locked`.
-   - Pastikan konfigurasi Xray valid: `xray run -test -config /etc/xray/json/ws.json`.
+- Connect: `ssh -p 3303 root@202.155.17.126`, then run `menu`.
+- Rule: **keys only** — type menu numbers, `0` back, `Enter`, `Ctrl+D`. Do NOT run `/usr/bin/add-*` directly in this channel. If the menu cannot do it, that is a finding.
+- Use a normal terminal (min 80x24, `TERM=xterm`). Screenshot or copy text for every screen you check.
 
 ---
 
-## 2. Dokumen & Sumber Referensi Wajib (Mandatory References)
+## 2. TUI Quality Bar (applies to every phase)
 
-Setiap pengujian pada seluruh fase **WAJIB** merujuk dan mencocokkan hasil aktual dengan 7 sumber referensi utama proyek:
+Check these three on every screen you open:
 
-| # | Sumber Referensi | Lokasi / Sumber | Peran dalam Pengujian Live |
+1. **Wording:** simple words a junior IT understands. No typo. Same term everywhere (e.g. do not mix `Expired` / `Kadaluarsa` on one screen). Units shown (`GB`, `days`, `IP`).
+2. **Navigation:** every number works. `0` goes back to parent, never drops to shell. Wrong number re-shows the menu. Empty `Enter` is rejected with a clear message, no crash. `Ctrl+D` (EOF) exits cleanly (`exit 0`).
+3. **Layout tidiness:** header centered, separator lines same length, `Label : value` colons aligned, no wrapped/truncated lines at 80 cols, colors reset at end, account card stays on screen (pause) before clear.
+
+If any screen fails one of the three, note: menu name + option + what you typed + what you saw.
+
+---
+
+## 3. Safety Rules
+
+1. **Test account names:** only `testcard*` or `livetest*`. Never touch `wgtest1`, `wglive1`.
+2. **Snapshot before mutating:**
+   ```bash
+   cp -a /etc/xray/json /tmp/snap-xray-json
+   cp -a /etc/funny /tmp/snap-funny
+   cp -a /etc/wireguard /tmp/snap-wireguard
+   ```
+3. **Cleanup after each phase:** delete test accounts via the menu, remove `.locked` leftovers, confirm `xray run -test -config /etc/xray/json/<touched>.json` prints `Configuration OK.`, and `systemctl --failed` is `0`.
+
+---
+
+## 4. Mandatory References
+
+Each phase result must be compared against these 7 sources, not judged by feeling:
+
+| # | Source | Location | Role |
 | :- | :--- | :--- | :--- |
-| 1 | **Bugs Fixed** | `project-information/bugs-fixed.md` | Verifikasi bahwa pengujian menguji fungsionalitas yang telah diperbaiki tanpa menyebabkan regresi pada perilaku lama. |
-| 2 | **Original Sources (Both Versions)** | - **Arsip Resmi di Repo:**<br>  • `original-source-do-not-edit/V23 Linux Ubuntu, Debian, Kali.zip`<br>  • `original-source-do-not-edit/Autoscript New 1.20.zip`<br>- **Ekstraksi Kerja (Transient):**<br>  • V23: `/tmp/opencode/original-v23`<br>  • 1.20: `/tmp/opencode/original-120`<br>*(Portabel: ekstrak dari zip repo di atas bila `/tmp` tidak ada)* | Tolok ukur perilaku asli (upstream). Membedakan antara anomali yang disengaja dari upstream vs bug nyata. |
-| 3 | **Git Commit History** | `git log --stat` / `git log -p` | Menelusuri riwayat mengapa suatu konfigurasi atau batasan dipasang pada commit sebelumnya. |
-| 4 | **Bug Fixes Regression** | `project-information/bug-fixes-regression.md` | Memvalidasi kriteria Section 35: memastikan pengujian tidak menganggap penolakan input tidak valid sebagai over-strictness atau regresi. |
-| 5 | **Bugs Found** | `project-information/bugs-found.md` | Memastikan skenario uji mencakup kasus reproduksi kegagalan yang pernah terjadi sebelumnya (contoh: bug 300 s.d. 309). |
-| 6 | **FN-API Specification** | `project-information/fn-api.md` | Rujukan kontrak request, body JSON, header token, dan kode status pada pengujian API di Fase 16. |
-| 7 | **Architectural Decisions** | `project-information/is-decision.md` | **Kunci Validasi:** Dilarang menganggap tes "gagal" jika perilaku sesuai dengan 28 keputusan arsitektur (misal: Xray 25.3.6, Dropbear 2019.78, akun SSH tanpa shell/home `-s /bin/false -M`, kuota habis = hapus total, quantity `0` ditolak). |
+| 1 | Bugs Fixed | `project-information/bugs-fixed.md` | The thing you test must still behave as fixed. |
+| 2 | Original sources | `original-source-do-not-edit/V23...zip`, `.../1.20.zip` | Upstream behavior baseline. |
+| 3 | Git history | `git log --stat` / `git log -p` | Why a limit/config exists. |
+| 4 | Regression notes | `project-information/bug-fixes-regression.md` | Section-35 rule: rejecting bad input is not a bug. |
+| 5 | Bugs Found | `project-information/bugs-found.md` | Old failure cases must stay fixed. |
+| 6 | FN-API spec | `project-information/fn-api.md` | Contract for Fase 16. |
+| 7 | Decisions | `project-information/is-decision.md` | If behavior matches a decision (e.g. Xray 25.3.6, Dropbear 2019.78, SSH accounts `-s /bin/false -M`, quota = full delete, `0` rejected), it is PASS, not fail. |
 
 ---
 
-## 3. Struktur 21 Fase Pengujian Live
+## 5. Phase Map (21 phases)
 
 ```
-Fase 1: Baseline Sistem Operasi, Izin Kriptografi & Kernel Sysctl
-   │
-Fase 2: Reverse Proxy Utama Nginx, HAProxy & Inbound TLS
-   │
-Fase 3: Layanan Native SSH, Dropbear 2019.78, SSH-WS & OHP
-   │
-Fase 4: Suite Transport Xray WebSocket (VMess, VLESS, Trojan)
-   │
-Fase 5: Suite Transport Xray gRPC Streaming (vmgr, vlgr, trgr)
-   │
-Fase 6: Suite Transport Xray HTTPUpgrade & XHTTP
-   │
-Fase 7: Suite Tunnel VPN (WireGuard, NoobzVPN, SlowDNS, L2TP, OpenVPN)
-   │
-Fase 8: Siklus Pembuatan Akun & Pencegahan Duplikasi
-   │
-Fase 9: Penegakan Konkurensi IP & Penguncian Akun (.locked)
-   │
-Fase 10: Pemutusan Kuota Otomatis & Pembersihan Total Akun
-   │
-Fase 11: Perpanjangan Akun, Ganti Password & Penghapusan Aman
-   │
-Fase 12: Pembersihan Akun Kadaluarsa Otomatis (xp.sh & Cron)
-   │
-Fase 13: Uji TUI Menu Interaktif & Fault Injection Input Operator
-   │
-Fase 14: Migrasi Domain Server & Mekanisme Fallback Sertifikat ACME
-   │
-Fase 15: Pengujian Backup Telegram & Web-Restore Berotentikasi Token
-   │
-Fase 16: Pengujian Suite REST API Headless (FN-API & Concurrency Lock)
-   │
-Fase 17: Pengujian Live Migrasi XHTTP (/akun, path & trafik)
-   │
-Fase 18: Pengujian Live Fallback URL Otorisasi
-   │
-Fase 19: Ketahanan Gate di Bawah Gangguan Jaringan & Ketatnya Pencocokan
-   │
-Fase 20: Balapan Daemon Konkuren & Audit Restart
-   │
-Fase 21: Verifikasi Drift Template & Kejujuran Tool Go
+F1 baseline → F2 proxy/TLS → F3 SSH → F4 WS → F5 gRPC → F6 HTTPUpgrade+XHTTP
+→ F7 tunnels → F8 create/dup → F9 IP-limit/lock → F10 quota → F11 extend/pwd/delete
+→ F12 expiry xp → F13 TUI sweep + fault injection → F14 domain/cert
+→ F15 backup/restore → F16 API → F17 XHTTP migration → F18 auth fallback
+→ F19 gate hardness → F20 daemon race → F21 drift + tool honesty
 ```
+
+Each phase below lists: **Goal**, **K** (client traffic), **S** (menu walk), **PASS**.
+
+### Fase 1: Baseline OS, permissions, sysctl
+
+- **Goal:** host healthy before traffic.
+- **K:** none (no traffic yet).
+- **S:** open `menu` → `menu-system` → status screens. Check quality bar: version lines readable, no overflow.
+- **Steps:** 16 units active (`nginx`, `haproxy`, `xray@ws`, `xray@grpc`, `xray@upgrade`, `xray@xhttp`, `noobzvpns`, `dnstt`, `wg-quick@wg0`, `openvpn`, `xl2tpd`, `dropbear`, `ws`, `fn-ohp`, `udp-custom`, `udp-request`); `systemctl --failed` = 0; modes `0600` on `/etc/xray/xray.key`, `/etc/haproxy/funny.pem`, `/etc/xray/.key`, `0640` on `/etc/funny/.restore.key`, `0644` on crt; `fs.file-max=1000000`, `nf_conntrack_max=262144`.
+- **PASS:** all active, 0 failed, modes exact, TUI status matches `systemctl`.
+
+### Fase 2: Nginx, HAProxy, TLS inbound
+
+- **Goal:** port 443/80 routing correct.
+- **K:** from VM: `curl` TLS handshake to domain:443 (expect TLS 1.3, valid cert); port 80 served without redirect loop; TCP open on 777 (stunnel-wrapped SSH, no HTTP banner by design).
+- **S:** `menu-system` → nginx/haproxy status screens. Wording: `ON/OFF` consistent. Layout: port lists aligned.
+- **PASS:** TLS ok, 80 ok, 777 TCP-only per `installer/stunnel5.sh`.
+
+### Fase 3: SSH, Dropbear, SSH-WS, OHP
+
+- **Goal:** all SSH front-ends accept password logins.
+- **K:** VM-1: OpenSSH password login on 22 and 3303 (forward-only, shell `/bin/false` by design, `Could not chdir` message is cosmetic); Dropbear banner `SSH-2.0-dropbear_2019.78` on 111/109; WS path `/` reaches `wsEpro` (2080); OHP port 9088 TCP-open.
+- **S:** `menu-ssh` → create `livetest_ssh*` via menu only. Check card: ports listed (`22, 3303`, `111, 109`), pause before clear, `0` back to main.
+- **PASS:** logins work, banner exact, card readable.
+
+### Fase 4: Xray WebSocket (VMess, VLESS, Trojan)
+
+- **Goal:** real payload through WS.
+- **K:** create one account per proto; VM runs xray client (`/vmws`, `/vlws`, `/trws`, TLS 443); download 1–5 MB file; checksum == direct download. Repeat one via port 80 NonTLS.
+- **S:** `menu-x` → create each account via TUI. Check: card shows `Path`, `Network: WebSocket`, full link; duplicate name rejected clearly.
+- **PASS:** 3/3 checksums match, NonTLS ok.
+
+### Fase 5: Xray gRPC (`vmgr`, `vlgr`, `trgr`)
+
+- **Goal:** gRPC streaming works behind nginx.
+- **K:** same as F4 but service names `vmgr`/`vlgr`/`trgr`; transfer >3 MB both directions.
+- **S:** same TUI card checks in `menu-x` gRPC entries; wording `gRPC` spelled same everywhere.
+- **PASS:** 3/3 transfers match.
+
+### Fase 6: HTTPUpgrade + XHTTP
+
+- **Goal:** modern transports work.
+- **K:** HTTPUpgrade paths `/vmhu`, `/vlhu`, `/trhu`; XHTTP paths `/vmxh`, `/vlxh`, `/trxh` with `network: xhttp` (no `mode: packet-up` needed); 1 MB download each, checksum match.
+- **S:** card must show `Network: HTTP Upgrade` / `Network: XHTTP` with correct path. Old path `/vmspl` must not appear anywhere.
+- **PASS:** 6/6 match, no stale path text.
+
+### Fase 7: Tunnels (WireGuard, Noobz, SlowDNS, L2TP, OpenVPN)
+
+- **Goal:** each tunnel connects (or fails only for documented reason).
+- **K:** WG: `wg-quick up`, ping `10.66.66.1`. Noobz on 8080/8443 with payload auth. SlowDNS via UDP 53 (needs public NS delegation — note if skipped). L2TP: SA forms (cloud kernel has no PPP data path — note if control-only). OpenVPN TCP 1194 + UDP 2200, TLS handshake ok.
+- **S:** `menu-wg`, `menu-noobz`, `menu-dnstt` → create `livetest_*` via TUI; card per tunnel complete and pause-readable.
+- **PASS:** WG + Noobz + OpenVPN live; SlowDNS/L2TP judged per known-limitation note, not as fail.
+
+### Fase 8: Create cycle + duplicate guard
+
+- **Goal:** accounts created cleanly, doubles refused.
+- **K:** none extra (accounts from F4–F7 reused).
+- **S:** in each `add-*` screen: try empty name (rejected), bad chars (rejected, no shell eval), existing name (duplicate message), `0` for limit/quota/days (`0 not allowed`, Decision 4). Verify JSON has `"level": 0`.
+- **PASS:** all rejections clean, JSON valid.
+
+### Fase 9: IP-limit + lock/unlock
+
+- **Goal:** concurrent-IP abuse locks, unlock restores.
+- **K:** account limit-IP=1 (or 2); hold slow downloads from VM-1 + VM-2 at the same time; run `limit-ip-*`; expect card → `.locked`, JSON entry removed, sessions cut.
+- **S:** do lock + `unlock-*` via TUI only. Confirm prompt `y/n` works, `n` cancels safely, re-unlock of already-present account prints skip message (no duplicate JSON).
+- **PASS:** lock file exists, unlock restores same UUID, `Configuration OK.`
+
+### Fase 10: Quota + full delete
+
+- **Goal:** over-quota = deleted (Decision 16), not locked.
+- **K:** small-quota account (e.g. 5 GB file quota tripped by test or usage-file plant + trickle traffic); run `quota-*`; expect JSON + quota + usage + card all gone, audit line in `.quota.logs`.
+- **S:** create + delete via TUI; card gone, message says `deleted`, service stays active.
+- **PASS:** total cleanup, valid JSON, both services active.
+
+### Fase 11: Extend, password change, safe delete
+
+- **Goal:** edits work, bad deletes harmless.
+- **K:** SSH login with new password after `pwd-ssh` change.
+- **S:** `extend-*` (date grows, format `YY-MM-DD`); `delete-*` existing (clean); `delete-* notarealuser999` (prints `User not found`, no restart, nothing deleted).
+- **PASS:** date math right, new password works, phantom delete side-effect free.
+
+### Fase 12: Expiry sweep (`xp` + cron)
+
+- **Goal:** yesterday-expired accounts reaped, one restart per transport.
+- **K:** none (server-side).
+- **S:** plant expired `livetest_*` via TUI-created account + backdated marker; run `xp` from `menu-system`; verify gone from JSON + DB.
+- **PASS:** exact accounts reaped, journal shows 1 stop/start per touched transport, no storm.
+
+### Fase 13: Full TUI sweep + fault injection (TUI-focused)
+
+- **Goal:** every menu survives operator mistakes and reads tidy.
+- **K:** none.
+- **S:** visit ALL: `menu`, `menu-x`, `menu-ssh`, `menu-wg`, `menu-noobz`, `menu-dnstt`, `menu-system`, `menu-bot`, `menu-argo`, `bmenu`, `dm-menu`. Per menu: press `0` (back to parent), `00` (spell/behavior), `99` (invalid re-show), empty Enter, `Ctrl+D`. Per numeric field: `0`, `-1`, `abc`, `1.5`, metachars (`;`, `$()`, `*`). Record every screen against the §2 quality bar (wording/navigation/layout). This is the main TUI-tidiness gate.
+- **PASS:** zero crashes/hangs/shell-drops; all rejections worded; layout checklist clean.
+
+### Fase 14: Domain move + cert fallback
+
+- **Goal:** domain change safe, TLS never bricks.
+- **K:** after valid change, TLS cert covers new name; traffic still flows.
+- **S:** `dm-menu`: `bad domain` rejected, files unchanged; valid change updates domain file + nginx + new cards consistently. Cert-fail simulation (rate-limit 429) falls back without killing nginx/haproxy.
+- **PASS:** invalid input harmless, valid move consistent, fallback keeps 443 up.
+
+### Fase 15: Telegram backup + web restore
+
+- **Goal:** backup arrives, restore needs the key.
+- **K:** none (server-side + Telegram client).
+- **S:** `bmenu` → backup: zip arrives as Telegram document with Domain/IP/Date caption, no public link. Restore page `:855/upload.php`: no token → 401, wrong token → 401, right token (`/etc/funny/.restore.key`) → extracted; restored `.key` back to `0600`.
+- **PASS:** 401/401/ok, modes correct. (Destructive: snapshot first, restore to test box if possible.)
+
+### Fase 16: REST API suite (FN-API)
+
+- **Goal:** headless contract holds + concurrent safe.
+- **K:** VM sends HTTP to `https://<domain>/api/*`: no-auth → 401, bad token → 401, traversal `..%2f` → deny (400 edge / 404 app, both deny); CRUD `ping`, `add-vmess`, `list-xray`, `renew-xray`, `delete-xray`; `add-ss`/`add-socks` → explicit unsupported error; 5× parallel `add-vmess` all succeed, JSON valid (single-threaded design).
+- **S:** `menu-api status/install` screens: counts honest, `0` exits, invalid re-shows.
+- **PASS:** auth matrix + CRUD + 5/5 parallel, per `fn-api.md`.
+
+### Fase 17: XHTTP migration live
+
+- **Goal:** rename `split`→`xhttp` complete in production.
+- **K:** `add-vmess-xhttp` link decodes to `"net":"xhttp"`, path `/vmxh`; traffic checksum match; `/vmspl` unrouted; `core=xhttp` works, legacy `split` alias still accepted.
+- **S:** card shows `Path: /vmxh`, `Network: XHTTP`; `delete-xhttp` via TUI leaves valid JSON + active service.
+- **PASS:** traffic + card + alias + cleanup all green.
+
+### Fase 18: Auth URL fallback (Pages → GitHub)
+
+- **Goal:** license gate survives one source down.
+- **K:** VM checks both URLs return same `###` count.
+- **S:** `menu-api status` green on primary; block primary (temp `/etc/hosts`) → still green via fallback; block both → fail-closed (`Failed to download permissions.`, non-zero exit) before any mutation; remove blocks after.
+- **PASS:** green/green/fail-closed, box clean after.
+
+### Fase 19: Gate hardness (network + matching)
+
+- **Goal:** gate never passes open or on wrong IP.
+- **K:** block `ifconfig.me` → explicit fail (no empty-IP continue); serve HTML error as `izin.txt` (local mock) → reject, nothing printed; substring test (`11.2.3.44` must not pass `1.2.3.4`) on a gate copy; broken/empty date → fail-closed.
+- **S:** each refusal message exact (`Your IP is not in the database`, etc.), no DB leak to output; production gate green after mocks removed.
+- **PASS:** all closed, messages exact.
+
+### Fase 20: Daemon race + restart audit
+
+- **Goal:** shared JSON stays valid when daemons collide; restarts counted.
+- **K:** plant N triggers (expired + over-quota + over-IP `livetest_*`); fire `xp` + `limit-ip-*` + `quota-*` together; count `Stopping xray@<t>` in journal; next `*/5` cron tick with no triggers → zero restarts.
+- **S:** observe via `menu-system` log/status screens (no direct daemon edits).
+- **PASS:** valid JSON, right accounts reaped/locked, 1 restart per touched transport per run, 0 failed units.
+
+### Fase 21: Template drift + tool honesty
+
+- **Goal:** template = installed = card; tools tell the truth.
+- **K:** new account link UUID/password == JSON; deleted == gone everywhere.
+- **S:** `cek-xray-*`, `list-ssh`, `cek-login-ssh` vs raw state (`grep '^###'`, `chage`, `passwd -S`): no fake `UNLOCKED`/`No Expiry`/`0/0`; missing-binary simulation errors explicitly (then restore binary).
+- **PASS:** 1:1 ports/paths, no placeholder `server_name`, no false success.
 
 ---
 
-### Fase 1: Baseline Sistem Operasi, Izin Kriptografi & Kernel Sysctl
-- **Tujuan:** Verifikasi kesehatan awal host VPS, status seluruh unit systemd, dan izin berkas sensitif sebelum pengujian trafik.
-- **Langkah Pengujian:**
-  1. Cek status aktif 16 layanan inti: `nginx`, `haproxy`, `xray@ws`, `xray@grpc`, `xray@upgrade`, `xray@xhttp`, `noobzvpns`, `dnstt`, `wg-quick@wg0`, `openvpn`, `xl2tpd`, `dropbear`, `ws`, `fn-ohp`, `udp-custom`, `udp-request`.
-  2. Pastikan `systemctl --failed` bernilai `0`.
-  3. Verifikasi izin berkas: `/etc/xray/xray.key` (mode `0600`), `/etc/haproxy/funny.pem` (mode `0600`), `/etc/xray/xray.crt` (mode `0644`), `/etc/xray/.key` (mode `0600`), `/etc/funny/.restore.key` (mode `0640`).
-  4. Verifikasi nilai sysctl: `fs.file-max = 1000000`, `net.netfilter.nf_conntrack_max = 262144`.
+## 6. Run Order & Cleanup
 
-### Fase 2: Reverse Proxy Utama Nginx, HAProxy & Inbound TLS
-- **Tujuan:** Memvalidasi listener TLS dan routing multiplexing port 443 dan 80.
-- **Langkah Pengujian:**
-  1. Uji koneksi TLS HTTPS ke `autosc.rohcuan.dpdns.org:443` dari client KVM menggunakan `curl -vI`.
-  2. Pastikan sertifikat SSL valid dan handshake TLS 1.3 berhasil.
-  3. Uji koneksi HTTP port 80; pastikan diarahkan atau dilayani dengan benar tanpa loop redirect.
-  4. Verifikasi HAProxy hanya fronting port 777 ke backend Dropbear (`127.0.0.1:109`) mode TCP — sesuai `installer/stunnel5.sh` dan V23 upstream; Nginx menerminasi 443 langsung (tidak ada listener `10443`).
+1. F1 → F2 → F3 (infra first; stop on red).
+2. F4 → F5 → F6 → F7 (transports; one VM per proto set, reuse accounts).
+3. F8 → F9 → F10 → F11 → F12 (lifecycle/enforcement; clean accounts between phases).
+4. F13 (TUI sweep; can run in parallel with KVM transfers from another terminal).
+5. F14 → F15 (domain/backup; snapshot first, most disruptive last among panel phases).
+6. F16 (API; needs token from `/etc/xray/.key`, shred local copy after).
+7. F17 → F18 → F19 (migration + auth; network mocks removed immediately after).
+8. F20 → F21 (race + honesty; final `box-as-found`: 0 test accounts, valid JSONs, 0 failed units).
 
-### Fase 3: Layanan Native SSH, Dropbear 2019.78, SSH-WS & OHP
-- **Tujuan:** Memvalidasi seluruh front-end koneksi SSH dari client KVM.
-- **Langkah Pengujian:**
-  1. OpenSSH: autentikasi password pada port 22 dan 3303. Pastikan port forwarding `-L` berhasil dan shell interaktif ditolak (`/bin/false`).
-  2. Dropbear: autentikasi password pada port 111 dan 109. Pastikan banner identitas `SSH-2.0-dropbear_2019.78` (Decision 25).
-  3. SSH WebSocket: kirim request HTTP Upgrade pada `location /` port 80/443; pastikan mencapai backend `wsEpro` (port 2080).
-  4. OHP: uji proksi OpenVPN/SSH via port 9088.
-
-### Fase 4: Suite Transport Xray WebSocket (VMess, VLESS, Trojan)
-- **Tujuan:** Verifikasi pengiriman payload trafik data nyata melalui WebSocket.
-- **Langkah Pengujian:**
-  1. Buat akun uji untuk VMess-WS, VLESS-WS, Trojan-WS.
-  2. Eksekusi client `xray-core` pada client KVM menggunakan config JSON yang diarahkan ke path `/vmws`, `/vlws`, `/trws`.
-  3. Unduh payload uji (file 5MB) melalui tunnel; pastikan checksum payload identik dan koneksi stabil.
-  4. Uji konektivitas jalur NonTLS pada port 80.
-
-### Fase 5: Suite Transport Xray gRPC Streaming (vmgr, vlgr, trgr)
-- **Tujuan:** Memvalidasi komunikasi dua arah multiplex gRPC di balik Nginx.
-- **Langkah Pengujian:**
-  1. Buat akun uji VMess-gRPC, VLESS-gRPC, Trojan-gRPC.
-  2. Jalankan client Xray dari KVM dengan konfigurasi gRPC service name `vmgr`, `vlgr`, `trgr`.
-  3. Uji streaming data dua arah dan transfer file besar (>3MB) untuk memastikan tidak terbentur `client_max_body_size`.
-
-### Fase 6: Suite Transport Xray HTTPUpgrade & XHTTP
-- **Tujuan:** Memvalidasi transport HTTP modern Xray v25.3.6.
-- **Langkah Pengujian:**
-  1. HTTPUpgrade: uji koneksi VMess, VLESS, Trojan melalui path `/vmhu`, `/vlhu`, `/trhu`.
-  2. XHTTP: uji koneksi upload dan download terpisah pada `/vmxh`.
-  3. Pastikan upload file besar tidak terputus timeout Nginx 12 detik (`client_body_timeout 300s`, Fix 29).
-
-### Fase 7: Suite Tunnel VPN (WireGuard, NoobzVPN, SlowDNS, L2TP, OpenVPN)
-- **Tujuan:** Menguji konektivitas seluruh transport VPN kernel dan userspace.
-- **Langkah Pengujian:**
-  1. WireGuard: pasang file config client di KVM, jalankan `wg-quick up`, lakukan ping ke `10.66.66.1`.
-  2. NoobzVPN: jalankan client noobzvpns ke port 8080/8443, pastikan autentikasi payload berhasil.
-  3. SlowDNS: jalankan `dnstt-client` via UDP port 53 ke domain nameserver; pastikan port forwarding SSH berhasil.
-  4. L2TP/IPsec: hubungkan client L2TP ke port 500/4500/1701; pastikan SA IPsec terbentuk dan IP virtual diberikan.
-  5. OpenVPN: koneksi TCP port 1194 dan UDP port 2200; verifikasi negosiasi cipher TLS.
-
-### Fase 8: Siklus Pembuatan Akun & Pencegahan Duplikasi
-- **Tujuan:** Memvalidasi integritas pembuatan akun baru di semua protokol.
-- **Langkah Pengujian:**
-  1. Jalankan skrip pembuatan akun (`add-*`, `trial-*`, `addssh`).
-  2. Verifikasi kartu akun dicetak lengkap dan terminal tidak langsung dibersihkan (pause aktif).
-  3. Pastikan atribut `"level": 0` tercantum di dalam konfigurasi JSON Xray (Decision 23).
-  4. Masukkan username yang sama untuk kedua kalinya; pastikan sistem menolak dengan pesan duplikasi yang jelas.
-
-### Fase 9: Penegakan Konkurensi IP & Penguncian Akun (.locked)
-- **Tujuan:** Menguji akurasi pemantauan multi-IP dan proses penguncian akun.
-- **Langkah Pengujian:**
-  1. Buat akun dengan limit IP = 1.
-  2. Sambungkan dua koneksi bersamaan dari dua alamat IP berbeda ke akun tersebut.
-  3. Picu eksekusi daemon `limit-ip-*`.
-  4. Pastikan akun dipindahkan ke `<user>.locked`, dihapus dari konfigurasi aktif, dan koneksi diputus.
-  5. Jalankan `unlock-*`; verifikasi akun dipulihkan kembali ke konfigurasi aktif dengan kredensial yang sama.
-
-### Fase 10: Pemutusan Kuota Otomatis & Pembersihan Total Akun
-- **Tujuan:** Memvalidasi penegakan kuota habis sesuai Decision 16.
-- **Langkah Pengujian:**
-  1. Buat akun dengan batas kuota kecil (misal 10 MB).
-  2. Alirkan trafik melalui client KVM hingga melewati batas kuota.
-  3. Jalankan `quota-*` atau `kill-*`.
-  4. Pastikan akun dihapus secara total: entri JSON dihapus, file kuota dan file usage dihapus, dan log akun dibersihkan.
-  5. Pastikan layanan Xray direstart bersih tanpa error JSON.
-
-### Fase 11: Perpanjangan Akun, Ganti Password & Penghapusan Aman
-- **Tujuan:** Memvalidasi modifikasi akun aktif dan keamanan penghapusan.
-- **Langkah Pengujian:**
-  1. Perpanjang akun (`extend-*`): verifikasi tanggal kadaluarsa bertambah dan format `YY-MM-DD` tetap valid.
-  2. Ganti password SSH (`pwd-ssh`): verifikasi hash shadow diperbarui dan login menggunakan password baru berhasil.
-  3. Hapus akun yang ada (`delete-*`): pastikan konfigurasi dan file terkait terhapus bersih.
-  4. Hapus akun yang TIDAK ada (`delete-* notarealuser999`): pastikan tidak ada layanan yang direstart, tidak ada file yang terhapus, dan mencetak "User not found" (Fix 306).
-
-### Fase 12: Pembersihan Akun Kadaluarsa Otomatis (xp.sh & Cron)
-- **Tujuan:** Menguji pembersihan akun kadaluarsa berkala.
-- **Langkah Pengujian:**
-  1. Tanam akun uji dengan tanggal kadaluarsa kemarin pada file konfigurasi JSON dan database panel.
-  2. Eksekusi `/usr/bin/xp`.
-  3. Verifikasi akun kadaluarsa dihapus dari JSON dan database sistem.
-  4. Pastikan daemon hanya merekapitulasi satu kali restart per transport (pencegahan restart storm).
-
-### Fase 13: Uji TUI Menu Interaktif & Fault Injection Input Operator
-- **Tujuan:** Memvalidasi ketahanan seluruh menu TUI terhadap input salah, kosong, atau jebakan navigasi.
-- **Langkah Pengujian:**
-  1. Masuk ke seluruh submenu: `menu`, `menu-x`, `menu-ssh`, `menu-wg`, `menu-noobz`, `menu-dnstt`, `menu-system`, `menu-bot`, `menu-argo`, `bmenu`, `dm-menu`.
-  2. Uji Opsi `0`: pastikan seluruh submenu kembali ke menu induk tanpa keluar ke shell prompt (Fix 287–299).
-  3. Uji input kosong (`Enter` kosong): pastikan prompt tidak mengalami crash atau loop tak terbatas.
-  4. Uji EOF (`Ctrl+D`): pastikan skrip keluar secara anggun (`exit 0`).
-  5. Uji input `0` pada durasi/kuota: pastikan ditolak dengan pesan `0 not allowed` (Decision 4).
-  6. Uji karakter khusus/metakarakter: pastikan input metakarakter ditolak tanpa dievaluasi oleh shell.
-
-### Fase 14: Migrasi Domain Server & Mekanisme Fallback Sertifikat ACME
-- **Tujuan:** Memvalidasi penggantian nama domain dan sertifikat SSL.
-- **Langkah Pengujian:**
-  1. Masukkan input domain salah pada `dm-menu` (contoh: `bad domain`, `invalid_host`): pastikan ditolak tanpa mengubah file (Fix 304).
-  2. Uji pergantian ke domain valid: pastikan file domain, konfigurasi Nginx, dan kartu akun diperbarui secara konsisten.
-  3. Uji simulasi kegagalan Let's Encrypt (rate limit 429): pastikan sistem otomatis fallback ke ZeroSSL atau self-signed cert tanpa merusak startup Nginx/HAProxy (Fix 140).
-
-### Fase 15: Pengujian Backup Telegram & Web-Restore Berotentikasi Token
-- **Tujuan:** Menguji pencadangan sistem dan pemulihan darurat tanpa celah keamanan.
-- **Langkah Pengujian:**
-  1. Jalankan `backup`: verifikasi file arsip `.zip` terkirim sebagai dokumen ke bot Telegram (Decision 12).
-  2. Pastikan tidak ada kredensial terbuka atau link publik pihak ketiga yang kadaluarsa.
-  3. Uji endpoint web restore `http://<domain>:855/upload.php` (plain HTTP sesuai `website/install.sh`; PHP `upload_max_filesize/post_max_size = 64M` per Fix 327):
-     - Upload tanpa token: wajib ditolak HTTP `401 Unauthorized`.
-     - Upload dengan token salah: wajib ditolak HTTP `401 Unauthorized`.
-     - Upload dengan token valid dari `/etc/funny/.restore.key`: file diterima dan diekstrak dengan benar (Decision 19; butuh aturan sudoers `/etc/sudoers.d/restore-ftp` per Fix 328).
-  4. Pastikan seluruh kunci privat yang dipulihkan disetel kembali ke izin `0600` (Fix 305).
-
-### Fase 16: Pengujian Suite REST API Headless (FN-API & Concurrency Lock)
-- **Tujuan:** Menguji seluruh endpoint REST API dan keamanan eksekusi konkruen.
-- **Langkah Pengujian:**
-  1. Uji autentikasi: request tanpa header `Authorization` atau token salah wajib menghasilkan HTTP `401`.
-  2. Uji path traversal: request `GET /api/..%2f..%2fetc/passwd` wajib ditolak (`404` di api-server, `400` di edge nginx — keduanya deny).
-  3. Uji CRUD endpoint: jalankan `ping`, `add-vmess`, `list-xray`, `renew-xray`, `delete-xray`.
-  4. Uji penolakan endpoint tak didukung: `add-ss` dan `add-socks` wajib menghasilkan respon error eksplisit.
-  5. Uji konkruensi: kirim 5 request `POST /api/add-vmess` secara simultan; pastikan kelima akun terbuat sempurna tanpa korupsi file konfigurasi berkat desain single-threaded (upaya threading+lock sudah direvert, Fix 326).
-
-### Fase 17: Pengujian Live Migrasi XHTTP (Akun, Path & Trafik)
-- **Tujuan:** Membuktikan transport XHTTP bekerja ujung-ke-ujung setelah rename dari SplitHTTP.
-- **Langkah Pengujian:**
-  1. Buat akun via `add-vmess-xhttp` (atau varian): kartu wajib menampilkan `Path: /vmxh`, `Network: XHTTP`, dan link mengandung `"net": "xhttp"`, `"path": "/vmxh"`.
-  2. Jalankan client `xray-core` 25.3.6 dengan `network: xhttp` + `xhttpSettings.path: /vmxh` via TLS 443; unduh payload 5MB dan pastikan checksum identik dengan direct.
-  3. Pastikan path lama `/vmspl` tidak lagi di-route (nginx tidak punya lokasi tersebut).
-  4. Hapus akun via `delete-xhttp`; pastikan `xhttp.json` valid dan `xray@xhttp` tetap active. API `core=xhttp` (alias legacy `split` tetap diterima).
-- **Uji umum area transport (di luar migrasi):**
-  5. Ulangi Fase 4–6 live-testing untuk core `xhttp` (VMess/VLESS/Trojan): kartu lengkap, duplikat ditolak, kuota/IP/limit tertulis benar.
-  6. Uji upload besar via XHTTP (verifikasi `client_max_body_size`/`client_body_timeout` scoped masih menahan) dan koneksi idle panjang (timeout 300s).
-  7. Picu `quota-xhttp` dan `limit-ip-xhttp` dengan akun uji (lampaui kuota/IP) lalu `unlock-xhttp`: pastikan hapus-total vs `.locked` sesuai Decision 16 dan kredensial pulih sama.
-
-### Fase 18: Pengujian Live Fallback URL Otorisasi
-- **Tujuan:** Membuktikan gate lisensi tahan terhadap matinya salah satu sumber.
-- **Langkah Pengujian:**
-  1. Verifikasi konten setara: jumlah baris `###` dari Pages dan GitHub sama.
-  2. Uji primer: gate (`menu-api status` atau skrip panel) hijau dengan Pages terjangkau.
-  3. Uji fallback (simulasi): blokir primer sementara (contoh entri `/etc/hosts` atau aturan DROP) lalu jalankan gate — wajib tetap hijau via GitHub, tanpa perubahan perilaku.
-  4. Uji gagal total: blokir keduanya — gate wajib fail-closed (`Failed to download permissions.`, exit non-nol) sebelum mutasi apa pun.
-  5. Kembalikan kondisi jaringan dan pastikan tak ada sisa blokir/patch sementara di VPS.
-- **Uji umum area otorisasi (di luar fallback):**
-  6. Uji gate di bawah network lambat (tambah latency/packet-loss sementara): gate wajib selesai dalam batas wajar tanpa menggantung cron 5-menitan; catat durasi tiap sumber (Pages vs GitHub) sebagai bukti klaim peering.
-  7. Uji respons non-`###` (halaman error HTML dari CDN): gate wajib menolak (tidak ada MATCH palsu) dan tidak mencetak isi respons ke log.
-  8. Uji IP tak terdaftar: keluaran persis `Your IP doesn't have on database` + exit, tanpa bocor isi database ke output.
-
-### Fase 19: Ketahanan Gate di Bawah Gangguan Jaringan & Ketatnya Pencocokan
-- **Tujuan:** Gate lisensi benar-benar fail-closed dan tepat-sasaran, bukan longgar.
-- **Langkah Pengujian:**
-  1. Dari KVM: blokir `ifconfig.me` sementara — gate wajib gagal eksplisit (IP kosong), bukan lanjut dengan IP kosong yang merusak config (`vpn.sh`).
-  2. Sajikan respons HTML error sebagai `izin.txt` (mock lokal via `/etc/hosts`): gate wajib menolak tanpa MATCH palsu dan tanpa mencetak isi respons.
-  3. Uji substring: baris `### x 11.2.3.44 <date>` tidak boleh me-loloskan IP `1.2.3.4` (uji di salinan fungsi gate, bukan DB produksi).
-  4. Uji tanggal rusak/kosong di entri: wajib fail-closed, tidak lolos terbuka.
-  5. Kembalikan semua mock; verifikasi gate produksi hijau kembali.
-
-### Fase 20: Balapan Daemon Konkuren & Audit Restart
-- **Tujuan:** File bersama tetap valid saat semua daemon menembak bersamaan; restart terhitung, bukan badai.
-- **Langkah Pengujian:**
-  1. Tanam N akun pemicu (kadaluarsa + over-kuota + over-IP, awalan `livetest_*`).
-  2. Jalankan `xp`, `limit-ip-*`, `quota-*` serentak; catat hitungan `Stopping xray@<t>` di journal.
-  3. Verifikasi: tiap `xray -test` valid, akun tepat yang terhapus/terkunci, dan restart 1x per transport per run (bukan per user).
-  4. Tunggu tick cron `*/5` berikutnya dan ulangi hitungan: tidak ada restart tanpa pemicu (pola Found 173 tidak kembali).
-  5. Bersihkan semua akun uji; 0 failed unit.
-
-### Fase 21: Verifikasi Drift Template & Kejujuran Tool Go
-- **Tujuan:** Tiga sisi (template, terinstal, kartu) konsisten; tool CLI melaporkan kebenaran.
-- **Langkah Pengujian:**
-  1. Bandingkan port/path `config/dual.conf` vs `/etc/nginx/nginx.conf` vs `json/*.json` vs link kartu akun baru — harus 1:1; pastikan tanpa `server_name` placeholder.
-  2. Buat akun tiap transport, decode link, samakan UUID/password dengan JSON; hapus dan pastikan bersih total.
-  3. Jalankan `cek-xray-*`, `list-ssh`, `cek-login-ssh` lalu bandingkan dengan state langsung (`grep '^###'`, `chage`, `passwd -S`): tidak boleh ada "No Expiry"/"UNLOCKED" palsu atau `0/0` dari parse gagal.
-  4. Simulasi dependensi hilang (sementara, kembalikan): tool wajib error eksplisit, bukan sukses palsu.
-  5. Bersihkan akun uji dan kembalikan semua biner yang dipindah sementara.
+Log per phase: commands/keys pressed, expected vs actual, checksums, journal counts, and any TUI wording/layout photo or pasted screen.
