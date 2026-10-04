@@ -188,7 +188,7 @@ fi
 ws=$(cat /etc/xray/json/ws.json | grep "###" | sort | uniq | wc -l)
 http=$(cat /etc/xray/json/upgrade.json | grep "###" | sort | uniq | wc -l)
 gpc=$(cat /etc/xray/json/grpc.json | grep "###" | sort | uniq | wc -l)
-split=$(cat /etc/xray/json/split.json | grep "###" | sort | uniq | wc -l)
+xhttp=$(cat /etc/xray/json/xhttp.json | grep "###" | sort | uniq | wc -l)
 
 # Xray/XTLS core version
 xver=$(xray version 2>/dev/null | awk '{print $2}' | head -n 1)
@@ -213,13 +213,13 @@ ${purple}TOTAL ACCOUNTS${NC}
 WS           : ${green}$ws${NC}
 HTTP         : ${green}$http${NC}
 gRPC         : ${green}$gpc${NC}
-Split        : ${green}$split${NC}
+XHTTP        : ${green}$xhttp${NC}
 ${blue_sep}
 ${purple}MENU${NC}
 ${green}1${NC}. WebSocket (WS)        ${green}5${NC}. System Menu
 ${green}2${NC}. HTTP Upgrade (HTTP)   ${green}6${NC}. Domain Menu
 ${green}3${NC}. gRPC (XTLS)           ${green}7${NC}. Backup Menu
-${green}4${NC}. XHTTP (Split)    ${green}8${NC}. Telegram Bot
+${green}4${NC}. XHTTP (XHTTP)    ${green}8${NC}. Telegram Bot
 ${blue_sep}
 Today: ${red}$ttoday${NC} Yesterday: ${red}$tyest${NC} This month: ${red}$tmon${NC}
 ${separator}
@@ -232,7 +232,7 @@ case $opws in
 1) clear ; x-ws ; menu-x ;;
 2) clear ; x-http ; menu-x ;;
 3) clear ; x-grpc ; menu-x ;;
-4) clear ; x-split ; menu-x ;;
+4) clear ; x-xhttp ; menu-x ;;
 5) clear ; menu-system ; menu-x ;;
 6) clear ; dm-menu ; menu-x ;;
 7) clear ; bmenu ; menu-x ;;

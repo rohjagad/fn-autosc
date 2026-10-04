@@ -85,7 +85,7 @@ sshd="$(awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd | wc -l)"
 ws=$(cat /etc/xray/json/ws.json 2>/dev/null | grep "###" | sort | uniq | wc -l)
 http=$(cat /etc/xray/json/upgrade.json 2>/dev/null | grep "###" | sort | uniq | wc -l)
 gpc=$(cat /etc/xray/json/grpc.json 2>/dev/null | grep "###" | sort | uniq | wc -l)
-split=$(cat /etc/xray/json/split.json 2>/dev/null | grep "###" | sort | uniq | wc -l)
+xhttp=$(cat /etc/xray/json/xhttp.json 2>/dev/null | grep "###" | sort | uniq | wc -l)
 
 total_sec=$(cut -d. -f1 /proc/uptime 2>/dev/null || echo 0)
 days=$((total_sec / 86400))
@@ -248,11 +248,11 @@ xhttp="${red}OFF${NC}"
 fi
 
 ### Status XTLS XHTTP
-vxsplit=$(service xray@split status | grep active | cut -d ' ' $stat)
-if [ "$vxsplit" = "active" ]; then
-xsplit="${green}ON${NC}"
+vxxhttp=$(service xray@xhttp status | grep active | cut -d ' ' $stat)
+if [ "$vxxhttp" = "active" ]; then
+xxhttp="${green}ON${NC}"
 else
-xsplit="${red}OFF${NC}"
+xxhttp="${red}OFF${NC}"
 fi
 
 ### Status XTLS gRPC
@@ -294,11 +294,11 @@ ${purple}TOTAL ACCOUNTS${NC}
 SSH SERVER   : $sshd
 XTLS WS      : $ws
 XTLS HTTP UP : $http
-XTLS SPLIT   : $split
+XTLS XHTTP   : $xhttp
 XTLS gRPC    : $gpc
 ${blue_sep}
 SSH: $resh | WS: $xws | HTTP: $xhttp
-SPLIT: $xsplit | gRPC: $xgcp | ePRO: $pro
+XHTTP: $xxhttp | gRPC: $xgcp | ePRO: $pro
 Loadbalance: $loadbalance
 ${blue_sep}
 ${purple}MENU${NC}

@@ -206,7 +206,7 @@ Branches into the four protocol submenus:
 
 - `x-ws` — WebSocket
 - `x-http` — HTTP Upgrade
-- `x-split` — XHTTP
+- `x-xhttp` — XHTTP
 - `x-grpc` — gRPC
 
 Each submenu offers the same 17 actions: create VMess / VLESS / Trojan,
@@ -391,7 +391,7 @@ Each account with a quota has two files:
 ```
 
 Usage is measured through the Xray stats API by the `quota-*` services
-(`quota-ws`, `quota-http`, `quota-split`, `quota-grpc`), which run continuously.
+(`quota-ws`, `quota-http`, `quota-xhttp`, `quota-grpc`), which run continuously.
 
 When usage reaches the limit, `kill-*` removes the account and notifies
 Telegram. If an account is killed for a missing quota file, the same path
@@ -413,10 +413,10 @@ excess sessions.
 
 | Command | Protocol | What it does |
 | :--- | :--- | :--- |
-| `limit-ip-*` | ws/http/split/grpc | Enforce IP limits |
-| `auto-delete-*` | ws/http/split/grpc | Remove orphans (log exists, account does not) |
-| `kill-*` | ws/http/split/grpc | Remove accounts over quota |
-| `quota-*` | ws/http/split/grpc | Service that measures and stores usage |
+| `limit-ip-*` | ws/http/xhttp/grpc | Enforce IP limits |
+| `auto-delete-*` | ws/http/xhttp/grpc | Remove orphans (log exists, account does not) |
+| `kill-*` | ws/http/xhttp/grpc | Remove accounts over quota |
+| `quota-*` | ws/http/xhttp/grpc | Service that measures and stores usage |
 | `xp` | all + SSH | Remove accounts past their expiry date |
 
 ---
@@ -432,16 +432,16 @@ These jobs are added to `/etc/crontab` during installation. Each runs under
 | `0,15,30,45 * * * *` | `sleep 300 && xp` | Expiry sweep every 15 min (delayed 5 min) |
 | `*/5 * * * *` | `limit-ip-ssh` | SSH IP limit |
 | `*/5 * * * *` | `limit-ip-ws` | WebSocket IP limit |
-| `*/5 * * * *` | `limit-ip-split` | XHTTP IP limit |
+| `*/5 * * * *` | `limit-ip-xhttp` | XHTTP IP limit |
 | `*/5 * * * *` | `limit-ip-http` | HTTP Upgrade IP limit |
 | `*/5 * * * *` | `limit-ip-grpc` | gRPC IP limit |
 | `*/5 * * * *` | `auto-delete-ws` | Remove orphaned WS accounts |
-| `*/5 * * * *` | `auto-delete-split` | Remove orphaned XHTTP accounts |
+| `*/5 * * * *` | `auto-delete-xhttp` | Remove orphaned XHTTP accounts |
 | `*/5 * * * *` | `auto-delete-http` | Remove orphaned HTTP Upgrade accounts |
 | `*/5 * * * *` | `auto-delete-grpc` | Remove orphaned gRPC accounts |
 | `*/5 * * * *` | `kill-ws` | Remove WS accounts over quota |
 | `*/5 * * * *` | `kill-http` | Remove HTTP Upgrade accounts over quota |
-| `*/5 * * * *` | `kill-split` | Remove XHTTP accounts over quota |
+| `*/5 * * * *` | `kill-xhttp` | Remove XHTTP accounts over quota |
 | `*/5 * * * *` | `kill-grpc` | Remove gRPC accounts over quota |
 
 ---
@@ -662,7 +662,7 @@ terminal only.
 | :--- | :--- |
 | VMess / VLESS / Trojan WebSocket | `/var/log/create/xray/ws/` |
 | VMess / VLESS / Trojan HTTP Upgrade | `/var/log/create/xray/http/` |
-| VMess / VLESS / Trojan XHTTP | `/var/log/create/xray/split/` |
+| VMess / VLESS / Trojan XHTTP | `/var/log/create/xray/xhttp/` |
 | VMess / VLESS / Trojan gRPC | `/var/log/create/xray/grpc/` |
 | SSH | `/var/log/create/ssh/` |
 
@@ -674,7 +674,7 @@ Files are named `{username}.log`. Locking renames them to `{username}.locked`.
 | :--- | :--- |
 | Xray WebSocket (WS) | `/var/log/xray/ws.log` |
 | Xray HTTP Upgrade | `/var/log/xray/upgrade.log` |
-| Xray XHTTP | `/var/log/xray/split.log` |
+| Xray XHTTP | `/var/log/xray/xhttp.log` |
 | Xray gRPC | `/var/log/xray/grpc.log` |
 
 ### Config Files
@@ -683,7 +683,7 @@ Files are named `{username}.log`. Locking renames them to `{username}.locked`.
 | :--- | :--- |
 | Xray WebSocket (WS) | `/etc/xray/json/ws.json` |
 | Xray HTTP Upgrade | `/etc/xray/json/upgrade.json` |
-| Xray XHTTP | `/etc/xray/json/split.json` |
+| Xray XHTTP | `/etc/xray/json/xhttp.json` |
 | Xray gRPC | `/etc/xray/json/grpc.json` |
 | Nginx | `/etc/nginx/nginx.conf` |
 | Domain | `/etc/xray/domain` |
@@ -700,7 +700,7 @@ Files are named `{username}.log`. Locking renames them to `{username}.locked`.
 /etc/xray/limit/ip/xray/<protocol>/<username>  # max IPs (integer)
 ```
 
-Where `<protocol>` is `ws`, `http`, `split`, or `grpc`.
+Where `<protocol>` is `ws`, `http`, `xhttp`, or `grpc`.
 
 ---
 
@@ -713,12 +713,12 @@ shell scripts.
 | :--- | :--- | :--- |
 | `log-database-xray-ws` | `log-database-xray-ws.go` | Styled WS account log viewer |
 | `log-database-xray-http` | `log-database-xray-http.go` | Styled HTTP Upgrade log viewer |
-| `log-database-xray-split` | `log-database-xray-split.go` | Styled XHTTP log viewer |
+| `log-database-xray-xhttp` | `log-database-xray-xhttp.go` | Styled XHTTP log viewer |
 | `log-database-xray-grpc` | `log-database-xray-grpc.go` | Styled gRPC log viewer |
 | `log-acc-ssh` | `log-acc-ssh.go` | Styled SSH log viewer |
 | `cek-xray-ws` | `cek-xray-ws.sh` (shell, not Go) | WS account status |
 | `cek-xray-http` | `cek-xray-http.go` | HTTP Upgrade account status |
-| `cek-xray-split` | `cek-xray-split.go` | XHTTP account status |
+| `cek-xray-xhttp` | `cek-xray-xhttp.go` | XHTTP account status |
 | `cek-xray-grpc` | `cek-xray-grpc.go` | gRPC account status |
 | `limit-ip` | `limit-ip.go` | SSH IP limiter |
 | `delete-ssh` | `delete-ssh.go` | Delete SSH accounts |
@@ -727,7 +727,7 @@ shell scripts.
 | `pwd-ssh` | `pwd-ssh.go` | Show SSH passwords |
 | `change-limit-ip-ws` | `change-limit-ip-ws.go` | Change WS IP limit |
 | `change-limit-ip-http` | `change-limit-ip-http.go` | Change HTTP Upgrade IP limit |
-| `change-limit-ip-split` | `change-limit-ip-split.go` | Change XHTTP IP limit |
+| `change-limit-ip-xhttp` | `change-limit-ip-xhttp.go` | Change XHTTP IP limit |
 | `change-limit-ip-grpc` | `change-limit-ip-grpc.go` | Change gRPC IP limit |
 
 Binaries are built with `-ldflags='-s -w'` for a small footprint.

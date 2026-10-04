@@ -1,0 +1,143 @@
+#!/bin/bash
+
+[[ -e $(which curl) ]] && grep -q "1.1.1.1" /etc/resolv.conf || { 
+    echo "nameserver 1.1.1.1" | cat - /etc/resolv.conf >> /etc/resolv.conf.tmp && mv /etc/resolv.conf.tmp /etc/resolv.conf
+}
+
+    # Konfigurasi URL izin
+    PERMISSION_PRIMARY="https://fn-autosc-auth.pages.dev/izin.txt"
+    PERMISSION_FALLBACK="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt"
+    LOCAL_IP=$(curl -4 -s ifconfig.me) # Mendapatkan IP lokal
+
+    # Fungsi menghitung sisa waktu
+    calculate_remaining_days() {
+        local today=$(date +%s)
+        local expired_date
+        expired_date=$(date -d "$1" +%s 2>/dev/null)
+        if [ $? -ne 0 ]; then
+            echo "Invalid expiration date."
+            exit 1
+        fi
+        echo $(( (expired_date - today) / 86400 ))
+    }
+
+    # Unduh izin dan validasi
+    clear
+    PERMISSION_DATA=$(curl -s "$PERMISSION_PRIMARY" || curl -s "$PERMISSION_FALLBACK" || { echo "Failed to download permissions."; exit 1; })
+
+    # Mencocokkan data berdasarkan IP lokal
+    MATCH=$(echo "$PERMISSION_DATA" | grep "###" | grep "$LOCAL_IP")
+    if [ -z "$MATCH" ]; then
+        echo "Your IP doesn’t have on database"
+        exit 1
+    fi
+
+    # Ekstraksi data dari baris yang cocok
+    USERNAME=$(echo "$MATCH" | awk '{print $2}')
+    PERMISSION_IP=$(echo "$MATCH" | awk '{print $3}')
+    EXPIRED_DATE=$(echo "$MATCH" | awk '{print $4}')
+
+    # Validasi masa aktif
+    # A "lifetime" entry means auth is off: the expiry check is skipped
+    # (is-decision.md 28). This gate also runs during installation, so a
+    # lifetime machine installs without a date.
+    if [ "$EXPIRED_DATE" = "lifetime" ]; then
+        REMAINING_DAYS="lifetime"
+    else
+    REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
+    fi
+    if [ "$REMAINING_DAYS" != "lifetime" ] && [ "$REMAINING_DAYS" -lt 0 ]; then
+        echo "Permission expired."
+        exit 1
+    fi
+
+    # Output informasi izin
+    output() {
+        echo "Username: $USERNAME"
+        echo "IPv4: $PERMISSION_IP"
+        if [ "$REMAINING_DAYS" = "lifetime" ]; then echo "Expired: lifetime"; else echo "Expired: $EXPIRED_DATE ( $REMAINING_DAYS Days )"; fi
+    }
+
+    output
+clear
+
+domain=$(cat /etc/xray/domain)
+CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
+KEY=$(cat /etc/funny/.keybot 2>/dev/null)
+TIME="10"
+URL="https://api.telegram.org/bot$KEY/sendMessage"
+clear
+user=trial`</dev/urandom tr -dc 0-9 | head -c3`
+masaaktif="1"
+quota="1"
+ip="1"
+clear
+
+# Limit Quota
+if [[ $quota -gt 0 ]]; then
+echo -e "$(($quota * 1024 * 1024 * 1024))" > /etc/xray/quota/xhttp/$user
+else
+echo > /dev/null
+fi
+
+# Limit IP
+if [[ $ip -gt 0 ]]; then
+echo -e "${ip}" > /etc/xray/limit/ip/xray/xhttp/$user
+else
+echo > /dev/null
+fi
+
+# Masa Aktif
+exp=`date -d "$masaaktif days" +"%y-%m-%d"`
+
+# Generate UUID
+uuid=$(xray uuid)
+
+# Menambahkan Akun di Database
+sed -i '/#trojan$/{n;s/}/},\n### '"$user $exp"'\n{"password": "'""$uuid""'","email": "'""$user""'","level": 0}/}' /etc/xray/json/xhttp.json
+
+# Restart Service
+if xray run -test -config /etc/xray/json/xhttp.json >/dev/null 2>&1; then
+    systemctl daemon-reload
+    systemctl restart xray@xhttp
+    systemctl restart quota-xhttp
+fi
+
+# Konfigurasi Trojan WS TLS
+link1="trojan://${uuid}@${domain}:443?path=/trxh&security=tls&host=${domain}&type=xhttp&sni=${domain}#${user}"
+
+# Konfigurasi Trojan WS NonTLS
+link2="trojan://${uuid}@${domain}:80?path=/trxh&security=none&host=${domain}&type=xhttp#${user}"
+
+TEKS="
+======================
+   Trojan XHTTP
+======================
+
+Remarks : $user
+Domain  : $domain
+UUID    : $uuid
+Expired : $exp
+Limit IP: $ip
+Quota   : $quota GB
+Protokol: Trojan
+======================
+
+Path: /trxh
+Network: XHTTP
+Port TLS: 443, 2053, 2083, 2087, 2096
+Port None: 80, 8880, 2052, 2082, 2095
+======================
+Link TLS : $link1
+======================
+Link None: $link2
+======================
+"
+if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
+    curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's/\\033\[[0-9;]*m//g' -e 's/\x1b\[[0-9;]*m//g')" $URL >/dev/null 2>&1
+fi
+echo -e "$TEKS" > /var/log/create/xray/xhttp/${user}.log
+echo 'sed -i "/^### '"$user"' '"$exp"'/ {N;d}" /etc/xray/json/xhttp.json && sed -i -z '"'"'s/},\n *\]/}\n        ]/g'"'"' /etc/xray/json/xhttp.json && systemctl restart xray@xhttp && systemctl restart quota-xhttp && rm -fr /var/log/create/xray/xhttp/'"$user"'.log && rm -fr /etc/xray/limit/ip/xray/xhttp/'"$user"' && rm -fr /etc/xray/quota/xhttp/'"$user"' /etc/xray/quota/xhttp/'"$user"'_usage' | at now + 60 minutes >/dev/null 2>&1
+clear
+source /etc/funny/format.sh
+format_display "$TEKS"

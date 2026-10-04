@@ -2433,6 +2433,10 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Fix 332 (Found 332):** 193 files, same two-line shape everywhere: `PERMISSION_URL=` replaced by `PERMISSION_PRIMARY` (Pages) + `PERMISSION_FALLBACK` (GitHub raw); fetch tries primary then fallback (`curl -s primary || curl -s fallback || { fail }`). The one stray non-canonical URL (`fix/fix-decrypted-original.sh` → `rohmatsb-biz/cobaizin`) deliberately untouched. Same change in `fn-autosc-api/menu-api` gate (keeping its `--max-time 15` caps).
 - **Verified:** 193/193 converted, 0 old-var residuals, `bash -n` clean on all touched scripts; live gate green via Pages.
 
+### Fix 333 - Full `split` → `xhttp` identifier rename (Found 333)
+
+- **Fix 333 (Found 333):** mechanical 1:1 rename across both repos (fn-autosc: files, service instance, JSON, data dirs, function/vars, menus, cron, docs; fn-autosc-api: `core` mapping + `xhttp.json`/tool paths + README + plans, with legacy `split`→`xhttp` alias). Live migration moves data (accounts, quota, limit, logs) into `xhttp` homes, switches the systemd instance, updates crontab, and redeploys `/usr/bin` — verified end-to-end with account create/traffic/delete.
+
 
 
 

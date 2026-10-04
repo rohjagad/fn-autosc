@@ -306,7 +306,7 @@ dm() {
         sed -i "s|server_name $old_domain;|server_name $host;|" /etc/nginx/nginx.conf
 	sed -i "s|${old_domain}|${host}|g" /var/log/create/xray/ws/* 2>/dev/null || true
 	sed -i "s|${old_domain}|${host}|g" /var/log/create/xray/http/* 2>/dev/null || true
-	sed -i "s|${old_domain}|${host}|g" /var/log/create/xray/split/* 2>/dev/null || true
+	sed -i "s|${old_domain}|${host}|g" /var/log/create/xray/xhttp/* 2>/dev/null || true
 	sed -i "s|${old_domain}|${host}|g" /var/log/create/xray/grpc/* 2>/dev/null || true
 	sed -i "s|${old_domain}|${host}|g" /var/log/create/ssh/* 2>/dev/null || true
 

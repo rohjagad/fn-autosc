@@ -107,13 +107,13 @@ mkdir -p /etc/xray/json
 cd /etc/xray/json
 wget --no-check-certificate ${hosting}/json/ws.json >> /dev/null 2>&1
 wget --no-check-certificate ${hosting}/json/upgrade.json >> /dev/null 2>&1
-wget --no-check-certificate ${hosting}/json/split.json >> /dev/null 2>&1
+wget --no-check-certificate ${hosting}/json/xhttp.json >> /dev/null 2>&1
 wget --no-check-certificate ${hosting}/json/grpc.json >> /dev/null 2>&1
 
 # Mengubah Permision Json
 chmod 644 ws.json
 chmod 644 upgrade.json
-chmod 644 split.json
+chmod 644 xhttp.json
 chmod 644 grpc.json
 
 # Every template ships publicly-known default credentials and the repository is
@@ -122,7 +122,7 @@ chmod 644 grpc.json
 # no committed credential can be used against a fresh host.
 #   ws.json      rerechan-store (vmess x3, trojan), cfbbaafc-... (vless, vmess)
 #   grpc.json    cfbbaafc-...                        (vless, vmess, trojan)
-#   split.json   019e0bf3-... , af7d5cf8-... , diy2020
+#   xhttp.json   019e0bf3-... , af7d5cf8-... , diy2020
 #   upgrade.json nonescript-fn-project               (vmess, vless, trojan)
 for def in "rerechan-store" \
            "cfbbaafc-8d52-450c-9fb0-145bc8221e6d" \
@@ -133,14 +133,14 @@ for def in "rerechan-store" \
     rep="$(xray uuid)"
     sed -i "s|${def}|${rep}|g" \
         /etc/xray/json/ws.json /etc/xray/json/upgrade.json \
-        /etc/xray/json/split.json /etc/xray/json/grpc.json
+        /etc/xray/json/xhttp.json /etc/xray/json/grpc.json
 done
 
 # Membuat File Log
 mkdir -p /var/log/xray
 cd /var/log/xray
 touch /var/log/xray/ws.log
-touch /var/log/xray/split.log
+touch /var/log/xray/xhttp.log
 touch /var/log/xray/upgrade.log
 touch /var/log/xray/http.log
 touch /var/log/xray/grpc.log
@@ -148,7 +148,7 @@ touch /etc/xray/.quota.logs
 
 # Mengubah Permision Log File
 chmod 644 ws.log
-chmod 644 split.log
+chmod 644 xhttp.log
 chmod 644 upgrade.log
 chmod 644 http.log
 chmod 644 grpc.log
@@ -160,23 +160,23 @@ apt install cron -y
 #0,15,30,45 * * * * root /usr/bin/xp
 #*/5 * * * * root limit-ip-ssh
 #*/5 * * * * root limit-ip-ws
-#*/5 * * * * root limit-ip-split
+#*/5 * * * * root limit-ip-xhttp
 #*/5 * * * * root limit-ip-http
 #*/5 * * * * root limit-ip-grpc
 #*/5 * * * * root auto-delete-ws
-#*/5 * * * * root auto-delete-split
+#*/5 * * * * root auto-delete-xhttp
 #*/5 * * * * root auto-delete-http
 #*/5 * * * * root auto-delete-grpc
 #*/5 * * * * root kill-ws
 #*/5 * * * * root kill-http
-#*/5 * * * * root kill-split
+#*/5 * * * * root kill-xhttp
 #*/5 * * * * root kill-grpc" >> /etc/crontab
 
 # Bug 73: reinstall-safe cron install. The block below used to append
 # unconditionally, so every reinstall stacked a second copy of all 17 daemon
 # lines (every daemon ran twice per tick and locks scheduled double at-jobs).
 # Drop previously installed panel lines first, then append exactly one set.
-sed -i '/flock -n \/tmp\/\(backup\|xp\|expire-ssh\|limit-ip-ssh\|limit-ip-ws\|limit-ip-split\|limit-ip-http\|limit-ip-grpc\|auto-delete-ws\|auto-delete-split\|auto-delete-http\|auto-delete-grpc\|kill-ws\|kill-http\|kill-split\|kill-grpc\)\.lock /d' /etc/crontab
+sed -i '/flock -n \/tmp\/\(backup\|xp\|expire-ssh\|limit-ip-ssh\|limit-ip-ws\|limit-ip-xhttp\|limit-ip-http\|limit-ip-grpc\|auto-delete-ws\|auto-delete-xhttp\|auto-delete-http\|auto-delete-grpc\|kill-ws\|kill-http\|kill-xhttp\|kill-grpc\)\.lock /d' /etc/crontab
 # Only schedule daemons this edition actually ships. The lite edition has no
 # SSH tools, and a crontab entry for a command that is not installed fails on
 # every tick ("flock: failed to execute expire-ssh: No such file or directory").
@@ -186,16 +186,16 @@ cron_block="0 0,6,12,18 * * * root flock -n /tmp/backup.lock backup
 */5 * * * * root flock -n /tmp/expire-ssh.lock expire-ssh
 */5 * * * * root flock -n /tmp/limit-ip-ssh.lock limit-ip-ssh
 */5 * * * * root flock -n /tmp/limit-ip-ws.lock limit-ip-ws
-*/5 * * * * root flock -n /tmp/limit-ip-split.lock limit-ip-split
+*/5 * * * * root flock -n /tmp/limit-ip-xhttp.lock limit-ip-xhttp
 */5 * * * * root flock -n /tmp/limit-ip-http.lock limit-ip-http
 */5 * * * * root flock -n /tmp/limit-ip-grpc.lock limit-ip-grpc
 */5 * * * * root flock -n /tmp/auto-delete-ws.lock auto-delete-ws
-*/5 * * * * root flock -n /tmp/auto-delete-split.lock auto-delete-split
+*/5 * * * * root flock -n /tmp/auto-delete-xhttp.lock auto-delete-xhttp
 */5 * * * * root flock -n /tmp/auto-delete-http.lock auto-delete-http
 */5 * * * * root flock -n /tmp/auto-delete-grpc.lock auto-delete-grpc
 */5 * * * * root flock -n /tmp/kill-ws.lock kill-ws
 */5 * * * * root flock -n /tmp/kill-http.lock kill-http
-*/5 * * * * root flock -n /tmp/kill-split.lock kill-split
+*/5 * * * * root flock -n /tmp/kill-xhttp.lock kill-xhttp
 */5 * * * * root flock -n /tmp/kill-grpc.lock kill-grpc"
 while IFS= read -r cron_line; do
     [ -z "$cron_line" ] && continue
@@ -232,7 +232,7 @@ User=root
 WantedBy=multi-user.target
 END
 
-cat> /etc/systemd/system/quota-split.service << END
+cat> /etc/systemd/system/quota-xhttp.service << END
 [Unit]
 Description=Xray Quota Management Service By FN AutoSC
 After=network.target
@@ -241,7 +241,7 @@ StartLimitBurst=30
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/quota-split
+ExecStart=/usr/bin/quota-xhttp
 Restart=on-failure
 RestartSec=3s
 User=root
@@ -292,8 +292,8 @@ systemctl enable xray@ws
 systemctl enable quota-ws
 systemctl enable xray@upgrade
 systemctl enable quota-http
-systemctl enable xray@split
-systemctl enable quota-split
+systemctl enable xray@xhttp
+systemctl enable quota-xhttp
 systemctl enable xray@grpc
 systemctl enable quota-grpc
 
@@ -302,8 +302,8 @@ systemctl start xray@ws
 systemctl start quota-ws
 systemctl start xray@upgrade
 systemctl start quota-http
-systemctl start xray@split
-systemctl start quota-split
+systemctl start xray@xhttp
+systemctl start quota-xhttp
 systemctl start xray@grpc
 systemctl start quota-grpc
 

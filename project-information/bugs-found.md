@@ -2102,6 +2102,10 @@ Found 332. **Auth fetch single-sourced to GitHub raw; Cloudflare Pages is faster
 all 193 permission gates fetched `izin.txt` only from `raw.githubusercontent.com`. `https://fn-autosc-auth.pages.dev/izin.txt` serves byte-identical content (7 `###` entries on both) with better peering; GitHub stays as fallback.
 - **Confirmed live:** Pages URL returns 7 entries from the VPS; gate (`menu-api status`) green.
 
+Found 333. **Full rename `split` → `xhttp` for every machine identifier** (follow-up to Found 331, per explicit direction) —
+`*-split.sh` → `*-xhttp.sh` (45 files via `git mv`), `split.json` → `xhttp.json`, service `xray@split` → `xray@xhttp`, data dirs (`/var/log/create/xray/`, `/etc/xray/quota/`, `/etc/xray/limit/ip/xray/`, `/var/log/xray/*.log`) → `xhttp`, function/var/case names (`xsplit()` → `xxhttp()`, `opsplit`, `ceksplit`, `vxsplit`, `split_expired`), menu texts, cron entries, and API `core=split` → `core=xhttp` (with a one-line legacy alias per handler so old clients keep working). Deliberately untouched: language builtins (`strings.Split`, awk `split()`) and append-only history.
+- **Verified (repo):** zero `split` tokens outside builtins/history; `bash -n` clean; Go diffs are renames only.
+
 
 
 

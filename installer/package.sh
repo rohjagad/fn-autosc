@@ -25,24 +25,24 @@ mkdir -p /etc/xray/json
 mkdir -p /var/log/xray
 mkdir -p /var/log/create/ssh
 mkdir -p /var/log/create/xray/ws
-mkdir -p /var/log/create/xray/split
+mkdir -p /var/log/create/xray/xhttp
 mkdir -p /var/log/create/xray/http
 mkdir -p /var/log/create/xray/grpc
 mkdir -p /etc/slowdns
 mkdir -p /etc/xray/limit/ip/xray/ws
 mkdir -p /etc/xray/limit/ip/xray/http
-mkdir -p /etc/xray/limit/ip/xray/split
+mkdir -p /etc/xray/limit/ip/xray/xhttp
 mkdir -p /etc/xray/limit/ip/xray/grpc
 mkdir -p /etc/xray/quota/ws
 mkdir -p /etc/xray/quota/http
-mkdir -p /etc/xray/quota/split
+mkdir -p /etc/xray/quota/xhttp
 mkdir -p /etc/xray/quota/grpc
 mkdir -p /etc/xray/limit/ip/ssh
 mkdir -p /root/.rules
 
 # Membuat File Log Database
 touch /var/log/xray/ws.log
-touch /var/log/xray/split.log
+touch /var/log/xray/xhttp.log
 touch /var/log/xray/upgrade.log
 touch /var/log/xray/http.log
 touch /var/log/xray/grpc.log

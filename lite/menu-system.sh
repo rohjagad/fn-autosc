@@ -119,11 +119,11 @@ systemctl restart sshd 2>/dev/null || true
 systemctl restart cron
 systemctl restart xray@ws
 systemctl restart xray@upgrade
-systemctl restart xray@split
+systemctl restart xray@xhttp
 systemctl restart xray@grpc
 systemctl restart quota-ws
 systemctl restart quota-http
-systemctl restart quota-split
+systemctl restart quota-xhttp
 systemctl restart quota-grpc
 systemctl restart nginx
 clear

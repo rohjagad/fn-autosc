@@ -1516,6 +1516,17 @@ Section 35's four-check rule applied to Fix 332:
 | **Over-engineering** | One extra variable + one extra `curl` alternative per gate; no helper, no dependency. |
 | **vs the source** | V23/1.20 predate both URLs (dead `permision.rerechanstore.eu.org`); the canonical GitHub URL is kept verbatim as fallback. |
 
+## 118. Full Split→XHTTP Identifier Rename — Four Checks (October 4, 2026)
+
+Section 35's four-check rule applied to Fix 333:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Rename mekanis 1:1 (`split`→`xhttp` dengan guard builtin bahasa); `bash -n` bersih; `xray -test` OK; API menerima alias legacy `split`. Migrasi live memindahkan data (akun, kuota, limit, log), bukan menghapus. |
+| **Over-strictness** | Tidak ada penolakan baru; alias `split`→`xhttp` justru melonggarkan kompatibilitas klien lama. |
+| **Over-engineering** | Tanpa kode baru kecuali 1 baris alias per handler; tanpa dependensi baru. |
+| **vs the source** | V23/1.20 tak mengenal XHTTP sama sekali; rename mengikuti arah upstream Xray dan menghilangkan kelas inkonsistensi nama ganda. |
+
 
 
 

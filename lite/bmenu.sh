@@ -148,11 +148,11 @@ systemctl daemon-reload
 systemctl restart ssh
 if xray run -test -config /etc/xray/json/ws.json >/dev/null 2>&1; then systemctl restart xray@ws; fi
 if xray run -test -config /etc/xray/json/grpc.json >/dev/null 2>&1; then systemctl restart xray@grpc; fi
-if xray run -test -config /etc/xray/json/split.json >/dev/null 2>&1; then systemctl restart xray@split; fi
+if xray run -test -config /etc/xray/json/xhttp.json >/dev/null 2>&1; then systemctl restart xray@xhttp; fi
 if xray run -test -config /etc/xray/json/upgrade.json >/dev/null 2>&1; then systemctl restart xray@upgrade; fi
 systemctl restart quota-ws 2>/dev/null || true
 systemctl restart quota-http 2>/dev/null || true
-systemctl restart quota-split 2>/dev/null || true
+systemctl restart quota-xhttp 2>/dev/null || true
 systemctl restart quota-grpc 2>/dev/null || true
 systemctl restart nginx
 systemctl restart cron
@@ -220,11 +220,11 @@ systemctl daemon-reload
 systemctl restart ssh
 if xray run -test -config /etc/xray/json/ws.json >/dev/null 2>&1; then systemctl restart xray@ws; fi
 if xray run -test -config /etc/xray/json/grpc.json >/dev/null 2>&1; then systemctl restart xray@grpc; fi
-if xray run -test -config /etc/xray/json/split.json >/dev/null 2>&1; then systemctl restart xray@split; fi
+if xray run -test -config /etc/xray/json/xhttp.json >/dev/null 2>&1; then systemctl restart xray@xhttp; fi
 if xray run -test -config /etc/xray/json/upgrade.json >/dev/null 2>&1; then systemctl restart xray@upgrade; fi
 systemctl restart quota-ws 2>/dev/null || true
 systemctl restart quota-http 2>/dev/null || true
-systemctl restart quota-split 2>/dev/null || true
+systemctl restart quota-xhttp 2>/dev/null || true
 systemctl restart quota-grpc 2>/dev/null || true
 systemctl restart nginx
 systemctl restart cron
@@ -313,7 +313,7 @@ for def in "rerechan-store" \
     rep="$(xray uuid)"
     sed -i "s|${def}|${rep}|g" \
         /etc/xray/json/ws.json /etc/xray/json/upgrade.json \
-        /etc/xray/json/split.json /etc/xray/json/grpc.json 2>/dev/null
+        /etc/xray/json/xhttp.json /etc/xray/json/grpc.json 2>/dev/null
 done
 
 # Mengambil Lokasi Xray Config
@@ -405,11 +405,11 @@ systemctl daemon-reload
 systemctl restart ssh
 if xray run -test -config /etc/xray/json/ws.json >/dev/null 2>&1; then systemctl restart xray@ws; fi
 if xray run -test -config /etc/xray/json/grpc.json >/dev/null 2>&1; then systemctl restart xray@grpc; fi
-if xray run -test -config /etc/xray/json/split.json >/dev/null 2>&1; then systemctl restart xray@split; fi
+if xray run -test -config /etc/xray/json/xhttp.json >/dev/null 2>&1; then systemctl restart xray@xhttp; fi
 if xray run -test -config /etc/xray/json/upgrade.json >/dev/null 2>&1; then systemctl restart xray@upgrade; fi
 systemctl restart quota-ws 2>/dev/null || true
 systemctl restart quota-http 2>/dev/null || true
-systemctl restart quota-split 2>/dev/null || true
+systemctl restart quota-xhttp 2>/dev/null || true
 systemctl restart quota-grpc 2>/dev/null || true
 systemctl restart nginx
 systemctl restart cron

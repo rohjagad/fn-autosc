@@ -316,7 +316,7 @@ Fase 17: Inspeksi Fallback URL Otorisasi (Pages + GitHub)
 
 - **Komponen Target:** `json/split.json`, `config/4.conf`, `config/6.conf`, `config/dual.conf`, 12 skrip `add-*-split`/`trial-*-split` (`full/` + `lite/`), string display XHTTP (menu, kartu, Telegram), `menu/full.zip`, `menu/lite.zip`.
 - **Finding (Metodologi Penemuan):**
-  - Pindai sisa wire-visible lama: `splithttp`, `SplitHTTP`, `Split HTTP` (semua varian case/spasi), path `/vmspl`, `/vlspl`, `/trspl`, link `type=splithttp` di seluruh `.sh`/`.json`/`.conf`/`.go` (`grep -rin`). Yang boleh tersisa hanya identifier mesin: nama file `*-split.sh`, service `xray@split`, `split.json`, dir log/kuota/limit, dan API `core=split`.
+  - Pindai sisa lama: `splithttp`, `SplitHTTP`, `Split HTTP` (semua varian case/spasi), path `/vmspl`, `/vlspl`, `/trspl`, link `type=splithttp`, nama file `*-split.sh`, service `xray@split`, `split.json`, dir log/kuota/limit `split`, dan API `core=split` di seluruh `.sh`/`.json`/`.conf`/`.go` (`grep -rin`). Target akhir: nol token `split` kecuali builtin bahasa (`strings.Split`, awk `split()`) dan arsip history.
   - Verifikasi skema XHTTP terhadap biner pin (`strings xray | grep xhttpSettings`; `xray run -test` pada `json/split.json` hasil migrasi).
   - Verifikasi konsistensi tiga lapis: path di JSON server == lokasi nginx == path di kartu/link yang dicetak skrip (`/vmxh`, `/vlxh`, `/trxh`).
   - Verifikasi paritas zip: hash byte tiap entri `*-split*` di `menu/full.zip`/`menu/lite.zip` sama dengan source; biner Go yang display-nya berubah dikompilasi ulang (cek string `XHTTP` di biner).
@@ -326,7 +326,7 @@ Fase 17: Inspeksi Fallback URL Otorisasi (Pages + GitHub)
   - Uji kartu akun: field lengkap, link decode cocok kredensial, duplikat ditolak sebelum mutasi, `0 not allowed` di kuota/IP/durasi.
   - Uji hapus total: entri JSON, kartu log, file kuota+usage, file limit hilang semua; service restart bersih dan config valid.
 - **Fixing (Standar Perbaikan):**
-  - Rename murni tanpa logika: `splithttp`→`xhttp`, display→`XHTTP`, path ke `/vmxh`, `/vlxh`, `/trxh`. Jangan rename identifier mesin (kontrak API/cron/systemd).
+  - Rename total ke `xhttp`: file `*-split.sh`→`*-xhttp.sh`, `split.json`→`xhttp.json`, service `xray@split`→`xray@xhttp`, dir data →`xhttp`, API `core` →`xhttp` (dengan alias legacy `split`→`xhttp` di handler), plus rename protokol/path/display seperti sebelumnya.
   - Bug umum ikut standar fasenya masing-masing (timeout→Fase 12 nginx; kuota→Fase 6; kartu→Fase 7); fase ini hanya mengoordinasi temuan area-xhttp.
   - Repack zip deterministik (timestamp tetap, mode `0755`) dan catat append-only (Found/Fix + Section regresi).
 

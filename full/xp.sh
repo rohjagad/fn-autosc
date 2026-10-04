@@ -155,12 +155,12 @@ if [[ $http_expired -eq 1 ]]; then
 fi
 
 ##----- Auto Remove Xray XHTTP
-split_expired=0
-data=( `cat /etc/xray/json/split.json | grep '^###' | cut -d ' ' -f 2 | sort | uniq`);
+xhttp_expired=0
+data=( `cat /etc/xray/json/xhttp.json | grep '^###' | cut -d ' ' -f 2 | sort | uniq`);
 now=`date +"%Y-%m-%d"`
 for user in "${data[@]}"
 do
-exp=$(grep -w "^### $user" "/etc/xray/json/split.json" | cut -d ' ' -f 3 | sort | uniq | head -n 1)
+exp=$(grep -w "^### $user" "/etc/xray/json/xhttp.json" | cut -d ' ' -f 3 | sort | uniq | head -n 1)
 d1=$(date -d "$exp" +%s 2>/dev/null)
 if [ -z "$d1" ]; then
     echo "Skipping $user: unparseable expiry '$exp'"
@@ -170,14 +170,14 @@ d2=$(date -d "$now" +%s)
 exp2=$(( (d1 - d2) / 86400 ))
 if [[ "$exp2" -le "0" ]]; then
     xp_log "deleted $user (expiry $exp)"
-sed -i "/^### $user $exp/ {N;d}" /etc/xray/json/split.json
-sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/split.json
-        rm -f /var/log/create/xray/split/${user}.log
-        rm -f /etc/xray/quota/split/$user /etc/xray/quota/split/${user}_usage
-        rm -f /etc/xray/limit/ip/xray/split/$user
+sed -i "/^### $user $exp/ {N;d}" /etc/xray/json/xhttp.json
+sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/xhttp.json
+        rm -f /var/log/create/xray/xhttp/${user}.log
+        rm -f /etc/xray/quota/xhttp/$user /etc/xray/quota/xhttp/${user}_usage
+        rm -f /etc/xray/limit/ip/xray/xhttp/$user
 TEKS="
 ====================
-X-Ray split Account Expired
+X-Ray xhttp Account Expired
 ====================
 
 -> $user / $exp
@@ -187,13 +187,13 @@ KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL
-split_expired=1
+xhttp_expired=1
 fi
 done
-if [[ $split_expired -eq 1 ]]; then
-    if xray run -test -config /etc/xray/json/split.json >/dev/null 2>&1; then
+if [[ $xhttp_expired -eq 1 ]]; then
+    if xray run -test -config /etc/xray/json/xhttp.json >/dev/null 2>&1; then
         systemctl daemon-reload
-        systemctl restart xray@split
+        systemctl restart xray@xhttp
     fi
 fi
 

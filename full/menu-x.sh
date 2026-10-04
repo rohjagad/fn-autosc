@@ -109,7 +109,7 @@ fi
 ws=$(cat /etc/xray/json/ws.json 2>/dev/null | grep "###" | sort | uniq | wc -l)
 http=$(cat /etc/xray/json/upgrade.json 2>/dev/null | grep "###" | sort | uniq | wc -l)
 gpc=$(cat /etc/xray/json/grpc.json 2>/dev/null | grep "###" | sort | uniq | wc -l)
-split=$(cat /etc/xray/json/split.json 2>/dev/null | grep "###" | sort | uniq | wc -l)
+xhttp=$(cat /etc/xray/json/xhttp.json 2>/dev/null | grep "###" | sort | uniq | wc -l)
 
 # Xray/XTLS core version (moved here from the main menu, which is too cramped)
 xver=$(xray version 2>/dev/null | awk '{print $2}' | head -n 1)
@@ -124,7 +124,7 @@ ${blue_sep}
 ${purple}TOTAL ACCOUNTS${NC}
 WS           : $ws
 HTTP         : $http
-Split        : $split
+XHTTP        : $xhttp
 gRPC         : $gpc
 ${blue_sep}
 ${purple}MENU${NC}
@@ -140,7 +140,7 @@ read -p "Input option: " opws || exit 0
 case $opws in
 1) clear ; x-ws ; menu-x ;;
 2) clear ; x-http ; menu-x ;;
-3) clear ; x-split ; menu-x ;;
+3) clear ; x-xhttp ; menu-x ;;
 4) clear ; x-grpc ; menu-x ;;
 0) clear ; menu ;;
 *) clear ; menu-x ;;
