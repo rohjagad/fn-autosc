@@ -1527,6 +1527,17 @@ Section 35's four-check rule applied to Fix 333:
 | **Over-engineering** | Tanpa kode baru kecuali 1 baris alias per handler; tanpa dependensi baru. |
 | **vs the source** | V23/1.20 tak mengenal XHTTP sama sekali; rename mengikuti arah upstream Xray dan menghilangkan kelas inkonsistensi nama ganda. |
 
+## 119. Phase 1: Restore Re-Secures API Token + Restore-Key Ownership — Four Checks (October 4, 2026)
+
+Section 35's four-check rule applied to Fix 334:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Guarded (`2>/dev/null \|\| true`) no-ops when files absent; no restart/service/input path touched; `bash -n` clean; zips deterministic (same entry lists, `0755`, byte-identical). |
+| **Over-strictness** | Nothing rejected; only permission bits + group ownership re-asserted to the documented values (Decision 19). |
+| **Over-engineering** | Two lines per restore block, no helper/dependency; transient-umask hardening deliberately skipped (single-tenant install window, would add noise for no persistent gain). |
+| **vs the source** | V23/1.20 omitted `0600` on restored keys (Found 305, inherited); this closes the two lines that fix left uncovered (`.key` never chmodded, `.restore.key` never chowned). |
+
 
 
 

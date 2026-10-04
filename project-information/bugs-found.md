@@ -2106,6 +2106,12 @@ Found 333. **Full rename `split` → `xhttp` for every machine identifier** (fol
 `*-split.sh` → `*-xhttp.sh` (45 files via `git mv`), `split.json` → `xhttp.json`, service `xray@split` → `xray@xhttp`, data dirs (`/var/log/create/xray/`, `/etc/xray/quota/`, `/etc/xray/limit/ip/xray/`, `/var/log/xray/*.log`) → `xhttp`, function/var/case names (`xsplit()` → `xxhttp()`, `opsplit`, `ceksplit`, `vxsplit`, `split_expired`), menu texts, cron entries, and API `core=split` → `core=xhttp` (with a one-line legacy alias per handler so old clients keep working). Deliberately untouched: language builtins (`strings.Split`, awk `split()`) and append-only history.
 - **Verified (repo):** zero `split` tokens outside builtins/history; `bash -n` clean; Go diffs are renames only.
 
+Found 334. **Phase 1: restore paths leave the API token unhardened and the restore key mis-owned** (`full/bmenu.sh`, `lite/bmenu.sh` ×3 restore functions each, `full/restore-ftp.sh`, `lite/restore-ftp.sh`, `website/restore-ftp.sh`) —
+1. `cp -r xray /etc/` restores `/etc/xray/.key` (the API root credential) with whatever mode the zip carries, but the post-restore chmod block never touches it — every other secret in the block (`xray.key`, `funny.pem`, wg/ipsec/bot creds, `.restore.key`) is re-secured, the API token is not. A backup taken before Fix 305-era hardening (or any zip that stores 0644) leaves the root API credential world-readable after every restore.
+2. `cp -r funny /etc/` restores `/etc/funny/.restore.key` and the block does `chmod 640` but never `chown root:www-data`, so when the archive carries `root:root` ownership the web-server user can no longer read it and the *next* web-restore fails closed with 401 even with the right key (reliability, not just secrecy). `website/install.sh` creates it correctly (`chown root:www-data` + `640`); the 9 restore blocks did not re-assert it.
+- **Inherited pattern:** same class as Found 305 (V23/1.20 omitted `0600` on restored keys) — this is the two lines that fix left uncovered.
+- **Confirmed by inspection:** `grep -n "chmod 640 /etc/funny/.restore.key"` hits 9 restore blocks, 0 of which mention `/etc/xray/.key` or `chown root:www-data` before this fix. No live VPS mutation was needed (pure permission re-assertion, `|| true` guarded).
+
 
 
 

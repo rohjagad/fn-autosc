@@ -2437,6 +2437,11 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 333 (Found 333):** mechanical 1:1 rename across both repos (fn-autosc: files, service instance, JSON, data dirs, function/vars, menus, cron, docs; fn-autosc-api: `core` mapping + `xhttp.json`/tool paths + README + plans, with legacy `split`→`xhttp` alias). Live migration moves data (accounts, quota, limit, logs) into `xhttp` homes, switches the systemd instance, updates crontab, and redeploys `/usr/bin` — verified end-to-end with account create/traffic/delete.
 
+### Fix 334 - Phase 1: re-secure API token + restore-key ownership on every restore (Found 334)
+
+- **Fix 334 (Found 334):** in all 9 restore blocks (`full/bmenu.sh` ×3, `lite/bmenu.sh` ×3, `full/restore-ftp.sh`, `lite/restore-ftp.sh`, `website/restore-ftp.sh`) appended two guarded lines after the existing `chmod 640 /etc/funny/.restore.key`: `chmod 600 /etc/xray/.key` (API token back to Decision-19 `0600 root`) and `chown root:www-data /etc/funny/.restore.key` (web-restore key readable by `www-data` again). Repacked `menu/full.zip` (114 entries) + `menu/lite.zip` (97 entries) deterministically (fixed timestamp, mode `0755`, byte-identical entries).
+- **Verified:** `bash -n` clean on all 5 files; zip entries byte-identical to sources, 0 non-`0755` entries; no logic/input handling touched.
+
 
 
 
