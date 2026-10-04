@@ -2130,6 +2130,9 @@ Found 339. **Phase 7: `addssh` ignores a failed `useradd` and reports success an
 `create_ssh_user` returns 1 when `useradd` fails, but the caller discards the status and proceeds to `chage`, card, Telegram, log and display — a phantom success for an account that does not exist (reachable via a double-create race; `trial-ssh.sh` already guards its caller with `exit 1`). One-word fix (`|| return`).
 - **Also Phase 7:** the first `read -p "Username: "` had no EOF guard while every retry carries `|| exit 1` — added the same guard (Fase 20 pattern, in-scope per the Phase 7 `read -p` scan).
 
+Found 340. **Phase 10: four submenus accept `0` but not the displayed `00` spelling** (`full/menu-ssh.sh:139`, `full/menu-x.sh:145`, `full/menu-system.sh:375,410`, `lite/menu-system.sh:360,395`) —
+18 of 24 back-branches use `0|00)` (Fix 181 precedent for accepting displayed variants); these six used bare `0)`, so typing the documented `00` fell into `*)` redisplay instead of going back. Same action, wider spelling — zero behavior risk.
+
 
 
 

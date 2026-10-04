@@ -1593,6 +1593,17 @@ Section 35's four-check rule applied to Fix 339:
 | **Over-engineering** | Two words (`\|\| return`, `\|\| exit 0`), both mirroring guards already present in `trial-ssh.sh` / the same file's retries. |
 | **vs the source** | V23/1.20 share the unchecked call; guarding it follows the already-accepted `trial-ssh` pattern in this repo. |
 
+## 125. Phase 10: 00-Accepting Back Branches — Four Checks (October 4, 2026)
+
+Section 35's four-check rule applied to Fix 340:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Same back-action, one extra accepted spelling; `bash -n` clean; zips deterministic. |
+| **Over-strictness** | Strictly less strict (accepts more); no input newly rejected. |
+| **Over-engineering** | Three characters (`\|00`) per branch; Fix 181 precedent. |
+| **vs the source** | Both references mix `0)`/`0\|00)` spellings the same way; harmonizing to the majority spelling changes no flow. |
+
 
 
 

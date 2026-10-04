@@ -372,7 +372,7 @@ add() {
     case $aws in
     1) akun4 ; menuwg ;;
     2) akun6 ; menuwg ;;
-    0) menuwg ;;
+    0|00) menuwg ;;
     *) add ;;
     esac
 }
@@ -407,7 +407,7 @@ menuwg() {
     7) add ; menuwg ;;
     8) menu ;;
     9) exit ;;
-    0) systemd ;;
+    0|00) systemd ;;
     *) menuwg ;;
     esac
 }

@@ -2466,6 +2466,11 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Fix 339 (Found 339):** `create_ssh_user ... || return` (mirrors `trial-ssh.sh`'s caller guard) and `|| exit 0` on the first username `read` (mirrors every retry in the same file). Repacked `menu/full.zip` (`addssh` entry byte-identical; lite ships no SSH tooling).
 - **Verified:** `bash -n` clean; no prompt/validation logic altered.
 
+### Fix 340 - Phase 10: accept `00` alongside `0` in the four remaining submenus (Found 340)
+
+- **Fix 340 (Found 340):** `0)` → `0|00)` at six branches (same back-action, wider spelling). Repacked `menu/full.zip` + `menu/lite.zip` (entries byte-identical, 0 non-`0755`).
+- **Verified:** `bash -n` clean ×4; census 24/24 branches `0|00)`; main menu intentionally unchanged (no parent to return to; Ctrl+C documented).
+
 
 
 

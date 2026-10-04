@@ -136,6 +136,6 @@ read -p "Input option: " aws || exit 0
     7) clear ; list-ssh ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; menu-ssh ;;
     8) clear ; pwd-ssh ; menu-ssh ;;
     9) clear ; limit-ip ; menu-ssh ;;
-    0) clear ; menu ;;
+    0|00) clear ; menu ;;
     *) clear ; menu-ssh ;;
     esac

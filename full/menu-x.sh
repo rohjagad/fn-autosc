@@ -142,7 +142,7 @@ case $opws in
 2) clear ; x-http ; menu-x ;;
 3) clear ; x-xhttp ; menu-x ;;
 4) clear ; x-grpc ; menu-x ;;
-0) clear ; menu ;;
+0|00) clear ; menu ;;
 *) clear ; menu-x ;;
 esac
 }
