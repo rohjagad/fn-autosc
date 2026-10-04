@@ -2506,6 +2506,11 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Fix 349 (Found 349):** `need_restart` flag + single post-loop `xray -test`-gated restart in all 24 daemon files; per-user Telegram notices unchanged; zips repacked.
 - **Verified:** sandbox runs (2-lock/2-quota/2-kill triggers → 1 restart each; zero-trigger → 0); `bash -n` clean ×24; no in-loop restart left by scan.
 
+### Fix 350 - Phase 22: one shared lock per JSON file for daemons (Found 350)
+
+- **Fix 350 (Found 350):** `exec 9` + `flock -w 30` around the edit sections of all 26 daemon files (per-file lock, held for milliseconds-to-seconds, skip-and-retry on timeout); zips repacked.
+- **Verified:** counter race 40/80 lost → 0/80; pre-lock pile-up dropped a healthy account, locked pile-up exact; `bash -n` clean ×26.
+
 ### Fix 343 - Phase 14: full-length API token (Found 343)
 
 - **Fix 343 (Found 343):** `head -c 32` → `head -c 48` in `token()` (`fn-autosc-api/menu-api:18`); charset and 40-char cut unchanged, so existing tokens stay valid and rotation works as before.

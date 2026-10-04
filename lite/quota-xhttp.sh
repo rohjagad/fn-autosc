@@ -104,6 +104,8 @@ function cekxhttp() {
     users=$(grep '^###' /etc/xray/json/xhttp.json | cut -d ' ' -f 2 | sort | uniq)
 
     need_restart=
+    exec 9>/tmp/xray-json-xhttp.lock
+    if flock -w 30 9; then
     for user in $users; do
         # Ambil statistik penggunaan dari Xray API
         inb=$(xray api stats --server=127.0.0.1:10082 -name "user>>>${user}>>>traffic>>>uplink" 2>/dev/null | grep value | awk '{gsub(/[",]/,"",$2); print $2}')
@@ -154,6 +156,10 @@ function cekxhttp() {
         if xray run -test -config /etc/xray/json/xhttp.json >/dev/null 2>&1; then
             systemctl restart xray@xhttp
         fi
+    fi
+    flock -u 9
+    else
+        echo "quota-xhttp: /etc/xray/json/xhttp.json busy, skipping this pass"
     fi
 }
 

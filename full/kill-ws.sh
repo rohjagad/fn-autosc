@@ -173,6 +173,8 @@ function process_quota() {
     done
 }
 
+exec 9>/tmp/xray-json-ws.lock
+if flock -w 30 9; then
 process_quota
 # One restart per run, not per deleted user (Found 329 class).
 if [ -n "$need_restart" ]; then
@@ -181,5 +183,10 @@ if [ -n "$need_restart" ]; then
         systemctl restart xray@ws
     fi
 fi
+flock -u 9
+else
+    echo "kill-ws: /etc/xray/json/ws.json busy, skipping this run"
+fi
+exec 9>&-
 
 > /var/log/xray/ws.log

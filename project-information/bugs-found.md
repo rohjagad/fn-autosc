@@ -2172,6 +2172,11 @@ Found 349. **Phase 21: daemons restarted the service once per user instead of on
 a cron run that locked/deleted N users issued N back-to-back `systemctl restart`s (the `xp`/`auto-delete` daemons already batch correctly and were the template). Each in-loop restart is now a `need_restart=1` flag; one `xray -test`-gated restart fires after the loop (quota resets its flag each 30s pass; `send_log` per-user notices unchanged).
 - **Verified live-locally in a sandbox** (fake license server, fake xray API, restart counter): 2 locked users → exactly 1 restart with only the right accounts removed; 2 over-quota users → 1 restart with cards/quota/limit cleaned and the healthy account's usage file kept; 2 kill triggers (over-quota + missing-file) → 1 restart; zero-trigger run → 0 restarts, config untouched. All 24 files `bash -n` clean; static scan confirms zero in-loop restarts remain; zips repacked.
 
+Found 350. **Phase 22: background daemons edited the same config file with no shared lock** (`xp`, `limit-ip-*`, `quota-*`, `kill-*` — 26 files, both editions) —
+each daemon had only its own cron lock, so overlapping runs (aligned cron ticks, the 30-second quota loop) read-modify-wrote the same JSON: entries could vanish while the file stayed valid. Each JSON file now has one lock (`/tmp/xray-json-<name>.lock`, held only around the edit + restart, max 30s wait, never nested so no deadlock); a waiter that times out skips that run/section and the next tick retries.
+- **Verified live-locally in a sandbox:** a two-process counter lost 40 of 80 updates unlocked vs 0 locked; worse, the pre-lock daemons under a triple pile-up silently dropped a healthy account (`k1`) with the JSON still valid — the exact real-world damage. With locks, two full pile-up rounds deleted exactly the 5 triggered accounts, kept the healthy one, left valid JSON, 3 restarts, 0 skips.
+- **Openly out of scope:** menu/API scripts also write these files but run at human speed behind an already one-at-a-time API server; their window is tiny and nothing on record ever hit it. If that changes, the same one-lock-per-file pattern applies.
+
 
 
 

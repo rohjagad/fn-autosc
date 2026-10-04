@@ -104,6 +104,8 @@ function cekgrpc() {
     users=$(grep '^###' /etc/xray/json/grpc.json | cut -d ' ' -f 2 | sort | uniq)
 
     need_restart=
+    exec 9>/tmp/xray-json-grpc.lock
+    if flock -w 30 9; then
     for user in $users; do
         # Ambil statistik penggunaan dari Xray API
         inb=$(xray api stats --server=127.0.0.1:10083 -name "user>>>${user}>>>traffic>>>uplink" 2>/dev/null | grep value | awk '{gsub(/[",]/,"",$2); print $2}')
@@ -154,6 +156,10 @@ function cekgrpc() {
         if xray run -test -config /etc/xray/json/grpc.json >/dev/null 2>&1; then
             systemctl restart xray@grpc
         fi
+    fi
+    flock -u 9
+    else
+        echo "quota-grpc: /etc/xray/json/grpc.json busy, skipping this pass"
     fi
 }
 

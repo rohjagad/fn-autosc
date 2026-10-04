@@ -145,6 +145,8 @@ function process_quota() {
     done
 }
 
+exec 9>/tmp/xray-json-xhttp.lock
+if flock -w 30 9; then
 process_quota
 # One restart per run, not per deleted user (Found 329 class).
 if [ -n "$need_restart" ]; then
@@ -153,3 +155,8 @@ if [ -n "$need_restart" ]; then
         systemctl restart xray@xhttp
     fi
 fi
+flock -u 9
+else
+    echo "kill-xhttp: /etc/xray/json/xhttp.json busy, skipping this run"
+fi
+exec 9>&-

@@ -101,6 +101,8 @@ cekws() {
     users=$(grep '^###' /etc/xray/json/ws.json | cut -d ' ' -f 2 | sort | uniq)
 
     need_restart=
+    exec 9>/tmp/xray-json-ws.lock
+    if flock -w 30 9; then
     for user in $users; do
         # Ambil statistik penggunaan dari Xray API (raw bytes). Bug 99: the
         # migration kept V2Ray's `api stats` call, but Xray's `stats` needs an
@@ -156,6 +158,10 @@ cekws() {
         if xray run -test -config /etc/xray/json/ws.json >/dev/null 2>&1; then
             systemctl restart xray@ws
         fi
+    fi
+    flock -u 9
+    else
+        echo "quota-ws: /etc/xray/json/ws.json busy, skipping this pass"
     fi
 }
 

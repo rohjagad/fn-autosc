@@ -104,6 +104,8 @@ function cekhttp() {
     users=$(grep '^###' /etc/xray/json/upgrade.json | cut -d ' ' -f 2 | sort | uniq)
 
     need_restart=
+    exec 9>/tmp/xray-json-upgrade.lock
+    if flock -w 30 9; then
     for user in $users; do
         # Ambil statistik penggunaan dari Xray API
         inb=$(xray api stats --server=127.0.0.1:10081 -name "user>>>${user}>>>traffic>>>uplink" 2>/dev/null | grep value | awk '{gsub(/[",]/,"",$2); print $2}')
@@ -154,6 +156,10 @@ function cekhttp() {
         if xray run -test -config /etc/xray/json/upgrade.json >/dev/null 2>&1; then
             systemctl restart xray@upgrade
         fi
+    fi
+    flock -u 9
+    else
+        echo "quota-http: /etc/xray/json/upgrade.json busy, skipping this pass"
     fi
 }
 

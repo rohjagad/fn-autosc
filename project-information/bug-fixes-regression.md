@@ -1681,6 +1681,17 @@ Section 35's four-check rule applied to Fix 349:
 | **Over-engineering** | One flag + one block per file, copied from the `xp`/`auto-delete` pattern already in the repo; no debounce logic, no new files. |
 | **vs the source** | V23/1.20 restart per user in these loops (inherited); batching follows this repo's own `xp.sh` precedent. |
 
+## 134. Phase 22: Shared JSON Lock for Daemons — Four Checks (October 4, 2026)
+
+Section 35's four-check rule applied to Fix 350:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Locks only serialize overlapping edits; solo runs behave identically (proven: same deletions, same restarts); `bash -n` clean; zips deterministic. Timeouts skip-and-retry, never corrupt. |
+| **Over-strictness** | Nothing rejected; a timed-out waiter skips one run/section, the next tick retries — accounts live slightly longer, never wrongly die. |
+| **Over-engineering** | Five lines per site, standard `flock`, no new files/daemons; one lock per file (no ordering rules, no nesting, no deadlock shape). |
+| **vs the source** | V23/1.20 have only per-daemon cron locks (same gap, inherited); per-file sharing is new hardening in this repo's direction. |
+
 ## 128. Phase 14: Full-Length API Token — Four Checks (October 4, 2026)
 
 Section 35's four-check rule applied to Fix 343:

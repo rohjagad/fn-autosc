@@ -70,6 +70,8 @@ xp_log() { echo "$(date '+%F %T') xp: $*" >> /etc/xray/.quota.logs; }
 
 ##----- Auto Remove Xray Websocket
 ws_expired=0
+exec 9>/tmp/xray-json-ws.lock
+if flock -w 30 9; then
 data=( `cat /etc/xray/json/ws.json | grep '^###' | cut -d ' ' -f 2 | sort | uniq`);
 now=`date +"%Y-%m-%d"`
 for user in "${data[@]}"
@@ -110,9 +112,16 @@ if [[ $ws_expired -eq 1 ]]; then
         systemctl restart xray@ws
     fi
 fi
+flock -u 9
+else
+    echo "xp: /etc/xray/json/ws.json busy, skipping this section"
+fi
+exec 9>&-
 
 ##----- Auto Remove Xray HTTP UPGRADE
 http_expired=0
+exec 9>/tmp/xray-json-upgrade.lock
+if flock -w 30 9; then
 data=( `cat /etc/xray/json/upgrade.json | grep '^###' | cut -d ' ' -f 2 | sort | uniq`);
 now=`date +"%Y-%m-%d"`
 for user in "${data[@]}"
@@ -153,9 +162,16 @@ if [[ $http_expired -eq 1 ]]; then
         systemctl restart xray@upgrade
     fi
 fi
+flock -u 9
+else
+    echo "xp: /etc/xray/json/upgrade.json busy, skipping this section"
+fi
+exec 9>&-
 
 ##----- Auto Remove Xray XHTTP
 xhttp_expired=0
+exec 9>/tmp/xray-json-xhttp.lock
+if flock -w 30 9; then
 data=( `cat /etc/xray/json/xhttp.json | grep '^###' | cut -d ' ' -f 2 | sort | uniq`);
 now=`date +"%Y-%m-%d"`
 for user in "${data[@]}"
@@ -196,9 +212,16 @@ if [[ $xhttp_expired -eq 1 ]]; then
         systemctl restart xray@xhttp
     fi
 fi
+flock -u 9
+else
+    echo "xp: /etc/xray/json/xhttp.json busy, skipping this section"
+fi
+exec 9>&-
 
 ##----- Auto Remove Xray grpc HTTP
 grpc_expired=0
+exec 9>/tmp/xray-json-grpc.lock
+if flock -w 30 9; then
 data=( `cat /etc/xray/json/grpc.json | grep '^###' | cut -d ' ' -f 2 | sort | uniq`);
 now=`date +"%Y-%m-%d"`
 for user in "${data[@]}"
@@ -239,6 +262,11 @@ if [[ $grpc_expired -eq 1 ]]; then
         systemctl restart xray@grpc
     fi
 fi
+flock -u 9
+else
+    echo "xp: /etc/xray/json/grpc.json busy, skipping this section"
+fi
+exec 9>&-
 
 ##------ Auto Remove SSH
 hariini=`date +%d-%m-%Y`

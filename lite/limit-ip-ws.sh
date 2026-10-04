@@ -96,6 +96,8 @@ if ! xray api statsonline --server=127.0.0.1:10080 -email probe 2>&1 | grep -q "
     exit 0
 fi
 
+exec 9>/tmp/xray-json-ws.lock
+if flock -w 30 9; then
 for user in $username; do
     # Get the limit and current online stats for each user
     limit=$(cat "/etc/xray/limit/ip/xray/ws/${user}" 2>/dev/null)
@@ -141,3 +143,8 @@ if [ -n "$need_restart" ]; then
         systemctl restart xray@ws >> /dev/null 2>&1
     fi
 fi
+flock -u 9
+else
+    echo "limit-ip-ws: /etc/xray/json/ws.json busy, skipping this run"
+fi
+exec 9>&-
