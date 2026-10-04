@@ -51,7 +51,7 @@ Setiap langkah dalam seluruh fase **WAJIB** membaca dan mengacu pada 7 sumber re
 
 ---
 
-## 3. Struktur 17 Fase Bug-Finding & Fixing
+## 3. Struktur 24 Fase Bug-Finding & Fixing
 
 ```
 Fase 1: Keamanan Izin Berkas & Kriptografi
@@ -87,6 +87,20 @@ Fase 15: Sinkronisasi Paket Dual-Edition (full.zip & lite.zip)
 Fase 16: Inspeksi Migrasi SplitHTTP → XHTTP
    │
 Fase 17: Inspeksi Fallback URL Otorisasi (Pages + GitHub)
+   │
+Fase 18: Quoting & Word-Splitting pada rm/sed/grep
+   │
+Fase 19: Ketahanan Fetch Jaringan (Timeout & Fallback)
+   │
+Fase 20: Guard EOF & Perbandingan Integer Aman
+   │
+Fase 21: Batching Restart di Daemon (Bukan per-User)
+   │
+Fase 22: Penguncian Lintas-Daemon pada File Bersama
+   │
+Fase 23: Drift Template ↔ Terinstal ↔ Kartu Akun
+   │
+Fase 24: Penanganan Error di Tool Go
 ```
 
 ---
@@ -353,6 +367,91 @@ Fase 17: Inspeksi Fallback URL Otorisasi (Pages + GitHub)
 
 ---
 
+### Fase 18: Quoting & Word-Splitting pada rm/sed/grep
+
+- **Komponen Target:** seluruh `.sh` di `full/`, `lite/`, `installer/` — fokus `installer/vpn.sh`, pola `grep -w $user`, `sed -i $VAR`.
+- **Finding (Metodologi Penemuan):**
+  - Pindai ekspansi tak dikutip di argumen destruktif: `sed -i $MYIP* file` (`vpn.sh:141,161,242` — `$MYIP` kosong merusak ovpn/squid), `rm -rf $var`, `grep -w $user` (glob + regex aktif).
+  - Uji variabel kosong: set `MYIP=""`/username aneh lalu jalankan path instalasi/limit — config tidak boleh korup; pola benar adalah versi dikutip (`rm -f "$quota_file"` di `kill-*.sh`).
+  - Bandingkan dengan referensi: idiom ini warisan V23/1.20 — divergensi hanya berupa quoting, tanpa ubah logika.
+- **Fixing (Standar Perbaikan):**
+  - Kutip seluruh ekspansi di argumen file/pola (`"$var"`); untuk pola grep pakai `-F`/`-x` di mana regex tak dibutuhkan. Tanpa helper baru.
+
+---
+
+### Fase 19: Ketahanan Fetch Jaringan (Timeout & Fallback)
+
+- **Komponen Target:** semua `curl`/`wget` di gate lisensi, `send_log` Telegram (`quota-*.sh:80`), `restore-ftp.sh` (`icanhazip`), `diamond.sh` (`ipinfo.io`), fetch `reinstall.sh` di `menu-system.sh`, `hosting=` raw triangle.
+- **Finding (Metodologi Penemuan):**
+  - Pindai fetch tanpa `--max-time`: gate 5-menitan yang hang melewati interval; kirim Telegram tanpa timeout menggantung daemon.
+  - Pindai sumber tunggal tanpa fallback (`icanhazip`, `ipinfo.io`, `bin456789/reinstall` tanpa pin/checksum, `request.sh` URL 404).
+  - Uji host mati/lambat (DROP sementara di KVM): skrip wajib gagal-cepat dengan pesan jelas, bukan hang; instalasi setengah jalan wajib dilaporkan bukan sukses.
+  - Bandingkan dengan referensi: gate tanpa timeout adalah warisan; fallback Pages+GitHub adalah pola kanonis baru (Fase 17).
+- **Fixing (Standar Perbaikan):**
+  - Tambah `--max-time` wajar + fallback sumber di mana ada mirror; pin atau checksum untuk fetch kode yang di-`bash` langsung. Tanpa framework retry.
+
+---
+
+### Fase 20: Guard EOF & Perbandingan Integer Aman
+
+- **Komponen Target:** seluruh `read -p` di `add-*`/`trial-*` (prompt pertama telanjang vs retry `|| exit 1`), perbandingan `-gt/-lt/-ge` di daemon.
+- **Finding (Metodologi Penemuan):**
+  - Uji stdin tertutup/EOF di tiap prompt: loop validasi tanpa guard berputar selamanya (contoh `read -p "Limit Ip: " ip` telanjang vs retry yang ber-`|| exit 1`).
+  - Pindai `-gt/-lt/-ge` pada var yang bisa kosong: `quota`/`usage`/`quota_limit`/`nais`/`userexpireinseconds` — `integer expression expected`/`unary operator` di log cron = temuan.
+  - Pola benar yang sudah ada: guard regex `^[0-9]+$` sebelum bandingkan (`limit-ip-xhttp.sh:103-109`).
+- **Fixing (Standar Perbaikan):**
+  - `|| exit`/`|| return` di semua `read`; guard numerik sebelum perbandingan. Tanpa ubah pesan/loop yang sudah benar.
+
+---
+
+### Fase 21: Batching Restart di Daemon (Bukan per-User)
+
+- **Komponen Target:** `limit-ip-*.sh`, `quota-*.sh`, `kill-*.sh` (restart di dalam loop per-user) — rujukan pola benar: flag `*_expired` + satu restart pasca-loop di `xp.sh`.
+- **Finding (Metodologi Penemuan):**
+  - Pindai `systemctl restart` di dalam `for user`: N user = N restart beruntun → trips `StartLimitBurst`, memutus sesi membayar.
+  - Ukur live: tanam N akun pemicu, jalankan daemon sekali, hitung `Stopping` di journal — target 1 restart per transport per run.
+  - Perhatian over-engineering: jangan skip restart yang semantically perlu; kumpulkan lalu flush sekali (pola `xp.sh`), bukan debounce-diam.
+- **Fixing (Standar Perbaikan):**
+  - Kumpulkan unit kotor dalam flag/variabel; satu restart validasi-`xray -test` di akhir loop. Budget unit (Fix 329/330) tetap sebagai jaring pengaman.
+
+---
+
+### Fase 22: Penguncian Lintas-Daemon pada File Bersama
+
+- **Komponen Target:** penulis `/etc/xray/json/*.json` (`xp`, `limit-ip-*`, `quota-*`, `kill-*`, `auto-delete-*`, loop `sleep 30` quota services) vs `flock -n` per-daemon di crontab.
+- **Finding (Metodologi Penemuan):**
+  - Petakan siapa menulis file JSON apa dan kapan (cron `*/5` vs loop 30-detik vs handler API): dua penulis `sed -i` bersamaan = lost-update/truncate.
+  - Uji live di KVM: jalankan `xp` + `limit-ip-*` + `quota-*` serentak atas akun uji, lalu `xray -test` + hitung akun — harus valid dan utuh.
+  - `flock` per-daemon saja tidak cukup untuk file yang dibagi; catat sebagai kelas, bukan insiden tunggal.
+- **Fixing (Standar Perbaikan):**
+  - Kunci per-file-bersama (bukan per-daemon) dengan timeout gagal-cepat; tanpa daemon lock global baru yang bisa deadlock cron.
+
+---
+
+### Fase 23: Drift Template ↔ Terinstal ↔ Kartu Akun
+
+- **Komponen Target:** `config/{4,6,dual}.conf` (placeholder + 12 lokasi), `json/*.json` (port/path), link di kartu akun, `installer/diamond.sh` (sed domain).
+- **Finding (Metodologi Penemuan):**
+  - Bangun matriks port/path: tiap `proxy_pass 127.0.0.1:<port>` + `location <path>` di ketiga template harus sama dengan inbound JSON dan link kartu (`14016/23456/25432`, `/vmws /vlws /trws /vmxh /vlxh /trxh /vmhu /vlhu /trhu`, service `vmgr/vlgr/trgr`).
+  - Uji placeholder bocor: `server_name tes1.rohshop.cloud` tidak boleh ada di instalasi; `sed` domain wajib idempoten.
+  - Uji `routing-*.sh` `sed "${line},$d"`: batas rentang harus tepat, bukan sampai EOF.
+- **Fixing (Standar Perbaikan):**
+  - Selaraskan ketiga sisi ke satu sumber kebenaran (template); tambah uji komparasi otomatis bila murah, bukan framework baru.
+
+---
+
+### Fase 24: Penanganan Error di Tool Go
+
+- **Komponen Target:** `full/*.go`, `lite/*.go` (`_,` pada `Output()`/`ReadFile`/`ParseInt`, `Run()` tanpa cek).
+- **Finding (Metodologi Penemuan):**
+  - Pindai `out, _ :=`, `configData, _ :=`, `usage, _ := ParseInt`, `exec.Command("rm"/"systemctl"/"clear")` tanpa cek: `chage`/`passwd` kosong → misreport "No Expiry"/"UNLOCKED"; kuota non-numerik → `0/0`; `userdel`/`rm`/`restart` gagal diam-diam.
+  - Uji tiap tool dengan kondisi gagal (file hilang, biner hilang, input rusak): keluaran harus error eksplisit, bukan sukses palsu.
+  - Bandingkan dengan referensi: `_,` pada `chage`/`passwd`/config adalah warisan V23 (Found 289 mencatat sebagian).
+- **Fixing (Standar Perbaikan):**
+  - Kembalikan dan tangani error (`return err`, pesan ke stderr, exit non-nol); tanpa refactor arsitektur tool.
+
+---
+
 ## 4. Alur Kerja Eksekusi & Kriteria Kelulusan
 
 Untuk setiap siklus penemuan dan perbaikan bug:
@@ -363,3 +462,16 @@ Untuk setiap siklus penemuan dan perbaikan bug:
 4. **Tahap Repack & Deploy:** Perbarui arsip zip terkait, deploy ke `/usr/bin/` pada VPS uji, dan pastikan izin `0755`.
 5. **Tahap Regresi:** Terapkan Gerbang 4 Pengecekan Regresi (Section 35).
 6. **Tahap Dokumentasi & Commit:** Catat append-only di `bugs-found.md`, `bugs-fixed.md`, dan `bug-fixes-regression.md`. Lakukan commit atomik git.
+
+## 5. Gerbang Penerimaan Fix & Cakupan Repo
+
+Setiap fix yang lulus wajib memenuhi gerbang ini (berlaku untuk Fase 1–24):
+
+1. **Tanpa over-engineering:** shortest working diff; tanpa helper/framework/dependensi baru kecuali tak ada cara sebaris.
+2. **Cek regresi:** lulus 4-Check Section 35; tidak membatalkan Found/Fix sebelumnya (`bugs-fixed.md` dibaca dulu).
+3. **Banding sumber asli:** perilaku dibandingkan ke V23 + 1.20; warisan yang benar dipertahankan, divergensi hanya untuk keamanan/stabilitas terbukti.
+4. **Tanpa over-strictness:** tidak menolak input sah yang referensi/panel terima; validasi mengikuti Decision 4 dan batas panel.
+5. **Keamanan tanpa korban reliabilitas:** hardening (izin, fail-closed, timeout) tidak boleh membuat boot/install/cron gagal atau menggantung; tiap penguatan diuji di VPS hidup.
+6. **Klien uji siap:** `/dev/kvm` (KVM Debian 12 lokal) selalu tersedia untuk trafik nyata dan fault injection; uji tuan-rumah saja tidak cukup untuk klaim perilaku jaringan.
+
+**Di luar cakupan:** `fn-autosc-auth` tidak berisi kode (hanya `izin.txt` yang dibaca) — tidak ada fase bug-finding untuknya; ia dirujuk hanya sebagai sumber data gate.

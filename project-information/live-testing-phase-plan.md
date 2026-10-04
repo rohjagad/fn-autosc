@@ -50,7 +50,7 @@ Setiap pengujian pada seluruh fase **WAJIB** merujuk dan mencocokkan hasil aktua
 
 ---
 
-## 3. Struktur 18 Fase Pengujian Live
+## 3. Struktur 21 Fase Pengujian Live
 
 ```
 Fase 1: Baseline Sistem Operasi, Izin Kriptografi & Kernel Sysctl
@@ -88,6 +88,12 @@ Fase 16: Pengujian Suite REST API Headless (FN-API & Concurrency Lock)
 Fase 17: Pengujian Live Migrasi XHTTP (/akun, path & trafik)
    │
 Fase 18: Pengujian Live Fallback URL Otorisasi
+   │
+Fase 19: Ketahanan Gate di Bawah Gangguan Jaringan & Ketatnya Pencocokan
+   │
+Fase 20: Balapan Daemon Konkuren & Audit Restart
+   │
+Fase 21: Verifikasi Drift Template & Kejujuran Tool Go
 ```
 
 ---
@@ -250,3 +256,30 @@ Fase 18: Pengujian Live Fallback URL Otorisasi
   6. Uji gate di bawah network lambat (tambah latency/packet-loss sementara): gate wajib selesai dalam batas wajar tanpa menggantung cron 5-menitan; catat durasi tiap sumber (Pages vs GitHub) sebagai bukti klaim peering.
   7. Uji respons non-`###` (halaman error HTML dari CDN): gate wajib menolak (tidak ada MATCH palsu) dan tidak mencetak isi respons ke log.
   8. Uji IP tak terdaftar: keluaran persis `Your IP doesn't have on database` + exit, tanpa bocor isi database ke output.
+
+### Fase 19: Ketahanan Gate di Bawah Gangguan Jaringan & Ketatnya Pencocokan
+- **Tujuan:** Gate lisensi benar-benar fail-closed dan tepat-sasaran, bukan longgar.
+- **Langkah Pengujian:**
+  1. Dari KVM: blokir `ifconfig.me` sementara — gate wajib gagal eksplisit (IP kosong), bukan lanjut dengan IP kosong yang merusak config (`vpn.sh`).
+  2. Sajikan respons HTML error sebagai `izin.txt` (mock lokal via `/etc/hosts`): gate wajib menolak tanpa MATCH palsu dan tanpa mencetak isi respons.
+  3. Uji substring: baris `### x 11.2.3.44 <date>` tidak boleh me-loloskan IP `1.2.3.4` (uji di salinan fungsi gate, bukan DB produksi).
+  4. Uji tanggal rusak/kosong di entri: wajib fail-closed, tidak lolos terbuka.
+  5. Kembalikan semua mock; verifikasi gate produksi hijau kembali.
+
+### Fase 20: Balapan Daemon Konkuren & Audit Restart
+- **Tujuan:** File bersama tetap valid saat semua daemon menembak bersamaan; restart terhitung, bukan badai.
+- **Langkah Pengujian:**
+  1. Tanam N akun pemicu (kadaluarsa + over-kuota + over-IP, awalan `livetest_*`).
+  2. Jalankan `xp`, `limit-ip-*`, `quota-*` serentak; catat hitungan `Stopping xray@<t>` di journal.
+  3. Verifikasi: tiap `xray -test` valid, akun tepat yang terhapus/terkunci, dan restart 1x per transport per run (bukan per user).
+  4. Tunggu tick cron `*/5` berikutnya dan ulangi hitungan: tidak ada restart tanpa pemicu (pola Found 173 tidak kembali).
+  5. Bersihkan semua akun uji; 0 failed unit.
+
+### Fase 21: Verifikasi Drift Template & Kejujuran Tool Go
+- **Tujuan:** Tiga sisi (template, terinstal, kartu) konsisten; tool CLI melaporkan kebenaran.
+- **Langkah Pengujian:**
+  1. Bandingkan port/path `config/dual.conf` vs `/etc/nginx/nginx.conf` vs `json/*.json` vs link kartu akun baru — harus 1:1; pastikan tanpa `server_name` placeholder.
+  2. Buat akun tiap transport, decode link, samakan UUID/password dengan JSON; hapus dan pastikan bersih total.
+  3. Jalankan `cek-xray-*`, `list-ssh`, `cek-login-ssh` lalu bandingkan dengan state langsung (`grep '^###'`, `chage`, `passwd -S`): tidak boleh ada "No Expiry"/"UNLOCKED" palsu atau `0/0` dari parse gagal.
+  4. Simulasi dependensi hilang (sementara, kembalikan): tool wajib error eksplisit, bukan sukses palsu.
+  5. Bersihkan akun uji dan kembalikan semua biner yang dipindah sementara.
