@@ -1549,6 +1549,28 @@ Section 35's four-check rule applied to Fix 335:
 | **Over-engineering** | No helper/dependency; upstream-fetched `noobzvpns.service` and per-user loop batching (Fase 21) deliberately out of scope. |
 | **vs the source** | V23/1.20 carry no `StartLimit*` overrides anywhere (defaults everywhere); widening follows the already-accepted Fix 329/330 direction for burst-tolerance. |
 
+## 121. Phase 4: xp SSH Guard — Four Checks (October 4, 2026)
+
+Section 35's four-check rule applied to Fix 336:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Guard only skips non-numeric field-8 rows (previously destroyed); genuinely-expired and future accounts behave identically (reproduced); `bash -n` clean; zips deterministic. |
+| **Over-strictness** | Only corrupt (non-date) rows skipped — valid numeric expiries, the only values `useradd`/`chage` write, all pass. |
+| **Over-engineering** | Four lines per edition, same shape as the Found-108 sibling guards; no helper. |
+| **vs the source** | V23/1.20 have no unparseable-skip anywhere in `xp` (Found 108 class); this extends the already-accepted guard to the last unguarded branch. |
+
+## 122. Phase 4: fn-api.md Transport Names — Four Checks (October 4, 2026)
+
+Section 35's four-check rule applied to Fix 337:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Doc-only; no code path touched. |
+| **Over-strictness** | Nothing rejected; alias documented, not removed. |
+| **Over-engineering** | Three in-place words; non-append-only doc corrected as the plan requires. |
+| **vs the source** | V23/1.20 predate XHTTP; naming follows Fix 333 + the API README (already correct there). |
+
 
 
 

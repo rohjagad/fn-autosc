@@ -2447,6 +2447,15 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Fix 335 (Found 335):** added `StartLimitIntervalSec=120` + `StartLimitBurst=30` to the `[Unit]` section of all nine templates (`installer/udp.sh`, `installer/request.sh`, `installer/slowdns.sh`, `full/menu-dnstt.sh`, `installer/ssh.sh` badvpn block, `installer/vpn.sh` ×2, `full/menu-bot.sh`, `lite/menu-bot.sh`) plus `api.service` in `fn-autosc-api/menu-api`; `fn-api.md` unit row updated in place. Repacked `menu/full.zip` (114) + `menu/lite.zip` (97) deterministically. Crash behavior untouched (genuine crash-loops still fail, only later).
 - **Verified:** `bash -n` clean ×9; unit bodies extracted and `systemd-analyze verify` reports no syntax/section errors (only missing-binary warnings from the workstation, absent on target); zip entries byte-identical, 0 non-`0755`.
 
+### Fix 336 - Phase 4: guard the `xp` SSH branch against corrupt shadow expiry (Found 336)
+
+- **Fix 336 (Found 336):** four-line numeric guard (`[[ "$userexp" =~ ^[0-9]+$ ]] || { skip + continue }`) after the field-8 extraction in `full/xp.sh` + `lite/xp.sh`, mirroring the Found-108 guards in the sibling branches. Repacked `menu/full.zip` + `menu/lite.zip` (`xp` entry byte-identical).
+- **Verified:** `bash -n` clean ×2; logic reproduction (DELETE stays for genuinely-expired, SKIP for corrupt, KEEP for future); zips deterministic.
+
+### Fix 337 - Phase 4: `fn-api.md` transport names follow the xhttp rename (Found 337)
+
+- **Fix 337 (Found 337):** three in-place edits (`:155` core enum, `:163` delete backends, `:175` naming paragraph) — `xhttp` canonical, `split` as legacy alias. No code touched.
+
 
 
 

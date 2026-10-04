@@ -152,7 +152,7 @@ non-zero exit is reserved for a genuine failure and surfaces as HTTP `500`.
 | Endpoint | Method | Body fields | Backend it drives | Response highlights |
 | :-- | :-- | :-- | :-- | :-- |
 | `ping` | any | — | — | `status`, `message`, `host` |
-| `add-vmess` / `add-vless` / `add-trojan` | POST | `username`, `core` (`ws`\|`http`\|`split`\|`grpc`, default `ws`), `expired` (days, default 30), `limit-ip` (default 1), `quota` GB (default 1) | `add-<proto>-<core>` | `status`, `username`, `protocol`, `core`, `expired`, `links[]` |
+| `add-vmess` / `add-vless` / `add-trojan` | POST | `username`, `core` (`ws`\|`http`\|`xhttp`\|`grpc`, default `ws`; `split` still accepted as a legacy alias), `expired` (days, default 30), `limit-ip` (default 1), `quota` GB (default 1) | `add-<proto>-<core>` | `status`, `username`, `protocol`, `core`, `expired`, `links[]` |
 | `addssh` | POST | `username`, `password`, `expired`, `limit-ip` | `addssh` | `status`, `username`, `password`, `expired`, `text` |
 | `add-noobz` | POST | `username`, `password`, `expired` | `noobzvpns add` | `status`, `username`, `password`, `expired` |
 | `list-xray` | GET | — | the four `json/*.json` | `status`, `count`, `accounts[{username,expired,transport}]` |
@@ -160,7 +160,7 @@ non-zero exit is reserved for a genuine failure and surfaces as HTTP `500`.
 | `cek-xray` | GET | — | the four `cek-xray-*` | `status`, `text` |
 | `cek-ssh` | GET | — | `cek-login-ssh` | `status`, `text` |
 | `list-noobz` | GET | — | `noobzvpns print-all` | `status`, `text` |
-| `delete-xray` | DELETE | `username` | `delete-ws`/`-http`/`-split`/`-grpc` for every transport that holds it | `status`, `username`, `deleted_from[]` |
+| `delete-xray` | DELETE | `username` | `delete-ws`/`-http`/`-xhttp`/`-grpc` for every transport that holds it | `status`, `username`, `deleted_from[]` |
 | `delete-ssh` | DELETE | `username` | `delete-ssh` | `status`, `message` |
 | `delete-noobz` | DELETE | `username` | `noobzvpns remove` | `status`, `message` |
 | `renew-xray` | PUT/POST | `username`, `days`, `core` (default `ws`) | `extend-<core>` (keeps the account's usage) | `status`, `username`, `core`, `previous_expired`, `expired` |
@@ -172,7 +172,7 @@ non-zero exit is reserved for a genuine failure and surfaces as HTTP `500`.
 protocol comes from the handler name and `core` selects the transport, so `{core:"grpc"}` builds a
 `add-vmess-grpc` account and `{core:"http"}` (HTTPUpgrade) one in `upgrade.json`.
 
-The transport is named the same everywhere: `core` accepts `ws`, `http`, `split` or `grpc`, and
+The transport is named the same everywhere: `core` accepts `ws`, `http`, `xhttp` or `grpc` (`split` still accepted as a legacy alias), and
 `list-xray` / `delete-xray` / `renew-xray` report it back under those names. The panel's internal name
 for the HTTPUpgrade config, `upgrade`, is not exposed.
 

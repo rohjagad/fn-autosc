@@ -250,6 +250,10 @@ do
 tuserval=`head -n $i /tmp/expirelist.txt | tail -n 1`
 username=`echo $tuserval | cut -f1 -d:`
 userexp=`echo $tuserval | cut -f2 -d:`
+if ! [[ "$userexp" =~ ^[0-9]+$ ]]; then
+    echo "Skipping $username: unparseable expiry '$userexp'"
+    continue
+fi
 userexpireinseconds=$(( $userexp * 86400 ))
 tglexp=`date -d @$userexpireinseconds`             
 tgl=`echo $tglexp |awk -F" " '{print $3}'`
