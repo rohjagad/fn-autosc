@@ -164,7 +164,7 @@ function cekxhttp() {
 }
 
 # Fungsi utama untuk memonitor xhttp secara terus-menerus
-function split() {
+function xhttp() {
     while true; do
         sleep 30
         cekxhttp

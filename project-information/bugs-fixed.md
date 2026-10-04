@@ -2511,6 +2511,16 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Fix 350 (Found 350):** `exec 9` + `flock -w 30` around the edit sections of all 26 daemon files (per-file lock, held for milliseconds-to-seconds, skip-and-retry on timeout); zips repacked.
 - **Verified:** counter race 40/80 lost → 0/80; pre-lock pile-up dropped a healthy account, locked pile-up exact; `bash -n` clean ×26.
 
+### Fix 351 - Live: unlock skips re-add when already present (Found 351)
+
+- **Fix 351 (Found 351):** exact-match guard in all 8 `unlock-*.sh`; zips repacked.
+- **Verified live on the VPS:** duplicate scenario prints the skip message, single entry kept, `Configuration OK`, card restored.
+
+### Fix 352 - Live: quota-xhttp resurrected (Found 352)
+
+- **Fix 352 (Found 352):** repo `function split()` → `function xhttp()` (both editions) + zips; live box: stale `quota-split.service` stopped/disabled/removed, `quota-xhttp.service` created from template, enabled, active.
+- **Verified live:** full over-quota cycle with audit line; `Configuration OK`; 0 failed units.
+
 ### Fix 343 - Phase 14: full-length API token (Found 343)
 
 - **Fix 343 (Found 343):** `head -c 32` → `head -c 48` in `token()` (`fn-autosc-api/menu-api:18`); charset and 40-char cut unchanged, so existing tokens stay valid and rotation works as before.

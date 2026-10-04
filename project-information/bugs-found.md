@@ -2177,6 +2177,19 @@ each daemon had only its own cron lock, so overlapping runs (aligned cron ticks,
 - **Verified live-locally in a sandbox:** a two-process counter lost 40 of 80 updates unlocked vs 0 locked; worse, the pre-lock daemons under a triple pile-up silently dropped a healthy account (`k1`) with the JSON still valid — the exact real-world damage. With locks, two full pile-up rounds deleted exactly the 5 triggered accounts, kept the healthy one, left valid JSON, 3 restarts, 0 skips.
 - **Openly out of scope:** menu/API scripts also write these files but run at human speed behind an already one-at-a-time API server; their window is tiny and nothing on record ever hit it. If that changes, the same one-lock-per-file pattern applies.
 
+Found 351. **Live: `unlock-*` re-adds an account that is already there, breaking the config** (all 8 `unlock-*.sh`) —
+found by doing it live: with the account still in JSON, unlock appended a second copy → duplicate user → `xray -test` fails → the transport can never restart again until repaired by hand (repaired on the spot, `Configuration OK` restored). Guard added: exact full-line match (`grep -qxF "### $user $exp"`) skips the re-add and the run continues to card restore + restart normally. Proven live with the same scenario (skip message, single entry, valid config).
+- Note: the first attempt used a name-only match; refined to full-line exact so operator typos can't cause a wrong skip.
+
+Found 352. **Live: XHTTP quota enforcement was dead two ways on the live box** —
+1. No `quota-xhttp.service` unit existed (rename created `xhttp.json` + `xray@xhttp` but never the quota daemon), while stale `quota-split.service` kept running and error-looping on the deleted `split.json`. Stopped/disabled/removed the stale unit; created + enabled + started `quota-xhttp.service` from the repo template. Full cycle proven live: over-quota account deleted totally with audit line, both services stay active.
+2. Repo bug behind it: `quota-xhttp.sh` (both editions) still defined `function split()` but called `xhttp` — instant exit 127, so the daemon could never have worked even with a unit (missed by the rename; the other three transports match). One-word fix per edition; zips repacked.
+- Side note: usage counters only get judged when fresh traffic exists (idle passes stay quiet by design), so a freshly-tripped quota fires on the next activity, not the next tick.
+
+Found 353. **Live: IP-limit counters are blind behind the reverse proxy — the limiter cannot trigger in production** (design-level, fix deferred) —
+measured live: 3 concurrent sessions from one address read back 1, then 1-2-2 across reads for 4 sessions (client multiplexing + timing noise); every proxied connection reaches xray as 127.0.0.1 and no PROXY protocol exists anywhere, so `statsonline` can never count two real client addresses apart. Any two-device abuse looks like 1 and `cek > limit` never fires. The display side (log-based) can see real addresses, which is why screens and enforcement disagree.
+- **Not hot-fixed:** the cures (PROXY protocol on every transport, or log-based counting) are rollout-risky and need a staged plan + rollback, not a live edit. Directions recorded; enforcement stays as-is (harmless: it under-enforces, never over-locks).
+
 
 
 

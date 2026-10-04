@@ -184,7 +184,11 @@ read -p "Apakah Anda yakin ingin unlock akun ini? (y/n): " confirm
 
 if [[ "$confirm" == "y" || "$confirm" == "Y" ]]; then
     # Logika melakukan unlock
-    if [ "$protokol2" == "Vmess" ]; then
+    # Already present (restored by hand or a previous run):
+    # never append a second copy - it would invalidate the JSON.
+    if [ -n "$exp2" ] && grep -qxF "### $name $exp2" /etc/xray/json/upgrade.json 2>/dev/null; then
+        echo "Account '$name' already present in config - skipping re-add."
+    elif [ "$protokol2" == "Vmess" ]; then
         sed -i '/#vmess$/{n;s/}/},\n### '"$name $exp2"'\n{"id": "'""$uuid""'","alterid": 0,"email": "'""$name""'","level": 0}/}' /etc/xray/json/upgrade.json
     elif [ "$protokol2" == "Vless" ]; then
         sed -i '/#vless$/{n;s/}/},\n### '"$name $exp2"'\n{"id": "'""$uuid""'","email": "'""$name""'","level": 0}/}' /etc/xray/json/upgrade.json

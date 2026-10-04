@@ -1692,6 +1692,28 @@ Section 35's four-check rule applied to Fix 350:
 | **Over-engineering** | Five lines per site, standard `flock`, no new files/daemons; one lock per file (no ordering rules, no nesting, no deadlock shape). |
 | **vs the source** | V23/1.20 have only per-daemon cron locks (same gap, inherited); per-file sharing is new hardening in this repo's direction. |
 
+## 135. Live: Unlock Guard — Four Checks (October 4, 2026)
+
+Section 35's four-check rule applied to Fix 351:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Unlock normal path byte-identical when the account is absent (proven: full restore, card back, restart). |
+| **Over-strictness** | Guard skips only exact full-line duplicates; empty-expiry falls back to old behavior, never a wrong skip. |
+| **Over-engineering** | Guard: 4 lines per file, same shape ×8. |
+| **vs the source** | V23/1.20 predate the lock/unlock flow refinements; guard follows this repo's own duplicate-check direction. |
+
+## 136. Live: Quota-xhttp Resurrection — Four Checks (October 4, 2026)
+
+Section 35's four-check rule applied to Fix 352:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | quota-xhttp is the same tested daemon shape as its three siblings; stale split unit protected nothing (its target service is gone). |
+| **Over-strictness** | Nothing rejected; one dead daemon replaced by the live one. |
+| **Over-engineering** | One word in repo + stock unit install on the box. |
+| **vs the source** | V23/1.20 predate xhttp entirely; both fixes finish the rename's own direction. |
+
 ## 128. Phase 14: Full-Length API Token — Four Checks (October 4, 2026)
 
 Section 35's four-check rule applied to Fix 343:
