@@ -1659,6 +1659,17 @@ Section 35's four-check rule applied to Fix 347:
 | **Over-engineering** | Quotes only where the plan names; server bounds are three constants + stdlib handler swap + one `try`; env deliberately NOT stripped (would change script behavior). |
 | **vs the source** | V23/1.20 quote the same way loosely (inherited style); server bounds follow this repo's own gate-timeout idiom, single-threaded invariant kept. |
 
+## 132. Phase 19: Background Fetch Caps — Four Checks (October 4, 2026)
+
+Section 35's four-check rule applied to Fix 348:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Caps only cut stalled transfers (healthy Telegram/uploads finish in ~1s vs 10–120s caps); `&&` chains and fail messages unchanged; `bash -n` clean; zips deterministic. |
+| **Over-strictness** | Nothing rejected; timeouts only abandon hangs, and every capped call already tolerates empty results. |
+| **Over-engineering** | One flag per call site, same idiom as the gate caps; no retry logic; code-signing/pinning left out (upstream moves — recorded choice). |
+| **vs the source** | V23/1.20 fetch the same way uncapped (inherited); caps follow this repo's own gate precedent. Full atomic-install staging stays future work, noted openly. |
+
 ## 128. Phase 14: Full-Length API Token — Four Checks (October 4, 2026)
 
 Section 35's four-check rule applied to Fix 343:

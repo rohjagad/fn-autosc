@@ -2496,6 +2496,11 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Fix 347 (Found 347):** panel — quotes in 27 files (3× `sed -i "$MYIP*"`, 24× `grep -w "$user"`, `"$VPN_USER"`, `"$1"` ×2); zips repacked. API `server` — 64-deep accept queue, 30s socket silence cap, 1MB body cap (413 + close, handler skipped), `WatchedFileHandler` for log rotation, broken-pipe guard on every reply path. Single-threaded kept; full request environment kept (locale-sensitive panel scripts depend on it — stripping it would change `sort`/`date` behavior).
 - **Verified:** `bash -n`/`py_compile` clean; backlog pain reproduced before (2/12 through) and re-tested after; 413 closes TCP with server alive; rotation-safe logging; no token in logs.
 
+### Fix 348 - Phase 19: time caps on background fetches + uninstall reset (Found 348)
+
+- **Fix 348 (Found 348):** panel — 10s on 8 quota Telegram sends, 10s on restore/install info lookups, 120s on 62 reinstall downloads; zips repacked. API `menu-api` — `reset-failed` on uninstall; README method-convention note.
+- **Verified:** `bash -n` clean everywhere; no request/response logic touched.
+
 ### Fix 343 - Phase 14: full-length API token (Found 343)
 
 - **Fix 343 (Found 343):** `head -c 32` → `head -c 48` in `token()` (`fn-autosc-api/menu-api:18`); charset and 40-char cut unchanged, so existing tokens stay valid and rotation works as before.

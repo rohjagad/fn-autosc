@@ -596,9 +596,9 @@ ${separator}
 ${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input Option: " opn || exit 0
 case $opn in
-1) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root openeuler 20.03 && reboot  ;;
-2) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root openeuler 22.03 && reboot  ;;
-3) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root openeuler 24.03 && reboot  ;;
+1) cd /root ; curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root openeuler 20.03 && reboot  ;;
+2) cd /root ; curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root openeuler 22.03 && reboot  ;;
+3) cd /root ; curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root openeuler 24.03 && reboot  ;;
 *) openeuler
 esac
 }
@@ -616,9 +616,9 @@ ${separator}
 ${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input Option: " osu || exit 0
 case $osu in
-1) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root opensuse 15.6 && reboot  ;;
-2) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root opensuse tumbleweed && reboot  ;;
-3) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root opensuse tumbleweed && reboot  ;;
+1) cd /root ; curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root opensuse 15.6 && reboot  ;;
+2) cd /root ; curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root opensuse tumbleweed && reboot  ;;
+3) cd /root ; curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root opensuse tumbleweed && reboot  ;;
 *) opensuse ;;
 esac
 }
@@ -637,10 +637,10 @@ ${separator}
 ${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input Option: " db || exit 0
 case $db in
-1) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root debian 9 && reboot  ;;
-2) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root debian 10 && reboot  ;;
-3) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root debian 11 && reboot  ;;
-4) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root debian 12 && reboot  ;;
+1) cd /root ; curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root debian 9 && reboot  ;;
+2) cd /root ; curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root debian 10 && reboot  ;;
+3) cd /root ; curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root debian 11 && reboot  ;;
+4) cd /root ; curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root debian 12 && reboot  ;;
 *) debian ;;
 esac
 }
@@ -660,11 +660,11 @@ ${separator}
 ${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input Option: " wq || exit 0
 case $wq in
-1) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root ubuntu 16.04 && reboot ;;
-2) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root ubuntu 18.04 && reboot ;;
-3) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root ubuntu 20.04 && reboot ;;
-4) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root ubuntu 22.04 && reboot ;;
-5) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root ubuntu 24.04 && reboot ;;
+1) cd /root ; curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root ubuntu 16.04 && reboot ;;
+2) cd /root ; curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root ubuntu 18.04 && reboot ;;
+3) cd /root ; curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root ubuntu 20.04 && reboot ;;
+4) cd /root ; curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root ubuntu 22.04 && reboot ;;
+5) cd /root ; curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root ubuntu 24.04 && reboot ;;
 *) ubuntu ;;
 esac
 }
@@ -683,10 +683,10 @@ ${separator}
 ${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input Option: " ap || exit 0
 case $ap in
-1) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root alpine 3.21 && reboot ;;
-2) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root alpine 3.20 && reboot ;;
-3) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root alpine 3.19 && reboot ;;
-4) cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root alpine 3.18 && reboot ;;
+1) cd /root ; curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root alpine 3.21 && reboot ;;
+2) cd /root ; curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root alpine 3.20 && reboot ;;
+3) cd /root ; curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root alpine 3.19 && reboot ;;
+4) cd /root ; curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root alpine 3.18 && reboot ;;
 *) clear ; alpine ;;
 esac
 }
@@ -702,8 +702,8 @@ ${separator}
 ${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input Options: " opw || exit 0
 case $opw in
-1) clear ; cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root rocky 8 && reboot ;;
-2) clear ; cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root rocky 9 && reboot ;;
+1) clear ; cd /root ; curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root rocky 8 && reboot ;;
+2) clear ; cd /root ; curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root rocky 9 && reboot ;;
 *) rocky ;;
 esac
 }
@@ -758,21 +758,21 @@ Press CTRL + C to Exit
     case $os in
         01|1) clear ; rocky ;;
         02|2) clear ; alpine ;;
-        03|3) clear ; cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root anolis 8 && reboot ;;
+        03|3) clear ; cd /root ; curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root anolis 8 && reboot ;;
         04|4) clear ; debian ;;
         05|5) clear ; ubuntu ;;
         06|6) clear ; echo -e "Coming Soon" ;; #redhat;;
-        07|7) clear ; cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root centos 9 && reboot ;;
-        08|8) clear ; cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root almalinux 9 && reboot ;;
+        07|7) clear ; cd /root ; curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root centos 9 && reboot ;;
+        08|8) clear ; cd /root ; curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root almalinux 9 && reboot ;;
         09|9) clear ; openeuler ;;
         10) clear ; opensuse ;;
-        11) clear ; cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root arch && reboot  ;;
-        12) clear ; cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root nixos 24.05 && reboot ;;
-        13) clear ; cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root oracle 8 && reboot ;;
-        14) clear ; cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root fedora 43 && reboot ;;
-        15) clear ; cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root gentoo && reboot  ;;
-        16) clear ; cd /root ;curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root opencloudos 8 && reboot ;;
-        17) clear ; cd /root ; curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root kali rolling && reboot  ;;
+        11) clear ; cd /root ; curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root arch && reboot  ;;
+        12) clear ; cd /root ; curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root nixos 24.05 && reboot ;;
+        13) clear ; cd /root ; curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root oracle 8 && reboot ;;
+        14) clear ; cd /root ; curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root fedora 43 && reboot ;;
+        15) clear ; cd /root ; curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root gentoo && reboot  ;;
+        16) clear ; cd /root ;curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root opencloudos 8 && reboot ;;
+        17) clear ; cd /root ; curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root kali rolling && reboot  ;;
         *) clear ; echo "Invalid option. Please select a valid number.";;
     esac
 }

@@ -106,8 +106,8 @@ esac
 sed -i "s|server_name tes1.rohshop.cloud;|server_name $domain;|" /etc/nginx/nginx.conf
 
 # Menyimpan Informasi detail ISP
-curl ipinfo.io/region | cut -d ' ' -f 2-10 > /root/.region
-curl ipinfo.io/org | cut -d ' ' -f 2-10 > /root/.isp
+curl -m 10 ipinfo.io/region | cut -d ' ' -f 2-10 > /root/.region
+curl -m 10 ipinfo.io/org | cut -d ' ' -f 2-10 > /root/.isp
 
 # Mulai ulang nginx
 systemctl start nginx

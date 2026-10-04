@@ -77,7 +77,7 @@ send_log() {
 <code>Status    : </code><code>Deleted</code>
 <code>────────────────────</code>
 "
-    curl -s -X POST "$URL" -d "chat_id=${CHATID}&parse_mode=html" --data-urlencode "text=${TEXT}" >/dev/null
+    curl -s --max-time 10 -X POST "$URL" -d "chat_id=${CHATID}&parse_mode=html" --data-urlencode "text=${TEXT}" >/dev/null
 }
 
 # Fungsi untuk mengonversi byte ke format manusiawi

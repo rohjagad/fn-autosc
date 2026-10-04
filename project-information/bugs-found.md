@@ -2160,6 +2160,14 @@ Found 347. **Phase 18: unquoted variables in delete-adjacent grep/sed** (27 file
 `sed -i $MYIP2/$MYIP3` (`installer/vpn.sh`, the plan's named example), `grep -w $user` in all 24 `add-*.sh` duplicate checks, `grep -w $VPN_USER` (`full/xl2tp.sh`), `grep -qw $1` + `is-active $1` (`installer/wg.sh`). All proven safe-today (validated charsets / literal installer args — quoting changes zero behavior), quoted anyway per the plan: one bad future edit away from a word-split config wipe.
 - **Verified:** zero unquoted leftovers via grep; `bash -n` clean on all 27; zips repacked.
 
+Found 348. **Phase 19: background message sends with no time limit** (quota daemons, restore display, install info) —
+1. `send_log` in all 8 `quota-*.sh` used bare `curl -s -X POST`: these run in 30-second loops, so one stuck Telegram send stalls the whole quota pass (the `limit-ip` sisters already cap theirs). Capped at 10s.
+2. Cosmetic lookups (`icanhazip` in 3 `restore-ftp.sh`, `ipinfo.io` in `diamond.sh`) could hold up restore/install completion text. Capped at 10s each — they only fill display lines, so a timeout just leaves them blank.
+3. All 62 OS-reinstall `curl -O` lines in both `menu-system.sh` capped at 120s (big file, generous). The `&&` chain already stops a failed download from running; now a stalled one stops too.
+- **Also Phase 19 (API side):** `menu-api uninstall` now clears the failed-state flag (`reset-failed`), so a unit that once tripped its limiter starts fresh on reinstall; README notes the Method column is convention-only (the server answers any method — proven in Phase 1).
+- **Verified:** `bash -n` clean everywhere; fallback binary URL returns 200; zips repacked.
+- **Openly not done:** atomic staging/rollback + checksums for the installer (needs a live box to prove; stays in the Fase 19 plan as future work, same honest status as Found 344).
+
 
 
 
