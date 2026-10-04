@@ -233,6 +233,10 @@ Fase 18: Pengujian Live Fallback URL Otorisasi
   2. Jalankan client `xray-core` 25.3.6 dengan `network: xhttp` + `xhttpSettings.path: /vmxh` via TLS 443; unduh payload 5MB dan pastikan checksum identik dengan direct.
   3. Pastikan path lama `/vmspl` tidak lagi di-route (nginx tidak punya lokasi tersebut).
   4. Hapus akun via `delete-split`; pastikan `split.json` valid dan `xray@split` tetap active. Identifier `core=split` di API tidak berubah.
+- **Uji umum area transport (di luar migrasi):**
+  5. Ulangi Fase 4–6 live-testing untuk core `split` (VMess/VLESS/Trojan): kartu lengkap, duplikat ditolak, kuota/IP/limit tertulis benar.
+  6. Uji upload besar via XHTTP (verifikasi `client_max_body_size`/`client_body_timeout` scoped masih menahan) dan koneksi idle panjang (timeout 300s).
+  7. Picu `quota-split` dan `limit-ip-split` dengan akun uji (lampaui kuota/IP) lalu `unlock-split`: pastikan hapus-total vs `.locked` sesuai Decision 16 dan kredensial pulih sama.
 
 ### Fase 18: Pengujian Live Fallback URL Otorisasi
 - **Tujuan:** Membuktikan gate lisensi tahan terhadap matinya salah satu sumber.
@@ -242,3 +246,7 @@ Fase 18: Pengujian Live Fallback URL Otorisasi
   3. Uji fallback (simulasi): blokir primer sementara (contoh entri `/etc/hosts` atau aturan DROP) lalu jalankan gate — wajib tetap hijau via GitHub, tanpa perubahan perilaku.
   4. Uji gagal total: blokir keduanya — gate wajib fail-closed (`Failed to download permissions.`, exit non-nol) sebelum mutasi apa pun.
   5. Kembalikan kondisi jaringan dan pastikan tak ada sisa blokir/patch sementara di VPS.
+- **Uji umum area otorisasi (di luar fallback):**
+  6. Uji gate di bawah network lambat (tambah latency/packet-loss sementara): gate wajib selesai dalam batas wajar tanpa menggantung cron 5-menitan; catat durasi tiap sumber (Pages vs GitHub) sebagai bukti klaim peering.
+  7. Uji respons non-`###` (halaman error HTML dari CDN): gate wajib menolak (tidak ada MATCH palsu) dan tidak mencetak isi respons ke log.
+  8. Uji IP tak terdaftar: keluaran persis `Your IP doesn't have on database` + exit, tanpa bocor isi database ke output.

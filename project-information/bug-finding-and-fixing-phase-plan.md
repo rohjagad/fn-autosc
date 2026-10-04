@@ -320,8 +320,14 @@ Fase 17: Inspeksi Fallback URL Otorisasi (Pages + GitHub)
   - Verifikasi skema XHTTP terhadap biner pin (`strings xray | grep xhttpSettings`; `xray run -test` pada `json/split.json` hasil migrasi).
   - Verifikasi konsistensi tiga lapis: path di JSON server == lokasi nginx == path di kartu/link yang dicetak skrip (`/vmxh`, `/vlxh`, `/trxh`).
   - Verifikasi paritas zip: hash byte tiap entri `*-split*` di `menu/full.zip`/`menu/lite.zip` sama dengan source; biner Go yang display-nya berubah dikompilasi ulang (cek string `XHTTP` di biner).
+- **Finding umum area transport (di luar migrasi):**
+  - Audit direktif buffering/timeout lokasi xhttp vs ws/grpc/httpupgrade: `proxy_request_buffering off`, `proxy_buffering off`, `client_max_body_size`, dan trio `proxy_*_timeout` + `client_body_timeout` harus setara kebutuhan streaming (regresi pola Found 103/133/160).
+  - Audit daemon transport (`quota-split`, `limit-ip-split`, `auto-delete-split`, `kill-split`): path file kuota/usage/limit benar milik `split/` (pola salah-alamat Found 127), restart hanya bila benar ada penghapusan, dan pola hapus JSON presisi (`/### $user $exp/ {N;d}` + comma cleanup).
+  - Uji kartu akun: field lengkap, link decode cocok kredensial, duplikat ditolak sebelum mutasi, `0 not allowed` di kuota/IP/durasi.
+  - Uji hapus total: entri JSON, kartu log, file kuota+usage, file limit hilang semua; service restart bersih dan config valid.
 - **Fixing (Standar Perbaikan):**
   - Rename murni tanpa logika: `splithttp`→`xhttp`, display→`XHTTP`, path ke `/vmxh`, `/vlxh`, `/trxh`. Jangan rename identifier mesin (kontrak API/cron/systemd).
+  - Bug umum ikut standar fasenya masing-masing (timeout→Fase 12 nginx; kuota→Fase 6; kartu→Fase 7); fase ini hanya mengoordinasi temuan area-xhttp.
   - Repack zip deterministik (timestamp tetap, mode `0755`) dan catat append-only (Found/Fix + Section regresi).
 
 ---
@@ -334,8 +340,15 @@ Fase 17: Inspeksi Fallback URL Otorisasi (Pages + GitHub)
   - Verifikasi kesetaraan konten: jumlah baris `###` dari Pages vs GitHub harus sama (sumber berbeda, data sama).
   - Verifikasi semantik fail-closed: kedua sumber mati → pesan `Failed to download permissions.` + exit non-nol, tanpa lanjut ke mutasi.
   - Verifikasi tidak ada URL pihak ketiga lain yang menyelinap (contoh pola `cobaizin` hanya boleh di file referensi).
+- **Finding umum area gate otorisasi (di luar fallback):**
+  - Pindai `curl` tanpa `--max-time` di semua gate (`ifconfig.me`, `izin.txt`): gate yang hang menggantung skrip panel/cron tanpa batas — cap wajar + error eksplisit bila IP kosong (pola fix `menu-api`).
+  - Audit pencocokan IP: `grep "$LOCAL_IP"` tanpa `-F`/`-x` bisa cocok substring (IP `1.2.3.4` cocok di `11.2.3.44`); pastikan pencocokan eksak terhadap kolom IP.
+  - Audit kebocoran kredensial: respons `curl` gagal (HTML error Cloudflare/GitHub) tidak boleh di-`grep` menjadi MATCH palsu atau dicetak ke log; kunci/token tidak boleh tampil di output gate.
+  - Audit hitung mundur expiry: tanggal `lifetime` vs `YYYY-MM-DD` vs format rusak — expiry rusak harus gagal tertutup, bukan lolos terbuka.
+  - Audit perilaku cron: gate di daemon 5-menitan tidak boleh membanjiri log atau memakan waktu melebihi interval saat network lambat.
 - **Fixing (Standar Perbaikan):**
   - Bentuk kanonis dua baris: `PERMISSION_PRIMARY` (Pages) + `PERMISSION_FALLBACK` (GitHub raw); fetch `primary || fallback || { fail }`. Tanpa timeout baru, tanpa helper baru.
+  - Bug umum ikut standar fasenya (hang→cap waktu ala Fase 13 API; parsing→validasi eksak); fase ini mengoordinasi temuan area-gate.
   - Repack zip karena skrip gate ikut berubah; catat append-only.
 
 ---
