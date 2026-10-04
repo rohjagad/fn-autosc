@@ -123,9 +123,7 @@ for user in $username; do
         if [[ -n "$exp" ]]; then
             sed -i "/^### $user $exp/ {N;d}" /etc/xray/json/ws.json
             sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/ws.json
-            if xray run -test -config /etc/xray/json/ws.json >/dev/null 2>&1; then
-                systemctl restart xray@ws >> /dev/null 2>&1
-            fi
+            need_restart=1
             send_log
             mv /var/log/create/xray/ws/${user}.log /var/log/create/xray/ws/${user}.locked
         fi
@@ -135,3 +133,11 @@ for user in $username; do
         clear
     fi
 done
+
+# One restart per run, not per locked user: N triggered users used
+# to mean N back-to-back restarts and tripped the start limiter.
+if [ -n "$need_restart" ]; then
+    if xray run -test -config /etc/xray/json/ws.json >/dev/null 2>&1; then
+        systemctl restart xray@ws >> /dev/null 2>&1
+    fi
+fi

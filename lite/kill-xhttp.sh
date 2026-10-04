@@ -113,10 +113,7 @@ function check_quota() {
             if [[ -n "$exp" ]]; then
                 sed -i "/^### $user $exp/ {N;d}" /etc/xray/json/xhttp.json
                 sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/xhttp.json
-                if xray run -test -config /etc/xray/json/xhttp.json >/dev/null 2>&1; then
-                    systemctl daemon-reload
-                    systemctl restart xray@xhttp
-                fi
+                need_restart=1
             fi
 
             readable_limit=$(human_readable "$quota_limit")
@@ -149,3 +146,10 @@ function process_quota() {
 }
 
 process_quota
+# One restart per run, not per deleted user (Found 329 class).
+if [ -n "$need_restart" ]; then
+    if xray run -test -config /etc/xray/json/xhttp.json >/dev/null 2>&1; then
+        systemctl daemon-reload
+        systemctl restart xray@xhttp
+    fi
+fi

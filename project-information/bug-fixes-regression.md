@@ -1670,6 +1670,17 @@ Section 35's four-check rule applied to Fix 348:
 | **Over-engineering** | One flag per call site, same idiom as the gate caps; no retry logic; code-signing/pinning left out (upstream moves — recorded choice). |
 | **vs the source** | V23/1.20 fetch the same way uncapped (inherited); caps follow this repo's own gate precedent. Full atomic-install staging stays future work, noted openly. |
 
+## 133. Phase 21: Single Restart Per Daemon Run — Four Checks (October 4, 2026)
+
+Section 35's four-check rule applied to Fix 349:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Restarts still happen exactly when deletions/locks happen (proven in sandbox, including the zero-trigger case); `xray -test` gate and per-user notices preserved; final-state test is equivalent-or-safer than per-step tests. |
+| **Over-strictness** | Nothing rejected; strictly fewer restarts, same triggers. |
+| **Over-engineering** | One flag + one block per file, copied from the `xp`/`auto-delete` pattern already in the repo; no debounce logic, no new files. |
+| **vs the source** | V23/1.20 restart per user in these loops (inherited); batching follows this repo's own `xp.sh` precedent. |
+
 ## 128. Phase 14: Full-Length API Token — Four Checks (October 4, 2026)
 
 Section 35's four-check rule applied to Fix 343:

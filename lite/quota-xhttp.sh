@@ -103,6 +103,7 @@ function con() {
 function cekxhttp() {
     users=$(grep '^###' /etc/xray/json/xhttp.json | cut -d ' ' -f 2 | sort | uniq)
 
+    need_restart=
     for user in $users; do
         # Ambil statistik penggunaan dari Xray API
         inb=$(xray api stats --server=127.0.0.1:10082 -name "user>>>${user}>>>traffic>>>uplink" 2>/dev/null | grep value | awk '{gsub(/[",]/,"",$2); print $2}')
@@ -139,9 +140,7 @@ function cekxhttp() {
             rm -f "$usage_file" "$quota_file"
             rm -f /var/log/create/xray/xhttp/${user}.log
             rm -f /etc/xray/limit/ip/xray/xhttp/${user}
-            if xray run -test -config /etc/xray/json/xhttp.json >/dev/null 2>&1; then
-                systemctl restart xray@xhttp
-            fi
+            need_restart=1
             echo "User $user reached quota limit and has been deleted."
         fi
         fi
@@ -150,6 +149,12 @@ function cekxhttp() {
         xray api stats --server=127.0.0.1:10082 -name "user>>>${user}>>>traffic>>>downlink" -reset >/dev/null 2>&1
         xray api stats --server=127.0.0.1:10082 -name "user>>>${user}>>>traffic>>>uplink" -reset >/dev/null 2>&1
     done
+    # One restart per pass, not per deleted user (Found 329 class).
+    if [ -n "$need_restart" ]; then
+        if xray run -test -config /etc/xray/json/xhttp.json >/dev/null 2>&1; then
+            systemctl restart xray@xhttp
+        fi
+    fi
 }
 
 # Fungsi utama untuk memonitor xhttp secara terus-menerus

@@ -100,6 +100,7 @@ con() {
 cekws() {
     users=$(grep '^###' /etc/xray/json/ws.json | cut -d ' ' -f 2 | sort | uniq)
 
+    need_restart=
     for user in $users; do
         # Ambil statistik penggunaan dari Xray API (raw bytes). Bug 99: the
         # migration kept V2Ray's `api stats` call, but Xray's `stats` needs an
@@ -141,9 +142,7 @@ cekws() {
             rm -f "$usage_file" "$quota_file"
             rm -f /var/log/create/xray/ws/${user}.log
             rm -f /etc/xray/limit/ip/xray/ws/${user}
-            if xray run -test -config /etc/xray/json/ws.json >/dev/null 2>&1; then
-                systemctl restart xray@ws
-            fi
+            need_restart=1
             echo "User $user reached quota limit and has been deleted."
         fi
         fi
@@ -152,6 +151,12 @@ cekws() {
         xray api stats --server=127.0.0.1:10080 -name "user>>>${user}>>>traffic>>>downlink" -reset >/dev/null 2>&1
         xray api stats --server=127.0.0.1:10080 -name "user>>>${user}>>>traffic>>>uplink" -reset >/dev/null 2>&1
     done
+    # One restart per pass, not per deleted user (Found 329 class).
+    if [ -n "$need_restart" ]; then
+        if xray run -test -config /etc/xray/json/ws.json >/dev/null 2>&1; then
+            systemctl restart xray@ws
+        fi
+    fi
 }
 
 # Fungsi utama untuk memonitor ws secara terus-menerus

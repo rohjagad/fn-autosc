@@ -2501,6 +2501,11 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Fix 348 (Found 348):** panel — 10s on 8 quota Telegram sends, 10s on restore/install info lookups, 120s on 62 reinstall downloads; zips repacked. API `menu-api` — `reset-failed` on uninstall; README method-convention note.
 - **Verified:** `bash -n` clean everywhere; no request/response logic touched.
 
+### Fix 349 - Phase 21: one restart per daemon run (Found 349)
+
+- **Fix 349 (Found 349):** `need_restart` flag + single post-loop `xray -test`-gated restart in all 24 daemon files; per-user Telegram notices unchanged; zips repacked.
+- **Verified:** sandbox runs (2-lock/2-quota/2-kill triggers → 1 restart each; zero-trigger → 0); `bash -n` clean ×24; no in-loop restart left by scan.
+
 ### Fix 343 - Phase 14: full-length API token (Found 343)
 
 - **Fix 343 (Found 343):** `head -c 32` → `head -c 48` in `token()` (`fn-autosc-api/menu-api:18`); charset and 40-char cut unchanged, so existing tokens stay valid and rotation works as before.

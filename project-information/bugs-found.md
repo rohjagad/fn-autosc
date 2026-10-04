@@ -2168,6 +2168,10 @@ Found 348. **Phase 19: background message sends with no time limit** (quota daem
 - **Verified:** `bash -n` clean everywhere; fallback binary URL returns 200; zips repacked.
 - **Openly not done:** atomic staging/rollback + checksums for the installer (needs a live box to prove; stays in the Fase 19 plan as future work, same honest status as Found 344).
 
+Found 349. **Phase 21: daemons restarted the service once per user instead of once per run** (`limit-ip-*`, `quota-*`, `kill-*`, all transports, both editions — 24 files) —
+a cron run that locked/deleted N users issued N back-to-back `systemctl restart`s (the `xp`/`auto-delete` daemons already batch correctly and were the template). Each in-loop restart is now a `need_restart=1` flag; one `xray -test`-gated restart fires after the loop (quota resets its flag each 30s pass; `send_log` per-user notices unchanged).
+- **Verified live-locally in a sandbox** (fake license server, fake xray API, restart counter): 2 locked users → exactly 1 restart with only the right accounts removed; 2 over-quota users → 1 restart with cards/quota/limit cleaned and the healthy account's usage file kept; 2 kill triggers (over-quota + missing-file) → 1 restart; zero-trigger run → 0 restarts, config untouched. All 24 files `bash -n` clean; static scan confirms zero in-loop restarts remain; zips repacked.
+
 
 
 
