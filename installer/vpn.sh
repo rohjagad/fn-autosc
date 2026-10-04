@@ -138,7 +138,7 @@ comp-lzo
 verb 3
 END
 
-sed -i $MYIP2 /etc/openvpn/client-tcp-1194.ovpn;
+sed -i "$MYIP2" /etc/openvpn/client-tcp-1194.ovpn;
 
 # Buat config client UDP 2200
 cat > /etc/openvpn/client-udp-2200.ovpn <<-END
@@ -158,7 +158,7 @@ comp-lzo
 verb 3
 END
 
-sed -i $MYIP2 /etc/openvpn/client-udp-2200.ovpn;
+sed -i "$MYIP2" /etc/openvpn/client-udp-2200.ovpn;
 
 cd
 # pada tulisan xxx ganti dengan alamat ip address VPS anda
@@ -241,7 +241,7 @@ rm -f /etc/squid/squid.conf
 wget -O /etc/squid/squid.conf "${hosting}/config/squid.conf" >> /dev/null 2>&1
 MYIP1="${MYIP:-$(cat /etc/.ip 2>/dev/null || echo "$LOCAL_IP")}"
 MYIP3="s/rerechan/$MYIP1/g";
-sed -i $MYIP3 /etc/squid/squid.conf
+sed -i "$MYIP3" /etc/squid/squid.conf
 service squid restart
 
 # Enable Service

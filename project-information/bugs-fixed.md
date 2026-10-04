@@ -2491,6 +2491,11 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Fix 346 (Found 346):** panel — `--max-time 15` on all gate curls + `grep -wF` IP match across 193 files (+ `install.sh` wget fallback); zips repacked. API — `grep -qwF` in `add/delete-noobz` (4 sites; proven `ali`/`alice` mix-up before), `partial:true` + `failed_from[]` in `delete-xray` when transports refuse, `require_tool` per transport in `cek-xray` instead of silent skip.
 - **Verified:** panel grep shows zero leftovers, `bash -n` clean everywhere; API stub tests (collision refused, partial flag exact, missing tool named).
 
+### Fix 347 - Phase 18: quote destructive-adjacent expansions + harden API server sockets (Found 347)
+
+- **Fix 347 (Found 347):** panel — quotes in 27 files (3× `sed -i "$MYIP*"`, 24× `grep -w "$user"`, `"$VPN_USER"`, `"$1"` ×2); zips repacked. API `server` — 64-deep accept queue, 30s socket silence cap, 1MB body cap (413 + close, handler skipped), `WatchedFileHandler` for log rotation, broken-pipe guard on every reply path. Single-threaded kept; full request environment kept (locale-sensitive panel scripts depend on it — stripping it would change `sort`/`date` behavior).
+- **Verified:** `bash -n`/`py_compile` clean; backlog pain reproduced before (2/12 through) and re-tested after; 413 closes TCP with server alive; rotation-safe logging; no token in logs.
+
 ### Fix 343 - Phase 14: full-length API token (Found 343)
 
 - **Fix 343 (Found 343):** `head -c 32` → `head -c 48` in `token()` (`fn-autosc-api/menu-api:18`); charset and 40-char cut unchanged, so existing tokens stay valid and rotation works as before.

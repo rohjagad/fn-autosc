@@ -92,7 +92,7 @@ until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/creat
         continue
     fi
 
-    client_exists=$(grep -w $user /etc/xray/json/xhttp.json | wc -l)
+    client_exists=$(grep -w "$user" /etc/xray/json/xhttp.json | wc -l)
 
     if [[ ${client_exists} -gt 0 ]]; then
         clear

@@ -98,7 +98,7 @@ newline() {
 }
 
 check_run() {
-        if [[ "$(systemctl is-active $1)" == "active" ]]; then
+        if [[ "$(systemctl is-active "$1")" == "active" ]]; then
                 ok "$1 is running"
                 sleep 1
         else
@@ -109,7 +109,7 @@ check_run() {
 }
 
 check_screen() {
-        if screen -ls | grep -qw $1; then
+        if screen -ls | grep -qw "$1"; then
                 ok "$1 is running"
                 sleep 1
         else

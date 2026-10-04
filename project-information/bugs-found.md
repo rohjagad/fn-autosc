@@ -2156,6 +2156,10 @@ Found 346. **Phase 17: license gates hang forever on slow network and match the 
 2. `grep "$LOCAL_IP"` matches by substring: proven live-locally that IP `1.2.3.4` also matches the line for `11.2.3.44`, so a machine could pass with someone else's license line. Switched to `grep -wF` (exact text, word edges): `1.2.3.4` now matches only its own line.
 - **Verified:** zero leftover un-timed/anchored patterns via grep; `bash -n` clean on every touched script; zips repacked (114/97, `0755`, byte-identical).
 
+Found 347. **Phase 18: unquoted variables in delete-adjacent grep/sed** (27 files) —
+`sed -i $MYIP2/$MYIP3` (`installer/vpn.sh`, the plan's named example), `grep -w $user` in all 24 `add-*.sh` duplicate checks, `grep -w $VPN_USER` (`full/xl2tp.sh`), `grep -qw $1` + `is-active $1` (`installer/wg.sh`). All proven safe-today (validated charsets / literal installer args — quoting changes zero behavior), quoted anyway per the plan: one bad future edit away from a word-split config wipe.
+- **Verified:** zero unquoted leftovers via grep; `bash -n` clean on all 27; zips repacked.
+
 
 
 

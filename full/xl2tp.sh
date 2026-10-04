@@ -103,7 +103,7 @@ function create() {
 clear
 until [[ $VPN_USER =~ ^[a-zA-Z0-9_]+$ && ${CLIENT_EXISTS} == '0' ]]; do
 		read -rp "Username : " -e VPN_USER || exit 0
-		CLIENT_EXISTS=$(grep -w $VPN_USER /etc/funny/.l2tp | wc -l)
+		CLIENT_EXISTS=$(grep -w "$VPN_USER" /etc/funny/.l2tp | wc -l)
 
 		if [[ ${CLIENT_EXISTS} -gt 0 ]]; then
 			echo ""

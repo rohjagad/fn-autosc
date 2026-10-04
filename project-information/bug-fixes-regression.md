@@ -1648,6 +1648,17 @@ Section 35's four-check rule applied to Fix 346:
 | **Over-engineering** | Same-flag edits in panel; two-letter flag + one reporting branch + one guard loop in API; no helpers. |
 | **vs the source** | V23/1.20 share the un-timed gate and substring match (inherited); tightening follows this repo's own `menu-api` caps and Xray-handler anchor style. |
 
+## 131. Phase 18: Quoting + Server Sockets — Four Checks (October 4, 2026)
+
+Section 35's four-check rule applied to Fix 347:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Quoting is behavior-neutral on already-constrained values; server fast paths byte-identical (normal/empty/small bodies, HEAD, auth matrix re-tested); handler skipped only after a 413 it can never satisfy. |
+| **Over-strictness** | Nothing new rejected except >1MB bodies (100× above real use) and >30s-silent sockets (nginx buffers real clients). |
+| **Over-engineering** | Quotes only where the plan names; server bounds are three constants + stdlib handler swap + one `try`; env deliberately NOT stripped (would change script behavior). |
+| **vs the source** | V23/1.20 quote the same way loosely (inherited style); server bounds follow this repo's own gate-timeout idiom, single-threaded invariant kept. |
+
 ## 128. Phase 14: Full-Length API Token — Four Checks (October 4, 2026)
 
 Section 35's four-check rule applied to Fix 343:
