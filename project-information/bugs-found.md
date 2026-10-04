@@ -2133,6 +2133,9 @@ Found 339. **Phase 7: `addssh` ignores a failed `useradd` and reports success an
 Found 340. **Phase 10: four submenus accept `0` but not the displayed `00` spelling** (`full/menu-ssh.sh:139`, `full/menu-x.sh:145`, `full/menu-system.sh:375,410`, `lite/menu-system.sh:360,395`) —
 18 of 24 back-branches use `0|00)` (Fix 181 precedent for accepting displayed variants); these six used bare `0)`, so typing the documented `00` fell into `*)` redisplay instead of going back. Same action, wider spelling — zero behavior risk.
 
+Found 341. **Phase 12: installers accept non-FQDN domains that `dm-menu` would reject** (`installer/full.sh:87-90`, `installer/lite.sh:87-90`) —
+both install loops check only non-empty + no-spaces, then write `/etc/xray/domain` and sed it into nginx/ACME paths — while `dm-menu.sh:298` (Found 304 fix) enforces the full RFC FQDN regex for the same value post-install. A typo like `test..com` sails through install: ACME fails, the box silently runs self-signed until someone notices. Same regex, added as one `elif`-style branch per installer (language-matched messages).
+
 
 
 

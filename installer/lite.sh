@@ -89,6 +89,12 @@ while true; do
         continue
     fi
 
+    # Cek format FQDN (sama seperti dm-menu/menu-dnstt/menu-argo)
+    if ! [[ "$domain" =~ ^([[:alnum:]]([[:alnum:]-]{0,61}[[:alnum:]])?\.)+[[:alpha:]]{2,63}$ ]]; then
+        echo "Domain harus berupa hostname DNS yang valid. Silakan coba lagi."
+        continue
+    fi
+
     # Jika lolos validasi
     echo "Domain valid: $domain"
     break

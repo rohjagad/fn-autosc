@@ -2471,6 +2471,11 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Fix 340 (Found 340):** `0)` → `0|00)` at six branches (same back-action, wider spelling). Repacked `menu/full.zip` + `menu/lite.zip` (entries byte-identical, 0 non-`0755`).
 - **Verified:** `bash -n` clean ×4; census 24/24 branches `0|00)`; main menu intentionally unchanged (no parent to return to; Ctrl+C documented).
 
+### Fix 341 - Phase 12: FQDN validation for installer domains (Found 341)
+
+- **Fix 341 (Found 341):** the canonical FQDN branch in both installer loops (installers are fetched from GitHub, not zipped — no repack). Garbage now re-prompts instead of producing a self-signed-by-default install.
+- **Verified:** `bash -n` clean ×2; accept/reject matrix matches `dm-menu` behavior (`test..com`, spaces, leading/trailing hyphens rejected; multi-level names accepted).
+
 
 
 

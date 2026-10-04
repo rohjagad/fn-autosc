@@ -1604,6 +1604,17 @@ Section 35's four-check rule applied to Fix 340:
 | **Over-engineering** | Three characters (`\|00`) per branch; Fix 181 precedent. |
 | **vs the source** | Both references mix `0)`/`0\|00)` spellings the same way; harmonizing to the majority spelling changes no flow. |
 
+## 126. Phase 12: Installer FQDN Validation — Four Checks (October 4, 2026)
+
+Section 35's four-check rule applied to Fix 341:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Install flow unchanged for valid domains (loop + messages identical); `bash -n` clean; no zip involvement. |
+| **Over-strictness** | Regex is the same one `dm-menu`/`menu-dnstt`/`menu-argo` already enforce — a domain valid post-install is valid at install. |
+| **Over-engineering** | One branch per installer, shared canonical pattern, no helper. |
+| **vs the source** | V23/1.20 validate less (or nothing) at install; tightening follows the already-accepted Found-304 direction. |
+
 
 
 
