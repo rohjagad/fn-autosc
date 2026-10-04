@@ -2456,6 +2456,11 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 337 (Found 337):** three in-place edits (`:155` core enum, `:163` delete backends, `:175` naming paragraph) — `xhttp` canonical, `split` as legacy alias. No code touched.
 
+### Fix 338 - Phase 5: lite unlock-xhttp notification title (Found 338)
+
+- **Fix 338 (Found 338):** one line in `lite/unlock-xhttp.sh:111` (`DELETED` → `XHTTP UNLOCK`), restoring full/lite parity. Repacked `menu/lite.zip` (`unlock-xhttp` entry byte-identical); `menu/full.zip` untouched (no `full/` source changed — verified zero mismatched entries, reverted the no-op rebuild).
+- **Verified:** `bash -n` clean; `diff full/unlock-xhttp.sh lite/unlock-xhttp.sh` empty; zip deterministic.
+
 
 
 

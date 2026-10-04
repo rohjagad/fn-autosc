@@ -1571,6 +1571,17 @@ Section 35's four-check rule applied to Fix 337:
 | **Over-engineering** | Three in-place words; non-append-only doc corrected as the plan requires. |
 | **vs the source** | V23/1.20 predate XHTTP; naming follows Fix 333 + the API README (already correct there). |
 
+## 123. Phase 5: Lite Unlock-xhttp Title — Four Checks (October 4, 2026)
+
+Section 35's four-check rule applied to Fix 338:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | One notification string; no logic/prompt/restart touched; `bash -n` clean; `full/` untouched; lite zip deterministic. |
+| **Over-strictness** | Nothing rejected; text-only change. |
+| **Over-engineering** | One line; parity with the `full/` sibling, no new wording invented. |
+| **vs the source** | V23/1.20 predate the notification texts (panel-era copy); fix aligns the lite copy with the full copy. |
+
 
 
 

@@ -2123,6 +2123,9 @@ Found 337. **Phase 4: `fn-api.md` contract still names the pre-rename transport*
 the endpoint table and the "named the same everywhere" paragraph list `core` as `ws|http|split|grpc` and the delete backend as `delete-*-split`, with zero `xhttp` mentions anywhere in the file — Fix 333 renamed code/handlers/README but missed this contract doc. Non-append-only → corrected in place (`xhttp` canonical, `split` noted as legacy alias, matching the API README).
 - **Confirmed by inspection:** `grep -n "chmod 640 /etc/funny/.restore.key"` hits 9 restore blocks, 0 of which mention `/etc/xray/.key` or `chown root:www-data` before this fix. No live VPS mutation was needed (pure permission re-assertion, `|| true` guarded).
 
+Found 338. **Phase 5: lite unlock-xhttp Telegram title says the account was DELETED** (`lite/unlock-xhttp.sh:111`) —
+the unlock notification body reads `X-RAY DELETED ACOUNT` while the other seven unlock scripts (all three siblings in `full/`, the other three in `lite/`, both http variants) read `UNLOCK ...` — a copy-paste leftover that tells the operator the exact opposite of the operation that just ran (account restored, `.locked`→`.log`, service restarted). Same notification-text class as Found 85; one line restores full/lite parity (verified via `diff`: empty after fix).
+
 
 
 

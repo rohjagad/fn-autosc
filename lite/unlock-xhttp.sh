@@ -108,7 +108,7 @@ DATE=$(date +"%Y-%m-%d %H:%M:%S")
 
         TEXT="
 <b>━━━━━━━━━━━━━━━━━━━━━━━</b>
-<b>⚠️ X-RAY DELETED ACOUNT ⚠️</b>
+<b>⚠️ X-RAY XHTTP UNLOCK ACOUNT ⚠️</b>
 <b>━━━━━━━━━━━━━━━━━━━━━━━</b>
 <b>🗓️  Date     :</b> <code>$DATE</code>
 <b>👤 Username :</b> <code>$name</code>
