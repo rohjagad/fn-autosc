@@ -9,7 +9,7 @@
     # Konfigurasi URL izin
     PERMISSION_PRIMARY="https://fn-autosc-auth.pages.dev/izin.txt"
     PERMISSION_FALLBACK="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt"
-    LOCAL_IP=$(curl -4 -s ifconfig.me) # Mendapatkan IP lokal
+    LOCAL_IP=$(curl -4 -s --max-time 15 ifconfig.me) # Mendapatkan IP lokal
 
     # Fungsi menghitung sisa waktu
     calculate_remaining_days() {
@@ -25,10 +25,10 @@
 
     # Unduh izin dan validasi
     clear
-    PERMISSION_DATA=$(curl -s "$PERMISSION_PRIMARY" || curl -s "$PERMISSION_FALLBACK" || { echo "Failed to download permissions."; exit 1; })
+    PERMISSION_DATA=$(curl -s --max-time 15 "$PERMISSION_PRIMARY" || curl -s --max-time 15 "$PERMISSION_FALLBACK" || { echo "Failed to download permissions."; exit 1; })
 
     # Mencocokkan data berdasarkan IP lokal
-    MATCH=$(echo "$PERMISSION_DATA" | grep "###" | grep "$LOCAL_IP")
+    MATCH=$(echo "$PERMISSION_DATA" | grep "###" | grep -wF "$LOCAL_IP")
     if [ -z "$MATCH" ]; then
         echo "Your IP is not in the database"
         exit 1

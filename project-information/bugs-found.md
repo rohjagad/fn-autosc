@@ -2151,6 +2151,11 @@ Found 345. **Phase 16: handler input shaping verified end-to-end; panel-mirrorin
 `j()`'s `head -1` already neutralizes embedded newlines (verified: `"30\ninjected"` → `"30"`), but non-string scalars and out-of-panel names flowed into the panel's interactive re-prompts and failed obscurely at EOF. Added exact panel mirrors: `add-xray` (username `^[a-z0-9_]+$`, expired/limit-ip/quota `^[1-9][0-9]*$`), `addssh` (limit-ip/expired numeric; username tightened in Phase 7), `add-noobz` (username `^[a-zA-Z0-9_]{1,16}$`, expired numeric), `renew-*` (days numeric). Panel rules confirmed uniform across all 12 `add-*` scripts before mirroring.
 - **Verified live-locally via stub panel:** valid shape pipes exactly `user|ip|quota|days|` + empty-uuid; 8/8 malformed add-xray inputs, 3/3 addssh, 2/2 add-noobz, 3/3 renew inputs rejected explicitly naming field+rule; valid input with metachar password and JSON-number expiry passes guards (reaches panel, fails only at stub-verify as designed). No false rejects.
 
+Found 346. **Phase 17: license gates hang forever on slow network and match the wrong machine on similar IPs** (all 193 gate blocks in `full/`, `lite/`, `installer/`, `install.sh`) —
+1. None of the gate curls (`ifconfig.me`, Pages, GitHub) had a timeout, so one stalled download hangs the panel script or 5-minute cron job with no limit (`menu-api` already caps its own at 15s). Added `--max-time 15` everywhere (plus `--timeout=15` on the one `wget` fallback in `install.sh`).
+2. `grep "$LOCAL_IP"` matches by substring: proven live-locally that IP `1.2.3.4` also matches the line for `11.2.3.44`, so a machine could pass with someone else's license line. Switched to `grep -wF` (exact text, word edges): `1.2.3.4` now matches only its own line.
+- **Verified:** zero leftover un-timed/anchored patterns via grep; `bash -n` clean on every touched script; zips repacked (114/97, `0755`, byte-identical).
+
 
 
 

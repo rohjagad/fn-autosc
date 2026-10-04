@@ -1637,6 +1637,17 @@ Section 35's four-check rule applied to Fix 345:
 | **Over-engineering** | One regex line per field, no shared validator, no dependency. |
 | **vs the source** | FN-API reference defines no shapes; rules come from this panel's own scripts (uniform across all 12). |
 
+## 130. Phase 17: Gate + Noobz + Partial-Delete Honesty — Four Checks (October 4, 2026)
+
+Section 35's four-check rule applied to Fix 346:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Gate logic/wording untouched (same messages, same fail-closed exits); Noobz valid names still match; full deletes report exactly the old shape (no new keys when nothing is missing); `cek-xray` on healthy installs behaves the same (all four tools present). |
+| **Over-strictness** | Timeouts only cut stalled connections (healthy fetch ~1s vs 15s cap); `-wF`/`-w` only reject non-exact matches; 60s→15s nothing (panel had no cap at all). |
+| **Over-engineering** | Same-flag edits in panel; two-letter flag + one reporting branch + one guard loop in API; no helpers. |
+| **vs the source** | V23/1.20 share the un-timed gate and substring match (inherited); tightening follows this repo's own `menu-api` caps and Xray-handler anchor style. |
+
 ## 128. Phase 14: Full-Length API Token — Four Checks (October 4, 2026)
 
 Section 35's four-check rule applied to Fix 343:
