@@ -278,8 +278,13 @@ receiving the same TLS service.
 > (8s blackhole) while the server listened and served them locally
 > (`curl` to `127.0.0.1` works), the host firewall was ACCEPT, closed ports
 > elsewhere RST fast, and even hairpin via the public IP worked — while
-> `443`/`2053`/`80`/`8880`/`2052` connected in ~30ms. That combination points
-> at the VPS provider's edge firewall, not the panel. If clients report an
+> `443`/`2053`/`80`/`8880`/`2052` connected in ~30ms. The same five ports
+> also failed through Cloudflare edge IPs (`104.17.x.x`/`104.18.x.x`,
+> SNI+Host set correctly, valid edge cert): edge TCP+TLS fine, but no HTTP
+> answer, while `443`/`2053`/`80`/`8880`/`2052` via the same edge returned
+> `101` and carried full tunnels. That combination points at the VPS
+> provider's edge firewall for the direct path (and edge/port enablement on
+> the Cloudflare side for the CF path), not the panel. If clients report an
 > alt port dead, open it in the provider's firewall panel (or ticket them)
 > before assuming a panel fault.
 
