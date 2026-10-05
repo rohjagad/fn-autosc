@@ -456,12 +456,12 @@ or after - a pre-existing quirk, out of scope).
 goes in the same `if`, and any new feature that moves egress must take the same WARP guard.
 `fn-autosc-auth` itself is only ever read, never written, by this panel.
 
-## 29. The Licence Gate Reads Cloudflare Pages First, GitHub Second
+## 29. The Licence Gate Races Both Sources; First Valid Reply Wins
 
-- **Component:** all 193 permission gates (`PERMISSION_PRIMARY` / `PERMISSION_FALLBACK`) across `full/`, `lite/`, `installer/`, plus `menu-api`.
-- **Decision:** every gate fetches `https://fn-autosc-auth.pages.dev/izin.txt` first and falls back to `https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt` (`primary || fallback || { fail }`). Pages has better peering for this region; GitHub stays as the backup. Both sources carry byte-identical content, so the failover changes nothing semantically — and when both are down the gate still fails closed with `Failed to download permissions.` before any mutation.
-- **Reason:** a single source is a single point of failure for all 193 gates; the Pages mirror is the same file over better-peered infrastructure, and keeping the canonical GitHub URL verbatim as fallback means no trust migration, only transport redundancy.
-- **Verified live:** Pages serves 7 `###` entries from the VPS, identical count to GitHub; gate green via Pages.
+- **Component:** all permission gates (`PERMISSION_PRIMARY` / `PERMISSION_FALLBACK`) across `full/`, `lite/`, `installer/`, plus `menu-api`.
+- **Decision:** every gate fetches `https://fn-autosc-auth.pages.dev/izin.txt` and `https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt` **at the same time** and takes the first *complete, valid* reply (OR logic instead of sequential fallback). A reply counts only when its download finished (`.done` marker, so no truncated reads) and it contains `###` — a fast error page is skipped, not trusted. Overall bound 15s (each fetch capped at 12s). Both sources carry byte-identical content, so whichever wins changes nothing semantically — and when both fail the gate still fails closed with `Failed to download permissions.` before any mutation. This supersedes the earlier Pages-first/sequential-fallback form: the race is faster on slow runs (measured 5.3s Pages vs 0.6s GitHub once — the race takes the fast one), immune to a slow-primary stall, and additionally hardened against trusting an error page (the old `curl -s ... || curl ...` never fell through on HTTP errors since `curl -s` exits 0).
+- **Reason:** sequential fallback waits out the primary's full timeout before trying the backup, and never tries the backup at all on HTTP-error-with-exit-0. Racing costs one extra parallel request per gate run and removes both weaknesses.
+- **Verified live:** race takes ~1s on the VPS with 7 `###` entries; temp dir removed; fail-closed on double failure.
 
 ## 30. The SplitHTTP Transport Is Fully Renamed to XHTTP
 

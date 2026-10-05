@@ -1790,3 +1790,13 @@ Section 35's four-check rule applied to Fix 357:
 | **Over-strictness** | Nothing rejected; display-only change. |
 | **Over-engineering** | One line moved per file. |
 | **vs the source** | N/A (own new code, not from a reference). |
+## 142. Auth-Gate Race — Four Checks (October 5, 2026)
+
+Section 35's four-check rule applied to Fix 358:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Downstream gate logic (MATCH/USERNAME/EXPIRED_DATE handling) untouched; `PERMISSION_DATA` holds the same whole-file content as before, whichever source wins. |
+| **Over-strictness** | Nothing newly rejected; an error page that the old code *trusted* (exit 0, no match, fail) is now skipped in favour of good data. |
+| **Over-engineering** | One inline block replacing one line per file; no new dependency (`mktemp`, `curl`, `jobs` — all already used). |
+| **vs the source** | References fetch once with no fallback at all; the race keeps this repo's redundancy direction and hardens it. |

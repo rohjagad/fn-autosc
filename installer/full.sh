@@ -25,7 +25,22 @@ export DEBIAN_FRONTEND=noninteractive
 
     # Unduh izin dan validasi
     clear
-    PERMISSION_DATA=$(curl -s --max-time 15 "$PERMISSION_PRIMARY" || curl -s --max-time 15 "$PERMISSION_FALLBACK") || { echo "Failed to download permissions."; exit 1; }
+        # Fetch both auth sources at once; first complete valid reply wins (OR logic).
+    PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
+    (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
+    (curl -s --max-time 12 "$PERMISSION_FALLBACK" -o "$PERMISSION_TMP/b" 2>/dev/null; touch "$PERMISSION_TMP/b.done") &
+    PERMISSION_DATA=""; end=$((SECONDS+15))
+    while [ $SECONDS -lt $end ]; do
+        for f in "$PERMISSION_TMP/a" "$PERMISSION_TMP/b"; do
+            if [ -f "$f.done" ] && grep -q "###" "$f" 2>/dev/null; then PERMISSION_DATA=$(cat "$f"); break 2; fi
+        done
+        jobs -rp | grep -q . || break
+        sleep 1
+    done
+    kill $(jobs -rp) 2>/dev/null
+    wait 2>/dev/null
+    rm -rf "$PERMISSION_TMP"
+    [ -z "$PERMISSION_DATA" ] && { echo "Failed to download permissions."; exit 1; }
 
     # Mencocokkan data berdasarkan IP lokal
     MATCH=$(echo "$PERMISSION_DATA" | grep "###" | grep -wF "$LOCAL_IP")

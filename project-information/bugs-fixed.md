@@ -2561,3 +2561,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 357 (Found 358):** moved the `RSEP='...'` definition above the header block in all 8 `list-xray-*.sh`. Both zips entry-refreshed.
 - **Verified live:** title area renders rainbow/title/rainbow with no blank line; pick-by-number still resolves.
+### Fix 358 - Auth gates race both sources, first valid wins (Found 359)
+
+- **Fix 358 (Found 359):** all 192 gates (`full/`, `lite/`, `installer/`) plus `menu-api` (fn-autosc-api) now fetch Pages + GitHub at once and take the first *complete* reply containing `###` (`.done` markers prevent truncated reads; fast error pages are skipped, not trusted); 15s overall bound, fail-closed when both fail. Both zips refreshed.
+- **Verified:** 4-scenario mock matrix (fast/slow good, fast-bad + slow-good, both bad, both down) all correct; live race takes ~1s with 7 entries and no temp leftovers; gate green on the VPS.

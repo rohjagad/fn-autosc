@@ -2215,3 +2215,5 @@ Found 357. **List-account chooser (Fix 355) does not look like Check Database Lo
 follow-up styling: the new chooser kept the old blue `━━━` separators and `=[ Member ... ]=` header while option 10 uses rainbow `===` separators, centered `XTLS <T> DATABASE`-style headers, blue rules around Total and the orange exit line.
 Found 358. **Restyled list chooser printed a blank line instead of the top rainbow** —
 the `RSEP=` definition landed after its first use (behind the `accsess.log` truncation line), so the header's opening separator rendered empty in all 8 `list-xray-*.sh`.
+Found 359. **Auth gate fetches sequentially and trusts error pages** —
+all 192 gates ran `curl primary || curl fallback`, which waits out the primary's full timeout before trying the backup — and worse, never tries the backup on an HTTP error page at all, because `curl -s` exits 0. Measured live: Pages once took 5.3s while GitHub took 0.6s in the same minute.
