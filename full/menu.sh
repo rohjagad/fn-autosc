@@ -240,11 +240,11 @@ xws="${red}OFF${NC}"
 fi
 
 ### Status XTLS HTTP UPGRADE
-vxhttp=$(service xray@upgrade status | grep active | cut -d ' ' $stat)
-if [ "$vxhttp" = "active" ]; then
-xhttp="${green}ON${NC}"
+vxhup=$(service xray@upgrade status | grep active | cut -d ' ' $stat)
+if [ "$vxhup" = "active" ]; then
+xhup="${green}ON${NC}"
 else
-xhttp="${red}OFF${NC}"
+xhup="${red}OFF${NC}"
 fi
 
 ### Status XTLS XHTTP
@@ -297,7 +297,7 @@ XTLS HTTP UP : $http
 XTLS XHTTP   : $xhttp
 XTLS gRPC    : $gpc
 ${blue_sep}
-SSH: $resh | WS: $xws | HTTP: $xhttp
+SSH: $resh | WS: $xws | HTTP: $xhup
 XHTTP: $xxhttp | gRPC: $xgcp | ePRO: $pro
 Loadbalance: $loadbalance
 ${blue_sep}

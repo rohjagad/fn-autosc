@@ -2205,3 +2205,5 @@ measured live: 3 concurrent sessions from one address read back 1, then 1-2-2 ac
 
 
 
+Found 354. **Main menu shows `ON` where it should show the XHTTP account count** (`full/menu.sh`) —
+`XTLS XHTTP : $xhttp` under TOTAL ACCOUNTS prints `ON` instead of a number. Cause: the split→xhttp rename gave the XHTTP *count* (`xhttp=... | wc -l`, line 88) the same name as the pre-existing HTTP-upgrade *status* (`xhttp=ON/OFF`, ex-V23 lines 188-190), and the status block runs later so it wins. V23 kept three distinct names (`split` count, `xhttp` HTTP status, `xsplit` split status); the rename collapsed two of them. `lite/menu.sh` and `full/menu-x.sh` are unaffected (count flows straight to display). Whole-TUI sweep (every `full/*.sh` + `lite/*.sh`, count-assign vs ON/OFF-assign set intersection) finds this the only collision.

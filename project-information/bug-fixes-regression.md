@@ -1740,3 +1740,13 @@ Section 35's four-check rule applied to Fix 343:
 
 
 
+## 137. Main Menu XHTTP Count — Four Checks (October 5, 2026)
+
+Section 35's four-check rule applied to Fix 353:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Status line renders identical values (`HTTP: ON/OFF` from the same service probe); only the variable name changed; lite + menu-x paths untouched (verified no collision there). |
+| **Over-strictness** | Nothing rejected; display-only change, no input path touched. |
+| **Over-engineering** | 5 lines renamed in one file + zip entry refresh. |
+| **vs the source** | V23 kept three distinct names; the fix restores exactly that separation under the new transport name. |

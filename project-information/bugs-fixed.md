@@ -2541,3 +2541,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 
 
+### Fix 353 - Main menu XHTTP count clobbered by status variable (Found 354)
+
+- **Fix 353 (Found 354):** renamed the HTTP-upgrade *status* pair `vxhttp`/`xhttp` → `vxhup`/`xhup` in `full/menu.sh` (status block + `HTTP: $xhup` display line); the XHTTP *count* `$xhttp` is untouched, so `XTLS XHTTP : $xhttp` shows the number again; `menu/full.zip` repacked entry-only (5-byte delta), `menu/lite.zip` byte-identical.
+- **Verified:** `bash -n` clean; repo-wide collision sweep now empty; stubbed runtime run prints count `2` with independent ON/OFF statuses.
