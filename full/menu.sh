@@ -293,11 +293,11 @@ ${blue_sep}
 ${purple}TOTAL ACCOUNTS${NC}
 SSH SERVER   : $sshd
 XTLS WS      : $ws
-XTLS HTTP UP : $http
+XTLS HU      : $http
 XTLS XHTTP   : $xhttp
 XTLS gRPC    : $gpc
 ${blue_sep}
-SSH: $resh | WS: $xws | HTTP: $xhup
+SSH: $resh | WS: $xws | HU: $xhup
 XHTTP: $xxhttp | gRPC: $xgcp | ePRO: $pro
 Loadbalance: $loadbalance
 ${blue_sep}

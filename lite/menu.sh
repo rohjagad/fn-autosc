@@ -211,13 +211,13 @@ XTLS Version : ${xver:-unknown}
 ${blue_sep}
 ${purple}TOTAL ACCOUNTS${NC}
 WS           : ${green}$ws${NC}
-HTTP         : ${green}$http${NC}
+HU           : ${green}$http${NC}
 gRPC         : ${green}$gpc${NC}
 XHTTP        : ${green}$xhttp${NC}
 ${blue_sep}
 ${purple}MENU${NC}
 ${green}1${NC}. WebSocket (WS)        ${green}5${NC}. System Menu
-${green}2${NC}. HTTP Upgrade (HTTP)   ${green}6${NC}. Domain Menu
+${green}2${NC}. HTTP Upgrade (HU)   ${green}6${NC}. Domain Menu
 ${green}3${NC}. gRPC (XTLS)           ${green}7${NC}. Backup Menu
 ${green}4${NC}. XHTTP (XHTTP)    ${green}8${NC}. Telegram Bot
 ${blue_sep}

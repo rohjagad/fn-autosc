@@ -123,7 +123,7 @@ XTLS Version : ${xver:-unknown}
 ${blue_sep}
 ${purple}TOTAL ACCOUNTS${NC}
 WS           : $ws
-HTTP         : $http
+HU           : $http
 XHTTP        : $xhttp
 gRPC         : $gpc
 ${blue_sep}

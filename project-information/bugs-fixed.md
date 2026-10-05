@@ -2545,3 +2545,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 353 (Found 354):** renamed the HTTP-upgrade *status* pair `vxhttp`/`xhttp` → `vxhup`/`xhup` in `full/menu.sh` (status block + `HTTP: $xhup` display line); the XHTTP *count* `$xhttp` is untouched, so `XTLS XHTTP : $xhttp` shows the number again; `menu/full.zip` repacked entry-only (5-byte delta), `menu/lite.zip` byte-identical.
 - **Verified:** `bash -n` clean; repo-wide collision sweep now empty; stubbed runtime run prints count `2` with independent ON/OFF statuses.
+### Fix 354 - Short labels unified to HU (Found 355)
+
+- **Fix 354 (Found 355):** `XTLS HTTP UP` → `XTLS HU` and `HTTP:` → `HU:` in `full/menu.sh` (colon alignment kept); `HTTP :` → `HU :` in `full/menu-x.sh` and `lite/menu.sh`; lite option tag `(HTTP)` → `(HU)`. Full transport names on cards/options untouched. Both zips entry-refreshed (2-byte deltas each).
+- **Verified:** `bash -n` clean ×3; no `HTTP UP`/`HTTP: $` menu labels remain.

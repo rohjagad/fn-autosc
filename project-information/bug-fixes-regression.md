@@ -1750,3 +1750,13 @@ Section 35's four-check rule applied to Fix 353:
 | **Over-strictness** | Nothing rejected; display-only change, no input path touched. |
 | **Over-engineering** | 5 lines renamed in one file + zip entry refresh. |
 | **vs the source** | V23 kept three distinct names; the fix restores exactly that separation under the new transport name. |
+## 138. HU Short Labels — Four Checks (October 5, 2026)
+
+Section 35's four-check rule applied to Fix 354:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Label-only change; same variables, same values, same column alignment; card/option full names untouched. |
+| **Over-strictness** | Nothing rejected; display-only change. |
+| **Over-engineering** | 5 label swaps across 3 files. |
+| **vs the source** | References use longer `HTTP UPGRADE` wording; short `HU` matches this repo's own `WS`/`XHTTP`/`gRPC` menu style. |
