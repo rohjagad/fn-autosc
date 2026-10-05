@@ -273,12 +273,15 @@ ports, and because some ISPs block 80/443. Using `2053`, `2083`, `2087`, or
 `2096` lets clients connect through Cloudflare or past ISP filters while
 receiving the same TLS service.
 
-> Reachability note (measured live, Oct 2026): from one client network the
-> ports `2082`/`2083`/`2087`/`2095`/`2096` timed out at TCP level while the
-> server listened and served them locally and `443`/`2053`/`80`/`8880`/`2052`
-> worked — i.e. filtering on the path, not on the panel. If clients report an
-> alt port dead, re-probe it from a second network (and check the VPS
-> provider's edge firewall) before assuming a panel fault.
+> Reachability note (measured live, Oct 2026): from two different client ISPs
+> the ports `2082`/`2083`/`2087`/`2095`/`2096` timed out at TCP level
+> (8s blackhole) while the server listened and served them locally
+> (`curl` to `127.0.0.1` works), the host firewall was ACCEPT, closed ports
+> elsewhere RST fast, and even hairpin via the public IP worked — while
+> `443`/`2053`/`80`/`8880`/`2052` connected in ~30ms. That combination points
+> at the VPS provider's edge firewall, not the panel. If clients report an
+> alt port dead, open it in the provider's firewall panel (or ticket them)
+> before assuming a panel fault.
 
 ---
 
