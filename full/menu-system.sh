@@ -84,7 +84,7 @@ orange='\033[38;5;208m'
 NC='\033[0m'
 
 rainbow_sep() {
-  local text="${1:-===================================}"
+  local text="${1:------------------------------------}"
   local output=''
   local i segment fraction r g b color
   local -a red=(255 255 0 0 0 255 255)
@@ -107,7 +107,7 @@ rainbow_sep() {
   printf '%b\n' "${output}${NC}"
 }
 
-separator=$(rainbow_sep '===================================')
+separator=$(rainbow_sep '-----------------------------------')
 blue_sep="${blue}-----------------------------------${NC}"
 
 bnnr() {
@@ -326,11 +326,11 @@ akun4() {
     fi
     echo -e "
     Your WARP IPv4 WireGuard Account
-    ======================================
+    -----------------------------------===
          Wireguard Configuration
 
     ${conf:-No WARP WireGuard configuration found. Install WARP first.}
-    ======================================
+    -----------------------------------===
     "
     rm -fr /root/wgcf.conf
     read -n 1 -s -r -p "Press any key to return..." || true
@@ -348,11 +348,11 @@ akun6() {
     fi
     echo -e "
     Your WARP IPv6 WireGuard Account
-    ======================================
+    -----------------------------------===
          Wireguard Configuration
 
     ${conf:-No WARP WireGuard configuration found. Install WARP first.}
-    ======================================
+    -----------------------------------===
     "
     rm -fr /root/wgcf.conf
     read -n 1 -s -r -p "Press any key to return..." || true

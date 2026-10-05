@@ -100,7 +100,7 @@ green='\033[0;32m'
 NC='\033[0m'
 
 rainbow_sep() {
-  local text="${1:-===================================}"
+  local text="${1:------------------------------------}"
   local output=''
   local i segment fraction r g b color
   local -a red=(255 255 0 0 0 255 255)
@@ -123,7 +123,7 @@ rainbow_sep() {
   printf '%b\n' "${output}${NC}"
 }
 
-separator=$(rainbow_sep '===================================')
+separator=$(rainbow_sep '-----------------------------------')
 blue_sep="\033[1;34m-----------------------------------\033[0m"
 
 # Notification

@@ -2219,3 +2219,5 @@ Found 359. **Auth gate fetches sequentially and trusts error pages** —
 all 192 gates ran `curl primary || curl fallback`, which waits out the primary's full timeout before trying the backup — and worse, never tries the backup on an HTTP error page at all, because `curl -s` exits 0. Measured live: Pages once took 5.3s while GitHub took 0.6s in the same minute.
 Found 360. **Background daemons stopped enforcing during auth outages** —
 follow-up to the blackout rule: `xp`/`limit-ip-*`/`quota-*`/`kill-*`/`auto-delete-*`/`expire-ssh` (36 files) exited on fetch failure, so expiry/quota/IP enforcement paused whenever both auth sources were unreachable.
+Found 361. **Rainbow separators use `=` while the panel's short style moved on** —
+operator request: all rainbow `===================================` dividers (42 shell `rainbow_sep` defaults/calls, 9 Go `rainbowSep` calls, plus the embedded `RSEP` in the 8 `list-xray-*.sh`) should render as `-` like the rest of the modern separators. Plain (non-rainbow) `===` card borders and purple dividers intentionally untouched.

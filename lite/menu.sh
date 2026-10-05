@@ -208,7 +208,7 @@ xhttp=$(cat /etc/xray/json/xhttp.json | grep "###" | sort | uniq | wc -l)
 # Xray/XTLS core version
 xver=$(xray version 2>/dev/null | awk '{print $2}' | head -n 1)
 
-separator=$(rainbow_sep '===================================')
+separator=$(rainbow_sep '-----------------------------------')
 blue_sep="${blue}-----------------------------------${NC}"
 clear
 echo -e "${NC}${separator}

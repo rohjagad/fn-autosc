@@ -86,7 +86,7 @@ orange='\033[38;5;208m'
 NC='\033[0m'
 
 rainbow_sep() {
-  local text="${1:-===================================}"
+  local text="${1:------------------------------------}"
   local output=''
   local i segment fraction r g b color
   local -a red=(255 255 0 0 0 255 255)
@@ -109,7 +109,7 @@ rainbow_sep() {
   printf '%b\n' "${output}${NC}"
 }
 
-separator=$(rainbow_sep '===================================')
+separator=$(rainbow_sep '-----------------------------------')
 blue_sep="${blue}-----------------------------------${NC}"
 
 termbot() {
@@ -287,12 +287,12 @@ if [ -s /etc/funny/.keybot ] && [ -s /etc/funny/.chatid ]; then
 fi
 clear
 echo -e "
-=========================================
+-----------------------------------======
  Bot Credentials Not Set
-=========================================
+-----------------------------------======
  Choose "1. Set Up Bot Credentials" first,
  then come back to this menu.
-=========================================
+-----------------------------------======
 "
 return 1
 }
@@ -361,24 +361,24 @@ resp=$(curl -4 -s --max-time 15 -d "chat_id=$id" \
 clear
 if echo "$resp" | grep -q '"ok":true'; then
     echo -e "
-=========================================
+-----------------------------------======
  Bot Notifications
-=========================================
+-----------------------------------======
  Status  : enabled
  Chat ID : $id
  A test message has been sent to that chat.
-=========================================
+-----------------------------------======
 "
 else
     echo -e "
-=========================================
+-----------------------------------======
  Bot Notifications - FAILED
-=========================================
+-----------------------------------======
  Telegram replied:
  $resp
 
  Check the API key and chat ID (option 1).
-=========================================
+-----------------------------------======
 "
 fi
 read -n 1 -s -r -p "Press any key to return..." || true
@@ -393,13 +393,13 @@ grep -q 'flock -n /tmp/backup.lock backup' /etc/crontab 2>/dev/null || \
     echo '0 0,6,12,18 * * * root flock -n /tmp/backup.lock backup' >> /etc/crontab
 clear
 echo -e "
-=========================================
+-----------------------------------======
  Bot Auto Backup
-=========================================
+-----------------------------------======
  Chat ID  : $(cat /etc/funny/.chatid 2>/dev/null)
  Schedule : 0 0,6,12,18 (4x daily)
  Delivery : Telegram document
-=========================================
+-----------------------------------======
 "
 read -n 1 -s -r -p "Press any key to return..." || true
 echo ""

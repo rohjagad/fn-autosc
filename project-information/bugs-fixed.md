@@ -2569,3 +2569,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 359 (Found 360):** the 36 background-daemon gates now continue on *fetch failure* (`SKIP_AUTH=1`, `EXPIRED_DATE` treated as lifetime, unlicensed tag in logs) while an *unlisted/expired* machine still exits exactly as before; interactive menus, add/extend/delete and installer gates stay fail-closed. Both zips refreshed.
 - **Verified live:** blackout test — menu/add/extend blocked, `xp` reaped an expired account (exit 0, audit line, valid config), live tunnel traffic clean throughout, quota units still active, box green after unblock.
+### Fix 360 - Rainbow separators render dashes (Found 361)
+
+- **Fix 360 (Found 361):** all rainbow inputs changed from 35 `=` to 35 `-` (same length, layout and centering preserved); plain card borders, purple dividers and code comments untouched. Both zips refreshed.
+- **Verified:** rendered output contains 0 `=`; `bash -n` clean on all touched scripts; `gofmt` deltas pre-existing only.

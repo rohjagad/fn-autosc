@@ -110,11 +110,11 @@ usernames=($(grep "^### " /etc/xray/json/ws.json | awk '{print $2}' | sort | uni
 
 # Clear screen and display header
 clear
-echo -e "${CYAN}========================================="
+echo -e "${CYAN}-----------------------------------======"
 echo -e "${GREEN}          Change UUID X-ray Ws"
-echo -e "${CYAN}========================================="
+echo -e "${CYAN}-----------------------------------======"
 echo -e "${YELLOW} Username      |       UUID"
-echo -e "${CYAN}========================================="
+echo -e "${CYAN}-----------------------------------======"
 
 # Display usernames and UUIDs
 for user in "${usernames[@]}"; do
@@ -122,9 +122,9 @@ for user in "${usernames[@]}"; do
     echo -e "${GREEN} $user      |       $uid"
 done
 
-echo -e "${CYAN}========================================="
+echo -e "${CYAN}-----------------------------------======"
 echo -e "${RED} Press CTRL + C to exit"
-echo -e "${CYAN}=========================================${NC}"
+echo -e "${CYAN}-----------------------------------======${NC}"
 
 # Prompt user input for username and validate
 while true; do
@@ -190,10 +190,10 @@ send_log
 
 clear
 # Confirmation message with updated information
-echo -e "${CYAN}========================================="
+echo -e "${CYAN}-----------------------------------======"
 echo -e "${GREEN} UUID Update Successful!"
-echo -e "${CYAN}========================================="
+echo -e "${CYAN}-----------------------------------======"
 echo -e "${YELLOW} Username      |       New UUID"
-echo -e "${CYAN}========================================="
+echo -e "${CYAN}-----------------------------------======"
 echo -e "${GREEN} $user      |       $new"
-echo -e "${CYAN}=========================================${NC}"
+echo -e "${CYAN}-----------------------------------======${NC}"

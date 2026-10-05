@@ -1810,3 +1810,13 @@ Section 35's four-check rule applied to Fix 359:
 | **Over-strictness** | Only fetch-failure continues; unlisted/expired still refused. |
 | **Over-engineering** | 3 one-line edits per daemon file; no cache, no new dependency. |
 | **vs the source** | References have no daemon/outage distinction; split follows the operator's menu-vs-background rule. |
+## 144. Rainbow Dash Separators — Four Checks (October 5, 2026)
+
+Section 35's four-check rule applied to Fix 360:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Same lengths, same call sites, same colors — only the repeated character changed; parsers key on content, not separators. |
+| **Over-strictness** | Nothing rejected; display-only change. |
+| **Over-engineering** | One-character-class swap across call sites. |
+| **vs the source** | References use `=` rainbows; dash form is this repo's own direction per operator request. |

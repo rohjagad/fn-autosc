@@ -51,7 +51,7 @@ func rainbowSep(text string) string {
 }
 
 func formatLogForTerminal(raw string) string {
-	outerSep := rainbowSep("===================================")
+	outerSep := rainbowSep("-----------------------------------")
 	blueSep := colorBlue + "-----------------------------------" + colorReset
 
 	lines := strings.Split(strings.TrimSpace(raw), "\n")
@@ -120,7 +120,7 @@ func main() {
 		}
 	}
 
-	outerSep := rainbowSep("===================================")
+	outerSep := rainbowSep("-----------------------------------")
 	blueSep := colorBlue + "-----------------------------------" + colorReset
 
 	clearScreen()

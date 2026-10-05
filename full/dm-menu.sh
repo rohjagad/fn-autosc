@@ -85,7 +85,7 @@ orange='\033[38;5;208m'
 NC='\033[0m'
 
 rainbow_sep() {
-  local text="${1:-===================================}"
+  local text="${1:------------------------------------}"
   local output=''
   local i segment fraction r g b color
   local -a red=(255 255 0 0 0 255 255)
@@ -108,7 +108,7 @@ rainbow_sep() {
   printf '%b\n' "${output}${NC}"
 }
 
-separator=$(rainbow_sep '===================================')
+separator=$(rainbow_sep '-----------------------------------')
 blue_sep="${blue}-----------------------------------${NC}"
 
 acme() {
@@ -281,7 +281,7 @@ dm() {
         curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$log_message" $URL >/dev/null
     fi
 
-    echo -e "\e[33m===================================\033[0m"
+    echo -e "\e[33m-----------------------------------\033[0m"
     echo -e "Current Domain:"
     echo -e "$(cat /etc/xray/domain)"
     echo ""
@@ -306,7 +306,7 @@ dm() {
         curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$log_message" $URL >/dev/null
     fi
 
-        echo -e "\e[33m===================================\033[0m"
+        echo -e "\e[33m-----------------------------------\033[0m"
         read -n 1 -s -r -p "Press any key to return..." || true
         return 0
     elif ! [[ "$host" =~ ^([[:alnum:]]([[:alnum:]-]{0,61}[[:alnum:]])?\.)+[[:alpha:]]{2,63}$ ]]; then
@@ -370,9 +370,9 @@ dm() {
     fi
 
         if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
-            echo -e "\e[33m===================================\033[0m"
+            echo -e "\e[33m-----------------------------------\033[0m"
             echo "Notification sent to Telegram."
-            echo -e "\e[33m===================================\033[0m"
+            echo -e "\e[33m-----------------------------------\033[0m"
         fi
         read -n 1 -s -r -p "Press any key to return..." || true
         return 0
