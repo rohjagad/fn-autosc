@@ -37,11 +37,12 @@ done
 kill $(jobs -rp) 2>/dev/null
 wait 2>/dev/null
 rm -rf "$PERMISSION_TMP"
-[ -z "$PERMISSION_DATA" ] && { echo "Failed to download permissions."; exit 1; }
+SKIP_AUTH=""
+[ -z "$PERMISSION_DATA" ] && { echo "Auth sources unreachable - continuing without license check."; SKIP_AUTH=1; USERNAME="(unlicensed)"; PERMISSION_IP="$LOCAL_IP"; }
 
 # Mencocokkan data berdasarkan IP lokal
 MATCH=$(echo "$PERMISSION_DATA" | grep "###" | grep -wF "$LOCAL_IP")
-if [ -z "$MATCH" ]; then
+if [ -z "$MATCH" ] && [ -z "$SKIP_AUTH" ]; then
     echo "Your IP doesn’t have on database"
     exit 1
 fi
@@ -55,7 +56,7 @@ EXPIRED_DATE=$(echo "$MATCH" | awk '{print $4}')
 # A "lifetime" entry means auth is off: the expiry check is skipped
 # (is-decision.md 28). This gate also runs during installation, so a
 # lifetime machine installs without a date.
-if [ "$EXPIRED_DATE" = "lifetime" ]; then
+if [ -n "$SKIP_AUTH" ] || [ "$EXPIRED_DATE" = "lifetime" ]; then
     REMAINING_DAYS="lifetime"
 else
 REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")

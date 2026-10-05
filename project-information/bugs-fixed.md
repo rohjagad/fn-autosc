@@ -2565,3 +2565,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 358 (Found 359):** all 192 gates (`full/`, `lite/`, `installer/`) plus `menu-api` (fn-autosc-api) now fetch Pages + GitHub at once and take the first *complete* reply containing `###` (`.done` markers prevent truncated reads; fast error pages are skipped, not trusted); 15s overall bound, fail-closed when both fail. Both zips refreshed.
 - **Verified:** 4-scenario mock matrix (fast/slow good, fast-bad + slow-good, both bad, both down) all correct; live race takes ~1s with 7 entries and no temp leftovers; gate green on the VPS.
+### Fix 359 - Daemons enforce through auth outages (Found 360)
+
+- **Fix 359 (Found 360):** the 36 background-daemon gates now continue on *fetch failure* (`SKIP_AUTH=1`, `EXPIRED_DATE` treated as lifetime, unlicensed tag in logs) while an *unlisted/expired* machine still exits exactly as before; interactive menus, add/extend/delete and installer gates stay fail-closed. Both zips refreshed.
+- **Verified live:** blackout test — menu/add/extend blocked, `xp` reaped an expired account (exit 0, audit line, valid config), live tunnel traffic clean throughout, quota units still active, box green after unblock.

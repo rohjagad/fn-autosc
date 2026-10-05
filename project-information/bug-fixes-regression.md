@@ -1800,3 +1800,13 @@ Section 35's four-check rule applied to Fix 358:
 | **Over-strictness** | Nothing newly rejected; an error page that the old code *trusted* (exit 0, no match, fail) is now skipped in favour of good data. |
 | **Over-engineering** | One inline block replacing one line per file; no new dependency (`mktemp`, `curl`, `jobs` — all already used). |
 | **vs the source** | References fetch once with no fallback at all; the race keeps this repo's redundancy direction and hardens it. |
+## 143. Daemon Blackout Enforcement — Four Checks (October 5, 2026)
+
+Section 35's four-check rule applied to Fix 359:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Licensed path byte-identical (3 one-line conditions added, no logic moved); negative-auth exits preserved. |
+| **Over-strictness** | Only fetch-failure continues; unlisted/expired still refused. |
+| **Over-engineering** | 3 one-line edits per daemon file; no cache, no new dependency. |
+| **vs the source** | References have no daemon/outage distinction; split follows the operator's menu-vs-background rule. |

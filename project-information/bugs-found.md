@@ -2217,3 +2217,5 @@ Found 358. **Restyled list chooser printed a blank line instead of the top rainb
 the `RSEP=` definition landed after its first use (behind the `accsess.log` truncation line), so the header's opening separator rendered empty in all 8 `list-xray-*.sh`.
 Found 359. **Auth gate fetches sequentially and trusts error pages** —
 all 192 gates ran `curl primary || curl fallback`, which waits out the primary's full timeout before trying the backup — and worse, never tries the backup on an HTTP error page at all, because `curl -s` exits 0. Measured live: Pages once took 5.3s while GitHub took 0.6s in the same minute.
+Found 360. **Background daemons stopped enforcing during auth outages** —
+follow-up to the blackout rule: `xp`/`limit-ip-*`/`quota-*`/`kill-*`/`auto-delete-*`/`expire-ssh` (36 files) exited on fetch failure, so expiry/quota/IP enforcement paused whenever both auth sources were unreachable.
