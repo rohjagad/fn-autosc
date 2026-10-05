@@ -2553,3 +2553,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 355 (Found 356):** all 8 `list-xray-*.sh` now print a numbered list + Total, accept number or name, and show that one account's block (same fields, locked/unlocked branches kept); empty database prints a clean message; out-of-range/unknown input prints `User not found`. Also fixed the `list-xray-http.sh` title to "Member XTLS HTTP Upgrade Account". Both zips entry-refreshed.
 - **Verified live:** 2-account box lists + Total; pick-by-number and pick-by-name show the right card with UUID; bad name and `9` both rejected cleanly; API `list-xray` unaffected (reads JSON directly).
+### Fix 356 - List chooser styled like Check Database Logs (Found 357)
+
+- **Fix 356 (Found 357):** all 8 `list-xray-*.sh` now render rainbow separators, centered `XTLS <T> ACCOUNT LIST` headers, blue-rule/Total/blue-rule + orange exit line, and the plain `Input Username:` prompt — same visual shape as option 10. Card separators match. Both zips entry-refreshed.
+- **Verified live:** stripped-color render shows identical structure to the database tool; pick-by-number still resolves correctly.

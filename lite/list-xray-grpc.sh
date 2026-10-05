@@ -80,17 +80,18 @@ function bytes() {
 }
 
 clear
-echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-echo -e "=[ Member XTLS gRPC Account ]=         "
-echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+echo -e "$RSEP"
+echo -e "      XTLS gRPC ACCOUNT LIST"
+echo -e "$RSEP"
 > /var/log/xray/accsess.log
+RSEP='\033[38;2;255;0;0m=\033[38;2;255;45;0m=\033[38;2;255;90;0m=\033[38;2;255;135;0m=\033[38;2;255;180;0m=\033[38;2;255;225;0m=\033[38;2;240;255;0m=\033[38;2;195;255;0m=\033[38;2;150;255;0m=\033[38;2;105;255;0m=\033[38;2;60;255;0m=\033[38;2;15;255;0m=\033[38;2;0;255;30m=\033[38;2;0;255;75m=\033[38;2;0;255;120m=\033[38;2;0;255;165m=\033[38;2;0;255;210m=\033[38;2;0;255;255m=\033[38;2;0;210;255m=\033[38;2;0;165;255m=\033[38;2;0;120;255m=\033[38;2;0;75;255m=\033[38;2;0;30;255m=\033[38;2;15;0;255m=\033[38;2;60;0;255m=\033[38;2;105;0;255m=\033[38;2;150;0;255m=\033[38;2;195;0;255m=\033[38;2;240;0;255m=\033[38;2;255;0;225m=\033[38;2;255;0;180m=\033[38;2;255;0;135m=\033[38;2;255;0;90m=\033[38;2;255;0;45m=\033[38;2;255;0;0m=\033[0m'
 
 # Numbered user list, like Check Database Logs (option 10)
 data=( $(ls /var/log/create/xray/grpc/ | sed -E 's/\.(locked|log)$//' | sort -u) )
 
 if [ ${#data[@]} -eq 0 ]; then
     echo -e "No active accounts found."
-    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e "$RSEP"
     exit 0
 fi
 
@@ -99,9 +100,11 @@ for u in "${data[@]}"; do
     printf "\e[32;1m%02d\e[0m. %s\n" "$i" "$u"
     i=$((i+1))
 done
-echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+echo -e "\033[1;34m-----------------------------------\033[0m"
 echo -e "Total Accounts: ${#data[@]}"
-echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+echo -e "\033[1;34m-----------------------------------\033[0m"
+echo -e "\033[38;5;208mPress [Ctrl + C] to exit\033[0m"
+echo -e "$RSEP"
 read -p "Input Username: " input || exit 0
 
 # A number picks from the list, a name is used as-is
@@ -125,7 +128,7 @@ fi
 if [[ "$status" == "locked" ]]; then
     echo -e "\e[33;1mUser\e[32;1m: $user"
     echo -e "\e[33;1mStatus Account X-Ray\e[32;1m: $status"
-    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e "$RSEP"
 fi
 
 if [[ "$status" == "unlocked" ]]; then
@@ -142,5 +145,5 @@ if [[ "$status" == "unlocked" ]]; then
     echo -e "\e[33;1mUUID / Password\e[32;1m: $uid"
     echo -e "\e[33;1mProtocol Account\e[32;1m: $protokol"
     echo -e "\e[33;1mStatus Account X-Ray\e[32;1m: $status"
-    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e "$RSEP"
 fi

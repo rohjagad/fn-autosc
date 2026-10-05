@@ -1770,3 +1770,13 @@ Section 35's four-check rule applied to Fix 355:
 | **Over-strictness** | Nothing rejected that worked before; number input is additive (names still accepted). |
 | **Over-engineering** | Same chooser shape as the existing database-log tool; dump loop + counter file removed. |
 | **vs the source** | References dump-all the same way; chooser follows this repo's own option-10 UX instead. |
+## 140. List-Chooser Database Styling — Four Checks (October 5, 2026)
+
+Section 35's four-check rule applied to Fix 356:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Same chooser flow and fields as Fix 355; only separator/header/prompt cosmetics changed to the option-10 shape. |
+| **Over-strictness** | Nothing rejected; display-only change. |
+| **Over-engineering** | One rainbow constant + header/total-block restyle per file. |
+| **vs the source** | References have no chooser at all; style follows this repo's own database-log tool. |

@@ -2211,3 +2211,5 @@ Found 355. **Main-menu short labels still say `HTTP UP`/`HTTP` for the HTTP-upgr
 after Fix 353 restored the count, the labels themselves remained inconsistent with the `WS`/`XHTTP`/`gRPC` short style used everywhere else (`XTLS HTTP UP :`, `HTTP:`, plus `HTTP :` in `menu-x`/lite and lite's `HTTP Upgrade (HTTP)` option tag).
 Found 356. **"List All Accounts" dumps every card at once — unreadable with many users** —
 the four `list-xray-*.sh` (both editions) looped all accounts printing a full block each, while the sibling "Check Database Logs" (option 10) already had the neat numbered-chooser UX (`01. user` + Total + number-or-name prompt showing one card). Same TUI sweep also caught a copy-paste title: `list-xray-http.sh` headed itself "Member XTLS WebSocket Account".
+Found 357. **List-account chooser (Fix 355) does not look like Check Database Logs** —
+follow-up styling: the new chooser kept the old blue `━━━` separators and `=[ Member ... ]=` header while option 10 uses rainbow `===` separators, centered `XTLS <T> DATABASE`-style headers, blue rules around Total and the orange exit line.
