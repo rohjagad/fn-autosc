@@ -1760,3 +1760,13 @@ Section 35's four-check rule applied to Fix 354:
 | **Over-strictness** | Nothing rejected; display-only change. |
 | **Over-engineering** | 5 label swaps across 3 files. |
 | **vs the source** | References use longer `HTTP UPGRADE` wording; short `HU` matches this repo's own `WS`/`XHTTP`/`gRPC` menu style. |
+## 139. List-Account Chooser — Four Checks (October 5, 2026)
+
+Section 35's four-check rule applied to Fix 355:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Per-account fields byte-identical to the old loop body (locked/unlocked branches kept); one-shot flow matches option 10, which the submenu already pauses-and-returns from. |
+| **Over-strictness** | Nothing rejected that worked before; number input is additive (names still accepted). |
+| **Over-engineering** | Same chooser shape as the existing database-log tool; dump loop + counter file removed. |
+| **vs the source** | References dump-all the same way; chooser follows this repo's own option-10 UX instead. |

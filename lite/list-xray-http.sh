@@ -81,59 +81,66 @@ function bytes() {
 
 clear
 echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-echo -e "=[ Member XTLS WebSocket Account ]=         "
+echo -e "=[ Member XTLS HTTP Upgrade Account ]=         "
 echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
 > /var/log/xray/accsess.log
-> /root/.system
 
-# Mendapatkan daftar username tanpa duplikasi dan hanya memperhitungkan status
+# Numbered user list, like Check Database Logs (option 10)
 data=( $(ls /var/log/create/xray/http/ | sed -E 's/\.(locked|log)$//' | sort -u) )
 
-# Mengecek setiap user
-for user in "${data[@]}"
-do
-    # Mengecek status berdasarkan ekstensi file
-    if [[ -f /var/log/create/xray/http/${user}.locked ]]; then
-        status="locked"
-    elif [[ -f /var/log/create/xray/http/${user}.log ]]; then
-        status="unlocked"
-    else
-        status="unknown"
-    fi
+if [ ${#data[@]} -eq 0 ]; then
+    echo -e "No active accounts found."
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    exit 0
+fi
 
-    # Menampilkan informasi untuk status locked
-    if [[ "$status" == "locked" ]]; then
-        echo -e "\e[33;1mUser\e[32;1m: $user"
-        echo -e "\e[33;1mStatus Account X-Ray\e[32;1m: $status"
-        echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-        echo "FN AutoSC" >> /root/.system
-    fi
-
-    # Menampilkan informasi untuk status unlocked (hanya jika status unlocked)
-    if [[ "$status" == "unlocked" ]]; then
-        limip=$(grep "Limit IP:" /var/log/create/xray/http/${user}.log | awk '{print $3}')
-        top=$(cat /etc/xray/quota/http/${user} 2>/dev/null || echo 0)
-        quota=$(bytes "$top")
-        uid=$(grep -F "\"email\": \"${user}\"" /etc/xray/json/upgrade.json | sed -nE 's/.*"(id|password)": "([^"]+)".*/\2/p' | sort -u | head -1)
-        protokol=$(grep "Protokol:" /var/log/create/xray/http/${user}.log | awk '{print $2}')
-        exp=$(grep "Expired" /var/log/create/xray/http/${user}.log | awk '{print $3}')
-        
-        # Menampilkan informasi akun unlocked
-        echo -e "\e[33;1mUser\e[32;1m: $user"
-        echo -e "\e[33;1mExpired\e[32;1m: $exp"
-        echo -e "\e[33;1mLimit IP\e[32;1m: $limip"
-        echo -e "\e[33;1mLimit Quota\e[32;1m: $quota"
-        echo -e "\e[33;1mUUID / Password\e[32;1m: $uid"
-        echo -e "\e[33;1mProtocol Account\e[32;1m: $protokol"
-        echo -e "\e[33;1mStatus Account X-Ray\e[32;1m: $status"
-        echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-        echo "FN AutoSC" >> /root/.system
-    fi
-    sleep 0.1
+i=1
+for u in "${data[@]}"; do
+    printf "\e[32;1m%02d\e[0m. %s\n" "$i" "$u"
+    i=$((i+1))
 done
-
-# Menampilkan jumlah pengguna aktif
-aktif=$(wc -l < /root/.system)
-echo -e "$aktif Member Active"
 echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-> /root/.system
+echo -e "Total Accounts: ${#data[@]}"
+echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+read -p "Input Username: " input || exit 0
+
+# A number picks from the list, a name is used as-is
+user="$input"
+if [[ "$input" =~ ^[0-9]+$ ]]; then
+    n=$((10#$input))
+    if [ "$n" -ge 1 ] && [ "$n" -le "${#data[@]}" ]; then
+        user="${data[$((n-1))]}"
+    fi
+fi
+
+if [[ -f /var/log/create/xray/http/${user}.locked ]]; then
+    status="locked"
+elif [[ -f /var/log/create/xray/http/${user}.log ]]; then
+    status="unlocked"
+else
+    echo -e "\e[31;1mUser not found: $input\e[0m"
+    exit 0
+fi
+
+if [[ "$status" == "locked" ]]; then
+    echo -e "\e[33;1mUser\e[32;1m: $user"
+    echo -e "\e[33;1mStatus Account X-Ray\e[32;1m: $status"
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+fi
+
+if [[ "$status" == "unlocked" ]]; then
+    limip=$(grep "Limit IP:" /var/log/create/xray/http/${user}.log | awk '{print $3}')
+    top=$(cat /etc/xray/quota/http/$user 2>/dev/null || echo 0)
+    quota=$(bytes "$top")
+    uid=$(grep -F "\"email\": \"${user}\"" /etc/xray/json/upgrade.json | sed -nE 's/.*"(id|password)": "([^"]+)".*/\2/p' | sort -u | head -1)
+    protokol=$(grep "Protokol:" /var/log/create/xray/http/${user}.log | awk '{print $2}')
+    exp=$(grep "Expired" /var/log/create/xray/http/${user}.log | awk '{print $3}')
+    echo -e "\e[33;1mUser\e[32;1m: $user"
+    echo -e "\e[33;1mExpired\e[32;1m: $exp"
+    echo -e "\e[33;1mLimit IP\e[32;1m: $limip"
+    echo -e "\e[33;1mLimit Quota\e[32;1m: $quota"
+    echo -e "\e[33;1mUUID / Password\e[32;1m: $uid"
+    echo -e "\e[33;1mProtocol Account\e[32;1m: $protokol"
+    echo -e "\e[33;1mStatus Account X-Ray\e[32;1m: $status"
+    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+fi

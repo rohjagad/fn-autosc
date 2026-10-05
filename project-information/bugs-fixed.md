@@ -2549,3 +2549,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 354 (Found 355):** `XTLS HTTP UP` → `XTLS HU` and `HTTP:` → `HU:` in `full/menu.sh` (colon alignment kept); `HTTP :` → `HU :` in `full/menu-x.sh` and `lite/menu.sh`; lite option tag `(HTTP)` → `(HU)`. Full transport names on cards/options untouched. Both zips entry-refreshed (2-byte deltas each).
 - **Verified:** `bash -n` clean ×3; no `HTTP UP`/`HTTP: $` menu labels remain.
+### Fix 355 - List accounts gets the numbered chooser (Found 356)
+
+- **Fix 355 (Found 356):** all 8 `list-xray-*.sh` now print a numbered list + Total, accept number or name, and show that one account's block (same fields, locked/unlocked branches kept); empty database prints a clean message; out-of-range/unknown input prints `User not found`. Also fixed the `list-xray-http.sh` title to "Member XTLS HTTP Upgrade Account". Both zips entry-refreshed.
+- **Verified live:** 2-account box lists + Total; pick-by-number and pick-by-name show the right card with UUID; bad name and `9` both rejected cleanly; API `list-xray` unaffected (reads JSON directly).
