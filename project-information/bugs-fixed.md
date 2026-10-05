@@ -2557,3 +2557,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 356 (Found 357):** all 8 `list-xray-*.sh` now render rainbow separators, centered `XTLS <T> ACCOUNT LIST` headers, blue-rule/Total/blue-rule + orange exit line, and the plain `Input Username:` prompt — same visual shape as option 10. Card separators match. Both zips entry-refreshed.
 - **Verified live:** stripped-color render shows identical structure to the database tool; pick-by-number still resolves correctly.
+### Fix 357 - RSEP defined before first use (Found 358)
+
+- **Fix 357 (Found 358):** moved the `RSEP='...'` definition above the header block in all 8 `list-xray-*.sh`. Both zips entry-refreshed.
+- **Verified live:** title area renders rainbow/title/rainbow with no blank line; pick-by-number still resolves.

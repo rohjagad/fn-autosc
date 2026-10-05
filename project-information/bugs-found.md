@@ -2213,3 +2213,5 @@ Found 356. **"List All Accounts" dumps every card at once — unreadable with ma
 the four `list-xray-*.sh` (both editions) looped all accounts printing a full block each, while the sibling "Check Database Logs" (option 10) already had the neat numbered-chooser UX (`01. user` + Total + number-or-name prompt showing one card). Same TUI sweep also caught a copy-paste title: `list-xray-http.sh` headed itself "Member XTLS WebSocket Account".
 Found 357. **List-account chooser (Fix 355) does not look like Check Database Logs** —
 follow-up styling: the new chooser kept the old blue `━━━` separators and `=[ Member ... ]=` header while option 10 uses rainbow `===` separators, centered `XTLS <T> DATABASE`-style headers, blue rules around Total and the orange exit line.
+Found 358. **Restyled list chooser printed a blank line instead of the top rainbow** —
+the `RSEP=` definition landed after its first use (behind the `accsess.log` truncation line), so the header's opening separator rendered empty in all 8 `list-xray-*.sh`.

@@ -1780,3 +1780,13 @@ Section 35's four-check rule applied to Fix 356:
 | **Over-strictness** | Nothing rejected; display-only change. |
 | **Over-engineering** | One rainbow constant + header/total-block restyle per file. |
 | **vs the source** | References have no chooser at all; style follows this repo's own database-log tool. |
+## 141. List-Chooser RSEP Order — Four Checks (October 5, 2026)
+
+Section 35's four-check rule applied to Fix 357:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Same output lines, only definition order changed; verified live render. |
+| **Over-strictness** | Nothing rejected; display-only change. |
+| **Over-engineering** | One line moved per file. |
+| **vs the source** | N/A (own new code, not from a reference). |
