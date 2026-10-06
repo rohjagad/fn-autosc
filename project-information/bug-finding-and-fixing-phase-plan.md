@@ -16,9 +16,9 @@ Setiap langkah dalam seluruh fase **WAJIB** membaca dan mengacu pada 9 sumber re
 | 4 | **Bug Fixes Regression** | `project-information/bug-fixes-regression.md` | Rekam evaluasi 4-Check Rule (Regression, Over-Strictness, Over-Engineering, Source Alignment). Setiap perubahan baru wajib lulus 4 kriteria ini. Cek nomor Section tertinggi — tiap Fix wajib punya Section-nya. |
 | 5 | **Bugs Found** | `project-information/bugs-found.md` | Rekam jejak temuan bug historis (append-only; cek nomor Found tertinggi via `grep -o '^Found [0-9]*'`). Memastikan akar penyebab terdokumentasi akurat sebelum patch diterapkan. Tiap Found wajib punya Fix atau catatan deferral eksplisit. |
 | 6 | **FN-API Specification** | `project-information/fn-api.md` | Kontrak spesifikasi headless REST API, arsitektur handler `/usr/bin/rere`, penanganan single path segment, otentikasi token `/etc/xray/.key`, dan serializing lock. |
-| 7 | **Architectural Decisions** | `project-information/is-decision.md` | Daftar 28 keputusan desain arsitektural yang disengaja (bukan bug). Wajib dibaca agar tidak "memperbaiki" perilaku yang sengaja dirancang demikian (contoh: Xray 25.3.6 pin, Dropbear 2019.78 pin, auth lifetime vs date, penolakan angka 0, penghapusan total pada kuota habis). |
+| 7 | **Architectural Decisions** | `project-information/is-decision.md` | Daftar 30 keputusan desain arsitektural yang disengaja (bukan bug). Wajib dibaca agar tidak "memperbaiki" perilaku yang sengaja dirancang demikian (contoh: Xray 25.3.6 pin, Dropbear 2019.78 pin, auth lifetime vs date, penolakan angka 0, penghapusan total pada kuota habis, kapan race otorisasi menang, rename split→xhttp). |
 | 8 | **Live Testing Plan** | `project-information/live-testing-phase-plan.md` | Fase verifikasi live per area. Finding yang butuh pembuktian VPS dicatat untuk fase live-nya; klaim "verified live" di `bugs-fixed.md` wajib punya langkah yang sesuai di sini. |
-| 9 | **README** | `README.md` (repo ini) | Tabel port/layanan, caveat yang didokumentasikan (mis. SNAT lebar), dan urutan install. Caveat yang diklaim "terdokumentasi" wajib benar ada di sini; tabel wajib cocok dengan kode. |
+| 9 | **README** | `README.md` (repo ini) | Tabel port/layanan, tabel Transport Paths + alias warna (36 lokasi nginx), bagian rotasi domain, caveat yang didokumentasikan (mis. SNAT lebar), dan urutan install. Caveat yang diklaim "terdokumentasi" wajib benar ada di sini; tabel wajib cocok dengan kode. |
 
 ---
 
@@ -33,10 +33,10 @@ Setiap langkah dalam seluruh fase **WAJIB** membaca dan mengacu pada 9 sumber re
    - Karakter khusus & spasi (`" "`, `"user name"`, metakarakter regex/shell).
    - Nilai angka `0`, bilangan negatif, atau desimal pada field kuota/durasi.
    - Nama akun atau target yang tidak eksis di konfigurasi/database.
-4. **Verifikasi Terhadap `is-decision.md`:** Memastikan perilaku anomali yang ditemukan bukan salah satu dari 28 keputusan arsitektur resmi sebelum menandainya sebagai bug.
+4. **Verifikasi Terhadap `is-decision.md`:** Memastikan perilaku anomali yang ditemukan bukan salah satu dari 30 keputusan arsitektur resmi sebelum menandainya sebagai bug. Temuan yang ternyata direktif operator (bukan cacat) tetap dicatat sebagai Found bertanda `operator request/direction` — ia bukan bug, tetapi tetap wajib Fix + Section + verifikasi yang sama sebelum dianggap selesai.
 5. **Audit Dokumen Project-Information:** setiap fase wajib memeriksa seluruh berkas di `project-information/` (plus `README.md`) untuk klaim dalam cakupannya — drift dokumen-vs-kode, kontradiksi dokumen-vs-dokumen, dan verifikasi yang tidak mungkin membuktikan klaimnya (pola false-positive Found 96/98: pola grep yang tak bisa cocok, probe yang lolos dalam keadaan sehat maupun rusak). Dok non-append-only dikoreksi di tempat; riwayat append-only dipertahankan, koreksi dicatat sebagai Found/Fix baru.
 6. **Audit Riwayat Commit:** `git log -p -- <berkas-sentuh>` untuk berkas dalam cakupan — pastikan fix terdahulu benar melakukan klaim commit-nya, deteksi revert/regresi diam-diam, dan mismatch pesan-vs-diff.
-7. **Konsistensi Nomor Antar-Berkas Append-Only:** berkas append-only tidak bisa dikoreksi, jadi nomornya disilang-periksa via grep, bukan dibaca dari angka statis di dokumen: nomor Found tertinggi (`bugs-found.md`) vs nomor Fix tertinggi (`bugs-fixed.md`) vs nomor Section regresi (`bug-fixes-regression.md`) wajib selaras di ujungnya (tolak regresi: Section terbaru menutup Fix terbaru). Untuk Fix **baru** berlaku 1 Found → 1 Fix → 1 Section tanpa nomor ganda/lompat; riwayat lama dikecualikan dari keketatan 1:1 karena pernah dikelompokkan (mis. satu entri "Fix 258-261") — dari riwayat hanya diperiksa duplikat nomor. Angka statis ("s.d. 309") di dokumen mana pun adalah drift bila max grep lebih besar.
+7. **Konsistensi Nomor Antar-Berkas Append-Only:** berkas append-only tidak bisa dikoreksi, jadi nomornya disilang-periksa via grep, bukan dibaca dari angka statis di dokumen: nomor Found tertinggi (`bugs-found.md`) vs nomor Fix tertinggi (`bugs-fixed.md`) vs nomor Section regresi (`bug-fixes-regression.md`) wajib selaras di ujungnya (tolak regresi: Section terbaru menutup Fix terbaru). Untuk Fix **baru** berlaku 1 Found → 1 Fix → 1 Section tanpa nomor ganda/lompat; riwayat lama dikecualikan dari keketatan 1:1 karena pernah dikelompokkan (mis. satu entri "Fix 258-261") — dari riwayat hanya diperiksa duplikat nomor. Fix lanjutan (follow-up) boleh berbagi nomor Found asalkan dicatat eksplisit `follow-up` dengan Section sendiri (contoh Fix 371→Found 375). Angka statis ("s.d. 309") di dokumen mana pun adalah drift bila max grep lebih besar. Tips saat ini: Found 379 / Fix 375 / Section 159 — Section berjalan dengan offset tetap terhadap Fix di era baru, yang diwajibkan adalah Section terbaru menutup Fix terbaru.
 
 ### 2.2 Metodologi Fixing (Perbaikan Bug)
 1. **Shortest Working Diff Wins:** Terapkan perubahan paling minimal yang menyelesaikan masalah secara tepat. Hindari abstraksi berlebih, wrapper yang tidak perlu, atau dependency tambahan.
@@ -56,10 +56,10 @@ Setiap langkah dalam seluruh fase **WAJIB** membaca dan mengacu pada 9 sumber re
 
 ---
 
-## 3. Struktur 24 Fase Bug-Finding & Fixing
+## 3. Struktur 27 Fase Bug-Finding & Fixing
 
 ```
-Fase 1: Keamanan Izin Berkas & Kriptografi
+Fase 1: Keamanan Izin Berkas
    │
 Fase 2: Konfigurasi Kernel Sysctl & Routing Jaringan
    │
@@ -106,11 +106,17 @@ Fase 22: Penguncian Lintas-Daemon pada File Bersama
 Fase 23: Drift Template ↔ Terinstal ↔ Kartu Akun
    │
 Fase 24: Penanganan Error di Tool Go
+   │
+Fase 25: Alias Path Warna & Rotasi Link (36 lokasi)
+   │
+Fase 26: Rotasi Multi-Domain & Inventaris Per-Domain
+   │
+Fase 27: Review Kriptografi Final (setelah semua perubahan)
 ```
 
 ---
 
-### Fase 1: Keamanan Izin Berkas & Kriptografi
+### Fase 1: Keamanan Izin Berkas
 
 - **Komponen Target:** `installer/diamond.sh`, `full/dm-menu.sh`, `lite/dm-menu.sh`, `full/bmenu.sh`, `lite/bmenu.sh`, seluruh skrip `restore-ftp.sh`, direktori `/etc/xray/`, `/etc/haproxy/`, `/etc/funny/`.
 - **Finding (Metodologi Penemuan):**
@@ -118,6 +124,7 @@ Fase 24: Penanganan Error di Tool Go
   - Verifikasi apakah ada jalur instalasi atau restore yang masih menerapkan izin global `0644` pada kunci privat.
   - Periksa kepemilikan user:group pada berkas kunci web-restore (`/etc/funny/.restore.key`) apakah terbuka ke pengguna publik selain `root:www-data`.
   - Bandingkan dengan V23 dan 1.20 (keduanya memakai `0644` yang tidak aman) dan pastikan divergensi keamanan Fix 305 konsisten di semua skrip.
+  - Catatan urutan: verifikasi ISI kriptografi (SAN sertifikat, expiry, cipher/TLS, integritas kunci pasca-perubahan) TIDAK dilakukan di sini melainkan di Fase 27 paling akhir — fase-fase di antaranya memutasi jalur kode cert/key (penerbitan, rotasi domain, restore), sehingga audit kripto yang dikerjakan duluan akan basi.
 - **Fixing (Standar Perbaikan):**
   - Terapkan `chmod 600 /etc/xray/xray.key /etc/haproxy/funny.pem` pada semua alur penerbitan ACME, sertifikat self-signed, dan ekstraksi backup/restore.
   - Setel sertifikat publik `/etc/xray/xray.crt` ke `0644`.
@@ -207,11 +214,13 @@ Fase 24: Penanganan Error di Tool Go
   - Uji masukan angka `0`: pastikan ditolak di semua field kuantitas per Decision 4.
   - Uji pembuatan duplikat: periksa apakah nama yang sudah ada ditolak sebelum file konfigurasi dimodifikasi.
   - Uji display terminal: verifikasi apakah kartu akun langsung terhapus akibat tiadanya jeda baca di `format_display` (Found 288).
+  - Uji pengungkungan SSH: flag `useradd` tepat (`-s /bin/false -M`); `ssh <user>@host id` keluar non-nol tanpa eksekusi; `sftp`/`scp` gagal; forwarding `-L` tetap jalan (produk), `-R`/`-D` ikut diizinkan oleh desain; `PermitTunnel` tetap `no`.
 - **Fixing (Standar Perbaikan):**
   - Terapkan loop validasi `while [ -z "$password" ]` pada pembuatan akun SSH.
   - Terapkan validasi `^[1-9][0-9]*$` dengan pemberitahuan tunggal `\033[38;5;208m0 not allowed\033[0m`.
   - Tambahkan pengecekan duplikasi awal via `grep -w "^### $user"`.
   - Tambahkan jeda baca kartu akun (`read -n 1 -s -r -p "Press any key to return..."`) sebelum skrip pembuat keluar ke menu pemanggil.
+  - Kungkung akun SSH VPN (Decision 7 — akun adalah kredensial forwarding, bukan user sistem): pertahankan flag `useradd` tepat `-e … -s /bin/false -M` (addssh) / `-s /bin/false -M` (trial); `/bin/false` + `nologin` tetap terdaftar di `/etc/shells` (kompatibilitas Dropbear) tanpa memberi shell betulan; set eksplisit `X11Forwarding no` + `AllowAgentForwarding no` (idempoten, reload sshd); `AllowTcpForwarding yes` WAJIB dipertahankan (produknya memang forwarding); `PermitTunnel` wajib tetap `no`; tanpa blok `Match`/`ForceCommand` yang mematahkan forwarding; tidak ada referensi `$HOME`/home untuk akun ini di kode panel.
 
 ---
 
@@ -257,6 +266,7 @@ Fase 24: Penanganan Error di Tool Go
   - Tambahkan opsi `${green}0${NC}. Back to Main Menu` dan penanganan `0|00) clear ; menu ;;` pada semua dispatcher yang kehilangan opsi 0.
   - Panggil ulang fungsi submenu (misal: `xws`, `xhttp`, `xxhttp`, `xgrpc`, `menu-ssh`) di setiap akhir eksekusi case aksi.
   - Pertahankan display versi pada submenunya dengan fallback aman `2>/dev/null || echo "n/a"`.
+  - Standar TUI (hasil Found 361–375, berlaku untuk semua layar baru): pemisah judul/bawah rainbow `---` 35 (`${separator}`), pemisah dalam biru `---` 35 (`${blue_sep}`), tepat 3 baris kosong setelah setiap `clear`, daftar bernomor hijau (`%02d`) dengan Total +/total, dan input nomor-atau-nama. Tanpa `===`, tanpa `━━━`/`───`/`═══` di output terminal.
 
 ---
 
@@ -281,10 +291,14 @@ Fase 24: Penanganan Error di Tool Go
   - Audit timeout reverse proxy: periksa direktif timeout pada lokasi streaming Xray (`/vmxh`, `/vmgr`). Pastikan ada perlindungan terhadap body upload besar (Fix 29).
   - Uji penggantian nama domain: masukkan domain tidak valid (misal: `bad domain`, `test..com`) pada `dm-menu`. Periksa apakah string salah disubstitusikan ke konfigurasi Nginx dan seluruh kartu akun (Found 304).
   - Audit fallback sertifikat: periksa penanganan kondisi error saat Let's Encrypt mengembalikan HTTP 429 (rate limit). Pastikan skrip tidak membiarkan berkas sertifikat kosong yang menyebabkan Nginx/HAProxy gagal boot (Found 140).
+  - Audit menu domain multi-entri: opsi menu wajib Add / Remove / List / Acme-per-pilihan / Certbot-per-pilihan / SelfSign-per-pilihan; tiap alur sertifikat wajib memilih domain dulu (tanpa default), dengan peringatan DNS bila domain tak menunjuk ke VPS. Alur lama satu-domain (`dm`, submenu `cert`, duplikat `cert2`) wajib sudah tiada.
+  - Audit cakupan sertifikat: penambahan domain wajib sinkron `server_name` + reload; penerbitan multi-domain wajib melewati hanya domain yang DNS-nya menunjuk ke sini (tanpa menjadikan satu domain gagal sebagai kegagalan total).
+  - Audit default instalasi: installer wajib self-signed (tanpa fetch acme/LE saat install); acme.sh dan certbot murni manual.
 - **Fixing (Standar Perbaikan):**
   - Terapkan validasi regex FQDN sebelum memperbarui `/etc/xray/domain`, Nginx `server_name`, atau kartu akun.
-  - Pertahankan fallback otomatis bertingkat: Let's Encrypt -> ZeroSSL -> Self-signed certificate.
+  - Pertahankan fallback otomatis bertingkat: Let's Encrypt -> ZeroSSL -> Self-signed certificate (pada alur manual yang dipilih operator).
   - Pertahankan konfigurasi timeout memadai (`proxy_read_timeout 300s`, `client_body_timeout 300s`) pada endpoint streaming.
+  - Self-signed mencakup semua domain via SAN; tulis ke berkas temp dulu lalu pindah (jangan truncate path live).
 
 ---
 
@@ -440,8 +454,12 @@ Fase 24: Penanganan Error di Tool Go
   - Bangun matriks port/path: tiap `proxy_pass 127.0.0.1:<port>` + `location <path>` di ketiga template harus sama dengan inbound JSON dan link kartu (`14016/23456/25432`, `/vmws /vlws /trws /vmxh /vlxh /trxh /vmhu /vlhu /trhu`, service `vmgr/vlgr/trgr`).
   - Uji placeholder bocor: `server_name tes1.rohshop.cloud` tidak boleh ada di instalasi; `sed` domain wajib idempoten.
   - Uji `routing-*.sh` `sed "${line},$d"`: batas rentang harus tepat, bukan sampai EOF.
+  - Audit alias warna (36 lokasi, 3 per backend): tiap `/warna` wajib rewrite/proxy ke upstream kanonisnya dan mengembalikan status yang sama dengan kanonisnya; tanpa tabrakan antar-lokasi (`location =` eksak untuk WS/HU/XHTTP, prefix `^~` untuk gRPC). Pola `rewrite…break` sebelum guard `if` pada lokasi eksak HU terbukti 502 — untuk HU wajib bentuk URI `proxy_pass …/<kanonis>`.
+  - Audit rotasi link: counter `/etc/xray/.colorseq` maju per akun tercipta; kartu menampilkan path kanonis di deskripsi dan path terotasi di link salin; `/.domainseq` dan `/etc/xray/domains` untuk rotasi domain dengan aturan yang sama (tanpa default).
+  - Audit sinkron `server_name`: penambahan/penghapusan domain wajib membangun ulang `server_name` blok 443 + reload; penghapusan terakhir mengembalikan nama primer tunggal.
 - **Fixing (Standar Perbaikan):**
   - Selaraskan ketiga sisi ke satu sumber kebenaran (template); tambah uji komparasi otomatis bila murah, bukan framework baru.
+  - Blok lokasi warna wajib meniru blok kanonisnya baris-per-baris (header/proxy sama), hanya baris `location` + rewrite/URI yang berbeda; sisipkan berkelompok sebelum penutup blok server.
 
 ---
 
@@ -454,6 +472,49 @@ Fase 24: Penanganan Error di Tool Go
   - Bandingkan dengan referensi: `_,` pada `chage`/`passwd`/config adalah warisan V23 (Found 289 mencatat sebagian).
 - **Fixing (Standar Perbaikan):**
   - Kembalikan dan tangani error (`return err`, pesan ke stderr, exit non-nol); tanpa refactor arsitektur tool.
+
+---
+
+### Fase 25: Alias Path Warna & Rotasi Link (36 lokasi)
+
+- **Komponen Target:** `config/{4,6,dual}.conf` (blok `ALTERNATIVE COLOR PATHS`), `/etc/nginx/nginx.conf` terinstal, 48 skrip pembangun link (`add-*`, `trial-*` `full/` + `lite/`), `README.md` (tabel warna).
+- **Finding (Metodologi Penemuan):**
+  - Hitung lokasi warna: tepat 36 (`grep -c "ALT /"` per template), 3 warna unik per backend, tanpa tabrakan nama antar-lokasi maupun dengan lokasi kanonis.
+  - Verifikasi tiap warna berperilaku identik dengan kanonisnya: status HTTP sama untuk handshake sejenis (WS→400, HU/XHTTP→404, gRPC POST→200); `rewrite…break` sebelum guard `if` pada lokasi eksak adalah pola terlarang (terbukti 502, Found 376) — HU wajib bentuk URI `proxy_pass`.
+  - Verifikasi rotasi: N pembuatan beruntun wajib bersiklus kanonis→warna1→warna2→warna3 (`/etc/xray/.colorseq` maju per akun); kartu tetap sepanjang semula; baris deskripsi `Path`/`Service` tetap kanonis.
+  - Race counter bersamaan hanya boleh mengulang warna (kosmetik), bukan merusak link.
+- **Fixing (Standar Perbaikan):**
+  - Hasilkan blok warna dari blok kanonis secara programatik (satu sumber, tiga template + live); `nginx -t` + reload + bukti status per warna sebelum commit.
+  - Snippet rotasi 6-baris yang sama di semua builder; tanpa default baru — kanonis tetap entri rotasi pertama.
+
+---
+
+### Fase 26: Rotasi Multi-Domain & Inventaris Per-Domain
+
+- **Komponen Target:** `full/dm-menu.sh`, `lite/dm-menu.sh` (opsi 1–6, `pick_domain`, `domain_extra_*`, `gen_selfsigned_all`, `all_domains`, counter), `/etc/xray/domains`, `/etc/xray/.domainseq`, `installer/diamond.sh` (`issue_certificate`).
+- **Finding (Metodologi Penemuan):**
+  - Struktur menu wajib Add / Remove / List / Acme-per-pilihan / Certbot-per-pilihan / SelfSign-per-pilihan; pengubah domain-tunggal lama (`dm`), submenu `cert`, dan duplikat `cert2` wajib sudah tiada; helper yatim (`start_services`, `copy_certificates`) wajib tiada pemanggil.
+  - Rotasi tanpa default: berkas hilang/kosong → perilaku domain-tunggal lama; berkas ada → round-robin atas primer + ekstra terdedup; kartu menampilkan `Domain` terpakai + baris `Domains` tersedia; host link mengikuti rotasi.
+  - Batas fungsi bersarang: penghapusan fungsi wajib berjangkar pada definisi sibling berikutnya, bukan `}` pertama (kegagalan pola ini merusak `dm-menu.sh`, Found 378) — verifikasi silang terhadap `original-source-do-not-edit` untuk lingkup yang dihapus.
+  - Self-signed default: installer tanpa fetch acme; penambahan domain otomatis self-signed multi-SAN (CN primer); penerbitan tepercaya hanya mencakup domain yang DNS-nya menunjuk ke sini (lewati sisanya, jangan gagal total); tulis ke berkas temp lalu pindah (jangan truncate path live).
+- **Fixing (Standar Perbaikan):**
+  - Satu `pick_domain` dipakai tiga alur sertifikat; CN self-signed mengikuti pilihan; peringatan DNS sebelum penerbitan; pembatalan kembali ke menu tanpa mutasi.
+  - Kartu inventaris per domain (SSH/VMess/VLess/Trojan/WireGuard/L2TP/NoobzVPN) dihitung sekali dan dibagi semua kartu; bingkai bersama tanpa garis ganda.
+  - Uji live dengan domain nip.io sementara + backup/restore sertifikat tepercaya di sekelilingnya; kotak kembali single-domain dan bersertifikat LE setelahnya.
+
+---
+
+### Fase 27: Review Kriptografi Final (setelah semua perubahan)
+
+- **Komponen Target:** `/etc/xray/xray.crt`, `/etc/xray/xray.key`, `/etc/haproxy/funny.pem`, `/etc/funny/.restore.key`, `/etc/xray/.key`, konfigurasi TLS nginx/haproxy/stunnel, kunci/sertifikat sementara (`/tmp/xray-selfsigned.*`, `/root/backup*`).
+- **Alasan urutan:** fase-fase sebelumnya memutasi jalur kode yang menyentuh kriptografi (penerbitan acme/certbot/self-signed, rotasi domain + SAN, restore backup, izin berkas) — audit kripto yang dikerjakan duluan basi setiap ada perubahan. Fase ini berjalan PALING AKHIR, setelah semua fix lain mendarat dan lolos gerbangnya.
+- **Finding (Metodologi Penemuan):**
+  - Baca ulang sertifikat live: `openssl x509 -noout -subject -ext subjectAltName -dates` — CN/SAN wajib mencakup semua domain di `/etc/xray/domain` + `/etc/xray/domains`, expiry wajar, issuer sesuai ekspektasi (LE/ZeroSSL untuk tepercaya, self-signed bila itu yang dipilih operator).
+  - Verifikasi izin akhir: `600` pada `xray.key`/`funny.pem`, `644` pada `xray.crt`, `0600` pada `/etc/xray/.key`, `0640 root:www-data` pada `.restore.key`; tanpa kunci privat tertinggal di `/tmp`, `/root`, atau arsip backup.
+  - Verifikasi handshake: `openssl s_client` per domain yang terdaftar (SNI cocok, chain valid untuk tepercaya);nginx/haproxy/stunnel restart bersih pasca-verifikasi.
+  - Bandingkan dengan referensi hanya untuk bentuk (bukan isi): referensi memakai kunci longgar — divergensi izin adalah kebijakan repo ini (Fase 1).
+- **Fixing (Standar Perbaikan):**
+  - Perbaiki izin/kepemilikan di tempat; regenerasi sertifikat HANYA via alur menu yang sudah ada (opsi 4/5/6), bukan perintah ad-hoc; hapus material sementara dan catat rotasi yang dilakukan.
 
 ---
 
@@ -470,7 +531,7 @@ Untuk setiap siklus penemuan dan perbaikan bug:
 
 ## 5. Gerbang Penerimaan Fix & Cakupan Repo
 
-Setiap fix yang lulus wajib memenuhi gerbang ini (berlaku untuk Fase 1–24):
+Setiap fix yang lulus wajib memenuhi gerbang ini (berlaku untuk Fase 1–27):
 
 1. **Tanpa over-engineering:** shortest working diff; tanpa helper/framework/dependensi baru kecuali tak ada cara sebaris.
 2. **Cek regresi:** lulus 4-Check Section 35; tidak membatalkan Found/Fix sebelumnya (`bugs-fixed.md` dibaca dulu).

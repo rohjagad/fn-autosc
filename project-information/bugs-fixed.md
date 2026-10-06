@@ -2633,3 +2633,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 375 (Found 379):** installer `issue_certificate()` now generates a self-signed cert directly (LE/ZeroSSL attempts removed from the install path; certbot package still installed for manual option 5). Adding a domain auto-generates and installs a multi-SAN self-signed covering primary + extras, and says so on screen (re-running trusted issuance stays manual via options 4/5).
 - **Verified:** live add cycle served a dual-SAN self-signed, then the trusted LE cert was restored byte-identical; `bash -n` clean.
+### Fix 376 - X11/agent forwarding off, exec denial proven (Found 380)
+
+- **Fix 376 (Found 380):** `installer/ssh.sh` now enforces `X11Forwarding no` + `AllowAgentForwarding no` idempotently (replace-or-append, survives reinstalls); live box reloaded. `AllowTcpForwarding yes` kept (the product), `PermitTunnel` stays default no, no `Match`/`ForceCommand` added. Proven live: `id` exits 1 with no output, sftp/scp refused, `-L` tunnel still carries HTTP 101, X11 request fails on channel 0.
+- **Verified:** `bash -n` clean; `sshd -t` clean; sessions survived reload; 0 failed units.

@@ -104,9 +104,9 @@ Each phase below lists: **Goal**, **K** (client traffic), **S** (menu walk), **P
 ### Fase 3: SSH, Dropbear, SSH-WS, OHP
 
 - **Goal:** all SSH front-ends accept password logins.
-- **K:** VM-1: OpenSSH password login on 22 and 3303 (forward-only, shell `/bin/false` by design, `Could not chdir` message is cosmetic); Dropbear banner `SSH-2.0-dropbear_2019.78` on 111/109; WS path `/` reaches `wsEpro` (2080); OHP port 9088 TCP-open.
+- **K:** VM-1: OpenSSH password login on 22 and 3303 (forward-only, shell `/bin/false` by design, `Could not chdir` message is cosmetic); Dropbear banner `SSH-2.0-dropbear_2019.78` on 111/109; WS path `/` reaches `wsEpro` (2080); OHP port 9088 TCP-open. Containment (every run): `ssh testcard_ssh_0X@host id` exits non-zero with no output; `sftp` and `scp` fail; `ssh -N -L <port>:127.0.0.1:80` still carries HTTP through (forwarding is the product, Decision 7); `ssh -X` gets no X11 channel (`X11Forwarding no`).
 - **S:** `menu-ssh` → create `livetest_ssh*` via menu only. Check card: ports listed (`22, 3303`, `111, 109`), pause before clear, `0` back to main.
-- **PASS:** logins work, banner exact, card readable.
+- **PASS:** logins work, banner exact, card readable; containment denials hold while forwarding works.
 
 ### Fase 4: Xray WebSocket (VMess, VLESS, Trojan)
 

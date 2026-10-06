@@ -95,6 +95,16 @@ for _port in 22 3303; do
         echo "Port ${_port}" >> /etc/ssh/sshd_config
 done
 unset _port
+# VPN users are forwarding-only credentials (Decision 7): no X sessions,
+# no agent sockets. Forwarding itself stays on - it IS the product.
+for _k in X11Forwarding AllowAgentForwarding; do
+    if grep -qE "^[[:space:]]*${_k}[[:space:]]+" /etc/ssh/sshd_config; then
+        sed -i -E "s|^[[:space:]]*${_k}[[:space:]]+.*|${_k} no|" /etc/ssh/sshd_config
+    else
+        echo "${_k} no" >> /etc/ssh/sshd_config
+    fi
+done
+unset _k
 # Burst protection for distro units the daemons restart (limit-ip-ssh, xp):
 # drop-ins only, the packaged unit files themselves are never edited.
 for _u in ssh dropbear; do

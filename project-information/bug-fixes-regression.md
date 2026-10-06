@@ -1971,3 +1971,13 @@ Section 35's four-check rule applied to Fix 375:
 | **Over-strictness** | Nothing rejected; issuance paths preserved. |
 | **Over-engineering** | One straight-line generator; temp files then copy (never truncate live paths). |
 | **vs the source** | References chase trusted certs at install; self-signed default is this repo's own direction per operator request. |
+## 160. Forwarding-Only Surface — Four Checks (October 6, 2026)
+
+Section 35's four-check rule applied to Fix 376:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Forwarding (the product) re-proven working after the change; no exec-capable account affected (root keeps its shell). |
+| **Over-strictness** | Nothing legitimate removed; X11/agent had no consumer on this box. |
+| **Over-engineering** | Seven lines in the installer idiom, no new mechanism. |
+| **vs the source** | References leave these at default; explicit off is this repo's hardening per operator direction. |
