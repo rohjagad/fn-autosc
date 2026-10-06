@@ -27,7 +27,7 @@ send_telegram_notification() {
     local api_url="https://api.telegram.org/bot${key}/sendMessage"
     local TIME="${TIME:-10}"
 
-    curl -s --max-time $TIME --data-urlencode "chat_id=$chat_id&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$message" $api_url >/dev/null 2>&1
+    curl -s --max-time $TIME --data-urlencode "chat_id=$chat_id" --data-urlencode "disable_web_page_preview=1" --data-urlencode "parse_mode=html" --data-urlencode "text=$message" $api_url >/dev/null 2>&1
 }
 
 # Fungsi untuk membuat pengguna SSH
