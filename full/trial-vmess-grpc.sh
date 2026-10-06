@@ -134,7 +134,7 @@ uuid=$(xray uuid)
 
 # Menambahkan akun pada json
 sed -i '/#vmess$/{n;s/}/},\n### '"$user $exp"'\n{"id": "'""$uuid""'","alterid": 0,"email": "'""$user""'","level": 0}/}' /etc/xray/json/grpc.json
-# Alternate color path, rotated for balance (canonical + 3 colors)
+# vmgr stays the default and keeps working, but links never use it; rotation below is color-based only.
 opaths=("black" "gray" "silver")
 cseq=$(cat /etc/xray/.colorseq 2>/dev/null || echo 0)
 opath="${opaths[$((cseq % ${#opaths[@]}))]}"

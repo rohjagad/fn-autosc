@@ -218,7 +218,7 @@ exp=`date -d "$masaaktif days" +"%y-%m-%d"`
 
 # Menambahkan akun pada json
 sed -i '/#vless$/{n;s/}/},\n### '"$user $exp"'\n{"id": "'""$uuid""'","email": "'""$user""'","level": 0}/}' /etc/xray/json/upgrade.json
-# Alternate color path, rotated for balance (canonical + 3 colors)
+# /vlhu stays the default and keeps working, but links never use it; rotation below is color-based only.
 opaths=("/pink" "/coral" "/salmon")
 cseq=$(cat /etc/xray/.colorseq 2>/dev/null || echo 0)
 opath="${opaths[$((cseq % ${#opaths[@]}))]}"

@@ -219,7 +219,7 @@ exp=`date -d "$masaaktif days" +"%y-%m-%d"`
 
 # Menambahkan Akun di Database
 sed -i '/#trojan$/{n;s/}/},\n### '"$user $exp"'\n{"password": "'""$uuid""'","email": "'""$user""'","level": 0}/}' /etc/xray/json/grpc.json
-# Alternate color path, rotated for balance (canonical + 3 colors)
+# trgr stays the default and keeps working, but links never use it; rotation below is color-based only.
 opaths=("magenta" "plum" "orchid")
 cseq=$(cat /etc/xray/.colorseq 2>/dev/null || echo 0)
 opath="${opaths[$((cseq % ${#opaths[@]}))]}"
