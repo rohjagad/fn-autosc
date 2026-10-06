@@ -2669,3 +2669,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 384 (Found 388, Found 389):** row wrap emits whole-row `<code>label : value</code>` (no bold) in all 48 xray builders and both SSH senders; every account card and the backup caption gained `ISP`/`Region` rows (xray col 9, SSH col 12, backup col 8) sourced from `/root/.isp` + `/root/.region` with empty fallback.
 - **Verified:** `bash -n` clean; zips repacked (0755, parity rechecked); full-edition scripts redeployed hash-verified; live TUI cards show the new rows.
+### Fix 385 - Color-only links, whole-row notices, clean wording (Found 390, Found 391)
+
+- **Fix 385 (Found 390, Found 391):** rotation arrays hold colors only with a self-sizing modulo (`% ${#opaths[@]}`) — canonical paths never appear in links again (4 sequential live creates cycled scarlet/red/crimson/scarlet). All baked notice rows rewritten as whole-row `<code>Label : value</code>` (delete/extend/change-id/change-quota/locked/unlock/limit-ip/quota/kill/auto-delete, both editions, plus the Go SSH notice which was rebuilt and redeployed). Wording: `ACOUNT`→`ACCOUNT`, notes rewritten in clean English (`badwidth`/`didalam` gone), `HABIS`→`Quota Exhausted`, `Pengguna Dihapus`→`Deleted Users`, `Clear Log`→`Log Cleanup`. `Protokol` deliberately kept — it is parsed from old log cards by list/cek/unlock, and renaming would strand existing locked accounts.
+- **Verified:** `bash -n` + `gofmt` clean; zips repacked (0755, parity rechecked); scripts hash-verified and binaries hash-verified on the live box.

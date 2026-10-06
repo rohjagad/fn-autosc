@@ -90,7 +90,7 @@ send_log() {
 
     TEXT="
 <code>--------------------</code>
-<b>NOTIF QUOTA WebSocket HABIS</b>
+<b>WebSocket Quota Exhausted</b>
 <code>--------------------</code>
 <code>Username  : </code><code>${user}</code>
 <code>Usage     : </code><code>${total_usage}</code>

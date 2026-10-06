@@ -178,11 +178,11 @@ func sendTelegramNotification(username, oldLimit, newLimit, expiry string) {
 	message := fmt.Sprintf(`
 		<b>Change Limit IP SSH</b>
 		<b>──────────────────────────────────</b>
-		<b>Username      :</b> <code>%s</code>
-		<b>Old Limit IP  :</b> <code>%s</code>
-		<b>New Limit IP  :</b> <code>%s</code>
-		<b>Expiry        :</b> <code>%s</code>
-		<b>Change Date   :</b> <code>%s</code>
+		<code>Username      : %s</code>
+		<code>Old Limit IP  : %s</code>
+		<code>New Limit IP  : %s</code>
+		<code>Expiry        : %s</code>
+		<code>Change Date   : %s</code>
 		<b>──────────────────────────────────</b>
 		<b>Update Successful!</b>
 	`, username, oldLimit, newLimit, expiry, date)

@@ -94,10 +94,10 @@ send_log() {
 <b>-----------------------</b>
 <b>X-RAY WS Change UUID</b>
 <b>-----------------------</b>
-<b>Date         :</b> <code>$DATE</code>
-<b>Username     :</b> <code>$user</code>
-<b>Old UUID     :</b> <b>$old</b>
-<b>New UUID     :</b> <b>$new</b>
+<code>Date         : $DATE</code>
+<code>Username     : $user</code>
+<code>Old UUID     : $old</code>
+<code>New UUID     : $new</code>
 <b>-----------------------</b>
 <i>Note:</i> The account UUID has been successfully changed. Modification has been reflected in the database."
     curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$TEXT" $URL >/dev/null

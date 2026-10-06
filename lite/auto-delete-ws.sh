@@ -142,14 +142,14 @@ if [ -n "$deleted_users" ]; then
     systemctl restart xray@ws
     TEXT="
 <b>-----------------------</b>
-<b>X-RAY WS Clear Log</b>
+<b>X-RAY WS Log Cleanup</b>
 <b>-----------------------</b>
-<b>Date     :</b> <code>$DATE</code>
-<b>Status   :</b> <b>Success Clear Log</b>
+<code>Date     : $DATE</code>
+<code>Status   : Success Log Cleanup</code>
 <b>-----------------------</b>
-<b>Pengguna Dihapus:</b> <code>$deleted_users</code>
+<code>Deleted Users: $deleted_users</code>
 <b>-----------------------</b>
-<i>Catatan:</i> Menghapus Log Semua akun yang tidak tersedia didalam database Server.
+<i>Catatan:</i> Cleared the logs of all accounts missing from the server database.
 "
     # Kirim notifikasi ke Telegram
     curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$TEXT" $URL >/dev/null

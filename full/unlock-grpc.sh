@@ -128,14 +128,14 @@ DATE=$(date +"%Y-%m-%d %H:%M:%S")
 
         TEXT="
 <b>-----------------------</b>
-<b>gRPC UNLOCK ACOUNT</b>
+<b>gRPC UNLOCK ACCOUNT</b>
 <b>-----------------------</b>
-<b>Date     :</b> <code>$DATE</code>
-<b>Username :</b> <code>$name</code>
-<b>Expired  :</b> <b>$exp2</b>
-<b>Protokol :</b> <b>$protokol2</b>
+<code>Date     : $DATE</code>
+<code>Username : $name</code>
+<code>Expired  : $exp2</code>
+<code>Protokol : $protokol2</code>
 <b>-----------------------</b>
-<i>Catatan:</i> Akun Pengguna Telah di unlock oleh owner dan dapat digunakan kembali."
+<i>Catatan:</i> The user account has been unlocked by the owner and can be used again."
         curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$TEXT" $URL >/dev/null
 }
 

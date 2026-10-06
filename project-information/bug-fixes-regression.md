@@ -2061,3 +2061,13 @@ Section 35's four-check rule applied to Fix 384:
 | **Over-strictness** | Nothing rejected; text-scoped change. |
 | **Over-engineering** | One expression shape reused; two variable reads per script. |
 | **vs the source** | Main-menu header already shows ISP/Region; cards now match it. |
+## 169. Color-Only Links + Notice Wording — Four Checks (October 6, 2026)
+
+Section 35's four-check rule applied to Fix 385:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Canonical locations/proxying untouched — old canonical links keep working; only new links rotate colors-only. Parsers read UUID/Expiry/Protokol lines, never touched. |
+| **Over-strictness** | Nothing rejected; text-scoped change. |
+| **Over-engineering** | Array trim + modulo; literal wording swaps. |
+| **vs the source** | References predate rotation entirely; colors-only is this repo's own direction per operator request. |

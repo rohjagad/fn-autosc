@@ -133,13 +133,13 @@ TIME="10"
 DATE=$(date +"%Y-%m-%d %H:%M:%S")
 TEXT="
 <b>-----------------------</b>
-<b>QUOTA XTLS gRPC ACOUNT</b>
+<b>QUOTA XTLS gRPC ACCOUNT</b>
 <b>-----------------------</b>
-<b>Username    :</b> <code>$user</code>
-<b>Date        :</b> <code>$DATE</code>
-<b>Old Limit   :</b> <code>${old_quota} GB</code>
-<b>New Limit   :</b> <code>${new_quota} GB</code>
-<b>Quota Usage :</b> <code>${quota_status}</code>
+<code>Username    : $user</code>
+<code>Date        : $DATE</code>
+<code>Old Limit   : ${old_quota} GB</code>
+<code>New Limit   : ${new_quota} GB</code>
+<code>Quota Usage : ${quota_status}</code>
 <b>-----------------------</b>
 <i>Note:</i> The Xray account quota limit has been successfully updated in the server database."
         curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$TEXT" $URL >/dev/null

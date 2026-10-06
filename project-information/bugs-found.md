@@ -2277,3 +2277,7 @@ Found 388. **Bold labels cost alignment, and nesting is impossible** —
 operator refinement: drop the bold entirely — whole-row `<code>` keeps every colon aligned, which matters more. (A live Bot API probe confirmed `<b>` inside `<code>` parses to a single `code` entity.)
 Found 389. **Backup and account cards hide the server identity** —
 operator direction: show the VPS `ISP` and `Region` (from `/root/.isp`, `/root/.region`) in the backup caption and in every account-detail card, padded to each block's column.
+Found 390. **Every fourth link exposes the default transport path** —
+rotation arrays lead with the canonical path (`/vmws`, …), so 25% of copyable links use the most blockable path. Operator direction: rotated links must never use the default path — colors only.
+Found 391. **Notice rows still bold, titles still misspelled** —
+follow-up: the baked `<b>label</b> <code>value</code>` rows in delete/extend/change/lock/unlock/limit/quota/kill/clear-log notices (and the Go SSH notice) defeat whole-row code alignment; titles carry `ACOUNT`, notes carry mixed-language grammar (`Telah di locked…`, `badwidth`, `delete success`, `HABIS`, `Pengguna Dihapus`, `Clear Log`).

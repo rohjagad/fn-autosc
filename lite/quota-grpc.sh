@@ -91,7 +91,7 @@ function send_log() {
 
     TEXT="
 <code>--------------------</code>
-<b>NOTIF QUOTA gRPC HABIS</b>
+<b>gRPC Quota Exhausted</b>
 <code>--------------------</code>
 <code>Username  : </code><code>${user}</code>
 <code>Usage     : </code><code>${total_usage}</code>

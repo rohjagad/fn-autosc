@@ -125,11 +125,11 @@ send_log() {
 <b>-----------------------</b>
 <b>X-RAY Extend gRPC ACCOUNT</b>
 <b>-----------------------</b>
-<b>Date         :</b> <code>$DATE</code>
-<b>Username     :</b> <code>$user</code>
-<b>Old Expired  :</b> <b>$exp</b>
-<b>New Expired  :</b> <b>$exp4</b>
-<b>Status Quota :</b> <b>$quota_status</b>
+<code>Date         : $DATE</code>
+<code>Username     : $user</code>
+<code>Old Expired  : $exp</code>
+<code>New Expired  : $exp4</code>
+<code>Status Quota : $quota_status</code>
 <b>-----------------------</b>
 <i>Note:</i> The account's active period has been extended. Modification has been reflected in the database."
     curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$TEXT" $URL >/dev/null

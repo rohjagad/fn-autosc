@@ -91,13 +91,13 @@ DATE=$(date +"%Y-%m-%d %H:%M:%S")
 
         TEXT="
 <b>-----------------------</b>
-<b>X-RAY gRPC DELETED ACOUNT</b>
+<b>X-RAY gRPC DELETED ACCOUNT</b>
 <b>-----------------------</b>
-<b>Date     :</b> <code>$DATE</code>
-<b>Username :</b> <code>$user</code>
-<b>Expired  :</b> <b>$exp</b>
+<code>Date     : $DATE</code>
+<code>Username : $user</code>
+<code>Expired  : $exp</code>
 <b>-----------------------</b>
-<i>Note:</i> Account delete success. Modification has been reflected in the database."
+<i>Note:</i> Account deleted successfully. Modification has been reflected in the database."
         curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$TEXT" $URL >/dev/null
 }
 
