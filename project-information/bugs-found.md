@@ -2241,3 +2241,5 @@ Found 370. **Change-limit screens show two stacked boxes and crowd the empty sta
 live feedback: the `FN AutoSC` brand block plus the table frame read as multiple competing title boxes, and the banner-bottom/table-top lines stack into doubles. `limit-ip.go` carried a brand-only banner with no tool title.
 Found 371. **Change-limit screens list dense tables instead of the neat numbered list** —
 operator wants them neat like list-account/database-logs: green-numbered names, Total line, and number-or-name picking, instead of the wide USERNAME/EXP/LIMIT table.
+Found 372. **Change-limit list hides the current limit** —
+operator wants each numbered row to also show the account's current limit on the right side.

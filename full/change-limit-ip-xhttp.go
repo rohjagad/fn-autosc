@@ -195,7 +195,8 @@ func main() {
 		return
 	}
 	for i, username := range usernames {
-		fmt.Printf("\033[32;1m%02d\033[0m. %s\n", i+1, username)
+		logFile := fmt.Sprintf("/var/log/create/xray/xhttp/%s.log", username)
+		fmt.Printf("\033[32;1m%02d\033[0m. %-20s %s\n", i+1, username, getIPLimit(logFile))
 	}
 	barisBiru()
 	fmt.Printf("Total Accounts: %d\n", len(usernames))

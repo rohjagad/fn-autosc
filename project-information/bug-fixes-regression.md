@@ -1881,3 +1881,13 @@ Section 35's four-check rule applied to Fix 366:
 | **Over-strictness** | Nothing rejected; names still accepted as-is. |
 | **Over-engineering** | Mirrors the existing list-account pattern line for line. |
 | **vs the source** | References show wide tables; numbered list is this repo's own direction per operator request. |
+## 151. Limit Column on Numbered Rows — Four Checks (October 6, 2026)
+
+Section 35's four-check rule applied to Fix 367:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Same picker, same validation, same writes — one extra column from the already-read limit source. |
+| **Over-strictness** | Nothing rejected; display-only change. |
+| **Over-engineering** | One Printf widened per tool. |
+| **vs the source** | References show full tables; numbered rows with limit is this repo's own direction per operator request. |

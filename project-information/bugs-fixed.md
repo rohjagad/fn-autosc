@@ -2597,3 +2597,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 366 (Found 371):** the 9 change-limit tools drop the wide table for the list-account pattern — green `01.` numbering, `Total Accounts: N`, orange Ctrl+C hint, and number-or-name input (a number picks from the list, a name is used as-is). Details (expiry, current limit) still show on the Before card after picking. `limit-ip` main also gained its tool title. Binaries rebuilt.
 - **Verified:** all 9 tools build; populated + empty renders checked.
+### Fix 367 - Change-limit rows show current limit (Found 372)
+
+- **Fix 367 (Found 372):** numbered rows now read `01. name  <limit>` (name padded to 20, limit right after), fed from the same limit source the Before card shows. Binaries rebuilt.
+- **Verified:** all 9 tools build; populated render checked.
