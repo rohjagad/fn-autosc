@@ -177,7 +177,7 @@ Quota   : $quota GB
 Port        : 443, 2053, 2083, 2087, 2096
 Network     : gRPC
 Service Name: vlgr
-Path Alt    : white / ivory / snow
+Service Alt : white / ivory / snow
 ----------------------
 🟢 VLess GRPC
 

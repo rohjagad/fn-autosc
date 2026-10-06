@@ -277,7 +277,7 @@ Quota   : $quota GB
 Port        : 443, 2053, 2083, 2087, 2096
 AlterID     : 0
 Service     : vmgr
-Path Alt    : black / gray / silver
+Service Alt : black / gray / silver
 Network     : gRPC
 Alpn        : - [ None ]
 Decrypt     : auto

@@ -253,7 +253,7 @@ Protokol: Trojan
 -----------------------
 
 Service Name: trgr
-Path Alt    : magenta / plum / orchid
+Service Alt : magenta / plum / orchid
 Network     : gRPC GUN
 Port gRPC   : 443, 2053, 2083, 2087, 2096
 -----------------------
