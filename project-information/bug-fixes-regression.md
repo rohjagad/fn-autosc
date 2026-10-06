@@ -1861,3 +1861,13 @@ Section 35's four-check rule applied to Fix 364:
 | **Over-strictness** | Nothing rejected; display-only change. |
 | **Over-engineering** | Three-line empty-state, one newline, one dropped re-banner. |
 | **vs the source** | References re-print banners the same way; calmer error path is this repo's own direction per operator request. |
+## 149. Single-Card Change-Limit — Four Checks (October 6, 2026)
+
+Section 35's four-check rule applied to Fix 365:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Same prompts, same validation, same data flow — frame lines only. |
+| **Over-strictness** | Nothing rejected; display-only change. |
+| **Over-engineering** | Deleted redundant lines; no new code. |
+| **vs the source** | References stack brand + table boxes; single card is this repo's own direction per operator request. |

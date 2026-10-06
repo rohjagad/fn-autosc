@@ -61,8 +61,6 @@ func clearScreen() {
 
 func rerechanBanner() {
 	barisPanjang()
-	fmt.Println("                      FN AutoSC")
-	barisPanjang()
 	fmt.Println("          Menu Change Limit IP X-Ray WebSocket")
 	barisPanjang()
 }
@@ -187,7 +185,6 @@ func main() {
 	clearScreen()
 	rerechanBanner()
 
-	barisPanjang()
 	fmt.Println("   USERNAME       EXP DATE         LIMIT IP")
 	barisBiru()
 
@@ -205,7 +202,6 @@ func main() {
 	if count == 0 {
 		fmt.Println("   No accounts found.")
 	}
-	barisBiru()
 	fmt.Printf("   Account number: %d users\n", count)
 	barisPanjang()
 
@@ -223,7 +219,6 @@ func main() {
 
 	currentIPLimit := getIPLimit(logFile)
 	rerechanBanner()
-	barisPanjang()
 	fmt.Println(Yellow + " Before " + Xark)
 	fmt.Printf(" Username   : %s\n", user)
 	fmt.Printf(" Exp Date   : %s\n", getAccountExpiry(logFile))
@@ -246,7 +241,6 @@ func main() {
 		updateLimitFile(user, newIPLimit)
 	    clearScreen()
 		rerechanBanner()
-		barisPanjang()
 		fmt.Println(Green + " Successfully updated " + Xark)
 		fmt.Println()
 		fmt.Println(Yellow + " After " + Xark)

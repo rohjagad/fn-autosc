@@ -69,7 +69,7 @@ func barisBiru() {
 func rerechanBanner() {
 	clearScreen()
 	barisPanjang()
-	fmt.Println(Yellow + "             FN AutoSC" + Xark)
+	fmt.Println("            Menu Change Limit IP SSH")
 	barisPanjang()
 }
 
@@ -281,7 +281,6 @@ func main() {
 
 	currentIPLimit := getIPLimit(user)
 	rerechanBanner()
-	barisPanjang()
 	fmt.Println(Yellow + " Before " + Xark)
 	fmt.Printf(" Username   : %s\n", user)
 	fmt.Printf(" Ip Limit   : %s\n", currentIPLimit)
@@ -308,7 +307,6 @@ func main() {
 		updateLog(logFile, newIPLimit)
 
 		rerechanBanner()
-		barisPanjang()
 		fmt.Println(Green + " Successfully updated " + Xark)
 		fmt.Println()
 		fmt.Println(Yellow + " After " + Xark)

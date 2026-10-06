@@ -2589,3 +2589,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 364 (Found 369):** table top back to rainbow (blue reserved for the colhead divider and pre-count divider); empty tables print a `No accounts found.` row instead of doubled bare lines; blank line after the username prompt so the next screen starts clean; error path shows the error directly instead of re-printing the whole banner. Binaries rebuilt.
 - **Verified:** all 9 tools build; local + live renders checked.
+### Fix 365 - Change-limit screens are one card (Found 370)
+
+- **Fix 365 (Found 370):** brand line removed; banner-bottom doubles as table/card top so each screen is a single frame (title, table, count, bottom). `limit-ip.go` banner now titles the tool (`Menu Change Limit IP SSH`) instead of branding. Binaries rebuilt.
+- **Verified:** all 9 tools build; populated + empty renders checked live.
