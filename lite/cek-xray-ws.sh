@@ -5,6 +5,32 @@ GREEN="\033[32;1m"
 NC="\033[0m"
 BLUE="\033[0;34m"
 
+rainbow_sep() {
+  local text="${1:------------------------------------}"
+  local output=''
+  local i segment fraction r g b color
+  local -a red=(255 255 0 0 0 255 255)
+  local -a green=(0 255 255 255 0 0 0)
+  local -a blue=(0 0 0 255 255 255 0)
+  for ((i = 0; i < ${#text}; i++)); do
+    if ((i == ${#text} - 1)); then
+      segment=5
+      fraction=$((${#text} - 1))
+    else
+      segment=$((i * 6 / (${#text} - 1)))
+      fraction=$((i * 6 % (${#text} - 1)))
+    fi
+    r=$((red[segment] + (red[segment + 1] - red[segment]) * fraction / (${#text} - 1)))
+    g=$((green[segment] + (green[segment + 1] - green[segment]) * fraction / (${#text} - 1)))
+    b=$((blue[segment] + (blue[segment + 1] - blue[segment]) * fraction / (${#text} - 1)))
+    printf -v color '\033[38;2;%d;%d;%dm' "$r" "$g" "$b"
+    output+="${color}${text:i:1}"
+  done
+  printf '%b\n' "${output}${NC}"
+}
+
+separator=$(rainbow_sep '-----------------------------------')
+
 # Log file path
 log_path="/var/log/xray/ws.log"
 
@@ -32,9 +58,9 @@ format_bytes() {
 
 # Header
 clear
-echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${separator}"
 echo "  Log X-Ray WebSocket  "
-echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${separator}"
 
 # Load users from log
 users=($(grep "email:" "$log_path" | awk '{print $NF}' | cut -d':' -f2 | sort -u))
@@ -90,7 +116,7 @@ for user in "${users[@]}"; do
     echo "Traffic Downlink: ${downlink:-0} bytes ($(format_bytes "${downlink:-0}"))"
     echo "Quota: $quota"
 
-    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${separator}"
 done
 
 > /var/log/xray/ws.log

@@ -79,6 +79,34 @@ clear
 NC='\e[0m'
 GB='\e[32;1m'
 YB='\e[33;1m'
+blue='\033[1;34m'
+
+rainbow_sep() {
+  local text="${1:------------------------------------}"
+  local output=''
+  local i segment fraction r g b color
+  local -a red=(255 255 0 0 0 255 255)
+  local -a green=(0 255 255 255 0 0 0)
+  local -a blue=(0 0 0 255 255 255 0)
+  for ((i = 0; i < ${#text}; i++)); do
+    if ((i == ${#text} - 1)); then
+      segment=5
+      fraction=$((${#text} - 1))
+    else
+      segment=$((i * 6 / (${#text} - 1)))
+      fraction=$((i * 6 % (${#text} - 1)))
+    fi
+    r=$((red[segment] + (red[segment + 1] - red[segment]) * fraction / (${#text} - 1)))
+    g=$((green[segment] + (green[segment + 1] - green[segment]) * fraction / (${#text} - 1)))
+    b=$((blue[segment] + (blue[segment + 1] - blue[segment]) * fraction / (${#text} - 1)))
+    printf -v color '\033[38;2;%d;%d;%dm' "$r" "$g" "$b"
+    output+="${color}${text:i:1}"
+  done
+  printf '%b\n' "${output}${NC}"
+}
+
+separator=$(rainbow_sep '-----------------------------------')
+blue_sep="${blue}-----------------------------------${NC}"
 
 send_log() {
     CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
@@ -89,15 +117,15 @@ send_log() {
     DATE=$(date +"%y-%m-%d %H:%M:%S") # Format tahun menjadi 2 digit
 
     TEXT="
-<b>━━━━━━━━━━━━━━━━━━━━━━━</b>
+<b>-----------------------</b>
 <b>X-RAY Extend HTTP UPGRADE ACCOUNT</b>
-<b>━━━━━━━━━━━━━━━━━━━━━━━</b>
+<b>-----------------------</b>
 <b>🗓️ Date          :</b> <code>$DATE</code>
 <b>👤 Username     :</b> <code>$user</code>
 <b>📌 Old Expired  :</b> <b>$exp</b>
 <b>📌 New Expired  :</b> <b>$exp4</b>
 <b>📌 Status Quota :</b> <b>$quota_status</b>
-<b>━━━━━━━━━━━━━━━━━━━━━━━</b>
+<b>-----------------------</b>
 <i>Note:</i> The account's active period has been extended. Modification has been reflected in the database."
     curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$TEXT" $URL >/dev/null
 }
@@ -105,26 +133,26 @@ send_log() {
 clear
 NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/upgrade.json")
 if [[ ${NUMBER_OF_CLIENTS} == '0' ]]; then
-    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-    echo -e "                ${GB}XTLS X-RAY HTTP UPGRADE${NC}                "
-    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e "${separator}"
+    echo -e "      ${GB}XTLS X-RAY HTTP UPGRADE${NC}      "
+    echo -e "${separator}"
     echo -e "  ${YB}You have no existing clients!${NC}"
-    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e "${separator}"
     echo ""
     read -n 1 -s -r -p "Press any key to back on menu"
     x-http
 fi
 
 clear
-echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-echo -e "                ${GB}XTLS X-RAY HTTP UPGRADE${NC}                "
-echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+echo -e "${separator}"
+echo -e "      ${GB}XTLS X-RAY HTTP UPGRADE${NC}      "
+echo -e "${separator}"
 echo -e " ${YB}User  Expired${NC}  "
-echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+echo -e "${blue_sep}"
 grep -E "^### " "/etc/xray/json/upgrade.json" | cut -d ' ' -f 2-3 | column -t | sort | uniq
 echo ""
 echo -e "${YB}Tap enter to go back${NC}"
-echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+echo -e "${separator}"
 read -rp "Input Username: " user || { clear; return 0; }
 if [ -z "$user" ]; then
     x-http
@@ -165,12 +193,12 @@ else
     send_log
 
     clear
-    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
-    echo -e "                ${GB}XTLS X-RAY HTTP UPGRADE${NC}                "
-    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e "${separator}"
+    echo -e "      ${GB}XTLS X-RAY HTTP UPGRADE${NC}      "
+    echo -e "${separator}"
     echo -e " ${YB}Client Name :${NC} $user"
     echo -e " ${YB}Expired On  :${NC} $exp4"
     echo -e " ${YB}Status Quota:${NC} $quota_status"
-    echo -e "\033[0;34m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e "${separator}"
     echo ""
 fi

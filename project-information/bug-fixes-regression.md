@@ -1830,3 +1830,24 @@ Section 35's four-check rule applied to Fix 361:
 | **Over-strictness** | Nothing rejected; display-only change (quantity gates untouched). |
 | **Over-engineering** | Character swap plus wiring plain boxes to the existing separator vars; no new framework. |
 | **vs the source** | References use `=` boxes; dash-rainbow form is this repo's own direction per operator request. |
+## 146. Terminal Unification — Four Checks (October 6, 2026)
+
+Section 35's four-check rule applied to Fix 362:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Same boxes, same order, same prompts; only glyph/color/width-normalization changed. Wide data tables keep content-fit widths instead of 35 so columns still line up. |
+| **Over-strictness** | Nothing rejected; display-only change. |
+| **Over-engineering** | Wired boxes to existing separator vars; one new `barisBiru` divider where a divider func was shared. |
+| **vs the source** | References use assorted boxes; rainbow/blue dash form is this repo's own direction per operator request. |
+
+## 147. Telegram and Installer Dashes — Four Checks (October 6, 2026)
+
+Section 35's four-check rule applied to Fix 363:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Same widths, same tags, same layout — one character class swapped. Banner art and prompt art untouched. |
+| **Over-strictness** | Nothing rejected; text-only change. |
+| **Over-engineering** | Single-character swap across payload lines. |
+| **vs the source** | References use box glyphs in payloads; dash form is this repo's own direction per operator request. |

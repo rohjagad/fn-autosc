@@ -75,6 +75,9 @@
     }
 
     output
+blue='\033[1;34m'
+NC='\033[0m'
+
 clear
 
 # Membaca File Log
@@ -104,9 +107,9 @@ echo " "
 echo " "
 
 # Dropbear
-echo "----------=[ Dropbear User Login ]=-----------"
+echo -e "${blue}----------=[ Dropbear User Login ]=-----------${NC}"
 echo "ID  |  Username  |  IP Address  |  Time"
-echo "----------------------------------------------"
+echo -e "${blue}----------------------------------------------${NC}"
 # Bug 70/71: dropbear (the daemon serving SSH accounts on port 109) starts with
 # -E and logs only to the systemd journal on Debian 12 - /var/log/auth.log
 # contains zero dropbear lines - and rsyslog there writes RFC3339 timestamps
@@ -129,9 +132,9 @@ while IFS= read -r line; do
 done < /tmp/login-db.txt
 
 echo " "
-echo "----------=[ OpenSSH User Login ]=------------"
+echo -e "${blue}----------=[ OpenSSH User Login ]=------------${NC}"
 echo "ID  |  Username  |  IP Address  |  Time"
-echo "----------------------------------------------"
+echo -e "${blue}----------------------------------------------${NC}"
 # Bug 70/71: same for OpenSSH - parse from the message body so RFC3339 and
 # classic syslog prefixes both work.
 grep -E "Accepted password for" "$SSH_LOG" > /tmp/login-ssh.txt
@@ -149,9 +152,9 @@ done < /tmp/login-ssh.txt
 # OpenVPN TCP Log
 if [ -f "/etc/openvpn/server/openvpn-tcp.log" ]; then
     echo ""
-    echo "---------=[ OpenVPN TCP User Login ]=---------"
+    echo -e "${blue}---------=[ OpenVPN TCP User Login ]=---------${NC}"
     echo "Username  |  IP Address  |  Connected  |  Time"
-    echo "----------------------------------------------"
+    echo -e "${blue}----------------------------------------------${NC}"
     grep -w "^CLIENT_LIST" /etc/openvpn/server/openvpn-tcp.log | cut -d ',' -f 2,3,8 | sed -e 's/,/      /g' > /tmp/vpn-login-tcp.txt
     cat /tmp/vpn-login-tcp.txt
 fi
@@ -159,13 +162,13 @@ fi
 # OpenVPN UDP Log
 if [ -f "/etc/openvpn/server/openvpn-udp.log" ]; then
     echo " "
-    echo "---------=[ OpenVPN UDP User Login ]=---------"
+    echo -e "${blue}---------=[ OpenVPN UDP User Login ]=---------${NC}"
     echo "Username  |  IP Address  |  Connected  |  Time"
-    echo "----------------------------------------------"
+    echo -e "${blue}----------------------------------------------${NC}"
     grep -w "^CLIENT_LIST" /etc/openvpn/server/openvpn-udp.log | cut -d ',' -f 2,3,8 | sed -e 's/,/      /g' > /tmp/vpn-login-udp.txt
     cat /tmp/vpn-login-udp.txt
 fi
-echo "----------------------------------------------"
+echo -e "${blue}----------------------------------------------${NC}"
 echo ""
 }
 

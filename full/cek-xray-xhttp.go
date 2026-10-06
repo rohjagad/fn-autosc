@@ -109,6 +109,35 @@ func ReadProtocolFromLog(logFile string) string {
 	return "Not available"
 }
 
+
+func rainbowSepGo(text string) string {
+	n := len(text)
+	if n == 0 {
+		return ""
+	}
+	red := []int{255, 255, 0, 0, 0, 255, 255}
+	green := []int{0, 255, 255, 255, 0, 0, 0}
+	blue := []int{0, 0, 0, 255, 255, 255, 0}
+
+	var sb strings.Builder
+	for i := 0; i < n; i++ {
+		var segment, fraction int
+		if i == n-1 {
+			segment = 5
+			fraction = n - 1
+		} else {
+			segment = (i * 6) / (n - 1)
+			fraction = (i * 6) % (n - 1)
+		}
+		r := red[segment] + (red[segment+1]-red[segment])*fraction/(n-1)
+		g := green[segment] + (green[segment+1]-green[segment])*fraction/(n-1)
+		b := blue[segment] + (blue[segment+1]-blue[segment])*fraction/(n-1)
+		sb.WriteString(fmt.Sprintf("\033[38;2;%d;%d;%dm%c", r, g, b, text[i]))
+	}
+	sb.WriteString("\033[0m")
+	return sb.String()
+}
+
 func clearScreen() {
 	cmd := exec.Command("clear")
 	cmd.Stdout = os.Stdout
@@ -119,9 +148,11 @@ func main() {
 	// Clear screen
 	clearScreen()
 
-	fmt.Printf("%s━━━━━━━━━━━━━━━━━━━━━━━%s\n", BLUE, NC)
+	outerSep := rainbowSepGo("-----------------------------------")
+
+	fmt.Println(outerSep)
 	fmt.Println("  Log X-Ray XHTTP  ")
-	fmt.Printf("%s━━━━━━━━━━━━━━━━━━━━━━━%s\n", BLUE, NC)
+	fmt.Println(outerSep)
 
 	// Load user list from config file
 	configPath := "/etc/xray/json/xhttp.json"
@@ -209,6 +240,6 @@ func main() {
 		fmt.Printf("Traffic Uplink: %s\n", FormatBytes(uplink))
 		fmt.Printf("Traffic Downlink: %s\n", FormatBytes(downlink))
 		fmt.Printf("Quota: %s\n", quota)
-		fmt.Printf("%s━━━━━━━━━━━━━━━━━━━━━━━%s\n", BLUE, NC)
+		fmt.Println(outerSep)
 	}
 }

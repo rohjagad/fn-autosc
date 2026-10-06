@@ -281,7 +281,7 @@ dm() {
         curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$log_message" $URL >/dev/null
     fi
 
-    echo -e "\e[33m-----------------------------------\033[0m"
+    echo -e "${separator}"
     echo -e "Current Domain:"
     echo -e "$(cat /etc/xray/domain)"
     echo ""
@@ -306,7 +306,7 @@ dm() {
         curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$log_message" $URL >/dev/null
     fi
 
-        echo -e "\e[33m-----------------------------------\033[0m"
+        echo -e "${separator}"
         read -n 1 -s -r -p "Press any key to return..." || true
         return 0
     elif ! [[ "$host" =~ ^([[:alnum:]]([[:alnum:]-]{0,61}[[:alnum:]])?\.)+[[:alpha:]]{2,63}$ ]]; then
@@ -370,9 +370,9 @@ dm() {
     fi
 
         if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
-            echo -e "\e[33m-----------------------------------\033[0m"
+            echo -e "${separator}"
             echo "Notification sent to Telegram."
-            echo -e "\e[33m-----------------------------------\033[0m"
+            echo -e "${separator}"
         fi
         read -n 1 -s -r -p "Press any key to return..." || true
         return 0

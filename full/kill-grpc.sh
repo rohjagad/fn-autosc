@@ -86,14 +86,14 @@ function send_log() {
     [ -z "$CHATID" ] || [ -z "$KEY" ] && return 0
     TIME="10"
     TEXT="
-<code>────────────────────</code>
+<code>--------------------</code>
 <b>  ⚠️LIMIT QUOTA gRPC⚠️  </b>
-<code>────────────────────</code>
+<code>--------------------</code>
 <code>Username  : </code><code>$user</code>
 <code>Limit     : </code><code>$limit</code>
 <code>Total     : </code><code>$total</code>
 <code>Status    : </code><code>Deleted</code>
-<code>────────────────────</code>
+<code>--------------------</code>
 "
     curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$TEXT" "https://api.telegram.org/bot$KEY/sendMessage" >/dev/null
 }

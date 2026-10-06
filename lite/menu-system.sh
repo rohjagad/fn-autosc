@@ -417,9 +417,9 @@ menuwg
     change_timezone() {
 
     clear
-echo -e "\e[32m════════════════════════════════════════" | lolcat
-echo -e "\033[0;36m ═══[ \033[0m\e[1mCHANGE TIMEZONE\033[0;34m ]═══"
-echo -e "\e[32m════════════════════════════════════════" | lolcat
+echo -e "${separator}"
+echo -e "          CHANGE TIMEZONE"
+echo -e "${separator}"
 echo -e " 1)  Malaysia (GMT +8:00)"
 echo -e " 2)  Indonesia (GMT +7:00)"
 echo -e " 3)  Singapore (GMT +8:00)"
@@ -430,9 +430,9 @@ echo -e " 7)  India (GMT +5:30)"
 echo -e " 8)  Japan (GMT +9:00)"
 echo -e " 9)  View Current Time Zone"
 echo -e ""
-echo -e "\e[1;32m══════════════════════════════════════════\e[m" | lolcat
+echo -e "${blue_sep}"
 echo -e " x)   MAIN MENU"
-echo -e "\e[1;32m══════════════════════════════════════════\e[m" | lolcat
+echo -e "${separator}"
 echo -e ""
 read -p " Select menu :  "  opt || exit 0
 echo -e ""
@@ -441,11 +441,11 @@ case $opt in
 		clear
 		timedatectl set-timezone Asia/Kuala_Lumpur
 		echo -e "\e[0m                                                   "
-		echo -e "\e[1;32m══════════════════════════════════════════\e[m"
+		echo -e "${separator}"
 		echo -e "\e[0m                                                   "
 	    echo -e "\e[0m            Time Zone Set Asia Malaysia  "
 		echo -e "\e[0m                                                   "
-	    echo -e "\e[1;32m══════════════════════════════════════════\e[m"
+	    echo -e "${separator}"
         read -sp " Press ENTER to go back"
         echo ""
         change_timezone
@@ -454,11 +454,11 @@ case $opt in
 		clear
 		timedatectl set-timezone Asia/Jakarta
 		echo -e "\e[0m                                                   "
-		echo -e "\e[1;32m══════════════════════════════════════════\e[m"
+		echo -e "${separator}"
 		echo -e "\e[0m                                                   "
 	    echo -e "\e[0m           Time Zone Set Asia Indonesia "
 		echo -e "\e[0m                                                   "
-		echo -e "\e[1;32m══════════════════════════════════════════\e[m"
+		echo -e "${separator}"
 		echo ""
         read -sp " Press ENTER to go back"
         echo ""
@@ -468,11 +468,11 @@ case $opt in
 		clear
 		timedatectl set-timezone Asia/Singapore
 		echo -e "\e[0m                                                   "
-		echo -e "\e[1;32m══════════════════════════════════════════\e[m"
+		echo -e "${separator}"
 		echo -e "\e[0m                                                   "
 	    echo -e "\e[0m           Time Zone Set Asia Singapore "
 		echo -e "\e[0m                                                   "
-		echo -e "\e[1;32m══════════════════════════════════════════\e[m"
+		echo -e "${separator}"
 		echo ""
         read -sp " Press ENTER to go back"
         echo ""
@@ -482,11 +482,11 @@ case $opt in
 		clear
 		timedatectl set-timezone Asia/Brunei
 		echo -e "\e[0m                                                   "
-		echo -e "\e[1;32m══════════════════════════════════════════\e[m"
+		echo -e "${separator}"
 		echo -e "\e[0m                                                   "
 	    echo -e "\e[0m            Time Zone Set Asia Brunei   "
 		echo -e "\e[0m                                                   "
-		echo -e "\e[1;32m══════════════════════════════════════════\e[m"
+		echo -e "${separator}"
 		echo ""
         read -sp " Press ENTER to go back"
         echo ""
@@ -496,11 +496,11 @@ case $opt in
 		clear
 		timedatectl set-timezone Asia/Bangkok
 		echo -e "\e[0m                                                   "
-		echo -e "\e[1;32m══════════════════════════════════════════\e[m"
+		echo -e "${separator}"
 		echo -e "\e[0m                                                   "
 	    echo -e "\e[0m            Time Zone Set Asia Thailand  "
 		echo -e "\e[0m                                                   "
-		echo -e "\e[1;32m══════════════════════════════════════════\e[m"
+		echo -e "${separator}"
 		echo ""
         read -sp " Press ENTER to go back"
         echo ""
@@ -510,11 +510,11 @@ case $opt in
 		clear
 		timedatectl set-timezone Asia/Manila
 		echo -e "\e[0m                                                   "
-		echo -e "\e[1;32m══════════════════════════════════════════\e[m"
+		echo -e "${separator}"
 		echo -e "\e[0m                                                   "
 		echo -e "\e[0;37m        Time Zone Set Asia Philippines"
 		echo -e "\e[0m                                                   "
-		echo -e "\e[1;32m══════════════════════════════════════════\e[m"
+		echo -e "${separator}"
 		echo ""
         read -sp " Press ENTER to go back"
         echo ""
@@ -524,11 +524,11 @@ case $opt in
 		clear
 		timedatectl set-timezone Asia/Kolkata
 		echo -e "\e[0m                                                   "
-		echo -e "\e[1;32m══════════════════════════════════════════\e[m"
+		echo -e "${separator}"
 		echo -e "\e[0m                                                   "
 	    echo -e "\e[0m            Time Zone Set Asia India"
 		echo -e "\e[0m                                                   "
-		echo -e "\e[1;32m══════════════════════════════════════════\e[m"
+		echo -e "${separator}"
 		echo ""
         read -sp " Press ENTER to go back"
         echo ""
@@ -538,11 +538,11 @@ case $opt in
 		clear
 		timedatectl set-timezone Asia/Tokyo
 		echo -e "\e[0m                                                   "
-		echo -e "\e[1;32m══════════════════════════════════════════\e[m"
+		echo -e "${separator}"
 		echo -e "\e[0m                                                   "
 	    echo -e "\e[0m            Time Zone Set Asia Japan"
 		echo -e "\e[0m                                                   "
-		echo -e "\e[1;32m══════════════════════════════════════════\e[m"
+		echo -e "${separator}"
 		echo ""
         read -sp " Press ENTER to go back"
         echo ""

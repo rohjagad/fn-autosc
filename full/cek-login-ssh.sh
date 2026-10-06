@@ -77,6 +77,9 @@
 clear
 
 # Fungsi untuk mencetak teks dengan warna
+blue='\033[1;34m'
+NC='\033[0m'
+
 function print_color {
     echo -e "\033[1;34m$1\033[0m"  # Biru untuk header
 }
@@ -110,9 +113,9 @@ countsh=$(wc -l < "$SSH_SRC")
 
 # Fungsi untuk menampilkan login Dropbear dengan PID dan Limit IP
 function show_dropbear_logins {
-    print_color "═══════════[ Dropbear User Login ]═══════════"
+    print_color "-----------[ Dropbear User Login ]-----------"
     printf "%-20s| %-20s| %-12s| %-8s| %-8s\n" "Username" "IP Address" "Login Count" "PID" "Limit IP"
-    echo "──────────────────────────────"
+    echo -e "${blue}------------------------------${NC}"
     while IFS= read -r line; do
         # Bug 70/71: message-body parse - works for classic and RFC3339 prefixes
         user=$(sed -n "s/.*Password auth succeeded for '\([^']*\)' from.*/\1/p" <<< "$line")
@@ -139,9 +142,9 @@ function show_dropbear_logins {
 
 # Fungsi untuk menampilkan login OpenSSH dengan PID dan Limit IP
 function show_openssh_logins {
-    print_color "═══════════[ OpenSSH User Login ]═══════════"
+    print_color "-----------[ OpenSSH User Login ]-----------"
     printf "%-20s| %-20s| %-12s| %-8s| %-8s\n" "Username" "IP Address" "Login Count" "PID" "Limit IP"
-    echo "──────────────────────────────"
+    echo -e "${blue}------------------------------${NC}"
     while IFS= read -r line; do
         # Bug 70/71: message-body parse - works for classic and RFC3339 prefixes
         user=$(sed -n "s/.*Accepted password for \([^ ]*\) from .*/\1/p" <<< "$line")
@@ -189,9 +192,9 @@ function show_total_users {
     uniq_db=$(sed -n "s/.*Password auth succeeded for '\([^']*\)' from.*/\1/p" "$DB_SRC" 2>/dev/null | sort -u | wc -l)
     uniq_ssh=$(sed -n "s/.*Accepted password for \([^ ]*\) from .*/\1/p" "$SSH_SRC" 2>/dev/null | sort -u | wc -l)
     total_users=$((uniq_db + uniq_ssh))
-    print_color "═══════════════════════════════════════════════"
+    print_color "-----------------------------------------------"
     print_color "Total Active Users: $total_users"
-    print_color "═══════════════════════════════════════════════"
+    print_color "-----------------------------------------------"
 }
 
 # Bug 70/71: count both daemons' events (dropbear logins were invisible)

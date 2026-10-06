@@ -85,13 +85,13 @@ TIME="10"
 DATE=$(date +"%Y-%m-%d %H:%M:%S")
 
         TEXT="
-<b>━━━━━━━━━━━━━━━━━━━━━━━</b>
+<b>-----------------------</b>
 <b>X-RAY gRPC DELETED ACOUNT</b>
-<b>━━━━━━━━━━━━━━━━━━━━━━━</b>
+<b>-----------------------</b>
 <b>🗓️ Date      :</b> <code>$DATE</code>
 <b>👤 Username :</b> <code>$user</code>
 <b>📌 Expired  :</b> <b>$exp</b>
-<b>━━━━━━━━━━━━━━━━━━━━━━━</b>
+<b>-----------------------</b>
 <i>Note:</i> Account delete success. Modification has been reflected in the database."
         curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$TEXT" $URL >/dev/null
 }
@@ -103,6 +103,34 @@ NC='\033[0m'
 GREEN='\033[0;32m'
 ORANGE='\033[0;33m'
 BLUE='\033[0;34m'
+blue='\033[1;34m'
+
+rainbow_sep() {
+  local text="${1:------------------------------------}"
+  local output=''
+  local i segment fraction r g b color
+  local -a red=(255 255 0 0 0 255 255)
+  local -a green=(0 255 255 255 0 0 0)
+  local -a blue=(0 0 0 255 255 255 0)
+  for ((i = 0; i < ${#text}; i++)); do
+    if ((i == ${#text} - 1)); then
+      segment=5
+      fraction=$((${#text} - 1))
+    else
+      segment=$((i * 6 / (${#text} - 1)))
+      fraction=$((i * 6 % (${#text} - 1)))
+    fi
+    r=$((red[segment] + (red[segment + 1] - red[segment]) * fraction / (${#text} - 1)))
+    g=$((green[segment] + (green[segment + 1] - green[segment]) * fraction / (${#text} - 1)))
+    b=$((blue[segment] + (blue[segment + 1] - blue[segment]) * fraction / (${#text} - 1)))
+    printf -v color '\033[38;2;%d;%d;%dm' "$r" "$g" "$b"
+    output+="${color}${text:i:1}"
+  done
+  printf '%b\n' "${output}${NC}"
+}
+
+separator=$(rainbow_sep '-----------------------------------')
+blue_sep="${blue}-----------------------------------${NC}"
 PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
 LIGHT='\033[0;37m'
@@ -114,27 +142,27 @@ red() { echo -e "\\033[31;1m${*}\\033[0m"; }
 clear
 NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/grpc.json")
 	if [[ ${NUMBER_OF_CLIENTS} == '0' ]]; then
-		echo -e "\033[0;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+		echo -e "${separator}"
         echo -e "       Delete X-Ray gRPC Account       "
-        echo -e "\033[0;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+        echo -e "${separator}"
 		echo ""
 		echo "You have no existing clients!"
 		echo ""
-		echo -e "\033[0;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+		echo -e "${separator}"
 		read -n 1 -s -r -p "Press any key to back on menu"
         x-grpc
 	fi
 
 	clear
-	echo -e "\033[0;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+	echo -e "${separator}"
     echo -e "       Delete X-Ray gRPC Account       "
-    echo -e "\033[0;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e "${separator}"
     echo "  User       Expired  " 
-	echo -e "\033[0;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+	echo -e "${blue_sep}"
 	grep -E "^### " "/etc/xray/json/grpc.json" | cut -d ' ' -f 2-3 | column -t | sort | uniq
     echo ""
     red "tap enter to go back"
-    echo -e "\033[0;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+    echo -e "${separator}"
     read -rp "Input Username: " user || { clear; return 0; }
     if [ -z "$user" ]; then
     x-grpc
@@ -150,12 +178,12 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/grpc.json")
         if xray run -test -config /etc/xray/json/grpc.json >/dev/null 2>&1; then systemctl restart xray@grpc > /dev/null 2>&1; fi
         send_log
         clear
-        echo -e "\033[0;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+        echo -e "${separator}"
         echo " X-Ray gRPC Account Deleted Successfully"
-        echo -e "\033[0;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+        echo -e "${separator}"
         echo " Client Name : $user"
         echo " Expired On  : $exp"
-        echo -e "\033[0;33m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\033[0m"
+        echo -e "${separator}"
         echo ""
     else
         echo "User not found in config.json!"

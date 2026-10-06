@@ -131,9 +131,9 @@ noobz_list_users() {
 function create() {
 clear
 echo -e "
-════════════════════════════
+${separator}
 Create NoobzVPN Account
-════════════════════════════"
+${separator}"
 read -p "Username  : " user || return
 while ! [[ "$user" =~ ^[a-zA-Z0-9_]{1,16}$ ]]; do
     [ -z "$user" ] && return
@@ -167,20 +167,20 @@ expi=`date -d "$masaaktif days" +"%Y-%m-%d"`
 echo "### ${user} ${expi}" >>/etc/funny/.noob
 clear
 TEKS="
-════════════════════════════
+----------------------------
 NoobzVPN Account
-════════════════════════════
+----------------------------
 Hostname  : $domain
 Username  : $user
 Password  : $pass
-════════════════════════════
+----------------------------
 TCP_STD/HTTP  : 8080
 TCP_SSL/HTTPS : 8443
-════════════════════════════
+----------------------------
 PAYLOAD   : GET / HTTP/1.1[crlf]Host: [host][crlf]Upgrade: websocket[crlf][crlf]
-════════════════════════════
+----------------------------
 Expired   : $expi
-════════════════════════════"
+----------------------------"
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
@@ -198,11 +198,11 @@ function delete() {
 mna=$(grep -e "^### " "/etc/funny/.noob" | cut -d ' ' -f 2-3 | column -t | sort | uniq)
 clear
 echo -e "
-════════════════════════════
+${separator}
 Delete NoobzVPN Account
-════════════════════════════
+${separator}
 $mna
-════════════════════════════
+${separator}
 "
 read -p "Username: " name || return
 if [ -z "$name" ]; then
@@ -218,13 +218,13 @@ sed -i "/^### $name $exp/d" /etc/funny/.noob
 noobz_remove_user "$name"
 clear
 TEKS="
-════════════════════════════
+----------------------------
 Account Deleted
-════════════════════════════
+----------------------------
 
 User: $name
 Exp : $exp
-════════════════════════════
+----------------------------
 "
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
@@ -258,9 +258,9 @@ format_issued() {
 
 # Fungsi untuk memformat output dengan lebih rapi
 format_output() {
-  echo -e "\033[1;34m╭──────────────────────────────────────────╮\033[0m"
-  echo -e "\033[1;34m│         NoobzVPN Account Details         │\033[0m"
-  echo -e "\033[1;34m╰──────────────────────────────────────────╯\033[0m"  
+  echo -e "${separator}"
+  echo -e "     NoobzVPN Account Details"
+  echo -e "${separator}"
 
   while IFS= read -r line; do
     if [[ $line == +* ]]; then
@@ -284,9 +284,9 @@ format_output() {
     fi
   done <<< "$1"
 
-  echo -e "\033[1;34m╭──────────────────────────────────────────╮\033[0m"
-  echo -e "\033[1;34m│         End of Account Details           │\033[0m"
-  echo -e "\033[1;34m╰──────────────────────────────────────────╯\033[0m"
+  echo -e "${separator}"
+  echo -e "      End of Account Details"
+  echo -e "${separator}"
 }
 
 # Panggil fungsi format_output dengan output dari noobzvpns sebagai argumen

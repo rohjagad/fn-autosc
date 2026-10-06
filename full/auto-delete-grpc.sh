@@ -138,14 +138,14 @@ if [ -n "$deleted_users" ]; then
     systemctl daemon-reload
     systemctl restart xray@grpc
     TEXT="
-<b>━━━━━━━━━━━━━━━━━━━━━━━</b>
+<b>-----------------------</b>
 <b>⚠️ X-RAY gRPC Clear Log ⚠️</b>
-<b>━━━━━━━━━━━━━━━━━━━━━━━</b>
+<b>-----------------------</b>
 <b>🗓️ Date      :</b> <code>$DATE</code>
 <b>📌 Status   :</b> <b>Success Clear Log</b>
-<b>━━━━━━━━━━━━━━━━━━━━━━━</b>
+<b>-----------------------</b>
 <b>👤 Pengguna Dihapus:</b> <code>$deleted_users</code>
-<b>━━━━━━━━━━━━━━━━━━━━━━━</b>
+<b>-----------------------</b>
 <i>Catatan:</i> Menghapus Log Semua akun yang tidak tersedia didalam database Server.
 "
     # Kirim notifikasi ke Telegram

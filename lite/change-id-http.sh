@@ -86,14 +86,14 @@ send_log() {
     DATE=$(date +"%Y-%m-%d %H:%M:%S")
 
     TEXT="
-<b>━━━━━━━━━━━━━━━━━━━━━━━</b>
+<b>-----------------------</b>
 <b> HTTP UPGRADE CHANGE ID</b>
-<b>━━━━━━━━━━━━━━━━━━━━━━━</b>
+<b>-----------------------</b>
 <b>🗓️ Date          :</b> <code>$DATE</code>
 <b>👤 Username     :</b> <code>$user</code>
 <b>📌 Old UUID     :</b> <b>$old</b>
 <b>📌 New UUID     :</b> <b>$new</b>
-<b>━━━━━━━━━━━━━━━━━━━━━━━</b>
+<b>-----------------------</b>
 <i>Note:</i> The account UUID has been successfully changed. Modification has been reflected in the database."
     curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$TEXT" $URL >/dev/null
 }

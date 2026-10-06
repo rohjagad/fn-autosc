@@ -455,13 +455,13 @@ for user in "${data[@]}"; do
         
         # Menyiapkan teks untuk notifikasi
         TEKS="
-════════════════════════════
+----------------------------
 Username Expired
-════════════════════════════
+----------------------------
 
 User: $user
 Exp : $exp
-════════════════════════════
+----------------------------
 "
         # Mengambil CHATID dan KEY dari file
         CHATID=$(cat /etc/funny/.chatid 2>/dev/null)

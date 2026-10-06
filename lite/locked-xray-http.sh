@@ -121,14 +121,14 @@ send_log() {
     DATE=$(date +"%Y-%m-%d %H:%M:%S")
 
     TEXT="
-<b>━━━━━━━━━━━━━━━━━━━━━━━</b>
+<b>-----------------------</b>
 <b>⚠️ X-RAY HTTP LOCKED ACOUNT ⚠️</b>
-<b>━━━━━━━━━━━━━━━━━━━━━━━</b>
+<b>-----------------------</b>
 <b>🗓️  Date     :</b> <code>$DATE</code>
 <b>👤 Username :</b> <code>$name</code>
 <b>📌 Expired  :</b> <b>$exp2</b>
 <b>🛡️  Protokol :</b> <b>$protokol2</b>
-<b>━━━━━━━━━━━━━━━━━━━━━━━</b>
+<b>-----------------------</b>
 <i>Catatan:</i> Akun Pengguna Telah di locked oleh owner dan tidak dapat digunakan."
     curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$TEXT" $URL >/dev/null
 }

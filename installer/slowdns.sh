@@ -128,9 +128,9 @@ install_slowdns() {
 
   clear
   echo -e "
-========================
+------------------------
 SlowDNS / DNSTT Settings
-========================"
+------------------------"
   if [[ -s /etc/slowdns/nsdomain ]]; then
     Nameserver=$(cat /etc/slowdns/nsdomain)
   else

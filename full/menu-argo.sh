@@ -208,7 +208,7 @@ domargo=$(cat /etc/xray/domargo 2>/dev/null || echo "Not configured")
 clear
 echo -e "
     Argo Tunnel Details
-═════════════════════════════════
+${separator}
 
 Port HTTP:
 - 80 ( Standard )
@@ -231,7 +231,7 @@ Port HTTPS:
 - Status       : $ssws
 - Domain Nginx : $domargo
 - Domain SSH WS: $domargo
-═════════════════════════════════
+${blue_sep}
 Currently supported protocols:
 -> SSH WebSockets
 -> All Connections via Nginx

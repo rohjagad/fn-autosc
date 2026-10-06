@@ -176,14 +176,14 @@ systemctl restart cron
 clear
 
 #echo "Telah Berjaya Melakukan Backup"
-  echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo -e "${separator}"
     echo -e "SUCCESSFULL RESTORE YOUR VPS"
     echo -e "Please Save The Following Data"
-    echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo -e "${separator}"
     echo -e "Your VPS IP : $ip"
     echo -e "DOMAIN      : $domain"
     echo -e "DATE        : $date"
-    echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo -e "${separator}"
 read -n 1 -s -r -p "Press any key to return..." || true
 echo ""
 rm -fr /root/backup*
@@ -250,14 +250,14 @@ systemctl restart cron
 clear
 
 #echo "Telah Berjaya Melakukan Backup"
-  echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo -e "${separator}"
     echo -e " VPS RESTORED SUCCESSFULLY "
     echo -e "Please save the following data:"
-    echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo -e "${separator}"
     echo -e "Your VPS IP : $ip"
     echo -e "DOMAIN      : $domain"
     echo -e "DATE        : $date"
-    echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo -e "${separator}"
 read -n 1 -s -r -p "Press any key to return..." || true
 echo ""
 else
@@ -437,14 +437,14 @@ systemctl restart cron
 clear
 
 #echo "Telah Berjaya Melakukan Backup"
-  echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo -e "${separator}"
     echo -e " VPS RESTORED SUCCESSFULLY "
     echo -e "Please save the following data:"
-    echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo -e "${separator}"
     echo -e "Your VPS IP : $ip"
     echo -e "DOMAIN      : $domain"
     echo -e "DATE        : $date"
-    echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo -e "${separator}"
 read -n 1 -s -r -p "Press any key to return..." || true
 echo ""
 rm -fr /root/backup*

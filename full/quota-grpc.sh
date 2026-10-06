@@ -85,14 +85,14 @@ function send_log() {
     URL="https://api.telegram.org/bot${KEY}/sendMessage"
 
     TEXT="
-<code>────────────────────</code>
+<code>--------------------</code>
 <b> NOTIF QUOTA gRPC HABIS</b>
-<code>────────────────────</code>
+<code>--------------------</code>
 <code>Username  : </code><code>${user}</code>
 <code>Usage     : </code><code>${total_usage}</code>
 <code>Limit     : </code><code>${total_limit}</code>
 <code>Status    : </code><code>Deleted</code>
-<code>────────────────────</code>
+<code>--------------------</code>
 "
     curl -s --max-time 10 -X POST "$URL" -d "chat_id=${CHATID}&parse_mode=html" --data-urlencode "text=${TEXT}" >/dev/null
 }

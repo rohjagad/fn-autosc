@@ -196,14 +196,14 @@ rm -f /root/fix.sh
 echo -e "1.23" > /etc/funny/version
 OUTPUT="
 DETAIL INSTALL SCRIPT 1.23
-=========================
+-------------------------
 IP: $(curl -4 ifconfig.me)
 Domain: $domain
 Email Own: $email
 Type IP: $ips
 Type Script: Lite
 SSH Port: 22, 3303
-=========================
+-------------------------
 FN AutoSC
 "
 # Install notification uses the operator's own bot credentials, set later via
@@ -220,7 +220,7 @@ fi
 # Status Installasi
 clear
 echo ""
-echo -e "\033[96m_______________________________\033[0m"
+echo -e "\033[96m-------------------------------\033[0m"
 echo -e "\033[92m         INSTALL SUCCESS\033[0m"
-echo -e "\033[96m_______________________________\033[0m"
+echo -e "\033[96m-------------------------------\033[0m"
 rm -f /root/lite.sh
