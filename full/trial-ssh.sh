@@ -27,7 +27,7 @@ send_telegram_notification() {
     local api_url="https://api.telegram.org/bot${key}/sendMessage"
     local TIME="${TIME:-10}"
 
-    curl -s --max-time $TIME --data-urlencode "chat_id=$chat_id" --data-urlencode "disable_web_page_preview=1" --data-urlencode "parse_mode=html" --data-urlencode "text=$message" $api_url >/dev/null 2>&1
+    curl -s --max-time $TIME --data-urlencode "chat_id=$chat_id" --data-urlencode "disable_web_page_preview=1" --data-urlencode "parse_mode=html" --data-urlencode "text=$(printf '%s' "$message" | sed -e 's/&/\&amp;/g' -e 's|^\([A-Za-z][^:]*: \)\(.*\)$|<code>\1\2</code>|')" $api_url >/dev/null 2>&1
 }
 
 # Fungsi untuk membuat pengguna SSH
@@ -99,6 +99,8 @@ pub_key=$(read_file "/etc/slowdns/server.pub")
 nameserver=$(read_file "/etc/slowdns/nsdomain")
 chat_id=$(read_file "/etc/funny/.chatid")
 key=$(read_file "/etc/funny/.keybot")
+isp=$(cat /root/.isp 2>/dev/null)
+region=$(cat /root/.region 2>/dev/null)
 
 echo -e "\033[38;2;255;0;0m-\033[38;2;255;80;0m-\033[38;2;255;161;0m-\033[38;2;255;241;0m-\033[38;2;188;255;0m-\033[38;2;108;255;0m-\033[38;2;27;255;0m-\033[38;2;0;255;53m-\033[38;2;0;255;134m-\033[38;2;0;255;214m-\033[38;2;0;215;255m-\033[38;2;0;135;255m-\033[38;2;0;54;255m-\033[38;2;26;0;255m-\033[38;2;107;0;255m-\033[38;2;187;0;255m-\033[38;2;255;0;242m-\033[38;2;255;0;162m-\033[38;2;255;0;81m-\033[38;2;255;0;0m-\033[0m"
 echo -e "\033[1;33m Create SSH Account \033[0m"
@@ -147,6 +149,8 @@ message=$(cat <<EOF
 -------------------
 Domain     : ${rdomain}
 Domains    : $alldom
+ISP        : $isp
+Region     : $region
 Username   : $username
 Password   : $password
 Expired    : $masaaktif Minutes
@@ -177,7 +181,7 @@ EOF
 )
 
 # Kirim notifikasi ke Telegram
-send_telegram_notification "$chat_id" "$key" "$(printf '%s' "$message" | sed -e 's/&/\&amp;/g' -e 's|^\([A-Za-z][^:]*: \)\(.*\)$|<b>\1</b> <code>\2</code>|')"
+send_telegram_notification "$chat_id" "$key" "$(printf '%s' "$message" | sed -e 's/&/\&amp;/g' -e 's|^\([A-Za-z][^:]*: \)\(.*\)$|<code>\1\2</code>|')"
 
 mkdir -p /var/log/create/ssh
 echo "$message" > /var/log/create/ssh/${username}.log

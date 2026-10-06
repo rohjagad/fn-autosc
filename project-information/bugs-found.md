@@ -2273,3 +2273,7 @@ Found 386. **Labels cannot be bold inside code spans, and bare code rows look fl
 operator direction: bold `Remarks`/`Domain`/`UUID`/… labels in Telegram. A live probe (`<code><b>…</b>…</code>`) came back with only the outer `code` entity — Telegram drops nested tags, so bold-in-mono is not possible; the working shape is siblings (`<b>label</b> <code>value</code>`), same as the lock/unlock notices.
 Found 387. **Notice icons, ragged colons and missing path inventory** —
 operator direction covering three things at once: (a) account cards must show the canonical `Path` plus a `Path Alt` row listing the three rotation colors (real per-transport values, not placeholders); (b) every other Telegram notice drops its decorative icons (the 🟢 link headers in account cards stay); (c) their colons align via `<code>` exactly like the account cards.
+Found 388. **Bold labels cost alignment, and nesting is impossible** —
+operator refinement: drop the bold entirely — whole-row `<code>` keeps every colon aligned, which matters more. (A live Bot API probe confirmed `<b>` inside `<code>` parses to a single `code` entity.)
+Found 389. **Backup and account cards hide the server identity** —
+operator direction: show the VPS `ISP` and `Region` (from `/root/.isp`, `/root/.region`) in the backup caption and in every account-detail card, padded to each block's column.

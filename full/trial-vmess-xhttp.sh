@@ -100,6 +100,8 @@ echo $((dseq+1)) > /etc/xray/.domainseq
 alldom=$(printf '%s,' "${rdomains[@]}" | sed 's/,$//; s/,/, /g')
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
+isp=$(cat /root/.isp 2>/dev/null)
+region=$(cat /root/.region 2>/dev/null)
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 clear
@@ -195,6 +197,8 @@ TEKS="
 Remarks : $user
 Domain  : ${rdomain}
 Domains : $alldom
+ISP     : $isp
+Region  : $region
 UUID    : $uuid
 Expired : $exp
 Protokol: Vmess
@@ -226,7 +230,7 @@ $vmesslink2
 ----------------------
 "
 if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
-    curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "disable_web_page_preview=1" --data-urlencode "parse_mode=html" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's/&/\&amp;/g' -e 's/\\033\[[0-9;]*m//g' -e 's/\x1b\[[0-9;]*m//g' -e 's|^\(vmess://[^ ]*\)$|<code>\1</code>|' -e 's|^\(vless://[^ ]*\)$|<code>\1</code>|' -e 's|^\(trojan://[^ ]*\)$|<code>\1</code>|' -e 's|^\([A-Za-z][^:]*: \)\(.*\)$|<b>\1</b> <code>\2</code>|')" $URL >/dev/null 2>&1
+    curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "disable_web_page_preview=1" --data-urlencode "parse_mode=html" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's/&/\&amp;/g' -e 's/\\033\[[0-9;]*m//g' -e 's/\x1b\[[0-9;]*m//g' -e 's|^\(vmess://[^ ]*\)$|<code>\1</code>|' -e 's|^\(vless://[^ ]*\)$|<code>\1</code>|' -e 's|^\(trojan://[^ ]*\)$|<code>\1</code>|' -e 's|^\([A-Za-z][^:]*: \)\(.*\)$|<code>\1\2</code>|')" $URL >/dev/null 2>&1
 fi
 echo -e "$TEKS" > /var/log/create/xray/xhttp/${user}.log
 echo 'sed -i "/^### '"$user"' '"$exp"'/ {N;d}" /etc/xray/json/xhttp.json && sed -i -z '"'"'s/},\n *\]/}\n        ]/g'"'"' /etc/xray/json/xhttp.json && systemctl restart xray@xhttp && systemctl restart quota-xhttp && rm -fr /var/log/create/xray/xhttp/'"$user"'.log && rm -fr /etc/xray/limit/ip/xray/xhttp/'"$user"' && rm -fr /etc/xray/quota/xhttp/'"$user"' /etc/xray/quota/xhttp/'"$user"'_usage' | at now + 60 minutes >/dev/null 2>&1

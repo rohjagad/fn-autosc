@@ -2051,3 +2051,13 @@ Section 35's four-check rule applied to Fix 383:
 | **Over-strictness** | Nothing rejected; text-scoped change. |
 | **Over-engineering** | One shared row expression reused; per-block literal padding. |
 | **vs the source** | References share the icons/ragged rows; the cleanup is this repo's own direction per operator request. |
+## 168. Whole-Row Code + ISP/Region — Four Checks (October 6, 2026)
+
+Section 35's four-check rule applied to Fix 384:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Same rows/values/order plus two informational rows from existing on-box files; parsers unaffected (new rows carry no parsed keys). |
+| **Over-strictness** | Nothing rejected; text-scoped change. |
+| **Over-engineering** | One expression shape reused; two variable reads per script. |
+| **vs the source** | Main-menu header already shows ISP/Region; cards now match it. |

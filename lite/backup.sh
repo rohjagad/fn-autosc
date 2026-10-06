@@ -91,6 +91,8 @@ date=$(date)
 domain=$(cat /etc/xray/domain)
 cpt="$date / $domain"
 MYIP=$(curl -4 -s ifconfig.me)
+isp=$(cat /root/.isp 2>/dev/null)
+region=$(cat /root/.region 2>/dev/null)
 
 # Proses Backup
 clear
@@ -125,6 +127,8 @@ TEKS="
 
 Domain : $domain
 IP     : $MYIP
+ISP    : $isp
+Region : $region
 Date   : $date
 --------------------------------
 "
