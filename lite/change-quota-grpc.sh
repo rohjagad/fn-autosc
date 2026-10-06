@@ -82,6 +82,36 @@ ungu="\033[0;35m"
 Red="\033[91;1m"
 Cyan="\033[96;1m"
 Xark="\033[0m"
+blue='\033[1;34m'
+NC='\033[0m'
+
+rainbow_sep() {
+  local text="${1:------------------------------------}"
+  local output=''
+  local i segment fraction r g b color
+  local -a red=(255 255 0 0 0 255 255)
+  local -a green=(0 255 255 255 0 0 0)
+  local -a blue=(0 0 0 255 255 255 0)
+  for ((i = 0; i < ${#text}; i++)); do
+    if ((i == ${#text} - 1)); then
+      segment=5
+      fraction=$((${#text} - 1))
+    else
+      segment=$((i * 6 / (${#text} - 1)))
+      fraction=$((i * 6 % (${#text} - 1)))
+    fi
+    r=$((red[segment] + (red[segment + 1] - red[segment]) * fraction / (${#text} - 1)))
+    g=$((green[segment] + (green[segment + 1] - green[segment]) * fraction / (${#text} - 1)))
+    b=$((blue[segment] + (blue[segment + 1] - blue[segment]) * fraction / (${#text} - 1)))
+    printf -v color '\033[38;2;%d;%d;%dm' "$r" "$g" "$b"
+    output+="${color}${text:i:1}"
+  done
+  printf '%b\n' "${output}${NC}"
+}
+
+separator=$(rainbow_sep '-----------------------------------')
+blue_sep="${blue}-----------------------------------${NC}"
+
 BlueCyan="\033[5;36m"
 WhiteBe="\033[5;37m"
 GreenBe="\033[5;32m"
@@ -112,25 +142,25 @@ TEXT="
 
 # Garis Panjang Old
 function baris_panjang() {
-  echo -e "${BlueCyan} ——————————————————————————————————— ${Xark} "
+  echo -e "${separator}"
 }
 
 # Banner
 function FN_Banner() {
   clear
-  baris_panjang
-  echo -e "${ungu}            FN AutoSC      ${Xark} "
-  baris_panjang
+  echo -e "${separator}"
+  echo -e "   Menu Change Quota X-Ray gRPC"
+  echo -e "${separator}"
 }
 
 # Kredit
 function Sc_Credit(){
   sleep 1
-  baris_panjang
+  echo -e "${separator}"
   echo -e "${ungu}    Terimakasih Telah Menggunakan ${Xark}"
   echo -e "${ungu}             Script  Credit ${Xark}"
   echo -e "${ungu}               FN AutoSC ${Xark}"
-  baris_panjang
+  echo -e "${separator}"
   exit 0
 }
 
@@ -163,34 +193,38 @@ function Loading_Succes() {
 
 # Daftar Akun
 function Daftar_Account() {
-    # Header tabel
-    printf "${Cyan} %-20s %-15s %-10s ${Xark}\n" "Username" "Expired" "Limit Quota (GB)"
-    baris_panjang
-
-    # Loop melalui semua file log yang relevan
-    for file in /var/log/create/xray/grpc/*.log; do
-        if [[ -f "$file" ]]; then
-            username=$(basename "$file" .log)
-            expired=$(grep "Expired :" "$file" | awk -F': ' '{print $2}')
-            limit_quota=$(grep "Quota" "$file" | awk '{print $3}')
-
-            # Jika tidak ditemukan, set nilai default
-            expired=${expired:-"N/A"}
-            limit_quota=${limit_quota:-"N/A"}
-
-            # Tampilkan data dengan format terstruktur
-            printf "${ungu} %-20s %-15s %-10s ${Xark}\n" "$username" "$expired" "$limit_quota"
-        fi
+    users=( $(ls /var/log/create/xray/grpc/ 2>/dev/null | sed -E 's/\.log$'// | sort -u) )
+    if [ ${#users[@]} -eq 0 ]; then
+        echo "No active accounts found."
+        echo -e "${separator}"
+        return 1
+    fi
+    local i=1 u q
+    for u in "${users[@]}"; do
+        q=$(grep "Quota" "/var/log/create/xray/grpc/${u}.log" 2>/dev/null | awk '{print $3, $4}')
+        printf "\e[32;1m%02d\e[0m. %-20s %s\n" "$i" "$u" "${q:-N/A}"
+        i=$((i+1))
     done
+    echo -e "${blue_sep}"
+    echo -e "Total Accounts: ${#users[@]}"
+    echo -e "${blue_sep}"
+    echo -e "\033[38;5;208mPress [Ctrl + C] to exit\033[0m"
 }
 
 # Fungsi untuk Mengganti Kuota
 function change_quota() {
     FN_Banner
-    Daftar_Account
-    baris_panjang
+    Daftar_Account || return
+    echo -e "${separator}"
     echo ""
-    read -p " Input Username        :   " user
+    read -p " Input Username: " input || return
+    user="$input"
+    if [[ "$input" =~ ^[0-9]+$ ]]; then
+        n=$((10#$input))
+        if [ "$n" -ge 1 ] && [ "$n" -le "${#users[@]}" ]; then
+            user="${users[$((n-1))]}"
+        fi
+    fi
 
     quota_file="/etc/xray/quota/grpc/${user}"
     log_file="/var/log/create/xray/grpc/${user}.log"
@@ -201,13 +235,13 @@ function change_quota() {
         old_quota=$(grep "Quota" "$log_file" | awk '{print $3}')
         echo ""
         echo ""
-        baris_panjang
+        echo -e "${separator}"
         echo -e "${Cyan} BEFORE QUOTA ${Xark}"
         echo -e ""
         echo -e "${GreenBe} Quota      : $((current_quota / 1024 / 1024 / 1024)) GB ${Xark}"
         echo -e "${GreenBe} Username   : $user ${Xark}"
         echo -e ""
-        baris_panjang
+        echo -e "${separator}"
         echo ""
         echo ""
         echo -e "\033[38;5;208m0 not allowed\033[0m"
@@ -245,7 +279,9 @@ function change_quota() {
             echo -e "${Cyan} AFTER ${Xark}"
             echo ""
             printf "${yellow} %-20s %-15s %-10s ${Xark}\n" "Username" "Quota (GB)" "Status"
+            echo -e "${blue_sep}"
             printf "${ungu} %-20s %-15s %-10s ${Xark}\n" "$user" "$new_quota" "$quota_status"
+            echo -e "${separator}"
             echo ""
  #           baris_panjang
 	    send_log

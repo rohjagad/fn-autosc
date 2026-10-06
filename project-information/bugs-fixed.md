@@ -2601,3 +2601,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 367 (Found 372):** numbered rows now read `01. name  <limit>` (name padded to 20, limit right after), fed from the same limit source the Before card shows. Binaries rebuilt.
 - **Verified:** all 9 tools build; populated render checked.
+### Fix 368 - Change-quota screens list like change-limit (Found 373)
+
+- **Fix 368 (Found 373):** the 8 change-quota tools now mirror the change-limit pattern — rainbow title/bottom, blue inner dividers, green `01.` numbering with current quota right-aligned, `Total Accounts`, orange hint, number-or-name input, empty state exits clean. Brand banner replaced with per-transport titles; BEFORE/AFTER/Credit cards on the same separators.
+- **Verified:** `bash -n` clean; live 18-row render with quotas checked.

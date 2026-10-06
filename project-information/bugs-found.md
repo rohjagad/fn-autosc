@@ -2243,3 +2243,5 @@ Found 371. **Change-limit screens list dense tables instead of the neat numbered
 operator wants them neat like list-account/database-logs: green-numbered names, Total line, and number-or-name picking, instead of the wide USERNAME/EXP/LIMIT table.
 Found 372. **Change-limit list hides the current limit** —
 operator wants each numbered row to also show the account's current limit on the right side.
+Found 373. **Change-quota screens still use the old brand banner and wide table** —
+operator wants them like the change-limit style: titled card, green-numbered list with current quota on the right, Total line, number-or-name picking.
