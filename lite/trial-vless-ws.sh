@@ -179,7 +179,7 @@ Quota   : $quota GB
 
 TLS     : 443, 2053, 2083, 2087, 2096
 Path    : /vlws
-Path Alt : /green /lime /emerald
+Path Alt: /green /lime /emerald
 NoneTLS : 80, 8880, 2052, 2082, 2095
 Network : WebSocket
 -----------------------

@@ -175,7 +175,7 @@ Protokol: Trojan
 -------------------------
 
 Path     : /trhu
-Path Alt  : /orange /amber /chocolate
+Path Alt : /orange /amber /chocolate
 Network  : HTTP Upgrade
 Port TLS : 443, 2053, 2083, 2087, 2096
 Port None: 80, 8880, 2052, 2082, 2095

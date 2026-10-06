@@ -2281,3 +2281,5 @@ Found 390. **Every fourth link exposes the default transport path** —
 rotation arrays lead with the canonical path (`/vmws`, …), so 25% of copyable links use the most blockable path. Operator direction: rotated links must never use the default path — colors only.
 Found 391. **Notice rows still bold, titles still misspelled** —
 follow-up: the baked `<b>label</b> <code>value</code>` rows in delete/extend/change/lock/unlock/limit/quota/kill/clear-log notices (and the Go SSH notice) defeat whole-row code alignment; titles carry `ACOUNT`, notes carry mixed-language grammar (`Telah di locked…`, `badwidth`, `delete success`, `HABIS`, `Pengguna Dihapus`, `Clear Log`).
+Found 392. **Path Alt colons sit one column off** —
+`Path Alt` is 8 characters, so it needs zero/one trailing space for col 9/10 — the rows shipped with one space too many (col 10/11 against col 9/10 blocks). The SSH ports block has the same class of drift around the long `BadVpn/Udpgw` label.

@@ -2673,3 +2673,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 385 (Found 390, Found 391):** rotation arrays hold colors only with a self-sizing modulo (`% ${#opaths[@]}`) — canonical paths never appear in links again (4 sequential live creates cycled scarlet/red/crimson/scarlet). All baked notice rows rewritten as whole-row `<code>Label : value</code>` (delete/extend/change-id/change-quota/locked/unlock/limit-ip/quota/kill/auto-delete, both editions, plus the Go SSH notice which was rebuilt and redeployed). Wording: `ACOUNT`→`ACCOUNT`, notes rewritten in clean English (`badwidth`/`didalam` gone), `HABIS`→`Quota Exhausted`, `Pengguna Dihapus`→`Deleted Users`, `Clear Log`→`Log Cleanup`. `Protokol` deliberately kept — it is parsed from old log cards by list/cek/unlock, and renaming would strand existing locked accounts.
 - **Verified:** `bash -n` + `gofmt` clean; zips repacked (0755, parity rechecked); scripts hash-verified and binaries hash-verified on the live box.
+### Fix 386 - Path Alt column alignment (Found 392)
+
+- **Fix 386 (Found 392):** `Path Alt:` (col 9, vmess/vless), `Path Alt :` (col 10, trojan), `Service Alt :` verified col 13 (grpc); SSH ports block padded uniformly to col 15 including `BadVpn/Udpgw`. A block-uniformity audit now reports zero strays outside terminal-only menus.
+- **Verified:** live trojan card shows aligned Path/Path Alt/Network; `bash -n` clean; zips repacked (0755, parity rechecked); deployed scripts hash-verified.

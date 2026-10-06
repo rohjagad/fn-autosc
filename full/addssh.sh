@@ -216,21 +216,21 @@ DNS        : 1.1.1.1 / 8.8.8.8
 Pub Key    : $pub_key
 Nameserver : $nameserver
 -------------------
-OpenSSH    : 22, 3303
-Dropbear   : 111, 109
-NonTLS     : 80, 8880, 2052, 2082, 2086, 2095
-Enhanced   : 2080
-HTTP Proxy : 3128 ( Limit IP to Server )
-OHP        : 9088
-WS TLS     : 443, 2053, 2083, 2087, 2096
-STUNNEL5   : 777
-Slowdns    : 53
-Udp Custom : 1-65535
-Udp Request: 1-65535
-BadVpn/Udpgw : 7300
+OpenSSH       : 22, 3303
+Dropbear      : 111, 109
+NonTLS        : 80, 8880, 2052, 2082, 2086, 2095
+Enhanced      : 2080
+HTTP Proxy    : 3128 ( Limit IP to Server )
+OHP           : 9088
+WS TLS        : 443, 2053, 2083, 2087, 2096
+STUNNEL5      : 777
+Slowdns       : 53
+Udp Custom    : 1-65535
+Udp Request   : 1-65535
+BadVpn/Udpgw  : 7300
 -------------------
-OVPN WS     : 2086
-OVPN TCP/UDP: 1194 / 2200
+OVPN WS       : 2086
+OVPN TCP/UDP  : 1194 / 2200
 Config OVPN : http://${domain}/web/openvpn.zip
 -------------------
 EOF

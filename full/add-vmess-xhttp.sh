@@ -302,7 +302,7 @@ NoneTLS : 80, 8880, 2052, 2082, 2095
 ----------------------
 AlterID : 0
 Path    : /vmxh
-Path Alt : /purple /violet /indigo
+Path Alt: /purple /violet /indigo
 Network : XHTTP
 Alpn    : - [ None ]
 Decrypt : auto

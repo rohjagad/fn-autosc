@@ -2071,3 +2071,13 @@ Section 35's four-check rule applied to Fix 385:
 | **Over-strictness** | Nothing rejected; text-scoped change. |
 | **Over-engineering** | Array trim + modulo; literal wording swaps. |
 | **vs the source** | References predate rotation entirely; colors-only is this repo's own direction per operator request. |
+## 170. Path Alt Columns — Four Checks (October 6, 2026)
+
+Section 35's four-check rule applied to Fix 386:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Spacing-only change inside card text; no parser reads these columns. |
+| **Over-strictness** | Nothing rejected; text-scoped change. |
+| **Over-engineering** | Literal space adjustments. |
+| **vs the source** | References share the ragged rows; aligned cards are this repo's own direction per operator request. |

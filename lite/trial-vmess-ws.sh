@@ -215,7 +215,7 @@ NoneTLS : 80, 8880, 2052, 2082, 2095
 -----------------------
 AlterID : 0
 Path    : /vmws
-Path Alt : /red /crimson /scarlet
+Path Alt: /red /crimson /scarlet
 Network : WebSocket
 Alpn    : - [ None ]
 Decrypt : auto
