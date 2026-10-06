@@ -26,8 +26,6 @@
     echo ""
     echo ""
     echo ""
-    echo ""
-    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -80,8 +78,6 @@
 
     output
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""
@@ -160,8 +156,6 @@ function FN_Banner() {
   echo ""
   echo ""
   echo ""
-  echo ""
-  echo ""
   echo -e "${separator}"
   echo -e "   Menu Change Quota X-Ray WebSocket"
   echo -e "${separator}"
@@ -190,8 +184,6 @@ Loading_Animasi() {
     echo ""
     echo ""
     echo ""
-    echo ""
-    echo ""
     index=$((i % num_frames))
     color_code=$((31 + i % 7))
     echo ""
@@ -208,13 +200,9 @@ function Loading_Succes() {
   echo ""
   echo ""
   echo ""
-  echo ""
-  echo ""
   echo -e "\033[5;32mSucces\033[0m"
   sleep 1
   clear
-  echo ""
-  echo ""
   echo ""
   echo ""
   echo ""

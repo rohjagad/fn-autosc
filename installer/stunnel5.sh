@@ -31,8 +31,6 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 systemctl enable haproxy
 systemctl restart haproxy
 

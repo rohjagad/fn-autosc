@@ -80,8 +80,6 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 ### Warna / Collor jir
 export red='\033[0;31m'
 export green='\033[0;32m'
@@ -140,8 +138,6 @@ rainbow_sep() {
     echo ""
     echo ""
     echo ""
-    echo ""
-    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -196,8 +192,6 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 menu-x() {
 
 rerechan=$(output)
@@ -224,8 +218,6 @@ xver=$(xray version 2>/dev/null | awk '{print $2}' | head -n 1)
 separator=$(rainbow_sep '-----------------------------------')
 blue_sep="${blue}-----------------------------------${NC}"
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""

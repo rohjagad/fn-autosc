@@ -27,8 +27,6 @@
     echo ""
     echo ""
     echo ""
-    echo ""
-    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -84,16 +82,12 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 domain=$(cat /etc/xray/domain)
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""
@@ -109,8 +103,6 @@ until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/creat
         echo ""
         echo ""
         echo ""
-        echo ""
-        echo ""
         echo -e "\033[0;31mUsername cannot be empty.\033[0m"
         continue
     fi
@@ -120,16 +112,12 @@ until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/creat
         echo ""
         echo ""
         echo ""
-        echo ""
-        echo ""
         echo -e "\033[0;31mUsername cannot contain uppercase letters or spaces.\033[0m"
         continue
     fi
 
     if [[ $user =~ [^a-z0-9_] ]]; then
         clear
-        echo ""
-        echo ""
         echo ""
         echo ""
         echo ""
@@ -144,8 +132,6 @@ until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/creat
         echo ""
         echo ""
         echo ""
-        echo ""
-        echo ""
         echo -e "\033[0;31mUsername already exists.\033[0m"
         continue
     fi
@@ -155,16 +141,12 @@ until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/creat
         echo ""
         echo ""
         echo ""
-        echo ""
-        echo ""
         echo -e "\033[0;31mUsername already exists in log file.\033[0m"
         continue
     fi
 
     if [[ -f /var/log/create/xray/grpc/${user}.locked ]]; then
         clear
-        echo ""
-        echo ""
         echo ""
         echo ""
         echo ""
@@ -256,8 +238,6 @@ if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
 fi
 echo -e "$TEKS" > /var/log/create/xray/grpc/${user}.log
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""

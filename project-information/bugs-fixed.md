@@ -2613,3 +2613,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 370 (Found 375):** every `clear`/`clearScreen()` is now followed by exactly five blank lines (normalized, so reruns stay at five). Pure insertions; no logic touched. All affected Go binaries rebuilt.
 - **Verified:** `bash -n` clean; all 28 Go tools build; per-clear count audited (zero off-spec).
+### Fix 371 - Three-line gaps after every clear (Found 375 follow-up)
+
+- **Fix 371:** operator dialed the spacing back from five blank lines to three. Same normalization (exactly three, rerun-stable). All affected Go binaries rebuilt.
+- **Verified:** `bash -n` clean; all 28 Go tools build; per-clear count audited (zero off-spec).

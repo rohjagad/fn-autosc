@@ -18,8 +18,6 @@ func main() {
     fmt.Println()
     fmt.Println()
     fmt.Println()
-    fmt.Println()
-    fmt.Println()
     fmt.Println(sepOuter)
     fmt.Println("                MEMBER SSH                   ")
     fmt.Println(sepOuter)
@@ -61,13 +59,9 @@ func main() {
     fmt.Println()
     fmt.Println()
     fmt.Println()
-    fmt.Println()
-    fmt.Println()
     if userExists(user) {
         if err := deleteUser(user); err != nil {
             clearScreen()
-            fmt.Println()
-            fmt.Println()
             fmt.Println()
             fmt.Println()
             fmt.Println()
@@ -78,14 +72,10 @@ func main() {
             fmt.Println()
             fmt.Println()
             fmt.Println()
-            fmt.Println()
-            fmt.Println()
             fmt.Printf("User %s has been successfully deleted.\n", user)
         }
     } else {
         clearScreen()
-        fmt.Println()
-        fmt.Println()
         fmt.Println()
         fmt.Println()
         fmt.Println()

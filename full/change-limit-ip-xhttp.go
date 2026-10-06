@@ -187,8 +187,6 @@ func main() {
 	fmt.Println()
 	fmt.Println()
 	fmt.Println()
-	fmt.Println()
-	fmt.Println()
 	rerechanBanner()
 
 
@@ -250,8 +248,6 @@ func main() {
 		updateLog(logFile, newIPLimit)
 		updateLimitFile(user, newIPLimit)
 	    clearScreen()
-	    fmt.Println()
-	    fmt.Println()
 	    fmt.Println()
 	    fmt.Println()
 	    fmt.Println()

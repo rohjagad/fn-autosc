@@ -27,8 +27,6 @@
     echo ""
     echo ""
     echo ""
-    echo ""
-    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -83,8 +81,6 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 menu-argo() {
 
 red='\033[0;31m'
@@ -132,8 +128,6 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 # Copy File Core
 wget https://github.com/rohjagad/fn-autosc-miscellaneous/releases/download/v1.23/cloudflared-linux-amd64.deb
 sudo dpkg -i cloudflared-linux-amd64.deb
@@ -147,14 +141,10 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 echo -e "Log in to your Cloudflare account"
 cloudflared tunnel login
 
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""
@@ -167,15 +157,11 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 id=$(basename ~/.cloudflared/*.json | sed 's/\.json$//')
 echo -e "Save Your Tunnel ID"
 echo -e "ID: $id"
 sleep 10
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""
@@ -198,8 +184,6 @@ cloudflared tunnel route dns $rcs $opws
 echo "$opws" > /etc/xray/domargo
 domargo="$opws"
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""
@@ -230,8 +214,6 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 echo "Restarting Cloudflare Argo Tunnel..."
 systemctl restart cloudflared
 echo -e "\033[0;32mCloudflare Argo Tunnel restarted successfully.\033[0m"
@@ -244,8 +226,6 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 edussh_service=$(systemctl status cloudflared 2>/dev/null | grep Active | awk '{print $3}' | cut -d "(" -f2 | cut -d ")" -f1)
 if [[ $edussh_service == "running" ]]; then
 ssws="\e[1;32m[ ON ]\033[0m"
@@ -254,8 +234,6 @@ ssws="\e[1;31m[ OFF ]\033[0m"
 fi
 domargo=$(cat /etc/xray/domargo 2>/dev/null || echo "Not configured")
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""
@@ -301,8 +279,6 @@ else
     ssws="${red}OFF${NC}"
 fi
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""

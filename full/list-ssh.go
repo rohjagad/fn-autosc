@@ -18,8 +18,6 @@ func main() {
     fmt.Println()
     fmt.Println()
     fmt.Println()
-    fmt.Println()
-    fmt.Println()
     fmt.Println(sepOuter)
     fmt.Println("                MEMBER SSH                   ")
     fmt.Println(sepOuter)

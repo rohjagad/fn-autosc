@@ -27,8 +27,6 @@
     echo ""
     echo ""
     echo ""
-    echo ""
-    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -83,8 +81,6 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 red='\033[0;31m'
 green='\033[0;32m'
 blue='\033[1;34m'
@@ -129,8 +125,6 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 echo -e "
 ${separator}
 Success Change Banner
@@ -142,8 +136,6 @@ echo ""
 
 resall() {
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""
@@ -178,8 +170,6 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 echo -e "
 \n
 Success Restart All Service Server\n\n"
@@ -195,12 +185,8 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 install() {
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""
@@ -210,8 +196,6 @@ echo ""
     # (is-decision.md 28). $EXPIRED_DATE comes from the gate above.
     if [ "$EXPIRED_DATE" != "lifetime" ]; then
         clear
-        echo ""
-        echo ""
         echo ""
         echo ""
         echo ""
@@ -285,14 +269,10 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 }
 
 status() {
     clear
-    echo ""
-    echo ""
     echo ""
     echo ""
     echo ""
@@ -318,8 +298,6 @@ enable() {
         echo ""
         echo ""
         echo ""
-        echo ""
-        echo ""
         echo -e "WARP is not allowed on a date-licensed machine: it changes the server IP and would break the license check."
         read -n 1 -s -r -p "Press any key to return..." || true
         return
@@ -330,8 +308,6 @@ enable() {
     # install it has no registration, so connect/disconnect change nothing.
     systemctl enable --now wg-quick@wgcf >/dev/null 2>&1
     clear
-    echo ""
-    echo ""
     echo ""
     echo ""
     echo ""
@@ -347,8 +323,6 @@ disable() {
     systemctl disable --now wg-quick@wgcf >/dev/null 2>&1
     wg-quick down wgcf >/dev/null 2>&1
     clear
-    echo ""
-    echo ""
     echo ""
     echo ""
     echo ""
@@ -368,8 +342,6 @@ restart() {
         echo ""
         echo ""
         echo ""
-        echo ""
-        echo ""
         echo -e "WARP is not allowed on a date-licensed machine: it changes the server IP and would break the license check."
         read -n 1 -s -r -p "Press any key to return..." || true
         return
@@ -381,16 +353,12 @@ restart() {
     echo ""
     echo ""
     echo ""
-    echo ""
-    echo ""
     echo -e "Done Restart Service Warp Wireguard"
     read -n 1 -s -r -p "Press any key to return..." || true
 }
 
 akun4() {
     clear
-    echo ""
-    echo ""
     echo ""
     echo ""
     echo ""
@@ -419,8 +387,6 @@ akun6() {
     echo ""
     echo ""
     echo ""
-    echo ""
-    echo ""
     local conf=""
     if [[ -f /etc/wireguard/wgcf.conf ]]; then
         conf=$(cat /etc/wireguard/wgcf.conf)
@@ -446,12 +412,8 @@ token() {
     echo ""
     echo ""
     echo ""
-    echo ""
-    echo ""
     read -p "Input Your Token Teams WARP+: " token || return
     clear
-    echo ""
-    echo ""
     echo ""
     echo ""
     echo ""
@@ -468,8 +430,6 @@ token() {
 
 add() {
     clear
-    echo ""
-    echo ""
     echo ""
     echo ""
     echo ""
@@ -492,8 +452,6 @@ add() {
 
 menuwg() {
     clear
-    echo ""
-    echo ""
     echo ""
     echo ""
     echo ""
@@ -538,8 +496,6 @@ menuwg
     echo ""
     echo ""
     echo ""
-    echo ""
-    echo ""
 echo -e "${separator}"
 echo -e "          CHANGE TIMEZONE"
 echo -e "${separator}"
@@ -565,8 +521,6 @@ case $opt in
 		echo ""
 		echo ""
 		echo ""
-		echo ""
-		echo ""
 		timedatectl set-timezone Asia/Kuala_Lumpur
 		echo -e "\e[0m                                                   "
 		echo -e "${separator}"
@@ -580,8 +534,6 @@ case $opt in
 		;;
 		2)
 		clear
-		echo ""
-		echo ""
 		echo ""
 		echo ""
 		echo ""
@@ -602,8 +554,6 @@ case $opt in
 		echo ""
 		echo ""
 		echo ""
-		echo ""
-		echo ""
 		timedatectl set-timezone Asia/Singapore
 		echo -e "\e[0m                                                   "
 		echo -e "${separator}"
@@ -618,8 +568,6 @@ case $opt in
 		;;
 		4)
 		clear
-		echo ""
-		echo ""
 		echo ""
 		echo ""
 		echo ""
@@ -640,8 +588,6 @@ case $opt in
 		echo ""
 		echo ""
 		echo ""
-		echo ""
-		echo ""
 		timedatectl set-timezone Asia/Bangkok
 		echo -e "\e[0m                                                   "
 		echo -e "${separator}"
@@ -656,8 +602,6 @@ case $opt in
 		;;
 		6)
 		clear
-		echo ""
-		echo ""
 		echo ""
 		echo ""
 		echo ""
@@ -678,8 +622,6 @@ case $opt in
 		echo ""
 		echo ""
 		echo ""
-		echo ""
-		echo ""
 		timedatectl set-timezone Asia/Kolkata
 		echo -e "\e[0m                                                   "
 		echo -e "${separator}"
@@ -694,8 +636,6 @@ case $opt in
 		;;
         8)
 		clear
-		echo ""
-		echo ""
 		echo ""
 		echo ""
 		echo ""
@@ -716,8 +656,6 @@ case $opt in
 		echo ""
 		echo ""
 		echo ""
-		echo ""
-		echo ""
 		timedatectl
 	    echo ""
         read -sp " Press ENTER to go back"
@@ -726,8 +664,6 @@ case $opt in
 		;;
         x)
 		clear
-		echo ""
-		echo ""
 		echo ""
 		echo ""
 		echo ""
@@ -742,8 +678,6 @@ case $opt in
 
 detail() {
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""
@@ -782,12 +716,8 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 openeuler() {
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""
@@ -814,8 +744,6 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 echo -e "${NC}${separator}
           OPENSUSE LINUX
 ${separator}
@@ -836,8 +764,6 @@ esac
 
 debian() {
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""
@@ -866,8 +792,6 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 echo -e "${NC}${separator}
            UBUNTU LINUX
 ${separator}
@@ -892,8 +816,6 @@ esac
 
 alpine() {
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""
@@ -940,8 +862,6 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 echo -e "
 [ New Data Your VPS ]
 ${separator}
@@ -960,8 +880,6 @@ fi
 
 os() {
     clear
-    echo ""
-    echo ""
     echo ""
     echo ""
     echo ""
@@ -1018,8 +936,6 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 echo -e "
 ${separator}
 < = [ Reinstall OS ] = >
@@ -1045,8 +961,6 @@ tampilan
 
 systemd() {
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""

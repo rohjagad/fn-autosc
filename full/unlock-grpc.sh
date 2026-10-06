@@ -26,8 +26,6 @@
     echo ""
     echo ""
     echo ""
-    echo ""
-    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -80,8 +78,6 @@
 
     output
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""
@@ -152,8 +148,6 @@ if [ -n "$locked_files" ]; then
     echo ""
     echo ""
     echo ""
-    echo ""
-    echo ""
     echo -e "${NC}${separator}
        UNLOCK X-RAY gRPC ACCOUNT
 ${separator}"
@@ -187,8 +181,6 @@ else
     echo ""
     echo ""
     echo ""
-    echo ""
-    echo ""
     echo "No locked accounts found to unlock."
     exit 1
 fi
@@ -199,8 +191,6 @@ exp2=$(grep "Expired" /var/log/create/xray/grpc/${name}.locked | awk '{print $3}
 protokol2=$(grep "Protokol:" /var/log/create/xray/grpc/${name}.locked | awk '{print $2}')
 
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""

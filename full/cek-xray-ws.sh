@@ -61,8 +61,6 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 echo -e "${separator}"
 echo "  Log X-Ray WebSocket  "
 echo -e "${separator}"

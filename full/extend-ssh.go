@@ -43,8 +43,6 @@ func main() {
 	fmt.Println()
 	fmt.Println()
 	fmt.Println()
-	fmt.Println()
-	fmt.Println()
 	outerSep := rainbowSepGo("-----------------------------------")
 
 	fmt.Println(outerSep)
@@ -59,8 +57,6 @@ func main() {
 
 	if !userExists(username) {
 		clearScreen()
-		fmt.Println()
-		fmt.Println()
 		fmt.Println()
 		fmt.Println()
 		fmt.Println()
@@ -79,8 +75,6 @@ func main() {
 		fmt.Println()
 		fmt.Println()
 		fmt.Println()
-		fmt.Println()
-		fmt.Println()
 		fmt.Println("\033[31mDays must be a whole number greater than 0\033[0m")
 		return
 	}
@@ -88,8 +82,6 @@ func main() {
 	currentExpiration, err := getUserExpirationDate(username)
 	if err != nil {
 		clearScreen()
-		fmt.Println()
-		fmt.Println()
 		fmt.Println()
 		fmt.Println()
 		fmt.Println()
@@ -102,8 +94,6 @@ func main() {
 	err = updateUserExpiration(username, newExpiration)
 	if err != nil {
 		clearScreen()
-		fmt.Println()
-		fmt.Println()
 		fmt.Println()
 		fmt.Println()
 		fmt.Println()
@@ -124,15 +114,11 @@ func main() {
 		fmt.Println()
 		fmt.Println()
 		fmt.Println()
-		fmt.Println()
-		fmt.Println()
 		fmt.Println("\033[31mError updating log file\033[0m")
 		return
 	}
 
 	clearScreen()
-	fmt.Println()
-	fmt.Println()
 	fmt.Println()
 	fmt.Println()
 	fmt.Println()

@@ -27,8 +27,6 @@
     echo ""
     echo ""
     echo ""
-    echo ""
-    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -123,8 +121,6 @@ v_ws=$(timeout 5 ws version 2>/dev/null | head -n 1 | grep -oE 'v[0-9.]+' | head
 v_stunnel=$(stunnel -version 2>&1 | grep -oE 'stunnel [0-9.]+' | head -n 1 | awk '{print $2}')
 
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""

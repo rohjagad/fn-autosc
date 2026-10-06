@@ -28,8 +28,6 @@
     echo ""
     echo ""
     echo ""
-    echo ""
-    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -84,8 +82,6 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 red='\033[0;31m'
 green='\033[0;32m'
 blue='\033[1;34m'
@@ -125,19 +121,13 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 echo start
 clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 domain=$(cat /etc/xray/domain)
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""
@@ -223,8 +213,6 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 echo "
 L FN 项目更新证书
 ${separator}
@@ -286,8 +274,6 @@ fi
 
 dm() {
     clear
-    echo ""
-    echo ""
     echo ""
     echo ""
     echo ""
@@ -418,15 +404,11 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 echo start
 domain=$(cat /etc/xray/domain)
 systemctl stop nginx
 cd /root/
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""
@@ -454,8 +436,6 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 echo -e "${NC}${separator}
         GENERATE CERTIFICATE
 ${separator}
@@ -477,8 +457,6 @@ esac
 dmsl() {
 systemctl stop nginx
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""
@@ -513,8 +491,6 @@ echo ""
 
 dm1() {
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""

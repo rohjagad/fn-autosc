@@ -27,8 +27,6 @@
     echo ""
     echo ""
     echo ""
-    echo ""
-    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -80,8 +78,6 @@
     }
 
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""
@@ -169,8 +165,6 @@ function create() {
 	echo ""
 	echo ""
 	echo ""
-	echo ""
-	echo ""
 	newline
 	echo -e "Create WireGuard Account"
 	echo -e "${separator}"
@@ -245,8 +239,6 @@ AllowedIPs = ${client_ipv4}/32" >> /etc/wireguard/wg0.conf
 	echo ""
 	echo ""
 	echo ""
-	echo ""
-	echo ""
 	newline
 	echo -e "WireGuard User Information"
 	echo -e "${separator}"
@@ -269,8 +261,6 @@ function warp() {
 source /etc/wireguard/params
 #ip=$(curl -sS curl -sS ipv4.icanhazip.com)
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""
@@ -306,25 +296,17 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""
 warpd=$(cat warp.json | jq .)
 
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""
@@ -359,8 +341,6 @@ function delete() {
 	echo ""
 	echo ""
 	echo ""
-	echo ""
-	echo ""
 	newline
 	echo -e "Delete WireGuard User"
 	echo -e "${separator}"
@@ -389,8 +369,6 @@ function delete() {
 
 function extend() {
 	clear
-	echo ""
-	echo ""
 	echo ""
 	echo ""
 	echo ""
@@ -437,8 +415,6 @@ function extend() {
 	echo ""
 	echo ""
 	echo ""
-	echo ""
-	echo ""
 	newline
 	echo -e "WireGuard User Information"
 	echo -e "${separator}"
@@ -450,8 +426,6 @@ function extend() {
 
 function list() {
 	clear
-	echo ""
-	echo ""
 	echo ""
 	echo ""
 	echo ""
@@ -476,8 +450,6 @@ function list() {
 
 function show() {
 	clear
-	echo ""
-	echo ""
 	echo ""
 	echo ""
 	echo ""
@@ -510,8 +482,6 @@ function show() {
 
 function main() {
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""
@@ -553,14 +523,10 @@ case $menu in
 	echo ""
 	echo ""
 	echo ""
-	echo ""
-	echo ""
 	menu
 	;;
 *) 
 	clear 
-	echo ""
-	echo ""
 	echo ""
 	echo ""
 	echo ""

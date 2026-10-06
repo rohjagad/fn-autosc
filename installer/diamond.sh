@@ -27,8 +27,6 @@
     echo ""
     echo ""
     echo ""
-    echo ""
-    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -83,8 +81,6 @@
 
 ips=$(cat /root/.ips)
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""
@@ -212,8 +208,6 @@ elif [[ $ips == "dual" ]]; then
     echo "Success Install Certificate Dual Stack"
 fi
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""

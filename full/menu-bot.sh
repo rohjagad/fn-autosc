@@ -27,8 +27,6 @@
     echo ""
     echo ""
     echo ""
-    echo ""
-    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -83,8 +81,6 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 botmenu() {
 
 red='\033[0;31m'
@@ -134,8 +130,6 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 # [ File lokasi API Key dan Chat ID ]
 api_file="/etc/funny/.keybot"
 id_file="/etc/funny/.chatid"
@@ -163,8 +157,6 @@ ${separator}
 fi
 
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""
@@ -214,8 +206,6 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 # [ Menampilkan Output ]
 echo -e "
 Success Install Bot Terminal
@@ -239,8 +229,6 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 echo "
 Terminal Bot Uninstalled Successfully"
 }
@@ -249,8 +237,6 @@ restart() {
 systemctl daemon-reload
 systemctl restart bot
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""
@@ -263,8 +249,6 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 edussh_service=$(systemctl status bot 2>/dev/null | grep Active | awk '{print $3}' | cut -d "(" -f2 | cut -d ")" -f1)
 if [[ $edussh_service == "running" ]]; then
     ws="${green}ON${NC}"
@@ -272,8 +256,6 @@ else
     ws="${red}OFF${NC}"
 fi
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""
@@ -306,8 +288,6 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 lanjut() {
 rm -fr /etc/funny/.chatid
 rm -fr /etc/funny/.keybot
@@ -315,8 +295,6 @@ echo "$api" > /etc/funny/.keybot
 echo "$itd" > /etc/funny/.chatid
 chmod 600 /etc/funny/.keybot /etc/funny/.chatid 2>/dev/null || true
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""
@@ -339,8 +317,6 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 echo -e "
 ${separator}
  Bot Credentials Not Set
@@ -356,8 +332,6 @@ creds() {
 # The single place the bot credentials are entered or changed. The registered
 # values are shown first; pressing ENTER on a field keeps the registered value.
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""
@@ -385,8 +359,6 @@ if [ -z "$itd" ] || [ -z "$api" ]; then
     echo ""
     echo ""
     echo ""
-    echo ""
-    echo ""
     echo -e "
 ${separator}
  Both values are required.
@@ -397,8 +369,6 @@ ${separator}
     return
 fi
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""
@@ -427,15 +397,11 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 echo "Sending a test notification to Telegram..."
 resp=$(curl -4 -s --max-time 15 -d "chat_id=$id" \
     --data-urlencode "text=[ FN AutoSC ] Notification setup complete - the bot is configured correctly." \
     "https://api.telegram.org/bot$key/sendMessage")
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""
@@ -475,8 +441,6 @@ clear
 echo ""
 echo ""
 echo ""
-echo ""
-echo ""
 echo -e "
 ${separator}
  Bot Auto Backup
@@ -505,8 +469,6 @@ echo ""
 
 mna() {
 clear
-echo ""
-echo ""
 echo ""
 echo ""
 echo ""

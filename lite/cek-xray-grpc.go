@@ -150,8 +150,6 @@ func main() {
 	fmt.Println()
 	fmt.Println()
 	fmt.Println()
-	fmt.Println()
-	fmt.Println()
 	outerSep := rainbowSepGo("-----------------------------------")
 
 	fmt.Println(outerSep)
