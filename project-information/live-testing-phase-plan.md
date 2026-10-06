@@ -39,7 +39,7 @@ Check these three on every screen you open:
 
 1. **Wording:** simple words a junior IT understands. No typo. Same term everywhere (e.g. do not mix `Expired` / `Kadaluarsa` on one screen). Units shown (`GB`, `days`, `IP`).
 2. **Navigation:** every number works. `0` goes back to parent, never drops to shell. Wrong number re-shows the menu. Empty `Enter` is rejected with a clear message, no crash. `Ctrl+D` (EOF) exits cleanly (`exit 0`).
-3. **Layout tidiness:** header centered, separator lines same length, `Label : value` colons aligned, no wrapped/truncated lines at 80 cols, colors reset at end, account card stays on screen (pause) before clear.
+3. **Layout tidiness:** header centered, separator lines same length, `Label : value` colons aligned, no wrapped/truncated lines at 80 cols, colors reset at end, account card stays on screen (pause) before clear. Title/bottom separators rainbow `---` 35, inner dividers blue `---` 35, exactly 3 blank lines after each `clear`, picker lists green-numbered (`01.`) with `Total Accounts` and number-or-name input.
 
 If any screen fails one of the three, note: menu name + option + what you typed + what you saw.
 
@@ -97,7 +97,7 @@ Each phase below lists: **Goal**, **K** (client traffic), **S** (menu walk), **P
 ### Fase 2: Nginx, HAProxy, TLS inbound
 
 - **Goal:** port 443/80 routing correct.
-- **K:** from VM: `curl` TLS handshake to domain:443 (expect TLS 1.3, valid cert); port 80 served without redirect loop; TCP open on 777 (stunnel-wrapped SSH, no HTTP banner by design).
+- **K:** from VM: `curl` TLS handshake to domain:443 (expect TLS 1.3; installs ship **self-signed** by default with CN = install domain — trusted LE/ZeroSSL only after manual Domain-menu issuance, so do NOT expect a public chain on fresh installs); port 80 served without redirect loop; TCP open on 777 (stunnel-wrapped SSH, no HTTP banner by design).
 - **S:** `menu-system` → nginx/haproxy status screens. Wording: `ON/OFF` consistent. Layout: port lists aligned.
 - **PASS:** TLS ok, 80 ok, 777 TCP-only per `installer/stunnel5.sh`.
 
@@ -111,21 +111,21 @@ Each phase below lists: **Goal**, **K** (client traffic), **S** (menu walk), **P
 ### Fase 4: Xray WebSocket (VMess, VLESS, Trojan)
 
 - **Goal:** real payload through WS.
-- **K:** create one account per proto; VM runs xray client (`/vmws`, `/vlws`, `/trws`, TLS 443); download 1–5 MB file; checksum == direct download. Repeat one via port 80 NonTLS.
-- **S:** `menu-x` → create each account via TUI. Check: card shows `Path`, `Network: WebSocket`, full link; duplicate name rejected clearly.
+- **K:** create one account per proto; VM runs xray client (`/vmws`, `/vlws`, `/trws`, TLS 443); download 1–5 MB file; checksum == direct download. Repeat one via port 80 NonTLS. Spot-check one color alias (e.g. `/red` vs `/vmws`) returns the identical status.
+- **S:** `menu-x` → create each account via TUI. Check: card shows `Path`, `Network: WebSocket`, full link; duplicate name rejected clearly. Sequential creates rotate link paths (decode 2+ links: canonical, then colors).
 - **PASS:** 3/3 checksums match, NonTLS ok.
 
 ### Fase 5: Xray gRPC (`vmgr`, `vlgr`, `trgr`)
 
 - **Goal:** gRPC streaming works behind nginx.
-- **K:** same as F4 but service names `vmgr`/`vlgr`/`trgr`; transfer >3 MB both directions.
+- **K:** same as F4 but service names `vmgr`/`vlgr`/`trgr`; transfer >3 MB both directions. Spot-check one color service alias returns the canonical status.
 - **S:** same TUI card checks in `menu-x` gRPC entries; wording `gRPC` spelled same everywhere.
 - **PASS:** 3/3 transfers match.
 
 ### Fase 6: HTTPUpgrade + XHTTP
 
 - **Goal:** modern transports work.
-- **K:** HTTPUpgrade paths `/vmhu`, `/vlhu`, `/trhu`; XHTTP paths `/vmxh`, `/vlxh`, `/trxh` with `network: xhttp` (no `mode: packet-up` needed); 1 MB download each, checksum match.
+- **K:** HTTPUpgrade paths `/vmhu`, `/vlhu`, `/trhu`; XHTTP paths `/vmxh`, `/vlxh`, `/trxh` with `network: xhttp` (no `mode: packet-up` needed); 1 MB download each, checksum match. Spot-check one color alias per path the same way as F4.
 - **S:** card must show `Network: HTTP Upgrade` / `Network: XHTTP` with correct path. Old path `/vmspl` must not appear anywhere.
 - **PASS:** 6/6 match, no stale path text.
 
@@ -140,7 +140,7 @@ Each phase below lists: **Goal**, **K** (client traffic), **S** (menu walk), **P
 
 - **Goal:** accounts created cleanly, doubles refused.
 - **K:** none extra (accounts from F4–F7 reused).
-- **S:** in each `add-*` screen: try empty name (rejected), bad chars (rejected, no shell eval), existing name (duplicate message), `0` for limit/quota/days (`0 not allowed`, Decision 4). Verify JSON has `"level": 0`.
+- **S:** in each `add-*` screen: try empty name (rejected), bad chars (rejected, no shell eval), existing name (duplicate message), `0` for limit/quota/days (`0 not allowed`, Decision 4). Verify JSON has `"level": 0`. Rotation: sequential creates spread across canonical + colors (`/etc/xray/.colorseq` advances; decode links to confirm), and across domains when extras exist (`/etc/xray/.domainseq`; card shows used `Domain` + available `Domains`).
 - **PASS:** all rejections clean, JSON valid.
 
 ### Fase 9: IP-limit + lock/unlock
@@ -175,15 +175,15 @@ Each phase below lists: **Goal**, **K** (client traffic), **S** (menu walk), **P
 
 - **Goal:** every menu survives operator mistakes and reads tidy.
 - **K:** none.
-- **S:** visit ALL: `menu`, `menu-x`, `menu-ssh`, `menu-wg`, `menu-noobz`, `menu-dnstt`, `menu-system`, `menu-bot`, `menu-argo`, `bmenu`, `dm-menu`. Per menu: press `0` (back to parent), `00` (spell/behavior), `99` (invalid re-show), empty Enter, `Ctrl+D`. Per numeric field: `0`, `-1`, `abc`, `1.5`, metachars (`;`, `$()`, `*`). Record every screen against the §2 quality bar (wording/navigation/layout). This is the main TUI-tidiness gate.
+- **S:** visit ALL: `menu`, `menu-x`, `menu-ssh`, `menu-wg`, `menu-noobz`, `menu-dnstt`, `menu-system`, `menu-bot`, `menu-argo`, `bmenu`, `dm-menu`. Per menu: press `0` (back to parent), `00` (spell/behavior), `99` (invalid re-show), empty Enter, `Ctrl+D`. Per numeric field: `0`, `-1`, `abc`, `1.5`, metachars (`;`, `$()`, `*`). `dm-menu` options are 1–6 + 0 (add/remove/list, cert-per-chosen-domain ×3); stacked screens separated by blank-line air; picker lists numbered with number-or-name input; per-domain cards aligned. Record every screen against the §2 quality bar (wording/navigation/layout). This is the main TUI-tidiness gate.
 - **PASS:** zero crashes/hangs/shell-drops; all rejections worded; layout checklist clean.
 
-### Fase 14: Domain move + cert fallback
+### Fase 14: Domain list, rotation, and cert safety
 
-- **Goal:** domain change safe, TLS never bricks.
-- **K:** after valid change, TLS cert covers new name; traffic still flows.
-- **S:** `dm-menu`: `bad domain` rejected, files unchanged; valid change updates domain file + nginx + new cards consistently. Cert-fail simulation (rate-limit 429) falls back without killing nginx/haproxy.
-- **PASS:** invalid input harmless, valid move consistent, fallback keeps 443 up.
+- **Goal:** extra domains add cleanly, rotation spreads, TLS never bricks.
+- **K:** add a nip.io-style test domain pointing here; `openssl s_client` shows it in SANs after the auto self-sign; remove it; LE cert restored byte-identical after (back up `/etc/xray/xray.crt/.key` before, restore + reload after).
+- **S:** `dm-menu`: options 1–6 present; `bad domain` rejected, files unchanged; add validates + dedupes; list shows one shared-framed card per domain with matching protocol counts; remove empties the file and restores single `server_name` (no `.tmp` leftovers). Options 4–6 pick a domain first — test ONLY the cancel path (invalid choice returns clean, no issuance ever runs in tests: LE rate limits); unpointed domains print the skip notice instead of failing issuance.
+- **PASS:** add/remove/list round-trip clean; cancel paths write nothing; cert identical after restore; nginx -t clean throughout.
 
 ### Fase 15: Telegram backup + web restore
 
@@ -206,11 +206,11 @@ Each phase below lists: **Goal**, **K** (client traffic), **S** (menu walk), **P
 - **S:** card shows `Path: /vmxh`, `Network: XHTTP`; `delete-xhttp` via TUI leaves valid JSON + active service.
 - **PASS:** traffic + card + alias + cleanup all green.
 
-### Fase 18: Auth URL fallback (Pages → GitHub)
+### Fase 18: Auth URL race (Pages + GitHub, first valid wins)
 
 - **Goal:** license gate survives one source down.
 - **K:** VM checks both URLs return same `###` count.
-- **S:** `menu-api status` green on primary; block primary (temp `/etc/hosts`) → still green via fallback; block both → fail-closed (`Failed to download permissions.`, non-zero exit) before any mutation; remove blocks after.
+- **S:** `menu-api status` green on primary; block primary (temp `/etc/hosts`) → still green (race: whichever valid reply arrives first wins, Decision 29); block both → fail-closed (`Failed to download permissions.`, non-zero exit) before any mutation; remove blocks after.
 - **PASS:** green/green/fail-closed, box clean after.
 
 ### Fase 19: Gate hardness (network + matching)
@@ -231,7 +231,7 @@ Each phase below lists: **Goal**, **K** (client traffic), **S** (menu walk), **P
 
 - **Goal:** template = installed = card; tools tell the truth.
 - **K:** new account link UUID/password == JSON; deleted == gone everywhere.
-- **S:** `cek-xray-*`, `list-ssh`, `cek-login-ssh` vs raw state (`grep '^###'`, `chage`, `passwd -S`): no fake `UNLOCKED`/`No Expiry`/`0/0`; missing-binary simulation errors explicitly (then restore binary).
+- **S:** `cek-xray-*`, `list-ssh`, `cek-login-ssh` vs raw state (`grep '^###'`, `chage`, `passwd -S`): no fake `UNLOCKED`/`No Expiry`/`0/0`; missing-binary simulation errors explicitly (then restore binary). Drift matrix: 36 color locations present with canonical-matching status; rotated link paths + domains decode valid; `server_name` lists primary + extras with no placeholder.
 - **PASS:** 1:1 ports/paths, no placeholder `server_name`, no false success.
 
 ---
