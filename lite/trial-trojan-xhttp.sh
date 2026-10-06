@@ -82,6 +82,22 @@ echo ""
 echo ""
 echo ""
 domain=$(cat /etc/xray/domain)
+# Alternate domain, rotated for balance (no default; list order only)
+rdomains=("$domain")
+if [ -s /etc/xray/domains ]; then
+    _seen="|$domain|"
+    while IFS= read -r _d || [ -n "$_d" ]; do
+        _d=$(echo "$_d" | tr -d '[:space:]')
+        if [ -n "$_d" ] && [[ "$_seen" != *"|$_d|"* ]]; then
+            rdomains+=("$_d")
+            _seen="$_seen$_d|"
+        fi
+    done < /etc/xray/domains
+fi
+dseq=$(cat /etc/xray/.domainseq 2>/dev/null || echo 0)
+rdomain="${rdomains[$((dseq % ${#rdomains[@]}))]}"
+echo $((dseq+1)) > /etc/xray/.domainseq
+alldom=$(printf '%s,' "${rdomains[@]}" | sed 's/,$//; s/,/, /g')
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
@@ -134,10 +150,10 @@ if xray run -test -config /etc/xray/json/xhttp.json >/dev/null 2>&1; then
 fi
 
 # Konfigurasi Trojan WS TLS
-link1="trojan://${uuid}@${domain}:443?path=$opath&security=tls&host=${domain}&type=xhttp&sni=${domain}#${user}"
+link1="trojan://${uuid}@${rdomain}:443?path=$opath&security=tls&host=${rdomain}&type=xhttp&sni=${rdomain}#${user}"
 
 # Konfigurasi Trojan WS NonTLS
-link2="trojan://${uuid}@${domain}:80?path=$opath&security=none&host=${domain}&type=xhttp#${user}"
+link2="trojan://${uuid}@${rdomain}:80?path=$opath&security=none&host=${rdomain}&type=xhttp#${user}"
 
 TEKS="
 ----------------------
@@ -145,7 +161,8 @@ TEKS="
 ----------------------
 
 Remarks : $user
-Domain  : $domain
+Domain  : ${rdomain}
+Domains : $alldom
 UUID    : $uuid
 Expired : $exp
 Limit IP: $ip

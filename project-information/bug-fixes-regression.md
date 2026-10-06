@@ -1941,3 +1941,13 @@ Section 35's four-check rule applied to Fix 372:
 | **Over-strictness** | Nothing rejected; additive aliases only. |
 | **Over-engineering** | Generated location blocks mirroring canonicals; 6-line rotation snippet per builder. |
 | **vs the source** | References have one path per backend; color aliases are this repo's own direction per operator request. |
+## 157. Multi-Domain Rotation — Four Checks (October 6, 2026)
+
+Section 35's four-check rule applied to Fix 373:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Single-domain installs behave exactly as before (rotation over one entry; cert flow unchanged when no extras file). |
+| **Over-strictness** | Nothing rejected; unpointed domains are skipped for issuance, never fatal. |
+| **Over-engineering** | One list file, two counters, menu add/remove reusing existing patterns. |
+| **vs the source** | References are single-domain; rotation is this repo's own direction per operator request. |

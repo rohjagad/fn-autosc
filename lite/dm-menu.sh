@@ -127,6 +127,19 @@ echo ""
 echo ""
 echo ""
 domain=$(cat /etc/xray/domain)
+DARGS="-d $domain"
+MYIP=$(curl -4 -s --max-time 10 ifconfig.me 2>/dev/null)
+if [ -s /etc/xray/domains ] && [ -n "$MYIP" ]; then
+    while IFS= read -r _d || [ -n "$_d" ]; do
+        _d=$(echo "$_d" | tr -d '[:space:]')
+        RIP=$(getent hosts "$_d" 2>/dev/null | awk '$1 ~ /^[0-9.]+$/ {print $1; exit}')
+        if [ -n "$_d" ] && [ "$_d" != "$domain" ] && [ "$RIP" = "$MYIP" ]; then
+            DARGS="$DARGS -d $_d"
+        elif [ -n "$_d" ] && [ "$_d" != "$domain" ]; then
+            echo "Skipping $_d for this issuance (DNS does not point here yet)."
+        fi
+    done < /etc/xray/domains
+fi
 clear
 echo ""
 echo ""
@@ -147,11 +160,11 @@ if [[ $ip_version == "4" ]]; then
     chmod +x /root/.acme.sh/acme.sh
     /root/.acme.sh/acme.sh --upgrade --auto-upgrade
     /root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
-    if ! /root/.acme.sh/acme.sh --issue -d $domain --force --standalone -k ec-256; then
+    if ! /root/.acme.sh/acme.sh --issue $DARGS --force --standalone -k ec-256; then
         echo "Let's Encrypt failed/rate-limited, falling back to ZeroSSL..."
         /root/.acme.sh/acme.sh --set-default-ca --server zerossl
         /root/.acme.sh/acme.sh --register-account -m "${email:-admin@$domain}" --server zerossl 2>/dev/null || true
-        /root/.acme.sh/acme.sh --issue -d $domain --force --standalone -k ec-256 --server zerossl || true
+        /root/.acme.sh/acme.sh --issue $DARGS --force --standalone -k ec-256 --server zerossl || true
     fi
     /root/.acme.sh/acme.sh --installcert -d $domain --force --fullchainpath /etc/xray/xray.crt --keypath /etc/xray/xray.key --ecc || true
     if [[ ! -s /etc/xray/xray.crt || ! -s /etc/xray/xray.key ]]; then
@@ -176,11 +189,11 @@ elif [[ $ip_version == "6" ]]; then
     chmod +x /root/.acme.sh/acme.sh
     /root/.acme.sh/acme.sh --upgrade --auto-upgrade
     /root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
-    if ! /root/.acme.sh/acme.sh --issue -d $domain --force --standalone -k ec-256 --listen-v6; then
+    if ! /root/.acme.sh/acme.sh --issue $DARGS --force --standalone -k ec-256 --listen-v6; then
         echo "Let's Encrypt failed/rate-limited, falling back to ZeroSSL..."
         /root/.acme.sh/acme.sh --set-default-ca --server zerossl
         /root/.acme.sh/acme.sh --register-account -m "${email:-admin@$domain}" --server zerossl 2>/dev/null || true
-        /root/.acme.sh/acme.sh --issue -d $domain --force --standalone -k ec-256 --listen-v6 --server zerossl || true
+        /root/.acme.sh/acme.sh --issue $DARGS --force --standalone -k ec-256 --listen-v6 --server zerossl || true
     fi
     /root/.acme.sh/acme.sh --installcert -d $domain --force --fullchainpath /etc/xray/xray.crt --keypath /etc/xray/xray.key --ecc || true
     if [[ ! -s /etc/xray/xray.crt || ! -s /etc/xray/xray.key ]]; then
@@ -489,6 +502,98 @@ read -n 1 -s -r -p "Press any key to return..." || true
 echo ""
 }
 
+domain_sync_nginx() {
+    # Rebuild the 443 server_name from primary + extras, then reload.
+    local primary names
+    primary=$(cat /etc/xray/domain 2>/dev/null)
+    names="$primary $(tr '\n' ' ' < /etc/xray/domains 2>/dev/null)"
+    names=$(echo "$names" | tr -s ' ' | sed 's/^ //; s/ $//')
+    [ -z "$names" ] && { echo "No domain configured."; return 1; }
+    python3 - "$names" <<'PYEOF2'
+import re, sys
+names = sys.argv[1]
+p = "/etc/nginx/nginx.conf"
+s = open(p).read()
+lines = s.splitlines()
+li = next(i for i, l in enumerate(lines) if "listen 443" in l)
+tgt = next(i for i in range(li, len(lines)) if re.match(r"^\s*server_name\s", lines[i]))
+ind = lines[tgt][:len(lines[tgt]) - len(lines[tgt].lstrip())]
+lines[tgt] = ind + "server_name " + names + ";"
+open(p, "w").write("\n".join(lines) + "\n")
+print("server_name synced: " + names)
+PYEOF2
+    nginx -t 2>&1 | tail -1 && systemctl reload nginx
+}
+
+domain_extra_add() {
+    clear
+    echo ""
+    echo ""
+    echo ""
+    local primary cur
+    primary=$(cat /etc/xray/domain 2>/dev/null)
+    cur=$(tr '\n' ' ' < /etc/xray/domains 2>/dev/null)
+    echo -e "${separator}"
+    echo -e "Add Extra Domain (rotation)"
+    echo -e "${separator}"
+    echo -e "Primary : $primary"
+    echo -e "Extras  : ${cur:-<none>}"
+    echo -e "${separator}"
+    echo ""
+    read -p "New extra domain: " nd || return
+    if ! [[ "$nd" =~ ^([[:alnum:]]([[:alnum:]-]{0,61}[[:alnum:]])?\.)+[[:alpha:]]{2,63}$ ]]; then
+        echo "Domain must be a valid DNS hostname."
+        sleep 2
+        return
+    fi
+    if [ "$nd" = "$primary" ] || grep -qxF "$nd" /etc/xray/domains 2>/dev/null; then
+        echo "Domain already listed."
+        sleep 2
+        return
+    fi
+    echo "$nd" >> /etc/xray/domains
+    domain_sync_nginx
+    echo ""
+    echo "Point DNS for $nd at this VPS IP, then reissue the"
+    echo "certificate (option 2) so TLS links keep working."
+    read -n 1 -s -r -p "Press any key to return..." || true
+    echo ""
+}
+
+domain_extra_del() {
+    clear
+    echo ""
+    echo ""
+    echo ""
+    if [ ! -s /etc/xray/domains ]; then
+        echo "No extra domains."
+        sleep 2
+        return
+    fi
+    echo -e "${separator}"
+    echo -e "Remove Extra Domain"
+    echo -e "${separator}"
+    local i=1
+    while IFS= read -r _d; do
+        [ -n "$_d" ] && { echo -e "${green}$i${NC}. $_d"; i=$((i+1)); }
+    done < /etc/xray/domains
+    echo -e "${separator}"
+    echo ""
+    read -p "Number to remove (0 cancels): " nn || return
+    if ! [[ "$nn" =~ ^[0-9]+$ ]] || [ "$nn" -lt 1 ]; then
+        return
+    fi
+    local target
+    target=$(grep -v '^\s*$' /etc/xray/domains | sed -n "${nn}p")
+    [ -z "$target" ] && return
+    grep -vxF "$target" /etc/xray/domains > /etc/xray/domains.tmp || true
+    mv /etc/xray/domains.tmp /etc/xray/domains
+    domain_sync_nginx
+    echo "Removed $target."
+    sleep 1
+}
+
+
 dm1() {
 clear
 echo ""
@@ -501,6 +606,8 @@ ${green}1${NC}. Change Server Domain
 ${green}2${NC}. Renew Certificate (Acme: IPv4/IPv6)
 ${green}3${NC}. Renew Certificate (Certbot: IPv4 Only)
 ${green}4${NC}. Generate Self-Signed Certificate
+${green}5${NC}. Add Extra Domain (rotation)
+${green}6${NC}. Remove Extra Domain
 ${green}0${NC}. Back to Main Menu
 ${separator}
 
@@ -511,6 +618,8 @@ case $apw in
 2) clear ; cert ; dm1 ;;
 3) clear ; fn ; dm1 ;;
 4) clear ; dmsl ; dm1 ;;
+5) clear ; domain_extra_add ; dm1 ;;
+6) clear ; domain_extra_del ; dm1 ;;
 0|00) clear ; menu ;;
 *) clear ; dm1 ;;
 esac

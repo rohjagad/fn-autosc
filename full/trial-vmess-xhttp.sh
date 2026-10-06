@@ -82,6 +82,22 @@ echo ""
 echo ""
 echo ""
 domain=$(cat /etc/xray/domain)
+# Alternate domain, rotated for balance (no default; list order only)
+rdomains=("$domain")
+if [ -s /etc/xray/domains ]; then
+    _seen="|$domain|"
+    while IFS= read -r _d || [ -n "$_d" ]; do
+        _d=$(echo "$_d" | tr -d '[:space:]')
+        if [ -n "$_d" ] && [[ "$_seen" != *"|$_d|"* ]]; then
+            rdomains+=("$_d")
+            _seen="$_seen$_d|"
+        fi
+    done < /etc/xray/domains
+fi
+dseq=$(cat /etc/xray/.domainseq 2>/dev/null || echo 0)
+rdomain="${rdomains[$((dseq % ${#rdomains[@]}))]}"
+echo $((dseq+1)) > /etc/xray/.domainseq
+alldom=$(printf '%s,' "${rdomains[@]}" | sed 's/,$//; s/,/, /g')
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
@@ -134,14 +150,14 @@ acs=`cat<<eof
 {
 "v": "2",
 "ps": "${user}",
-"add": "${domain}",
+"add": "${rdomain}",
 "port": "443",
 "id": "${uuid}",
 "aid": "0",
 "net": "xhttp",
 "path": "$opath",
 "type": "none",
-"host": "${domain}",
+"host": "${rdomain}",
 "tls": "tls"
 }
 eof`
@@ -151,14 +167,14 @@ ask=`cat<<eof
 {
 "v": "2",
 "ps": "${user}",
-"add": "${domain}",
+"add": "${rdomain}",
 "port": "80",
 "id": "${uuid}",
 "aid": "0",
 "net": "xhttp",
 "path": "$opath",
 "type": "none",
-"host": "${domain}",
+"host": "${rdomain}",
 "tls": "none"
 }
 eof`
@@ -177,7 +193,8 @@ TEKS="
 ----------------------
 
 Remarks : $user
-Domain  : $domain
+Domain  : ${rdomain}
+Domains : $alldom
 UUID    : $uuid
 Expired : $exp
 Protokol: Vmess
