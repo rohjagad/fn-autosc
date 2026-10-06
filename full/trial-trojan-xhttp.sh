@@ -23,6 +23,7 @@
 
     # Unduh izin dan validasi
     clear
+    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -75,6 +76,7 @@
 
     output
 clear
+echo ""
 
 domain=$(cat /etc/xray/domain)
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
@@ -82,11 +84,13 @@ KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 clear
+echo ""
 user=trial`</dev/urandom tr -dc 0-9 | head -c3`
 masaaktif="1"
 quota="1"
 ip="1"
 clear
+echo ""
 
 # Limit Quota
 if [[ $quota -gt 0 ]]; then
@@ -154,5 +158,6 @@ fi
 echo -e "$TEKS" > /var/log/create/xray/xhttp/${user}.log
 echo 'sed -i "/^### '"$user"' '"$exp"'/ {N;d}" /etc/xray/json/xhttp.json && sed -i -z '"'"'s/},\n *\]/}\n        ]/g'"'"' /etc/xray/json/xhttp.json && systemctl restart xray@xhttp && systemctl restart quota-xhttp && rm -fr /var/log/create/xray/xhttp/'"$user"'.log && rm -fr /etc/xray/limit/ip/xray/xhttp/'"$user"' && rm -fr /etc/xray/quota/xhttp/'"$user"' /etc/xray/quota/xhttp/'"$user"'_usage' | at now + 60 minutes >/dev/null 2>&1
 clear
+echo ""
 source /etc/funny/format.sh
 format_display "$TEKS"

@@ -40,6 +40,7 @@ func rainbowSepGo(text string) string {
 
 func main() {
 	clearScreen()
+	fmt.Println()
 
 	outerSep := rainbowSepGo("-----------------------------------")
 
@@ -55,6 +56,7 @@ func main() {
 
 	if !userExists(username) {
 		clearScreen()
+		fmt.Println()
 		fmt.Println("\033[31mUsername Doesn't Exist\033[0m")
 		return
 	}
@@ -67,6 +69,7 @@ func main() {
 	days, err := strconv.Atoi(daysInput)
 	if err != nil || days < 1 {
 		clearScreen()
+		fmt.Println()
 		fmt.Println("\033[31mDays must be a whole number greater than 0\033[0m")
 		return
 	}
@@ -74,6 +77,7 @@ func main() {
 	currentExpiration, err := getUserExpirationDate(username)
 	if err != nil {
 		clearScreen()
+		fmt.Println()
 		fmt.Println("\033[31mError retrieving expiration date\033[0m")
 		return
 	}
@@ -83,6 +87,7 @@ func main() {
 	err = updateUserExpiration(username, newExpiration)
 	if err != nil {
 		clearScreen()
+		fmt.Println()
 		fmt.Println("\033[31mError updating expiration date\033[0m")
 		return
 	}
@@ -97,11 +102,13 @@ func main() {
 	err = updateLogFile(logFilePath, newExpiration)
 	if err != nil {
 		clearScreen()
+		fmt.Println()
 		fmt.Println("\033[31mError updating log file\033[0m")
 		return
 	}
 
 	clearScreen()
+	fmt.Println()
 	fmt.Println(outerSep)
 	fmt.Printf(" Username : %s\n", username)
 	fmt.Printf(" Days Added : %d Days\n", days)

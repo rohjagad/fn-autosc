@@ -23,6 +23,7 @@
 
     # Unduh izin dan validasi
     clear
+    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -75,6 +76,7 @@
 
     output
 clear
+echo ""
 # Cek apakah `curl` terpasang, lalu tambahkan `1.1.1.1` ke `/etc/resolv.conf` jika belum ada
 [[ -e $(which curl) ]] && grep -q "1.1.1.1" /etc/resolv.conf || { 
     echo "nameserver 1.1.1.1" | cat - /etc/resolv.conf >> /etc/resolv.conf.tmp && mv /etc/resolv.conf.tmp /etc/resolv.conf
@@ -88,6 +90,7 @@ MYIP=$(curl -4 -s ifconfig.me)
 
 # Proses Backup
 clear
+echo ""
 echo "Mohon Menunggu, Proses Backup sedang berlangsung!!"
 rm -rf /root/backup
 mkdir /root/backup
@@ -131,12 +134,14 @@ fi
 # Menyimpan Log Backup
 echo "$TEKS" >> /etc/funny/backup.log
 clear
+echo ""
 
 # Kirim pesan ke Telegram
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="120"
 clear
+echo ""
 if [ -z "$CHATID" ] || [ -z "$KEY" ]; then
     # No credentials means the upload cannot succeed; keep the only copy instead
     # of deleting it and claiming success.
@@ -156,12 +161,14 @@ RESP=$(curl -s --max-time $TIME -F chat_id=$CHATID -F document=@backup.zip -F ca
 if echo "$RESP" | grep -q '"ok":true'; then
     rm -fr /root/backup*
     clear
+    echo ""
     echo "$TEKS"
     echo "Backup sent to Telegram"
     read -n 1 -s -r -p "Press any key to return..." || true
     echo ""
 else
     clear
+    echo ""
     echo "$TEKS"
     echo "Telegram upload FAILED - the backup archive was KEPT at $file_path"
     echo "$RESP" | head -c 300

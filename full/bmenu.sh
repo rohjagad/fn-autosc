@@ -24,6 +24,7 @@
 
     # Unduh izin dan validasi
     clear
+    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -75,6 +76,7 @@
     }
 
 clear
+echo ""
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -118,6 +120,7 @@ ip="$ip4 / $ip6"
 date=$(date)
 domain=$(cat /etc/xray/domain)
 clear
+echo ""
 read -rp "Input Link Database: " url || return
 [ -z "$url" ] && return
 
@@ -182,6 +185,7 @@ systemctl restart noobzvpns 2>/dev/null || true
 systemctl restart xl2tpd 2>/dev/null || true
 systemctl restart ipsec 2>/dev/null || true
 clear
+echo ""
 
 #echo "Telah Berjaya Melakukan Backup"
   echo -e "${separator}"
@@ -205,6 +209,7 @@ ip="$ip4 / $ip6"
 date=$(date)
 domain=$(cat /etc/xray/domain)
 clear
+echo ""
 cd /root
 newest=$(ls -t /root/*.zip 2>/dev/null | head -1); [ -n "$newest" ] && [ "$newest" != "/root/backup.zip" ] && mv "$newest" /root/backup.zip
 file="backup.zip"
@@ -212,6 +217,7 @@ if [ -f "$file" ]; then
 echo "$file found, continuing..."
 sleep 2
 clear
+echo ""
 unzip -o backup.zip
 rm -f backup.zip
 sleep 1
@@ -264,6 +270,7 @@ systemctl restart noobzvpns 2>/dev/null || true
 systemctl restart xl2tpd 2>/dev/null || true
 systemctl restart ipsec 2>/dev/null || true
 clear
+echo ""
 
 #echo "Telah Berjaya Melakukan Backup"
   echo -e "${separator}"
@@ -292,6 +299,7 @@ ip="$ip4 / $ip6"
 date=$(date)
 domain=$(cat /etc/xray/domain)
 clear
+echo ""
 read -rp "Backup URL: " url || return
 [ -z "$url" ] && return
 
@@ -459,6 +467,7 @@ systemctl restart noobzvpns 2>/dev/null || true
 systemctl restart xl2tpd 2>/dev/null || true
 systemctl restart ipsec 2>/dev/null || true
 clear
+echo ""
 
 #echo "Telah Berjaya Melakukan Backup"
   echo -e "${separator}"
@@ -476,6 +485,7 @@ rm -fr /root/backup*
 
 bmenu() {
 clear
+echo ""
 echo -e "${NC}${separator}
             BACKUP MENU
 ${separator}

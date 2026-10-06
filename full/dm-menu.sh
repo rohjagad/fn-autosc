@@ -25,6 +25,7 @@
 
     # Unduh izin dan validasi
     clear
+    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -76,6 +77,7 @@
     }
 
 clear
+echo ""
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -113,10 +115,13 @@ blue_sep="${blue}-----------------------------------${NC}"
 
 acme() {
 clear
+echo ""
 echo start
 clear
+echo ""
 domain=$(cat /etc/xray/domain)
 clear
+echo ""
 echo "
 L FN 项目更新证书
 ${separator}
@@ -196,6 +201,7 @@ email=$(cat /etc/funny/.email 2>/dev/null || echo "admin@example.com")
 domain=$(cat /etc/xray/domain)
 
 clear
+echo ""
 echo "
 L FN 项目更新证书
 ${separator}
@@ -257,6 +263,7 @@ fi
 
 dm() {
     clear
+    echo ""
     CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
     KEY=$(cat /etc/funny/.keybot 2>/dev/null)
     URL="https://api.telegram.org/bot$KEY/sendMessage"
@@ -381,11 +388,13 @@ dm() {
 
 fn() {
 clear
+echo ""
 echo start
 domain=$(cat /etc/xray/domain)
 systemctl stop nginx
 cd /root/
 clear
+echo ""
 echo "Starting... Port 80 will be stopped during SSL certificate installation"
 certbot certonly --standalone --preferred-challenges http --agree-tos --email "$(cat /etc/funny/.email 2>/dev/null || echo "admin@example.com")" -d $domain 
 if [[ -s /etc/letsencrypt/live/$domain/fullchain.pem && -s /etc/letsencrypt/live/$domain/privkey.pem ]]; then
@@ -407,6 +416,7 @@ echo ""
 
 cert() {
 clear
+echo ""
 echo -e "${NC}${separator}
         GENERATE CERTIFICATE
 ${separator}
@@ -428,6 +438,7 @@ esac
 dmsl() {
 systemctl stop nginx
 clear
+echo ""
 #detail nama perusahaan
 country="ID"
 state="Central Kalimantan"
@@ -459,6 +470,7 @@ echo ""
 
 dm1() {
 clear
+echo ""
 echo -e "${NC}${separator}
             DOMAIN MENU
 ${separator}

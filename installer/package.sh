@@ -1,6 +1,7 @@
 #!/bin/bash
 
 clear
+echo ""
 
 # Install Package
 if grep -q "bullseye" /etc/os-release 2>/dev/null; then
@@ -53,6 +54,7 @@ touch /etc/funny/.noob
 
 # Installasi Ulang untuk menghindari package tidak terinstall
 clear
+echo ""
 red='\e[1;31m'
 green='\e[1;32m'
 yell='\e[1;33m'
@@ -137,5 +139,6 @@ yellow() { echo -e "\\033[33;1m${*}\\033[0m"; }
 yellow "Dependencies successfully installed..."
 sleep 3
 clear
+echo ""
 
 

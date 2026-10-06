@@ -15,8 +15,10 @@ var sepBlue = colorBlueGo + "-----------------------------------------------" + 
 
 func main() {
 	clearScreen()
+	fmt.Println()
 	fmt.Println("\n\n\n")
 	clearScreen()
+	fmt.Println()
 	fmt.Println(sepOuter)
 	fmt.Println("          CHANGE PASSWORD SSH Account          ")
 	fmt.Println(sepOuter)
@@ -43,6 +45,7 @@ func main() {
 	fmt.Scanln(&newPassword)
 
 	clearScreen()
+	fmt.Println()
 	fmt.Println("Connecting to Server...")
 	sleep(500)
 	fmt.Println("Generating New Password...")
@@ -61,8 +64,10 @@ func main() {
 	}
 
 	clearScreen()
+	fmt.Println()
 	fmt.Println("\n\n\n")
 	clearScreen()
+	fmt.Println()
 	fmt.Println(sepOuter)
 	fmt.Printf("Password for user %s successfully changed.\n", username)
 	fmt.Printf("The new Password for user %s is %s\n", username, newPassword)

@@ -23,6 +23,7 @@
 
     # Unduh izin dan validasi
     clear
+    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -75,6 +76,7 @@
 
     output
 clear
+echo ""
 
 NC='\e[0m'
 GB='\e[32;1m'
@@ -131,6 +133,7 @@ send_log() {
 }
 
 clear
+echo ""
 NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/grpc.json")
 if [[ ${NUMBER_OF_CLIENTS} == '0' ]]; then
     echo -e "${separator}"
@@ -144,6 +147,7 @@ if [[ ${NUMBER_OF_CLIENTS} == '0' ]]; then
 fi
 
 clear
+echo ""
 echo -e "${separator}"
 echo -e "          ${GB}XTLS X-RAY gRPC${NC}          "
 echo -e "${separator}"
@@ -193,6 +197,7 @@ else
     send_log
 
     clear
+    echo ""
     echo -e "${separator}"
     echo -e "          ${GB}XTLS X-RAY gRPC${NC}          "
     echo -e "${separator}"

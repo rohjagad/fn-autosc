@@ -5,6 +5,7 @@
 }
 
 clear
+echo ""
 
 # Fungsi untuk membaca file
 read_file() {
@@ -94,6 +95,7 @@ while ! [[ "$masaaktif" =~ ^[1-9][0-9]*$ ]]; do
 done
 
 clear
+echo ""
 
 # Buat username dan password otomatis
 # Retry up to 10 times to avoid collision with active trial accounts
@@ -162,5 +164,6 @@ mkdir -p /var/log/create/ssh
 echo "$message" > /var/log/create/ssh/${username}.log
 
 clear
+echo ""
 source /etc/funny/format.sh
 format_display "$message"

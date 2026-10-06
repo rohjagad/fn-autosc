@@ -54,6 +54,7 @@ blue_sep="${blue}-----------------------------------${NC}"
 
     # Unduh izin dan validasi
     clear
+    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -106,6 +107,7 @@ blue_sep="${blue}-----------------------------------${NC}"
 
     output
 clear
+echo ""
 
 # Detail Informasi
 ip4=$(curl -sS -m 10 ipv4.icanhazip.com)
@@ -127,6 +129,7 @@ if [ -f "$file" ]; then
 echo "$file found, continuing..."
 sleep 2
 clear
+echo ""
 unzip -o backup.zip
 rm -f backup.zip
 sleep 1
@@ -150,10 +153,12 @@ cp ipsec.secrets /etc/ 2>/dev/null || true
 mkdir -p /var/www/html
 cp -r html/* /var/www/html/ 2>/dev/null || true
 clear
+echo ""
 cd
 rm -rf /root/backup
 rm -f backup.zip
 clear
+echo ""
 systemctl daemon-reload
 systemctl restart ssh
 systemctl restart dropbear 2>/dev/null || true
@@ -183,6 +188,7 @@ systemctl restart noobzvpns 2>/dev/null || true
 systemctl restart xl2tpd 2>/dev/null || true
 systemctl restart ipsec 2>/dev/null || true
 clear
+echo ""
 echo -e "${separator}"
 echo -e "SUCCESSFULL RESTORE YOUR VPS"
 echo -e "Please Save The Following Data"

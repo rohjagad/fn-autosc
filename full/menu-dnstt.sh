@@ -24,6 +24,7 @@
 
     # Unduh izin dan validasi
     clear
+    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -75,6 +76,7 @@
     }
 
 clear
+echo ""
 red='\033[0;31m'
 green='\033[0;32m'
 blue='\033[1;34m'
@@ -118,6 +120,7 @@ blue_sep="${blue}-----------------------------------${NC}"
             stat_msg="${red}OFF${NC}"
         fi
         clear
+        echo ""
         echo -e "${NC}${separator}
             SLOWDNS MENU
 ${separator}
@@ -136,8 +139,10 @@ ${orange}Press [Ctrl + C] to exit${NC}"
         case $dn1 in
             1)
                 clear
+                echo ""
                 nsd=$(cat /etc/slowdns/nsdomain 2>/dev/null || echo "No nameserver found.")
                 clear
+                echo ""
                 echo -e "
                 ${separator}
                 Change Nameserver
@@ -158,10 +163,12 @@ ${orange}Press [Ctrl + C] to exit${NC}"
                     return
                 fi
                 clear
+                echo ""
                 echo "${nsdomen}" > /etc/slowdns/nsdomain
                 systemctl stop dnstt.service
                 systemctl disable dnstt.service
                 clear
+                echo ""
                 
                 cat > /etc/systemd/system/dnstt.service << SVCEOF
 [Unit]
@@ -188,6 +195,7 @@ SVCEOF
                 systemctl enable dnstt
                 systemctl start dnstt
                 clear
+                echo ""
                 echo -e "
                 Nameserver Updated Successfully
                 ${separator}
@@ -198,9 +206,11 @@ SVCEOF
                 ;;
             2)
                 clear
+                echo ""
                 systemctl stop dnstt.service
                 systemctl disable dnstt.service
                 clear
+                echo ""
                 chmod +x /etc/slowdns/dns-server
                 /etc/slowdns/dns-server -gen-key -privkey-file /etc/slowdns/server.key -pubkey-file /etc/slowdns/server.pub
                 chmod 600 /etc/slowdns/server.key 2>/dev/null || true
@@ -208,6 +218,7 @@ SVCEOF
                 systemctl enable dnstt.service
                 systemctl start dnstt.service
                 clear
+                echo ""
                 echo -e "
                 Server Keys Renewed Successfully
                 ${separator}"
@@ -216,9 +227,11 @@ SVCEOF
                 ;;
             3)
                 clear
+                echo ""
                 systemctl daemon-reload
                 systemctl restart dnstt.service
                 clear
+                echo ""
                 echo -e "
                 SlowDNS Restarted Successfully
                 ${separator}"
@@ -227,6 +240,7 @@ SVCEOF
                 ;;
             4)
                 clear
+                echo ""
                 nsd=$(cat /etc/slowdns/nsdomain 2>/dev/null || echo "N/A")
                 pubkey=$(cat /etc/slowdns/server.pub 2>/dev/null || echo "N/A")
                 echo -e "${NC}${separator}
@@ -242,10 +256,12 @@ ${separator}"
                 ;;
             0|00)
                 clear
+                echo ""
                 menu
                 ;;
             *)
                 clear
+                echo ""
                 mna89
                 ;;
         esac

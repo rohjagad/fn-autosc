@@ -25,6 +25,7 @@ domain=$(cat /etc/xray/domain)
 
     # Unduh izin dan validasi
     clear
+    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -76,6 +77,7 @@ domain=$(cat /etc/xray/domain)
     }
 
 clear
+echo ""
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -116,6 +118,7 @@ domain=$(cat /etc/xray/domain)
 
 function create() {
 clear
+echo ""
 until [[ $VPN_USER =~ ^[a-zA-Z0-9_]+$ && ${CLIENT_EXISTS} == '0' ]]; do
 		read -rp "Username : " -e VPN_USER || exit 0
 		CLIENT_EXISTS=$(grep -w "$VPN_USER" /etc/funny/.l2tp | wc -l)
@@ -140,6 +143,7 @@ done
 hariini=`date -d "0 days" +"%Y-%m-%d"`
 exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
 clear
+echo ""
 
 # Add or update VPN user
 cat >> /etc/ppp/chap-secrets <<EOF
@@ -158,6 +162,7 @@ systemctl daemon-reload
 systemctl restart ipsec
 systemctl restart xl2tpd
 clear
+echo ""
 PSK=$(grep -oP '(?<=: PSK ")\S+(?=")' /etc/ipsec.secrets 2>/dev/null || echo "myvpn")
 cat <<EOF
 
@@ -178,7 +183,9 @@ echo ""
 
 function delete() {
 clear
+echo ""
 clear
+echo ""
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/funny/.l2tp")
 	if [[ ${NUMBER_OF_CLIENTS} == '0' ]]; then
@@ -228,6 +235,7 @@ echo ""
 
 function extend() {
 clear
+echo ""
 NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/funny/.l2tp")
 	if [[ ${NUMBER_OF_CLIENTS} == '0' ]]; then
 		clear
@@ -292,6 +300,7 @@ echo ""
 
 function main() {
 clear
+echo ""
 echo -e "${NC}${separator}
              L2TP MENU
 ${separator}
@@ -320,14 +329,17 @@ main
 ;;
 0|4)
 clear
+echo ""
 menu
 ;;
 5)
 clear
+echo ""
 exit
 ;;
 *)
 clear
+echo ""
 main
 ;;
 esac

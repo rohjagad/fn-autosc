@@ -23,6 +23,7 @@
 
     # Unduh izin dan validasi
     clear
+    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -75,6 +76,7 @@
 
     output
 clear
+echo ""
 
 send_log() {
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
@@ -140,6 +142,7 @@ NC='\e[0m'
 green() { echo -e "\\033[32;1m${*}\\033[0m"; }
 red() { echo -e "\\033[31;1m${*}\\033[0m"; }
 clear
+echo ""
 NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/ws.json")
 	if [[ ${NUMBER_OF_CLIENTS} == '0' ]]; then
 		echo -e "${separator}"
@@ -154,6 +157,7 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/ws.json")
 	fi
 
 	clear
+	echo ""
 	echo -e "${separator}"
     echo -e "       Delete Vmess Account       "
     echo -e "${separator}"
@@ -178,6 +182,7 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/ws.json")
         if xray run -test -config /etc/xray/json/ws.json >/dev/null 2>&1; then systemctl restart xray@ws > /dev/null 2>&1; fi
         send_log
         clear
+        echo ""
         echo -e "${separator}"
         echo " Vmess Account Deleted Successfully"
         echo -e "${separator}"

@@ -23,6 +23,7 @@
 
     # Unduh izin dan validasi
     clear
+    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -75,6 +76,7 @@
 
     output
 clear
+echo ""
 
 # Function Send Log
 send_log() {
@@ -138,6 +140,7 @@ usernames=($(grep "^### " /etc/xray/json/ws.json | awk '{print $2}' | sort | uni
 
 # Clear screen and display header
 clear
+echo ""
 echo -e "${separator}"
 echo -e "${GREEN}          Change UUID X-ray Ws"
 echo -e "${separator}"
@@ -172,6 +175,7 @@ if [[ -z "$new" ]]; then
     sleep 2
 fi
 clear
+echo ""
 
 # GET OLD UUID
 old=$(grep -F "\"email\": \"${user}\"" /etc/xray/json/ws.json | sed -nE 's/.*"(id|password)": "([^"]+)".*/\2/p' | sort -u | head -1)
@@ -217,6 +221,7 @@ fi
 send_log
 
 clear
+echo ""
 # Confirmation message with updated information
 echo -e "${separator}"
 echo -e "${GREEN} UUID Update Successful!"

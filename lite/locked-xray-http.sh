@@ -23,6 +23,7 @@
 
     # Unduh izin dan validasi
     clear
+    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -75,6 +76,7 @@
 
     output
 clear
+echo ""
 
 # Colors
 green='\033[0;32m'
@@ -139,6 +141,7 @@ locked_files=$(ls /var/log/create/xray/http/*.log 2>/dev/null)
 
 if [ -n "$locked_files" ]; then
     clear
+    echo ""
     echo -e "${NC}${separator}
         LOCK X-RAY HTTP ACCOUNT
 ${separator}"
@@ -165,6 +168,7 @@ ${separator}"
     [ -z "$name" ] && exit 0
 else
     clear
+    echo ""
     echo "No active accounts found to lock."
     exit 1
 fi
@@ -175,6 +179,7 @@ exp2=$(grep "Expired" /var/log/create/xray/http/${name}.log | awk '{print $3}')
 protokol2=$(grep "Protokol:" /var/log/create/xray/http/${name}.log | awk '{print $2}')
 
 clear
+echo ""
 
 echo -e "${NC}${separator}
         LOCK ACCOUNT DETAILS

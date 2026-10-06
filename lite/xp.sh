@@ -23,6 +23,7 @@
 
     # Unduh izin dan validasi
     clear
+    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -76,9 +77,11 @@
 
     output
 clear
+echo ""
 
 systemctl daemon-reload
 clear
+echo ""
 
 # Deletions are destructive and were previously silent; keep an audit line so a
 # vanished account can always be attributed to xp.
@@ -330,6 +333,7 @@ TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL
 clear
+echo ""
 fi
 done
 if [[ $ssh_expired -eq 1 ]]; then
@@ -341,6 +345,7 @@ fi
 
 # L2TP
 clear
+echo ""
 l2tp_expired=0
 data=( `cat /etc/funny/.l2tp | grep '^###' | cut -d ' ' -f 2`);
 now=`date +"%Y-%m-%d"`
@@ -420,6 +425,7 @@ fi
 # <- Noobz Expired -> 
 # // Membersihkan layar
 clear
+echo ""
 
 # // Ini Adalah Auto Expired Untuk Noobzvpns
 
@@ -475,6 +481,7 @@ Exp : $exp
         # Memeriksa apakah pengiriman berhasil
         if [[ $(echo "$response" | jq -r '.ok') == "true" ]]; then
             clear
+            echo ""
             echo "$TEKS"
         else
             echo "Gagal mengirim notifikasi ke Telegram."

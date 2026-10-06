@@ -24,6 +24,7 @@
 
     # Unduh izin dan validasi
     clear
+    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -75,6 +76,7 @@
     }
 
 clear
+echo ""
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -113,6 +115,7 @@ blue_sep="${blue}-----------------------------------${NC}"
 domain=$(cat /etc/xray/domain)
 
 clear
+echo ""
 
 noobz_add_user() {
     local u="$1" p="$2" e="$3"
@@ -130,6 +133,7 @@ noobz_list_users() {
 
 function create() {
 clear
+echo ""
 echo -e "
 ${separator}
 Create NoobzVPN Account
@@ -158,6 +162,7 @@ while ! [[ "$masaaktif" =~ ^[1-9][0-9]*$ ]]; do
     read -p "Duration (Days): " masaaktif || exit 1
 done
 clear
+echo ""
 if ! noobz_add_user "$user" "$pass" "$masaaktif"; then
     echo "Failed to create NoobzVPN account."
     sleep 2
@@ -166,6 +171,7 @@ fi
 expi=`date -d "$masaaktif days" +"%Y-%m-%d"`
 echo "### ${user} ${expi}" >>/etc/funny/.noob
 clear
+echo ""
 TEKS="
 ----------------------------
 NoobzVPN Account
@@ -189,6 +195,7 @@ if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
     curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL >/dev/null 2>&1
 fi
 clear
+echo ""
 echo "$TEKS"
 read -n 1 -s -r -p "Press any key to return..." || true
 echo ""
@@ -197,6 +204,7 @@ echo ""
 function delete() {
 mna=$(grep -e "^### " "/etc/funny/.noob" | cut -d ' ' -f 2-3 | column -t | sort | uniq)
 clear
+echo ""
 echo -e "
 ${separator}
 Delete NoobzVPN Account
@@ -217,6 +225,7 @@ exp=$(grep -we "^### $name" "/etc/funny/.noob" | cut -d ' ' -f 3 | sort | uniq |
 sed -i "/^### $name $exp/d" /etc/funny/.noob
 noobz_remove_user "$name"
 clear
+echo ""
 TEKS="
 ----------------------------
 Account Deleted
@@ -234,6 +243,7 @@ if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
     curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL >/dev/null 2>&1
 fi
 clear
+echo ""
 echo "$TEKS"
 read -n 1 -s -r -p "Press any key to return..." || true
 echo ""
@@ -291,6 +301,7 @@ format_output() {
 
 # Panggil fungsi format_output dengan output dari noobzvpns sebagai argumen
 clear
+echo ""
 format_output "$output"
 read -n 1 -s -r -p "Press any key to return..." || true
 echo ""
@@ -303,6 +314,7 @@ else
     status="${red}OFF${NC}"
 fi
 clear
+echo ""
 echo -e "${NC}${separator}
            NOOBZVPN MENU
 ${separator}

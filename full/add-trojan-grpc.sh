@@ -24,6 +24,7 @@
 
     # Unduh izin dan validasi
     clear
+    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -76,12 +77,14 @@
 
     output
 clear
+echo ""
 domain=$(cat /etc/xray/domain)
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 clear
+echo ""
 
 until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/create/xray/grpc/${user}.log ]]; do
     echo -e "
@@ -92,18 +95,21 @@ until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/creat
     read -p "Username: " user || exit 0
     if [[ -z "$user" ]]; then
         clear
+        echo ""
         echo -e "\033[0;31mUsername cannot be empty.\033[0m"
         continue
     fi
 
     if [[ $user =~ [A-Z] || $user =~ [[:space:]] ]]; then
         clear
+        echo ""
         echo -e "\033[0;31mUsername cannot contain uppercase letters or spaces.\033[0m"
         continue
     fi
 
     if [[ $user =~ [^a-z0-9_] ]]; then
         clear
+        echo ""
         echo -e "Username can only contain lowercase letters, numbers, and underscores."
         continue
     fi
@@ -112,18 +118,21 @@ until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/creat
 
     if [[ ${client_exists} -gt 0 ]]; then
         clear
+        echo ""
         echo -e "\033[0;31mUsername already exists.\033[0m"
         continue
     fi
 
     if [[ -f /var/log/create/xray/grpc/${user}.log ]]; then
         clear
+        echo ""
         echo -e "\033[0;31mUsername already exists in log file.\033[0m"
         continue
     fi
 
     if [[ -f /var/log/create/xray/grpc/${user}.locked ]]; then
         clear
+        echo ""
         echo -e "\033[0;31mUsername already exists in locked file.\033[0m"
         continue
     fi
@@ -212,5 +221,6 @@ if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
 fi
 echo -e "$TEKS" > /var/log/create/xray/grpc/${user}.log
 clear
+echo ""
 source /etc/funny/format.sh
 format_display "$TEKS"

@@ -24,6 +24,7 @@
 
     # Unduh izin dan validasi
     clear
+    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -75,6 +76,7 @@
     }
 
 clear
+echo ""
 
 botmenu() {
 
@@ -122,6 +124,7 @@ link="https://raw.githubusercontent.com/rohjagad/fn-autosc/main/other/bot.zip"
 
 # [ Membersihkan layar ]
 clear
+echo ""
 
 # [ File lokasi API Key dan Chat ID ]
 api_file="/etc/funny/.keybot"
@@ -150,6 +153,7 @@ ${separator}
 fi
 
 clear
+echo ""
 
 # [ Menginstall Bot ]
 cd /usr/bin
@@ -194,6 +198,7 @@ systemctl restart bot
 
 # [ Membersihkan Layar ]
 clear
+echo ""
 
 # [ Menampilkan Output ]
 echo -e "
@@ -215,6 +220,7 @@ systemctl disable bot
 rm -fr /etc/systemd/system/bot.service
 rm -fr /usr/bin/bot
 clear
+echo ""
 echo "
 Terminal Bot Uninstalled Successfully"
 }
@@ -223,12 +229,14 @@ restart() {
 systemctl daemon-reload
 systemctl restart bot
 clear
+echo ""
 echo "
 Terminal Bot Restarted Successfully"
 }
 
 menubot() {
 clear
+echo ""
 edussh_service=$(systemctl status bot 2>/dev/null | grep Active | awk '{print $3}' | cut -d "(" -f2 | cut -d ")" -f1)
 if [[ $edussh_service == "running" ]]; then
     ws="${green}ON${NC}"
@@ -236,6 +244,7 @@ else
     ws="${red}OFF${NC}"
 fi
 clear
+echo ""
 echo -e "${NC}${separator}
         TERMINAL BOT MENU
 ${separator}
@@ -262,6 +271,7 @@ menubot
 }
 
 clear
+echo ""
 
 lanjut() {
 rm -fr /etc/funny/.chatid
@@ -270,6 +280,7 @@ echo "$api" > /etc/funny/.keybot
 echo "$itd" > /etc/funny/.chatid
 chmod 600 /etc/funny/.keybot /etc/funny/.chatid 2>/dev/null || true
 clear
+echo ""
 echo -e "
 Telegram Bot Configuration
 ${separator}
@@ -286,6 +297,7 @@ if [ -s /etc/funny/.keybot ] && [ -s /etc/funny/.chatid ]; then
     return 0
 fi
 clear
+echo ""
 echo -e "
 ${separator}
  Bot Credentials Not Set
@@ -301,6 +313,7 @@ creds() {
 # The single place the bot credentials are entered or changed. The registered
 # values are shown first; pressing ENTER on a field keeps the registered value.
 clear
+echo ""
 cur_id=$(cat /etc/funny/.chatid 2>/dev/null)
 cur_key=$(cat /etc/funny/.keybot 2>/dev/null)
 echo -e "
@@ -322,6 +335,7 @@ fi
 [ -z "$api" ] && api="$cur_key"
 if [ -z "$itd" ] || [ -z "$api" ]; then
     clear
+    echo ""
     echo -e "
 ${separator}
  Both values are required.
@@ -332,6 +346,7 @@ ${separator}
     return
 fi
 clear
+echo ""
 echo -e "
 Information
 ${separator}
@@ -354,11 +369,13 @@ local key id resp
 key=$(cat /etc/funny/.keybot 2>/dev/null)
 id=$(cat /etc/funny/.chatid 2>/dev/null)
 clear
+echo ""
 echo "Sending a test notification to Telegram..."
 resp=$(curl -4 -s --max-time 15 -d "chat_id=$id" \
     --data-urlencode "text=[ FN AutoSC ] Notification setup complete - the bot is configured correctly." \
     "https://api.telegram.org/bot$key/sendMessage")
 clear
+echo ""
 if echo "$resp" | grep -q '"ok":true'; then
     echo -e "
 ${separator}
@@ -392,6 +409,7 @@ havecreds || return
 grep -q 'flock -n /tmp/backup.lock backup' /etc/crontab 2>/dev/null || \
     echo '0 0,6,12,18 * * * root flock -n /tmp/backup.lock backup' >> /etc/crontab
 clear
+echo ""
 echo -e "
 ${separator}
  Bot Auto Backup
@@ -420,6 +438,7 @@ echo ""
 
 mna() {
 clear
+echo ""
 echo -e "${NC}${separator}
         TELEGRAM BOT MENU
 ${separator}

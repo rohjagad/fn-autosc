@@ -23,6 +23,7 @@
 
     # Unduh izin dan validasi
     clear
+    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -75,6 +76,7 @@
 
     output
 clear
+echo ""
 
 # Warna
 yellow="\033[0;33m"
@@ -148,6 +150,7 @@ function baris_panjang() {
 # Banner
 function FN_Banner() {
   clear
+  echo ""
   echo -e "${separator}"
   echo -e "   Menu Change Quota X-Ray HTTP"
   echo -e "${separator}"
@@ -173,6 +176,7 @@ num_iterations=$((duration))
 Loading_Animasi() {
   for ((i = 0; i < num_iterations; i++)); do
     clear
+    echo ""
     index=$((i % num_frames))
     color_code=$((31 + i % 7))
     echo ""
@@ -186,9 +190,11 @@ Loading_Animasi() {
 # Sukses setelah Loading
 function Loading_Succes() {
   clear
+  echo ""
   echo -e "\033[5;32mSucces\033[0m"
   sleep 1
   clear
+  echo ""
 }
 
 # Daftar Akun

@@ -23,6 +23,7 @@
 
     # Unduh izin dan validasi
     clear
+    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -79,6 +80,7 @@ blue='\033[1;34m'
 NC='\033[0m'
 
 clear
+echo ""
 
 # Membaca File Log
 LOG=""
@@ -103,6 +105,7 @@ LIGHT='\033[0;37m'
 # ==========================================
 # Getting
 clear
+echo ""
 echo " "
 echo " "
 
@@ -193,9 +196,11 @@ TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL >/dev/null 2>&1
 clear
+echo ""
 }
 
 clear
+echo ""
 # Bug 64: field 3 of /etc/passwd is the UID, field 4 is the GID. The old
 # pattern discarded the UID and enrolled every account whose GID >= 1000
 # (system accounts such as sync/_apt/sshd) while exempting real users whose
@@ -206,6 +211,7 @@ username=$(while IFS=: read -r username _ uid _ _ _ _; do
     fi
 done < /etc/passwd)
 clear
+echo ""
 
 # Membuat direktori jika belum ada
 if [ ! -d "/etc/xray/limit/ip/ssh" ]; then
@@ -325,6 +331,7 @@ done
 
 if [[ $nais -gt 1 ]]; then
     clear
+    echo ""
 else
     echo > /dev/null
 fi

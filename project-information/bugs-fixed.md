@@ -2605,3 +2605,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 368 (Found 373):** the 8 change-quota tools now mirror the change-limit pattern — rainbow title/bottom, blue inner dividers, green `01.` numbering with current quota right-aligned, `Total Accounts`, orange hint, number-or-name input, empty state exits clean. Brand banner replaced with per-transport titles; BEFORE/AFTER/Credit cards on the same separators.
 - **Verified:** `bash -n` clean; live 18-row render with quotas checked.
+### Fix 369 - Air between stacked screens (Found 374)
+
+- **Fix 369 (Found 374):** every `clear`/`clearScreen()` is now followed by one blank line, so each titled screen starts with breathing room even where clear does nothing. Pure insertions plus EOF-newline normalization; no logic touched. All affected Go binaries rebuilt.
+- **Verified:** `bash -n` clean on all touched scripts; all 28 Go tools build; transition renders checked with clear sequences stripped (broken-terminal simulation).

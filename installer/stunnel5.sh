@@ -28,6 +28,7 @@ backend ssh-backend
     server ssh-server 127.0.0.1:109
 HAH
 clear
+echo ""
 
 systemctl enable haproxy
 systemctl restart haproxy

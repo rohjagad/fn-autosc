@@ -24,6 +24,7 @@
 
     # Unduh izin dan validasi
     clear
+    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -75,6 +76,7 @@
     }
 
 clear
+echo ""
 
 # information
 domain=$(cat /etc/xray/domain)
@@ -157,6 +159,7 @@ function create() {
 	endpoint="${ip}:51820"
 
 	clear
+	echo ""
 	newline
 	echo -e "Create WireGuard Account"
 	echo -e "${separator}"
@@ -228,6 +231,7 @@ AllowedIPs = ${client_ipv4}/32" >> /etc/wireguard/wg0.conf
 	systemctl restart wg-quick@wg0
 
 	clear
+	echo ""
 	newline
 	echo -e "WireGuard User Information"
 	echo -e "${separator}"
@@ -250,6 +254,7 @@ function warp() {
 source /etc/wireguard/params
 #ip=$(curl -sS curl -sS ipv4.icanhazip.com)
 clear
+echo ""
 echo -n "Enter your generated PRIVATE KEY (leave blank to auto-generate): "
 read PRIVATEKEY
 echo -n "Enter your generated PUBLIC KEY (leave blank to auto-generate): "
@@ -279,12 +284,16 @@ wg-quick down wg0 > out.log 2> /dev/null
 wg-quick up wg0 > out.log 2> /dev/null
 
 clear
+echo ""
 clear
+echo ""
 clear
+echo ""
 
 warpd=$(cat warp.json | jq .)
 
 clear
+echo ""
 echo 'Wireguard has successfully installed in your VPS
 
 Your PUBLICKEY is '$PUBLICKEY'
@@ -313,6 +322,7 @@ rm -fr warp.json
 
 function delete() {
 	clear
+	echo ""
 	newline
 	echo -e "Delete WireGuard User"
 	echo -e "${separator}"
@@ -341,6 +351,7 @@ function delete() {
 
 function extend() {
 	clear
+	echo ""
 	newline
 	echo -e "Extend WireGuard User"
 	echo -e "${separator}"
@@ -381,6 +392,7 @@ function extend() {
 	echo -e "$user\t$exp_new" >> /etc/funny/.wireguard
 
 	clear
+	echo ""
 	newline
 	echo -e "WireGuard User Information"
 	echo -e "${separator}"
@@ -392,6 +404,7 @@ function extend() {
 
 function list() {
 	clear
+	echo ""
 	newline
 	echo -e "${separator}"
 	echo -e "Username          Exp. Date"
@@ -413,6 +426,7 @@ function list() {
 
 function show() {
 	clear
+	echo ""
 	newline
 	echo -e "WireGuard Configuration"
 	echo -e "${separator}"
@@ -442,6 +456,7 @@ function show() {
 
 function main() {
 clear
+echo ""
 echo -e "${NC}${separator}
           WIREGUARD MENU
 ${separator}
@@ -477,10 +492,12 @@ case $menu in
 	;;
 0|00|7)
 	clear
+	echo ""
 	menu
 	;;
 *) 
 	clear 
+	echo ""
 	newline
 	error "Invalid option"
 	sleep 1

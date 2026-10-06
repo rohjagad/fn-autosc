@@ -68,6 +68,7 @@ func barisBiru() {
 
 func rerechanBanner() {
 	clearScreen()
+	fmt.Println()
 	barisPanjang()
 	fmt.Println("            Menu Change Limit IP SSH")
 	barisPanjang()
@@ -87,6 +88,7 @@ func loadingAnimasi() {
 	frames := []string{"██10%", "█████35%", "█████████65%", "█████████████80%", "█████████████████████90%", "█████████████████████████100%"}
 	for i := 0; i < len(frames); i++ {
 		clearScreen()
+		fmt.Println()
 		fmt.Println(frames[i])
 		time.Sleep(500 * time.Millisecond)
 	}
@@ -94,9 +96,11 @@ func loadingAnimasi() {
 
 func loadingSucces() {
 	clearScreen()
+	fmt.Println()
 	fmt.Println(Green + "Success" + Xark)
 	time.Sleep(1 * time.Second)
 	clearScreen()
+	fmt.Println()
 }
 
 func getDomain() string {
@@ -224,10 +228,12 @@ func isPositiveInt(s string) bool {
 
 func main() {
 	clearScreen()
+	fmt.Println()
 
 	fmt.Println("Domain:", getDomain())
 	fmt.Println()
     clearScreen()
+    fmt.Println()
 	rerechanBanner()
 
 	file, err := os.Open("/etc/passwd")

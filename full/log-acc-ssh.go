@@ -123,6 +123,7 @@ func main() {
 	blueSep := colorBlue + "-----------------------------------" + colorReset
 
 	clearScreen()
+	fmt.Println()
 	fmt.Printf("%s\n           SSH DATABASE\n%s\n", outerSep, outerSep)
 	if len(userList) > 0 {
 		for i, u := range userList {
@@ -155,6 +156,7 @@ func main() {
 	}
 
 	clearScreen()
+	fmt.Println()
 	fmt.Println(formatLogForTerminal(string(logData)))
 
 	chatIDBytes, errChat := os.ReadFile("/etc/funny/.chatid")

@@ -184,6 +184,7 @@ func isPositiveInt(s string) bool {
 
 func main() {
 	clearScreen()
+	fmt.Println()
 	rerechanBanner()
 
 
@@ -245,6 +246,7 @@ func main() {
 		updateLog(logFile, newIPLimit)
 		updateLimitFile(user, newIPLimit)
 	    clearScreen()
+	    fmt.Println()
 		rerechanBanner()
 		fmt.Println(Green + " Successfully updated " + Xark)
 		fmt.Println()

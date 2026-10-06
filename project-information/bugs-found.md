@@ -2245,3 +2245,5 @@ Found 372. **Change-limit list hides the current limit** —
 operator wants each numbered row to also show the account's current limit on the right side.
 Found 373. **Change-quota screens still use the old brand banner and wide table** —
 operator wants them like the change-limit style: titled card, green-numbered list with current quota on the right, Total line, number-or-name picking.
+Found 374. **Stacked menus look connected on terminals that ignore clear** —
+main menu to submenu to sub-submenu prints with no gap between screens, so they read as one continuous screen on consoles where the clear sequence does nothing.

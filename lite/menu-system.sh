@@ -24,6 +24,7 @@
 
     # Unduh izin dan validasi
     clear
+    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -75,6 +76,7 @@
     }
 
 clear
+echo ""
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -116,6 +118,7 @@ echo -e "$bns" > /etc/issue.net
 systemctl daemon-reload
 systemctl restart ws 2>/dev/null || true
 clear
+echo ""
 echo -e "
 ${separator}
 Success Change Banner
@@ -127,6 +130,7 @@ echo ""
 
 resall() {
 clear
+echo ""
 echo -e "Start Restart All Service"
 systemctl daemon-reload
 systemctl restart ssh
@@ -142,6 +146,7 @@ systemctl restart quota-xhttp
 systemctl restart quota-grpc
 systemctl restart nginx
 clear
+echo ""
 echo -e "
 \n
 Success Restart All Service Server\n\n"
@@ -154,15 +159,18 @@ Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_p
 Info="${Red_font_prefix}[information]${Font_color_suffix}"
 
 clear
+echo ""
 
 install() {
 clear
+echo ""
     # Date-licensed machines must not bring WARP up: it moves egress through
     # Cloudflare, the licence gate then sees an unlisted IP and the whole
     # panel locks out (Found 168). Only "lifetime" entries may use WARP
     # (is-decision.md 28). $EXPIRED_DATE comes from the gate above.
     if [ "$EXPIRED_DATE" != "lifetime" ]; then
         clear
+        echo ""
         echo -e "WARP is not allowed on a date-licensed machine: it changes the server IP and would break the license check."
         return
     fi
@@ -229,10 +237,12 @@ bash warp.sh wgd
 fi
 chmod +x /usr/bin/warp.sh
 clear
+echo ""
 }
 
 status() {
     clear
+    echo ""
     if command -v warp.sh >/dev/null 2>&1 || [[ -x /usr/bin/warp.sh ]]; then
         /usr/bin/warp.sh status 2>/dev/null || warp.sh status 2>/dev/null || true
     else
@@ -252,6 +262,7 @@ enable() {
     # (is-decision.md 28). $EXPIRED_DATE comes from the gate above.
     if [ "$EXPIRED_DATE" != "lifetime" ]; then
         clear
+        echo ""
         echo -e "WARP is not allowed on a date-licensed machine: it changes the server IP and would break the license check."
         read -n 1 -s -r -p "Press any key to return..." || true
         return
@@ -262,6 +273,7 @@ enable() {
     # install it has no registration, so connect/disconnect change nothing.
     systemctl enable --now wg-quick@wgcf >/dev/null 2>&1
     clear
+    echo ""
     if ip link show wgcf >/dev/null 2>&1; then
         echo -e "Done Enable Warp"
     else
@@ -274,6 +286,7 @@ disable() {
     systemctl disable --now wg-quick@wgcf >/dev/null 2>&1
     wg-quick down wgcf >/dev/null 2>&1
     clear
+    echo ""
     if ip link show wgcf >/dev/null 2>&1; then
         echo -e "WARP is still running"
     else
@@ -287,6 +300,7 @@ restart() {
     # wgcf and move egress, breaking a date license the same way.
     if [ "$EXPIRED_DATE" != "lifetime" ]; then
         clear
+        echo ""
         echo -e "WARP is not allowed on a date-licensed machine: it changes the server IP and would break the license check."
         read -n 1 -s -r -p "Press any key to return..." || true
         return
@@ -295,12 +309,14 @@ restart() {
     systemctl daemon-reload
     systemctl restart wg-quick@wgcf 2>/dev/null || true
     clear
+    echo ""
     echo -e "Done Restart Service Warp Wireguard"
     read -n 1 -s -r -p "Press any key to return..." || true
 }
 
 akun4() {
     clear
+    echo ""
     local conf=""
     if [[ -f /etc/wireguard/wgcf.conf ]]; then
         conf=$(cat /etc/wireguard/wgcf.conf)
@@ -323,6 +339,7 @@ akun4() {
 
 akun6() {
     clear
+    echo ""
     local conf=""
     if [[ -f /etc/wireguard/wgcf.conf ]]; then
         conf=$(cat /etc/wireguard/wgcf.conf)
@@ -345,8 +362,10 @@ akun6() {
 
 token() {
     clear
+    echo ""
     read -p "Input Your Token Teams WARP+: " token || return
     clear
+    echo ""
     if command -v warp >/dev/null 2>&1; then
         warp -T "$token"
     elif [[ -x /usr/bin/warp.sh ]]; then
@@ -360,6 +379,7 @@ token() {
 
 add() {
     clear
+    echo ""
     echo -e "
     Create Cloudflare WARP Account
     ${separator}
@@ -379,6 +399,7 @@ add() {
 
 menuwg() {
     clear
+    echo ""
     echo -e "
         Cloudflare WARP Menu
     ${separator}
@@ -417,6 +438,7 @@ menuwg
     change_timezone() {
 
     clear
+    echo ""
 echo -e "${separator}"
 echo -e "          CHANGE TIMEZONE"
 echo -e "${separator}"
@@ -439,6 +461,7 @@ echo -e ""
 case $opt in
 		1)
 		clear
+		echo ""
 		timedatectl set-timezone Asia/Kuala_Lumpur
 		echo -e "\e[0m                                                   "
 		echo -e "${separator}"
@@ -452,6 +475,7 @@ case $opt in
 		;;
 		2)
 		clear
+		echo ""
 		timedatectl set-timezone Asia/Jakarta
 		echo -e "\e[0m                                                   "
 		echo -e "${separator}"
@@ -466,6 +490,7 @@ case $opt in
 		;;
 		3)
 		clear
+		echo ""
 		timedatectl set-timezone Asia/Singapore
 		echo -e "\e[0m                                                   "
 		echo -e "${separator}"
@@ -480,6 +505,7 @@ case $opt in
 		;;
 		4)
 		clear
+		echo ""
 		timedatectl set-timezone Asia/Brunei
 		echo -e "\e[0m                                                   "
 		echo -e "${separator}"
@@ -494,6 +520,7 @@ case $opt in
 		;;
 		5)
 		clear
+		echo ""
 		timedatectl set-timezone Asia/Bangkok
 		echo -e "\e[0m                                                   "
 		echo -e "${separator}"
@@ -508,6 +535,7 @@ case $opt in
 		;;
 		6)
 		clear
+		echo ""
 		timedatectl set-timezone Asia/Manila
 		echo -e "\e[0m                                                   "
 		echo -e "${separator}"
@@ -522,6 +550,7 @@ case $opt in
 		;;
 		7)
 		clear
+		echo ""
 		timedatectl set-timezone Asia/Kolkata
 		echo -e "\e[0m                                                   "
 		echo -e "${separator}"
@@ -536,6 +565,7 @@ case $opt in
 		;;
         8)
 		clear
+		echo ""
 		timedatectl set-timezone Asia/Tokyo
 		echo -e "\e[0m                                                   "
 		echo -e "${separator}"
@@ -559,6 +589,7 @@ case $opt in
 		;;
         x)
 		clear
+		echo ""
 		menu
 		;;
 		*)
@@ -570,6 +601,7 @@ case $opt in
 
 detail() {
 clear
+echo ""
 echo -e "\n
 ${separator}
 Autoscript Management Panel VPN
@@ -597,9 +629,11 @@ echo ""
 
 uninstall() {
 clear
+echo ""
 
 openeuler() {
 clear
+echo ""
 echo -e "${NC}${separator}
          OPENEULER LINUX
 ${separator}
@@ -620,6 +654,7 @@ esac
 
 opensuse() {
 clear
+echo ""
 echo -e "${NC}${separator}
           OPENSUSE LINUX
 ${separator}
@@ -640,6 +675,7 @@ esac
 
 debian() {
 clear
+echo ""
 echo -e "${NC}${separator}
            DEBIAN LINUX
 ${separator}
@@ -662,6 +698,7 @@ esac
 
 ubuntu() {
 clear
+echo ""
 echo -e "${NC}${separator}
            UBUNTU LINUX
 ${separator}
@@ -686,6 +723,7 @@ esac
 
 alpine() {
 clear
+echo ""
 echo -e "${NC}${separator}
            ALPINE LINUX
 ${separator}
@@ -726,6 +764,7 @@ esac
 information() {
 uuid=$(openssl rand -base64 12 | tr -dc 'a-zA-Z0-9' | head -c 16)
 clear
+echo ""
 echo -e "
 [ New Data Your VPS ]
 ${separator}
@@ -744,6 +783,7 @@ fi
 
 os() {
     clear
+    echo ""
     echo -e "
 < = [ Select New OS ] = >
 ${separator}
@@ -794,6 +834,7 @@ Press CTRL + C to Exit
 
 tampilan() {
 clear
+echo ""
 echo -e "
 ${separator}
 < = [ Reinstall OS ] = >
@@ -819,6 +860,7 @@ tampilan
 
 systemd() {
 clear
+echo ""
 echo -e "${NC}${separator}
             SYSTEM MENU
 ${separator}
