@@ -228,9 +228,9 @@ func main() {
 	fmt.Println("Domain:", getDomain())
 	fmt.Println()
     clearScreen()
-	barisBiru()
-	fmt.Println("   USERNAME       EXP DATE         LIMIT IP")
 	barisPanjang()
+	fmt.Println("   USERNAME       EXP DATE         LIMIT IP")
+	barisBiru()
 
 	file, err := os.Open("/etc/passwd")
 	if err != nil {
@@ -258,6 +258,9 @@ func main() {
 		}
 	}
 
+	if count == 0 {
+		fmt.Println("   No accounts found.")
+	}
 	barisBiru()
 	fmt.Printf("   Account number: %d users\n", count)
 	barisPanjang()
@@ -265,12 +268,12 @@ func main() {
 	fmt.Print("Input username: ")
 	var user string
 	fmt.Scanln(&user)
+	fmt.Println()
 
 	limitFile := "/etc/xray/limit/ip/ssh/" + user
 	logFile := "/var/log/create/ssh/" + user + ".log"
 
 	if _, err := os.Stat(logFile); os.IsNotExist(err) {
-		rerechanBanner()
 		fmt.Println("Error File " + user + ".log / File Log " + user + " " + Red + "Not Found" + Xark)
 		Credit()
 		return

@@ -187,9 +187,9 @@ func main() {
 	clearScreen()
 	rerechanBanner()
 
-	barisBiru()
-	fmt.Println("   USERNAME       EXP DATE         LIMIT IP")
 	barisPanjang()
+	fmt.Println("   USERNAME       EXP DATE         LIMIT IP")
+	barisBiru()
 
 	usernames := getUsernames()
 	var count int
@@ -202,6 +202,9 @@ func main() {
 		count++
 	}
 
+	if count == 0 {
+		fmt.Println("   No accounts found.")
+	}
 	barisBiru()
 	fmt.Printf("   Account number: %d users\n", count)
 	barisPanjang()
@@ -209,10 +212,10 @@ func main() {
 	fmt.Print("Input username: ")
 	var user string
 	fmt.Scanln(&user)
+	fmt.Println()
 
 	logFile := "/var/log/create/xray/grpc/" + user + ".log"
 	if _, err := os.Stat(logFile); os.IsNotExist(err) {
-		rerechanBanner()
 		fmt.Println("Error: File log " + user + ".log tidak ditemukan.")
 		Credit()
 		return

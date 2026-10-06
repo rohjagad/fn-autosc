@@ -2585,3 +2585,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 363 (Found 368):** all Telegram `<b>━━━</b>`/`<code>───</code>` payloads and `═` cards swapped to `-` at the same widths (card layout unchanged, colors/tags kept); `installer/slowdns.sh` `===` box, `installer/full.sh`/`lite.sh` Telegram card + `___` install banners swapped the same way. SSH login-banner art (`issue.net`) and the root PS1 prompt art deliberately untouched (decorative art, not separators). Cron-daemon terminal one-liners (`expire-ssh`, `limit-ip-*` skip notices) left as-is (not interactive screens).
 - **Verified:** same grep gates as Fix 362; installer scripts pass `bash -n`.
+### Fix 364 - Change-limit tables readable (Found 369)
+
+- **Fix 364 (Found 369):** table top back to rainbow (blue reserved for the colhead divider and pre-count divider); empty tables print a `No accounts found.` row instead of doubled bare lines; blank line after the username prompt so the next screen starts clean; error path shows the error directly instead of re-printing the whole banner. Binaries rebuilt.
+- **Verified:** all 9 tools build; local + live renders checked.

@@ -1851,3 +1851,13 @@ Section 35's four-check rule applied to Fix 363:
 | **Over-strictness** | Nothing rejected; text-only change. |
 | **Over-engineering** | Single-character swap across payload lines. |
 | **vs the source** | References use box glyphs in payloads; dash form is this repo's own direction per operator request. |
+## 148. Change-Limit Readability — Four Checks (October 6, 2026)
+
+Section 35's four-check rule applied to Fix 364:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Same prompts, same validation, same data flow — layout lines only. |
+| **Over-strictness** | Nothing rejected; display-only change. |
+| **Over-engineering** | Three-line empty-state, one newline, one dropped re-banner. |
+| **vs the source** | References re-print banners the same way; calmer error path is this repo's own direction per operator request. |
