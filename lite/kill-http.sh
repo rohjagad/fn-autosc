@@ -135,12 +135,12 @@ function check_quota() {
             readable_limit=$(human_readable "$quota_limit")
             readable_usage=$(human_readable "$usage")
             echo -e "Limit Quota Access
-            =================
+            -----------------
             Username: $user
             Limit Quota: $readable_limit
             Total Usage: $readable_usage
             Status: deleted
-            =================
+            -----------------
             " >> /etc/xray/.quota.logs
 
             send_log "$user" "$readable_limit" "$readable_usage"

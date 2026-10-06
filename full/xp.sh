@@ -108,12 +108,12 @@ sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/ws.json
         rm -f /etc/xray/quota/ws/$user /etc/xray/quota/ws/${user}_usage
         rm -f /etc/xray/limit/ip/xray/ws/$user
 TEKS="
-====================
+--------------------
 X-Ray WS Account Expired
-====================
+--------------------
 
 -> $user / $exp
-===================="
+--------------------"
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
@@ -158,12 +158,12 @@ sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/upgrade.json
         rm -f /etc/xray/quota/http/$user /etc/xray/quota/http/${user}_usage
         rm -f /etc/xray/limit/ip/xray/http/$user
 TEKS="
-====================
+--------------------
 X-Ray http Account Expired
-====================
+--------------------
 
 -> $user / $exp
-===================="
+--------------------"
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
@@ -208,12 +208,12 @@ sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/xhttp.json
         rm -f /etc/xray/quota/xhttp/$user /etc/xray/quota/xhttp/${user}_usage
         rm -f /etc/xray/limit/ip/xray/xhttp/$user
 TEKS="
-====================
+--------------------
 X-Ray xhttp Account Expired
-====================
+--------------------
 
 -> $user / $exp
-===================="
+--------------------"
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
@@ -258,12 +258,12 @@ sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/grpc.json
         rm -f /etc/xray/quota/grpc/$user /etc/xray/quota/grpc/${user}_usage
         rm -f /etc/xray/limit/ip/xray/grpc/$user
 TEKS="
-====================
+--------------------
 X-Ray grpc Account Expired
-====================
+--------------------
 
 -> $user / $exp
-===================="
+--------------------"
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
@@ -318,12 +318,12 @@ exp="$tgl $bulantahun"
 xp_log "deleted $username (expiry $exp)"
 ssh_expired=1
 TEKS="
-====================
+--------------------
 SSH Account Expired
-====================
+--------------------
 
 -> $username / $exp
-===================="
+--------------------"
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
@@ -361,12 +361,12 @@ sed -i "/^### $user $exp/d" "/etc/funny/.l2tp"
 sed -i '/^"'"$user"'" l2tpd/d' /etc/ppp/chap-secrets
 sed -i '/^'"$user"':/d' /etc/ipsec.d/passwd
 TEKS="
-====================
+--------------------
 L2TP Account Expired
-====================
+--------------------
 
 -> $user / $exp
-===================="
+--------------------"
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
@@ -397,12 +397,12 @@ while read expired; do
 		rm -f /var/www/html/wireguard-${user}.conf
 		sed -i "/\b$user\b/d" /etc/funny/.wireguard
         TEKS="
-        ====================
+        --------------------
         WG Account Expired
-        ====================
+        --------------------
 
         -> $user / $exp
-        ===================="
+        --------------------"
         CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
         KEY=$(cat /etc/funny/.keybot 2>/dev/null)
         TIME="10"

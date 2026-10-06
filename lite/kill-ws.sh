@@ -134,10 +134,10 @@ function check_quota() {
         fi
 
         echo -e "User tanpa file kuota ditemukan
-        =================
+        -----------------
         Username: $user
         Status: Deleted (Quota File Missing)
-        =================
+        -----------------
         " >> /etc/xray/.quota.logs
 
         send_log "$user" "File Kuota Tidak Ada" "N/A"
@@ -163,12 +163,12 @@ function check_quota() {
             readable_limit=$(human_readable "$quota_limit")
             readable_usage=$(human_readable "$usage")
             echo -e "Limit Quota Access
-            =================
+            -----------------
             Username: $user
             Limit Quota: $readable_limit
             Total Usage: $readable_usage
             Status: deleted
-            =================
+            -----------------
             " >> /etc/xray/.quota.logs
 
             send_log "$user" "$readable_limit" "$readable_usage"

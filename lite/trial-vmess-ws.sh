@@ -157,36 +157,36 @@ vmesslink2="vmess://$(echo $ask | base64 -w 0)"
 
 clear
 TEKS="
-=======================
+-----------------------
      Xray VMess WS
-=======================
+-----------------------
 
 Remarks : $user
 Domain  : $domain
 UUID    : $uuid
 Expired : $exp
 Protokol: Vmess
-=======================
+-----------------------
      Limit Detail
 
 Limit IP: $ip
 Quota   : $quota GB
-=======================
+-----------------------
    Detail Port Ws
 
 TLS: 443, 2053, 2083, 2087, 2096
 NoneTLS: 80, 8880, 2052, 2082, 2095
-=======================
+-----------------------
 AlterID: 0
 Path   : /vmws
 Network: WebSocket
 Alpn   : - [ None ]
 Decrypt: auto
-=======================
+-----------------------
 Link TLS : $vmesslink1
-=======================
+-----------------------
 Link None: $vmesslink2
-=======================
+-----------------------
 "
 if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
     curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's/\\033\[[0-9;]*m//g' -e 's/\x1b\[[0-9;]*m//g')" $URL >/dev/null 2>&1

@@ -2573,3 +2573,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 360 (Found 361):** all rainbow inputs changed from 35 `=` to 35 `-` (same length, layout and centering preserved); plain card borders, purple dividers and code comments untouched. Both zips refreshed.
 - **Verified:** rendered output contains 0 `=`; `bash -n` clean on all touched scripts; `gofmt` deltas pre-existing only.
+### Fix 361 - No more `===`, all submenus rainbow/blue styled (Found 362)
+
+- **Fix 361 (Found 362):** every `===` (3+ runs) replaced repo-wide — Telegram cards keep their width, only the character changed to `-`; TUI boxes now use rainbow `${separator}` for title frames and bottom lines, blue `${blue_sep}` for inner dividers (all 35 wide). `routing-*`/`change-id-*` (both editions) gained the standard `rainbow_sep` block; `extend-ssh.go` gained `rainbowSepGo` and its binary was rebuilt. Yellow `\e[33m` prompt dividers in `dm-menu`, log-file lines, and `━━━`/`───` box tools intentionally untouched (already dash/box style, not `===`). The one leftover `===` is a `#` code comment, never shown on screen. Both zips refreshed with ELF entries preserved.
+- **Verified:** `grep ===` clean except that comment; `bash -n` clean on all touched scripts; `extend-ssh` builds and runs; box renders checked centered and tidy.

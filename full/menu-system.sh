@@ -118,9 +118,9 @@ systemctl restart dropbear 2>/dev/null || true
 systemctl restart ws 2>/dev/null || true
 clear
 echo -e "
-=====================
+${separator}
 Success Change Banner
-=====================
+${separator}
 "
 read -n 1 -s -r -p "Press any key to return..." || true
 echo ""
@@ -326,11 +326,11 @@ akun4() {
     fi
     echo -e "
     Your WARP IPv4 WireGuard Account
-    -----------------------------------===
+    ${separator}
          Wireguard Configuration
 
     ${conf:-No WARP WireGuard configuration found. Install WARP first.}
-    -----------------------------------===
+    ${separator}
     "
     rm -fr /root/wgcf.conf
     read -n 1 -s -r -p "Press any key to return..." || true
@@ -348,11 +348,11 @@ akun6() {
     fi
     echo -e "
     Your WARP IPv6 WireGuard Account
-    -----------------------------------===
+    ${separator}
          Wireguard Configuration
 
     ${conf:-No WARP WireGuard configuration found. Install WARP first.}
-    -----------------------------------===
+    ${separator}
     "
     rm -fr /root/wgcf.conf
     read -n 1 -s -r -p "Press any key to return..." || true
@@ -377,11 +377,11 @@ add() {
     clear
     echo -e "
     Create Cloudflare WARP Account
-    ==============================
+    ${separator}
 
     1. Create Account (IPv4)
     2. Create Account (IPv6)
-    ==============================
+    ${separator}
     Press [Ctrl + C] to exit"
     read -p "Input option: " aws || exit 0
     case $aws in
@@ -396,7 +396,7 @@ menuwg() {
     clear
     echo -e "
         Cloudflare WARP Menu
-    ==========================
+    ${separator}
 
     1. Install Cloudflare WARP
     2. WARP Service Status
@@ -404,12 +404,12 @@ menuwg() {
     4. Enable WARP Service
     5. Disable WARP Service
     6. Enter WARP Teams Token
-    ==========================
+    ${blue_sep}
     
     7. Create WARP Account
     8. Back to Main Menu
     9. Exit
-    ==========================
+    ${separator}
     Press [Ctrl + C] to exit"
     read -p "Input option: " opt || exit 0
     case $opt in
@@ -586,9 +586,9 @@ case $opt in
 detail() {
 clear
 echo -e "\n
-===============================
+${separator}
 Autoscript Management Panel VPN
-===============================
+${separator}
 
 SSH WEBSOCKET: 80, 443, 2080
 SSH DROPBEAR : 109, 111
@@ -608,7 +608,7 @@ Feature:
 - Multiport 443 & 80 on server
 - Auto Configure Server
 - Auto Backup & Full Notif Telegram
-===============================
+${separator}
 \n"
 read -n 1 -s -r -p "Press any key to return..." || true
 echo ""
@@ -748,10 +748,10 @@ uuid=$(openssl rand -base64 12 | tr -dc 'a-zA-Z0-9' | head -c 16)
 clear
 echo -e "
 [ New Data Your VPS ]
-=====================
+${separator}
 Username: root
 Password: $uuid
-=====================
+${separator}
 Please Save Your Data
 "
 read -p "Continue (y/n): " osw
@@ -766,7 +766,7 @@ os() {
     clear
     echo -e "
 < = [ Select New OS ] = >
-=========================
+${separator}
 
 01. Rocky
 02. Alpine
@@ -786,7 +786,7 @@ os() {
 16. Open Cloud OS
 17. Kali Linux / Kali Rolling
 
-=========================
+${blue_sep}
 Press CTRL + C to Exit
 "
     read -p "Input Options: " os || exit 0
@@ -815,15 +815,15 @@ Press CTRL + C to Exit
 tampilan() {
 clear
 echo -e "
-==========================
+${separator}
 < = [ Reinstall OS ] = >
-==========================
+${separator}
 
 1. Reinstall OS
 2. Back to Main Menu
-==========================
+${blue_sep}
 [ Press Ctrl + C to Exit ]
-==========================
+${separator}
   Autoscript FN AutoSC
 "
 read -p "Input option: " ws || exit 0

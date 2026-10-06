@@ -112,12 +112,12 @@ file_path="/root/backup.zip"
 # there is no file-host upload and therefore no expiring public link.
 TEKS="
 [ Information Your Backup Data ]
-================================
+--------------------------------
 
 Domain : $domain
 IP     : $MYIP
 Date   : $date
-================================
+--------------------------------
 "
 
 # Cek dan buat file backup.log jika tidak ada

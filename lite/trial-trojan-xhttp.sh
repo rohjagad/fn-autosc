@@ -125,9 +125,9 @@ link1="trojan://${uuid}@${domain}:443?path=/trxh&security=tls&host=${domain}&typ
 link2="trojan://${uuid}@${domain}:80?path=/trxh&security=none&host=${domain}&type=xhttp#${user}"
 
 TEKS="
-======================
+----------------------
    Trojan XHTTP
-======================
+----------------------
 
 Remarks : $user
 Domain  : $domain
@@ -136,17 +136,17 @@ Expired : $exp
 Limit IP: $ip
 Quota   : $quota GB
 Protokol: Trojan
-======================
+----------------------
 
 Path: /trxh
 Network: XHTTP
 Port TLS: 443, 2053, 2083, 2087, 2096
 Port None: 80, 8880, 2052, 2082, 2095
-======================
+----------------------
 Link TLS : $link1
-======================
+----------------------
 Link None: $link2
-======================
+----------------------
 "
 if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
     curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's/\\033\[[0-9;]*m//g' -e 's/\x1b\[[0-9;]*m//g')" $URL >/dev/null 2>&1

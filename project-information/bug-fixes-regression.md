@@ -1820,3 +1820,13 @@ Section 35's four-check rule applied to Fix 360:
 | **Over-strictness** | Nothing rejected; display-only change. |
 | **Over-engineering** | One-character-class swap across call sites. |
 | **vs the source** | References use `=` rainbows; dash form is this repo's own direction per operator request. |
+## 145. TUI Separator Unification — Four Checks (October 6, 2026)
+
+Section 35's four-check rule applied to Fix 361:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Same box structure, same widths (35), same colors per position — only the repeated character and unstyled boxes changed; Telegram cards keep their layout; parsers key on content, not separators. |
+| **Over-strictness** | Nothing rejected; display-only change (quantity gates untouched). |
+| **Over-engineering** | Character swap plus wiring plain boxes to the existing separator vars; no new framework. |
+| **vs the source** | References use `=` boxes; dash-rainbow form is this repo's own direction per operator request. |

@@ -104,17 +104,45 @@ CYAN='\033[0;36m'
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
+blue='\033[1;34m'
+
+rainbow_sep() {
+  local text="${1:------------------------------------}"
+  local output=''
+  local i segment fraction r g b color
+  local -a red=(255 255 0 0 0 255 255)
+  local -a green=(0 255 255 255 0 0 0)
+  local -a blue=(0 0 0 255 255 255 0)
+  for ((i = 0; i < ${#text}; i++)); do
+    if ((i == ${#text} - 1)); then
+      segment=5
+      fraction=$((${#text} - 1))
+    else
+      segment=$((i * 6 / (${#text} - 1)))
+      fraction=$((i * 6 % (${#text} - 1)))
+    fi
+    r=$((red[segment] + (red[segment + 1] - red[segment]) * fraction / (${#text} - 1)))
+    g=$((green[segment] + (green[segment + 1] - green[segment]) * fraction / (${#text} - 1)))
+    b=$((blue[segment] + (blue[segment + 1] - blue[segment]) * fraction / (${#text} - 1)))
+    printf -v color '\033[38;2;%d;%d;%dm' "$r" "$g" "$b"
+    output+="${color}${text:i:1}"
+  done
+  printf '%b\n' "${output}${NC}"
+}
+
+separator=$(rainbow_sep '-----------------------------------')
+blue_sep="${blue}-----------------------------------${NC}"
 
 # Fetch all usernames and UUIDs
 usernames=($(grep "^### " /etc/xray/json/grpc.json | awk '{print $2}' | sort | uniq))
 
 # Clear screen and display header
 clear
-echo -e "${CYAN}-----------------------------------======"
+echo -e "${separator}"
 echo -e "${GREEN}          Change UUID X-ray gRPC"
-echo -e "${CYAN}-----------------------------------======"
+echo -e "${separator}"
 echo -e "${YELLOW} Username      |       UUID"
-echo -e "${CYAN}-----------------------------------======"
+echo -e "${blue_sep}"
 
 # Display usernames and UUIDs
 for user in "${usernames[@]}"; do
@@ -122,9 +150,9 @@ for user in "${usernames[@]}"; do
     echo -e "${GREEN} $user      |       $uid"
 done
 
-echo -e "${CYAN}-----------------------------------======"
+echo -e "${blue_sep}"
 echo -e "${RED} Press CTRL + C to exit"
-echo -e "${CYAN}-----------------------------------======${NC}"
+echo -e "${separator}"
 
 # Prompt user input for username and validate
 while true; do
@@ -192,13 +220,13 @@ fi
 
             clear
             # Confirmation message with updated information
-            echo -e "${CYAN}-----------------------------------======"
+            echo -e "${separator}"
             echo -e "${GREEN} UUID X-Ray gRPC Update Successful!"
-            echo -e "${CYAN}-----------------------------------======"
+            echo -e "${separator}"
             echo -e "${YELLOW} Username      |       New UUID"
-            echo -e "${CYAN}-----------------------------------======"
+            echo -e "${blue_sep}"
             echo -e "${GREEN} $user      |       $new"
-            echo -e "${CYAN}-----------------------------------======${NC}"
+            echo -e "${separator}"
             break
             ;;
         [nN]) 

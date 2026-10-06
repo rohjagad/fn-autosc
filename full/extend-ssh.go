@@ -10,12 +10,42 @@ import (
 	"time"
 )
 
+func rainbowSepGo(text string) string {
+	n := len(text)
+	if n == 0 {
+		return ""
+	}
+	red := []int{255, 255, 0, 0, 0, 255, 255}
+	green := []int{0, 255, 255, 255, 0, 0, 0}
+	blue := []int{0, 0, 0, 255, 255, 255, 0}
+
+	var sb strings.Builder
+	for i := 0; i < n; i++ {
+		var segment, fraction int
+		if i == n-1 {
+			segment = 5
+			fraction = n - 1
+		} else {
+			segment = (i * 6) / (n - 1)
+			fraction = (i * 6) % (n - 1)
+		}
+		r := red[segment] + (red[segment+1]-red[segment])*fraction/(n-1)
+		g := green[segment] + (green[segment+1]-green[segment])*fraction/(n-1)
+		b := blue[segment] + (blue[segment+1]-blue[segment])*fraction/(n-1)
+		sb.WriteString(fmt.Sprintf("\033[38;2;%d;%d;%dm%c", r, g, b, text[i]))
+	}
+	sb.WriteString("\033[0m")
+	return sb.String()
+}
+
 func main() {
 	clearScreen()
 
-	fmt.Println("==========================================")
-	fmt.Println("               RENEW  USER                ")
-	fmt.Println("==========================================")
+	outerSep := rainbowSepGo("-----------------------------------")
+
+	fmt.Println(outerSep)
+	fmt.Println("            RENEW  USER")
+	fmt.Println(outerSep)
 
 	reader := bufio.NewReader(os.Stdin)
 
@@ -72,11 +102,11 @@ func main() {
 	}
 
 	clearScreen()
-	fmt.Println("==========================================")
+	fmt.Println(outerSep)
 	fmt.Printf(" Username : %s\n", username)
 	fmt.Printf(" Days Added : %d Days\n", days)
 	fmt.Printf(" Expires on : %s\n", newExpiration.Format("Jan 02, 2006"))
-	fmt.Println("==========================================")
+	fmt.Println(outerSep)
 }
 
 func clearScreen() {

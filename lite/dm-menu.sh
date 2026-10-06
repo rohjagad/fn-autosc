@@ -119,9 +119,9 @@ domain=$(cat /etc/xray/domain)
 clear
 echo "
 L FN 项目更新证书
-=================================
+${separator}
 Your Domain: $domain
-=================================
+${blue_sep}
 4 For IPv4 &  For IPv6
 "
 echo -e "Generate new Ceritificate Please Input Type Your VPS"
@@ -198,9 +198,9 @@ domain=$(cat /etc/xray/domain)
 clear
 echo "
 L FN 项目更新证书
-=================================
+${separator}
 Your Domain: $domain
-=================================
+${blue_sep}
 4 For IPv4 & 6 For IPv6
 "
 echo -e "Generate new Certificate. Please input your VPS type:"

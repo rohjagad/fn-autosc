@@ -125,31 +125,31 @@ vlesslink1="vless://${uuid}@${domain}:443?path=/vlxh&security=tls&encryption=non
 vlesslink2="vless://${uuid}@${domain}:80?path=/vlxh&security=none&encryption=none&host=${domain}&type=xhttp#${user}"
 
 TEKS="
-=======================
+-----------------------
     VLess XHTTP
-=======================
+-----------------------
 
 Remarks : $user
 Domain  : $domain
 UUID    : $uuid
 Expired : $exp
 Protokol: Vless
-=======================
+-----------------------
      Limit Detail
 
 Limit IP: $ip
 Quota   : $quota GB
-=======================
+-----------------------
 
 TLS: 443, 2053, 2083, 2087, 2096
 Path: /vlxh
 NoneTLS: 80, 8880, 2052, 2082, 2095
 Network: XHTTP
-=======================
+-----------------------
 Link TLS : $vlesslink1
-=======================
+-----------------------
 Link None: $vlesslink2
-=======================
+-----------------------
 "
 if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
     curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's/\\033\[[0-9;]*m//g' -e 's/\x1b\[[0-9;]*m//g')" $URL >/dev/null 2>&1

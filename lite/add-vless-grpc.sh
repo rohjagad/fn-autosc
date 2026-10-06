@@ -186,28 +186,28 @@ fi
 vlesslink1="vless://$uuid@$domain:443?mode=gun&security=tls&encryption=none&authority=$domain&type=grpc&serviceName=vlgr&sni=$domain#${user}"
 
 TEKS="
-======================
+----------------------
     Xray VLess gRPC
-======================
+----------------------
 
 Remarks : $user
 Domain  : $domain
 UUID    : $uuid
 Expired : $exp
 Protokol: Vless
-======================
+----------------------
      Limit Detail
 
 Limit IP: $ip
 Quota   : $quota GB
-======================
+----------------------
 
 Port: 443, 2053, 2083, 2087, 2096
 Network: gRPC
 Service Name: vlgr
-======================
+----------------------
 Link TLS : $vlesslink1
-======================
+----------------------
 "
 if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
     curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's/\\033\[[0-9;]*m//g' -e 's/\x1b\[[0-9;]*m//g')" $URL >/dev/null 2>&1

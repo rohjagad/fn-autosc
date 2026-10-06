@@ -159,7 +159,7 @@ function create() {
 	clear
 	newline
 	echo -e "Create WireGuard Account"
-	echo -e "========================"
+	echo -e "${separator}"
 	echo -e " Username: \c"
 	read user || exit 0
 	while ! [[ "$user" =~ ^[a-zA-Z0-9_]+$ ]]; do
@@ -230,18 +230,18 @@ AllowedIPs = ${client_ipv4}/32" >> /etc/wireguard/wg0.conf
 	clear
 	newline
 	echo -e "WireGuard User Information"
-	echo -e "=========================="
+	echo -e "${separator}"
 	echo -e " Domain\t: $domain"
 	echo -e " Username\t: $user"
 	echo -e " Expired Date\t: $expired"
-	echo -e "=========================="
+	echo -e "${blue_sep}"
         echo -e "Wireguard Detail"
 	echo -e "Port Wireguard\t: 51820"
 	echo -e "Private Key\t: ${client_priv_key}"
         echo -e "Publik Key\t: ${client_pub_key}"
-	echo -e "=========================="
+	echo -e "${blue_sep}"
 	echo -e "Link Config: http://${domain}/web/wireguard-${user}.conf"
-        echo -e "=========================="
+        echo -e "${separator}"
 	newline
 	goback
 }
@@ -315,7 +315,7 @@ function delete() {
 	clear
 	newline
 	echo -e "Delete WireGuard User"
-	echo -e "====================="
+	echo -e "${separator}"
 	echo -e " Username: \c"
 	read user
 	[ -z "$user" ] && { goback; return; }
@@ -343,7 +343,7 @@ function extend() {
 	clear
 	newline
 	echo -e "Extend WireGuard User"
-	echo -e "====================="
+	echo -e "${separator}"
 	echo -e " Username: \c"
 	read user
 	[ -z "$user" ] && { goback; return; }
@@ -383,7 +383,7 @@ function extend() {
 	clear
 	newline
 	echo -e "WireGuard User Information"
-	echo -e "=========================="
+	echo -e "${separator}"
 	echo -e " Username\t: $user"
 	echo -e " Expired Date\t: $exp"
 	newline 
@@ -393,9 +393,9 @@ function extend() {
 function list() {
 	clear
 	newline
-	echo -e "==========================="
+	echo -e "${separator}"
 	echo -e "Username          Exp. Date"
-	echo -e "==========================="
+	echo -e "${blue_sep}"
 	while read expired
 	do
 		user=$(echo $expired | awk '{print $1}')
@@ -404,9 +404,9 @@ function list() {
 		printf "%-17s %2s\n" "$user" "$exp_date"
 	done < /etc/funny/.wireguard
 	total=$(wc -l /etc/funny/.wireguard | awk '{print $1}')
-	echo -e "==========================="
+	echo -e "${blue_sep}"
 	echo -e "Total Accounts: $total     "
-	echo -e "==========================="
+	echo -e "${separator}"
 	newline
 	goback
 }
@@ -415,7 +415,7 @@ function show() {
 	clear
 	newline
 	echo -e "WireGuard Configuration"
-	echo -e "======================="
+	echo -e "${separator}"
 	echo -e " Username\t: \c"
 	read user
 	[ -z "$user" ] && { goback; return; }
@@ -427,7 +427,7 @@ function show() {
 		qrencode -t ansiutf8 -l L < /var/www/html/wireguard-${user}.conf
 		newline
 		echo -e "Configuration"
-		echo -e "============="
+		echo -e "${separator}"
 		newline
 		cat /var/www/html/wireguard-${user}.conf
 		newline 

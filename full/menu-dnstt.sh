@@ -139,9 +139,9 @@ ${orange}Press [Ctrl + C] to exit${NC}"
                 nsd=$(cat /etc/slowdns/nsdomain 2>/dev/null || echo "No nameserver found.")
                 clear
                 echo -e "
-                =================
+                ${separator}
                 Change Nameserver
-                =================
+                ${separator}
                 Nameserver: $nsd
                 "
                 read -p "Input Nameserver: " nsdomen || return
@@ -190,9 +190,9 @@ SVCEOF
                 clear
                 echo -e "
                 Nameserver Updated Successfully
-                ===============================
+                ${separator}
                 New Nameserver: $nsdomen
-                ==============================="
+                ${separator}"
                 read -n 1 -s -r -p "Press any key to return..." || true
                 mna89
                 ;;
@@ -210,7 +210,7 @@ SVCEOF
                 clear
                 echo -e "
                 Server Keys Renewed Successfully
-                ================================"
+                ${separator}"
                 read -n 1 -s -r -p "Press any key to return..." || true
                 mna89
                 ;;
@@ -221,7 +221,7 @@ SVCEOF
                 clear
                 echo -e "
                 SlowDNS Restarted Successfully
-                =============================="
+                ${separator}"
                 read -n 1 -s -r -p "Press any key to return..." || true
                 mna89
                 ;;

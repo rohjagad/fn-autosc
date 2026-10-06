@@ -148,12 +148,12 @@ sleep 10
 clear
 echo -e "
 Set Up Argo Tunnel Domain
-=========================
+${separator}
 
 Example: mysubdom.myvpn.com
 
 Replace mysubdom with your subdomain and myvpn.com with your Cloudflare domain.
-=========================
+${separator}
 "
 read -p "New Domain: " opws
 if ! [[ "$opws" =~ ^([[:alnum:]]([[:alnum:]-]{0,61}[[:alnum:]])?\.)+[[:alpha:]]{2,63}$ ]]; then

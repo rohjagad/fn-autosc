@@ -161,15 +161,15 @@ clear
 PSK=$(grep -oP '(?<=: PSK ")\S+(?=")' /etc/ipsec.secrets 2>/dev/null || echo "myvpn")
 cat <<EOF
 
-============================
+${separator}
 L2TP/IPSEC XAuth PSK VPN
-============================
+${separator}
 Domain     : $domain
 IPsec PSK  : $PSK
 Username   : $VPN_USER
 Password   : $VPN_PASSWORD
 Expired    : $exp
-============================
+${separator}
 EOF
 read -n 1 -s -r -p "Press any key to return..." || true
 echo ""
@@ -190,7 +190,7 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/funny/.l2tp")
 	echo ""
 	echo " Select the existing client you want to remove"
 	echo " Press CTRL+C to return"
-	echo " ==============================="
+	echo " ${separator}"
 	echo "     No  Expired   User"
 	grep -E "^### " "/etc/funny/.l2tp" | cut -d ' ' -f 2-3 | nl -s ') '
 	until [[ ${CLIENT_NUMBER} -ge 1 && ${CLIENT_NUMBER} -le ${NUMBER_OF_CLIENTS} ]] 2>/dev/null; do
@@ -216,12 +216,12 @@ systemctl restart ipsec
 systemctl restart xl2tpd
 clear
 echo ""
-echo "=========================="
+echo "${separator}"
 echo "   L2TP Account Deleted   "
-echo "=========================="
+echo "${separator}"
 echo "Username  : $VPN_USER"
 echo "Expired   : $exp"
-echo "=========================="
+echo "${separator}"
 read -n 1 -s -r -p "Press any key to return..." || true
 echo ""
 }
@@ -240,7 +240,7 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/funny/.l2tp")
 	echo ""
 	echo "Select the existing client you want to renew"
 	echo " Press CTRL+C to return"
-	echo -e "==============================="
+	echo -e "${separator}"
 	grep -E "^### " "/etc/funny/.l2tp" | cut -d ' ' -f 2-3 | nl -s ') '
 	until [[ ${CLIENT_NUMBER} -ge 1 && ${CLIENT_NUMBER} -le ${NUMBER_OF_CLIENTS} ]] 2>/dev/null; do
 		if [[ ${CLIENT_NUMBER} == '1' ]]; then
@@ -279,12 +279,12 @@ systemctl restart ipsec
 systemctl restart xl2tpd
 clear
 echo ""
-echo "=========================="
+echo "${separator}"
 echo "   L2TP Account Renewed   "
-echo "=========================="
+echo "${separator}"
 echo "Username  : $user"
 echo "Expired   : $exp4"
-echo "=========================="
+echo "${separator}"
 read -n 1 -s -r -p "Press any key to return..." || true
 echo ""
 }

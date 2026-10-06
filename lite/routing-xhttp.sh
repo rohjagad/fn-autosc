@@ -76,13 +76,43 @@
     output
 clear
 
+blue='\033[1;34m'
+NC='\033[0m'
+
+rainbow_sep() {
+  local text="${1:------------------------------------}"
+  local output=''
+  local i segment fraction r g b color
+  local -a red=(255 255 0 0 0 255 255)
+  local -a green=(0 255 255 255 0 0 0)
+  local -a blue=(0 0 0 255 255 255 0)
+  for ((i = 0; i < ${#text}; i++)); do
+    if ((i == ${#text} - 1)); then
+      segment=5
+      fraction=$((${#text} - 1))
+    else
+      segment=$((i * 6 / (${#text} - 1)))
+      fraction=$((i * 6 % (${#text} - 1)))
+    fi
+    r=$((red[segment] + (red[segment + 1] - red[segment]) * fraction / (${#text} - 1)))
+    g=$((green[segment] + (green[segment + 1] - green[segment]) * fraction / (${#text} - 1)))
+    b=$((blue[segment] + (blue[segment + 1] - blue[segment]) * fraction / (${#text} - 1)))
+    printf -v color '\033[38;2;%d;%d;%dm' "$r" "$g" "$b"
+    output+="${color}${text:i:1}"
+  done
+  printf '%b\n' "${output}${NC}"
+}
+
+separator=$(rainbow_sep '-----------------------------------')
+blue_sep="${blue}-----------------------------------${NC}"
+
 trojanjir() {
 echo -e "
-==================
+${separator}
 [ Routing Seting ]
-==================
+${separator}
 Only X-Ray Trojan WebSocket TLS Routing
-=================="
+${separator}"
 read -p "Input Name: " names || return
 read -p "Input Domain: " domain || return
 read -p "Input Port: " port || return
@@ -228,11 +258,11 @@ echo -e "Routing Success With Trojan WebSocket TLS"
 
 vlessjir() {
 echo -e "
-==================
+${separator}
 [ Routing Seting ]
-==================
+${separator}
 Only X-Ray Vless None TLS
-=================="
+${separator}"
 read -p "Input Name: " names || return
 read -p "Input Domain: " domain || return
 read -p "Input Port: " port || return
@@ -381,11 +411,11 @@ echo -e "Routing Success With All Protocol X-Ray WebSocket using Xray Vless WS N
 
 vmessjir() {
 echo -e "
-==================
+${separator}
 [ Routing Setting ]
-==================
+${separator}
 Only X-Ray VMESS None TLS
-=================="
+${separator}"
 
 read -p "Input Name: " names || return
 read -p "Input Domain: " domain || return
@@ -653,16 +683,16 @@ done
 
 addroute() {
 echo -e "
-========================
+${separator}
 [ Add Routing X-Ray WS ]
-========================
+${separator}
 
 1. Vmess
 2. Vless
 3. Trojan
-========================
+${blue_sep}
  Press CTRL + C to Exit
-========================
+${separator}
 "
 read -p "Input Your Routing Protocol: " prot || exit 0
 case $prot in
@@ -675,12 +705,12 @@ esac
 
 addrules() {
 echo -e "
-====================
+${separator}
 [ Menu Rules X-Ray ]
-====================
+${separator}
 
 1. Add Rules Domain
-====================
+${separator}
 "
 read -p "Input Option: " op || exit 0
 case $op in
@@ -692,17 +722,17 @@ esac
 menu-rout() {
 clear
 echo -e "
-===================
+${separator}
 [ Menu Routing WS ]
-===================
+${separator}
 
 1. Add Account
 2. Create Rules
 3. Back To Default Routing
 4. Back To Menu
-===================
+${blue_sep}
 Press CTRL + C to Exit
-===================
+${separator}
 "
 read -p "Input Option: " aws || exit 0
 case $aws in

@@ -133,9 +133,9 @@ if [[ -f "$api_file" && -f "$id_file" ]]; then
     itd=$(cat "$id_file")
 else
     echo -e "
-===================
+${separator}
 [ 设置机器人通知 ]
-===================
+${separator}
 "
     read -p "API Key Bot: " api
     read -p "Your Chat ID: " itd
@@ -198,14 +198,14 @@ clear
 # [ Menampilkan Output ]
 echo -e "
 Success Install Bot Terminal
-============================
+${separator}
 
 Your Database
 Chat ID : $itd
 Api Bot : $api
 
 Just Check Your Bot Terminal
-============================
+${separator}
 "
 }
 
@@ -272,10 +272,10 @@ chmod 600 /etc/funny/.keybot /etc/funny/.chatid 2>/dev/null || true
 clear
 echo -e "
 Telegram Bot Configuration
-==========================
+${separator}
 Bot API Key: $api
 Owner Chat ID: $itd
-==========================
+${separator}
 "
 }
 
@@ -287,12 +287,12 @@ if [ -s /etc/funny/.keybot ] && [ -s /etc/funny/.chatid ]; then
 fi
 clear
 echo -e "
------------------------------------======
+${separator}
  Bot Credentials Not Set
------------------------------------======
+${separator}
  Choose "1. Set Up Bot Credentials" first,
  then come back to this menu.
------------------------------------======
+${separator}
 "
 return 1
 }
@@ -304,9 +304,9 @@ clear
 cur_id=$(cat /etc/funny/.chatid 2>/dev/null)
 cur_key=$(cat /etc/funny/.keybot 2>/dev/null)
 echo -e "
-=====================
+${separator}
 [ Bot Credentials ]
-=====================
+${separator}
  Registered Chat ID : ${cur_id:-<not set>}
  Registered API Key : ${cur_key:-<not set>}
 
@@ -323,9 +323,9 @@ fi
 if [ -z "$itd" ] || [ -z "$api" ]; then
     clear
     echo -e "
-==============================
+${separator}
  Both values are required.
-==============================
+${separator}
 "
     sleep 2
     clear ; creds
@@ -334,10 +334,10 @@ fi
 clear
 echo -e "
 Information
-==============================
+${separator}
 Bot API Key: $api
 Chat ID    : $itd
-==============================
+${separator}
 "
 read -p "Is the data above correct? (y/n): " opw || return
 case $opw in
@@ -361,24 +361,24 @@ resp=$(curl -4 -s --max-time 15 -d "chat_id=$id" \
 clear
 if echo "$resp" | grep -q '"ok":true'; then
     echo -e "
------------------------------------======
+${separator}
  Bot Notifications
------------------------------------======
+${separator}
  Status  : enabled
  Chat ID : $id
  A test message has been sent to that chat.
------------------------------------======
+${separator}
 "
 else
     echo -e "
------------------------------------======
+${separator}
  Bot Notifications - FAILED
------------------------------------======
+${separator}
  Telegram replied:
  $resp
 
  Check the API key and chat ID (option 1).
------------------------------------======
+${separator}
 "
 fi
 read -n 1 -s -r -p "Press any key to return..." || true
@@ -393,13 +393,13 @@ grep -q 'flock -n /tmp/backup.lock backup' /etc/crontab 2>/dev/null || \
     echo '0 0,6,12,18 * * * root flock -n /tmp/backup.lock backup' >> /etc/crontab
 clear
 echo -e "
------------------------------------======
+${separator}
  Bot Auto Backup
------------------------------------======
+${separator}
  Chat ID  : $(cat /etc/funny/.chatid 2>/dev/null)
  Schedule : 0 0,6,12,18 (4x daily)
  Delivery : Telegram document
------------------------------------======
+${separator}
 "
 read -n 1 -s -r -p "Press any key to return..." || true
 echo ""

@@ -90,7 +90,7 @@ export orange='\033[38;5;208m'
 export BICyan='\033[0;36m'
 
 rainbow_sep() {
-  local text="${1:-============================}"
+  local text="${1:-----------------------------}"
   local output=''
   local i segment fraction r g b color
   local -a red=(255 255 0 0 0 255 255)

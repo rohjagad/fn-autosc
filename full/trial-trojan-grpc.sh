@@ -122,9 +122,9 @@ fi
 link1="trojan://${uuid}@${domain}:443?mode=gun&security=tls&authority=${domain}&type=grpc&serviceName=trgr&sni=${domain}#${user}"
 
 TEKS="
-=======================
+-----------------------
    Xray Trojan gRPC
-=======================
+-----------------------
 
 Remarks : $user
 Domain  : $domain
@@ -133,14 +133,14 @@ Expired : $exp
 Limit IP: $ip
 Quota   : $quota GB
 Protokol: Trojan
-=======================
+-----------------------
 
 Service Name: trgr
 Network: gRPC GUN
 Port gRPC: 443, 2053, 2083, 2087, 2096
-=======================
+-----------------------
 Link TLS : $link1
-=======================
+-----------------------
 "
 if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
     curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's/\\033\[[0-9;]*m//g' -e 's/\x1b\[[0-9;]*m//g')" $URL >/dev/null 2>&1
