@@ -2001,3 +2001,13 @@ Section 35's four-check rule applied to Fix 378:
 | **Over-strictness** | Nothing rejected; display-scoped change. |
 | **Over-engineering** | One `sed` expression per send site; no parse_mode change, no helper. |
 | **vs the source** | References send raw card text; the send-time wrap is this repo's own direction per operator request. |
+## 163. HTML Code Links — Four Checks (October 6, 2026)
+
+Section 35's four-check rule applied to Fix 379:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Only the Telegram HTTP payload changes; terminal/`log`/API text byte-identical to Fix 378. Entity escaping verified so HTML mode cannot 400 on `&` in links. |
+| **Over-strictness** | Nothing rejected; send-scoped change. |
+| **Over-engineering** | Same one-expression-per-send-site shape as Fix 378; no parse layer, no helper. |
+| **vs the source** | References send plain text; `<code>` + HTML mode mirrors this repo's own lock/unlock notices. |

@@ -2645,3 +2645,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 378 (Found 382):** reverted the in-card backticks (cards, `.log` files and terminal output are plain again); the two `Link` lines are wrapped in backticks by an extra `sed` expression applied only to the Telegram `text=` payload in all 48 xray builders, and the `Config OVPN` line the same way at the SSH sender call sites. The `fn-autosc-api` extractor change from Fix 377 is reverted (nothing to exclude anymore).
 - **Verified:** send-pipeline replay on sample cards wraps only link lines; `bash -n` clean on all touched scripts; zips repacked (0755, parity rechecked); full-edition scripts redeployed with remote `bash -n` clean; live TUI card shows plain links.
+### Fix 379 - Copyable links via HTML code tags (Found 383)
+
+- **Fix 379 (Found 383):** the send-time wrap now emits `<code>link</code>` instead of backticks in all 48 xray builders and at both SSH sender call sites; all card sends gained `parse_mode=html` + `disable_web_page_preview=1`, and `&` is escaped to `&amp;` first (links carry query `&`; Telegram decodes entities on copy, so the pasted link is pristine). Cards, `.log` files, terminal output and API responses remain untouched plain text.
+- **Verified:** send-pipeline replay produces balanced-tag HTML with no raw `&`; card templates audited free of `<`/`>`; `bash -n` clean; zips repacked (0755, parity rechecked); full-edition scripts redeployed with remote `bash -n` clean.

@@ -110,7 +110,7 @@ send_telegram_notification() {
     local api_url="https://api.telegram.org/bot${key}/sendMessage"
     local TIME="${TIME:-10}"
 
-    curl -s --max-time $TIME --data-urlencode "chat_id=$chat_id" --data-urlencode "text=$message" $api_url >/dev/null 2>&1
+    curl -s --max-time $TIME --data-urlencode "chat_id=$chat_id&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$message" $api_url >/dev/null 2>&1
 }
 
 create_ssh_user() {
@@ -232,7 +232,7 @@ Config OVPN : http://${domain}/web/openvpn.zip
 EOF
 )
 
-    send_telegram_notification "$chat_id" "$key" "$(printf '%s' "$message" | sed -e 's|^\(Config OVPN : \)\([^ ]*\)$|\1`\2`|')"
+    send_telegram_notification "$chat_id" "$key" "$(printf '%s' "$message" | sed -e 's/&/\&amp;/g' -e 's|^\(Config OVPN : \)\([^ ]*\)$|\1<code>\2</code>|')"
 
     local log_dir="/var/log/create/ssh"
     mkdir -p "$log_dir"
