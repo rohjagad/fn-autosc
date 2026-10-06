@@ -277,11 +277,13 @@ Network: gRPC
 Alpn   : - [ None ]
 Decrypt: auto
 -----------------------
-Link TLS : $vmesslink1
+🟢 VMess GRPC
+
+$vmesslink1
 -----------------------
 "
 if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
-    curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "disable_web_page_preview=1" --data-urlencode "parse_mode=html" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's/&/\&amp;/g' -e 's/\\033\[[0-9;]*m//g' -e 's/\x1b\[[0-9;]*m//g' -e 's|^\(Link TLS : \)\([^ ]*\)$|\1<code>\2</code>|' -e 's|^\(Link None: \)\([^ ]*\)$|\1<code>\2</code>|')" $URL >/dev/null 2>&1
+    curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "disable_web_page_preview=1" --data-urlencode "parse_mode=html" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's/&/\&amp;/g' -e 's/\\033\[[0-9;]*m//g' -e 's/\x1b\[[0-9;]*m//g' -e 's|^\((vmess\|vless\|trojan)://[^ ]*\)$|<code>\1</code>|')" $URL >/dev/null 2>&1
 fi
 echo -e "$TEKS" > /var/log/create/xray/grpc/${user}.log
 clear

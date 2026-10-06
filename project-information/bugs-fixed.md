@@ -2649,3 +2649,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 379 (Found 383):** the send-time wrap now emits `<code>link</code>` instead of backticks in all 48 xray builders and at both SSH sender call sites; all card sends gained `parse_mode=html` + `disable_web_page_preview=1`, and `&` is escaped to `&amp;` first (links carry query `&`; Telegram decodes entities on copy, so the pasted link is pristine). Cards, `.log` files, terminal output and API responses remain untouched plain text.
 - **Verified:** send-pipeline replay produces balanced-tag HTML with no raw `&`; card templates audited free of `<`/`>`; `bash -n` clean; zips repacked (0755, parity rechecked); full-edition scripts redeployed with remote `bash -n` clean.
+### Fix 380 - Headed link blocks (Found 384)
+
+- **Fix 380 (Found 384):** all 48 xray builders (both editions) print each link as its own block (`---`, `🟢 VMess WS TLS`, blank line, bare link); gRPC keeps a single block. The Telegram send-time wrap now targets bare-scheme lines (`^(vmess|vless|trojan)://…` → `<code>`), replacing the two `Link`-prefix expressions; `&amp;` escaping, HTML mode and preview-disable unchanged. Terminal, `.log` and API text stay plain.
+- **Verified:** send-pipeline replay wraps only link lines; `bash -n` clean; zips repacked (0755, parity rechecked); full-edition scripts redeployed with remote `bash -n` clean.

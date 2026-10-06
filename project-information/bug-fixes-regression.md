@@ -2011,3 +2011,13 @@ Section 35's four-check rule applied to Fix 379:
 | **Over-strictness** | Nothing rejected; send-scoped change. |
 | **Over-engineering** | Same one-expression-per-send-site shape as Fix 378; no parse layer, no helper. |
 | **vs the source** | References send plain text; `<code>` + HTML mode mirrors this repo's own lock/unlock notices. |
+## 164. Headed Link Blocks — Four Checks (October 6, 2026)
+
+Section 35's four-check rule applied to Fix 380:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Same links, same order, same separators; unlock/change-id parsers never read link lines; API extractor still matches bare-scheme links. |
+| **Over-strictness** | Nothing rejected; layout-only change. |
+| **Over-engineering** | Label derived from each builder's own proto×transport; one send expression replaces two. |
+| **vs the source** | References share the flat rows; headed blocks are this repo's own direction per operator request. |
