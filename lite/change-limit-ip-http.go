@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"os"
 	"strings"
+	"strconv"
 	"time"
 )
 
@@ -185,30 +186,33 @@ func main() {
 	clearScreen()
 	rerechanBanner()
 
-	fmt.Println("   USERNAME       EXP DATE         LIMIT IP")
-	barisBiru()
 
 	usernames := getUsernames()
-	var count int
 
-	for _, username := range usernames {
-		logFile := fmt.Sprintf("/var/log/create/xray/http/%s.log", username)
-		expiry := getAccountExpiry(logFile)
-		ipLimit := getIPLimit(logFile)
-		fmt.Printf(" %-17s %-15s %-20s\n", username, expiry, ipLimit)
-		count++
+	if len(usernames) == 0 {
+		fmt.Println("No active accounts found.")
+		barisPanjang()
+		return
 	}
-
-	if count == 0 {
-		fmt.Println("   No accounts found.")
+	for i, username := range usernames {
+		fmt.Printf("\033[32;1m%02d\033[0m. %s\n", i+1, username)
 	}
-	fmt.Printf("   Account number: %d users\n", count)
+	barisBiru()
+	fmt.Printf("Total Accounts: %d\n", len(usernames))
+	barisBiru()
+	fmt.Println("\033[38;5;208mPress [Ctrl + C] to exit\033[0m")
 	barisPanjang()
 
 	fmt.Print("Input username: ")
-	var user string
-	fmt.Scanln(&user)
+	var input string
+	fmt.Scanln(&input)
 	fmt.Println()
+
+	// A number picks from the list, a name is used as-is
+	user := input
+	if n, err := strconv.Atoi(input); err == nil && n >= 1 && n <= len(usernames) {
+	user = usernames[n-1]
+	}
 
 	logFile := "/var/log/create/xray/http/" + user + ".log"
 	if _, err := os.Stat(logFile); os.IsNotExist(err) {

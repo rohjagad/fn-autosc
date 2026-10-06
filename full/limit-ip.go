@@ -228,9 +228,7 @@ func main() {
 	fmt.Println("Domain:", getDomain())
 	fmt.Println()
     clearScreen()
-	barisPanjang()
-	fmt.Println("   USERNAME       EXP DATE         LIMIT IP")
-	barisBiru()
+	rerechanBanner()
 
 	file, err := os.Open("/etc/passwd")
 	if err != nil {
@@ -240,7 +238,7 @@ func main() {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	var count int
+	var usernames []string
 	for scanner.Scan() {
 		line := scanner.Text()
 		fields := strings.Split(line, ":")
@@ -251,24 +249,33 @@ func main() {
 		uid := fields[2]
 
 		if id, _ := strconv.Atoi(uid); id >= 1000 && username != "nobody" {
-			expiry := getAccountExpiry(username)
-			ipLimit := getIPLimit(username)
-			fmt.Printf(" %-17s %-15s %-20s\n", username, expiry, ipLimit)
-			count++
+			usernames = append(usernames, username)
 		}
 	}
-
-	if count == 0 {
-		fmt.Println("   No accounts found.")
+	if len(usernames) == 0 {
+		fmt.Println("No active accounts found.")
+		barisPanjang()
+		return
+	}
+	for i, username := range usernames {
+		fmt.Printf("\033[32;1m%02d\033[0m. %s\n", i+1, username)
 	}
 	barisBiru()
-	fmt.Printf("   Account number: %d users\n", count)
+	fmt.Printf("Total Accounts: %d\n", len(usernames))
+	barisBiru()
+	fmt.Println("\033[38;5;208mPress [Ctrl + C] to exit\033[0m")
 	barisPanjang()
 
 	fmt.Print("Input username: ")
-	var user string
-	fmt.Scanln(&user)
+	var input string
+	fmt.Scanln(&input)
 	fmt.Println()
+
+	// A number picks from the list, a name is used as-is
+	user := input
+	if n, err := strconv.Atoi(input); err == nil && n >= 1 && n <= len(usernames) {
+		user = usernames[n-1]
+	}
 
 	limitFile := "/etc/xray/limit/ip/ssh/" + user
 	logFile := "/var/log/create/ssh/" + user + ".log"

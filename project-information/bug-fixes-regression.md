@@ -1871,3 +1871,13 @@ Section 35's four-check rule applied to Fix 365:
 | **Over-strictness** | Nothing rejected; display-only change. |
 | **Over-engineering** | Deleted redundant lines; no new code. |
 | **vs the source** | References stack brand + table boxes; single card is this repo's own direction per operator request. |
+## 150. Numbered Change-Limit List — Four Checks (October 6, 2026)
+
+Section 35's four-check rule applied to Fix 366:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Same validation, same Before/After flow, same limit writes — only the picker list changed. Number input maps strictly inside the list range, anything else falls through to name. |
+| **Over-strictness** | Nothing rejected; names still accepted as-is. |
+| **Over-engineering** | Mirrors the existing list-account pattern line for line. |
+| **vs the source** | References show wide tables; numbered list is this repo's own direction per operator request. |

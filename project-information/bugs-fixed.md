@@ -2593,3 +2593,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 365 (Found 370):** brand line removed; banner-bottom doubles as table/card top so each screen is a single frame (title, table, count, bottom). `limit-ip.go` banner now titles the tool (`Menu Change Limit IP SSH`) instead of branding. Binaries rebuilt.
 - **Verified:** all 9 tools build; populated + empty renders checked live.
+### Fix 366 - Change-limit screens list like list-account (Found 371)
+
+- **Fix 366 (Found 371):** the 9 change-limit tools drop the wide table for the list-account pattern — green `01.` numbering, `Total Accounts: N`, orange Ctrl+C hint, and number-or-name input (a number picks from the list, a name is used as-is). Details (expiry, current limit) still show on the Before card after picking. `limit-ip` main also gained its tool title. Binaries rebuilt.
+- **Verified:** all 9 tools build; populated + empty renders checked.
