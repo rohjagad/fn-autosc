@@ -2031,3 +2031,13 @@ Section 35's four-check rule applied to Fix 381:
 | **Over-strictness** | Nothing rejected; layout/send-scoped change. |
 | **Over-engineering** | One generic row expression covers all labels; padding is literal spaces. |
 | **vs the source** | References share the ragged rows; aligned monospace cards are this repo's own direction per operator request. |
+## 166. Bold Labels Beside Code Values — Four Checks (October 6, 2026)
+
+Section 35's four-check rule applied to Fix 382:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Same rows/values/order; only entity markup in the Telegram payload changes (nesting proven unsupported by live probe, siblings used instead). |
+| **Over-strictness** | Nothing rejected; send-scoped change. |
+| **Over-engineering** | Same single-expression shape; no new mechanism. |
+| **vs the source** | Matches this repo's own lock/unlock notice style. |

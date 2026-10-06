@@ -2657,3 +2657,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 381 (Found 385):** link wrap redone as three single-scheme expressions (no alternation), verified byte-for-byte from the deployed file; every `Label : value` card row is additionally wrapped in `<code>` at send time (monospace → colons line up in Telegram), while separators, titles, blanks and bare-link handling are untouched. Source padding normalized per block (xray main/detail col 9, trojan ports col 10, grpc col 13, SSH col 12; `BadVpn/Udpgw` left as the documented exception — label longer than the column). Terminal cards, `.log` files and API output keep plain text with the same aligned padding.
 - **Verified:** send-chain replay from repo bytes wraps only intended lines; `bash -n` clean; zips repacked (0755, parity rechecked); all 26 full-edition scripts hash-verified deployed; live TUI card shows aligned headed blocks.
+### Fix 382 - Bold labels beside code values (Found 386)
+
+- **Fix 382 (Found 386):** the send-time row wrap now emits `<b>label</b> <code>value</code>` as sibling entities in all 48 xray builders and both SSH senders (replacing whole-row `<code>`). Terminal cards, `.log` files and API output unchanged.
+- **Verified:** send-pipeline replay yields sibling entities; `bash -n` clean; zips repacked (0755, parity rechecked); full-edition scripts redeployed with remote `bash -n` clean.
