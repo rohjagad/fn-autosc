@@ -126,20 +126,7 @@ clear
 echo ""
 echo ""
 echo ""
-domain=$(cat /etc/xray/domain)
-DARGS="-d $domain"
-MYIP=$(curl -4 -s --max-time 10 ifconfig.me 2>/dev/null)
-if [ -s /etc/xray/domains ] && [ -n "$MYIP" ]; then
-    while IFS= read -r _d || [ -n "$_d" ]; do
-        _d=$(echo "$_d" | tr -d '[:space:]')
-        RIP=$(getent hosts "$_d" 2>/dev/null | awk '$1 ~ /^[0-9.]+$/ {print $1; exit}')
-        if [ -n "$_d" ] && [ "$_d" != "$domain" ] && [ "$RIP" = "$MYIP" ]; then
-            DARGS="$DARGS -d $_d"
-        elif [ -n "$_d" ] && [ "$_d" != "$domain" ]; then
-            echo "Skipping $_d for this issuance (DNS does not point here yet)."
-        fi
-    done < /etc/xray/domains
-fi
+domain="${CHOSEN:-$(cat /etc/xray/domain)}"
 clear
 echo ""
 echo ""
@@ -160,11 +147,11 @@ if [[ $ip_version == "4" ]]; then
     chmod +x /root/.acme.sh/acme.sh
     /root/.acme.sh/acme.sh --upgrade --auto-upgrade
     /root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
-    if ! /root/.acme.sh/acme.sh --issue $DARGS --force --standalone -k ec-256; then
+    if ! /root/.acme.sh/acme.sh --issue -d $domain --force --standalone -k ec-256; then
         echo "Let's Encrypt failed/rate-limited, falling back to ZeroSSL..."
         /root/.acme.sh/acme.sh --set-default-ca --server zerossl
         /root/.acme.sh/acme.sh --register-account -m "${email:-admin@$domain}" --server zerossl 2>/dev/null || true
-        /root/.acme.sh/acme.sh --issue $DARGS --force --standalone -k ec-256 --server zerossl || true
+        /root/.acme.sh/acme.sh --issue -d $domain --force --standalone -k ec-256 --server zerossl || true
     fi
     /root/.acme.sh/acme.sh --installcert -d $domain --force --fullchainpath /etc/xray/xray.crt --keypath /etc/xray/xray.key --ecc || true
     if [[ ! -s /etc/xray/xray.crt || ! -s /etc/xray/xray.key ]]; then
@@ -189,11 +176,11 @@ elif [[ $ip_version == "6" ]]; then
     chmod +x /root/.acme.sh/acme.sh
     /root/.acme.sh/acme.sh --upgrade --auto-upgrade
     /root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
-    if ! /root/.acme.sh/acme.sh --issue $DARGS --force --standalone -k ec-256 --listen-v6; then
+    if ! /root/.acme.sh/acme.sh --issue -d $domain --force --standalone -k ec-256 --listen-v6; then
         echo "Let's Encrypt failed/rate-limited, falling back to ZeroSSL..."
         /root/.acme.sh/acme.sh --set-default-ca --server zerossl
         /root/.acme.sh/acme.sh --register-account -m "${email:-admin@$domain}" --server zerossl 2>/dev/null || true
-        /root/.acme.sh/acme.sh --issue $DARGS --force --standalone -k ec-256 --listen-v6 --server zerossl || true
+        /root/.acme.sh/acme.sh --issue -d $domain --force --standalone -k ec-256 --listen-v6 --server zerossl || true
     fi
     /root/.acme.sh/acme.sh --installcert -d $domain --force --fullchainpath /etc/xray/xray.crt --keypath /etc/xray/xray.key --ecc || true
     if [[ ! -s /etc/xray/xray.crt || ! -s /etc/xray/xray.key ]]; then
@@ -218,199 +205,10 @@ else
 fi
 }
 
-cert2() {
-email=$(cat /etc/funny/.email 2>/dev/null || echo "admin@example.com")
-domain=$(cat /etc/xray/domain)
 
-clear
-echo ""
-echo ""
-echo ""
-echo "
-L FN 项目更新证书
-${separator}
-Your Domain: $domain
-${blue_sep}
-4 For IPv4 & 6 For IPv6
-"
-echo -e "Generate new Certificate. Please input your VPS type:"
-read -p "Input Your Type Pointing (4 for IPv4 / 6 for IPv6): " ip_version
 
-stop_services() {
-    systemctl stop nginx
-}
 
-start_services() {
-    systemctl start nginx
-}
 
-copy_certificates() {
-    # `cat src > dst` creates/truncates dst before src is read, so when certbot
-    # failed (rate limit, HTTP-01 failure) and never produced the files the live
-    # certificate was left as a 0-byte file and nginx could not start. Refuse to
-    # touch it unless certbot actually produced a non-empty pair.
-    if [[ ! -s /etc/letsencrypt/live/$domain/fullchain.pem || ! -s /etc/letsencrypt/live/$domain/privkey.pem ]]; then
-        echo "certbot did not produce certificate files for $domain - keeping the existing certificate."
-        return 1
-    fi
-    cp /etc/letsencrypt/live/$domain/fullchain.pem /etc/xray/xray.crt
-    cp /etc/letsencrypt/live/$domain/privkey.pem /etc/xray/xray.key
-    mkdir -p /etc/haproxy
-    cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem
-    chmod 644 /etc/xray/xray.crt
-    chmod 600 /etc/xray/xray.key /etc/haproxy/funny.pem
-}
-
-if [[ $ip_version == "4" || $ip_version == "6" ]]; then
-    stop_services
-    if [[ $ip_version == "4" ]]; then
-        certbot certonly --standalone --preferred-challenges http -d $domain --non-interactive --agree-tos --email $email
-    elif [[ $ip_version == "6" ]]; then
-        certbot certonly --standalone --preferred-challenges http -d $domain --non-interactive --agree-tos --email $email --preferred-challenges http --standalone-supported-challenges http
-    fi
-
-    if copy_certificates; then
-        echo "Cert installed for IPv$ip_version."
-    else
-        echo "Certificate renewal failed - the previously installed certificate was kept."
-    fi
-    start_services
-    systemctl restart noobzvpns 2>/dev/null || true
-    read -n 1 -s -r -p "Press any key to return..." || true
-    echo ""
-else
-    echo "Invalid IP version. Please choose '4' for IPv4 or '6' for IPv6."
-    sleep 3
-    cert2
-fi
-}
-
-dm() {
-    clear
-    echo ""
-    echo ""
-    echo ""
-    CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
-    KEY=$(cat /etc/funny/.keybot 2>/dev/null)
-    URL="https://api.telegram.org/bot$KEY/sendMessage"
-    TIME="10"
-    DATE=$(date +"%Y-%m-%d")  # Hanya tanggal, bulan, dan tahun
-
-    # Log Informasi Awal - Tampilkan domain yang sedang digunakan
-    old_domain=$(cat /etc/xray/domain)
-    log_message="<b>🚀 Log Perubahan Domain Xray</b>%0A"
-    log_message+="<i>Informasi Perubahan:</i>%0A"
-    log_message+="<pre>"
-    log_message+="-------------------------------------%0A"
-    log_message+="| Informasi            | Detail      |%0A"
-    log_message+="-------------------------------------%0A"
-    log_message+="| Tanggal              | $DATE       |%0A"
-    log_message+="| Domain Lama          | $old_domain |%0A"
-    log_message+="-------------------------------------%0A"
-    log_message+="</pre>"
-    log_message+="<b>Status:</b> Menampilkan Domain saat ini... 🔍"
-
-    if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
-        curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$log_message" $URL >/dev/null
-    fi
-
-    echo -e "${separator}"
-    echo -e "Current Domain:"
-    echo -e "$(cat /etc/xray/domain)"
-    echo ""
-    read -rp "New Domain/Host: " -e host
-    echo ""
-
-    if [ -z "$host" ]; then
-        echo "No domain changes made."
-        # Log jika tidak ada perubahan domain
-        log_message="<b>🚨 Perubahan Domain Xray</b>%0A"
-        log_message+="<i>Tidak ada perubahan domain yang dilakukan.</i>%0A"
-        log_message+="<pre>"
-        log_message+="-------------------------------------%0A"
-        log_message+="| Tanggal              | $DATE       |%0A"
-        log_message+="| Domain Lama          | $old_domain |%0A"
-        log_message+="| Domain Baru          | Tidak ada   |%0A"
-        log_message+="-------------------------------------%0A"
-        log_message+="</pre>"
-        log_message+="<b>Status:</b> Tidak ada perubahan dilakukan. ❌"
-
-        if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
-        curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$log_message" $URL >/dev/null
-    fi
-
-        echo -e "${separator}"
-        read -n 1 -s -r -p "Press any key to return..." || true
-        return 0
-    elif ! [[ "$host" =~ ^([[:alnum:]]([[:alnum:]-]{0,61}[[:alnum:]])?\.)+[[:alpha:]]{2,63}$ ]]; then
-        echo "Domain must be a valid DNS hostname."
-        read -n 1 -s -r -p "Press any key to return..." || true
-        return 0
-    else
-        # Simpan domain lama dan ganti dengan domain baru
-        mv /etc/xray/domain /etc/xray/domain.old
-        echo "$host" > /etc/xray/domain
-        # Update konfigurasi di nginx.conf
-        sed -i "s|server_name $old_domain;|server_name $host;|" /etc/nginx/nginx.conf
-	sed -i "s|${old_domain}|${host}|g" /var/log/create/xray/ws/* 2>/dev/null || true
-	sed -i "s|${old_domain}|${host}|g" /var/log/create/xray/http/* 2>/dev/null || true
-	sed -i "s|${old_domain}|${host}|g" /var/log/create/xray/xhttp/* 2>/dev/null || true
-	sed -i "s|${old_domain}|${host}|g" /var/log/create/xray/grpc/* 2>/dev/null || true
-	sed -i "s|${old_domain}|${host}|g" /var/log/create/ssh/* 2>/dev/null || true
-
-        # Log perubahan domain
-        log_message="<b>🚀 Perubahan Domain Xray</b>%0A"
-        log_message+="<i>Berikut detail perubahan:</i>%0A"
-        log_message+="<pre>"
-        log_message+="-------------------------------------%0A"
-        log_message+="| Informasi            | Detail      |%0A"
-        log_message+="-------------------------------------%0A"
-        log_message+="| Tanggal              | $DATE       |%0A"
-        log_message+="| Domain Lama          | $old_domain |%0A"
-        log_message+="| Domain Baru          | $host       |%0A"
-        log_message+="-------------------------------------%0A"
-        log_message+="</pre>"
-        log_message+="<b>Status:</b> Domain berhasil diperbarui ✅"
-
-        if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
-        curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$log_message" $URL >/dev/null
-    fi
-
-        # Konfirmasi untuk memperbarui sertifikat
-        read -rp "Renew SSL certificate? (y/n): " cert_choice
-        if [[ "$cert_choice" == "y" || "$cert_choice" == "Y" ]]; then
-            echo -e "\nRenewing SSL certificate..."
-            cert_status="Berhasil"
-            cert
-        else
-            cert_status="Tidak diperbarui"
-            systemctl reload nginx 2>/dev/null || systemctl restart nginx 2>/dev/null || true
-        fi
-
-        # Log untuk pembaruan sertifikat
-        log_message="<b>🔧 Pembaruan Sertifikat</b>%0A"
-        log_message+="<i>Hasil pembaruan sertifikat:</i>%0A"
-        log_message+="<pre>"
-        log_message+="-------------------------------------%0A"
-        log_message+="| Tanggal              | $DATE       |%0A"
-        log_message+="| Pembaruan Sertifikat | $cert_status|%0A"
-        log_message+="-------------------------------------%0A"
-        log_message+="</pre>"
-        log_message+="<b>Status:</b> Sertifikat diperbarui: $cert_status"
-
-        if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
-        curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$log_message" $URL >/dev/null
-    fi
-
-        if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
-            echo -e "${separator}"
-            echo "Notification sent to Telegram."
-            echo -e "${separator}"
-        fi
-        read -n 1 -s -r -p "Press any key to return..." || true
-        return 0
-    fi
-}
 
 fn() {
 clear
@@ -418,7 +216,7 @@ echo ""
 echo ""
 echo ""
 echo start
-domain=$(cat /etc/xray/domain)
+domain="${CHOSEN:-$(cat /etc/xray/domain)}"
 systemctl stop nginx
 cd /root/
 clear
@@ -444,28 +242,6 @@ read -n 1 -s -r -p "Press any key to return..." || true
 echo ""
 }
 
-cert() {
-clear
-echo ""
-echo ""
-echo ""
-echo -e "${NC}${separator}
-        GENERATE CERTIFICATE
-${separator}
-${green}1${NC}. Issue via acme.sh
-${green}2${NC}. Issue via Certbot
-${green}0${NC}. Back to Domain Menu
-${separator}
-
-${orange}Press [Ctrl + C] to exit${NC}"
-read -p "Input option: " akz || exit 0
-case $akz in
-1) clear ; acme ;;
-2) clear ; cert2 ;;
-0|00) clear ; return 0 ;;
-*) clear ; cert ;;
-esac
-}
 
 dmsl() {
 systemctl stop nginx
@@ -479,7 +255,7 @@ state="Central Kalimantan"
 locality="Kab. Kota Waringin Timur"
 organization="FN AutoSC"
 organizationalunit="99999"
-commonname="FN"
+commonname="${CHOSEN:-FN}"
 email=$(cat /etc/funny/.email 2>/dev/null || echo "admin@example.com")
 
 # delete
@@ -594,6 +370,175 @@ domain_extra_del() {
 }
 
 
+pick_domain() {
+    # Choose a domain first (primary + extras, no default). Sets CHOSEN.
+    unset CHOSEN
+    local _all _d
+    _all=()
+    _all+=("$(cat /etc/xray/domain 2>/dev/null)")
+    if [ -s /etc/xray/domains ]; then
+        while IFS= read -r _d || [ -n "$_d" ]; do
+            _d=$(echo "$_d" | tr -d '[:space:]')
+            [ -n "$_d" ] && [ "$_d" != "${_all[0]}" ] && _all+=("$_d")
+        done < /etc/xray/domains
+    fi
+    [ -z "${_all[0]}" ] && { echo "No domain configured."; return 1; }
+    clear
+    echo ""
+    echo ""
+    echo ""
+    echo -e "${separator}"
+    echo -e "Choose Domain"
+    echo -e "${separator}"
+    local i=1
+    for _d in "${_all[@]}"; do
+        echo -e "${green}$i${NC}. $_d"
+        i=$((i+1))
+    done
+    echo -e "${separator}"
+    echo ""
+    read -p "Choose domain [1]: " nn || return 1
+    [ -z "$nn" ] && nn=1
+    if ! [[ "$nn" =~ ^[0-9]+$ ]] || [ "$nn" -lt 1 ] || [ "$nn" -gt "${#_all[@]}" ]; then
+        echo "Invalid choice."
+        return 1
+    fi
+    CHOSEN="${_all[$((nn-1))]}"
+    local MYIP RIP
+    MYIP=$(curl -4 -s --max-time 10 ifconfig.me 2>/dev/null)
+    RIP=$(getent hosts "$CHOSEN" 2>/dev/null | awk '$1 ~ /^[0-9.]+$/ {print $1; exit}')
+    if [ -n "$MYIP" ] && [ "$RIP" != "$MYIP" ]; then
+        echo "Warning: $CHOSEN does not resolve here yet - issuance will fail."
+        read -p "Continue anyway? (y/N): " yy || return 1
+        [[ "$yy" == "y" || "$yy" == "Y" ]] || return 1
+    fi
+}
+
+all_domains() {
+    local primary
+    primary=$(cat /etc/xray/domain 2>/dev/null)
+    {
+        [ -n "$primary" ] && echo "$primary"
+        [ -s /etc/xray/domains ] && grep -v '^[[:space:]]*$' /etc/xray/domains | sed 's/[[:space:]]//g'
+    } | awk '$0 != "" && !seen[$0]++'
+}
+
+count_ssh() {
+    awk -F: '$3 >= 1000 && $1 != "nobody" {c++} END {print c+0}' /etc/passwd
+}
+
+count_xray() {
+    local total=0 f sec line
+    for f in /etc/xray/json/ws.json /etc/xray/json/upgrade.json /etc/xray/json/grpc.json /etc/xray/json/xhttp.json; do
+        [ -f "$f" ] || continue
+        sec=""
+        while IFS= read -r line; do
+            case "$line" in
+                "#vmess") sec=vmess ;;
+                "#vless") sec=vless ;;
+                "#trojan") sec=trojan ;;
+                "### "*) [ "$sec" = "$1" ] && total=$((total+1)) ;;
+            esac
+        done < "$f"
+    done
+    echo "$total"
+}
+
+count_mark() {
+    local c
+    c=$(grep -c "^### " "$1" 2>/dev/null || true)
+    echo "${c:-0}"
+}
+
+count_lines() {
+    local c
+    c=$(grep -cve '^\s*$' "$1" 2>/dev/null || true)
+    echo "${c:-0}"
+}
+
+all_domains() {
+    local primary
+    primary=$(cat /etc/xray/domain 2>/dev/null)
+    {
+        [ -n "$primary" ] && echo "$primary"
+        [ -s /etc/xray/domains ] && grep -v '^[[:space:]]*$' /etc/xray/domains | sed 's/[[:space:]]//g'
+    } | awk '$0 != "" && !seen[$0]++'
+}
+
+count_ssh() {
+    awk -F: '$3 >= 1000 && $1 != "nobody" {c++} END {print c+0}' /etc/passwd
+}
+
+count_xray() {
+    local total=0 f sec line
+    for f in /etc/xray/json/ws.json /etc/xray/json/upgrade.json /etc/xray/json/grpc.json /etc/xray/json/xhttp.json; do
+        [ -f "$f" ] || continue
+        sec=""
+        while IFS= read -r line; do
+            case "$line" in
+                "#vmess") sec=vmess ;;
+                "#vless") sec=vless ;;
+                "#trojan") sec=trojan ;;
+                "### "*) [ "$sec" = "$1" ] && total=$((total+1)) ;;
+            esac
+        done < "$f"
+    done
+    echo "$total"
+}
+
+count_mark() {
+    local c
+    c=$(grep -c "^### " "$1" 2>/dev/null || true)
+    echo "${c:-0}"
+}
+
+count_lines() {
+    local c
+    c=$(grep -cve '^\s*$' "$1" 2>/dev/null || true)
+    echo "${c:-0}"
+}
+
+domain_extra_list() {
+    clear
+    echo ""
+    echo ""
+    echo ""
+    echo -e "${separator}"
+    echo -e "Domain List (all domains serve all accounts)"
+    echo -e "${separator}"
+    local _all _ssh _vm _vl _tr _wg _l2 _nb d
+    mapfile -t _all < <(all_domains)
+    if [ ${#_all[@]} -eq 0 ]; then
+        echo -e "No domain configured."
+        echo -e "${separator}"
+        read -n 1 -s -r -p "Press any key to return..." || true
+        echo ""
+        return
+    fi
+    _ssh=$(count_ssh)
+    _vm=$(count_xray vmess)
+    _vl=$(count_xray vless)
+    _tr=$(count_xray trojan)
+    _wg=$(count_lines /etc/funny/.wireguard)
+    _l2=$(count_mark /etc/funny/.l2tp)
+    _nb=$(count_mark /etc/funny/.noob)
+    for d in "${_all[@]}"; do
+        echo -e "Domain : $d"
+        printf "%-9s : %s\\n" "SSH" "$_ssh"
+        printf "%-9s : %s\\n" "VMess" "$_vm"
+        printf "%-9s : %s\\n" "VLess" "$_vl"
+        printf "%-9s : %s\\n" "Trojan" "$_tr"
+        printf "%-9s : %s\\n" "WireGuard" "$_wg"
+        printf "%-9s : %s\\n" "L2TP" "$_l2"
+        printf "%-9s : %s\\n" "NoobzVPN" "$_nb"
+        echo -e "${separator}"
+    done
+    echo -e "${separator}"
+    read -n 1 -s -r -p "Press any key to return..." || true
+    echo ""
+}
+
+
 dm1() {
 clear
 echo ""
@@ -602,24 +547,24 @@ echo ""
 echo -e "${NC}${separator}
             DOMAIN MENU
 ${separator}
-${green}1${NC}. Change Server Domain
-${green}2${NC}. Renew Certificate (Acme: IPv4/IPv6)
-${green}3${NC}. Renew Certificate (Certbot: IPv4 Only)
-${green}4${NC}. Generate Self-Signed Certificate
-${green}5${NC}. Add Extra Domain (rotation)
-${green}6${NC}. Remove Extra Domain
+${green}1${NC}. Add Domain
+${green}2${NC}. Remove Domain
+${green}3${NC}. List Domain
+${green}4${NC}. Renew Certificate (Acme) - choose domain first
+${green}5${NC}. Renew Certificate (Certbot) - choose domain first
+${green}6${NC}. Generate Self-Signed Certificate - choose domain first
 ${green}0${NC}. Back to Main Menu
 ${separator}
 
 ${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input option: " apw || exit 0
 case $apw in
-1) clear ; dm ; dm1 ;;
-2) clear ; cert ; dm1 ;;
-3) clear ; fn ; dm1 ;;
-4) clear ; dmsl ; dm1 ;;
-5) clear ; domain_extra_add ; dm1 ;;
-6) clear ; domain_extra_del ; dm1 ;;
+1) clear ; domain_extra_add ; dm1 ;;
+2) clear ; domain_extra_del ; dm1 ;;
+3) clear ; domain_extra_list ; dm1 ;;
+4) clear ; pick_domain && acme ; dm1 ;;
+5) clear ; pick_domain && fn ; dm1 ;;
+6) clear ; pick_domain && dmsl ; dm1 ;;
 0|00) clear ; menu ;;
 *) clear ; dm1 ;;
 esac

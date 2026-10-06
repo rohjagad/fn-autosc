@@ -2253,3 +2253,5 @@ Found 376. **One path per backend is a single point for path-based blocking** �
 operator request: give every transport path color aliases (`/red`, `/green`, …) and rotate new account links across them so usage stays balanced without bloating cards.
 Found 377. **Only one domain can serve accounts** —
 operator request: support extra domains with round-robin rotation in copyable links (no default domain), show all available domains on account cards, and manage the list from the domain menu with nginx + certificate staying consistent.
+Found 378. **Domain menu centers on single-domain change and shows no inventory** —
+operator wants it restructured: Add / Remove / List / cert-per-chosen-domain (acme, certbot, self-signed with CN following the choice), plus a per-domain account card roster (SSH/VMess/VLess/Trojan/WireGuard/L2TP/NoobzVPN counts).

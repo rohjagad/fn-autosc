@@ -1951,3 +1951,13 @@ Section 35's four-check rule applied to Fix 373:
 | **Over-strictness** | Nothing rejected; unpointed domains are skipped for issuance, never fatal. |
 | **Over-engineering** | One list file, two counters, menu add/remove reusing existing patterns. |
 | **vs the source** | References are single-domain; rotation is this repo's own direction per operator request. |
+## 158. Domain Menu Restructure — Four Checks (October 6, 2026)
+
+Section 35's four-check rule applied to Fix 374:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Issuance workers untouched apart from honoring the pre-picked domain; rotation, add/remove, and cert fallbacks behave as before. |
+| **Over-strictness** | Nothing rejected; invalid picks return to the menu. |
+| **Over-engineering** | One picker reused by three flows; counters shared, computed once. |
+| **vs the source** | References center on single-domain change; choose-first inventory is this repo's own direction per operator request. |
