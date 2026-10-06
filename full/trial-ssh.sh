@@ -177,7 +177,7 @@ EOF
 )
 
 # Kirim notifikasi ke Telegram
-send_telegram_notification "$chat_id" "$key" "$(printf '%s' "$message" | sed -e 's/&/\&amp;/g' -e 's|^\(Config OVPN : \)\([^ ]*\)$|\1<code>\2</code>|')"
+send_telegram_notification "$chat_id" "$key" "$(printf '%s' "$message" | sed -e 's/&/\&amp;/g' -e 's|^[A-Za-z][^:]*: .*|<code>&</code>|')"
 
 mkdir -p /var/log/create/ssh
 echo "$message" > /var/log/create/ssh/${username}.log

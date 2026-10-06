@@ -232,7 +232,7 @@ Config OVPN : http://${domain}/web/openvpn.zip
 EOF
 )
 
-    send_telegram_notification "$chat_id" "$key" "$(printf '%s' "$message" | sed -e 's/&/\&amp;/g' -e 's|^\(Config OVPN : \)\([^ ]*\)$|\1<code>\2</code>|')"
+    send_telegram_notification "$chat_id" "$key" "$(printf '%s' "$message" | sed -e 's/&/\&amp;/g' -e 's|^[A-Za-z][^:]*: .*|<code>&</code>|')"
 
     local log_dir="/var/log/create/ssh"
     mkdir -p "$log_dir"

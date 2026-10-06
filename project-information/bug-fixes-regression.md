@@ -2021,3 +2021,13 @@ Section 35's four-check rule applied to Fix 380:
 | **Over-strictness** | Nothing rejected; layout-only change. |
 | **Over-engineering** | Label derived from each builder's own proto×transport; one send expression replaces two. |
 | **vs the source** | References share the flat rows; headed blocks are this repo's own direction per operator request. |
+## 165. Code Wrap + Aligned Colons — Four Checks (October 6, 2026)
+
+Section 35's four-check rule applied to Fix 381:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Same rows, same values, only spacing + send-time entities; parsers (unlock/change-id/API grep) never read padded columns. |
+| **Over-strictness** | Nothing rejected; layout/send-scoped change. |
+| **Over-engineering** | One generic row expression covers all labels; padding is literal spaces. |
+| **vs the source** | References share the ragged rows; aligned monospace cards are this repo's own direction per operator request. |

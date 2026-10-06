@@ -170,8 +170,8 @@ Limit IP: $ip
 Quota   : $quota GB
 ----------------------
 
-Port: 443, 2053, 2083, 2087, 2096
-Network: gRPC
+Port        : 443, 2053, 2083, 2087, 2096
+Network     : gRPC
 Service Name: vlgr
 ----------------------
 🟢 VLess GRPC
@@ -180,7 +180,7 @@ $vlesslink1
 ----------------------
 "
 if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
-    curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "disable_web_page_preview=1" --data-urlencode "parse_mode=html" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's/&/\&amp;/g' -e 's/\\033\[[0-9;]*m//g' -e 's/\x1b\[[0-9;]*m//g' -e 's|^\((vmess\|vless\|trojan)://[^ ]*\)$|<code>\1</code>|')" $URL >/dev/null 2>&1
+    curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "disable_web_page_preview=1" --data-urlencode "parse_mode=html" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's/&/\&amp;/g' -e 's/\\033\[[0-9;]*m//g' -e 's/\x1b\[[0-9;]*m//g' -e 's|^\(vmess://[^ ]*\)$|<code>\1</code>|' -e 's|^\(vless://[^ ]*\)$|<code>\1</code>|' -e 's|^\(trojan://[^ ]*\)$|<code>\1</code>|' -e 's|^\([A-Za-z][^:]*: \)\(.*\)$|<code>\1\2</code>|')" $URL >/dev/null 2>&1
 fi
 echo -e "$TEKS" > /var/log/create/xray/grpc/${user}.log
 echo 'sed -i "/^### '"$user"' '"$exp"'/ {N;d}" /etc/xray/json/grpc.json && sed -i -z '"'"'s/},\n *\]/}\n        ]/g'"'"' /etc/xray/json/grpc.json && systemctl restart xray@grpc && systemctl restart quota-grpc && rm -fr /var/log/create/xray/grpc/'"$user"'.log && rm -fr /etc/xray/limit/ip/xray/grpc/'"$user"' && rm -fr /etc/xray/quota/grpc/'"$user"' /etc/xray/quota/grpc/'"$user"'_usage' | at now + 60 minutes >/dev/null 2>&1
