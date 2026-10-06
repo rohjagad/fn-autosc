@@ -2283,3 +2283,13 @@ Found 391. **Notice rows still bold, titles still misspelled** —
 follow-up: the baked `<b>label</b> <code>value</code>` rows in delete/extend/change/lock/unlock/limit/quota/kill/clear-log notices (and the Go SSH notice) defeat whole-row code alignment; titles carry `ACOUNT`, notes carry mixed-language grammar (`Telah di locked…`, `badwidth`, `delete success`, `HABIS`, `Pengguna Dihapus`, `Clear Log`).
 Found 392. **Path Alt colons sit one column off** —
 `Path Alt` is 8 characters, so it needs zero/one trailing space for col 9/10 — the rows shipped with one space too many (col 10/11 against col 9/10 blocks). The SSH ports block has the same class of drift around the long `BadVpn/Udpgw` label.
+Found 393. **Config OVPN row sits off-column** —
+`Config OVPN : http…` uses a single space before the colon (col 13) against the col-15 OVPN port block, so the link row breaks the monospace column.
+Found 394. **Change-limit-IP notice still uses box-drawing rules** —
+the Go SSH notice (`limit-ip.go`) separators are U+2500 (`──────────────────────────────────`) while every shell notice uses ASCII dashes, so the card renders a mismatched heavy rule.
+Found 395. **Section titles centered instead of left** —
+`Limit Detail`, `Detail Port …` and the main card titles ship with leading spaces for centering, while every data row is left-aligned; centered titles drift against the left column.
+Found 396. **Trojan cards diverge from the shared layout** —
+trojan ws/http/xhttp keep Limit IP/Quota inside the top block with no `Limit Detail` split and mix Path/Network/Ports in one untitled block (no `Detail Port …` title); vless ws/http/xhttp and all grpc cards are likewise missing their `Detail Port …` title, so 9 of 12 builders disagree with the vmess pattern.
+Found 397. **Card title names inconsistent** —
+some carry the `Xray` prefix and some do not; transports mix `WS`/`WebSocket`, `HU`/`HTTP Upgrade`, `gRPC`/`GRPC`, `xhttp`/`XHTTP`. Operator direction: single scheme — `Xray` + short codes (`WS`, `HU`, `XHTTP`, `GRPC`).

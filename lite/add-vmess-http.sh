@@ -275,7 +275,7 @@ echo ""
 echo ""
 TEKS="
 ------------------------
-   VMess HTTP Upgrade
+🟢 Xray VMess HU 🟢
 ------------------------
 
 Remarks : $user
@@ -287,12 +287,12 @@ UUID    : $uuid
 Expired : $exp
 Protokol: Vmess
 ------------------------
-     Limit Detail
+Limit Detail
 
 Limit IP: $ip
 Quota   : $quota GB
 ------------------------
-   Detail Port http
+Detail Port HU
 
 TLS     : 443, 2053, 2083, 2087, 2096
 NoneTLS : 80, 8880, 2052, 2082, 2095

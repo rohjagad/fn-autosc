@@ -239,7 +239,7 @@ link2="trojan://${uuid}@${rdomain}:80?path=$opath&security=none&host=${rdomain}&
 
 TEKS="
 ----------------------
-   Trojan XHTTP
+🟢 Xray Trojan XHTTP 🟢
 ----------------------
 
 Remarks : $user
@@ -249,16 +249,21 @@ ISP     : $isp
 Region  : $region
 UUID    : $uuid
 Expired : $exp
-Limit IP: $ip
-Quota   : $quota GB
 Protokol: Trojan
 ----------------------
+Limit Detail
 
+Limit IP: $ip
+Quota   : $quota GB
+----------------------
+Detail Port XHTTP
+
+Port TLS : 443, 2053, 2083, 2087, 2096
+Port None: 80, 8880, 2052, 2082, 2095
+----------------------
 Path     : /trxh
 Path Alt : /brown /tan /beige
 Network  : XHTTP
-Port TLS : 443, 2053, 2083, 2087, 2096
-Port None: 80, 8880, 2052, 2082, 2095
 ----------------------
 🟢 Trojan XHTTP TLS
 

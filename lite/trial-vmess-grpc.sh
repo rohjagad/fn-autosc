@@ -173,7 +173,7 @@ echo ""
 echo ""
 TEKS="
 -----------------------
-     Xray VMess gRPC
+🟢 Xray VMess GRPC 🟢
 -----------------------
 
 Remarks : $user
@@ -185,11 +185,13 @@ UUID    : $uuid
 Expired : $exp
 Protokol: Vmess
 -----------------------
-     Limit Detail
+Limit Detail
 
 Limit IP: $ip
 Quota   : $quota GB
 -----------------------
+Detail Port GRPC
+
 Port        : 443, 2053, 2083, 2087, 2096
 AlterID     : 0
 Service     : vmgr

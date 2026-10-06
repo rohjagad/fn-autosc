@@ -145,7 +145,7 @@ fi
 # Buat pesan notifikasi
 message=$(cat <<EOF
 -------------------
-    SSH Account
+🟢 SSH Account 🟢
 -------------------
 Domain     : ${rdomain}
 Domains    : $alldom
@@ -175,7 +175,7 @@ BadVpn/Udpgw  : 7300
 -------------------
 OVPN WS       : 2086
 OVPN TCP/UDP  : 1194 / 2200
-Config OVPN : http://${domain}/web/openvpn.zip
+Config OVPN   : http://${domain}/web/openvpn.zip
 -------------------
 EOF
 )

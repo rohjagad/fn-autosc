@@ -278,7 +278,7 @@ echo ""
 echo ""
 TEKS="
 ----------------------
-   VMess XHTTP
+🟢 Xray VMess XHTTP 🟢
 ----------------------
 
 Remarks : $user
@@ -290,12 +290,12 @@ UUID    : $uuid
 Expired : $exp
 Protokol: Vmess
 ----------------------
-     Limit Detail
+Limit Detail
 
 Limit IP: $ip
 Quota   : $quota GB
 ----------------------
-  Detail Port xhttp
+Detail Port XHTTP
 
 TLS     : 443, 2053, 2083, 2087, 2096
 NoneTLS : 80, 8880, 2052, 2082, 2095

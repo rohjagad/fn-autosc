@@ -2081,3 +2081,13 @@ Section 35's four-check rule applied to Fix 386:
 | **Over-strictness** | Nothing rejected; text-scoped change. |
 | **Over-engineering** | Literal space adjustments. |
 | **vs the source** | References share the ragged rows; aligned cards are this repo's own direction per operator request. |
+## 171. Card Layout Unification — Four Checks (October 6, 2026)
+
+Section 35's four-check rule applied to Fix 387:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Text/ordering change inside card bodies only; log parsers read `Remarks/UUID/Expired/Protokol/Limit IP` rows, never titles or section order. Old cards keep working. |
+| **Over-strictness** | Nothing rejected; text-scoped change. |
+| **Over-engineering** | Literal title/space swaps plus section splits mirroring the existing vmess pattern. |
+| **vs the source** | References predate the shared layout; unified cards are this repo's own direction per operator request. |

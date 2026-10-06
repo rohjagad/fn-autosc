@@ -239,7 +239,7 @@ vlesslink2="vless://${uuid}@${rdomain}:80?path=$opath&security=none&encryption=n
 
 TEKS="
 -----------------------
-     Xray VLess WS
+🟢 Xray VLess WS 🟢
 -----------------------
 
 Remarks : $user
@@ -251,11 +251,12 @@ UUID    : $uuid
 Expired : $exp
 Protokol: Vless
 -----------------------
-     Limit Detail
+Limit Detail
 
 Limit IP: $ip
 Quota   : $quota GB
 -----------------------
+Detail Port WS
 
 TLS      : 443, 2053, 2083, 2087, 2096
 Path     : /vlws

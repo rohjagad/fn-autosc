@@ -156,7 +156,7 @@ vlesslink1="vless://$uuid@$rdomain:443?mode=gun&security=tls&encryption=none&aut
 
 TEKS="
 ----------------------
-    Xray VLess gRPC
+🟢 Xray VLess GRPC 🟢
 ----------------------
 
 Remarks : $user
@@ -168,11 +168,12 @@ UUID    : $uuid
 Expired : $exp
 Protokol: Vless
 ----------------------
-     Limit Detail
+Limit Detail
 
 Limit IP: $ip
 Quota   : $quota GB
 ----------------------
+Detail Port GRPC
 
 Port        : 443, 2053, 2083, 2087, 2096
 Network     : gRPC

@@ -237,7 +237,7 @@ link1="trojan://${uuid}@${rdomain}:443?mode=gun&security=tls&authority=${rdomain
 
 TEKS="
 -----------------------
-   Xray Trojan gRPC
+🟢 Xray Trojan GRPC 🟢
 -----------------------
 
 Remarks : $user
@@ -247,10 +247,14 @@ ISP     : $isp
 Region  : $region
 UUID    : $uuid
 Expired : $exp
-Limit IP: $ip
-Quota   : $quota GB
 Protokol: Trojan
 -----------------------
+Limit Detail
+
+Limit IP: $ip
+Quota   : $quota GB
+-----------------------
+Detail Port GRPC
 
 Service Name: trgr
 Service Alt : magenta / plum / orchid
