@@ -254,7 +254,7 @@ Port: 443, 2053, 2083, 2087, 2096
 Network: gRPC
 Service Name: vlgr
 ----------------------
-Link TLS : $vlesslink1
+Link TLS : \`$vlesslink1\`
 ----------------------
 "
 if [ -n "$CHATID" ] && [ -n "$KEY" ]; then

@@ -193,7 +193,7 @@ Network: gRPC
 Alpn   : - [ None ]
 Decrypt: auto
 -----------------------
-Link TLS : $vmesslink1
+Link TLS : \`$vmesslink1\`
 -----------------------
 "
 if [ -n "$CHATID" ] && [ -n "$KEY" ]; then

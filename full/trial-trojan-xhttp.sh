@@ -175,9 +175,9 @@ Network: XHTTP
 Port TLS: 443, 2053, 2083, 2087, 2096
 Port None: 80, 8880, 2052, 2082, 2095
 ----------------------
-Link TLS : $link1
+Link TLS : \`$link1\`
 ----------------------
-Link None: $link2
+Link None: \`$link2\`
 ----------------------
 "
 if [ -n "$CHATID" ] && [ -n "$KEY" ]; then

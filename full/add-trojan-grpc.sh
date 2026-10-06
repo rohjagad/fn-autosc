@@ -252,7 +252,7 @@ Service Name: trgr
 Network: gRPC GUN
 Port gRPC: 443, 2053, 2083, 2087, 2096
 -----------------------
-Link TLS : $link1
+Link TLS : \`$link1\`
 -----------------------
 "
 if [ -n "$CHATID" ] && [ -n "$KEY" ]; then

@@ -221,7 +221,6 @@ opaths=("/trws" "/blue" "/navy" "/azure")
 cseq=$(cat /etc/xray/.colorseq 2>/dev/null || echo 0)
 opath="${opaths[$((cseq % 4))]}"
 echo $((cseq+1)) > /etc/xray/.colorseq
-epath="${opath//\///%2f}"
 
 # Restart Service
 if xray run -test -config /etc/xray/json/ws.json >/dev/null 2>&1; then
@@ -231,7 +230,7 @@ if xray run -test -config /etc/xray/json/ws.json >/dev/null 2>&1; then
 fi
 
 # Konfigurasi Trojan WS TLS
-link1="trojan://${uuid}@${rdomain}:443?path=${epath}&security=tls&host=${rdomain}&type=ws&sni=${rdomain}#${user}"
+link1="trojan://${uuid}@${rdomain}:443?path=$opath&security=tls&host=${rdomain}&type=ws&sni=${rdomain}#${user}"
 
 # Konfigurasi Trojan WS NonTLS
 link2="trojan://${uuid}@${rdomain}:80?path=$opath&security=none&host=${rdomain}&type=ws#${user}"
@@ -256,9 +255,9 @@ Network: WebSocket
 Port TLS: 443, 2053, 2083, 2087, 2096
 Port None: 80, 8880, 2052, 2082, 2095
 ----------------------
-Link TLS : $link1
+Link TLS : \`$link1\`
 ----------------------
-Link None: $link2
+Link None: \`$link2\`
 ----------------------
 "
 if [ -n "$CHATID" ] && [ -n "$KEY" ]; then

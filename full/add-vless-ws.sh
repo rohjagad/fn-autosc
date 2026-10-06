@@ -258,9 +258,9 @@ Path: /vlws
 NoneTLS: 80, 8880, 2052, 2082, 2095
 Network: WebSocket
 -----------------------
-Link TLS : $vlesslink1
+Link TLS : \`$vlesslink1\`
 -----------------------
-Link None: $vlesslink2
+Link None: \`$vlesslink2\`
 -----------------------
 "
 if [ -n "$CHATID" ] && [ -n "$KEY" ]; then

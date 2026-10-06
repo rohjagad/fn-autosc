@@ -2259,3 +2259,5 @@ Found 379. **Trusted certs are automatic, self-signed is only a fallback** —
 operator direction: self-signed is the default everywhere (fresh installs and on domain add, covering all domains via SANs); acme.sh and certbot stay strictly manual.
 Found 380. **X11/agent forwarding left enabled for shell-less VPN users** —
 plan review while gating SSH containment: `X11Forwarding yes` sat explicitly in `sshd_config` and agent forwarding rode the default, buying nothing on a headless box while widening channels past the intended forwarding-only surface (Decision 7).
+Found 381. **Trojan WS links carry a doubled path slash, and bare links are hard to copy from Telegram** —
+live TUI review of a trial-trojan-ws card showed `path=/%2fnavy` (decodes to `//navy`): `epath="${opath//\///%2f}"` replaces `/` with `/%2f` instead of `%2f`, so every trojan WS TLS link (canonical and color) has carried a leading double slash since before rotation; nginx `merge_slashes` heals it on this box, which is why no outage was ever seen. Operator direction on the same cards: wrap every copyable link/URL in backticks so it lifts cleanly out of Telegram and terminal cards.

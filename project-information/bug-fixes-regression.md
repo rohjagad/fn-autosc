@@ -1981,3 +1981,13 @@ Section 35's four-check rule applied to Fix 376:
 | **Over-strictness** | Nothing legitimate removed; X11/agent had no consumer on this box. |
 | **Over-engineering** | Seven lines in the installer idiom, no new mechanism. |
 | **vs the source** | References leave these at default; explicit off is this repo's hardening per operator direction. |
+## 161. Plain Links + Backticks — Four Checks (October 6, 2026)
+
+Section 35's four-check rule applied to Fix 377:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Link semantics unchanged (same UUID/host/rotated path, only the encoding wrapper removed); unlock/change-id parsers read UUID/Expired/Protokol lines, never link lines; API extractor updated in the same commit so `links[]` has no stray backticks. |
+| **Over-strictness** | Nothing rejected; display-only change plus one narrowed substitution. |
+| **Over-engineering** | One-line-per-file edits (delete + `$opath` + backticks); no helper, no parse_mode change (sends stay plain-text, backticks render literally as requested). |
+| **vs the source** | References predate color rotation and carry the same `%2f` habit; plain path matches this repo's own http/xhttp/grpc builders. |

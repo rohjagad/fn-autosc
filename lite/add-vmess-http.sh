@@ -299,9 +299,9 @@ Network: HTTP Upgrade
 Alpn   : - [ None ]
 Decrypt: auto
 ------------------------
-Link TLS : $vmesslink1
+Link TLS : \`$vmesslink1\`
 ------------------------
-Link None: $vmesslink2
+Link None: \`$vmesslink2\`
 ------------------------
 "
 if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
