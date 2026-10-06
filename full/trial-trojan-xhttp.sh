@@ -175,13 +175,13 @@ Network: XHTTP
 Port TLS: 443, 2053, 2083, 2087, 2096
 Port None: 80, 8880, 2052, 2082, 2095
 ----------------------
-Link TLS : \`$link1\`
+Link TLS : $link1
 ----------------------
-Link None: \`$link2\`
+Link None: $link2
 ----------------------
 "
 if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
-    curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's/\\033\[[0-9;]*m//g' -e 's/\x1b\[[0-9;]*m//g')" $URL >/dev/null 2>&1
+    curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's/\\033\[[0-9;]*m//g' -e 's/\x1b\[[0-9;]*m//g' -e 's|^\(Link TLS : \)\([^ ]*\)$|\1`\2`|' -e 's|^\(Link None: \)\([^ ]*\)$|\1`\2`|')" $URL >/dev/null 2>&1
 fi
 echo -e "$TEKS" > /var/log/create/xray/xhttp/${user}.log
 echo 'sed -i "/^### '"$user"' '"$exp"'/ {N;d}" /etc/xray/json/xhttp.json && sed -i -z '"'"'s/},\n *\]/}\n        ]/g'"'"' /etc/xray/json/xhttp.json && systemctl restart xray@xhttp && systemctl restart quota-xhttp && rm -fr /var/log/create/xray/xhttp/'"$user"'.log && rm -fr /etc/xray/limit/ip/xray/xhttp/'"$user"' && rm -fr /etc/xray/quota/xhttp/'"$user"' /etc/xray/quota/xhttp/'"$user"'_usage' | at now + 60 minutes >/dev/null 2>&1

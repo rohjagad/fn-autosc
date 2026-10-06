@@ -227,12 +227,12 @@ BadVpn/Udpgw : 7300
 -------------------
 OVPN WS     : 2086
 OVPN TCP/UDP: 1194 / 2200
-Config OVPN : \`http://${domain}/web/openvpn.zip\`
+Config OVPN : http://${domain}/web/openvpn.zip
 -------------------
 EOF
 )
 
-    send_telegram_notification "$chat_id" "$key" "$message"
+    send_telegram_notification "$chat_id" "$key" "$(printf '%s' "$message" | sed -e 's|^\(Config OVPN : \)\([^ ]*\)$|\1`\2`|')"
 
     local log_dir="/var/log/create/ssh"
     mkdir -p "$log_dir"

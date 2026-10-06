@@ -251,7 +251,7 @@ AllowedIPs = ${client_ipv4}/32" >> /etc/wireguard/wg0.conf
 	echo -e "Private Key\t: ${client_priv_key}"
         echo -e "Publik Key\t: ${client_pub_key}"
 	echo -e "${blue_sep}"
-	echo -e "Link Config: \`http://${domain}/web/wireguard-${user}.conf\`"
+	echo -e "Link Config: http://${domain}/web/wireguard-${user}.conf"
         echo -e "${separator}"
 	newline
 	goback

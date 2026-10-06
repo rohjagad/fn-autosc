@@ -215,13 +215,13 @@ Network: HTTP Upgrade
 Alpn   : - [ None ]
 Decrypt: auto
 ------------------------
-Link TLS : \`$vmesslink1\`
+Link TLS : $vmesslink1
 ------------------------
-Link None: \`$vmesslink2\`
+Link None: $vmesslink2
 ------------------------
 "
 if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
-    curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's/\\033\[[0-9;]*m//g' -e 's/\x1b\[[0-9;]*m//g')" $URL >/dev/null 2>&1
+    curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's/\\033\[[0-9;]*m//g' -e 's/\x1b\[[0-9;]*m//g' -e 's|^\(Link TLS : \)\([^ ]*\)$|\1`\2`|' -e 's|^\(Link None: \)\([^ ]*\)$|\1`\2`|')" $URL >/dev/null 2>&1
 fi
 echo -e "$TEKS" > /var/log/create/xray/http/${user}.log
 echo 'sed -i "/^### '"$user"' '"$exp"'/ {N;d}" /etc/xray/json/upgrade.json && sed -i -z '"'"'s/},\n *\]/}\n        ]/g'"'"' /etc/xray/json/upgrade.json && systemctl restart xray@upgrade && systemctl restart quota-http && rm -fr /var/log/create/xray/http/'"$user"'.log && rm -fr /etc/xray/limit/ip/xray/http/'"$user"' && rm -fr /etc/xray/quota/http/'"$user"' /etc/xray/quota/http/'"$user"'_usage' | at now + 60 minutes >/dev/null 2>&1

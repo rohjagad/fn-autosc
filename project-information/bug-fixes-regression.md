@@ -1991,3 +1991,13 @@ Section 35's four-check rule applied to Fix 377:
 | **Over-strictness** | Nothing rejected; display-only change plus one narrowed substitution. |
 | **Over-engineering** | One-line-per-file edits (delete + `$opath` + backticks); no helper, no parse_mode change (sends stay plain-text, backticks render literally as requested). |
 | **vs the source** | References predate color rotation and carry the same `%2f` habit; plain path matches this repo's own http/xhttp/grpc builders. |
+## 162. Telegram-Only Backticks — Four Checks (October 6, 2026)
+
+Section 35's four-check rule applied to Fix 378:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Terminal cards, `.log` files and API `links[]` byte-identical to pre-381; only the Telegram HTTP payload gains backticks (verified by replaying the exact send-time `sed` chain). |
+| **Over-strictness** | Nothing rejected; display-scoped change. |
+| **Over-engineering** | One `sed` expression per send site; no parse_mode change, no helper. |
+| **vs the source** | References send raw card text; the send-time wrap is this repo's own direction per operator request. |
