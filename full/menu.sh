@@ -25,6 +25,10 @@
     # Unduh izin dan validasi
     clear
     echo ""
+    echo ""
+    echo ""
+    echo ""
+    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -78,6 +82,10 @@
 
 clear
 echo ""
+echo ""
+echo ""
+echo ""
+echo ""
 # The XTLS/Xray version is shown in the XTLS menu (menu-x.sh), not here - the
 # main menu is already crowded.
 domain=$(cat /etc/xray/domain 2>/dev/null)
@@ -114,7 +122,10 @@ isp=$(cat /root/.isp 2>/dev/null)
 region=$(cat /root/.region 2>/dev/null)
 clear
 echo ""
-
+echo ""
+echo ""
+echo ""
+echo ""
 #Download/Upload today
 #dtoday="$(vnstat -i eth0 | grep "today" | awk '{print $2" "substr ($3, 1, 1)}')"
 #utoday="$(vnstat -i eth0 | grep "today" | awk '{print $5" "substr ($6, 1, 1)}')"
@@ -129,7 +140,10 @@ echo ""
 #tmon="$(vnstat -i eth0 -m | grep "`date +"%b '%y"`" | awk '{print $9" "substr ($10, 1, 1)}')"
 clear
 echo ""
-
+echo ""
+echo ""
+echo ""
+echo ""
 # Fungsi untuk membaca data vnstat
 read_vnstat_usage() {
   local interface=$1
@@ -301,6 +315,10 @@ rechan=$(output)
 separator=$(rainbow_sep '-----------------------------------')
 blue_sep="${blue}-----------------------------------${NC}"
 clear
+echo ""
+echo ""
+echo ""
+echo ""
 echo ""
 echo -e "${NC}${separator}
      VPN MANAGEMENT PANEL

@@ -25,6 +25,10 @@
     # Unduh izin dan validasi
     clear
     echo ""
+    echo ""
+    echo ""
+    echo ""
+    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -78,12 +82,19 @@
     output
 clear
 echo ""
+echo ""
+echo ""
+echo ""
+echo ""
 # Informasi
 echo -e "\nAuto Install NoobzVPN'S by FN AutoSC"
 sleep 2
 clear
 echo ""
-
+echo ""
+echo ""
+echo ""
+echo ""
 # [ Create Directory File ]
 mkdir -p /etc/noobzvpns
 touch /etc/funny/.noob
@@ -91,7 +102,10 @@ touch /etc/funny/.noob
 # [ Membersihkan layar ]
 clear
 echo ""
-
+echo ""
+echo ""
+echo ""
+echo ""
 # [ Membuat Json Config yang di gunakan pada server ]
 cat > /etc/noobzvpns/config.json <<-JSON
 {
@@ -164,7 +178,10 @@ systemctl restart noobzvpns
 # [ Membersihkan layar ]
 clear
 echo ""
-
+echo ""
+echo ""
+echo ""
+echo ""
 echo -e " Success Setup Noobzvpn's"
 
 # [ Menghapus file tidak penting ]

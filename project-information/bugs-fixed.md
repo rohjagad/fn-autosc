@@ -2609,3 +2609,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 369 (Found 374):** every `clear`/`clearScreen()` is now followed by one blank line, so each titled screen starts with breathing room even where clear does nothing. Pure insertions plus EOF-newline normalization; no logic touched. All affected Go binaries rebuilt.
 - **Verified:** `bash -n` clean on all touched scripts; all 28 Go tools build; transition renders checked with clear sequences stripped (broken-terminal simulation).
+### Fix 370 - Five-line gaps after every clear (Found 375)
+
+- **Fix 370 (Found 375):** every `clear`/`clearScreen()` is now followed by exactly five blank lines (normalized, so reruns stay at five). Pure insertions; no logic touched. All affected Go binaries rebuilt.
+- **Verified:** `bash -n` clean; all 28 Go tools build; per-clear count audited (zero off-spec).

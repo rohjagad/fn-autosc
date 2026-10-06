@@ -16,6 +16,10 @@ var sepBlue = colorBlueGo + "------------------------------------------" + color
 func main() {
     clearScreen()
     fmt.Println()
+    fmt.Println()
+    fmt.Println()
+    fmt.Println()
+    fmt.Println()
     fmt.Println(sepOuter)
     fmt.Println("                MEMBER SSH                   ")
     fmt.Println(sepOuter)
@@ -55,20 +59,35 @@ func main() {
 
     clearScreen()
     fmt.Println()
-
+    fmt.Println()
+    fmt.Println()
+    fmt.Println()
+    fmt.Println()
     if userExists(user) {
         if err := deleteUser(user); err != nil {
             clearScreen()
+            fmt.Println()
+            fmt.Println()
+            fmt.Println()
+            fmt.Println()
             fmt.Println()
             fmt.Printf("Failure: User %s could not be deleted: %v\n", user, err)
             fmt.Println("The account still exists; remove its running processes and retry.")
         } else {
             clearScreen()
             fmt.Println()
+            fmt.Println()
+            fmt.Println()
+            fmt.Println()
+            fmt.Println()
             fmt.Printf("User %s has been successfully deleted.\n", user)
         }
     } else {
         clearScreen()
+        fmt.Println()
+        fmt.Println()
+        fmt.Println()
+        fmt.Println()
         fmt.Println()
         fmt.Printf("Failure: User %s not found.\n", user)
     }

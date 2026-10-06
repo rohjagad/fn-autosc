@@ -25,6 +25,10 @@
     # Unduh izin dan validasi
     clear
     echo ""
+    echo ""
+    echo ""
+    echo ""
+    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -77,7 +81,10 @@
 
 clear
 echo ""
-
+echo ""
+echo ""
+echo ""
+echo ""
 # information
 domain=$(cat /etc/xray/domain)
 source /etc/wireguard/params
@@ -160,6 +167,10 @@ function create() {
 
 	clear
 	echo ""
+	echo ""
+	echo ""
+	echo ""
+	echo ""
 	newline
 	echo -e "Create WireGuard Account"
 	echo -e "${separator}"
@@ -232,6 +243,10 @@ AllowedIPs = ${client_ipv4}/32" >> /etc/wireguard/wg0.conf
 
 	clear
 	echo ""
+	echo ""
+	echo ""
+	echo ""
+	echo ""
 	newline
 	echo -e "WireGuard User Information"
 	echo -e "${separator}"
@@ -254,6 +269,10 @@ function warp() {
 source /etc/wireguard/params
 #ip=$(curl -sS curl -sS ipv4.icanhazip.com)
 clear
+echo ""
+echo ""
+echo ""
+echo ""
 echo ""
 echo -n "Enter your generated PRIVATE KEY (leave blank to auto-generate): "
 read PRIVATEKEY
@@ -285,14 +304,29 @@ wg-quick up wg0 > out.log 2> /dev/null
 
 clear
 echo ""
-clear
+echo ""
+echo ""
+echo ""
 echo ""
 clear
 echo ""
-
+echo ""
+echo ""
+echo ""
+echo ""
+clear
+echo ""
+echo ""
+echo ""
+echo ""
+echo ""
 warpd=$(cat warp.json | jq .)
 
 clear
+echo ""
+echo ""
+echo ""
+echo ""
 echo ""
 echo 'Wireguard has successfully installed in your VPS
 
@@ -323,6 +357,10 @@ rm -fr warp.json
 function delete() {
 	clear
 	echo ""
+	echo ""
+	echo ""
+	echo ""
+	echo ""
 	newline
 	echo -e "Delete WireGuard User"
 	echo -e "${separator}"
@@ -351,6 +389,10 @@ function delete() {
 
 function extend() {
 	clear
+	echo ""
+	echo ""
+	echo ""
+	echo ""
 	echo ""
 	newline
 	echo -e "Extend WireGuard User"
@@ -393,6 +435,10 @@ function extend() {
 
 	clear
 	echo ""
+	echo ""
+	echo ""
+	echo ""
+	echo ""
 	newline
 	echo -e "WireGuard User Information"
 	echo -e "${separator}"
@@ -404,6 +450,10 @@ function extend() {
 
 function list() {
 	clear
+	echo ""
+	echo ""
+	echo ""
+	echo ""
 	echo ""
 	newline
 	echo -e "${separator}"
@@ -426,6 +476,10 @@ function list() {
 
 function show() {
 	clear
+	echo ""
+	echo ""
+	echo ""
+	echo ""
 	echo ""
 	newline
 	echo -e "WireGuard Configuration"
@@ -456,6 +510,10 @@ function show() {
 
 function main() {
 clear
+echo ""
+echo ""
+echo ""
+echo ""
 echo ""
 echo -e "${NC}${separator}
           WIREGUARD MENU
@@ -493,10 +551,18 @@ case $menu in
 0|00|7)
 	clear
 	echo ""
+	echo ""
+	echo ""
+	echo ""
+	echo ""
 	menu
 	;;
 *) 
 	clear 
+	echo ""
+	echo ""
+	echo ""
+	echo ""
 	echo ""
 	newline
 	error "Invalid option"

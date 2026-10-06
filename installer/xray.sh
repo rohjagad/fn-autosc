@@ -25,6 +25,10 @@
     # Unduh izin dan validasi
     clear
     echo ""
+    echo ""
+    echo ""
+    echo ""
+    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -81,7 +85,10 @@
 hosting="https://raw.githubusercontent.com/rohjagad/fn-autosc/main"
 clear
 echo ""
-
+echo ""
+echo ""
+echo ""
+echo ""
 # Menginstall Core
 xver="25.3.6"
 bash -c "$(curl -L https://raw.githubusercontent.com/rohjagad/Xray-install/main/install-release.sh)" @ install -u www-data --version $xver
@@ -119,7 +126,10 @@ MLBB
 systemctl daemon-reload
 clear
 echo ""
-
+echo ""
+echo ""
+echo ""
+echo ""
 # Mengcopy Json
 mkdir -p /etc/xray/json
 cd /etc/xray/json

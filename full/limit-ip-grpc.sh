@@ -24,6 +24,10 @@
     # Unduh izin dan validasi
     clear
     echo ""
+    echo ""
+    echo ""
+    echo ""
+    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -78,7 +82,10 @@
     output
 clear
 echo ""
-
+echo ""
+echo ""
+echo ""
+echo ""
 # Function Send Log
 send_log() {
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
@@ -132,7 +139,10 @@ for user in $username; do
     # Clear screen
     clear
     echo ""
-    
+    echo ""
+    echo ""
+    echo ""
+    echo ""
     # Check if usage exceeds limit
     if [[ "$cek" -gt "$limit" ]]; then
         # Deleted Account
@@ -152,6 +162,10 @@ for user in $username; do
     else
         # If within limit, just clear the screen and display a message
         clear
+        echo ""
+        echo ""
+        echo ""
+        echo ""
         echo ""
     fi
 done

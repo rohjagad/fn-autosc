@@ -148,7 +148,10 @@ func main() {
 	// Clear screen
 	clearScreen()
 	fmt.Println()
-
+	fmt.Println()
+	fmt.Println()
+	fmt.Println()
+	fmt.Println()
 	outerSep := rainbowSepGo("-----------------------------------")
 
 	fmt.Println(outerSep)

@@ -2,7 +2,10 @@
 
 clear
 echo ""
-
+echo ""
+echo ""
+echo ""
+echo ""
 # Install Package
 if grep -q "bullseye" /etc/os-release 2>/dev/null; then
     if ! grep -qs "deb.debian.org/debian.*bullseye" /etc/apt/sources.list /etc/apt/sources.list.d/* 2>/dev/null; then
@@ -54,6 +57,10 @@ touch /etc/funny/.noob
 
 # Installasi Ulang untuk menghindari package tidak terinstall
 clear
+echo ""
+echo ""
+echo ""
+echo ""
 echo ""
 red='\e[1;31m'
 green='\e[1;32m'
@@ -140,5 +147,7 @@ yellow "Dependencies successfully installed..."
 sleep 3
 clear
 echo ""
-
-
+echo ""
+echo ""
+echo ""
+echo ""

@@ -25,6 +25,10 @@
     # Unduh izin dan validasi
     clear
     echo ""
+    echo ""
+    echo ""
+    echo ""
+    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -78,6 +82,10 @@
     output
 clear
 echo ""
+echo ""
+echo ""
+echo ""
+echo ""
 red='\e[1;31m'
 green='\e[0;32m'
 NC='\e[0m'
@@ -90,6 +98,10 @@ for package in "${REQUIRED_PACKAGES[@]}"; do
   fi
 done
 clear
+echo ""
+echo ""
+echo ""
+echo ""
 echo ""
 GOARCH=$(dpkg --print-architecture 2>/dev/null || echo amd64) ; rm -fr /usr/bin/go /usr/local/go ; { wget -q -O "go1.22.0.linux-${GOARCH}.tar.gz" "https://github.com/rohjagad/fn-autosc-miscellaneous/releases/download/v1.23/go1.22.0.linux-${GOARCH}.tar.gz" || wget -q -O "go1.22.0.linux-${GOARCH}.tar.gz" "https://go.dev/dl/go1.22.0.linux-${GOARCH}.tar.gz" ; } ; sudo tar -C /usr/local -xzf "go1.22.0.linux-${GOARCH}.tar.gz" ; rm -f "go1.22.0.linux-${GOARCH}.tar.gz" ; grep -q "/usr/local/go/bin" /root/.bashrc 2>/dev/null || echo 'export PATH="/usr/local/go/bin:$PATH"' >> /root/.bashrc ; cd ; source .bashrc ; go version
 
@@ -130,6 +142,10 @@ install_slowdns() {
   rm -rf /root/dnstt
 
   clear
+  echo ""
+  echo ""
+  echo ""
+  echo ""
   echo ""
   echo -e "
 ------------------------
@@ -246,6 +262,10 @@ install_firewall
 rm -rf /root/slowdns.sh
 #rm -rf /root/*.sh
 clear
+echo ""
+echo ""
+echo ""
+echo ""
 echo ""
 echo -e ""
 echo -e "Installing Patch SlowDNS Autoscript done..."

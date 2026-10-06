@@ -26,6 +26,10 @@ domain=$(cat /etc/xray/domain)
     # Unduh izin dan validasi
     clear
     echo ""
+    echo ""
+    echo ""
+    echo ""
+    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -78,7 +82,10 @@ domain=$(cat /etc/xray/domain)
 
 clear
 echo ""
-
+echo ""
+echo ""
+echo ""
+echo ""
 red='\033[0;31m'
 green='\033[0;32m'
 blue='\033[1;34m'
@@ -119,6 +126,10 @@ domain=$(cat /etc/xray/domain)
 function create() {
 clear
 echo ""
+echo ""
+echo ""
+echo ""
+echo ""
 until [[ $VPN_USER =~ ^[a-zA-Z0-9_]+$ && ${CLIENT_EXISTS} == '0' ]]; do
 		read -rp "Username : " -e VPN_USER || exit 0
 		CLIENT_EXISTS=$(grep -w "$VPN_USER" /etc/funny/.l2tp | wc -l)
@@ -144,7 +155,10 @@ hariini=`date -d "0 days" +"%Y-%m-%d"`
 exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
 clear
 echo ""
-
+echo ""
+echo ""
+echo ""
+echo ""
 # Add or update VPN user
 cat >> /etc/ppp/chap-secrets <<EOF
 "$VPN_USER" l2tpd "$VPN_PASSWORD" *
@@ -162,6 +176,10 @@ systemctl daemon-reload
 systemctl restart ipsec
 systemctl restart xl2tpd
 clear
+echo ""
+echo ""
+echo ""
+echo ""
 echo ""
 PSK=$(grep -oP '(?<=: PSK ")\S+(?=")' /etc/ipsec.secrets 2>/dev/null || echo "myvpn")
 cat <<EOF
@@ -184,7 +202,15 @@ echo ""
 function delete() {
 clear
 echo ""
+echo ""
+echo ""
+echo ""
+echo ""
 clear
+echo ""
+echo ""
+echo ""
+echo ""
 echo ""
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/funny/.l2tp")
@@ -223,6 +249,10 @@ systemctl restart ipsec
 systemctl restart xl2tpd
 clear
 echo ""
+echo ""
+echo ""
+echo ""
+echo ""
 echo "${separator}"
 echo "   L2TP Account Deleted   "
 echo "${separator}"
@@ -236,15 +266,27 @@ echo ""
 function extend() {
 clear
 echo ""
+echo ""
+echo ""
+echo ""
+echo ""
 NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/funny/.l2tp")
 	if [[ ${NUMBER_OF_CLIENTS} == '0' ]]; then
 		clear
+		echo ""
+		echo ""
+		echo ""
+		echo ""
 		echo ""
 		echo "You have no existing clients!"
 		exit 1
 	fi
 
 	clear
+	echo ""
+	echo ""
+	echo ""
+	echo ""
 	echo ""
 	echo "Select the existing client you want to renew"
 	echo " Press CTRL+C to return"
@@ -287,6 +329,10 @@ systemctl restart ipsec
 systemctl restart xl2tpd
 clear
 echo ""
+echo ""
+echo ""
+echo ""
+echo ""
 echo "${separator}"
 echo "   L2TP Account Renewed   "
 echo "${separator}"
@@ -300,6 +346,10 @@ echo ""
 
 function main() {
 clear
+echo ""
+echo ""
+echo ""
+echo ""
 echo ""
 echo -e "${NC}${separator}
              L2TP MENU
@@ -330,15 +380,27 @@ main
 0|4)
 clear
 echo ""
+echo ""
+echo ""
+echo ""
+echo ""
 menu
 ;;
 5)
 clear
 echo ""
+echo ""
+echo ""
+echo ""
+echo ""
 exit
 ;;
 *)
 clear
+echo ""
+echo ""
+echo ""
+echo ""
 echo ""
 main
 ;;

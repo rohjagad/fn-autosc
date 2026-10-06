@@ -6,7 +6,10 @@
 
 clear
 echo ""
-
+echo ""
+echo ""
+echo ""
+echo ""
 # Fungsi untuk membaca file
 read_file() {
     local file_path="$1"
@@ -96,7 +99,10 @@ done
 
 clear
 echo ""
-
+echo ""
+echo ""
+echo ""
+echo ""
 # Buat username dan password otomatis
 # Retry up to 10 times to avoid collision with active trial accounts
 for _i in $(seq 1 10); do
@@ -164,6 +170,10 @@ mkdir -p /var/log/create/ssh
 echo "$message" > /var/log/create/ssh/${username}.log
 
 clear
+echo ""
+echo ""
+echo ""
+echo ""
 echo ""
 source /etc/funny/format.sh
 format_display "$message"

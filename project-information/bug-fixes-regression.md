@@ -1911,3 +1911,13 @@ Section 35's four-check rule applied to Fix 369:
 | **Over-strictness** | Nothing rejected; display-only change. |
 | **Over-engineering** | One blank line per clear site, no new mechanism. |
 | **vs the source** | References print screens back to back; gapped screens are this repo's own direction per operator request. |
+## 154. Five-Line Screen Gaps — Four Checks (October 6, 2026)
+
+Section 35's four-check rule applied to Fix 370:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Blank output lines only; prompts, reads, branches and payloads untouched. |
+| **Over-strictness** | Nothing rejected; display-only change. |
+| **Over-engineering** | Five blank lines per clear site, no new mechanism. |
+| **vs the source** | References print screens back to back; gapped screens are this repo's own direction per operator request. |

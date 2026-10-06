@@ -55,6 +55,10 @@ blue_sep="${blue}-----------------------------------${NC}"
     # Unduh izin dan validasi
     clear
     echo ""
+    echo ""
+    echo ""
+    echo ""
+    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -108,7 +112,10 @@ blue_sep="${blue}-----------------------------------${NC}"
     output
 clear
 echo ""
-
+echo ""
+echo ""
+echo ""
+echo ""
 # Detail Informasi
 ip4=$(curl -sS -m 10 ipv4.icanhazip.com)
 ip6=$(curl -sS -m 10 ipv6.icanhazip.com)
@@ -129,6 +136,10 @@ if [ -f "$file" ]; then
 echo "$file found, continuing..."
 sleep 2
 clear
+echo ""
+echo ""
+echo ""
+echo ""
 echo ""
 unzip -o backup.zip
 rm -f backup.zip
@@ -154,10 +165,18 @@ mkdir -p /var/www/html
 cp -r html/* /var/www/html/ 2>/dev/null || true
 clear
 echo ""
+echo ""
+echo ""
+echo ""
+echo ""
 cd
 rm -rf /root/backup
 rm -f backup.zip
 clear
+echo ""
+echo ""
+echo ""
+echo ""
 echo ""
 systemctl daemon-reload
 systemctl restart ssh
@@ -181,6 +200,10 @@ chown root:www-data /etc/funny/.restore.key 2>/dev/null || true
 # haproxy not used in lite edition
 systemctl restart cron
 clear
+echo ""
+echo ""
+echo ""
+echo ""
 echo ""
 echo -e "${separator}"
 echo -e "SUCCESSFULL RESTORE YOUR VPS"

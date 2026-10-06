@@ -24,6 +24,10 @@
     # Unduh izin dan validasi
     clear
     echo ""
+    echo ""
+    echo ""
+    echo ""
+    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -77,6 +81,10 @@
     output
 clear
 echo ""
+echo ""
+echo ""
+echo ""
+echo ""
 domain=$(cat /etc/xray/domain)
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
@@ -84,7 +92,10 @@ TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 clear
 echo ""
-
+echo ""
+echo ""
+echo ""
+echo ""
 until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/create/xray/http/${user}.log ]]; do
     echo -e "
 \033[38;2;255;0;0m-\033[38;2;255;51;0m-\033[38;2;255;102;0m-\033[38;2;255;153;0m-\033[38;2;255;204;0m-\033[38;2;255;255;0m-\033[38;2;204;255;0m-\033[38;2;153;255;0m-\033[38;2;102;255;0m-\033[38;2;51;255;0m-\033[38;2;0;255;0m-\033[38;2;0;255;51m-\033[38;2;0;255;102m-\033[38;2;0;255;153m-\033[38;2;0;255;204m-\033[38;2;0;255;255m-\033[38;2;0;204;255m-\033[38;2;0;153;255m-\033[38;2;0;102;255m-\033[38;2;0;51;255m-\033[38;2;0;0;255m-\033[38;2;51;0;255m-\033[38;2;102;0;255m-\033[38;2;153;0;255m-\033[38;2;204;0;255m-\033[38;2;255;0;255m-\033[38;2;255;0;204m-\033[38;2;255;0;153m-\033[38;2;255;0;102m-\033[38;2;255;0;51m-\033[38;2;255;0;0m-\033[0m
@@ -95,6 +106,10 @@ until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/creat
     if [[ -z "$user" ]]; then
         clear
         echo ""
+        echo ""
+        echo ""
+        echo ""
+        echo ""
         echo -e "\033[0;31mUsername cannot be empty.\033[0m"
         continue
     fi
@@ -102,12 +117,20 @@ until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/creat
     if [[ $user =~ [A-Z] || $user =~ [[:space:]] ]]; then
         clear
         echo ""
+        echo ""
+        echo ""
+        echo ""
+        echo ""
         echo -e "\033[0;31mUsername cannot contain uppercase letters or spaces.\033[0m"
         continue
     fi
 
     if [[ $user =~ [^a-z0-9_] ]]; then
         clear
+        echo ""
+        echo ""
+        echo ""
+        echo ""
         echo ""
         echo -e "Username can only contain lowercase letters, numbers, and underscores."
         continue
@@ -118,6 +141,10 @@ until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/creat
     if [[ ${client_exists} -gt 0 ]]; then
         clear
         echo ""
+        echo ""
+        echo ""
+        echo ""
+        echo ""
         echo -e "\033[0;31mUsername already exists.\033[0m"
         continue
     fi
@@ -125,12 +152,20 @@ until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/creat
     if [[ -f /var/log/create/xray/http/${user}.log ]]; then
         clear
         echo ""
+        echo ""
+        echo ""
+        echo ""
+        echo ""
         echo -e "\033[0;31mUsername already exists in log file.\033[0m"
         continue
     fi
 
     if [[ -f /var/log/create/xray/http/${user}.locked ]]; then
         clear
+        echo ""
+        echo ""
+        echo ""
+        echo ""
         echo ""
         echo -e "\033[0;31mUsername already exists in locked file.\033[0m"
         continue
@@ -231,6 +266,10 @@ vmesslink2="vmess://$(echo $ask | base64 -w 0)"
 
 clear
 echo ""
+echo ""
+echo ""
+echo ""
+echo ""
 TEKS="
 ------------------------
    VMess HTTP Upgrade
@@ -268,6 +307,10 @@ if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
 fi
 echo -e "$TEKS" > /var/log/create/xray/http/${user}.log
 clear
+echo ""
+echo ""
+echo ""
+echo ""
 echo ""
 source /etc/funny/format.sh
 format_display "$TEKS"

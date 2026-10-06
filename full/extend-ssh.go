@@ -41,7 +41,10 @@ func rainbowSepGo(text string) string {
 func main() {
 	clearScreen()
 	fmt.Println()
-
+	fmt.Println()
+	fmt.Println()
+	fmt.Println()
+	fmt.Println()
 	outerSep := rainbowSepGo("-----------------------------------")
 
 	fmt.Println(outerSep)
@@ -57,6 +60,10 @@ func main() {
 	if !userExists(username) {
 		clearScreen()
 		fmt.Println()
+		fmt.Println()
+		fmt.Println()
+		fmt.Println()
+		fmt.Println()
 		fmt.Println("\033[31mUsername Doesn't Exist\033[0m")
 		return
 	}
@@ -70,6 +77,10 @@ func main() {
 	if err != nil || days < 1 {
 		clearScreen()
 		fmt.Println()
+		fmt.Println()
+		fmt.Println()
+		fmt.Println()
+		fmt.Println()
 		fmt.Println("\033[31mDays must be a whole number greater than 0\033[0m")
 		return
 	}
@@ -77,6 +88,10 @@ func main() {
 	currentExpiration, err := getUserExpirationDate(username)
 	if err != nil {
 		clearScreen()
+		fmt.Println()
+		fmt.Println()
+		fmt.Println()
+		fmt.Println()
 		fmt.Println()
 		fmt.Println("\033[31mError retrieving expiration date\033[0m")
 		return
@@ -87,6 +102,10 @@ func main() {
 	err = updateUserExpiration(username, newExpiration)
 	if err != nil {
 		clearScreen()
+		fmt.Println()
+		fmt.Println()
+		fmt.Println()
+		fmt.Println()
 		fmt.Println()
 		fmt.Println("\033[31mError updating expiration date\033[0m")
 		return
@@ -103,11 +122,19 @@ func main() {
 	if err != nil {
 		clearScreen()
 		fmt.Println()
+		fmt.Println()
+		fmt.Println()
+		fmt.Println()
+		fmt.Println()
 		fmt.Println("\033[31mError updating log file\033[0m")
 		return
 	}
 
 	clearScreen()
+	fmt.Println()
+	fmt.Println()
+	fmt.Println()
+	fmt.Println()
 	fmt.Println()
 	fmt.Println(outerSep)
 	fmt.Printf(" Username : %s\n", username)

@@ -24,6 +24,10 @@
     # Unduh izin dan validasi
     clear
     echo ""
+    echo ""
+    echo ""
+    echo ""
+    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -77,7 +81,10 @@
     output
 clear
 echo ""
-
+echo ""
+echo ""
+echo ""
+echo ""
 blue='\033[1;34m'
 NC='\033[0m'
 
@@ -126,6 +133,10 @@ if [[ -z "$names" || -z "$domain" || -z "$port" || -z "$password" || -z "$path" 
     return
 fi
 clear
+echo ""
+echo ""
+echo ""
+echo ""
 echo ""
 DOMAIN_FILE="/root/.rules/domain"
 XRAY_CONFIG="/etc/xray/json/upgrade.json"
@@ -258,6 +269,10 @@ systemctl restart xray@upgrade
 
 clear
 echo ""
+echo ""
+echo ""
+echo ""
+echo ""
 echo -e "Routing Success With Trojan WebSocket TLS"
 }
 
@@ -279,6 +294,10 @@ if [[ -z "$names" || -z "$domain" || -z "$port" || -z "$uid" || -z "$path" ]]; t
     return
 fi
 clear
+echo ""
+echo ""
+echo ""
+echo ""
 echo ""
 DOMAIN_FILE="/root/.rules/domain"
 XRAY_CONFIG="/etc/xray/json/upgrade.json"
@@ -414,6 +433,10 @@ systemctl restart xray@upgrade
 
 clear
 echo ""
+echo ""
+echo ""
+echo ""
+echo ""
 echo -e "Routing Success With All Protocol X-Ray WebSocket using Xray Vless WS NoneTLS"
 }
 
@@ -437,7 +460,10 @@ if [[ -z "$names" || -z "$domain" || -z "$port" || -z "$uid" || -z "$path" ]]; t
 fi
 clear
 echo ""
-
+echo ""
+echo ""
+echo ""
+echo ""
 DOMAIN_FILE="/root/.rules/domain"
 XRAY_CONFIG="/etc/xray/json/upgrade.json"
 
@@ -573,6 +599,10 @@ systemctl restart xray@upgrade
 
 clear
 echo ""
+echo ""
+echo ""
+echo ""
+echo ""
 echo -e "Routing Success With All Protocol X-Ray VMESS WebSocket Non-TLS"
 }
 
@@ -668,6 +698,10 @@ systemctl restart xray@upgrade
 
 clear
 echo ""
+echo ""
+echo ""
+echo ""
+echo ""
 echo -e "Success Back To Default Routing"
 }
 
@@ -732,6 +766,10 @@ esac
 
 menu-rout() {
 clear
+echo ""
+echo ""
+echo ""
+echo ""
 echo ""
 echo -e "
 ${separator}

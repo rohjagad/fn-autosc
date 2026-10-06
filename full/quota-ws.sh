@@ -23,6 +23,10 @@ calculate_remaining_days() {
 # Unduh izin dan validasi
 clear
 echo ""
+echo ""
+echo ""
+echo ""
+echo ""
 # Fetch both auth sources at once; first complete valid reply wins (OR logic).
 PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
 (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -77,7 +81,10 @@ output() {
 output
 clear
 echo ""
-
+echo ""
+echo ""
+echo ""
+echo ""
 # Fungsi untuk mengirim log ke Telegram
 send_log() {
     CHATID=$(cat /etc/funny/.chatid 2>/dev/null)

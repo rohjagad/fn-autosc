@@ -25,6 +25,10 @@
     # Unduh izin dan validasi
     clear
     echo ""
+    echo ""
+    echo ""
+    echo ""
+    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -77,7 +81,10 @@
 
 clear
 echo ""
-
+echo ""
+echo ""
+echo ""
+echo ""
 red='\033[0;31m'
 green='\033[0;32m'
 blue='\033[1;34m'
@@ -120,6 +127,10 @@ systemctl restart dropbear 2>/dev/null || true
 systemctl restart ws 2>/dev/null || true
 clear
 echo ""
+echo ""
+echo ""
+echo ""
+echo ""
 echo -e "
 ${separator}
 Success Change Banner
@@ -131,6 +142,10 @@ echo ""
 
 resall() {
 clear
+echo ""
+echo ""
+echo ""
+echo ""
 echo ""
 echo -e "Start Restart All Service"
 systemctl daemon-reload
@@ -161,6 +176,10 @@ systemctl restart fn-ohp 2>/dev/null || true
 systemctl restart opn 2>/dev/null || true
 clear
 echo ""
+echo ""
+echo ""
+echo ""
+echo ""
 echo -e "
 \n
 Success Restart All Service Server\n\n"
@@ -174,9 +193,16 @@ Info="${Red_font_prefix}[information]${Font_color_suffix}"
 
 clear
 echo ""
-
+echo ""
+echo ""
+echo ""
+echo ""
 install() {
 clear
+echo ""
+echo ""
+echo ""
+echo ""
 echo ""
     # Date-licensed machines must not bring WARP up: it moves egress through
     # Cloudflare, the licence gate then sees an unlisted IP and the whole
@@ -184,6 +210,10 @@ echo ""
     # (is-decision.md 28). $EXPIRED_DATE comes from the gate above.
     if [ "$EXPIRED_DATE" != "lifetime" ]; then
         clear
+        echo ""
+        echo ""
+        echo ""
+        echo ""
         echo ""
         echo -e "WARP is not allowed on a date-licensed machine: it changes the server IP and would break the license check."
         return
@@ -253,10 +283,18 @@ fi
 chmod +x /usr/bin/warp.sh
 clear
 echo ""
+echo ""
+echo ""
+echo ""
+echo ""
 }
 
 status() {
     clear
+    echo ""
+    echo ""
+    echo ""
+    echo ""
     echo ""
     if command -v warp.sh >/dev/null 2>&1 || [[ -x /usr/bin/warp.sh ]]; then
         /usr/bin/warp.sh status 2>/dev/null || warp.sh status 2>/dev/null || true
@@ -278,6 +316,10 @@ enable() {
     if [ "$EXPIRED_DATE" != "lifetime" ]; then
         clear
         echo ""
+        echo ""
+        echo ""
+        echo ""
+        echo ""
         echo -e "WARP is not allowed on a date-licensed machine: it changes the server IP and would break the license check."
         read -n 1 -s -r -p "Press any key to return..." || true
         return
@@ -288,6 +330,10 @@ enable() {
     # install it has no registration, so connect/disconnect change nothing.
     systemctl enable --now wg-quick@wgcf >/dev/null 2>&1
     clear
+    echo ""
+    echo ""
+    echo ""
+    echo ""
     echo ""
     if ip link show wgcf >/dev/null 2>&1; then
         echo -e "Done Enable Warp"
@@ -301,6 +347,10 @@ disable() {
     systemctl disable --now wg-quick@wgcf >/dev/null 2>&1
     wg-quick down wgcf >/dev/null 2>&1
     clear
+    echo ""
+    echo ""
+    echo ""
+    echo ""
     echo ""
     if ip link show wgcf >/dev/null 2>&1; then
         echo -e "WARP is still running"
@@ -316,6 +366,10 @@ restart() {
     if [ "$EXPIRED_DATE" != "lifetime" ]; then
         clear
         echo ""
+        echo ""
+        echo ""
+        echo ""
+        echo ""
         echo -e "WARP is not allowed on a date-licensed machine: it changes the server IP and would break the license check."
         read -n 1 -s -r -p "Press any key to return..." || true
         return
@@ -325,12 +379,20 @@ restart() {
     systemctl restart wg-quick@wgcf 2>/dev/null || true
     clear
     echo ""
+    echo ""
+    echo ""
+    echo ""
+    echo ""
     echo -e "Done Restart Service Warp Wireguard"
     read -n 1 -s -r -p "Press any key to return..." || true
 }
 
 akun4() {
     clear
+    echo ""
+    echo ""
+    echo ""
+    echo ""
     echo ""
     local conf=""
     if [[ -f /etc/wireguard/wgcf.conf ]]; then
@@ -355,6 +417,10 @@ akun4() {
 akun6() {
     clear
     echo ""
+    echo ""
+    echo ""
+    echo ""
+    echo ""
     local conf=""
     if [[ -f /etc/wireguard/wgcf.conf ]]; then
         conf=$(cat /etc/wireguard/wgcf.conf)
@@ -378,8 +444,16 @@ akun6() {
 token() {
     clear
     echo ""
+    echo ""
+    echo ""
+    echo ""
+    echo ""
     read -p "Input Your Token Teams WARP+: " token || return
     clear
+    echo ""
+    echo ""
+    echo ""
+    echo ""
     echo ""
     if command -v warp >/dev/null 2>&1; then
         warp -T "$token"
@@ -394,6 +468,10 @@ token() {
 
 add() {
     clear
+    echo ""
+    echo ""
+    echo ""
+    echo ""
     echo ""
     echo -e "
     Create Cloudflare WARP Account
@@ -414,6 +492,10 @@ add() {
 
 menuwg() {
     clear
+    echo ""
+    echo ""
+    echo ""
+    echo ""
     echo ""
     echo -e "
         Cloudflare WARP Menu
@@ -454,6 +536,10 @@ menuwg
 
     clear
     echo ""
+    echo ""
+    echo ""
+    echo ""
+    echo ""
 echo -e "${separator}"
 echo -e "          CHANGE TIMEZONE"
 echo -e "${separator}"
@@ -477,6 +563,10 @@ case $opt in
 		1)
 		clear
 		echo ""
+		echo ""
+		echo ""
+		echo ""
+		echo ""
 		timedatectl set-timezone Asia/Kuala_Lumpur
 		echo -e "\e[0m                                                   "
 		echo -e "${separator}"
@@ -490,6 +580,10 @@ case $opt in
 		;;
 		2)
 		clear
+		echo ""
+		echo ""
+		echo ""
+		echo ""
 		echo ""
 		timedatectl set-timezone Asia/Jakarta
 		echo -e "\e[0m                                                   "
@@ -506,6 +600,10 @@ case $opt in
 		3)
 		clear
 		echo ""
+		echo ""
+		echo ""
+		echo ""
+		echo ""
 		timedatectl set-timezone Asia/Singapore
 		echo -e "\e[0m                                                   "
 		echo -e "${separator}"
@@ -520,6 +618,10 @@ case $opt in
 		;;
 		4)
 		clear
+		echo ""
+		echo ""
+		echo ""
+		echo ""
 		echo ""
 		timedatectl set-timezone Asia/Brunei
 		echo -e "\e[0m                                                   "
@@ -536,6 +638,10 @@ case $opt in
 		5)
 		clear
 		echo ""
+		echo ""
+		echo ""
+		echo ""
+		echo ""
 		timedatectl set-timezone Asia/Bangkok
 		echo -e "\e[0m                                                   "
 		echo -e "${separator}"
@@ -550,6 +656,10 @@ case $opt in
 		;;
 		6)
 		clear
+		echo ""
+		echo ""
+		echo ""
+		echo ""
 		echo ""
 		timedatectl set-timezone Asia/Manila
 		echo -e "\e[0m                                                   "
@@ -566,6 +676,10 @@ case $opt in
 		7)
 		clear
 		echo ""
+		echo ""
+		echo ""
+		echo ""
+		echo ""
 		timedatectl set-timezone Asia/Kolkata
 		echo -e "\e[0m                                                   "
 		echo -e "${separator}"
@@ -581,6 +695,10 @@ case $opt in
         8)
 		clear
 		echo ""
+		echo ""
+		echo ""
+		echo ""
+		echo ""
 		timedatectl set-timezone Asia/Tokyo
 		echo -e "\e[0m                                                   "
 		echo -e "${separator}"
@@ -595,7 +713,11 @@ case $opt in
 		;;
 		9)
 		clear
-        echo ""
+		echo ""
+		echo ""
+		echo ""
+		echo ""
+		echo ""
 		timedatectl
 	    echo ""
         read -sp " Press ENTER to go back"
@@ -604,6 +726,10 @@ case $opt in
 		;;
         x)
 		clear
+		echo ""
+		echo ""
+		echo ""
+		echo ""
 		echo ""
 		menu
 		;;
@@ -616,6 +742,10 @@ case $opt in
 
 detail() {
 clear
+echo ""
+echo ""
+echo ""
+echo ""
 echo ""
 echo -e "\n
 ${separator}
@@ -650,9 +780,16 @@ echo ""
 uninstall() {
 clear
 echo ""
-
+echo ""
+echo ""
+echo ""
+echo ""
 openeuler() {
 clear
+echo ""
+echo ""
+echo ""
+echo ""
 echo ""
 echo -e "${NC}${separator}
          OPENEULER LINUX
@@ -675,6 +812,10 @@ esac
 opensuse() {
 clear
 echo ""
+echo ""
+echo ""
+echo ""
+echo ""
 echo -e "${NC}${separator}
           OPENSUSE LINUX
 ${separator}
@@ -695,6 +836,10 @@ esac
 
 debian() {
 clear
+echo ""
+echo ""
+echo ""
+echo ""
 echo ""
 echo -e "${NC}${separator}
            DEBIAN LINUX
@@ -718,6 +863,10 @@ esac
 
 ubuntu() {
 clear
+echo ""
+echo ""
+echo ""
+echo ""
 echo ""
 echo -e "${NC}${separator}
            UBUNTU LINUX
@@ -743,6 +892,10 @@ esac
 
 alpine() {
 clear
+echo ""
+echo ""
+echo ""
+echo ""
 echo ""
 echo -e "${NC}${separator}
            ALPINE LINUX
@@ -785,6 +938,10 @@ information() {
 uuid=$(openssl rand -base64 12 | tr -dc 'a-zA-Z0-9' | head -c 16)
 clear
 echo ""
+echo ""
+echo ""
+echo ""
+echo ""
 echo -e "
 [ New Data Your VPS ]
 ${separator}
@@ -803,6 +960,10 @@ fi
 
 os() {
     clear
+    echo ""
+    echo ""
+    echo ""
+    echo ""
     echo ""
     echo -e "
 < = [ Select New OS ] = >
@@ -855,6 +1016,10 @@ Press CTRL + C to Exit
 tampilan() {
 clear
 echo ""
+echo ""
+echo ""
+echo ""
+echo ""
 echo -e "
 ${separator}
 < = [ Reinstall OS ] = >
@@ -880,6 +1045,10 @@ tampilan
 
 systemd() {
 clear
+echo ""
+echo ""
+echo ""
+echo ""
 echo ""
 echo -e "${NC}${separator}
             SYSTEM MENU

@@ -25,6 +25,10 @@
     # Unduh izin dan validasi
     clear
     echo ""
+    echo ""
+    echo ""
+    echo ""
+    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -81,7 +85,10 @@ hosting="https://raw.githubusercontent.com/rohjagad/fn-autosc/main/udp"
 
 clear
 echo ""
-
+echo ""
+echo ""
+echo ""
+echo ""
 # Create Directory
 mkdir -p /root/udp-request
 

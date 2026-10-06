@@ -16,6 +16,10 @@ var sepBlue = colorBlueGo + "------------------------------------------" + color
 func main() {
     clearScreen()
     fmt.Println()
+    fmt.Println()
+    fmt.Println()
+    fmt.Println()
+    fmt.Println()
     fmt.Println(sepOuter)
     fmt.Println("                MEMBER SSH                   ")
     fmt.Println(sepOuter)
