@@ -200,6 +200,11 @@ exp=`date -d "$masaaktif days" +"%y-%m-%d"`
 
 # Menambahkan akun pada json
 sed -i '/#vless$/{n;s/}/},\n### '"$user $exp"'\n{"id": "'""$uuid""'","email": "'""$user""'","level": 0}/}' /etc/xray/json/grpc.json
+# Alternate color path, rotated for balance (canonical + 3 colors)
+opaths=("vlgr" "white" "ivory" "snow")
+cseq=$(cat /etc/xray/.colorseq 2>/dev/null || echo 0)
+opath="${opaths[$((cseq % 4))]}"
+echo $((cseq+1)) > /etc/xray/.colorseq
 
 # Restart Service
 if xray run -test -config /etc/xray/json/grpc.json >/dev/null 2>&1; then
@@ -209,7 +214,7 @@ if xray run -test -config /etc/xray/json/grpc.json >/dev/null 2>&1; then
 fi
 
 # Konfigurasi Vless gRPC
-vlesslink1="vless://$uuid@$domain:443?mode=gun&security=tls&encryption=none&authority=$domain&type=grpc&serviceName=vlgr&sni=$domain#${user}"
+vlesslink1="vless://$uuid@$domain:443?mode=gun&security=tls&encryption=none&authority=$domain&type=grpc&serviceName=$opath&sni=$domain#${user}"
 
 TEKS="
 ----------------------

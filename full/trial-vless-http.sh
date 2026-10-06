@@ -120,6 +120,11 @@ uuid=$(xray uuid)
 
 # Menambahkan akun pada json
 sed -i '/#vless$/{n;s/}/},\n### '"$user $exp"'\n{"id": "'""$uuid""'","email": "'""$user""'","level": 0}/}' /etc/xray/json/upgrade.json
+# Alternate color path, rotated for balance (canonical + 3 colors)
+opaths=("/vlhu" "/pink" "/coral" "/salmon")
+cseq=$(cat /etc/xray/.colorseq 2>/dev/null || echo 0)
+opath="${opaths[$((cseq % 4))]}"
+echo $((cseq+1)) > /etc/xray/.colorseq
 
 # Restart Service
 if xray run -test -config /etc/xray/json/upgrade.json >/dev/null 2>&1; then
@@ -129,10 +134,10 @@ if xray run -test -config /etc/xray/json/upgrade.json >/dev/null 2>&1; then
 fi
 
 # Konfigurasi Vless WS TLS
-vlesslink1="vless://${uuid}@${domain}:443?path=/vlhu&security=tls&encryption=none&host=${domain}&type=httpupgrade&sni=${domain}#${user}"
+vlesslink1="vless://${uuid}@${domain}:443?path=$opath&security=tls&encryption=none&host=${domain}&type=httpupgrade&sni=${domain}#${user}"
 
 # Konfigurasi Vless WS NoneTLS
-vlesslink2="vless://${uuid}@${domain}:80?path=/vlhu&security=none&encryption=none&host=${domain}&type=httpupgrade#${user}"
+vlesslink2="vless://${uuid}@${domain}:80?path=$opath&security=none&encryption=none&host=${domain}&type=httpupgrade#${user}"
 
 TEKS="
 ------------------------

@@ -2617,3 +2617,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 371:** operator dialed the spacing back from five blank lines to three. Same normalization (exactly three, rerun-stable). All affected Go binaries rebuilt.
 - **Verified:** `bash -n` clean; all 28 Go tools build; per-clear count audited (zero off-spec).
+### Fix 372 - Color path aliases with rotated links (Found 376)
+
+- **Fix 372 (Found 376):** 36 nginx color locations (3 unique colors per each of the 12 backends) rewrite to canonical upstream — zero xray changes. All 48 link builders rotate the copyable link across canonical + colors via `/etc/xray/.colorseq`; cards stay the same length and descriptions keep the canonical path. No new terminal colors introduced (links/descriptions stay in the existing palette). Quiz: standalone `rewrite…break` before an `if` guard 502s on exact HU locations in this nginx build — HU colors use `proxy_pass` with URI form instead (WS-in-if and gRPC forms tested fine and were kept).
+- **Verified:** all 36 aliases return their canonical's exact status live; 4 sequential creates cycled `/vmws`→`/red`→`/crimson`→`/scarlet`; `bash -n` clean; `nginx -t` clean.

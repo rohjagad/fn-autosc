@@ -1931,3 +1931,13 @@ Section 35's four-check rule applied to Fix 371:
 | **Over-strictness** | Nothing rejected; display-only change. |
 | **Over-engineering** | Three blank lines per clear site, no new mechanism. |
 | **vs the source** | References print screens back to back; gapped screens are this repo's own direction per operator request. |
+## 156. Color Path Aliases — Four Checks (October 6, 2026)
+
+Section 35's four-check rule applied to Fix 372:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Canonical paths untouched and still valid; xray configs untouched; rotation counter is best-effort (a race only repeats a color). |
+| **Over-strictness** | Nothing rejected; additive aliases only. |
+| **Over-engineering** | Generated location blocks mirroring canonicals; 6-line rotation snippet per builder. |
+| **vs the source** | References have one path per backend; color aliases are this repo's own direction per operator request. |

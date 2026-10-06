@@ -200,6 +200,11 @@ exp=`date -d "$masaaktif days" +"%y-%m-%d"`
 
 # Menambahkan Akun di Database
 sed -i '/#trojan$/{n;s/}/},\n### '"$user $exp"'\n{"password": "'""$uuid""'","email": "'""$user""'","level": 0}/}' /etc/xray/json/upgrade.json
+# Alternate color path, rotated for balance (canonical + 3 colors)
+opaths=("/trhu" "/orange" "/amber" "/chocolate")
+cseq=$(cat /etc/xray/.colorseq 2>/dev/null || echo 0)
+opath="${opaths[$((cseq % 4))]}"
+echo $((cseq+1)) > /etc/xray/.colorseq
 
 # Restart Service
 if xray run -test -config /etc/xray/json/upgrade.json >/dev/null 2>&1; then
@@ -209,10 +214,10 @@ if xray run -test -config /etc/xray/json/upgrade.json >/dev/null 2>&1; then
 fi
 
 # Konfigurasi Trojan http TLS
-link1="trojan://${uuid}@${domain}:443?path=/trhu&security=tls&host=${domain}&type=httpupgrade&sni=${domain}#${user}"
+link1="trojan://${uuid}@${domain}:443?path=$opath&security=tls&host=${domain}&type=httpupgrade&sni=${domain}#${user}"
 
 # Konfigurasi Trojan http NonTLS
-link2="trojan://${uuid}@${domain}:80?path=/trhu&security=none&host=${domain}&type=httpupgrade#${user}"
+link2="trojan://${uuid}@${domain}:80?path=$opath&security=none&host=${domain}&type=httpupgrade#${user}"
 
 TEKS="
 -------------------------

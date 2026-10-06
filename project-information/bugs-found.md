@@ -2249,3 +2249,5 @@ Found 374. **Stacked menus look connected on terminals that ignore clear** —
 main menu to submenu to sub-submenu prints with no gap between screens, so they read as one continuous screen on consoles where the clear sequence does nothing.
 Found 375. **One blank line of air is too tight on tall stacked flows** —
 operator wants about five blank lines after every clear so screens breathe on terminals that ignore clear.
+Found 376. **One path per backend is a single point for path-based blocking** —
+operator request: give every transport path color aliases (`/red`, `/green`, …) and rotate new account links across them so usage stays balanced without bloating cards.

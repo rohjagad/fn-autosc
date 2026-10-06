@@ -200,6 +200,11 @@ exp=`date -d "$masaaktif days" +"%y-%m-%d"`
 
 # Menambahkan akun pada json
 sed -i '/#vless$/{n;s/}/},\n### '"$user $exp"'\n{"id": "'""$uuid""'","email": "'""$user""'","level": 0}/}' /etc/xray/json/ws.json
+# Alternate color path, rotated for balance (canonical + 3 colors)
+opaths=("/vlws" "/green" "/lime" "/emerald")
+cseq=$(cat /etc/xray/.colorseq 2>/dev/null || echo 0)
+opath="${opaths[$((cseq % 4))]}"
+echo $((cseq+1)) > /etc/xray/.colorseq
 
 # Restart Service
 if xray run -test -config /etc/xray/json/ws.json >/dev/null 2>&1; then
@@ -209,10 +214,10 @@ if xray run -test -config /etc/xray/json/ws.json >/dev/null 2>&1; then
 fi
 
 # Konfigurasi Vless WS TLS
-vlesslink1="vless://${uuid}@${domain}:443?path=/vlws&security=tls&encryption=none&host=${domain}&type=ws&sni=${domain}#${user}"
+vlesslink1="vless://${uuid}@${domain}:443?path=$opath&security=tls&encryption=none&host=${domain}&type=ws&sni=${domain}#${user}"
 
 # Konfigurasi Vless WS NoneTLS
-vlesslink2="vless://${uuid}@${domain}:80?path=/vlws&security=none&encryption=none&host=${domain}&type=ws#${user}"
+vlesslink2="vless://${uuid}@${domain}:80?path=$opath&security=none&encryption=none&host=${domain}&type=ws#${user}"
 
 TEKS="
 -----------------------

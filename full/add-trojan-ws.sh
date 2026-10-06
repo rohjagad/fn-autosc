@@ -200,6 +200,12 @@ exp=`date -d "$masaaktif days" +"%y-%m-%d"`
 
 # Menambahkan Akun di Database
 sed -i '/#trojan$/{n;s/}/},\n### '"$user $exp"'\n{"password": "'""$uuid""'","email": "'""$user""'","level": 0}/}' /etc/xray/json/ws.json
+# Alternate color path, rotated for balance (canonical + 3 colors)
+opaths=("/trws" "/blue" "/navy" "/azure")
+cseq=$(cat /etc/xray/.colorseq 2>/dev/null || echo 0)
+opath="${opaths[$((cseq % 4))]}"
+echo $((cseq+1)) > /etc/xray/.colorseq
+epath="${opath//\///%2f}"
 
 # Restart Service
 if xray run -test -config /etc/xray/json/ws.json >/dev/null 2>&1; then
@@ -209,10 +215,10 @@ if xray run -test -config /etc/xray/json/ws.json >/dev/null 2>&1; then
 fi
 
 # Konfigurasi Trojan WS TLS
-link1="trojan://${uuid}@${domain}:443?path=%2ftrws&security=tls&host=${domain}&type=ws&sni=${domain}#${user}"
+link1="trojan://${uuid}@${domain}:443?path=${epath}&security=tls&host=${domain}&type=ws&sni=${domain}#${user}"
 
 # Konfigurasi Trojan WS NonTLS
-link2="trojan://${uuid}@${domain}:80?path=/trws&security=none&host=${domain}&type=ws#${user}"
+link2="trojan://${uuid}@${domain}:80?path=$opath&security=none&host=${domain}&type=ws#${user}"
 
 TEKS="
 ----------------------

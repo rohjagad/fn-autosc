@@ -203,6 +203,11 @@ exp=`date -d "$masaaktif days" +"%y-%m-%d"`
 
 # Menambahkan akun pada json
 sed -i '/#vmess$/{n;s/}/},\n### '"$user $exp"'\n{"id": "'""$uuid""'","alterid": 0,"email": "'""$user""'","level": 0}/}' /etc/xray/json/xhttp.json
+# Alternate color path, rotated for balance (canonical + 3 colors)
+opaths=("/vmxh" "/purple" "/violet" "/indigo")
+cseq=$(cat /etc/xray/.colorseq 2>/dev/null || echo 0)
+opath="${opaths[$((cseq % 4))]}"
+echo $((cseq+1)) > /etc/xray/.colorseq
 
 # Me Restart Service
 if xray run -test -config /etc/xray/json/xhttp.json >/dev/null 2>&1; then
@@ -221,7 +226,7 @@ acs=`cat<<eof
 "id": "${uuid}",
 "aid": "0",
 "net": "xhttp",
-"path": "/vmxh",
+"path": "$opath",
 "type": "none",
 "host": "${domain}",
 "tls": "tls"
@@ -238,7 +243,7 @@ ask=`cat<<eof
 "id": "${uuid}",
 "aid": "0",
 "net": "xhttp",
-"path": "/vmxh",
+"path": "$opath",
 "type": "none",
 "host": "${domain}",
 "tls": "none"

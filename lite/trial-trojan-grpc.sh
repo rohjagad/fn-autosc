@@ -120,6 +120,11 @@ uuid=$(xray uuid)
 
 # Menambahkan Akun di Database
 sed -i '/#trojan$/{n;s/}/},\n### '"$user $exp"'\n{"password": "'""$uuid""'","email": "'""$user""'","level": 0}/}' /etc/xray/json/grpc.json
+# Alternate color path, rotated for balance (canonical + 3 colors)
+opaths=("trgr" "magenta" "plum" "orchid")
+cseq=$(cat /etc/xray/.colorseq 2>/dev/null || echo 0)
+opath="${opaths[$((cseq % 4))]}"
+echo $((cseq+1)) > /etc/xray/.colorseq
 
 # Restart Service
 if xray run -test -config /etc/xray/json/grpc.json >/dev/null 2>&1; then
@@ -129,7 +134,7 @@ if xray run -test -config /etc/xray/json/grpc.json >/dev/null 2>&1; then
 fi
 
 # Konfigurasi Trojan gRPC TLS
-link1="trojan://${uuid}@${domain}:443?mode=gun&security=tls&authority=${domain}&type=grpc&serviceName=trgr&sni=${domain}#${user}"
+link1="trojan://${uuid}@${domain}:443?mode=gun&security=tls&authority=${domain}&type=grpc&serviceName=$opath&sni=${domain}#${user}"
 
 TEKS="
 -----------------------

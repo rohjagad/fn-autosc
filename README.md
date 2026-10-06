@@ -315,6 +315,29 @@ to `127.0.0.1` only and are never reachable from outside.
 | VLESS gRPC | gRPC | `vlgr` | — | `127.0.0.1:24456` |
 | Trojan gRPC | gRPC | `trgr` | — | `127.0.0.1:33456` |
 
+### Alternative color paths
+
+Every canonical path above has three color aliases (e.g. `/vmws` also
+answers on `/red`, `/crimson`, `/scarlet`). Nginx rewrites them to the
+canonical path upstream, so they behave identically. New account links
+rotate across canonical + colors (round-robin via `/etc/xray/.colorseq`)
+to spread usage; the card description always shows the canonical path.
+
+| Canonical | Colors |
+| :--- | :--- |
+| `/vmws` | `/red`, `/crimson`, `/scarlet` |
+| `/vlws` | `/green`, `/lime`, `/emerald` |
+| `/trws` | `/blue`, `/navy`, `/azure` |
+| `/vmhu` | `/yellow`, `/gold`, `/khaki` |
+| `/vlhu` | `/pink`, `/coral`, `/salmon` |
+| `/trhu` | `/orange`, `/amber`, `/chocolate` |
+| `/vmxh` | `/purple`, `/violet`, `/indigo` |
+| `/vlxh` | `/cyan`, `/teal`, `/turquoise` |
+| `/trxh` | `/brown`, `/tan`, `/beige` |
+| `vmgr` | `black`, `gray`, `silver` |
+| `vlgr` | `white`, `ivory`, `snow` |
+| `trgr` | `magenta`, `plum`, `orchid` |
+
 ### Why arbitrary paths are unstable
 
 You may have seen advice to use paths like `/anything` or `/custom`. Those are
