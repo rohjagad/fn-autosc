@@ -175,6 +175,7 @@ Quota   : $quota GB
 
 TLS     : 443, 2053, 2083, 2087, 2096
 Path    : /vlhu
+Path Alt : /pink /coral /salmon
 NoneTLS : 80, 8880, 2052, 2082, 2095
 Network : HTTP Upgrade
 ------------------------

@@ -163,8 +163,8 @@ if [ -z "$CHATID" ] || [ -z "$KEY" ]; then
 fi
 # Kirim file backup ke Telegram (sebagai lampiran)
 URL2="https://api.telegram.org/bot$KEY/sendDocument"
-CAPTION="$TEKS"
-RESP=$(curl -s --max-time $TIME -F chat_id=$CHATID -F document=@backup.zip -F caption="$CAPTION" $URL2 2>&1)
+CAPTION="$(printf '%s' "$TEKS" | sed -e 's|^[A-Za-z][^:]*: .*|<code>&</code>|')"
+RESP=$(curl -s --max-time $TIME -F chat_id=$CHATID -F document=@backup.zip -F parse_mode=html -F caption="$CAPTION" $URL2 2>&1)
 
 # Bersihkan file backup hanya bila Telegram benar-benar menerimanya
 if echo "$RESP" | grep -q '"ok":true'; then

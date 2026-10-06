@@ -142,12 +142,12 @@ if [ -n "$deleted_users" ]; then
     systemctl restart xray@ws
     TEXT="
 <b>-----------------------</b>
-<b>⚠️ X-RAY WS Clear Log ⚠️</b>
+<b>X-RAY WS Clear Log</b>
 <b>-----------------------</b>
-<b>🗓️ Date      :</b> <code>$DATE</code>
-<b>📌 Status   :</b> <b>Success Clear Log</b>
+<b>Date     :</b> <code>$DATE</code>
+<b>Status   :</b> <b>Success Clear Log</b>
 <b>-----------------------</b>
-<b>👤 Pengguna Dihapus:</b> <code>$deleted_users</code>
+<b>Pengguna Dihapus:</b> <code>$deleted_users</code>
 <b>-----------------------</b>
 <i>Catatan:</i> Menghapus Log Semua akun yang tidak tersedia didalam database Server.
 "

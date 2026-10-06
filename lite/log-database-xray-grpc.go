@@ -7,16 +7,17 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
 )
 
 const (
-	colorReset  = "\033[0m"
-	colorGreen  = "\033[0;32m"
-	colorBlue   = "\033[1;34m"
-	colorPurple = "\033[1;35m"
+	colorReset      = "\033[0m"
+	colorGreen      = "\033[0;32m"
+	colorBlue       = "\033[1;34m"
+	colorPurple     = "\033[1;35m"
 	colorOrange     = "\033[38;5;208m"
 	colorRed        = "\033[0;31m"
 	colorDeepPurple = "\033[38;5;141m"
@@ -175,14 +176,26 @@ func main() {
 	}
 }
 
+var cardLinkRe = regexp.MustCompile(`(?m)^((?:vmess|vless|trojan)://\S+)$`)
+var cardRowRe = regexp.MustCompile(`(?m)^([A-Za-z][^:]*: .+)$`)
+
+func htmlCard(s string) string {
+	s = strings.ReplaceAll(s, "&", "&amp;")
+	s = cardLinkRe.ReplaceAllString(s, "<code>$1</code>")
+	s = cardRowRe.ReplaceAllString(s, "<code>$1</code>")
+	return s
+}
+
 func sendToTelegram(message, chatID, key string) {
 	if chatID == "" || key == "" {
 		return
 	}
 	urlStr := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", key)
 	formData := url.Values{
-		"chat_id": {chatID},
-		"text":    {message},
+		"chat_id":                  {chatID},
+		"text":                     {htmlCard(message)},
+		"parse_mode":               {"html"},
+		"disable_web_page_preview": {"true"},
 	}
 	client := &http.Client{Timeout: 5 * time.Second}
 	resp, err := client.PostForm(urlStr, formData)

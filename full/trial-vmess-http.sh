@@ -211,6 +211,7 @@ NoneTLS : 80, 8880, 2052, 2082, 2095
 ------------------------
 AlterID : 0
 Path    : /vmhu
+Path Alt : /yellow /gold /khaki
 Network : HTTP Upgrade
 Alpn    : - [ None ]
 Decrypt : auto

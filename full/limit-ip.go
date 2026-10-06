@@ -4,12 +4,12 @@ import (
 	"bufio"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
 	"time"
-	"net/url"
 )
 
 var (
@@ -19,7 +19,6 @@ var (
 	Green    = "\033[92;1m"
 	Xark     = "\033[0m"
 )
-
 
 func rainbowSepGo(text string) string {
 	n := len(text)
@@ -47,9 +46,10 @@ func rainbowSepGo(text string) string {
 	sb.WriteString("\033[0m")
 	return sb.String()
 }
+
 const (
 	colorResetGo = "\033[0m"
-	colorBlueGo = "\033[1;34m"
+	colorBlueGo  = "\033[1;34m"
 )
 
 func clearScreen() {
@@ -176,15 +176,15 @@ func sendTelegramNotification(username, oldLimit, newLimit, expiry string) {
 
 	date := time.Now().Format("2006-01-02")
 	message := fmt.Sprintf(`
-		<b>🔒 Change Limit IP SSH</b>
+		<b>Change Limit IP SSH</b>
 		<b>──────────────────────────────────</b>
-		<b>👤 Username:</b> %s
-		<b>🌐 Old Limit IP:</b> %s
-		<b>🔄 New Limit IP:</b> %s
-		<b>⏳ Expiry:</b> %s
-		<b>📅 Change Date:</b> %s
+		<b>Username      :</b> <code>%s</code>
+		<b>Old Limit IP  :</b> <code>%s</code>
+		<b>New Limit IP  :</b> <code>%s</code>
+		<b>Expiry        :</b> <code>%s</code>
+		<b>Change Date   :</b> <code>%s</code>
 		<b>──────────────────────────────────</b>
-		<b>✅ Update Successful!</b>
+		<b>Update Successful!</b>
 	`, username, oldLimit, newLimit, expiry, date)
 
 	data := url.Values{}
@@ -201,7 +201,7 @@ func sendTelegramNotification(username, oldLimit, newLimit, expiry string) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		fmt.Printf(Red + "Failed to send message: %s" + Xark, resp.Status)
+		fmt.Printf(Red+"Failed to send message: %s"+Xark, resp.Status)
 	} else {
 		fmt.Println(Green + "Telegram notification sent successfully!" + Xark)
 	}
@@ -241,10 +241,10 @@ func main() {
 	fmt.Println()
 	fmt.Println("Domain:", getDomain())
 	fmt.Println()
-    clearScreen()
-    fmt.Println()
-    fmt.Println()
-    fmt.Println()
+	clearScreen()
+	fmt.Println()
+	fmt.Println()
+	fmt.Println()
 	rerechanBanner()
 
 	file, err := os.Open("/etc/passwd")

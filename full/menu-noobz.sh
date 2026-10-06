@@ -186,23 +186,23 @@ TEKS="
 ----------------------------
 NoobzVPN Account
 ----------------------------
-Hostname  : $domain
-Username  : $user
-Password  : $pass
+Hostname        : $domain
+Username        : $user
+Password        : $pass
 ----------------------------
-TCP_STD/HTTP  : 8080
-TCP_SSL/HTTPS : 8443
+TCP_STD/HTTP    : 8080
+TCP_SSL/HTTPS   : 8443
 ----------------------------
-PAYLOAD   : GET / HTTP/1.1[crlf]Host: [host][crlf]Upgrade: websocket[crlf][crlf]
+PAYLOAD         : GET / HTTP/1.1[crlf]Host: [host][crlf]Upgrade: websocket[crlf][crlf]
 ----------------------------
-Expired   : $expi
+Expired         : $expi
 ----------------------------"
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
-    curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL >/dev/null 2>&1
+    curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "disable_web_page_preview=1" --data-urlencode "parse_mode=html" --data-urlencode "text=$(printf '%s' $TEKS | sed -e 's|^[A-Za-z][^:]*: .*|<code>&</code>|')" $URL >/dev/null 2>&1
 fi
 clear
 echo ""
@@ -247,8 +247,8 @@ TEKS="
 Account Deleted
 ----------------------------
 
-User: $name
-Exp : $exp
+User            : $name
+Exp             : $exp
 ----------------------------
 "
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
@@ -256,7 +256,7 @@ KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
-    curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL >/dev/null 2>&1
+    curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "disable_web_page_preview=1" --data-urlencode "parse_mode=html" --data-urlencode "text=$(printf '%s' $TEKS | sed -e 's|^[A-Za-z][^:]*: .*|<code>&</code>|')" $URL >/dev/null 2>&1
 fi
 clear
 echo ""

@@ -2041,3 +2041,13 @@ Section 35's four-check rule applied to Fix 382:
 | **Over-strictness** | Nothing rejected; send-scoped change. |
 | **Over-engineering** | Same single-expression shape; no new mechanism. |
 | **vs the source** | Matches this repo's own lock/unlock notice style. |
+## 167. Notice Cleanup + Path Alt — Four Checks (October 6, 2026)
+
+Section 35's four-check rule applied to Fix 383:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Same senders, same triggers, same values; only markup/padding/columns change; unlock/change-id parsers unaffected (new rows carry no parsed keys). |
+| **Over-strictness** | Nothing rejected; text-scoped change. |
+| **Over-engineering** | One shared row expression reused; per-block literal padding. |
+| **vs the source** | References share the icons/ragged rows; the cleanup is this repo's own direction per operator request. |

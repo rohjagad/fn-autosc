@@ -184,8 +184,8 @@ logs() {
     TEKS="
 Log Multi Login SSH
 -----------------
-Username: $user
-Limit IP: $iplimit
+Username   : $user
+Limit IP   : $iplimit
 Total Login: $cekcek
 Unlock Time: $unlock_time
 -----------------
@@ -199,7 +199,7 @@ KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 [ -z "$CHATID" ] || [ -z "$KEY" ] && return 0
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
-curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL >/dev/null 2>&1
+curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "disable_web_page_preview=1" --data-urlencode "parse_mode=html" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's|^[A-Za-z][^:]*: .*|<code>&</code>|')" $URL >/dev/null 2>&1
 clear
 echo ""
 echo ""

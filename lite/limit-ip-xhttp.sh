@@ -95,10 +95,10 @@ DATE=$(date +"%Y-%m-%d %H:%M:%S")
 <b>-----------------------</b>
 <b>XTLS XHTTP MULTILOGIN</b>
 <b>-----------------------</b>
-<b>🗓️ Date      :</b> <code>$DATE</code>
-<b>👤 Username :</b> <code>$user</code>
-<b>📌 Login    :</b> <b>$cek / $limit</b>
-<b>✳️ Status    :</b> <b>Locked</b>
+<b>Date     :</b> <code>$DATE</code>
+<b>Username :</b> <code>$user</code>
+<b>Login    :</b> <b>$cek / $limit</b>
+<b>Status   :</b> <b>Locked</b>
 <b>-----------------------</b>
 <i>Catatan:</i> Akun Pengguna Telah dikunci dan total usage badwidth tidak akan di reset didalam server."
         curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$TEXT" $URL >/dev/null
