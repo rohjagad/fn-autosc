@@ -301,6 +301,40 @@ PYEOF2
     nginx -t 2>&1 | tail -1 && systemctl reload nginx
 }
 
+gen_selfsigned_all() {
+    # Self-signed covering primary + extras (auto on domain add).
+    local primary all san seen d
+    primary=$(cat /etc/xray/domain 2>/dev/null)
+    all="$primary $(tr '\n' ' ' < /etc/xray/domains 2>/dev/null)"
+    san=""
+    seen=""
+    for d in $all; do
+        [ -z "$d" ] && continue
+        case ",$seen," in
+            *",$d,"*) continue ;;
+        esac
+        seen="$seen,$d"
+        san="$san,DNS:$d"
+    done
+    san="${san#,}"
+    [ -z "$san" ] && { echo "No domain configured."; return 1; }
+    openssl req -new -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -days 365 -nodes -x509 \
+        -subj "/CN=$primary" -addext "subjectAltName=$san" \
+        -keyout /tmp/xray-selfsigned.key -out /tmp/xray-selfsigned.crt 2>/dev/null || return 1
+    cat /tmp/xray-selfsigned.crt > /etc/xray/xray.crt
+    cat /tmp/xray-selfsigned.key > /etc/xray/xray.key
+    rm -f /tmp/xray-selfsigned.crt /tmp/xray-selfsigned.key
+    chmod 644 /etc/xray/xray.crt
+    chmod 600 /etc/xray/xray.key
+    cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem 2>/dev/null
+    chmod 600 /etc/haproxy/funny.pem 2>/dev/null || true
+    systemctl reload nginx 2>/dev/null || systemctl restart nginx 2>/dev/null || true
+    # haproxy not used in lite edition
+    systemctl restart noobzvpns 2>/dev/null || true
+    echo "Self-signed installed for: $(echo "$san" | sed 's/DNS://g; s/,/, /g')"
+}
+
+
 domain_extra_add() {
     clear
     echo ""
@@ -330,8 +364,10 @@ domain_extra_add() {
     echo "$nd" >> /etc/xray/domains
     domain_sync_nginx
     echo ""
-    echo "Point DNS for $nd at this VPS IP, then reissue the"
-    echo "certificate (option 2) so TLS links keep working."
+    gen_selfsigned_all
+    echo ""
+    echo "Note: live certificate is now self-signed (covers all domains)."
+    echo "Point DNS for $nd at this VPS IP; trusted certs via options 4/5."
     read -n 1 -s -r -p "Press any key to return..." || true
     echo ""
 }

@@ -2255,3 +2255,5 @@ Found 377. **Only one domain can serve accounts** —
 operator request: support extra domains with round-robin rotation in copyable links (no default domain), show all available domains on account cards, and manage the list from the domain menu with nginx + certificate staying consistent.
 Found 378. **Domain menu centers on single-domain change and shows no inventory** —
 operator wants it restructured: Add / Remove / List / cert-per-chosen-domain (acme, certbot, self-signed with CN following the choice), plus a per-domain account card roster (SSH/VMess/VLess/Trojan/WireGuard/L2TP/NoobzVPN counts).
+Found 379. **Trusted certs are automatic, self-signed is only a fallback** —
+operator direction: self-signed is the default everywhere (fresh installs and on domain add, covering all domains via SANs); acme.sh and certbot stay strictly manual.

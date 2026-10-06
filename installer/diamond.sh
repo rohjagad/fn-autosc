@@ -137,32 +137,17 @@ fuser -k 80/tcp 2>/dev/null || true
 systemctl stop nginx
 
 issue_certificate() {
-    local extra_flag="$1"
+    # Self-signed is the default (operator direction): acme.sh and certbot
+    # stay strictly manual (Domain menu options 4 and 5). $1 kept for callers.
     local crt_path="$2"
     local key_path="$3"
 
-    mkdir -p /root/.acme.sh
-    curl -fsSL https://raw.githubusercontent.com/rohjagad/fn-autosc-miscellaneous/main/acme.sh -o /root/.acme.sh/acme.sh
-    chmod +x /root/.acme.sh/acme.sh
-    /root/.acme.sh/acme.sh --upgrade --auto-upgrade
-
-    # 1. Try Let's Encrypt first
-    /root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
-    if ! /root/.acme.sh/acme.sh --issue -d "$domain" --force --standalone -k ec-256 $extra_flag; then
-        echo "Let's Encrypt failed/rate-limited, falling back to ZeroSSL..."
-        # 2. Fallback to ZeroSSL
-        /root/.acme.sh/acme.sh --set-default-ca --server zerossl
-        /root/.acme.sh/acme.sh --register-account -m "${email:-admin@$domain}" --server zerossl 2>/dev/null || true
-        /root/.acme.sh/acme.sh --issue -d "$domain" --force --standalone -k ec-256 $extra_flag --server zerossl || true
-    fi
-
-    /root/.acme.sh/acme.sh --installcert -d "$domain" --force --fullchainpath "$crt_path" --keypath "$key_path" --ecc || true
-
-    # 3. Emergency self-signed fallback so nginx/haproxy never fail to start
+    echo "Generating default self-signed certificate for $domain ..."
+    openssl req -new -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -days 365 -nodes -x509 \
+        -subj "/CN=$domain" -addext "subjectAltName=DNS:$domain" -keyout "$key_path" -out "$crt_path" 2>/dev/null
     if [[ ! -s "$crt_path" || ! -s "$key_path" ]]; then
-        echo "ACME verification failed. Generating self-signed SSL certificate fallback..."
-        openssl req -new -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -days 365 -nodes -x509 \
-            -subj "/CN=$domain" -keyout "$key_path" -out "$crt_path" 2>/dev/null
+        echo "Self-signed generation failed."
+        return 1
     fi
 }
 

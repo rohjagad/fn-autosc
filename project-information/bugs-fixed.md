@@ -2629,3 +2629,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 374 (Found 378):** menu is now Add / Remove / List / Acme / Certbot / Self-Sign (each cert flow picks a domain first with a DNS warning; self-signed CN follows the choice). Removed the dead single-domain changer, cert submenu, and certbot duplicate (reference-checked: only original or superseded lines went). List renders one shared-framed card per domain with the 7-type account roster. Quiz: naive first-`}` function matching eats nested definitions — anchor ends on the next sibling definition instead.
 - **Verified:** `bash -n` clean both editions (identical modulo haproxy); two-domain cards, add/remove cycle, and pick-cancel all proven live with zero writes on cancel.
+### Fix 375 - Self-signed default, manual trusted certs (Found 379)
+
+- **Fix 375 (Found 379):** installer `issue_certificate()` now generates a self-signed cert directly (LE/ZeroSSL attempts removed from the install path; certbot package still installed for manual option 5). Adding a domain auto-generates and installs a multi-SAN self-signed covering primary + extras, and says so on screen (re-running trusted issuance stays manual via options 4/5).
+- **Verified:** live add cycle served a dual-SAN self-signed, then the trusted LE cert was restored byte-identical; `bash -n` clean.

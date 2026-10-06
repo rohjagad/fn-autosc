@@ -1961,3 +1961,13 @@ Section 35's four-check rule applied to Fix 374:
 | **Over-strictness** | Nothing rejected; invalid picks return to the menu. |
 | **Over-engineering** | One picker reused by three flows; counters shared, computed once. |
 | **vs the source** | References center on single-domain change; choose-first inventory is this repo's own direction per operator request. |
+## 159. Self-Signed Default — Four Checks (October 6, 2026)
+
+Section 35's four-check rule applied to Fix 375:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Manual acme/certbot/self-sign flows untouched; rotation, add/remove, and nginx sync behave as before. |
+| **Over-strictness** | Nothing rejected; issuance paths preserved. |
+| **Over-engineering** | One straight-line generator; temp files then copy (never truncate live paths). |
+| **vs the source** | References chase trusted certs at install; self-signed default is this repo's own direction per operator request. |
