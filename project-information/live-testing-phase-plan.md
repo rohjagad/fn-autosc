@@ -20,10 +20,11 @@ VM-3 ──┘                      ▲
 
 ### Channel K: KVM clients (`/dev/kvm`)
 
-- Host always has `/dev/kvm` ready. Multi-VM allowed (VM-1, VM-2, ...).
+- Host always has `/dev/kvm` ready. Multi-VM allowed (VM-1, VM-2, ...). **`/dev/kvm` VMs are the required traffic clients for every phase with K steps — no phase passes on Channel S alone where K steps exist.**
 - Simple setup: 1 Debian 12 VM per test role (e.g. VM-1 = xray client, VM-2 = second IP for limit test).
 - Each VM needs: `curl`, `xray-core` (same version as VPS), `ssh`, `wg-quick`, `noobz` client where needed.
 - One VM is enough for most phases. Use 2 VMs only for: IP-limit (Fase 9), concurrency (Fase 16/20).
+- KVM is also the fault-injection box: DROP/slow network mocks (Fase 18/19/22) run here, never on the VPS data path.
 
 ### Channel S: SSH TUI (pure keyboard)
 
@@ -39,7 +40,7 @@ Check these three on every screen you open:
 
 1. **Wording:** simple words a junior IT understands. No typo. Same term everywhere (e.g. do not mix `Expired` / `Kadaluarsa` on one screen). Units shown (`GB`, `days`, `IP`).
 2. **Navigation:** every number works. `0` goes back to parent, never drops to shell. Wrong number re-shows the menu. Empty `Enter` is rejected with a clear message, no crash. `Ctrl+D` (EOF) exits cleanly (`exit 0`).
-3. **Layout tidiness:** header centered, separator lines same length, `Label : value` colons aligned, no wrapped/truncated lines at 80 cols, colors reset at end, account card stays on screen (pause) before clear. Title/bottom separators rainbow `---` 35, inner dividers blue `---` 35, exactly 3 blank lines after each `clear`, picker lists green-numbered (`01.`) with `Total Accounts` and number-or-name input.
+3. **Layout tidiness:** header centered, separator lines same length, `Label : value` colons aligned, no wrapped/truncated lines at 80 cols, colors reset at end, account card stays on screen (pause) before clear. Title/bottom separators rainbow `---` 35, inner dividers blue `---` 35, exactly 3 blank lines after each `clear`, picker lists green-numbered (`01.`) with `Total Accounts` and number-or-name input. Cards/notices: bare uppercase titles, `Protocol :` + `Transport:` rows, `DD-Mon-YYYY` dates, `XRAY` spelling, green-double titles / blue-single links in Telegram, titles centered on card width in TUI with left payload.
 
 If any screen fails one of the three, note: menu name + option + what you typed + what you saw.
 
@@ -112,7 +113,7 @@ Each phase below lists: **Goal**, **K** (client traffic), **S** (menu walk), **P
 
 - **Goal:** real payload through WS.
 - **K:** create one account per proto; VM runs xray client (`/vmws`, `/vlws`, `/trws`, TLS 443); download 1–5 MB file; checksum == direct download. Repeat one via port 80 NonTLS. Spot-check one color alias (e.g. `/red` vs `/vmws`) returns the identical status.
-- **S:** `menu-x` → create each account via TUI. Check: card shows `Path`, `Network: WebSocket`, full link; duplicate name rejected clearly. Sequential creates rotate link paths (decode 2+ links: canonical, then colors).
+- **S:** `menu-x` → create each account via TUI. Check: bare `ACCOUNT DETAIL` title, `Protocol :` + `Transport:` rows, `Network: WebSocket`, full link; duplicate name rejected clearly. Sequential creates rotate color-only link paths (canonical paths never appear in links — decode 2+ links to confirm), and `Path Alt`/`Service Alt` rows list the rotation set.
 - **PASS:** 3/3 checksums match, NonTLS ok.
 
 ### Fase 5: Xray gRPC (`vmgr`, `vlgr`, `trgr`)
@@ -147,7 +148,7 @@ Each phase below lists: **Goal**, **K** (client traffic), **S** (menu walk), **P
 
 - **Goal:** concurrent-IP abuse locks, unlock restores.
 - **K:** account limit-IP=1 (or 2); hold slow downloads from VM-1 + VM-2 at the same time; run `limit-ip-*`; expect card → `.locked`, JSON entry removed, sessions cut.
-- **S:** do lock + `unlock-*` via TUI only. Confirm prompt `y/n` works, `n` cancels safely, re-unlock of already-present account prints skip message (no duplicate JSON).
+- **S:** do lock + `unlock-*` via TUI only (direct unlock, no confirmation). Multilogin locks auto-lift (~15 min via cron sweeper); manual locks stay indefinite. Confirm re-unlock of already-present account prints skip message (no duplicate JSON).
 - **PASS:** lock file exists, unlock restores same UUID, `Configuration OK.`
 
 ### Fase 10: Quota + full delete
@@ -161,7 +162,7 @@ Each phase below lists: **Goal**, **K** (client traffic), **S** (menu walk), **P
 
 - **Goal:** edits work, bad deletes harmless.
 - **K:** SSH login with new password after `pwd-ssh` change.
-- **S:** `extend-*` (date grows, format `YY-MM-DD`); `delete-*` existing (clean); `delete-* notarealuser999` (prints `User not found`, no restart, nothing deleted).
+- **S:** `extend-*` (date grows, format `DD-Mon-YYYY`); `delete-*` existing (clean); `delete-* notarealuser999` (prints `User not found`, no restart, nothing deleted).
 - **PASS:** date math right, new password works, phantom delete side-effect free.
 
 ### Fase 12: Expiry sweep (`xp` + cron)

@@ -36,7 +36,7 @@ Setiap langkah dalam seluruh fase **WAJIB** membaca dan mengacu pada 9 sumber re
 4. **Verifikasi Terhadap `is-decision.md`:** Memastikan perilaku anomali yang ditemukan bukan salah satu dari 30 keputusan arsitektur resmi sebelum menandainya sebagai bug. Temuan yang ternyata direktif operator (bukan cacat) tetap dicatat sebagai Found bertanda `operator request/direction` — ia bukan bug, tetapi tetap wajib Fix + Section + verifikasi yang sama sebelum dianggap selesai.
 5. **Audit Dokumen Project-Information:** setiap fase wajib memeriksa seluruh berkas di `project-information/` (plus `README.md`) untuk klaim dalam cakupannya — drift dokumen-vs-kode, kontradiksi dokumen-vs-dokumen, dan verifikasi yang tidak mungkin membuktikan klaimnya (pola false-positive Found 96/98: pola grep yang tak bisa cocok, probe yang lolos dalam keadaan sehat maupun rusak). Dok non-append-only dikoreksi di tempat; riwayat append-only dipertahankan, koreksi dicatat sebagai Found/Fix baru.
 6. **Audit Riwayat Commit:** `git log -p -- <berkas-sentuh>` untuk berkas dalam cakupan — pastikan fix terdahulu benar melakukan klaim commit-nya, deteksi revert/regresi diam-diam, dan mismatch pesan-vs-diff.
-7. **Konsistensi Nomor Antar-Berkas Append-Only:** berkas append-only tidak bisa dikoreksi, jadi nomornya disilang-periksa via grep, bukan dibaca dari angka statis di dokumen: nomor Found tertinggi (`bugs-found.md`) vs nomor Fix tertinggi (`bugs-fixed.md`) vs nomor Section regresi (`bug-fixes-regression.md`) wajib selaras di ujungnya (tolak regresi: Section terbaru menutup Fix terbaru). Untuk Fix **baru** berlaku 1 Found → 1 Fix → 1 Section tanpa nomor ganda/lompat; riwayat lama dikecualikan dari keketatan 1:1 karena pernah dikelompokkan (mis. satu entri "Fix 258-261") — dari riwayat hanya diperiksa duplikat nomor. Fix lanjutan (follow-up) boleh berbagi nomor Found asalkan dicatat eksplisit `follow-up` dengan Section sendiri (contoh Fix 371→Found 375). Angka statis ("s.d. 309") di dokumen mana pun adalah drift bila max grep lebih besar. Tips saat ini: Found 379 / Fix 375 / Section 159 — Section berjalan dengan offset tetap terhadap Fix di era baru, yang diwajibkan adalah Section terbaru menutup Fix terbaru.
+7. **Konsistensi Nomor Antar-Berkas Append-Only:** berkas append-only tidak bisa dikoreksi, jadi nomornya disilang-periksa via grep, bukan dibaca dari angka statis di dokumen: nomor Found tertinggi (`bugs-found.md`) vs nomor Fix tertinggi (`bugs-fixed.md`) vs nomor Section regresi (`bug-fixes-regression.md`) wajib selaras di ujungnya (tolak regresi: Section terbaru menutup Fix terbaru). Untuk Fix **baru** berlaku 1 Found → 1 Fix → 1 Section tanpa nomor ganda/lompat; riwayat lama dikecualikan dari keketatan 1:1 karena pernah dikelompokkan (mis. satu entri "Fix 258-261") — dari riwayat hanya diperiksa duplikat nomor. Fix lanjutan (follow-up) boleh berbagi nomor Found asalkan dicatat eksplisit `follow-up` dengan Section sendiri (contoh Fix 371→Found 375). Angka statis ("s.d. 309") di dokumen mana pun adalah drift bila max grep lebih besar. Tips saat ini: Found 431 / Fix 412 / Section 197 — Section berjalan dengan offset tetap terhadap Fix di era baru, yang diwajibkan adalah Section terbaru menutup Fix terbaru.
 
 ### 2.2 Metodologi Fixing (Perbaikan Bug)
 1. **Shortest Working Diff Wins:** Terapkan perubahan paling minimal yang menyelesaikan masalah secara tepat. Hindari abstraksi berlebih, wrapper yang tidak perlu, atau dependency tambahan.
@@ -172,6 +172,7 @@ Fase 27: Review Kriptografi Final (setelah semua perubahan)
   - Pastikan `xp.sh` membersihkan akun menggunakan pola `/### $user $exp/ {N;d}` yang presisi, diiringi pembersihan trailing comma array JSON.
   - Tambahkan penguncian shadow (`passwd -l`) pada `expire-ssh.sh` agar Dropbear non-PAM menolak login segera setelah akun kadaluarsa.
   - Batasi restart daemon Xray hanya satu kali per transport yang akunnya benar-benar terhapus.
+  - Notifikasi expiry mengikuti spesifikasi operator (Found 429–431): judul `<b>EXPIRED ACCOUNT</b>` + baris lowercase `Username/Protocol/Transport/Expired at` yang colon-aligned di dalam `<code>` sebaris-penuh, dengan `parse_mode=html`; tanggal `DD-Mon-YYYY` (`07-Oct-2026`).
 
 ---
 
@@ -188,6 +189,7 @@ Fase 27: Review Kriptografi Final (setelah semua perubahan)
   - Ganti `os.Exit(1)` dengan `os.Exit(0)` pada penyelesaian normal di `limit-ip.go`.
   - Guard pengiriman notifikasi Telegram: lewati jika `/etc/funny/.chatid` atau `.keybot` tidak ada atau kosong.
   - Pastikan `unlock-*` membaca kredensial dari file `.locked` dan meregenerasi baris klien ke file JSON terkait.
+  - Kunci multilogin Xray auto-unlock ~15 menit via sweeper cron (state due-epoch, tanpa `at` — `atd` terbukti macet di lingkungan ini, Found 419); kunci manual tetap indefinit. Kartu kunci mengikuti bentuk delete: `<b>MULTILOGIN LOCKED</b>` vs manual `<b>ACCOUNT LOCKED</b>, baris `Date/Username/Protocol/Transport/...`.
 
 ---
 
@@ -220,6 +222,7 @@ Fase 27: Review Kriptografi Final (setelah semua perubahan)
   - Terapkan validasi `^[1-9][0-9]*$` dengan pemberitahuan tunggal `\033[38;5;208m0 not allowed\033[0m`.
   - Tambahkan pengecekan duplikasi awal via `grep -w "^### $user"`.
   - Tambahkan jeda baca kartu akun (`read -n 1 -s -r -p "Press any key to return..."`) sebelum skrip pembuat keluar ke menu pemanggil.
+  - Standar kartu akun & notifikasi (hasil Found 385–426, berlaku untuk semua kartu/notifikasi baru): judul bare bercode (`ACCOUNT DETAIL`, `ACCOUNT DELETED/LOCKED/UNLOCKED`, `EXTEND EXPIRATION`, `MULTILOGIN LOCKED`, `CHANGE UUID/QUOTA`) — tanpa nama transport di judul; baris `Protocol :` + `Transport:` di setiap kartu/pemberitahuan (nilai UPPERCASE); tanggal `DD-Mon-YYYY`; ejaan `XRAY` (bukan `X-RAY`); judul hijau-ganda / tautan biru-tunggal; judul TUI rata-tengah selebar kartu, payload Telegram rata-kiri.
   - Kungkung akun SSH VPN (Decision 7 — akun adalah kredensial forwarding, bukan user sistem): pertahankan flag `useradd` tepat `-e … -s /bin/false -M` (addssh) / `-s /bin/false -M` (trial); `/bin/false` + `nologin` tetap terdaftar di `/etc/shells` (kompatibilitas Dropbear) tanpa memberi shell betulan; set eksplisit `X11Forwarding no` + `AllowAgentForwarding no` (idempoten, reload sshd); `AllowTcpForwarding yes` WAJIB dipertahankan (produknya memang forwarding); `PermitTunnel` wajib tetap `no`; tanpa blok `Match`/`ForceCommand` yang mematahkan forwarding; tidak ada referensi `$HOME`/home untuk akun ini di kode panel.
 
 ---
@@ -266,7 +269,7 @@ Fase 27: Review Kriptografi Final (setelah semua perubahan)
   - Tambahkan opsi `${green}0${NC}. Back to Main Menu` dan penanganan `0|00) clear ; menu ;;` pada semua dispatcher yang kehilangan opsi 0.
   - Panggil ulang fungsi submenu (misal: `xws`, `xhttp`, `xxhttp`, `xgrpc`, `menu-ssh`) di setiap akhir eksekusi case aksi.
   - Pertahankan display versi pada submenunya dengan fallback aman `2>/dev/null || echo "n/a"`.
-  - Standar TUI (hasil Found 361–375, berlaku untuk semua layar baru): pemisah judul/bawah rainbow `---` 35 (`${separator}`), pemisah dalam biru `---` 35 (`${blue_sep}`), tepat 3 baris kosong setelah setiap `clear`, daftar bernomor hijau (`%02d`) dengan Total +/total, dan input nomor-atau-nama. Tanpa `===`, tanpa `━━━`/`───`/`═══` di output terminal.
+  - Standar TUI (hasil Found 361–375 dan 393–413, berlaku untuk semua layar baru): pemisah judul/bawah rainbow `---` 35 (`${separator}`), pemisah dalam biru `---` 35 (`${blue_sep}`), tepat 3 baris kosong setelah setiap `clear`, daftar bernomor hijau (`%02d`) dengan Total +/total, dan input nomor-atau-nama. Judul TUI rata-tengah selebar pemisah; setiap layar hasil (limit/kuota/kosong) wajib jeda `Press any key` agar tak flashing. Tanpa `===`, tanpa `━━━`/`───`/`═══` di output terminal.
 
 ---
 
