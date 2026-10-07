@@ -182,7 +182,7 @@ ${orange}Press [Ctrl + C] to exit${NC}"
         14) clearScreen; routing-ws ; xws ;;
         15) clearScreen; change-limit-ip-ws ; xws ;;
         16) clearScreen; change-quota-ws ; xws ;;
-        17) clearScreen; locked-xray-ws ; xws ;;
+        17) clearScreen; locked-xray-ws ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xws ;;
         0|00) clearScreen; menu ;;
         *) clearScreen; xws ;;  # Jika input tidak valid, ulangi menu
     esac

@@ -153,8 +153,7 @@ ${orange}Press [Ctrl + C] to exit${NC}"
                 echo ""
                 echo ""
                 echo ""
-                echo -e "
-                ${separator}
+                echo -e "                ${separator}
                 Change Nameserver
                 ${separator}
                 Nameserver: $nsd
@@ -211,8 +210,7 @@ SVCEOF
                 echo ""
                 echo ""
                 echo ""
-                echo -e "
-                Nameserver Updated Successfully
+                echo -e "                Nameserver Updated Successfully
                 ${separator}
                 New Nameserver: $nsdomen
                 ${separator}"
@@ -240,8 +238,7 @@ SVCEOF
                 echo ""
                 echo ""
                 echo ""
-                echo -e "
-                Server Keys Renewed Successfully
+                echo -e "                Server Keys Renewed Successfully
                 ${separator}"
                 read -n 1 -s -r -p "Press any key to return..." || true
                 mna89
@@ -257,8 +254,7 @@ SVCEOF
                 echo ""
                 echo ""
                 echo ""
-                echo -e "
-                SlowDNS Restarted Successfully
+                echo -e "                SlowDNS Restarted Successfully
                 ${separator}"
                 read -n 1 -s -r -p "Press any key to return..." || true
                 mna89

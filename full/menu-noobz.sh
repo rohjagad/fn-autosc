@@ -140,8 +140,7 @@ clear
 echo ""
 echo ""
 echo ""
-echo -e "
-${separator}
+echo -e "${separator}
 Create NoobzVPN Account
 ${separator}"
 read -p "Username  : " user || return
@@ -219,8 +218,7 @@ clear
 echo ""
 echo ""
 echo ""
-echo -e "
-${separator}
+echo -e "${separator}
 Delete NoobzVPN Account
 ${separator}
 $mna

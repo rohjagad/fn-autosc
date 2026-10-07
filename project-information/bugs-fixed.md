@@ -2833,3 +2833,15 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 424 (Found 443):** `config/format.sh` no longer centers `^🔵.*$`; only `🟢…🟢`/`Limit Detail`/`Detail Port` center. `🔵` lines fall through to plain left print, matching Telegram/`.log` (col 0). Green titles stay centered.
 - **Verified:** simulated `TEKS` shows `🟢 ACCOUNT DETAIL 🟢` padded, both `🔵 VLess WS` lines at col 0; deployed to 157.10.253.95 (`/etc/funny/format.sh` updated); `bash -n` clean.
+### Fix 425 - Prefix paths on all transports (Found 444)
+
+- **Fix 425 (Found 444):** `config/4.conf,6.conf,dual.conf`: HU canonical + 9 colors `location =` → `location ~` with `rewrite /(.*) /<canon> break;` (colors also drop the `/<canon>` suffix from `proxy_pass`, mirroring proven WS blocks); XHTTP canonical `location /<canon>` → `location ~` with same rewrite, 9 colors `=` → `~` with `rewrite ^` → `rewrite /(.*)`; gRPC canonical + 9 colors `location ^~` → `location ~`, rewrites `^/<name>(.*)$` → `^.*/\\/<name>(.*)$` (prefix stripped, method suffix kept). Upstream ports/targets and guards (`websocket`/`POST`) untouched.
+- **Verified live:** new `nginx.conf` diffed against live (server_name kept, only location/rewrite/proxy lines change), `nginx -t` ok, restarted active; parity per transport: `/a/vmhu`=`/a/yellow`=404, `/a/vmxh`=`/a/purple`=404, `POST /a/vlgr`=`POST /a/white`=415, `/a/b/vmws`=`/a/b/green`=400.
+### Fix 426 - Remaining empty-flash menus pause (Found 445)
+
+- **Fix 426 (Found 445):** all 8 lock callers (`full/lite x-*` option 17) now pause like option 13; `full/menu-ssh.sh` option 9 (`limit-ip`) now pauses like options 4/5/7 (Go binary untouched, no rebuild); `full/xl2tp.sh` `delete()`/`extend()` empty branches now `read ... || true` before `exit 1`. `locked-xray-*.sh`/`limit-ip` bodies untouched.
+- **Verified:** `bash -n` clean; live `/usr/bin/x-ws` shows 5 pauses; zips repacked (0755, IN-SYNC).
+### Fix 419 follow-up - Remaining upper spacings capped at 3 (Found 438)
+
+- **Fix 419 follow-up (Found 438):** 40 more `clear`+3x+extra-blank spots merged: `menu-dnstt` (4), `menu-argo` (2+2 lite), `menu-noobz` (2), `menu-system`/`lite` (add/menuwg/detail/information/os/tampilan), `menu-bot`/`lite` (3+2 extra), 8 `routing-*.sh` (both editions). Bare `echo -e "` / `echo -e "\n` opening lines joined with next content line; inner message spacing kept.
+- **Verified:** repo-wide audit of every `clear` in `full/*.sh`+`lite/*.sh`: all upper spacings exactly 3; `bash -n` clean; zips repacked (0755, IN-SYNC).

@@ -165,8 +165,7 @@ clear
 echo ""
 echo ""
 echo ""
-echo -e "
-Set Up Argo Tunnel Domain
+echo -e "Set Up Argo Tunnel Domain
 ${separator}
 
 Example: mysubdom.myvpn.com
@@ -237,8 +236,7 @@ clear
 echo ""
 echo ""
 echo ""
-echo -e "
-    Argo Tunnel Details
+echo -e "    Argo Tunnel Details
 ${separator}
 
 Port HTTP:

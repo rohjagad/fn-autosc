@@ -184,7 +184,7 @@ ${orange}Press [Ctrl + C] to exit${NC}"
         14) clearScreen; routing-xhttp ; xxhttp ;;
         15) clearScreen; change-limit-ip-xhttp ; xxhttp ;;
         16) clearScreen; change-quota-xhttp ; xxhttp ;;
-        17) clearScreen; locked-xray-xhttp ; xxhttp ;;
+        17) clearScreen; locked-xray-xhttp ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xxhttp ;;
         0|00) clearScreen; menu ;;
         *) clearScreen; xxhttp ;;  # Jika input tidak valid, ulangi menu
     esac

@@ -757,8 +757,7 @@ clear
 echo ""
 echo ""
 echo ""
-echo -e "
-${separator}
+echo -e "${separator}
 [ Menu Routing gRPC ]
 ${separator}
 

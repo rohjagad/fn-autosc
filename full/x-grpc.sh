@@ -184,7 +184,7 @@ ${orange}Press [Ctrl + C] to exit${NC}"
         14) clearScreen; routing-grpc ; xgrpc ;;
         15) clearScreen; change-limit-ip-grpc ; xgrpc ;;
         16) clearScreen; change-quota-grpc ; xgrpc ;;
-	17) clearScreen; locked-xray-grpc ; xgrpc ;;
+	17) clearScreen; locked-xray-grpc ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xgrpc ;;
         0|00) clearScreen; menu ;;
         *) clearScreen; xgrpc ;;  # Jika input tidak valid, ulangi menu
     esac

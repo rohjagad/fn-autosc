@@ -410,8 +410,7 @@ add() {
     echo ""
     echo ""
     echo ""
-    echo -e "
-    Create Cloudflare WARP Account
+    echo -e "    Create Cloudflare WARP Account
     ${separator}
 
     1. Create Account (IPv4)
@@ -432,8 +431,7 @@ menuwg() {
     echo ""
     echo ""
     echo ""
-    echo -e "
-        Cloudflare WARP Menu
+    echo -e "        Cloudflare WARP Menu
     ${separator}
 
     1. Install Cloudflare WARP
@@ -658,8 +656,7 @@ clear
 echo ""
 echo ""
 echo ""
-echo -e "\n
-${separator}
+echo -e "${separator}
 Autoscript Management Panel VPN
 ${separator}
 
@@ -834,8 +831,7 @@ clear
 echo ""
 echo ""
 echo ""
-echo -e "
-[ New Data Your VPS ]
+echo -e "[ New Data Your VPS ]
 ${separator}
 Username: root
 Password: $uuid
@@ -855,8 +851,7 @@ os() {
     echo ""
     echo ""
     echo ""
-    echo -e "
-< = [ Select New OS ] = >
+    echo -e "< = [ Select New OS ] = >
 ${separator}
 
 01. Rocky
@@ -908,8 +903,7 @@ clear
 echo ""
 echo ""
 echo ""
-echo -e "
-${separator}
+echo -e "${separator}
 < = [ Reinstall OS ] = >
 ${separator}
 

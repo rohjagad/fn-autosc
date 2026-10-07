@@ -203,6 +203,8 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/funny/.l2tp")
 	if [[ ${NUMBER_OF_CLIENTS} == '0' ]]; then
 		echo ""
 		echo "You have no existing clients!"
+		read -n 1 -s -r -p "Press any key to return..." || true
+		echo ""
 		exit 1
 	fi
 
@@ -259,6 +261,8 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/funny/.l2tp")
 		echo ""
 		echo ""
 		echo "You have no existing clients!"
+		read -n 1 -s -r -p "Press any key to return..." || true
+		echo ""
 		exit 1
 	fi
 

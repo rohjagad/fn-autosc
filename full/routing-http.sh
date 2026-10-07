@@ -751,8 +751,7 @@ clear
 echo ""
 echo ""
 echo ""
-echo -e "
-${separator}
+echo -e "${separator}
 [ Menu Routing HTTP ]
 ${separator}
 

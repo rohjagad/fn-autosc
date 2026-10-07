@@ -2447,3 +2447,30 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | Display only; no filtering. |
 | **Over-engineering** | Condition trimmed, no new code. |
 | **vs the source** | Matches Telegram/`.log` left alignment (col 0). |
+
+## 209. All-Transport Prefix — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Same rewrite targets, ports and guards; bare paths still match (`~` is substring, suffix preserved for gRPC). |
+| **Over-strictness** | Wider match only; nothing newly rejected. |
+| **Over-engineering** | Mirrors proven WS `rewrite /(.*)` shape; no new blocks. |
+| **vs the source** | Reference predates color aliases; divergence is prefix-parity (Found 440 class). |
+
+## 210. Empty-Flash Remainders — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Pause-after-return only (callers) + pause-before-exit (xl2tp); list/lock/limit logic untouched. |
+| **Over-strictness** | All pauses `|| true`; non-tty use unaffected. |
+| **Over-engineering** | Same one-liner as existing pauses. |
+| **vs the source** | Matches options 07/10/11/13 pattern in the same menus. |
+
+## 211. Upper-Spacing Remainder — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Blank opening lines joined only; message text and order kept. |
+| **Over-strictness** | Display only; no reads changed. |
+| **Over-engineering** | Line joins only. |
+| **vs the source** | Standard is `clear`+3x everywhere else. |

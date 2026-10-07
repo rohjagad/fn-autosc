@@ -298,8 +298,7 @@ clear
 echo ""
 echo ""
 echo ""
-echo -e "
-Telegram Bot Configuration
+echo -e "Telegram Bot Configuration
 ${separator}
 Bot API Key: $api
 Owner Chat ID: $itd
@@ -317,8 +316,7 @@ clear
 echo ""
 echo ""
 echo ""
-echo -e "
-${separator}
+echo -e "${separator}
  Bot Credentials Not Set
 ${separator}
  Choose "1. Set Up Bot Credentials" first,
@@ -359,8 +357,7 @@ if [ -z "$itd" ] || [ -z "$api" ]; then
     echo ""
     echo ""
     echo ""
-    echo -e "
-${separator}
+    echo -e "${separator}
  Both values are required.
 ${separator}
 "
@@ -372,8 +369,7 @@ clear
 echo ""
 echo ""
 echo ""
-echo -e "
-Information
+echo -e "Information
 ${separator}
 Bot API Key: $api
 Chat ID    : $itd
@@ -441,8 +437,7 @@ clear
 echo ""
 echo ""
 echo ""
-echo -e "
-${separator}
+echo -e "${separator}
  Bot Auto Backup
 ${separator}
  Chat ID  : $(cat /etc/funny/.chatid 2>/dev/null)
