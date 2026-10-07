@@ -27,7 +27,6 @@ domain=$(cat /etc/xray/domain)
     clear
     echo ""
     echo ""
-    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -81,7 +80,6 @@ domain=$(cat /etc/xray/domain)
 clear
 echo ""
 echo ""
-echo ""
 red='\033[0;31m'
 green='\033[0;32m'
 blue='\033[1;34m'
@@ -123,7 +121,6 @@ function create() {
 clear
 echo ""
 echo ""
-echo ""
 until [[ $VPN_USER =~ ^[a-zA-Z0-9_]+$ && ${CLIENT_EXISTS} == '0' ]]; do
 		read -rp "Username : " -e VPN_USER || exit 0
 		CLIENT_EXISTS=$(grep -w "$VPN_USER" /etc/funny/.l2tp | wc -l)
@@ -150,7 +147,6 @@ exp=`date -d "$masaaktif days" +"%d-%b-%Y"`
 clear
 echo ""
 echo ""
-echo ""
 # Add or update VPN user
 cat >> /etc/ppp/chap-secrets <<EOF
 "$VPN_USER" l2tpd "$VPN_PASSWORD" *
@@ -168,7 +164,6 @@ systemctl daemon-reload
 systemctl restart ipsec
 systemctl restart xl2tpd
 clear
-echo ""
 echo ""
 echo ""
 PSK=$(grep -oP '(?<=: PSK ")\S+(?=")' /etc/ipsec.secrets 2>/dev/null || echo "myvpn")
@@ -193,9 +188,7 @@ function delete() {
 clear
 echo ""
 echo ""
-echo ""
 clear
-echo ""
 echo ""
 echo ""
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
@@ -238,7 +231,6 @@ systemctl restart xl2tpd
 clear
 echo ""
 echo ""
-echo ""
 echo "${separator}"
 echo "   L2TP Account Deleted   "
 echo "${separator}"
@@ -253,11 +245,9 @@ function extend() {
 clear
 echo ""
 echo ""
-echo ""
 NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/funny/.l2tp")
 	if [[ ${NUMBER_OF_CLIENTS} == '0' ]]; then
 		clear
-		echo ""
 		echo ""
 		echo ""
 		echo "You have no existing clients!"
@@ -267,7 +257,6 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/funny/.l2tp")
 	fi
 
 	clear
-	echo ""
 	echo ""
 	echo ""
 	echo "Select the existing client you want to renew"
@@ -312,7 +301,6 @@ systemctl restart xl2tpd
 clear
 echo ""
 echo ""
-echo ""
 echo "${separator}"
 echo "   L2TP Account Renewed   "
 echo "${separator}"
@@ -326,7 +314,6 @@ echo ""
 
 function main() {
 clear
-echo ""
 echo ""
 echo ""
 echo -e "${NC}${separator}
@@ -359,19 +346,16 @@ main
 clear
 echo ""
 echo ""
-echo ""
 menu
 ;;
 5)
 clear
 echo ""
 echo ""
-echo ""
 exit
 ;;
 *)
 clear
-echo ""
 echo ""
 echo ""
 main

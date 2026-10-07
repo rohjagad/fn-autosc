@@ -25,7 +25,6 @@
     clear
     echo ""
     echo ""
-    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -80,10 +79,8 @@
 clear
 echo ""
 echo ""
-echo ""
 clear_screen() {
     clear
-    echo ""
     echo ""
     echo ""
 }
@@ -204,7 +201,6 @@ alldom=$(printf '%s,' "${rdomains[@]}" | sed 's/,$//; s/,/, /g')
 -------------------
 🟢 SSH ACCOUNT 🟢
 -------------------
-Domain     : ${rdomain}
 Domains    : $alldom
 ISP        : $isp
 Region     : $region

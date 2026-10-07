@@ -26,7 +26,6 @@
     clear
     echo ""
     echo ""
-    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -80,7 +79,6 @@
 clear
 echo ""
 echo ""
-echo ""
 red='\033[0;31m'
 green='\033[0;32m'
 blue='\033[1;34m'
@@ -120,7 +118,6 @@ domain=$(cat /etc/xray/domain)
 clear
 echo ""
 echo ""
-echo ""
 noobz_add_user() {
     local u="$1" p="$2" e="$3"
     noobzvpns add --password "$p" --expired "$e" "$u"
@@ -137,7 +134,6 @@ noobz_list_users() {
 
 function create() {
 clear
-echo ""
 echo ""
 echo ""
 echo -e "${separator}
@@ -169,7 +165,6 @@ done
 clear
 echo ""
 echo ""
-echo ""
 if ! noobz_add_user "$user" "$pass" "$masaaktif"; then
     echo "Failed to create NoobzVPN account."
     sleep 2
@@ -178,7 +173,6 @@ fi
 expi=`date -d "$masaaktif days" +"%d-%b-%Y"`
 echo "### ${user} ${expi}" >>/etc/funny/.noob
 clear
-echo ""
 echo ""
 echo ""
 TEKS="
@@ -206,7 +200,6 @@ fi
 clear
 echo ""
 echo ""
-echo ""
 echo "$TEKS"
 read -n 1 -s -r -p "Press any key to return..." || true
 echo ""
@@ -215,7 +208,6 @@ echo ""
 function delete() {
 mna=$(grep -e "^### " "/etc/funny/.noob" | cut -d ' ' -f 2-3 | column -t | sort | uniq)
 clear
-echo ""
 echo ""
 echo ""
 echo -e "${separator}
@@ -239,7 +231,6 @@ noobz_remove_user "$name"
 clear
 echo ""
 echo ""
-echo ""
 TEKS="
 ----------------------------
 Account Deleted
@@ -257,7 +248,6 @@ if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
     curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "disable_web_page_preview=1" --data-urlencode "parse_mode=html" --data-urlencode "text=$(printf '%s' $TEKS | sed -e 's|^[A-Za-z][^:]*: .*|<code>&</code>|')" $URL >/dev/null 2>&1
 fi
 clear
-echo ""
 echo ""
 echo ""
 echo "$TEKS"
@@ -319,7 +309,6 @@ format_output() {
 clear
 echo ""
 echo ""
-echo ""
 format_output "$output"
 read -n 1 -s -r -p "Press any key to return..." || true
 echo ""
@@ -332,7 +321,6 @@ else
     status="${red}OFF${NC}"
 fi
 clear
-echo ""
 echo ""
 echo ""
 echo -e "${NC}${separator}

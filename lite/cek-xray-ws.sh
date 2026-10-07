@@ -60,7 +60,6 @@ format_bytes() {
 clear
 echo ""
 echo ""
-echo ""
 echo -e "${separator}"
 echo "  Log XRAY WebSocket  "
 echo -e "${separator}"

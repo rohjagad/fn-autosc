@@ -25,7 +25,6 @@
     clear
     echo ""
     echo ""
-    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -81,10 +80,8 @@
 clear
 echo ""
 echo ""
-echo ""
 systemctl daemon-reload
 clear
-echo ""
 echo ""
 echo ""
 # Deletions are destructive and were previously silent; keep an audit line so a
@@ -355,7 +352,6 @@ curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "te
 clear
 echo ""
 echo ""
-echo ""
 fi
 done
 if [[ $ssh_expired -eq 1 ]]; then
@@ -367,7 +363,6 @@ fi
 
 # L2TP
 clear
-echo ""
 echo ""
 echo ""
 l2tp_expired=0
@@ -451,7 +446,6 @@ fi
 clear
 echo ""
 echo ""
-echo ""
 # // Ini Adalah Auto Expired Untuk Noobzvpns
 
 # Membaca Akun Yang Aktif
@@ -506,7 +500,6 @@ Exp : $exp
         # Memeriksa apakah pengiriman berhasil
         if [[ $(echo "$response" | jq -r '.ok') == "true" ]]; then
             clear
-            echo ""
             echo ""
             echo ""
             echo "$TEKS"

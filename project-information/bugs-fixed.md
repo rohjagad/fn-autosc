@@ -2861,3 +2861,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 430 (Found 449):** `full/cek-login-ssh.sh` `show_logins` now sizes columns from the longest content and prints both gaps as exactly 4 spaces (`%-<wu>s    %-<wl>s    %s`). Rows collected first, then header + rows share the format.
 - **Verified live:** `cek-login-ssh` on 157.10.253.95 shows equal 4-space gaps; `bash -n` clean; zips repacked (0755, IN-SYNC).
+### Fix 431 - Domains-only cards everywhere (Found 450-451)
+
+- **Fix 431 (Found 450-451):** deleted the singular `Domain   :` TEKS line in all 50 card files (48 Xray + `addssh`/`trial-ssh`); every card now shows only `Domains  :`. TUI, Telegram and `.log` all follow (same `TEKS`); Telegram strips kept as no-op safety. Rotation re-verified: all links use `$rdomain`, none use `$domain`.
+- **Verified live:** created `trial261` on 157.10.253.95 — card shows `Domains` only, link uses rotated domain + color path (`...@autosc.rohcuan.dpdns.org:443?path=/lime...`); account deleted after, 0 residue (no log, 0 refs in `ws.json`); `bash -n` clean on all 50; zips repacked (0755, IN-SYNC).

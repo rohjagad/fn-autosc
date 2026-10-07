@@ -25,7 +25,6 @@
     clear
     echo ""
     echo ""
-    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -78,7 +77,6 @@
 
     output
 clear
-echo ""
 echo ""
 echo ""
 # Function Send Log
@@ -147,7 +145,6 @@ usernames=($(grep "^### " /etc/xray/json/grpc.json | awk '{print $2}' | sort | u
 clear
 echo ""
 echo ""
-echo ""
 echo -e "${separator}"
 echo -e "${GREEN}          Change UUID XRAY gRPC"
 echo -e "${separator}"
@@ -195,7 +192,6 @@ fi
 clear
 echo ""
 echo ""
-echo ""
 
 while true; do
     read -p "Please Input option (y/n): " pks || exit 1
@@ -240,7 +236,6 @@ fi
             send_log
 
             clear
-            echo ""
             echo ""
             echo ""
             # Confirmation message with updated information

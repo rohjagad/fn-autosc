@@ -25,7 +25,6 @@
     clear
     echo ""
     echo ""
-    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -84,7 +83,6 @@ NC='\033[0m'
 clear
 echo ""
 echo ""
-echo ""
 # Membaca File Log
 LOG=""
 if [ -e "/var/log/auth.log" ]; then
@@ -108,7 +106,6 @@ LIGHT='\033[0;37m'
 # ==========================================
 # Getting
 clear
-echo ""
 echo ""
 echo ""
 echo " "
@@ -205,11 +202,9 @@ curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "di
 clear
 echo ""
 echo ""
-echo ""
 }
 
 clear
-echo ""
 echo ""
 echo ""
 # Bug 64: field 3 of /etc/passwd is the UID, field 4 is the GID. The old
@@ -222,7 +217,6 @@ username=$(while IFS=: read -r username _ uid _ _ _ _; do
     fi
 done < /etc/passwd)
 clear
-echo ""
 echo ""
 echo ""
 # Membuat direktori jika belum ada
@@ -343,7 +337,6 @@ done
 
 if [[ $nais -gt 1 ]]; then
     clear
-    echo ""
     echo ""
     echo ""
 else

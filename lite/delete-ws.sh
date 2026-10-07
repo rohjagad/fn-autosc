@@ -25,7 +25,6 @@
     clear
     echo ""
     echo ""
-    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -78,7 +77,6 @@
 
     output
 clear
-echo ""
 echo ""
 echo ""
 send_log() {
@@ -149,7 +147,6 @@ red() { echo -e "\\033[31;1m${*}\\033[0m"; }
 clear
 echo ""
 echo ""
-echo ""
 NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/ws.json")
 	if [[ ${NUMBER_OF_CLIENTS} == '0' ]]; then
 		echo -e "${separator}"
@@ -164,7 +161,6 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/ws.json")
 	fi
 
 	clear
-	echo ""
 	echo ""
 	echo ""
 	echo -e "${separator}"
@@ -203,7 +199,6 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/ws.json")
         if xray run -test -config /etc/xray/json/ws.json >/dev/null 2>&1; then systemctl restart xray@ws > /dev/null 2>&1; fi
         send_log
         clear
-        echo ""
         echo ""
         echo ""
         echo -e "${separator}"

@@ -25,7 +25,6 @@
     clear
     echo ""
     echo ""
-    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -78,7 +77,6 @@
 
     output
 clear
-echo ""
 echo ""
 echo ""
 # Warna
@@ -157,7 +155,6 @@ function FN_Banner() {
   clear
   echo ""
   echo ""
-  echo ""
   echo -e "${separator}"
   echo -e "         Change Quota GRPC"
   echo -e "${separator}"
@@ -174,7 +171,6 @@ Loading_Animasi() {
     clear
     echo ""
     echo ""
-    echo ""
     index=$((i % num_frames))
     color_code=$((31 + i % 7))""
     echo -e "\e[1;${color_code}m ${frames[$index]}\e[0m"
@@ -187,11 +183,9 @@ function Loading_Succes() {
   clear
   echo ""
   echo ""
-  echo ""
   echo -e "\033[5;32mSucces\033[0m"
   sleep 1
   clear
-  echo ""
   echo ""
   echo ""
 }

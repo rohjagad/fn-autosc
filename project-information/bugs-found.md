@@ -2399,3 +2399,7 @@ Found 448. **SSH table refinements (operator direction)** —
 title card still reads `SSH LOGIN CHECK`; a second `SSH USER LOGIN` header repeats below it; table uses `|` separators; login shows `count/limit` with no spaces and mixed-case limits (`No Limit`); type prints lowercase (`dropbear/openssh`). Specced: title `SSH USER LOGIN`, no repeat header, no pipes, `count / limit` spaced with lowercase hyphen limits (`32 / no-limit`), capitalized type (`Dropbear/Openssh`).
 Found 449. **SSH table column gaps uneven (operator direction)** —
 `Username|Login` gap and `Login|Type` gap differ (fixed 20/14 field widths). Specced: gap 1 and gap 2 equal length.
+Found 450. **Account cards still show singular Domain despite no default (operator direction)** —
+all 48 Xray creation cards + 2 SSH cards printed both `Domain : <used>` and `Domains : <all>` in TUI and `.log` (Telegram already stripped). With round-robin rotation there is no default domain, so the used line must go everywhere, not just Telegram. Non-card `Domain` uses (`backup.sh`, `xl2tp.sh`) are single-domain and out of scope.
+Found 451. **Rotation in xray link insertion must hold (operator reminder)** —
+verified all 48 Xray creation scripts build links from `$rdomain` (`.domainseq` round-robin), zero links use bare `$domain`; trial scripts rotate the same way as add scripts.

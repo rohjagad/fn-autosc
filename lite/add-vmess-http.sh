@@ -25,7 +25,6 @@
     clear
     echo ""
     echo ""
-    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -80,7 +79,6 @@
 clear
 echo ""
 echo ""
-echo ""
 domain=$(cat /etc/xray/domain)
 # Alternate domain, rotated for balance (no default; list order only)
 rdomains=("$domain")
@@ -107,7 +105,6 @@ URL="https://api.telegram.org/bot$KEY/sendMessage"
 clear
 echo ""
 echo ""
-echo ""
 until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/create/xray/http/${user}.log ]]; do
     echo -e "
 [38;2;255;0;0m-[38;2;255;45;0m-[38;2;255;90;0m-[38;2;255;135;0m-[38;2;255;180;0m-[38;2;255;225;0m-[38;2;240;255;0m-[38;2;195;255;0m-[38;2;150;255;0m-[38;2;105;255;0m-[38;2;60;255;0m-[38;2;15;255;0m-[38;2;0;255;30m-[38;2;0;255;75m-[38;2;0;255;120m-[38;2;0;255;165m-[38;2;0;255;210m-[38;2;0;255;255m-[38;2;0;210;255m-[38;2;0;165;255m-[38;2;0;120;255m-[38;2;0;75;255m-[38;2;0;30;255m-[38;2;15;0;255m-[38;2;60;0;255m-[38;2;105;0;255m-[38;2;150;0;255m-[38;2;195;0;255m-[38;2;240;0;255m-[38;2;255;0;225m-[38;2;255;0;180m-[38;2;255;0;135m-[38;2;255;0;90m-[38;2;255;0;45m-[38;2;255;0;0m-\033[0m
@@ -119,7 +116,6 @@ until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/creat
         clear
         echo ""
         echo ""
-        echo ""
         echo -e "\033[0;31mUsername cannot be empty.\033[0m"
         continue
     fi
@@ -128,14 +124,12 @@ until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/creat
         clear
         echo ""
         echo ""
-        echo ""
         echo -e "\033[0;31mUsername cannot contain uppercase letters or spaces.\033[0m"
         continue
     fi
 
     if [[ $user =~ [^a-z0-9_] ]]; then
         clear
-        echo ""
         echo ""
         echo ""
         echo -e "Username can only contain lowercase letters, numbers, and underscores."
@@ -148,7 +142,6 @@ until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/creat
         clear
         echo ""
         echo ""
-        echo ""
         echo -e "\033[0;31mUsername already exists.\033[0m"
         continue
     fi
@@ -157,14 +150,12 @@ until [[ $user =~ ^[a-z0-9_]+$ && ${client_exists} == '0' && ! -f /var/log/creat
         clear
         echo ""
         echo ""
-        echo ""
         echo -e "\033[0;31mUsername already exists in log file.\033[0m"
         continue
     fi
 
     if [[ -f /var/log/create/xray/http/${user}.locked ]]; then
         clear
-        echo ""
         echo ""
         echo ""
         echo -e "\033[0;31mUsername already exists in locked file.\033[0m"
@@ -272,14 +263,12 @@ vmesslink2="vmess://$(echo $ask | base64 -w 0)"
 clear
 echo ""
 echo ""
-echo ""
 TEKS="
 -----------------------
 🟢 ACCOUNT DETAIL 🟢
 -----------------------
 
 Remarks  : $user
-Domain   : ${rdomain}
 Domains  : $alldom
 ISP      : $isp
 Region   : $region
@@ -319,7 +308,6 @@ if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
 fi
 echo -e "$TEKS" > /var/log/create/xray/http/${user}.log
 clear
-echo ""
 echo ""
 echo ""
 source /etc/funny/format.sh

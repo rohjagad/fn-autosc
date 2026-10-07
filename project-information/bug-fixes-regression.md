@@ -2510,3 +2510,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | Display only. |
 | **Over-engineering** | Width scan + one format; no new deps. |
 | **vs the source** | Specced equal gaps. |
+
+## 216. Domains-Only Cards — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | One display line removed per card; links, rotation, quotas, Telegram pipeline untouched. |
+| **Over-strictness** | Only dual-line cards touched; single-domain backup/xl2tp kept. |
+| **Over-engineering** | Line deletions only. |
+| **vs the source** | No-default rotation rule (Telegram already Domains-only since Fix 415). |

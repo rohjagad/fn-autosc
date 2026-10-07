@@ -27,7 +27,6 @@
     clear
     echo ""
     echo ""
-    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -81,7 +80,6 @@
 clear
 echo ""
 echo ""
-echo ""
 red='\033[0;31m'
 green='\033[0;32m'
 blue='\033[1;34m'
@@ -120,15 +118,12 @@ acme() {
 clear
 echo ""
 echo ""
-echo ""
 echo start
 clear
 echo ""
 echo ""
-echo ""
 domain="${CHOSEN:-$(cat /etc/xray/domain)}"
 clear
-echo ""
 echo ""
 echo ""
 echo "
@@ -214,13 +209,11 @@ fn() {
 clear
 echo ""
 echo ""
-echo ""
 echo start
 domain="${CHOSEN:-$(cat /etc/xray/domain)}"
 systemctl stop nginx
 cd /root/
 clear
-echo ""
 echo ""
 echo ""
 echo "Starting... Port 80 will be stopped during SSL certificate installation"
@@ -246,7 +239,6 @@ echo ""
 dmsl() {
 systemctl stop nginx
 clear
-echo ""
 echo ""
 echo ""
 #detail nama perusahaan
@@ -339,7 +331,6 @@ domain_extra_add() {
     clear
     echo ""
     echo ""
-    echo ""
     local primary cur
     primary=$(cat /etc/xray/domain 2>/dev/null)
     cur=$(tr '\n' ' ' < /etc/xray/domains 2>/dev/null)
@@ -374,7 +365,6 @@ domain_extra_add() {
 
 domain_extra_del() {
     clear
-    echo ""
     echo ""
     echo ""
     if [ ! -s /etc/xray/domains ]; then
@@ -420,7 +410,6 @@ pick_domain() {
     fi
     [ -z "${_all[0]}" ] && { echo "No domain configured."; return 1; }
     clear
-    echo ""
     echo ""
     echo ""
     echo -e "${separator}"
@@ -538,7 +527,6 @@ domain_extra_list() {
     clear
     echo ""
     echo ""
-    echo ""
     echo -e "${separator}"
     echo -e "Domain List (all domains serve all accounts)"
     echo -e "${separator}"
@@ -577,7 +565,6 @@ domain_extra_list() {
 
 dm1() {
 clear
-echo ""
 echo ""
 echo ""
 echo -e "${NC}${separator}

@@ -26,7 +26,6 @@
     clear
     echo ""
     echo ""
-    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -174,7 +173,6 @@ END
 clear
 echo ""
 echo ""
-echo ""
 cat>  /etc/default/dropbear << END
 # disabled because OpenSSH is installed
 # change to NO_START=0 to enable Dropbear
@@ -209,11 +207,9 @@ grep -qs "^/usr/sbin/nologin$" /etc/shells || echo "/usr/sbin/nologin" >> /etc/s
 clear
 echo ""
 echo ""
-echo ""
 systemctl daemon-reload
 /etc/init.d/dropbear restart
 clear
-echo ""
 echo ""
 echo ""
 # Installasi WebSocket

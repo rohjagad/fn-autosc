@@ -26,7 +26,6 @@
     clear
     echo ""
     echo ""
-    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -78,7 +77,6 @@
     }
 
 clear
-echo ""
 echo ""
 echo ""
 # information
@@ -164,7 +162,6 @@ function create() {
 	clear
 	echo ""
 	echo ""
-	echo ""
 	echo -e "Create WireGuard Account"
 	echo -e "${separator}"
 	echo -e " Username: \c"
@@ -237,7 +234,6 @@ AllowedIPs = ${client_ipv4}/32" >> /etc/wireguard/wg0.conf
 	clear
 	echo ""
 	echo ""
-	echo ""
 	echo -e "WireGuard User Information"
 	echo -e "${separator}"
 	echo -e " Domain\t: $domain"
@@ -259,7 +255,6 @@ function warp() {
 source /etc/wireguard/params
 #ip=$(curl -sS curl -sS ipv4.icanhazip.com)
 clear
-echo ""
 echo ""
 echo ""
 echo -n "Enter your generated PRIVATE KEY (leave blank to auto-generate): "
@@ -293,11 +288,9 @@ wg-quick up wg0 > out.log 2> /dev/null
 clear
 echo ""
 echo ""
-echo ""
 warpd=$(cat warp.json | jq .)
 
 clear
-echo ""
 echo ""
 echo ""
 echo 'Wireguard has successfully installed in your VPS
@@ -330,7 +323,6 @@ function delete() {
 	clear
 	echo ""
 	echo ""
-	echo ""
 	echo -e "Delete WireGuard User"
 	echo -e "${separator}"
 	echo -e " Username: \c"
@@ -358,7 +350,6 @@ function delete() {
 
 function extend() {
 	clear
-	echo ""
 	echo ""
 	echo ""
 	echo -e "Extend WireGuard User"
@@ -402,7 +393,6 @@ function extend() {
 	clear
 	echo ""
 	echo ""
-	echo ""
 	echo -e "WireGuard User Information"
 	echo -e "${separator}"
 	echo -e " Username\t: $user"
@@ -413,7 +403,6 @@ function extend() {
 
 function list() {
 	clear
-	echo ""
 	echo ""
 	echo ""
 	echo -e "${separator}"
@@ -436,7 +425,6 @@ function list() {
 
 function show() {
 	clear
-	echo ""
 	echo ""
 	echo ""
 	echo -e "WireGuard Configuration"
@@ -467,7 +455,6 @@ function show() {
 
 function main() {
 clear
-echo ""
 echo ""
 echo ""
 echo -e "${NC}${separator}
@@ -507,12 +494,10 @@ case $menu in
 	clear
 	echo ""
 	echo ""
-	echo ""
 	menu
 	;;
 *) 
 	clear 
-	echo ""
 	echo ""
 	echo ""
 	error "Invalid option"

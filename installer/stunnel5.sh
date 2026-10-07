@@ -30,7 +30,6 @@ HAH
 clear
 echo ""
 echo ""
-echo ""
 systemctl enable haproxy
 systemctl restart haproxy
 

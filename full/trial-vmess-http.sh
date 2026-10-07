@@ -25,7 +25,6 @@
     clear
     echo ""
     echo ""
-    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -80,7 +79,6 @@
 clear
 echo ""
 echo ""
-echo ""
 domain=$(cat /etc/xray/domain)
 # Alternate domain, rotated for balance (no default; list order only)
 rdomains=("$domain")
@@ -105,7 +103,6 @@ region=$(cat /root/.region 2>/dev/null)
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 clear
-echo ""
 echo ""
 echo ""
 user=trial`</dev/urandom tr -dc 0-9 | head -c3`
@@ -188,14 +185,12 @@ vmesslink2="vmess://$(echo $ask | base64 -w 0)"
 clear
 echo ""
 echo ""
-echo ""
 TEKS="
 -----------------------
 🟢 ACCOUNT DETAIL 🟢
 -----------------------
 
 Remarks  : $user
-Domain   : ${rdomain}
 Domains  : $alldom
 ISP      : $isp
 Region   : $region
@@ -236,7 +231,6 @@ fi
 echo -e "$TEKS" > /var/log/create/xray/http/${user}.log
 echo 'sed -i "/^### '"$user"' '"$exp"'/ {N;d}" /etc/xray/json/upgrade.json && sed -i -z '"'"'s/},\n *\]/}\n        ]/g'"'"' /etc/xray/json/upgrade.json && systemctl restart xray@upgrade && systemctl restart quota-http && rm -fr /var/log/create/xray/http/'"$user"'.log && rm -fr /etc/xray/limit/ip/xray/http/'"$user"' && rm -fr /etc/xray/quota/http/'"$user"' /etc/xray/quota/http/'"$user"'_usage' | at now + 60 minutes >/dev/null 2>&1
 clear
-echo ""
 echo ""
 echo ""
 source /etc/funny/format.sh

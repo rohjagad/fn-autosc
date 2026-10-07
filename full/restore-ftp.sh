@@ -56,7 +56,6 @@ blue_sep="${blue}-----------------------------------${NC}"
     clear
     echo ""
     echo ""
-    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -111,7 +110,6 @@ blue_sep="${blue}-----------------------------------${NC}"
 clear
 echo ""
 echo ""
-echo ""
 # Detail Informasi
 ip4=$(curl -sS -m 10 ipv4.icanhazip.com)
 ip6=$(curl -sS -m 10 ipv6.icanhazip.com)
@@ -132,7 +130,6 @@ if [ -f "$file" ]; then
 echo "$file found, continuing..."
 sleep 2
 clear
-echo ""
 echo ""
 echo ""
 unzip -o backup.zip
@@ -160,12 +157,10 @@ cp -r html/* /var/www/html/ 2>/dev/null || true
 clear
 echo ""
 echo ""
-echo ""
 cd
 rm -rf /root/backup
 rm -f backup.zip
 clear
-echo ""
 echo ""
 echo ""
 systemctl daemon-reload
@@ -197,7 +192,6 @@ systemctl restart noobzvpns 2>/dev/null || true
 systemctl restart xl2tpd 2>/dev/null || true
 systemctl restart ipsec 2>/dev/null || true
 clear
-echo ""
 echo ""
 echo ""
 echo -e "${separator}"

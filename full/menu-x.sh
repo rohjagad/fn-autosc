@@ -26,7 +26,6 @@
     clear
     echo ""
     echo ""
-    echo ""
         # Fetch both auth sources at once; first complete valid reply wins (OR logic).
     PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
     (curl -s --max-time 12 "$PERMISSION_PRIMARY" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
@@ -133,7 +132,6 @@ xhttp=$(cat /etc/xray/json/xhttp.json 2>/dev/null | grep "###" | sort | uniq | w
 xver=$(xray version 2>/dev/null | awk '{print $2}' | head -n 1)
 
 clear
-echo ""
 echo ""
 echo ""
 echo -e "${NC}${separator}
