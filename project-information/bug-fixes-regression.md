@@ -2361,3 +2361,6 @@ Section 35's four-check rule applied to Fix 415:
 | **Over-strictness** | Nothing rejected; display-scoped change. |
 | **Over-engineering** | One sed expression prepended per file. |
 | **vs the source** | No ruling; no-default presentation per operator direction. |
+## 199 follow-up. SSH Domains-Only — Four Checks (October 7, 2026)
+
+Same four checks as Section 199, applied to the two SSH caller pipelines: Telegram transform only; no TUI/log/validation change; one sed expression each; operator direction.

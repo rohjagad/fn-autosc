@@ -2793,3 +2793,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 415 (Found 434):** all 48 Xray creation cards (both editions) strip the `Domain   :` line in the Telegram `sed` pipeline (`/^Domain   : /d` first expression); TUI and `.log` keep both lines. SSH cards (no rotation) untouched.
 - **Verified live:** created `testcard_tg1` on fresh install — TUI/`.log` show both lines, simulated Telegram payload shows only `<code>Domains  : ...</code>`; account deleted after, box clean; `bash -n` clean; zips repacked (0755, parity rechecked); single-tarball deploy with hash verify.
+### Fix 415 follow-up - SSH cards Domains-only (Found 434)
+
+- **Fix 415 follow-up (Found 434):** `full/addssh.sh:240` + `full/trial-ssh.sh:184` caller pipelines strip `Domain     :` for Telegram; TUI/`.log` keep both lines. Single-domain non-rotation cards (WG/Noobz/L2TP) untouched — no list to fall back on.
+- **Verified live:** deployed hash-verified; `.log` shows both lines, Telegram sim shows `Domains` only; `bash -n` clean; full.zip repacked (0755).

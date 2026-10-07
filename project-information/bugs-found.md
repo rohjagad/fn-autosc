@@ -2367,3 +2367,5 @@ Found 433. **SSH Go tools swallow cleanup errors (Fase 24)** —
 `full/delete-ssh.go:154-157` ignores `Run()` errors on both `rm` cleanups and both `systemctl restart`s (reports success even when files survive or daemons fail); `full/extend-ssh.go` ignores `passwd -u` failure (expiry moves but account stays shadow-locked, menu still prints success).
 Found 434. **Telegram cards show used-Domain line despite no-default rotation (operator direction)** —
 creation cards list both `Domain : <used>` and `Domains : <all>`; with no-default round-robin rotation the used line implies a default that does not exist. Rotation itself is link-text insertion only (no connection change), so the list alone suffices.
+Found 434 follow-up. **SSH cards same used-Domain line** —
+`addssh.sh`/`trial-ssh.sh` carry the same `Domain : <used>` + `Domains : <all>` pair; same no-default rule applies.
