@@ -2319,3 +2319,7 @@ Found 409. **Change tools flash past results** —
 after a limit/quota change completes, both tools exit straight back into the calling menu, so the Before/After result screens are visible only for a split second (the quota credit block's `sleep 1` was the only accidental pause, and Fix 393 removed it).
 Found 410. **Empty no-accounts path has no pause either** —
 with zero accounts on the box, options 15/16 print `No active accounts found.` and return instantly to the calling menu, so from the operator side the tools flash and look unopenable. Fix 394 covered success/not-found exits but missed this path.
+Found 411. **TUI titles left-aligned, Telegram already left** —
+card titles render at column 0 in the terminal too, while operators read centered titles in every other menu. Payload must stay left for Telegram, so centering belongs in the TUI renderer, not the shared text.
+Found 412. **Rainbow lines in three lengths** —
+TUI prompt headers run 28 segments and Go tools 42/47/50 dashes, while the main menu standard is 35. Operator direction: 35 everywhere.

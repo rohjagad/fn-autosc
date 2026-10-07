@@ -10,8 +10,8 @@ import (
 	"time"
 )
 
-var sepOuter = rainbowSepGo("-----------------------------------------------")
-var sepBlue = colorBlueGo + "-----------------------------------------------" + colorResetGo
+var sepOuter = rainbowSepGo("-----------------------------------")
+var sepBlue = colorBlueGo + "-----------------------------------" + colorResetGo
 
 func main() {
 	clearScreen()

@@ -2713,3 +2713,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 395 (Found 410):** `Press any key to return...` added to the Go limit and shell quota no-accounts branches (16 files, both editions). Binaries rebuilt, shipped in zips, deployed in one combined bundle with hash verify.
 - **Verified:** empty-box option 15/16 now hold on `No active accounts found.` + pause instead of flashing; `bash -n` clean; zips repacked (0755, parity rechecked); box left with 0 test residue.
+### Fix 396 - Centered TUI titles, 35-dash rainbows (Found 411, Found 412)
+
+- **Fix 396 (Found 411, Found 412):** `format_display` centers title lines (main, section, link headers, wide-emoji compensated) using terminal width — Telegram payloads untouched and verified still left. All inline prompt rainbows regenerated to 35 segments in the main-menu gradient (26 files); Go rainbow/blue runs cut to 35 (change-limit ×8, limit-ip, delete/list/pwd-ssh); 7 binaries rebuilt. Deployed scripts + binaries (one bundle, hash-verified) and the renderer copy.
+- **Verified:** live card shows centered titles in TUI with left payload on disk; `bash -n` clean; zips repacked (0755, parity rechecked); box left with 0 test residue.

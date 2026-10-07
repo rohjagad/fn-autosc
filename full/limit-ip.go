@@ -59,11 +59,11 @@ func clearScreen() {
 }
 
 func barisPanjang() {
-	fmt.Println(rainbowSepGo("--------------------------------------------------"))
+	fmt.Println(rainbowSepGo("-----------------------------------"))
 }
 
 func barisBiru() {
-	fmt.Println(colorBlueGo + "--------------------------------------------------" + colorResetGo)
+	fmt.Println(colorBlueGo + "-----------------------------------" + colorResetGo)
 }
 
 func rerechanBanner() {

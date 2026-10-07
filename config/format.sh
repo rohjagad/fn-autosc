@@ -9,6 +9,8 @@ format_display() {
     local blue=$'\033[1;34m'
     local purple=$'\033[1;35m'
     local dpurple=$'\033[38;5;141m'
+    local cols=$(tput cols 2>/dev/null || echo 80)
+    [[ "$cols" =~ ^[0-9]+$ ]] || cols=80
     local -a sep_lines=() all_lines=()
     local idx=0
     while IFS= read -r line; do
@@ -55,7 +57,17 @@ format_display() {
                 nt="${nt#"${nt%%[![:space:]]*}"}"
                 [[ "$nt" =~ ^[=]{3,}$ ]] && ns=1
             fi
-            if ((ps && ns)) && [[ ! "$trimmed" =~ ^Link\  ]]; then
+            # TUI-only: center title lines (payload stays left for Telegram).
+            # Main titles, section titles, and link headers.
+            if [[ "$trimmed" =~ ^🟢.*🟢$ ]] || [[ "$trimmed" == "Limit Detail" ]] || \
+               [[ "$trimmed" == "Detail Port" ]] || [[ "$trimmed" =~ ^🔵.*$ ]]; then
+                local tlen=${#trimmed}
+                local wide=$(grep -o "[🟢🔵]" <<< "$trimmed" | wc -l)
+                (( tlen += wide ))
+                local pad=$(( (cols - tlen) / 2 ))
+                (( pad < 0 )) && pad=0
+                printf "%*s%s\n" "$pad" "" "$trimmed"
+            elif ((ps && ns)) && [[ ! "$trimmed" =~ ^Link\  ]]; then
                 echo -e "${purple}${trimmed}${reset}"
             elif [[ "$trimmed" =~ ^Link\  ]] && [[ "$line" == *:* ]]; then
                 local key="${line%%:*}" val="${line#*:}"

@@ -2171,3 +2171,13 @@ Section 35's four-check rule applied to Fix 395:
 | **Over-strictness** | Nothing rejected; text-scoped change. |
 | **Over-engineering** | One prompt line per branch. |
 | **vs the source** | References have no empty-path pauses; pausing follows this repo's own `Press any key` convention per operator report. |
+## 180. TUI Titles + Rainbows — Four Checks (October 7, 2026)
+
+Section 35's four-check rule applied to Fix 396:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Renderer-only padding (payload bytes unchanged); dash runs are decorative. Parsers unaffected. |
+| **Over-strictness** | Nothing rejected; text-scoped change. |
+| **Over-engineering** | One centering branch plus literal dash swaps. |
+| **vs the source** | References predate styled renderers; centered TUI titles and the 35 standard are this repo's own direction per operator request. |
