@@ -203,6 +203,8 @@ function Daftar_Account() {
     if [ ${#users[@]} -eq 0 ]; then
         echo "No active accounts found."
         echo -e "${separator}"
+        read -n 1 -s -r -p "Press any key to return..." || true
+        echo ""
         return 1
     fi
     local i=1 u q

@@ -192,6 +192,8 @@ func main() {
 	if len(usernames) == 0 {
 		fmt.Println("No active accounts found.")
 		barisPanjang()
+		fmt.Print("Press any key to return... ")
+		fmt.Scanln()
 		return
 	}
 	for i, username := range usernames {

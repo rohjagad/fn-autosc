@@ -2161,3 +2161,13 @@ Section 35's four-check rule applied to Fix 394:
 | **Over-strictness** | Nothing rejected; text-scoped change. |
 | **Over-engineering** | One prompt line per exit path. |
 | **vs the source** | References have no return pauses; pausing follows this repo's own `Press any key` convention per operator report. |
+## 179. Empty-Path Pause — Four Checks (October 7, 2026)
+
+Section 35's four-check rule applied to Fix 395:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Pause-only additions before existing returns; piped-stdin callers see EOF and continue as before. |
+| **Over-strictness** | Nothing rejected; text-scoped change. |
+| **Over-engineering** | One prompt line per branch. |
+| **vs the source** | References have no empty-path pauses; pausing follows this repo's own `Press any key` convention per operator report. |

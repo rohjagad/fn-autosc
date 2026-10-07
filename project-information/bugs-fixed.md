@@ -2709,3 +2709,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 394 (Found 409):** `Press any key to return...` pause added to the Go limit success + not-found paths and both shell quota exits (after telegram send on the success path). Binaries rebuilt, shipped in zips, deployed in one combined bundle with hash verify.
 - **Verified:** live limit/quota runs wait on the result screen; `bash -n` clean; zips repacked (0755, parity rechecked); box left with 0 test residue.
+### Fix 395 - Pause on empty no-accounts path (Found 410)
+
+- **Fix 395 (Found 410):** `Press any key to return...` added to the Go limit and shell quota no-accounts branches (16 files, both editions). Binaries rebuilt, shipped in zips, deployed in one combined bundle with hash verify.
+- **Verified:** empty-box option 15/16 now hold on `No active accounts found.` + pause instead of flashing; `bash -n` clean; zips repacked (0755, parity rechecked); box left with 0 test residue.

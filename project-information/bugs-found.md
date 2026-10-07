@@ -2317,3 +2317,5 @@ Found 408. **Change-limit / change-quota TUIs unstyled** —
 the Go limit banners read `Menu Change Limit IP X-Ray WebSocket` (and HTTP Upgrade/gRPC variants), print `Powered by FN AutoSC` credits, mix Indonesian errors, and misalign Before (`Username   :`/`Ip Limit`) against After (`Username :`/`New IP`); the shell quota banners carry the same long titles plus a `Terimakasih … FN AutoSC` credit block.
 Found 409. **Change tools flash past results** —
 after a limit/quota change completes, both tools exit straight back into the calling menu, so the Before/After result screens are visible only for a split second (the quota credit block's `sleep 1` was the only accidental pause, and Fix 393 removed it).
+Found 410. **Empty no-accounts path has no pause either** —
+with zero accounts on the box, options 15/16 print `No active accounts found.` and return instantly to the calling menu, so from the operator side the tools flash and look unopenable. Fix 394 covered success/not-found exits but missed this path.
