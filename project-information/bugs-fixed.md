@@ -2689,3 +2689,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 389 (Found 399, Found 400):** delete titles swapped to `X-RAY … ACCOUNT DELETED` (8 files), matching the existing `Account Expired` / `Account Deleted` precedent. Every user-visible date now renders `07-Oct-2026`: Xray exp/exp4 generations, notice `Date` stamps (time kept), WG/Noobz/L2TP displays, SSH chage reformat (with fallback), Go `extend-ssh`/`limit-ip` displays (both binaries rebuilt, redeployed, hash-verified). Deliberately untouched internals: `useradd`/`usermod -e` (`YYYY-MM-DD`), chage parsing, epoch math, `.quota.logs`, dead `biji`/`hariini` lines. Auth repo converted (header + all 5 entries) — the gate parses via `date -d`, verified for the new shape.
 - **Verified:** live VMess card `Expired : 06-Nov-2026`, live SSH card `Expired : 06-Nov-2026`, live delete fires `X-RAY WS ACCOUNT DELETED`; `bash -n` + `gofmt` clean; zips repacked (0755, parity rechecked); deployed scripts/binaries verified; box left with 0 test residue.
+### Fix 390 - Bare delete title + Type row (Found 401)
+
+- **Fix 390 (Found 401):** all 8 delete notices retitled to bare `<b>ACCOUNT DELETED</b>`; body now `Date/Username/Type/Expired` (`Type: WS/HU/XHTTP/GRPC` per transport, colon-aligned col 10) in both the Telegram card and the TUI echo.
+- **Verified:** live delete shows `Client Name/Type: WS/Expired On: 06-Nov-2026` in TUI and fires the titled card; `bash -n` clean; zips repacked (0755, parity rechecked); deployed scripts verified; box left with 0 test residue.

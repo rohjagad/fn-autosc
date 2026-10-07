@@ -91,10 +91,11 @@ DATE=$(date +"%d-%b-%Y %H:%M:%S")
 
         TEXT="
 <b>-----------------------</b>
-<b>X-RAY XHTTP ACCOUNT DELETED</b>
+<b>ACCOUNT DELETED</b>
 <b>-----------------------</b>
 <code>Date     : $DATE</code>
 <code>Username : $user</code>
+<code>Type     : XHTTP</code>
 <code>Expired  : $exp</code>
 <b>-----------------------</b>
 <i>Note:</i> Account deleted successfully. Modification has been reflected in the database."
@@ -196,6 +197,7 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/xhttp.json")
         echo " Vmess Account Deleted Successfully"
         echo -e "${separator}"
         echo " Client Name : $user"
+        echo " Type        : XHTTP"
         echo " Expired On  : $exp"
         echo -e "${separator}"
         echo ""

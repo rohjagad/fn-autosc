@@ -2111,3 +2111,13 @@ Section 35's four-check rule applied to Fix 389:
 | **Over-strictness** | Nothing rejected; text-scoped change. |
 | **Over-engineering** | Format-string swaps plus one SSH display reformat with fallback. |
 | **vs the source** | References predate any date rule; `DD-Mon-YYYY` and noun-first titles are this repo's own direction per operator request. |
+## 174. Delete Title + Type — Four Checks (October 7, 2026)
+
+Section 35's four-check rule applied to Fix 390:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Header/body text only; no parser reads delete titles or the new `Type` row (parsers match `Username/Expired/Protokol/Limit IP`). |
+| **Over-strictness** | Nothing rejected; text-scoped change. |
+| **Over-engineering** | Literal title swap plus one inserted row per transport. |
+| **vs the source** | References predate typed delete bodies; bare-title-plus-Type is this repo's own direction per operator request. |
