@@ -291,6 +291,8 @@ function change_quota() {
             echo ""
  #           baris_panjang
 	    send_log
+            read -n 1 -s -r -p "Press any key to return..." || true
+            echo ""
             exit 0
     else
         FN_Banner
@@ -298,6 +300,8 @@ function change_quota() {
         echo -e "${Red} Error: Invalid username or quota file does not exist. ${Xark}"
         echo ""
 #        baris_panjang
+        read -n 1 -s -r -p "Press any key to return..." || true
+        echo ""
         exit 0
     fi
 }

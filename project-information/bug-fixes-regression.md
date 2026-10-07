@@ -2151,3 +2151,13 @@ Section 35's four-check rule applied to Fix 393:
 | **Over-strictness** | Nothing rejected; text-scoped change. |
 | **Over-engineering** | Literal title/error/label swaps. |
 | **vs the source** | References predate styled change tools; short banners match this repo's short-code titles per operator request. |
+## 178. Change Return Pauses — Four Checks (October 7, 2026)
+
+Section 35's four-check rule applied to Fix 394:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Pause-only additions before existing returns/exits; piped-stdin callers see EOF and continue as before. |
+| **Over-strictness** | Nothing rejected; text-scoped change. |
+| **Over-engineering** | One prompt line per exit path. |
+| **vs the source** | References have no return pauses; pausing follows this repo's own `Press any key` convention per operator report. |

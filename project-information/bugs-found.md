@@ -2315,3 +2315,5 @@ Found 407. **Whole-card sections hold different fields per builder** —
 vless ws/http/xhttp lump ports+path+network under one header, all three grpc cards lump ports+service+network, while vmess/trojan split ports from details; `Service Name` vs `Service` and `Port gRPC` vs `Port` labels disagree; separator runs use four different dash lengths. Operator direction: one canonical skeleton, same rows in the same order everywhere.
 Found 408. **Change-limit / change-quota TUIs unstyled** —
 the Go limit banners read `Menu Change Limit IP X-Ray WebSocket` (and HTTP Upgrade/gRPC variants), print `Powered by FN AutoSC` credits, mix Indonesian errors, and misalign Before (`Username   :`/`Ip Limit`) against After (`Username :`/`New IP`); the shell quota banners carry the same long titles plus a `Terimakasih … FN AutoSC` credit block.
+Found 409. **Change tools flash past results** —
+after a limit/quota change completes, both tools exit straight back into the calling menu, so the Before/After result screens are visible only for a split second (the quota credit block's `sleep 1` was the only accidental pause, and Fix 393 removed it).

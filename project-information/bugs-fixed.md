@@ -2705,3 +2705,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 393 (Found 408):** short centered banners (`Change Limit IP WS/HU/XHTTP/GRPC`, `Change Quota WS/HU/XHTTP/GRPC`, 16 files both editions); credit functions/blocks removed (flows exit cleanly); Go errors in English; Before/After share `Username/Exp Date/IP Limit` at one column. Binaries rebuilt, shipped inside the zips, deployed via single-bundle upload with hash verify.
 - **Verified:** live limit change shows the short banner + aligned Before; live quota change shows the short banner with no credit text; `bash -n` clean (Go `gofmt` drift is pre-existing, untouched); zips repacked (0755, parity rechecked); box left with 0 test residue.
+### Fix 394 - Return pauses on change tools (Found 409)
+
+- **Fix 394 (Found 409):** `Press any key to return...` pause added to the Go limit success + not-found paths and both shell quota exits (after telegram send on the success path). Binaries rebuilt, shipped in zips, deployed in one combined bundle with hash verify.
+- **Verified:** live limit/quota runs wait on the result screen; `bash -n` clean; zips repacked (0755, parity rechecked); box left with 0 test residue.

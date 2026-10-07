@@ -218,6 +218,8 @@ func main() {
 	logFile := "/var/log/create/xray/http/" + user + ".log"
 	if _, err := os.Stat(logFile); os.IsNotExist(err) {
 		fmt.Println("Error: log file " + user + ".log not found.")
+		fmt.Print("Press any key to return... ")
+		fmt.Scanln()
 		return
 	}
 
@@ -255,5 +257,7 @@ func main() {
 		fmt.Printf(" Exp Date : %s\n", getAccountExpiry(logFile))
 		fmt.Printf(" IP Limit : %s\n", newIPLimit)
 		barisPanjang()
+		fmt.Print("Press any key to return... ")
+		fmt.Scanln()
 	}
 }
