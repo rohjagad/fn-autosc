@@ -9,12 +9,16 @@ format_display() {
     local blue=$'\033[1;34m'
     local purple=$'\033[1;35m'
     local dpurple=$'\033[38;5;141m'
-    # Card width: titles center relative to the 35-dash rainbow standard.
+    # Card width: titles center relative to the card's own dash runs
+    # (payload stays left for Telegram).
     local -a sep_lines=() all_lines=()
-    local idx=0
+    local idx=0 maxdash=0
     while IFS= read -r line; do
         local t="${line#"${line%%[![:space:]]*}"}"
         [[ "$t" =~ ^[=]{3,}$ ]] && sep_lines+=($idx)
+        if [[ "$t" =~ ^[-]{10,}$ ]]; then
+            (( ${#t} > maxdash )) && maxdash=${#t}
+        fi
         all_lines+=("$line")
         ((idx++))
     done <<< "$text"
@@ -63,7 +67,7 @@ format_display() {
                 local tlen=${#trimmed}
                 local wide=$(grep -o "[🟢🔵]" <<< "$trimmed" | wc -l)
                 (( tlen += wide ))
-                local pad=$(( (35 - tlen) / 2 ))
+                local pad=$(( (maxdash - tlen) / 2 ))
                 (( pad < 0 )) && pad=0
                 printf "%*s%s\n" "$pad" "" "$trimmed"
             elif ((ps && ns)) && [[ ! "$trimmed" =~ ^Link\  ]]; then

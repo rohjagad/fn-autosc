@@ -2733,3 +2733,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 400 (Found 416):** prompt now `New UUID (Enter for random): ` in all 8 change-id scripts.
 - **Verified:** `bash -n` clean; zips repacked (0755, parity rechecked); deployed scripts grep-verified.
+### Fix 401 - Card-width title centering (Found 417)
+
+- **Fix 401 (Found 417):** renderer measures the longest dash run in the card and centers titles on it (wide-emoji compensated), instead of a fixed 35. Payloads untouched.
+- **Verified:** live render holds titles inside the 23-dash body; renderer hash-verified on box.

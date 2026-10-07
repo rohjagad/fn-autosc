@@ -2221,3 +2221,13 @@ Section 35's four-check rule applied to Fix 400:
 | **Over-strictness** | Nothing rejected; text-scoped change. |
 | **Over-engineering** | One prompt string. |
 | **vs the source** | No ruling; hint restores info the old long prompt carried, per operator request. |
+## 185. Card-Width Centering — Four Checks (October 7, 2026)
+
+Section 35's four-check rule applied to Fix 401:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Renderer padding only; payload bytes untouched. |
+| **Over-strictness** | Nothing rejected; text-scoped change. |
+| **Over-engineering** | One width measurement replacing a constant. |
+| **vs the source** | No ruling; card-relative centering per operator follow-up. |
