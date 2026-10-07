@@ -149,7 +149,7 @@ if [ -n "$locked_files" ]; then
     echo ""
     echo ""
     echo -e "${NC}${separator}
-       UNLOCK X-RAY gRPC ACCOUNT
+       UNLOCK XRAY gRPC ACCOUNT
 ${separator}"
 
     count=0

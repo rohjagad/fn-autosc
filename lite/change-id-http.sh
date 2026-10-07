@@ -147,7 +147,7 @@ echo ""
 echo ""
 echo ""
 echo -e "${separator}"
-echo -e "${GREEN}       Change UUID X-ray HTTP UPGRADE"
+echo -e "${GREEN}       Change UUID XRAY HTTP UPGRADE"
 echo -e "${separator}"
 echo -e "${blue_sep}"
 

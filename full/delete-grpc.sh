@@ -152,7 +152,7 @@ echo ""
 NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/grpc.json")
 	if [[ ${NUMBER_OF_CLIENTS} == '0' ]]; then
 		echo -e "${separator}"
-        echo -e "       Delete X-Ray gRPC Account       "
+        echo -e "       Delete XRAY gRPC Account       "
         echo -e "${separator}"
 		echo ""
 		echo "You have no existing clients!"
@@ -167,7 +167,7 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/grpc.json")
 	echo ""
 	echo ""
 	echo -e "${separator}"
-    echo -e "       Delete X-Ray gRPC Account       "
+    echo -e "       Delete XRAY gRPC Account       "
     echo -e "${separator}"
     _users=( $(grep -E "^### " "/etc/xray/json/grpc.json" | awk '{print $2}' | sort -u) )
     _i=1
@@ -205,7 +205,7 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/grpc.json")
         echo ""
         echo ""
         echo -e "${separator}"
-        echo " X-Ray gRPC Account Deleted Successfully"
+        echo " XRAY gRPC Account Deleted Successfully"
         echo -e "${separator}"
         echo " Client Name : $user"
         echo " Type        : GRPC"

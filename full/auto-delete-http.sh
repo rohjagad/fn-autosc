@@ -142,7 +142,7 @@ if [ -n "$deleted_users" ]; then
     systemctl restart xray@upgrade
     TEXT="
 <b>-----------------------</b>
-<b>X-RAY HTTP Log Cleanup</b>
+<b>XRAY HTTP Log Cleanup</b>
 <b>-----------------------</b>
 <code>Date     : $DATE</code>
 <code>Status   : Success Log Cleanup</code>

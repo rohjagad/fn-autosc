@@ -2231,3 +2231,13 @@ Section 35's four-check rule applied to Fix 401:
 | **Over-strictness** | Nothing rejected; text-scoped change. |
 | **Over-engineering** | One width measurement replacing a constant. |
 | **vs the source** | No ruling; card-relative centering per operator follow-up. |
+## 186. XRAY Spelling — Four Checks (October 7, 2026)
+
+Section 35's four-check rule applied to Fix 402:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Display strings only; verified no code matches on the hyphenated forms, and `xray` invocations/paths are lowercase. |
+| **Over-strictness** | Nothing rejected; text-scoped change. |
+| **Over-engineering** | Literal token swaps. |
+| **vs the source** | No ruling; single spelling per operator request. |

@@ -92,7 +92,7 @@ send_log() {
 
     TEXT="
 <b>-----------------------</b>
-<b>X-RAY WS Change UUID</b>
+<b>XRAY WS Change UUID</b>
 <b>-----------------------</b>
 <code>Date         : $DATE</code>
 <code>Username     : $user</code>
@@ -147,7 +147,7 @@ echo ""
 echo ""
 echo ""
 echo -e "${separator}"
-echo -e "${GREEN}          Change UUID X-ray Ws"
+echo -e "${GREEN}          Change UUID XRAY Ws"
 echo -e "${separator}"
 echo -e "${blue_sep}"
 

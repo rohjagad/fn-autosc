@@ -2333,3 +2333,5 @@ Found 416. **New-UUID prompt hides the random-on-empty behavior** —
 `New UUID:` gives no hint that an empty answer auto-generates a randomized UUID.
 Found 417. **Centered titles overshoot the card body** —
 centering on width 35 while the card separators run 23 pushes titles right of the body. Titles must center on the card's own dash width.
+Found 418. **XRAY spelled three ways** —
+messages mix `XRAY`, `X-RAY`, and `X-Ray` across telegram titles, TUI banners, and expiry lines. Operator direction: just `XRAY`, both places.

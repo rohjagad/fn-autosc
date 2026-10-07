@@ -130,7 +130,7 @@ DATE=$(date +"%d-%b-%Y %H:%M:%S")
 
         TEXT="
 <b>-----------------------</b>
-<b>UNLOCK X-RAY HTTP UPGRADE</b>
+<b>UNLOCK XRAY HTTP UPGRADE</b>
 <b>-----------------------</b>
 <code>Date     : $DATE</code>
 <code>Username : $name</code>
@@ -151,7 +151,7 @@ if [ -n "$locked_files" ]; then
     echo ""
     echo ""
     echo -e "${NC}${separator}
-       UNLOCK X-RAY HTTP ACCOUNT
+       UNLOCK XRAY HTTP ACCOUNT
 ${separator}"
 
     count=0

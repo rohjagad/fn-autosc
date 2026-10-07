@@ -120,7 +120,7 @@ echo -e "
 ${separator}
 [ Routing Seting ]
 ${separator}
-Only X-Ray Trojan WebSocket TLS Routing
+Only XRAY Trojan WebSocket TLS Routing
 ${separator}"
 read -p "Input Name: " names || return
 read -p "Input Domain: " domain || return
@@ -277,7 +277,7 @@ echo -e "
 ${separator}
 [ Routing Seting ]
 ${separator}
-Only X-Ray Vless None TLS
+Only XRAY Vless None TLS
 ${separator}"
 read -p "Input Name: " names || return
 read -p "Input Domain: " domain || return
@@ -429,7 +429,7 @@ clear
 echo ""
 echo ""
 echo ""
-echo -e "Routing Success With All Protocol X-Ray WebSocket using Xray Vless WS NoneTLS"
+echo -e "Routing Success With All Protocol XRAY WebSocket using Xray Vless WS NoneTLS"
 }
 
 vmessjir() {
@@ -437,7 +437,7 @@ echo -e "
 ${separator}
 [ Routing Setting ]
 ${separator}
-Only X-Ray VMESS None TLS
+Only XRAY VMESS None TLS
 ${separator}"
 
 read -p "Input Name: " names || return
@@ -591,7 +591,7 @@ clear
 echo ""
 echo ""
 echo ""
-echo -e "Routing Success With All Protocol X-Ray VMESS WebSocket Non-TLS"
+echo -e "Routing Success With All Protocol XRAY VMESS WebSocket Non-TLS"
 }
 
 
@@ -717,7 +717,7 @@ done
 addroute() {
 echo -e "
 ${separator}
-[ Add Routing X-Ray gRPC ]
+[ Add Routing XRAY gRPC ]
 ${separator}
 
 1. Vmess
@@ -739,7 +739,7 @@ esac
 addrules() {
 echo -e "
 ${separator}
-[ Menu Rules X-Ray ]
+[ Menu Rules XRAY ]
 ${separator}
 
 1. Add Rules Domain

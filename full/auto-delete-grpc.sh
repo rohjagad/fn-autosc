@@ -146,7 +146,7 @@ if [ -n "$deleted_users" ]; then
     systemctl restart xray@grpc
     TEXT="
 <b>-----------------------</b>
-<b>X-RAY gRPC Log Cleanup</b>
+<b>XRAY gRPC Log Cleanup</b>
 <b>-----------------------</b>
 <code>Date     : $DATE</code>
 <code>Status   : Success Log Cleanup</code>

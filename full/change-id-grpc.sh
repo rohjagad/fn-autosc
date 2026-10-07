@@ -92,7 +92,7 @@ send_log() {
 
     TEXT="
 <b>-----------------------</b>
-<b>X-RAY gRPC Change UUID</b>
+<b>XRAY gRPC Change UUID</b>
 <b>-----------------------</b>
 <code>Date         : $DATE</code>
 <code>Username     : $user</code>
@@ -147,7 +147,7 @@ echo ""
 echo ""
 echo ""
 echo -e "${separator}"
-echo -e "${GREEN}          Change UUID X-ray gRPC"
+echo -e "${GREEN}          Change UUID XRAY gRPC"
 echo -e "${separator}"
 echo -e "${blue_sep}"
 
@@ -242,7 +242,7 @@ fi
             echo ""
             # Confirmation message with updated information
             echo -e "${separator}"
-            echo -e "${GREEN} UUID X-Ray gRPC Update Successful!"
+            echo -e "${GREEN} UUID XRAY gRPC Update Successful!"
             echo -e "${separator}"
             echo -e "${YELLOW} Username      |       New UUID"
             echo -e "${blue_sep}"

@@ -2737,3 +2737,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 401 (Found 417):** renderer measures the longest dash run in the card and centers titles on it (wide-emoji compensated), instead of a fixed 35. Payloads untouched.
 - **Verified:** live render holds titles inside the 23-dash body; renderer hash-verified on box.
+### Fix 402 - XRAY spelling unified (Found 418)
+
+- **Fix 402 (Found 418):** all `X-RAY`/`X-Ray`/`X-ray` spellings converted to `XRAY` (68 files, both editions, shell + Go; commands/paths are lowercase and untouched, nothing parses the hyphenated forms). 3 cek binaries rebuilt.
+- **Verified:** `bash -n` clean; zips repacked (0755, parity rechecked); one-bundle deploy with hash verify on scripts + binaries.

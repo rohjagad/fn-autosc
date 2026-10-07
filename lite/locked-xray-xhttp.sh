@@ -127,7 +127,7 @@ send_log() {
 
     TEXT="
 <b>-----------------------</b>
-<b>X-RAY XHTTP LOCKED ACCOUNT</b>
+<b>XRAY XHTTP LOCKED ACCOUNT</b>
 <b>-----------------------</b>
 <code>Date     : $DATE</code>
 <code>Username : $name</code>
@@ -148,7 +148,7 @@ if [ -n "$locked_files" ]; then
     echo ""
     echo ""
     echo -e "${NC}${separator}
-        LOCK X-RAY XHTTP ACCOUNT
+        LOCK XRAY XHTTP ACCOUNT
 ${separator}"
 
     count=0

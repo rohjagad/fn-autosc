@@ -62,7 +62,7 @@ echo ""
 echo ""
 echo ""
 echo -e "${separator}"
-echo "  Log X-Ray WebSocket  "
+echo "  Log XRAY WebSocket  "
 echo -e "${separator}"
 
 # Load users from log

@@ -128,7 +128,7 @@ DATE=$(date +"%d-%b-%Y %H:%M:%S")
 
         TEXT="
 <b>-----------------------</b>
-<b>X-RAY XHTTP UNLOCK ACCOUNT</b>
+<b>XRAY XHTTP UNLOCK ACCOUNT</b>
 <b>-----------------------</b>
 <code>Date     : $DATE</code>
 <code>Username : $name</code>
@@ -149,7 +149,7 @@ if [ -n "$locked_files" ]; then
     echo ""
     echo ""
     echo -e "${NC}${separator}
-       UNLOCK X-RAY XHTTP ACCOUNT
+       UNLOCK XRAY XHTTP ACCOUNT
 ${separator}"
 
     count=0

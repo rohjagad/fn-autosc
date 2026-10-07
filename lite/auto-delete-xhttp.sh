@@ -142,7 +142,7 @@ if [ -n "$deleted_users" ]; then
     systemctl restart xray@xhttp
     TEXT="
 <b>-----------------------</b>
-<b>X-RAY XHTTP Log Cleanup</b>
+<b>XRAY XHTTP Log Cleanup</b>
 <b>-----------------------</b>
 <code>Date     : $DATE</code>
 <code>Status   : Success Log Cleanup</code>

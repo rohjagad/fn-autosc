@@ -116,7 +116,7 @@ sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/ws.json
         rm -f /etc/xray/limit/ip/xray/ws/$user
 TEKS="
 --------------------
-X-Ray WS Account Expired
+XRAY WS Account Expired
 --------------------
 
 -> $user / $exp
@@ -166,7 +166,7 @@ sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/upgrade.json
         rm -f /etc/xray/limit/ip/xray/http/$user
 TEKS="
 --------------------
-X-Ray http Account Expired
+XRAY http Account Expired
 --------------------
 
 -> $user / $exp
@@ -216,7 +216,7 @@ sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/xhttp.json
         rm -f /etc/xray/limit/ip/xray/xhttp/$user
 TEKS="
 --------------------
-X-Ray xhttp Account Expired
+XRAY xhttp Account Expired
 --------------------
 
 -> $user / $exp
@@ -266,7 +266,7 @@ sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/grpc.json
         rm -f /etc/xray/limit/ip/xray/grpc/$user
 TEKS="
 --------------------
-X-Ray grpc Account Expired
+XRAY grpc Account Expired
 --------------------
 
 -> $user / $exp

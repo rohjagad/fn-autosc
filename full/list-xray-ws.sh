@@ -152,7 +152,7 @@ fi
 
 if [[ "$status" == "locked" ]]; then
     echo -e "\e[33;1mUser\e[32;1m: $user"
-    echo -e "\e[33;1mStatus Account X-Ray\e[32;1m: $status"
+    echo -e "\e[33;1mStatus Account XRAY\e[32;1m: $status"
     echo -e "$RSEP"
 fi
 
@@ -169,6 +169,6 @@ if [[ "$status" == "unlocked" ]]; then
     echo -e "\e[33;1mLimit Quota\e[32;1m: $quota"
     echo -e "\e[33;1mUUID / Password\e[32;1m: $uid"
     echo -e "\e[33;1mProtocol Account\e[32;1m: $protokol"
-    echo -e "\e[33;1mStatus Account X-Ray\e[32;1m: $status"
+    echo -e "\e[33;1mStatus Account XRAY\e[32;1m: $status"
     echo -e "$RSEP"
 fi

@@ -128,7 +128,7 @@ send_log() {
 
     TEXT="
 <b>-----------------------</b>
-<b>X-RAY gRPC LOCKED ACCOUNT</b>
+<b>XRAY gRPC LOCKED ACCOUNT</b>
 <b>-----------------------</b>
 <code>Date     : $DATE</code>
 <code>Username : $name</code>
@@ -149,7 +149,7 @@ if [ -n "$locked_files" ]; then
     echo ""
     echo ""
     echo -e "${NC}${separator}
-        LOCK X-RAY gRPC ACCOUNT
+        LOCK XRAY gRPC ACCOUNT
 ${separator}"
 
     count=0

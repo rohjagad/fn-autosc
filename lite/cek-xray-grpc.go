@@ -153,7 +153,7 @@ func main() {
 	outerSep := rainbowSepGo("-----------------------------------")
 
 	fmt.Println(outerSep)
-	fmt.Println("  Log X-Ray gRPC  ")
+	fmt.Println("  Log XRAY gRPC  ")
 	fmt.Println(outerSep)
 
 	// Load user list from config file
