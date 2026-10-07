@@ -2365,3 +2365,5 @@ Found 432. **bmenu.sh IP lookup hangs without timeout (Fase 19)** —
 `restore()/restf()/resold()` in `full/bmenu.sh` + `lite/bmenu.sh` (12 lines) fetch `ipv4/icanhazip.com` via `curl -sS` with no `-m/--max-time`. `restore-ftp.sh` already uses `-m 10`; a stalled icanhazip hangs the backup/restore menu indefinitely.
 Found 433. **SSH Go tools swallow cleanup errors (Fase 24)** —
 `full/delete-ssh.go:154-157` ignores `Run()` errors on both `rm` cleanups and both `systemctl restart`s (reports success even when files survive or daemons fail); `full/extend-ssh.go` ignores `passwd -u` failure (expiry moves but account stays shadow-locked, menu still prints success).
+Found 434. **Telegram cards show used-Domain line despite no-default rotation (operator direction)** —
+creation cards list both `Domain : <used>` and `Domains : <all>`; with no-default round-robin rotation the used line implies a default that does not exist. Rotation itself is link-text insertion only (no connection change), so the list alone suffices.

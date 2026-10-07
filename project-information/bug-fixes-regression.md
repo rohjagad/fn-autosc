@@ -2351,3 +2351,13 @@ Section 35's four-check rule applied to Fix 413–414:
 | **Over-strictness** | Nothing rejected; `-m 10` matches existing restore-ftp value. |
 | **Over-engineering** | Flag addition + error returns; no helpers. |
 | **vs the source** | Upstream has bare curl; divergence is fail-fast hardening per Fase 19/24. |
+## 199. Telegram Domains-Only — Four Checks (October 7, 2026)
+
+Section 35's four-check rule applied to Fix 415:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Telegram transform only; TEKS source, TUI render, `.log` consumers untouched. |
+| **Over-strictness** | Nothing rejected; display-scoped change. |
+| **Over-engineering** | One sed expression prepended per file. |
+| **vs the source** | No ruling; no-default presentation per operator direction. |

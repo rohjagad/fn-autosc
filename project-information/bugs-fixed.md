@@ -2789,3 +2789,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 414 (Found 433):** `delete-ssh.go` returns `err` on any failed `rm`/`systemctl restart`; `extend-ssh.go` prints `Error unlocking account` and returns on failed `passwd -u` instead of claiming success.
 - **Verified:** both binaries cross-compile (`GOOS=linux GOARCH=amd64`); `gofmt` drift pre-existing, untouched; zips repacked (0755, parity rechecked).
+### Fix 415 - Telegram Domains-only cards (Found 434)
+
+- **Fix 415 (Found 434):** all 48 Xray creation cards (both editions) strip the `Domain   :` line in the Telegram `sed` pipeline (`/^Domain   : /d` first expression); TUI and `.log` keep both lines. SSH cards (no rotation) untouched.
+- **Verified live:** created `testcard_tg1` on fresh install — TUI/`.log` show both lines, simulated Telegram payload shows only `<code>Domains  : ...</code>`; account deleted after, box clean; `bash -n` clean; zips repacked (0755, parity rechecked); single-tarball deploy with hash verify.
