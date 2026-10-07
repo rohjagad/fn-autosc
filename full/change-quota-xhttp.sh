@@ -133,10 +133,12 @@ TIME="10"
 DATE=$(date +"%d-%b-%Y %H:%M:%S")
 TEXT="
 <b>-----------------------</b>
-<b>QUOTA XHTTP ACCOUNT</b>
+<b>CHANGE QUOTA</b>
 <b>-----------------------</b>
 <code>Username    : $user</code>
 <code>Date        : $DATE</code>
+<code>Protocol    : $proto</code>
+<code>Transport   : XHTTP</code>
 <code>Old Limit   : ${old_quota} GB</code>
 <code>New Limit   : ${new_quota} GB</code>
 <code>Quota Usage : ${quota_status}</code>
@@ -241,6 +243,7 @@ function change_quota() {
     if [[ -e "$quota_file" && -e "$log_file" ]]; then
         current_quota=$(cat "$quota_file")
         old_quota=$(grep "Quota" "$log_file" | awk '{print $3}')
+        proto=$(grep -E "^(Protokol|Protocol) *:" "$log_file" | awk '{print $NF}'); proto=${proto^^}
         echo ""
         echo ""
         echo -e "${separator}"

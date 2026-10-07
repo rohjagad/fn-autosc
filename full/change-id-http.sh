@@ -92,10 +92,12 @@ send_log() {
 
     TEXT="
 <b>-----------------------</b>
-<b>HTTP UPGRADE CHANGE ID</b>
+<b>CHANGE UUID</b>
 <b>-----------------------</b>
 <code>Date         : $DATE</code>
 <code>Username     : $user</code>
+<code>Protocol     : $proto</code>
+<code>Transport    : HU</code>
 <code>Old UUID     : $old</code>
 <code>New UUID     : $new</code>
 <b>-----------------------</b>
@@ -178,6 +180,7 @@ while true; do
         break
     fi
 done
+    proto=$(grep -E "^(Protokol|Protocol) *:" "/var/log/create/xray/http/${user}.log" | awk '{print $NF}'); proto=${proto^^}
 
 # Prompt for new UUID, generate if empty
 # GET OLD UUID

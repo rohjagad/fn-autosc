@@ -2765,3 +2765,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 408 (Found 425):** top account block widened to col 10 across all 48 cards; extend log-swap handles old and new spacing. Block audit reports zero strays.
 - **Verified live:** aligned card + extend moving log and json together; `bash -n` clean; zips repacked (0755, parity rechecked); one-bundle deploy; box left with 0 test residue.
+### Fix 409 - Protocol/Transport rows on all notices (Found 426)
+
+- **Fix 409 (Found 426):** delete/extend/multilogin `Type` replaced by the pair; lock/unlock `Protokol` renamed with `Transport` added; change-id/quota titles bared (`CHANGE UUID`/`CHANGE QUOTA`) with the pair added. Protocol read from the account log (both spellings, uppercased); Transport static per script. TUI echoes mirror. 64 files, both editions.
+- **Verified live:** extend-by-name flows with new rows; `bash -n` clean; zips repacked (0755, parity rechecked); one-bundle deploy with hash verify; box left with 0 test residue.

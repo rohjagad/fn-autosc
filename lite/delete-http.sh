@@ -95,7 +95,8 @@ DATE=$(date +"%d-%b-%Y %H:%M:%S")
 <b>-----------------------</b>
 <code>Date     : $DATE</code>
 <code>Username : $user</code>
-<code>Type     : HU</code>
+<code>Protocol : $proto</code>
+<code>Transport: HU</code>
 <code>Expired  : $exp</code>
 <b>-----------------------</b>
 <i>Note:</i> Account deleted successfully. Modification has been reflected in the database."
@@ -191,6 +192,7 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/upgrade.json")
     x-http
     else
         exp=$(grep -wE "^### $user" "/etc/xray/json/upgrade.json" | cut -d ' ' -f 3 | sort | uniq | head -n 1)
+    proto=$(grep -E "^(Protokol|Protocol) *:" "/var/log/create/xray/http/${user}.log" | awk '{print $NF}'); proto=${proto^^}
 
     if [ -n "$exp" ]; then
         sed -i "/^### $user $exp/ {N;d}" /etc/xray/json/upgrade.json
@@ -208,6 +210,7 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/upgrade.json")
         echo " HTTP Account Deleted Successfully"
         echo -e "${separator}"
         echo " Client Name : $user"
+        echo " Protocol    : $proto"
         echo " Type        : HU"
         echo " Expired On  : $exp"
         echo -e "${separator}"

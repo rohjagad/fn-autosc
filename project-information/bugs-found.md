@@ -2349,3 +2349,5 @@ Found 424. **Card titles repeat what the rows say** —
 `XRAY VMESS WS` etc. restate the new Protocol/Transport rows. Operator direction: bare `ACCOUNT DETAIL` everywhere.
 Found 425. **Top-block colons split 9/10 after the row change** —
 new `Protocol :`/`Transport:` rows sit at col 10 against the col-9 block. Fix by widening the block to col 10 (and teaching the extend swap both spacings so old single-space logs still update).
+Found 426. **Notices carry type info unevenly** —
+extend/delete/multilogin show only `Type`, lock/unlock only `Protokol`, change-id/quota only in titles. Operator direction: every notice shows `Protocol :` + `Transport:` rows; transport comes out of titles.

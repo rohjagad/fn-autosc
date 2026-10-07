@@ -95,7 +95,8 @@ DATE=$(date +"%d-%b-%Y %H:%M:%S")
 <b>-----------------------</b>
 <code>Date     : $DATE</code>
 <code>Username : $user</code>
-<code>Type     : XHTTP</code>
+<code>Protocol : $proto</code>
+<code>Transport: XHTTP</code>
 <code>Expired  : $exp</code>
 <b>-----------------------</b>
 <i>Note:</i> Account deleted successfully. Modification has been reflected in the database."
@@ -191,6 +192,7 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/xhttp.json")
     x-xhttp
     else
         exp=$(grep -wE "^### $user" "/etc/xray/json/xhttp.json" | cut -d ' ' -f 3 | sort | uniq | head -n 1)
+    proto=$(grep -E "^(Protokol|Protocol) *:" "/var/log/create/xray/xhttp/${user}.log" | awk '{print $NF}'); proto=${proto^^}
 
     if [ -n "$exp" ]; then
         sed -i "/^### $user $exp/ {N;d}" /etc/xray/json/xhttp.json
@@ -208,6 +210,7 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/xhttp.json")
         echo " Vmess Account Deleted Successfully"
         echo -e "${separator}"
         echo " Client Name : $user"
+        echo " Protocol    : $proto"
         echo " Type        : XHTTP"
         echo " Expired On  : $exp"
         echo -e "${separator}"

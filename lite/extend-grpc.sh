@@ -127,7 +127,8 @@ send_log() {
 <b>-----------------------</b>
 <code>Date         : $DATE</code>
 <code>Username     : $user</code>
-<code>Type         : GRPC</code>
+<code>Protocol     : $proto</code>
+<code>Transport    : GRPC</code>
 <code>Old Expired  : $exp</code>
 <code>New Expired  : $exp4</code>
 <code>Status Quota : $quota_status</code>
@@ -190,6 +191,7 @@ else
         read -p "Expired (days): " masaaktif || exit 1
     done
     exp=$(grep -wE "^### $user" "/etc/xray/json/grpc.json" | cut -d ' ' -f 3 | sort | uniq | head -n 1)
+    proto=$(grep -E "^(Protokol|Protocol) *:" "/var/log/create/xray/grpc/${user}.log" | awk '{print $NF}'); proto=${proto^^}
     now=$(date +%y-%m-%d) # internal epoch math only
     d1=$(date -d "$exp" +%s 2>/dev/null)
     if [ -z "$d1" ]; then
@@ -226,6 +228,7 @@ else
     echo -e "${separator}"
     echo -e " ${YB}Client Name :${NC} $user"
     echo -e " ${YB}Type        :${NC} GRPC"
+    echo -e " ${YB}Protocol    :${NC} $proto"
     echo -e " ${YB}Expired On  :${NC} $exp4"
     echo -e " ${YB}Status Quota:${NC} $quota_status"
     echo -e "${separator}"

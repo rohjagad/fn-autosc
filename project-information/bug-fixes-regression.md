@@ -2301,3 +2301,13 @@ Section 35's four-check rule applied to Fix 408:
 | **Over-strictness** | Nothing rejected; text-scoped change. |
 | **Over-engineering** | Spacing adjustments plus a dual-form swap. |
 | **vs the source** | No ruling; aligned columns per operator request. |
+## 194. Notice Rows Parity — Four Checks (October 7, 2026)
+
+Section 35's four-check rule applied to Fix 409:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Protocol read from existing card rows; no account data touched. Name and number paths re-verified. |
+| **Over-strictness** | Nothing rejected; additions only. |
+| **Over-engineering** | One read plus row swaps per notice, mirroring the card labels. |
+| **vs the source** | No ruling; row parity per operator request. |

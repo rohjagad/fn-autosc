@@ -97,7 +97,8 @@ DATE=$(date +"%d-%b-%Y %H:%M:%S")
 <b>-----------------------</b>
 <code>Date     : $DATE</code>
 <code>Username : $user</code>
-<code>Type     : XHTTP</code>
+<code>Protocol : $proto</code>
+<code>Transport: XHTTP</code>
 <code>Login    : $cek / $limit</code>
 <code>Status   : Locked</code>
 <b>-----------------------</b>
@@ -146,6 +147,7 @@ for user in $username; do
         # undefined, so a triggered limit deleted the account block plus
         # everything after it to the end of the file. Remove only the account.
         exp=$(grep -wE "^### $user" "/etc/xray/json/xhttp.json" | cut -d ' ' -f 3 | sort | uniq | head -n 1)
+    proto=$(grep -E "^(Protokol|Protocol) *:" "/var/log/create/xray/xhttp/${user}.log" | awk '{print $NF}'); proto=${proto^^}
         if [[ -n "$exp" ]]; then
             sed -i "/^### $user $exp/ {N;d}" /etc/xray/json/xhttp.json
             sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/xhttp.json

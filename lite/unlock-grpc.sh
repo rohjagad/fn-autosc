@@ -133,7 +133,8 @@ DATE=$(date +"%d-%b-%Y %H:%M:%S")
 <code>Date     : $DATE</code>
 <code>Username : $name</code>
 <code>Expired  : $exp2</code>
-<code>Protokol : $protokol2</code>
+<code>Protocol : $protokol2</code>
+<code>Transport: GRPC</code>
 <b>-----------------------</b>
 <i>Catatan:</i> The user account has been unlocked by the owner and can be used again."
         curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$TEXT" $URL >/dev/null

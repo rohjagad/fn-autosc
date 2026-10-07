@@ -132,7 +132,8 @@ send_log() {
 <code>Date     : $DATE</code>
 <code>Username : $name</code>
 <code>Expired  : $exp2</code>
-<code>Protokol : $protokol2</code>
+<code>Protocol : $protokol2</code>
+<code>Transport: HU</code>
 <b>-----------------------</b>
 <i>Catatan:</i> The user account has been locked by the owner and cannot be used."
     curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$TEXT" $URL >/dev/null
