@@ -41,7 +41,7 @@ Check these three on every screen you open:
 
 1. **Wording:** simple words a junior IT understands. No typo. Same term everywhere (e.g. do not mix `Expired` / `Kadaluarsa` on one screen). Units shown (`GB`, `days`, `IP`).
 2. **Navigation:** every number works. `0` goes back to parent, never drops to shell. Wrong number re-shows the menu. Empty `Enter` is rejected with a clear message, no crash. `Ctrl+D` (EOF) exits cleanly (`exit 0`).
-3. **Layout tidiness:** header centered, separator lines same length, `Label : value` colons aligned, no wrapped/truncated lines at 80 cols, colors reset at end, account card stays on screen (pause) before clear. Title/bottom separators rainbow `---` 35, inner dividers blue `---` 35, exactly 2 blank lines after each `clear`, picker lists green-numbered (`01.`) with `Total Accounts` and number-or-name input. Cards/notices: bare uppercase titles, `Protocol :` + `Transport:` rows, `DD-Mon-YYYY` dates, `XRAY` spelling, green-double titles / blue-single links in Telegram, titles centered on card width in TUI with left payload.
+3. **Layout tidiness:** header centered, separator lines same length, `Label : value` colons aligned, no wrapped/truncated lines at 80 cols, colors reset at end, account card stays on screen (pause) before clear. Title/bottom separators rainbow `---` 35, inner dividers blue `---` 35, exactly 2 blank lines after each `clear`, picker lists green-numbered (`01.`) with `Total Accounts` and number-or-name input. Cards/notices: bare uppercase titles, `Protocol :` + `Transport:` rows, `DD-Mon-YYYY` dates, `XRAY` spelling, green-double titles / blue-single links in Telegram, titles centered on card width in TUI with left payload. SSH online table: `Username Login Type`, no pipes, equal gaps, `n / limit`, `Dropbear`/`Openssh`.
 
 If any screen fails one of the three, note: menu name + option + what you typed + what you saw.
 
@@ -113,21 +113,21 @@ Each phase below lists: **Goal**, **K** (client traffic), **S** (menu walk), **P
 ### Fase 4: Xray WebSocket (VMess, VLESS, Trojan)
 
 - **Goal:** real payload through WS.
-- **K:** create one account per proto; VM runs xray client (`/vmws`, `/vlws`, `/trws`, TLS 443); download 1–5 MB file; checksum == direct download. Repeat one via port 80 NonTLS. Spot-check one color alias (e.g. `/red` vs `/vmws`) returns the identical status.
+- **K:** create one account per proto; VM runs xray client (`/vmws`, `/vlws`, `/trws`, TLS 443); download 1–5 MB file; checksum == direct download. Repeat one via port 80 NonTLS. Spot-check one color alias (e.g. `/red` vs `/vmws`) returns the identical status, plus one prefixed pair (`/a/green` vs `/a/vlws`) — all transports accept arbitrary prefixes, normalized to canonical before Xray.
 - **S:** `menu-x` → create each account via TUI. Check: bare `ACCOUNT DETAIL` title, `Protocol :` + `Transport:` rows, `Network: WebSocket`, full link; duplicate name rejected clearly. Sequential creates rotate color-only link paths (canonical paths never appear in links — decode 2+ links to confirm), and `Path Alt`/`Service Alt` rows list the rotation set.
 - **PASS:** 3/3 checksums match, NonTLS ok.
 
 ### Fase 5: Xray gRPC (`vmgr`, `vlgr`, `trgr`)
 
 - **Goal:** gRPC streaming works behind nginx.
-- **K:** same as F4 but service names `vmgr`/`vlgr`/`trgr`; transfer >3 MB both directions. Spot-check one color service alias returns the canonical status.
+- **K:** same as F4 but service names `vmgr`/`vlgr`/`trgr`; transfer >3 MB both directions. Spot-check one color service alias returns the canonical status, plus one prefixed pair (`POST /a/white` vs `POST /a/vlgr`, gRPC keeps the method suffix).
 - **S:** same TUI card checks in `menu-x` gRPC entries; wording `gRPC` spelled same everywhere.
 - **PASS:** 3/3 transfers match.
 
 ### Fase 6: HTTPUpgrade + XHTTP
 
 - **Goal:** modern transports work.
-- **K:** HTTPUpgrade paths `/vmhu`, `/vlhu`, `/trhu`; XHTTP paths `/vmxh`, `/vlxh`, `/trxh` with `network: xhttp` (no `mode: packet-up` needed); 1 MB download each, checksum match. Spot-check one color alias per path the same way as F4.
+- **K:** HTTPUpgrade paths `/vmhu`, `/vlhu`, `/trhu`; XHTTP paths `/vmxh`, `/vlxh`, `/trxh` with `network: xhttp` (no `mode: packet-up` needed); 1 MB download each, checksum match. Spot-check one color alias per path the same way as F4, plus one prefixed pair each (`/a/yellow` vs `/a/vmhu`, `/a/purple` vs `/a/vmxh`).
 - **S:** card must show `Network: HTTP Upgrade` / `Network: XHTTP` with correct path. Old path `/vmspl` must not appear anywhere.
 - **PASS:** 6/6 match, no stale path text.
 
@@ -177,7 +177,7 @@ Each phase below lists: **Goal**, **K** (client traffic), **S** (menu walk), **P
 
 - **Goal:** every menu survives operator mistakes and reads tidy.
 - **K:** none.
-- **S:** visit ALL: `menu`, `menu-x`, `menu-ssh`, `menu-wg`, `menu-noobz`, `menu-dnstt`, `menu-system`, `menu-bot`, `menu-argo`, `bmenu`, `dm-menu`. Per menu: press `0` (back to parent), `00` (spell/behavior), `99` (invalid re-show), empty Enter, `Ctrl+D`. Per numeric field: `0`, `-1`, `abc`, `1.5`, metachars (`;`, `$()`, `*`). `dm-menu` options are 1–6 + 0 (add/remove/list, cert-per-chosen-domain ×3); stacked screens separated by blank-line air; picker lists numbered with number-or-name input; per-domain cards aligned. Record every screen against the §2 quality bar (wording/navigation/layout). This is the main TUI-tidiness gate.
+- **S:** visit ALL: `menu`, `menu-x`, `menu-ssh`, `menu-wg`, `menu-noobz`, `menu-dnstt`, `menu-system`, `menu-bot`, `menu-argo`, `bmenu`, `dm-menu`. Per menu: press `0` (back to parent), `00` (spell/behavior), `99` (invalid re-show), empty Enter, `Ctrl+D`. Per numeric field: `0`, `-1`, `abc`, `1.5`, metachars (`;`, `$()`, `*`). Empty-list screens (`unlock-*`, `locked-xray-*`, `limit-ip`, `xl2tp` delete/extend, bot creds notice) must hold for a keypress, never flash. SSH online table reads `Username Login Type` (no pipes, equal gaps, `n / limit`, `Dropbear`/`Openssh`). `dm-menu` options are 1–6 + 0 (add/remove/list, cert-per-chosen-domain ×3); stacked screens separated by blank-line air; picker lists numbered with number-or-name input; per-domain cards aligned. Record every screen against the §2 quality bar (wording/navigation/layout). This is the main TUI-tidiness gate.
 - **PASS:** zero crashes/hangs/shell-drops; all rejections worded; layout checklist clean.
 
 ### Fase 14: Domain list, rotation, and cert safety
@@ -192,7 +192,7 @@ Each phase below lists: **Goal**, **K** (client traffic), **S** (menu walk), **P
 
 - **Goal:** backup arrives, restore needs the key.
 - **K:** none (server-side + Telegram client).
-- **S:** `bmenu` → backup: zip arrives as Telegram document with Username/IP/Date caption, no public link. Without bot creds the backup must fail safe: archive staged, clear `Telegram credentials are not configured` message, archive KEPT at `/root/backup.zip`, exit 0, no hang. Restore page `:855/upload.php`: no token → 401, wrong token → 401, right token (`/etc/funny/.restore.key`) → extracted; restored `.key` back to `0600`.
+- **S:** `bmenu` → backup: zip arrives as Telegram document with Username/IP/Date caption, no public link. Without bot creds the backup must fail safe: archive staged, clear `Telegram credentials are not configured` message, archive KEPT at `/root/backup.zip`, exit 0, no hang. `menu-bot` option 3 shows `Current interval` parsed from the live cron, accepts 1–24 (`0`/text/25+ re-asked, blank keeps), writes a single `0 */h` line. Restore page `:855/upload.php`: no token → 401, wrong token → 401, right token (`/etc/funny/.restore.key`) → extracted; restored `.key` back to `0600`.
 - **PASS:** 401/401/ok, modes correct. (Destructive: snapshot first, restore to test box if possible.)
 
 ### Fase 16: REST API suite (FN-API)
@@ -235,7 +235,7 @@ Each phase below lists: **Goal**, **K** (client traffic), **S** (menu walk), **P
 
 - **Goal:** template = installed = card; tools tell the truth.
 - **K:** new account link UUID/password == JSON; deleted == gone everywhere.
-- **S:** `cek-xray-*`, `list-ssh`, `cek-login-ssh` vs raw state (`grep '^###'`, `chage`, `passwd -S`): no fake `UNLOCKED`/`No Expiry`/`0/0`; missing-binary simulation errors explicitly (then restore binary). Drift matrix: 36 color locations present with canonical-matching status; rotated link paths + domains decode valid; `server_name` lists primary + extras with no placeholder.
+- **S:** `cek-xray-*`, `list-ssh`, `cek-login-ssh` vs raw state (`grep '^###'`, `chage`, `passwd -S`): no fake `UNLOCKED`/`No Expiry`/`0/0`; `cek-login-ssh` prints the 3-column `Username Login Type` table (counts match log lines, `n / limit`, capitalized type); missing-binary simulation errors explicitly (then restore binary). Drift matrix: 36 color locations present with canonical-matching status; rotated link paths + domains decode valid; `server_name` lists primary + extras with no placeholder.
 - **PASS:** 1:1 ports/paths, no placeholder `server_name`, no false success.
 
 ---

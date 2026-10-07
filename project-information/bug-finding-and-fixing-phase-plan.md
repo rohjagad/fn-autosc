@@ -224,7 +224,7 @@ Fase 27: Review Kriptografi Final (setelah semua perubahan)
   - Terapkan validasi `^[1-9][0-9]*$` dengan pemberitahuan tunggal `\033[38;5;208m0 not allowed\033[0m`.
   - Tambahkan pengecekan duplikasi awal via `grep -w "^### $user"`.
   - Tambahkan jeda baca kartu akun (`read -n 1 -s -r -p "Press any key to return..."`) sebelum skrip pembuat keluar ke menu pemanggil.
-  - Standar kartu akun & notifikasi (hasil Found 385–426 dan 434, berlaku untuk semua kartu/notifikasi baru): judul bare bercode (`ACCOUNT DETAIL`, `ACCOUNT DELETED/LOCKED/UNLOCKED`, `EXTEND EXPIRATION`, `MULTILOGIN LOCKED`, `CHANGE UUID/QUOTA`) — tanpa nama transport di judul; baris `Protocol :` + `Transport:` di setiap kartu/pemberitahuan (nilai UPPERCASE); tanggal `DD-Mon-YYYY`; ejaan `XRAY` (bukan `X-RAY`); judul hijau-ganda / tautan biru-tunggal; judul TUI rata-tengah selebar kartu, payload Telegram rata-kiri. Payload Telegram kartu rotasi-domain hanya menampilkan `Domains :` (daftar semua, tanpa baris `Domain :` — tidak ada default); TUI/`.log` tetap menampilkan keduanya.
+  - Standar kartu akun & notifikasi (hasil Found 385–426 dan 434, berlaku untuk semua kartu/notifikasi baru): judul bare bercode (`ACCOUNT DETAIL`, `ACCOUNT DELETED/LOCKED/UNLOCKED`, `EXTEND EXPIRATION`, `MULTILOGIN LOCKED`, `CHANGE UUID/QUOTA`) — tanpa nama transport di judul; baris `Protocol :` + `Transport:` di setiap kartu/pemberitahuan (nilai UPPERCASE); tanggal `DD-Mon-YYYY`; ejaan `XRAY` (bukan `X-RAY`); judul hijau-ganda / tautan biru-tunggal; judul TUI rata-tengah selebar kartu, payload Telegram rata-kiri. Payload kartu rotasi-domain di semua permukaan (TUI, Telegram, `.log`) hanya menampilkan `Domains :` (daftar semua, tanpa baris `Domain :` — tidak ada default); header tautan lingkaran-biru rata-kiri seperti Telegram/`.log` (tidak di-center); tabel login SSH berbentuk `Username Login Type` tanpa pipa, celah 4-spasi sama, `count / limit` spasi, tipe kapital (`Dropbear/Openssh`).
   - Kungkung akun SSH VPN (Decision 7 — akun adalah kredensial forwarding, bukan user sistem): pertahankan flag `useradd` tepat `-e … -s /bin/false -M` (addssh) / `-s /bin/false -M` (trial); `/bin/false` + `nologin` tetap terdaftar di `/etc/shells` (kompatibilitas Dropbear) tanpa memberi shell betulan; set eksplisit `X11Forwarding no` + `AllowAgentForwarding no` (idempoten, reload sshd); `AllowTcpForwarding yes` WAJIB dipertahankan (produknya memang forwarding); `PermitTunnel` wajib tetap `no`; tanpa blok `Match`/`ForceCommand` yang mematahkan forwarding; tidak ada referensi `$HOME`/home untuk akun ini di kode panel.
 
 ---
@@ -271,7 +271,7 @@ Fase 27: Review Kriptografi Final (setelah semua perubahan)
   - Tambahkan opsi `${green}0${NC}. Back to Main Menu` dan penanganan `0|00) clear ; menu ;;` pada semua dispatcher yang kehilangan opsi 0.
   - Panggil ulang fungsi submenu (misal: `xws`, `xhttp`, `xxhttp`, `xgrpc`, `menu-ssh`) di setiap akhir eksekusi case aksi.
   - Pertahankan display versi pada submenunya dengan fallback aman `2>/dev/null || echo "n/a"`.
-  - Standar TUI (hasil Found 361–375 dan 393–413, berlaku untuk semua layar baru): pemisah judul/bawah rainbow `---` 35 (`${separator}`), pemisah dalam biru `---` 35 (`${blue_sep}`), tepat 3 baris kosong setelah setiap `clear`, daftar bernomor hijau (`%02d`) dengan Total +/total, dan input nomor-atau-nama. Judul TUI rata-tengah selebar pemisah; setiap layar hasil (limit/kuota/kosong) wajib jeda `Press any key` agar tak flashing. Tanpa `===`, tanpa `━━━`/`───`/`═══` di output terminal.
+  - Standar TUI (hasil Found 361–375 dan 393–413, berlaku untuk semua layar baru): pemisah judul/bawah rainbow `---` 35 (`${separator}`), pemisah dalam biru `---` 35 (`${blue_sep}`), tepat 2 baris kosong setelah setiap `clear`, daftar bernomor hijau (`%02d`) dengan Total +/total, dan input nomor-atau-nama. Judul TUI rata-tengah selebar pemisah; setiap layar hasil (limit/kuota/kosong) wajib jeda `Press any key` agar tak flashing. Tanpa `===`, tanpa `━━━`/`───`/`═══` di output terminal. Label menu XTLS tanpa akhiran kurung (`WebSocket`, `gRPC`); tabel login SSH `Username Login Type` tanpa pipa, celah sama, `count / limit`, tipe kapital.
 
 ---
 
@@ -280,7 +280,7 @@ Fase 27: Review Kriptografi Final (setelah semua perubahan)
 - **Komponen Target:** `full/menu-system.sh`, `lite/menu-system.sh`, `full/menu-bot.sh`, `lite/menu-bot.sh`, `full/menu-argo.sh`, `lite/menu-argo.sh`.
 - **Finding (Metodologi Penemuan):**
   - Menu Sistem: uji opsi 1 s.d. 8; periksa apakah operator terjebak di `systemd()` tanpa opsi kembali atau terlempar setelah melihat detail sistem (Found 291).
-  - Menu Bot: periksa apakah informasi konfigurasi bot atau laporan bug langsung terhapus tanpa memberi waktu operator membaca (Found 292).
+  - Menu Bot: periksa apakah informasi konfigurasi bot atau laporan bug langsung terhapus tanpa memberi waktu operator membaca (Found 292); opsi interval auto-backup wajib tampil `Current interval` dari cron live, menerima 1–24 (kosong = keep, 0/tulisan/25+ ditolak ulang), menulis satu baris `0 */h` tanpa duplikat; notice `Bot Credentials Not Set` wajib jeda baca sebelum kembali (Found 454).
   - Terowongan Argo: audit prompt `read -p "New Domain: " opws` pada fungsi `setup()`. Periksa apakah masukan sembarang langsung ditulis ke `/etc/xray/domargo` dan konfigurasi YAML cloudflared (Found 307).
 - **Fixing (Standar Perbaikan):**
   - Tambahkan loop navigasi dan Opsi `0` pada `menu-system.sh` dan `menu-bot.sh`.
@@ -315,9 +315,10 @@ Fase 27: Review Kriptografi Final (setelah semua perubahan)
   - Audit keamanan upload web restore (`website/upload.php`): periksa apakah endpoint menerima upload file `.zip` tanpa otentikasi token yang sah (Decision 19, Found 138).
   - Periksa izin berkas kunci privat setelah pemulihan (restore): pastikan berkas `/etc/xray/xray.key` dan `funny.pem` tidak tereksploitasi menjadi `0644` setelah unpack zip.
 - **Fixing (Standar Perbaikan):**
-  - Kirim arsip backup murni sebagai dokumen Telegram attachment dengan informasi caption minimalis (Domain, IP, Date).
+  - Kirim arsip backup murni sebagai dokumen Telegram attachment dengan informasi caption minimalis (Username pemilik auth, IP, Date).
   - Wajibkan otentikasi kunci `/etc/funny/.restore.key` menggunakan `hash_equals` sebelum menerima arsip di `upload.php`.
   - Pasang instruksi pengetatan izin `chmod 600` pada seluruh script pemulihan backup.
+  - Opsi interval auto-backup (menu-bot opsi 3): parse cron live (`*/h`, legacy `0,6,12,18`, hourly, kosong), prompt `New interval` sejajar titik-dua, tulis `0 */h * * *` ganti baris lama + restart cron.
 
 ---
 
@@ -485,8 +486,8 @@ Fase 27: Review Kriptografi Final (setelah semua perubahan)
 - **Komponen Target:** `config/{4,6,dual}.conf` (blok `ALTERNATIVE COLOR PATHS`), `/etc/nginx/nginx.conf` terinstal, 48 skrip pembangun link (`add-*`, `trial-*` `full/` + `lite/`), `README.md` (tabel warna).
 - **Finding (Metodologi Penemuan):**
   - Hitung lokasi warna: tepat 36 (`grep -c "ALT /"` per template), 3 warna unik per backend, tanpa tabrakan nama antar-lokasi maupun dengan lokasi kanonis.
-  - Verifikasi tiap warna berperilaku identik dengan kanonisnya: status HTTP sama untuk handshake sejenis (WS→400, HU/XHTTP→404, gRPC POST→200); `rewrite…break` sebelum guard `if` pada lokasi eksak adalah pola terlarang (terbukti 502, Found 376) — HU wajib bentuk URI `proxy_pass`.
-  - Verifikasi rotasi: N pembuatan beruntun wajib bersiklus kanonis→warna1→warna2→warna3 (`/etc/xray/.colorseq` maju per akun); kartu tetap sepanjang semula; baris deskripsi `Path`/`Service` tetap kanonis.
+  - Verifikasi tiap warna berperilaku identik dengan kanonisnya: status HTTP sama untuk handshake sejenis (WS→400, HU/XHTTP→404, gRPC POST→status identik kanonis-vs-warna); kanonis + warna SEMUA transport menerima path ber-prefix (`/a/<nama>` diringkas ke kanonis: WS/HU/XHTTP via `rewrite /(.*)`, gRPC via `rewrite ^.*\/<nama>(.*)$` yang mempertahankan suffix method); `rewrite…break` sebelum guard `if` pada lokasi eksak adalah pola terlarang (terbukti 502, Found 376) — semua lokasi kini regex + rewrite, tanpa `proxy_pass` ber-URI.
+  - Verifikasi rotasi: N pembuatan beruntun wajib bersiklus kanonis→warna1→warna2→warna3 (`/etc/xray/.colorseq` maju per akun); kartu tetap sepanjang semula; baris deskripsi `Path`/`Service` tetap kanonis; kartu hanya menampilkan `Domains :` (tanpa `Domain :`).
   - Race counter bersamaan hanya boleh mengulang warna (kosmetik), bukan merusak link.
 - **Fixing (Standar Perbaikan):**
   - Hasilkan blok warna dari blok kanonis secara programatik (satu sumber, tiga template + live); `nginx -t` + reload + bukti status per warna sebelum commit.
@@ -499,7 +500,7 @@ Fase 27: Review Kriptografi Final (setelah semua perubahan)
 - **Komponen Target:** `full/dm-menu.sh`, `lite/dm-menu.sh` (opsi 1–6, `pick_domain`, `domain_extra_*`, `gen_selfsigned_all`, `all_domains`, counter), `/etc/xray/domains`, `/etc/xray/.domainseq`, `installer/diamond.sh` (`issue_certificate`).
 - **Finding (Metodologi Penemuan):**
   - Struktur menu wajib Add / Remove / List / Acme-per-pilihan / Certbot-per-pilihan / SelfSign-per-pilihan; pengubah domain-tunggal lama (`dm`), submenu `cert`, dan duplikat `cert2` wajib sudah tiada; helper yatim (`start_services`, `copy_certificates`) wajib tiada pemanggil.
-  - Rotasi tanpa default: berkas hilang/kosong → perilaku domain-tunggal lama; berkas ada → round-robin atas primer + ekstra terdedup; kartu menampilkan `Domain` terpakai + baris `Domains` tersedia; host link mengikuti rotasi.
+  - Rotasi tanpa default: berkas hilang/kosong → perilaku domain-tunggal lama; berkas ada → round-robin atas primer + ekstra terdedup; kartu menampilkan HANYA baris `Domains` tersedia (tanpa `Domain` terpakai); host link mengikuti rotasi.
   - Batas fungsi bersarang: penghapusan fungsi wajib berjangkar pada definisi sibling berikutnya, bukan `}` pertama (kegagalan pola ini merusak `dm-menu.sh`, Found 378) — verifikasi silang terhadap `original-source-do-not-edit` untuk lingkup yang dihapus.
   - Self-signed default: installer tanpa fetch acme; penambahan domain otomatis self-signed multi-SAN (CN primer); penerbitan tepercaya hanya mencakup domain yang DNS-nya menunjuk ke sini (lewati sisanya, jangan gagal total); tulis ke berkas temp lalu pindah (jangan truncate path live).
 - **Fixing (Standar Perbaikan):**
