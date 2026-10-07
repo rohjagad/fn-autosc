@@ -2805,3 +2805,31 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 417 (Found 436):** `gen_selfsigned_all` (full + lite `dm-menu.sh`) now has openssl write same-directory temps (`/etc/xray/.xray-selfsigned.{crt,key}.tmp`, removed on failure) and publishes via `mv -f` (same-filesystem rename is atomic); `funny.pem` rebuilt via same-dir temp + `mv`, keeping the best-effort silent semantics when `/etc/haproxy` is absent (lite). No `/tmp` litter; surrounding perms/restarts untouched.
 - **Verified:** `bash -n` clean on both files; sandbox replay of the exact new sequence (multi-SAN cert verifies via openssl, 644/600, no leftover tmps); openssl-failure path leaves no tmps; both zips repacked single-entry, IN-SYNC, 0755.
+### Fix 418 - Expired lifetime indent (Found 437)
+
+- **Fix 418 (Found 437):** `REMAINING_DAYS=$(calculate_remaining_days ...)` else-branch re-indented 4→8 spaces in 191 scripts (`full/`,`lite/`,`installer/`,`install.sh`); `full/quota-ws.sh:76` + `lite/quota-ws.sh:76` output-if 4→8. No logic change.
+- **Verified:** `grep` for 4-space variants returns 0; `bash -n` clean; zips repacked (0755, IN-SYNC).
+### Fix 419 - Blank-row cap at 3 (Found 438)
+
+- **Fix 419 (Found 438):** `menu-wg.sh` warp triple-clear collapsed to single `clear`+3x; 8x post-clear `newline` removed; all 8 `change-quota-*.sh` `Loading_Animasi` second 3x removed; `menu-system.sh` `resall` extra `\n\n` removed, `bnnr` leading `\n` removed, `menu-warp` pre-`install()` clear removed (both editions).
+- **Verified:** worst-case grep clean; `bash -n` clean on all touched files; zips repacked (0755, IN-SYNC).
+### Fix 420 - SSH login check themed (Found 439)
+
+- **Fix 420 (Found 439):** `full/cek-login-ssh.sh` now uses the general theme: full color block + `rainbow_sep`/`separator`/`blue_sep`, `SSH LOGIN CHECK` title card, purple `DROPBEAR/OPENSSH USER LOGIN` sections + purple table headers, `blue_sep` rules (35-wide), `separator` + purple/green total. Logic (Bug 70/71, per-user counts, temp cleanup) untouched; caller pause unchanged.
+- **Verified live:** deployed to 157.10.253.95, title/section markers present, `bash -n` clean; zips repacked (0755, IN-SYNC).
+### Fix 421 - WS color paths accept prefixes (Found 440)
+
+- **Fix 421 (Found 440):** 9 WS color locations in `config/4.conf,6.conf,dual.conf` changed `location = /c` → `location ~ /c` (`red,crimson,scarlet,green,lime,emerald,blue,navy,azure`), mirroring canonical `location ~ /vmws/vlws/trws`; same `rewrite ... /vlws|/vmws|/trws break` + upstream kept. HU/XH exact aliases untouched.
+- **Verified live:** live `/etc/nginx/nginx.conf` patched in place, `nginx -t` ok, service restarted active, `location ~ /green` present; zips do not ship nginx conf (installer pulls `config/`), no zip impact.
+### Fix 422 - XTLS menu labels uniform (Found 441)
+
+- **Fix 422 (Found 441):** `full/menu-x.sh` → `1. WebSocket` / `4. gRPC`; `lite/menu.sh` → `1. WebSocket` / `2. HTTP Upgrade` / `3. gRPC` / `4. XHTTP` (all parenthetical suffixes dropped). Wiring (`case` branches) untouched.
+- **Verified live:** `/usr/bin/menu-x` on 157.10.253.95 shows `1. WebSocket`; `bash -n` clean; zips repacked (0755, IN-SYNC).
+### Fix 423 - Unlock menus pause (Found 442)
+
+- **Fix 423 (Found 442):** all 8 unlock callers (`full/lite x-ws/x-http/x-grpc/x-xhttp` option 13) now `...; echo ""; read -n 1 -s -r -p "Press any key to return..." || true; ...` like options 07/10/11. Empty-list and success outputs stay visible; `unlock-*.sh` bodies untouched (no double-pause).
+- **Verified live:** `/usr/bin/x-ws` contains the pause on line 13; `bash -n` clean on all 8; zips repacked (0755, IN-SYNC).
+### Fix 424 - Blue-circle headers left-aligned (Found 443)
+
+- **Fix 424 (Found 443):** `config/format.sh` no longer centers `^🔵.*$`; only `🟢…🟢`/`Limit Detail`/`Detail Port` center. `🔵` lines fall through to plain left print, matching Telegram/`.log` (col 0). Green titles stay centered.
+- **Verified:** simulated `TEKS` shows `🟢 ACCOUNT DETAIL 🟢` padded, both `🔵 VLess WS` lines at col 0; deployed to 157.10.253.95 (`/etc/funny/format.sh` updated); `bash -n` clean.

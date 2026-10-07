@@ -63,7 +63,7 @@
     if [ "$EXPIRED_DATE" = "lifetime" ]; then
         REMAINING_DAYS="lifetime"
     else
-    REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
+        REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
     fi
     if [ "$REMAINING_DAYS" != "lifetime" ] && [ "$REMAINING_DAYS" -lt 0 ]; then
         echo "Authorization has expired."
@@ -180,7 +180,7 @@ ${orange}Press [Ctrl + C] to exit${NC}"
         10) clearScreen; log-database-xray-http  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xhttp ;;
         11) clearScreen; list-xray-http  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xhttp ;;
         12) clearScreen; change-id-http ; xhttp ;;
-        13) clearScreen; unlock-http ; xhttp ;;
+        13) clearScreen; unlock-http ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xhttp ;;
         14) clearScreen; routing-http ; xhttp ;;
         15) clearScreen; change-limit-ip-http ; xhttp ;;
         16) clearScreen; change-quota-http ; xhttp ;;

@@ -2384,3 +2384,66 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | Nothing rejected; publish path only. |
 | **Over-engineering** | Same line-count class; no helpers, no traps. |
 | **vs the source** | References predate multi-domain self-sign; divergence is Fase 12 temp-then-move compliance. |
+
+## 202. Lifetime Indent — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Whitespace only; gate arithmetic and `lifetime` bypass untouched. |
+| **Over-strictness** | Nothing rejected; display path only. |
+| **Over-engineering** | One indent level; no helpers. |
+| **vs the source** | Matches surrounding 8-space style. |
+
+## 203. Blank-Row Cap — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Removed blanks only; prompts, reads and animation frames kept. |
+| **Over-strictness** | No input validation changed. |
+| **Over-engineering** | Deletions only; no new functions. |
+| **vs the source** | Standard is `clear`+3x everywhere else. |
+
+## 204. SSH Login Theme — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Log sources, per-user counts, PID/limit lookup and cleanup unchanged. |
+| **Over-strictness** | No new exits; missing-log path still errors. |
+| **Over-engineering** | Reuses existing theme block; no new deps. |
+| **vs the source** | Mirrors `menu-ssh`/`x-ws`/`cek-xray-ws` separators and colors. |
+
+## 205. WS Color Prefix — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Same rewrite targets and upstreams; bare `/green` still matches (`~` is substring). |
+| **Over-strictness** | Wider match only; nothing newly rejected. |
+| **Over-engineering** | One token per block (`=`→`~`); no new locations. |
+| **vs the source** | Mirrors canonical `location ~ /vmws/vlws/trws`. |
+
+## 206. Menu Labels — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Text only; option numbers and branches unchanged. |
+| **Over-strictness** | Nothing rejected. |
+| **Over-engineering** | Label strings only. |
+| **vs the source** | Uniform bare names across both editions. |
+
+## 207. Unlock Pause — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Pause after return only; unlock logic and file moves untouched. |
+| **Over-strictness** | `|| true` so non-tty/API use never fails. |
+| **Over-engineering** | Same one-liner as options 07/10/11. |
+| **vs the source** | Matches existing pause pattern in the same menus. |
+
+## 208. Blue-Circle Left Align — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | `🟢`/section centering kept; payload and link lines untouched. |
+| **Over-strictness** | Display only; no filtering. |
+| **Over-engineering** | Condition trimmed, no new code. |
+| **vs the source** | Matches Telegram/`.log` left alignment (col 0). |

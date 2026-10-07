@@ -62,7 +62,7 @@
     if [ "$EXPIRED_DATE" = "lifetime" ]; then
         REMAINING_DAYS="lifetime"
     else
-    REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
+        REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
     fi
     if [ "$REMAINING_DAYS" != "lifetime" ] && [ "$REMAINING_DAYS" -lt 0 ]; then
         echo "Permission expired."
@@ -176,10 +176,7 @@ Loading_Animasi() {
     echo ""
     echo ""
     index=$((i % num_frames))
-    color_code=$((31 + i % 7))
-    echo ""
-    echo ""
-    echo ""
+    color_code=$((31 + i % 7))""
     echo -e "\e[1;${color_code}m ${frames[$index]}\e[0m"
     sleep 0.5
   done

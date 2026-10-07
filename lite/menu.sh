@@ -174,7 +174,7 @@ rainbow_sep() {
     if [ "$EXPIRED_DATE" = "lifetime" ]; then
         REMAINING_DAYS="lifetime"
     else
-    REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
+        REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
     fi
     if [ "$REMAINING_DAYS" != "lifetime" ] && [ "$REMAINING_DAYS" -lt 0 ]; then
         echo "Authorization has expired."
@@ -241,10 +241,10 @@ gRPC         : ${green}$gpc${NC}
 XHTTP        : ${green}$xhttp${NC}
 ${blue_sep}
 ${purple}MENU${NC}
-${green}1${NC}. WebSocket (WS)        ${green}5${NC}. System Menu
-${green}2${NC}. HTTP Upgrade (HU)   ${green}6${NC}. Domain Menu
-${green}3${NC}. gRPC (XTLS)           ${green}7${NC}. Backup Menu
-${green}4${NC}. XHTTP (XHTTP)    ${green}8${NC}. Telegram Bot
+${green}1${NC}. WebSocket        ${green}5${NC}. System Menu
+${green}2${NC}. HTTP Upgrade   ${green}6${NC}. Domain Menu
+${green}3${NC}. gRPC           ${green}7${NC}. Backup Menu
+${green}4${NC}. XHTTP    ${green}8${NC}. Telegram Bot
 ${blue_sep}
 Today: ${red}$ttoday${NC} Yesterday: ${red}$tyest${NC} This month: ${red}$tmon${NC}
 ${separator}

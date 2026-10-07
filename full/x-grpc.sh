@@ -63,7 +63,7 @@
     if [ "$EXPIRED_DATE" = "lifetime" ]; then
         REMAINING_DAYS="lifetime"
     else
-    REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
+        REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
     fi
     if [ "$REMAINING_DAYS" != "lifetime" ] && [ "$REMAINING_DAYS" -lt 0 ]; then
         echo "Authorization has expired."
@@ -180,7 +180,7 @@ ${orange}Press [Ctrl + C] to exit${NC}"
         10) clearScreen; log-database-xray-grpc  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xgrpc ;;
         11) clearScreen; list-xray-grpc  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xgrpc ;;
         12) clearScreen; change-id-grpc ; xgrpc ;;
-        13) clearScreen; unlock-grpc ; xgrpc ;;
+        13) clearScreen; unlock-grpc ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xgrpc ;;
         14) clearScreen; routing-grpc ; xgrpc ;;
         15) clearScreen; change-limit-ip-grpc ; xgrpc ;;
         16) clearScreen; change-quota-grpc ; xgrpc ;;

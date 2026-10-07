@@ -63,7 +63,7 @@
     if [ "$EXPIRED_DATE" = "lifetime" ]; then
         REMAINING_DAYS="lifetime"
     else
-    REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
+        REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
     fi
     if [ "$REMAINING_DAYS" != "lifetime" ] && [ "$REMAINING_DAYS" -lt 0 ]; then
         echo "Authorization has expired."
@@ -124,11 +124,9 @@ clear
 echo ""
 echo ""
 echo ""
-echo -e "
-${separator}
+echo -e "${separator}
 Success Change Banner
-${separator}
-"
+${separator}"
 read -n 1 -s -r -p "Press any key to return..." || true
 echo ""
 }
@@ -156,9 +154,7 @@ clear
 echo ""
 echo ""
 echo ""
-echo -e "
-\n
-Success Restart All Service Server\n\n"
+echo -e "Success Restart All Service Server"
 read -n 1 -s -r -p "Press any key to return..." || true
 echo ""
 }
@@ -167,10 +163,6 @@ menu-warp() {
 Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && Font_color_suffix="\033[0m"
 Info="${Red_font_prefix}[information]${Font_color_suffix}"
 
-clear
-echo ""
-echo ""
-echo ""
 install() {
 clear
 echo ""

@@ -61,9 +61,10 @@ format_display() {
                 [[ "$nt" =~ ^[=]{3,}$ ]] && ns=1
             fi
             # TUI-only: center title lines (payload stays left for Telegram).
-            # Main titles, section titles, and link headers.
+            # Main titles and section titles. Link headers (blue circle) stay
+            # left-aligned like Telegram/log.
             if [[ "$trimmed" =~ ^🟢.*🟢$ ]] || [[ "$trimmed" == "Limit Detail" ]] || \
-               [[ "$trimmed" == "Detail Port" ]] || [[ "$trimmed" =~ ^🔵.*$ ]]; then
+               [[ "$trimmed" == "Detail Port" ]]; then
                 local tlen=${#trimmed}
                 local wide=$(grep -o "[🟢🔵]" <<< "$trimmed" | wc -l)
                 (( tlen += wide ))

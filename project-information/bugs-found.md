@@ -2373,3 +2373,17 @@ Found 435. **Template default clients lack `level` (Fase 6)** —
 `json/{ws,grpc,upgrade,xhttp}.json` ship 12 default clients (3 each) with no `"level": 0`, while every created account carries it (Decision 23). Xray only emits per-user uplink/downlink counters for clients with explicit level, so the always-active template defaults are invisible to quota accounting.
 Found 436. **Self-signed install truncates live cert paths (Fase 12)** —
 `gen_selfsigned_all` in `full/dm-menu.sh:321-330` (`lite/` identical) publishes the fresh key/cert with `cat /tmp/xray-selfsigned.crt > /etc/xray/xray.crt` (same for the key and `funny.pem`): each live path is truncated first, then filled. A kill/power-loss/disk-full in between leaves a corrupt live cert/key, and nginx + haproxy fail to boot on it. Violates the Fase 12 standard (write temp, then move — never truncate the live path). The `openssl` step itself is guarded (`|| return 1`); only the publish step is racy.
+Found 437. **Expired lifetime indent off (operator list)** —
+191 panel scripts indent the `else`-branch `REMAINING_DAYS=$(calculate_remaining_days ...)` with 4 spaces instead of 8; `full/quota-ws.sh:76` + `lite/quota-ws.sh:76` indent the `Expired: lifetime` output-if with 4 instead of 8. Display identical, code style only.
+Found 438. **Some menus print more than 3 blank rows (operator list)** —
+`full/menu-wg.sh` warp block ran 3x `clear` + 9x `echo ""`; 8x `clear` + 3x `echo ""` + `newline` (=4th blank); all 8 `change-quota-*.sh` `Loading_Animasi` printed 3x + assignments + 3x (=6); `menu-system.sh` `resall` added leading `\n` + trailing `\n\n`, `bnnr` leading `\n`, `menu-warp` cleared twice around nested `install()` definition.
+Found 439. **SSH online-user view unstyled (operator list)** —
+`full/cek-login-ssh.sh` used blue-only `print_color` headers (`-----------[ Dropbear/OpenSSH User Login ]-----------`), 30-wide rules and 47-wide total lines, colorless table, no title card — off the general rainbow/purple/blue/green theme used by `menu-ssh`/`x-ws`/`cek-xray-ws`.
+Found 440. **Prefixed color path /a/green misses (operator list)** —
+canonical WS `location ~ /vmws` matches any URI containing `/vmws` so `/a/b/vmws` works; all 9 WS color aliases (`/red,/crimson,/scarlet,/green,/lime,/emerald,/blue,/navy,/azure`) were `location =` exact so `/a/green` fell through to `location /` (SSH backend) and failed.
+Found 441. **XTLS menu labels carry uneven suffixes (operator list)** —
+`full/menu-x.sh` showed `1. WebSocket (WS)` / `4. gRPC (XTLS)` while `2. HTTP Upgrade` / `3. XHTTP` had none; `lite/menu.sh` carried all four suffixes (`(WS)/(HU)/(XTLS)/(XHTTP)`). Cosmetic uniformity only.
+Found 442. **Unlock WS flashes and returns (operator list)** —
+`x-ws.sh:13` ran `clearScreen; unlock-ws; xws` with no pause (options 07/10/11 pause); empty state (no `*.locked`, the hot path) prints one line and exits, caller redraws instantly. Same shape in http/grpc/xhttp callers.
+Found 443. **Blue-circle link headers centered in TUI but left in Telegram/log (operator list)** —
+`config/format.sh` centered every `^🔵.*$` line via `pad=(maxdash-tlen)/2`; Telegram/log use raw `TEKS` (col 0). `🔵 VLess WS TLS/none` (and all sibling cards) rendered indented on screen, left-aligned everywhere else.

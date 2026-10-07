@@ -73,7 +73,7 @@ fi
 output() {
     echo "Username: $USERNAME"
     echo "IPv4: $PERMISSION_IP"
-    if [ "$REMAINING_DAYS" = "lifetime" ]; then echo "Expired: lifetime"; else echo "Expired: $EXPIRED_DATE ( $REMAINING_DAYS Days )"; fi
+        if [ "$REMAINING_DAYS" = "lifetime" ]; then echo "Expired: lifetime"; else echo "Expired: $EXPIRED_DATE ( $REMAINING_DAYS Days )"; fi
 }
 
 output

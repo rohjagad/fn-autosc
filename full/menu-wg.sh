@@ -63,7 +63,7 @@
     if [ "$EXPIRED_DATE" = "lifetime" ]; then
         REMAINING_DAYS="lifetime"
     else
-    REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
+        REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
     fi
     if [ "$REMAINING_DAYS" != "lifetime" ] && [ "$REMAINING_DAYS" -lt 0 ]; then
         echo "Authorization has expired."
@@ -165,7 +165,6 @@ function create() {
 	echo ""
 	echo ""
 	echo ""
-	newline
 	echo -e "Create WireGuard Account"
 	echo -e "${separator}"
 	echo -e " Username: \c"
@@ -239,7 +238,6 @@ AllowedIPs = ${client_ipv4}/32" >> /etc/wireguard/wg0.conf
 	echo ""
 	echo ""
 	echo ""
-	newline
 	echo -e "WireGuard User Information"
 	echo -e "${separator}"
 	echo -e " Domain\t: $domain"
@@ -296,14 +294,6 @@ clear
 echo ""
 echo ""
 echo ""
-clear
-echo ""
-echo ""
-echo ""
-clear
-echo ""
-echo ""
-echo ""
 warpd=$(cat warp.json | jq .)
 
 clear
@@ -341,7 +331,6 @@ function delete() {
 	echo ""
 	echo ""
 	echo ""
-	newline
 	echo -e "Delete WireGuard User"
 	echo -e "${separator}"
 	echo -e " Username: \c"
@@ -372,7 +361,6 @@ function extend() {
 	echo ""
 	echo ""
 	echo ""
-	newline
 	echo -e "Extend WireGuard User"
 	echo -e "${separator}"
 	echo -e " Username: \c"
@@ -415,7 +403,6 @@ function extend() {
 	echo ""
 	echo ""
 	echo ""
-	newline
 	echo -e "WireGuard User Information"
 	echo -e "${separator}"
 	echo -e " Username\t: $user"
@@ -429,7 +416,6 @@ function list() {
 	echo ""
 	echo ""
 	echo ""
-	newline
 	echo -e "${separator}"
 	echo -e "Username          Exp. Date"
 	echo -e "${blue_sep}"
@@ -453,7 +439,6 @@ function show() {
 	echo ""
 	echo ""
 	echo ""
-	newline
 	echo -e "WireGuard Configuration"
 	echo -e "${separator}"
 	echo -e " Username\t: \c"
@@ -530,7 +515,6 @@ case $menu in
 	echo ""
 	echo ""
 	echo ""
-	newline
 	error "Invalid option"
 	sleep 1
 	main

@@ -63,7 +63,7 @@
     if [ "$EXPIRED_DATE" = "lifetime" ]; then
         REMAINING_DAYS="lifetime"
     else
-    REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
+        REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
     fi
     if [ "$REMAINING_DAYS" != "lifetime" ] && [ "$REMAINING_DAYS" -lt 0 ]; then
         echo "Authorization has expired."
@@ -149,10 +149,10 @@ XHTTP        : $xhttp
 gRPC         : $gpc
 ${blue_sep}
 ${purple}MENU${NC}
-${green}1${NC}. WebSocket (WS)
+${green}1${NC}. WebSocket
 ${green}2${NC}. HTTP Upgrade
 ${green}3${NC}. XHTTP
-${green}4${NC}. gRPC (XTLS)
+${green}4${NC}. gRPC
 ${green}0${NC}. Back to Main Menu
 ${separator}
 
