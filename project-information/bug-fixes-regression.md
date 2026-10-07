@@ -2364,3 +2364,13 @@ Section 35's four-check rule applied to Fix 415:
 ## 199 follow-up. SSH Domains-Only — Four Checks (October 7, 2026)
 
 Same four checks as Section 199, applied to the two SSH caller pipelines: Telegram transform only; no TUI/log/validation change; one sed expression each; operator direction.
+## 200. Template Level — Four Checks (October 7, 2026)
+
+Section 35's four-check rule applied to Fix 416:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Level 0 == Xray default; no routing/policy change. Live daemons restarted clean. |
+| **Over-strictness** | Nothing rejected; additive field. |
+| **Over-engineering** | One line per default client. |
+| **vs the source** | References lack it too; divergence is Decision-23 compliance (quota counters). |

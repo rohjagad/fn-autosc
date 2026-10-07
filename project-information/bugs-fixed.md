@@ -2797,3 +2797,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 415 follow-up (Found 434):** `full/addssh.sh:240` + `full/trial-ssh.sh:184` caller pipelines strip `Domain     :` for Telegram; TUI/`.log` keep both lines. Single-domain non-rotation cards (WG/Noobz/L2TP) untouched — no list to fall back on.
 - **Verified live:** deployed hash-verified; `.log` shows both lines, Telegram sim shows `Domains` only; `bash -n` clean; full.zip repacked (0755).
+### Fix 416 - Template clients level 0 (Found 435)
+
+- **Fix 416 (Found 435):** added `"level": 0` to all 12 default clients in `json/*.json` (last-property rule, marker comments preserved); same patch applied to live `/etc/xray/json/*.json` (snapshot first), all 4 `xray run -test` OK, daemons restarted, 0 failed.
+- **Verified:** templates parse as JSONC (12/12 level 0); created accounts already carried it (live `livetest_lv1` proof); routing unchanged (0 is the default level per Decision 23).

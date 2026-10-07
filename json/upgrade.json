@@ -20,7 +20,8 @@
       "settings": {
         "clients": [
           {
-            "id": "nonescript-fn-project"
+            "id": "nonescript-fn-project",
+            "level": 0
 #vmess
           }
         ],
@@ -48,7 +49,8 @@
       "settings": {
         "clients": [
           {
-            "password": "nonescript-fn-project"
+            "password": "nonescript-fn-project",
+            "level": 0
 #trojan
           }
         ],
@@ -76,7 +78,8 @@
       "settings": {
         "clients": [
           {
-            "id": "nonescript-fn-project"
+            "id": "nonescript-fn-project",
+            "level": 0
 #vless
           }
         ],

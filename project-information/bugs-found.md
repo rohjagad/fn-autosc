@@ -2369,3 +2369,5 @@ Found 434. **Telegram cards show used-Domain line despite no-default rotation (o
 creation cards list both `Domain : <used>` and `Domains : <all>`; with no-default round-robin rotation the used line implies a default that does not exist. Rotation itself is link-text insertion only (no connection change), so the list alone suffices.
 Found 434 follow-up. **SSH cards same used-Domain line** —
 `addssh.sh`/`trial-ssh.sh` carry the same `Domain : <used>` + `Domains : <all>` pair; same no-default rule applies.
+Found 435. **Template default clients lack `level` (Fase 6)** —
+`json/{ws,grpc,upgrade,xhttp}.json` ship 12 default clients (3 each) with no `"level": 0`, while every created account carries it (Decision 23). Xray only emits per-user uplink/downlink counters for clients with explicit level, so the always-active template defaults are invisible to quota accounting.

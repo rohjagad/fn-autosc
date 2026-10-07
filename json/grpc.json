@@ -21,7 +21,8 @@
         "decryption": "none",
         "clients": [
           {
-            "id": "cfbbaafc-8d52-450c-9fb0-145bc8221e6d"
+            "id": "cfbbaafc-8d52-450c-9fb0-145bc8221e6d",
+            "level": 0
 #vless
           }
         ]
@@ -41,7 +42,8 @@
         "clients": [
           {
             "id": "cfbbaafc-8d52-450c-9fb0-145bc8221e6d",
-            "alterId": 0
+            "alterId": 0,
+            "level": 0
 #vmess
           }
         ]
@@ -61,7 +63,8 @@
         "decryption": "none",
         "clients": [
           {
-            "password": "cfbbaafc-8d52-450c-9fb0-145bc8221e6d"
+            "password": "cfbbaafc-8d52-450c-9fb0-145bc8221e6d",
+            "level": 0
 #trojan
           }
         ]
