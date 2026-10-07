@@ -149,14 +149,12 @@ echo ""
 echo -e "${separator}"
 echo -e "${GREEN}          Change UUID X-ray gRPC"
 echo -e "${separator}"
-echo -e "${YELLOW} Username      |       UUID"
 echo -e "${blue_sep}"
 
-# Display usernames and UUIDs
+# Display usernames
 _i=1
 for user in "${usernames[@]}"; do
-    uid=$(grep -F "\"email\": \"${user}\"" /etc/xray/json/grpc.json | sed -nE 's/.*"(id|password)": "([^"]+)".*/\2/p' | sort -u | head -1)
-    printf "${GREEN}%02d${NC}. %-20s %s\n" "$_i" "$user" "$uid"
+    printf "${GREEN}%02d${NC}. %s\n" "$_i" "$user"
     _i=$((_i+1))
 done
 
@@ -182,7 +180,10 @@ while true; do
 done
 
 # Prompt for new UUID, generate if empty
-read -p " Input New UUID (or press Enter to auto-generate): " new
+# GET OLD UUID
+old=$(grep -F "\"email\": \"${user}\"" /etc/xray/json/grpc.json | sed -nE 's/.*"(id|password)": "([^"]+)".*/\2/p' | sort -u | head -1)
+echo -e "Old UUID: $old"
+read -p "New UUID: " new
 if [[ -z "$new" ]]; then
     new=$(xray uuid)
     echo -e "Generated new UUID: $new"
@@ -192,8 +193,6 @@ clear
 echo ""
 echo ""
 echo ""
-# GET OLD UUID
-old=$(grep -F "\"email\": \"${user}\"" /etc/xray/json/grpc.json | sed -nE 's/.*"(id|password)": "([^"]+)".*/\2/p' | sort -u | head -1)
 
 while true; do
     read -p "Please Input option (y/n): " pks || exit 1

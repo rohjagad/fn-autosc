@@ -2327,3 +2327,5 @@ Found 413. **TUI titles centered on the wrong width** —
 the new renderer centering used terminal width, scattering titles right of the card. Operator direction: center relative to the 35-dash rainbow length. Same fix owed to the change-tool banners and the `Create …` prompt titles.
 Found 414. **Account pickers username-only, lists unnumbered** —
 delete/extend/change-id show plain unnumbered tables and accept only usernames; lock/unlock show numbers but ignore them. Operator direction: every picker numbers its list and takes a number OR a username.
+Found 415. **Change-UUID table shows UUIDs nobody compares** —
+the picker prints a `Username | UUID` table, yet the operator picks by name/number and the flow never asks to confirm against the shown value; the wide table also crowds small terminals.

@@ -2201,3 +2201,13 @@ Section 35's four-check rule applied to Fix 398:
 | **Over-strictness** | Nothing newly rejected; numbers only add a resolution step. |
 | **Over-engineering** | Array + arithmetic-guard mapping per flow, mirroring the existing list-xray pattern. |
 | **vs the source** | References predate numbered pickers; number-or-name is this repo's own direction per operator request. |
+## 183. UUID Picker Simplify — Four Checks (October 7, 2026)
+
+Section 35's four-check rule applied to Fix 399:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Display-only trim plus prompt reorder; UUID fetch/replace logic and validation untouched. |
+| **Over-strictness** | Nothing rejected; text-scoped change. |
+| **Over-engineering** | Row removal plus two-line old/new display. |
+| **vs the source** | References predate numbered pickers; names-only with old/new confirmation is this repo's own direction per operator request. |

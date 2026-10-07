@@ -2725,3 +2725,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 398 (Found 414):** delete/extend/change-id lists numbered (`01. user  exp`, both editions); all pickers (delete/extend/change-id/unlock/lock, plus prompt wording on quota/list/Go) accept a list number or a username (`10#` base-guarded, out-of-range falls back to name lookup). Go binaries rebuilt.
 - **Verified live per group:** delete #1, extend #1, change-id #1, lock #1, unlock #1, quota #1, limit #1 — all resolve by number; `bash -n` clean; zips repacked (0755, parity rechecked); one-bundle deploy with hash verify; box left with 0 test residue.
+### Fix 399 - Names-only UUID picker with old/new display (Found 415)
+
+- **Fix 399 (Found 415):** change-id lists numbered usernames only; after picking, the flow prints `Old UUID:` then prompts `New UUID:` (empty still auto-generates). Number mapping re-proven live across two accounts: pick `2` rotated only the displayed second user.
+- **Verified:** `bash -n` clean; zips repacked (0755, parity rechecked); deployed scripts hash-verified; box left with 0 test residue (`trial452` is operator-made, preserved).
