@@ -194,13 +194,13 @@ TEKS="
 🟢 ACCOUNT DETAIL 🟢
 -----------------------
 
-Remarks : $user
-Domain  : ${rdomain}
-Domains : $alldom
-ISP     : $isp
-Region  : $region
-UUID    : $uuid
-Expired : $exp
+Remarks  : $user
+Domain   : ${rdomain}
+Domains  : $alldom
+ISP      : $isp
+Region   : $region
+UUID     : $uuid
+Expired  : $exp
 Protocol : VMESS
 Transport: HU
 -----------------------

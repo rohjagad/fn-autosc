@@ -2347,3 +2347,5 @@ Found 423. **Unlock titles still transport-flavored** —
 `XRAY WS UNLOCK ACCOUNT` / `UNLOCK XRAY HTTP UPGRADE` / `gRPC UNLOCK ACCOUNT`. Operator direction: bare `ACCOUNT UNLOCKED`.
 Found 424. **Card titles repeat what the rows say** —
 `XRAY VMESS WS` etc. restate the new Protocol/Transport rows. Operator direction: bare `ACCOUNT DETAIL` everywhere.
+Found 425. **Top-block colons split 9/10 after the row change** —
+new `Protocol :`/`Transport:` rows sit at col 10 against the col-9 block. Fix by widening the block to col 10 (and teaching the extend swap both spacings so old single-space logs still update).

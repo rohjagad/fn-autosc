@@ -2291,3 +2291,13 @@ Section 35's four-check rule applied to Fix 407:
 | **Over-strictness** | Nothing rejected; text-scoped change. |
 | **Over-engineering** | Literal title swaps. |
 | **vs the source** | No ruling; bare titles extend the operator-chosen notice pattern to cards. |
+## 193. Top-Block Columns — Four Checks (October 7, 2026)
+
+Section 35's four-check rule applied to Fix 408:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Whitespace-tolerant or field-based readers unaffected; the one literal matcher (extend swap) covers both spacings. Old and new logs both update. |
+| **Over-strictness** | Nothing rejected; text-scoped change. |
+| **Over-engineering** | Spacing adjustments plus a dual-form swap. |
+| **vs the source** | No ruling; aligned columns per operator request. |

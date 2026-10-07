@@ -2761,3 +2761,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 407 (Found 424):** all 48 cards titled `🟢 ACCOUNT DETAIL 🟢`; type info lives in Protocol/Transport rows and link headers. SSH card untouched.
 - **Verified live:** new card renders bare title + both rows; `bash -n` clean; zips repacked (0755, parity rechecked); one-bundle deploy; box left with 0 test residue.
+### Fix 408 - Col-10 top block (Found 425)
+
+- **Fix 408 (Found 425):** top account block widened to col 10 across all 48 cards; extend log-swap handles old and new spacing. Block audit reports zero strays.
+- **Verified live:** aligned card + extend moving log and json together; `bash -n` clean; zips repacked (0755, parity rechecked); one-bundle deploy; box left with 0 test residue.

@@ -203,7 +203,7 @@ else
     exp3=$(($exp2 + $masaaktif))
     exp4=$(date -d "$exp3 days" +"%d-%b-%Y") # Expiry display: DD-Mon-YYYY
     sed -i "/^### $user /c\### $user $exp4" /etc/xray/json/xhttp.json
-    sed -i "s/Expired : $exp/Expired : $exp4/" /var/log/create/xray/xhttp/${user}.log
+    sed -i "s/Expired : $exp/Expired  : $exp4/; s/Expired  : $exp/Expired  : $exp4/" /var/log/create/xray/xhttp/${user}.log
 
     echo -e "\n${YB}Reset total usage quota? (y/n):${NC}"
     read -rp "Input: " reset_quota
