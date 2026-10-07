@@ -2773,3 +2773,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 410 (Found 427–429):** Indonesian unlock confirmations removed (all unlocks direct like ws); SSH change title uppercased (`CHANGE LIMIT IP SSH`, binary rebuilt); SSH multilogin lock restyled to the shared `MULTILOGIN LOCKED` rows (`Type: SSH`, `Login: n / limit`, `Unlock Time` kept); expiry notices rewritten to the specced lowercase rows (8 sections, both editions).
 - **Verified live:** direct unlock works; SSH layout + title in new binary; expiry run deletes and notifies in the new shape; `bash -n` clean; zips repacked (0755, parity rechecked); one-bundle deploys with hash verify; box left with 0 test residue.
+### Fix 411 - Expiry code rows + bold title (Found 430)
+
+- **Fix 411 (Found 430):** expiry rows colon-aligned at 12 inside whole-row `<code>`; title `<b>EXPIRED ACCOUNT</b>`; `parse_mode=html` added to the 4 Xray expiry sends (other xp sends untouched).
+- **Verified live:** expiry run deletes and notifies in the final shape; `bash -n` clean; zips repacked (0755, parity rechecked); deployed + grep-verified; box left with 0 test residue.

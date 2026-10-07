@@ -2357,3 +2357,5 @@ Found 428. **SSH notices off-pattern** —
 the change notice title is mixed-case (`Change Limit IP SSH`) and the multilogin lock card uses its own shape instead of the shared `MULTILOGIN LOCKED` rows.
 Found 429. **Expiry notices use arrow lines** —
 `-> user / exp` with per-transport mixed titles. Operator spec: `EXPIRED ACCOUNT` with lowercase `username/protocol/transport/expired at` rows.
+Found 430. **Expiry rows unaligned, plain title, no HTML mode** —
+the specced lowercase rows shipped ragged without code tags, the title unbolder, and xp sends without `parse_mode` so tags would print literally.

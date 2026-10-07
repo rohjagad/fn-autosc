@@ -117,19 +117,19 @@ sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/ws.json
         rm -f /etc/xray/limit/ip/xray/ws/$user
 TEKS="
 --------------------
-EXPIRED ACCOUNT
+<b>EXPIRED ACCOUNT</b>
 --------------------
 
-username : $user
-protocol : $proto
-transport : WS
-expired at : $exp
+<code>username   : $user</code>
+<code>protocol   : $proto</code>
+<code>transport  : WS</code>
+<code>expired at : $exp</code>
 --------------------"
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
-curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL
+curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "parse_mode=html" --data-urlencode "text=$TEKS" $URL
 ws_expired=1
 fi
 done
@@ -171,19 +171,19 @@ sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/upgrade.json
         rm -f /etc/xray/limit/ip/xray/http/$user
 TEKS="
 --------------------
-EXPIRED ACCOUNT
+<b>EXPIRED ACCOUNT</b>
 --------------------
 
-username : $user
-protocol : $proto
-transport : HU
-expired at : $exp
+<code>username   : $user</code>
+<code>protocol   : $proto</code>
+<code>transport  : HU</code>
+<code>expired at : $exp</code>
 --------------------"
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
-curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL
+curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "parse_mode=html" --data-urlencode "text=$TEKS" $URL
 http_expired=1
 fi
 done
@@ -225,19 +225,19 @@ sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/xhttp.json
         rm -f /etc/xray/limit/ip/xray/xhttp/$user
 TEKS="
 --------------------
-EXPIRED ACCOUNT
+<b>EXPIRED ACCOUNT</b>
 --------------------
 
-username : $user
-protocol : $proto
-transport : XHTTP
-expired at : $exp
+<code>username   : $user</code>
+<code>protocol   : $proto</code>
+<code>transport  : XHTTP</code>
+<code>expired at : $exp</code>
 --------------------"
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
-curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL
+curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "parse_mode=html" --data-urlencode "text=$TEKS" $URL
 xhttp_expired=1
 fi
 done
@@ -279,19 +279,19 @@ sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/grpc.json
         rm -f /etc/xray/limit/ip/xray/grpc/$user
 TEKS="
 --------------------
-EXPIRED ACCOUNT
+<b>EXPIRED ACCOUNT</b>
 --------------------
 
-username : $user
-protocol : $proto
-transport : GRPC
-expired at : $exp
+<code>username   : $user</code>
+<code>protocol   : $proto</code>
+<code>transport  : GRPC</code>
+<code>expired at : $exp</code>
 --------------------"
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
-curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "text=$TEKS" $URL
+curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "parse_mode=html" --data-urlencode "text=$TEKS" $URL
 grpc_expired=1
 fi
 done

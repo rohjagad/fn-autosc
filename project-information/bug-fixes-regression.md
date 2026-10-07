@@ -2321,3 +2321,13 @@ Section 35's four-check rule applied to Fix 410:
 | **Over-strictness** | Nothing rejected; text-scoped changes. |
 | **Over-engineering** | Literal title/row/wrapper swaps. |
 | **vs the source** | No ruling; uniform notices per operator request. |
+## 196. Expiry Final Shape — Four Checks (October 7, 2026)
+
+Section 35's four-check rule applied to Fix 411:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Text + send-mode on the 4 Xray expiry sends only; deletion math untouched. |
+| **Over-strictness** | Nothing rejected; text-scoped change. |
+| **Over-engineering** | Literal row/title/send-flag swaps. |
+| **vs the source** | No ruling; final shape per operator spec. |
