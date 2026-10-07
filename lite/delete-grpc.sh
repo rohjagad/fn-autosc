@@ -169,13 +169,24 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/grpc.json")
 	echo -e "${separator}"
     echo -e "       Delete X-Ray gRPC Account       "
     echo -e "${separator}"
-    echo "  User       Expired  " 
-	echo -e "${blue_sep}"
-	grep -E "^### " "/etc/xray/json/grpc.json" | cut -d ' ' -f 2-3 | column -t | sort | uniq
+    _users=( $(grep -E "^### " "/etc/xray/json/grpc.json" | awk '{print $2}' | sort -u) )
+    _i=1
+    for _u in "${_users[@]}"; do
+        _e=$(grep -wE "^### $_u" "/etc/xray/json/grpc.json" | cut -d ' ' -f 3 | sort -u | tr '\n' ' ')
+        printf "\e[32;1m%02d\e[0m. %-20s %s\n" "$_i" "$_u" "$_e"
+        _i=$((_i+1))
+    done
     echo ""
     red "tap enter to go back"
     echo -e "${separator}"
-    read -rp "Input Username: " user || { clear; return 0; }
+    read -rp "Input Username or number: " _input || { clear; return 0; }
+    user="$_input"
+    if [[ "$_input" =~ ^[0-9]+$ ]]; then
+        _n=$((10#$_input))
+        if [ "$_n" -ge 1 ] && [ "$_n" -le "${#_users[@]}" ]; then
+            user="${_users[$((_n-1))]}"
+        fi
+    fi
     if [ -z "$user" ]; then
     x-grpc
     else

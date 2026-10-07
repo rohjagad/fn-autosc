@@ -153,9 +153,11 @@ echo -e "${YELLOW} Username      |       UUID"
 echo -e "${blue_sep}"
 
 # Display usernames and UUIDs
+_i=1
 for user in "${usernames[@]}"; do
     uid=$(grep -F "\"email\": \"${user}\"" /etc/xray/json/upgrade.json | sed -nE 's/.*"(id|password)": "([^"]+)".*/\2/p' | sort -u | head -1)
-    echo -e "${GREEN} $user      |       $uid"
+    printf "${GREEN}%02d${NC}. %-20s %s\n" "$_i" "$user" "$uid"
+    _i=$((_i+1))
 done
 
 echo -e "${blue_sep}"
@@ -164,7 +166,14 @@ echo -e "${separator}"
 
 # Prompt user input for username and validate
 while true; do
-    read -p "Input Username: " user || exit 1
+    read -p "Input Username or number: " _input || exit 1
+    user="$_input"
+    if [[ "$_input" =~ ^[0-9]+$ ]]; then
+        _n=$((10#$_input))
+        if [ "$_n" -ge 1 ] && [ "$_n" -le "${#usernames[@]}" ]; then
+            user="${usernames[$((_n-1))]}"
+        fi
+    fi
     if [[ -z "$user" || ! -f "/var/log/create/xray/http/${user}.log" ]]; then
         echo -e "${RED}Invalid username! Please try again.${NC}"
     else

@@ -2721,3 +2721,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 397 (Found 413):** renderer centers on width 35 (wide-emoji compensated); Go limit + shell quota banners re-padded to 35; all 24 `Create …` prompt titles recentered to 35. Telegram payloads still left (re-verified). Binaries rebuilt, one-bundle deploy with hash verify.
 - **Verified:** live card title sits centered over the 35-dash body; `bash -n` clean; zips repacked (0755, parity rechecked); box left with 0 test residue (one `trial452` present is operator-made, preserved).
+### Fix 398 - Number-or-name everywhere (Found 414)
+
+- **Fix 398 (Found 414):** delete/extend/change-id lists numbered (`01. user  exp`, both editions); all pickers (delete/extend/change-id/unlock/lock, plus prompt wording on quota/list/Go) accept a list number or a username (`10#` base-guarded, out-of-range falls back to name lookup). Go binaries rebuilt.
+- **Verified live per group:** delete #1, extend #1, change-id #1, lock #1, unlock #1, quota #1, limit #1 — all resolve by number; `bash -n` clean; zips repacked (0755, parity rechecked); one-bundle deploy with hash verify; box left with 0 test residue.

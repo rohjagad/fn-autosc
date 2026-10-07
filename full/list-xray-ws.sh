@@ -130,7 +130,7 @@ echo -e "Total Accounts: ${#data[@]}"
 echo -e "\033[1;34m-----------------------------------\033[0m"
 echo -e "\033[38;5;208mPress [Ctrl + C] to exit\033[0m"
 echo -e "$RSEP"
-read -p "Input Username: " input || exit 0
+read -p "Input Username or number: " input || exit 0
 
 # A number picks from the list, a name is used as-is
 user="$input"

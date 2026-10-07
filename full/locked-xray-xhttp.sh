@@ -153,12 +153,14 @@ if [ -n "$locked_files" ]; then
 ${separator}"
 
     count=0
+    names=()
     for file in $locked_files; do
         username=$(basename "$file" .log)
         uid=$(grep "UUID" "$file" | awk '{print $3}')
         exp=$(grep "Expired" "$file" | awk '{print $3}')
         protokol=$(grep "Protokol:" "$file" | awk '{print $2}')
         count=$((count+1))
+        names+=("$username")
 
         echo -e "${green}$(printf '%02d' $count)${NC}. Username : ${green}$username${NC}"
         echo -e "    Status   : ${green}Active${NC}"
@@ -170,7 +172,14 @@ ${separator}"
     echo -e "${orange}Press [Ctrl + C] to exit${NC}"
     echo -e "${separator}"
 
-    read -p "Input Username to Lock: " name || exit 0
+    read -p "Input Username or number to Lock: " _input || exit 0
+    name="$_input"
+    if [[ "$_input" =~ ^[0-9]+$ ]]; then
+        _n=$((10#$_input))
+        if [ "$_n" -ge 1 ] && [ "$_n" -le "${#names[@]}" ]; then
+            name="${names[$((_n-1))]}"
+        fi
+    fi
     [ -z "$name" ] && exit 0
 else
     clear

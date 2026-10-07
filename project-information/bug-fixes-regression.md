@@ -2191,3 +2191,13 @@ Section 35's four-check rule applied to Fix 397:
 | **Over-strictness** | Nothing rejected; text-scoped change. |
 | **Over-engineering** | Arithmetic swaps plus re-padding. |
 | **vs the source** | References have no centering rule; card-relative centering is this repo's own direction per operator request. |
+## 182. Dual Account Pick — Four Checks (October 7, 2026)
+
+Section 35's four-check rule applied to Fix 398:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Name path byte-identical behavior (invalid numbers fall through to existing not-found handling); numbering display-only. |
+| **Over-strictness** | Nothing newly rejected; numbers only add a resolution step. |
+| **Over-engineering** | Array + arithmetic-guard mapping per flow, mirroring the existing list-xray pattern. |
+| **vs the source** | References predate numbered pickers; number-or-name is this repo's own direction per operator request. |

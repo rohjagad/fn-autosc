@@ -206,7 +206,7 @@ func main() {
 	fmt.Println("\033[38;5;208mPress [Ctrl + C] to exit\033[0m")
 	barisPanjang()
 
-	fmt.Print("Input username: ")
+	fmt.Print("Input username or number: ")
 	var input string
 	fmt.Scanln(&input)
 	fmt.Println()

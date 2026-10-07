@@ -225,7 +225,7 @@ function change_quota() {
     Daftar_Account || return
     echo -e "${separator}"
     echo ""
-    read -p " Input Username: " input || return
+    read -p " Input Username or number: " input || return
     user="$input"
     if [[ "$input" =~ ^[0-9]+$ ]]; then
         n=$((10#$input))

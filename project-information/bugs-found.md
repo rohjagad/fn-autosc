@@ -2325,3 +2325,5 @@ Found 412. **Rainbow lines in three lengths** —
 TUI prompt headers run 28 segments and Go tools 42/47/50 dashes, while the main menu standard is 35. Operator direction: 35 everywhere.
 Found 413. **TUI titles centered on the wrong width** —
 the new renderer centering used terminal width, scattering titles right of the card. Operator direction: center relative to the 35-dash rainbow length. Same fix owed to the change-tool banners and the `Create …` prompt titles.
+Found 414. **Account pickers username-only, lists unnumbered** —
+delete/extend/change-id show plain unnumbered tables and accept only usernames; lock/unlock show numbers but ignore them. Operator direction: every picker numbers its list and takes a number OR a username.
