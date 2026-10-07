@@ -87,7 +87,7 @@ CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 TIME="10"
-DATE=$(date +"%Y-%m-%d %H:%M:%S")
+DATE=$(date +"%d-%b-%Y %H:%M:%S")
 
 # Daftar pengguna dari konfigurasi Xray (ambil username dari file JSON)
 users=$(grep '^###' /etc/xray/json/ws.json | cut -d ' ' -f 2 | sort | uniq)

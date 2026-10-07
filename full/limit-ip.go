@@ -174,7 +174,7 @@ func sendTelegramNotification(username, oldLimit, newLimit, expiry string) {
 	}
 	URL := "https://api.telegram.org/bot" + KEY + "/sendMessage"
 
-	date := time.Now().Format("2006-01-02")
+	date := time.Now().Format("02-Jan-2006")
 	message := fmt.Sprintf(`
 		<b>Change Limit IP SSH</b>
 		<b>-----------------------</b>

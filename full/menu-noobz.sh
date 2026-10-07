@@ -176,7 +176,7 @@ if ! noobz_add_user "$user" "$pass" "$masaaktif"; then
     sleep 2
     return
 fi
-expi=`date -d "$masaaktif days" +"%Y-%m-%d"`
+expi=`date -d "$masaaktif days" +"%d-%b-%Y"`
 echo "### ${user} ${expi}" >>/etc/funny/.noob
 clear
 echo ""

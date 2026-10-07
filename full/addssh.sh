@@ -198,6 +198,7 @@ alldom=$(printf '%s,' "${rdomains[@]}" | sed 's/,$//; s/,/, /g')
     create_ssh_user "$username" "$password" "$expiration_date" || return
 
     local expiry=$(chage -l "$username" | grep "Account expires" | awk -F": " '{print $2}' | xargs)
+    expiry=$(date -d "$expiry" +"%d-%b-%Y" 2>/dev/null || echo "$expiry")
 
     local message=$(cat <<EOF
 -------------------

@@ -146,7 +146,7 @@ while ! [[ "$masaaktif" =~ ^[1-9][0-9]*$ ]]; do
     read -p "Duration (Days) : " masaaktif || exit 1
 done
 hariini=`date -d "0 days" +"%Y-%m-%d"`
-exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
+exp=`date -d "$masaaktif days" +"%d-%b-%Y"`
 clear
 echo ""
 echo ""
@@ -299,7 +299,7 @@ if (( exp2 < 0 )); then
     exp2=0
 fi
 exp3=$(($exp2 + $masaaktif))
-exp4=$(date -d "$exp3 days" +"%Y-%m-%d")
+exp4=$(date -d "$exp3 days" +"%d-%b-%Y")
 sed -i "s/^### $user $exp/### $user $exp4/" /etc/funny/.l2tp
 chmod 600 /etc/funny/.l2tp 2>/dev/null || true
 systemctl daemon-reload

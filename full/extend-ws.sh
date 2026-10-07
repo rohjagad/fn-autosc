@@ -176,7 +176,7 @@ else
         read -p "Expired (days): " masaaktif || exit 1
     done
     exp=$(grep -wE "^### $user" "/etc/xray/json/ws.json" | cut -d ' ' -f 3 | sort | uniq | head -n 1)
-    now=$(date +%y-%m-%d) # Format tahun 2 digit
+    now=$(date +%y-%m-%d) # internal epoch math only
     d1=$(date -d "$exp" +%s 2>/dev/null)
     if [ -z "$d1" ]; then
         echo -e "\033[0;31mUnparseable expiry for this account - leaving it unchanged.\033[0m"
@@ -187,7 +187,7 @@ else
     d2=$(date -d "$now" +%s)
     exp2=$(( (d1 - d2) / 86400 ))
     exp3=$(($exp2 + $masaaktif))
-    exp4=$(date -d "$exp3 days" +"%y-%m-%d") # Format tahun 2 digit
+    exp4=$(date -d "$exp3 days" +"%d-%b-%Y") # Expiry display: DD-Mon-YYYY
     sed -i "/^### $user /c\### $user $exp4" /etc/xray/json/ws.json
     sed -i "s/Expired : $exp/Expired : $exp4/" /var/log/create/xray/ws/${user}.log
 

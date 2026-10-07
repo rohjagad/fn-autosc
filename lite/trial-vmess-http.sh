@@ -127,7 +127,7 @@ echo > /dev/null
 fi
 
 # Masa Aktif
-exp=`date -d "$masaaktif days" +"%y-%m-%d"`
+exp=`date -d "$masaaktif days" +"%d-%b-%Y"`
 
 # Generate UUID
 uuid=$(xray uuid)

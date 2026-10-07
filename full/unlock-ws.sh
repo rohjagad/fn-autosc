@@ -124,7 +124,7 @@ send_log() {
     [ -z "$CHATID" ] || [ -z "$KEY" ] && return 0
     URL="https://api.telegram.org/bot$KEY/sendMessage"
     TIME="10"
-    DATE=$(date +"%Y-%m-%d %H:%M:%S")
+    DATE=$(date +"%d-%b-%Y %H:%M:%S")
 
     TEXT="
 <b>-----------------------</b>

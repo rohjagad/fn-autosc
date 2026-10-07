@@ -123,7 +123,7 @@ send_log() {
     KEY=$(cat /etc/funny/.keybot 2>/dev/null)
     URL="https://api.telegram.org/bot$KEY/sendMessage"
     TIME="10"
-    DATE=$(date +"%Y-%m-%d %H:%M:%S")
+    DATE=$(date +"%d-%b-%Y %H:%M:%S")
 
     TEXT="
 <b>-----------------------</b>

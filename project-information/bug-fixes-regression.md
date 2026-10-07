@@ -2101,3 +2101,13 @@ Section 35's four-check rule applied to Fix 388:
 | **Over-strictness** | Nothing rejected; text-scoped change. |
 | **Over-engineering** | Literal single-character swaps. |
 | **vs the source** | References predate the two-color scheme; blue-links/green-titles is this repo's own direction per operator request. |
+## 173. Titles + Dates — Four Checks (October 7, 2026)
+
+Section 35's four-check rule applied to Fix 389:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Parsers consume dates only via `date -d` epoch math (verified for `DD-Mon-YYYY`) or `:`-split reads; system-account writes keep `YYYY-MM-DD`. Old-format rows still parse, so mixed old/new DB content works. Title swap touches header lines no parser reads. |
+| **Over-strictness** | Nothing rejected; text-scoped change. |
+| **Over-engineering** | Format-string swaps plus one SSH display reformat with fallback. |
+| **vs the source** | References predate any date rule; `DD-Mon-YYYY` and noun-first titles are this repo's own direction per operator request. |

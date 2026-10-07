@@ -87,11 +87,11 @@ KEY=$(cat /etc/funny/.keybot 2>/dev/null)
     [ -z "$CHATID" ] || [ -z "$KEY" ] && return 0
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 TIME="10"
-DATE=$(date +"%Y-%m-%d %H:%M:%S")
+DATE=$(date +"%d-%b-%Y %H:%M:%S")
 
         TEXT="
 <b>-----------------------</b>
-<b>X-RAY XHTTP DELETED ACCOUNT</b>
+<b>X-RAY XHTTP ACCOUNT DELETED</b>
 <b>-----------------------</b>
 <code>Date     : $DATE</code>
 <code>Username : $user</code>

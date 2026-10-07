@@ -214,7 +214,7 @@ echo > /dev/null
 fi
 
 # Masa Aktif
-exp=`date -d "$masaaktif days" +"%y-%m-%d"`
+exp=`date -d "$masaaktif days" +"%d-%b-%Y"`
 
 # Menambahkan akun pada json
 sed -i '/#vmess$/{n;s/}/},\n### '"$user $exp"'\n{"id": "'""$uuid""'","alterid": 0,"email": "'""$user""'","level": 0}/}' /etc/xray/json/ws.json

@@ -215,7 +215,7 @@ echo > /dev/null
 fi
 
 # Masa Aktif
-exp=`date -d "$masaaktif days" +"%y-%m-%d"`
+exp=`date -d "$masaaktif days" +"%d-%b-%Y"`
 
 # Menambahkan Akun di Database
 sed -i '/#trojan$/{n;s/}/},\n### '"$user $exp"'\n{"password": "'""$uuid""'","email": "'""$user""'","level": 0}/}' /etc/xray/json/grpc.json

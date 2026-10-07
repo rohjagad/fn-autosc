@@ -125,7 +125,7 @@ func main() {
 	fmt.Println(outerSep)
 	fmt.Printf(" Username : %s\n", username)
 	fmt.Printf(" Days Added : %d Days\n", days)
-	fmt.Printf(" Expires on : %s\n", newExpiration.Format("Jan 02, 2006"))
+	fmt.Printf(" Expires on : %s\n", newExpiration.Format("02-Jan-2006"))
 	fmt.Println(outerSep)
 }
 
@@ -181,7 +181,7 @@ func updateLogFile(logFilePath string, expiration time.Time) error {
 	lines := strings.Split(string(fileContent), "\n")
 	for i, line := range lines {
 		if strings.Contains(line, "Expired") {
-			lines[i] = fmt.Sprintf("Expired    : %s", expiration.Format("Jan 02, 2006"))
+			lines[i] = fmt.Sprintf("Expired    : %s", expiration.Format("02-Jan-2006"))
 			break
 		}
 	}

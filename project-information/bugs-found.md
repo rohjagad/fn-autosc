@@ -2295,3 +2295,7 @@ Found 397. **Card title names inconsistent** —
 some carry the `Xray` prefix and some do not; transports mix `WS`/`WebSocket`, `HU`/`HTTP Upgrade`, `gRPC`/`GRPC`, `xhttp`/`XHTTP`. Operator direction: single scheme — `Xray` + short codes (`WS`, `HU`, `XHTTP`, `GRPC`).
 Found 398. **Link-row icons share the title color** —
 link headers use the same green circle as the double-icon card titles, so the title and the copyable-link rows are visually indistinguishable. Operator direction: link area blue, titles stay green.
+Found 399. **Delete titles read backwards** —
+`X-RAY WS DELETED ACCOUNT` (and http/xhttp/grpc siblings) puts the verb first, while the sibling expiry cards already read noun-first (`X-Ray WS Account Expired`, NoobzVPN `Account Deleted`). Operator direction: `ACCOUNT DELETED` order everywhere.
+Found 400. **Dates mix three shapes** —
+cards stamp `26-10-07` (2-digit year, numeric month), stamps use `2026-10-07 10:00:00`, extend/WG show `07 Oct 2026`, SSH shows chage raw (`Nov 06, 2026`), Go tools print `Jan 02, 2006` / `2006-01-02`, and the auth repo documents `YYYY-MM-DD`. Operator direction: one shape everywhere — `07-Oct-2026` (4-digit year, 3-letter month, 2-digit day), including TUI and the auth repo.

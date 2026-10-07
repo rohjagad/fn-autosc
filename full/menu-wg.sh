@@ -194,7 +194,7 @@ function create() {
 		read duration || exit 1
 	done
 	exp=$(date -d +${duration}days +%Y-%m-%d)
-	expired=$(date -d "${exp}" +"%d %b %Y")
+	expired=$(date -d "${exp}" +"%d-%b-%Y")
 
 	for dot_ip in {2..254}; do
 		dot_exists=$(grep -cF "10.66.66.${dot_ip}/" /etc/wireguard/wg0.conf)
@@ -406,7 +406,7 @@ function extend() {
 	diff=$((($(date -d "${exp_old}" +%s)-$(date +%s))/(86400)))
 	duration=$(expr $diff + $extend)
 	exp_new=$(date -d +${duration}days +%Y-%m-%d)
-	exp=$(date -d "${exp_new}" +"%d %b %Y")
+	exp=$(date -d "${exp_new}" +"%d-%b-%Y")
 
 	sed -i "/^$user[[:space:]]/d" /etc/funny/.wireguard
 	echo -e "$user\t$exp_new" >> /etc/funny/.wireguard
