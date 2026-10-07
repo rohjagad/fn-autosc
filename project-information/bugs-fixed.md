@@ -2741,3 +2741,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 402 (Found 418):** all `X-RAY`/`X-Ray`/`X-ray` spellings converted to `XRAY` (68 files, both editions, shell + Go; commands/paths are lowercase and untouched, nothing parses the hyphenated forms). 3 cek binaries rebuilt.
 - **Verified:** `bash -n` clean; zips repacked (0755, parity rechecked); one-bundle deploy with hash verify on scripts + binaries.
+### Fix 403 - Xray multilogin auto-unlock (Found 419)
+
+- **Fix 403 (Found 419):** lock writes a due-epoch state file (`/etc/xray/autounlock/<t>/<user>`, lock + 10 min so the unlock lands within 15 min on the 5-minute cron); each limit run sweeps due entries through a new non-interactive `unlock-<t>-auto` helper (same restore as manual unlock, silent, idempotent, `XRAY_BATCH` shares the caller flock + single restart); stale states self-clean; lock notices now promise the 15-minute auto-unlock. Manual flows untouched and indefinite. 8 helpers + 8 limit scripts, both editions.
+- **Verified live:** past-due lock auto-restored via the cron path (json + log back, valid config, service active); ghost state cleaned; `bash -n` clean; zips repacked (0755, parity rechecked); one-bundle deploy with hash verify; box left with 0 test residue.

@@ -2335,3 +2335,5 @@ Found 417. **Centered titles overshoot the card body** —
 centering on width 35 while the card separators run 23 pushes titles right of the body. Titles must center on the card's own dash width.
 Found 418. **XRAY spelled three ways** —
 messages mix `XRAY`, `X-RAY`, and `X-Ray` across telegram titles, TUI banners, and expiry lines. Operator direction: just `XRAY`, both places.
+Found 419. **Xray multilogin locks never lift on their own** —
+a breach removes the account into `.locked` with no timer, unlike SSH which auto-unlocks after 15 minutes. Operator direction: Xray multilogin locks auto-unlock after ~15 minutes; manual locks stay indefinite (same split as SSH). Drive it off the 5-minute cron, not `at`: this box's `atd` demonstrably stalls new jobs until restarted.

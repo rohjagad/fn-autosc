@@ -100,7 +100,7 @@ DATE=$(date +"%d-%b-%Y %H:%M:%S")
 <code>Login    : $cek / $limit</code>
 <code>Status   : Locked</code>
 <b>-----------------------</b>
-<i>Catatan:</i> The user account has been locked and total usage bandwidth will not be reset on the server."
+<i>Catatan:</i> The user account has been locked and total usage bandwidth will not be reset on the server. The account will be automatically unlocked in 15 minutes."
         curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$TEXT" $URL >/dev/null
 }
 
@@ -151,6 +151,8 @@ for user in $username; do
             need_restart=1
             send_log
             mv /var/log/create/xray/grpc/${user}.log /var/log/create/xray/grpc/${user}.locked
+            mkdir -p /etc/xray/autounlock/grpc
+            echo $(( $(date +%s) + 600 )) > /etc/xray/autounlock/grpc/$user
         fi
 
     else
@@ -159,6 +161,25 @@ for user in $username; do
         echo ""
         echo ""
         echo ""
+    fi
+done
+
+# Auto-unlock sweeper: multilogin state written at lock time carries
+# the due epoch (lock + 10 min, so the unlock lands within 15 min on
+# the 5-minute cron). Manual locks never write state, so they stay
+# indefinite. Shares this flock and the single restart below.
+for _sf in /etc/xray/autounlock/grpc/*; do
+    [ -e "$_sf" ] || continue
+    _au=$(basename "$_sf")
+    if [ ! -f "/var/log/create/xray/grpc/${_au}.locked" ]; then
+        rm -f "$_sf"
+        continue
+    fi
+    _due=$(cat "$_sf" 2>/dev/null)
+    if [[ "$_due" =~ ^[0-9]+$ ]] && [ "$(date +%s)" -ge "$_due" ]; then
+        rm -f "$_sf"
+        XRAY_BATCH=1 "/usr/bin/unlock-grpc-auto" "$_au"
+        [ "$?" -eq 2 ] && need_restart=1
     fi
 done
 

@@ -2241,3 +2241,13 @@ Section 35's four-check rule applied to Fix 402:
 | **Over-strictness** | Nothing rejected; text-scoped change. |
 | **Over-engineering** | Literal token swaps. |
 | **vs the source** | No ruling; single spelling per operator request. |
+## 188. Multilogin Auto-Unlock — Four Checks (October 7, 2026)
+
+Section 35's four-check rule applied to Fix 403:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Breach detection/lock math untouched; sweeper only acts on state files the lock writes, skips anything already active, and can never duplicate a json entry (same guard as manual unlock). |
+| **Over-strictness** | Nothing rejected; additions only. |
+| **Over-engineering** | State file + sweep loop + thin helper mirroring manual restore. `at` deliberately avoided after this box's `atd` stalled new jobs twice. |
+| **vs the source** | No ruling; timed auto-unlock with indefinite manual is this repo's own direction per operator request (SSH parity). |
