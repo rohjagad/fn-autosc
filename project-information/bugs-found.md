@@ -2337,3 +2337,5 @@ Found 418. **XRAY spelled three ways** —
 messages mix `XRAY`, `X-RAY`, and `X-Ray` across telegram titles, TUI banners, and expiry lines. Operator direction: just `XRAY`, both places.
 Found 419. **Xray multilogin locks never lift on their own** —
 a breach removes the account into `.locked` with no timer, unlike SSH which auto-unlocks after 15 minutes. Operator direction: Xray multilogin locks auto-unlock after ~15 minutes; manual locks stay indefinite (same split as SSH). Drive it off the 5-minute cron, not `at`: this box's `atd` demonstrably stalls new jobs until restarted.
+Found 420. **Multilogin lock cards messy vs the delete pattern** —
+per-transport mixed titles (`XTLS gRPC Locked` vs `… MULTILOGIN`, missing `XTLS`, mixed case) and no Type row, while delete/extend use bare titles plus Type.

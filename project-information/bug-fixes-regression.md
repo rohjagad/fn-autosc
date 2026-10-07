@@ -2251,3 +2251,13 @@ Section 35's four-check rule applied to Fix 403:
 | **Over-strictness** | Nothing rejected; additions only. |
 | **Over-engineering** | State file + sweep loop + thin helper mirroring manual restore. `at` deliberately avoided after this box's `atd` stalled new jobs twice. |
 | **vs the source** | No ruling; timed auto-unlock with indefinite manual is this repo's own direction per operator request (SSH parity). |
+## 189. Multilogin Card Style — Four Checks (October 7, 2026)
+
+Section 35's four-check rule applied to Fix 404:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Header/body text only; lock detection, timing state, and restore untouched. |
+| **Over-strictness** | Nothing rejected; text-scoped change. |
+| **Over-engineering** | Literal title/row swaps mirroring Fix 390. |
+| **vs the source** | No ruling; delete-style cards per operator request. |

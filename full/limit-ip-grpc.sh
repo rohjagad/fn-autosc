@@ -93,10 +93,11 @@ DATE=$(date +"%d-%b-%Y %H:%M:%S")
 
         TEXT="
 <b>-----------------------</b>
-<b>XTLS gRPC Locked</b>
+<b>ACCOUNT LOCKED</b>
 <b>-----------------------</b>
 <code>Date     : $DATE</code>
 <code>Username : $user</code>
+<code>Type     : GRPC</code>
 <code>Login    : $cek / $limit</code>
 <code>Status   : Locked</code>
 <b>-----------------------</b>
