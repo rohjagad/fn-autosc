@@ -117,7 +117,7 @@ separator=$(rainbow_sep '-----------------------------------')
 blue_sep="${blue}-----------------------------------${NC}"
 
 echo -e "${NC}${separator}
-          SSH LOGIN CHECK
+          SSH USER LOGIN
 ${separator}"
 
 # Memeriksa apakah file log tersedia
@@ -147,24 +147,21 @@ grep -E "Accepted password for" "$LOG" > "$SSH_SRC"
 countdb=$(wc -l < "$DB_SRC")
 countsh=$(wc -l < "$SSH_SRC")
 
-# Single 3-column table: Username | Login (count/limit) | Type (dropbear/openssh)
+# 3-column table, no pipe separators: Username Login (count / limit) Type (Dropbear/Openssh)
 function show_logins {
-    echo -e "${blue_sep}
-${purple}SSH USER LOGIN${NC}
-${blue_sep}"
-    printf "${purple}%-20s| %-12s| %-10s${NC}\n" "Username" "Login" "Type"
+    printf "${purple}%-20s %-14s %-10s${NC}\n" "Username" "Login" "Type"
     echo -e "${blue_sep}"
     for user in $(sed -n "s/.*Password auth succeeded for '\([^']*\)' from.*/\1/p" "$DB_SRC" 2>/dev/null | sort -u); do
         [ -n "$user" ] || continue
-        LIMIT_IP=$(get_limit_ip "$user")
+        LIMIT_IP=$(get_limit_ip "$user" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
         user_count=$(grep -c "for '$user' from" "$DB_SRC" 2>/dev/null || echo 0)
-        printf "%-20s| %-12s| %-10s\n" "$user" "${user_count}/${LIMIT_IP}" "dropbear"
+        printf "%-20s %-14s %-10s\n" "$user" "${user_count} / ${LIMIT_IP}" "Dropbear"
     done
     for user in $(sed -n "s/.*Accepted password for \([^ ]*\) from .*/\1/p" "$SSH_SRC" 2>/dev/null | sort -u); do
         [ -n "$user" ] || continue
-        LIMIT_IP=$(get_limit_ip "$user")
+        LIMIT_IP=$(get_limit_ip "$user" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
         user_count=$(grep -c "for $user from" "$SSH_SRC" 2>/dev/null || echo 0)
-        printf "%-20s| %-12s| %-10s\n" "$user" "${user_count}/${LIMIT_IP}" "openssh"
+        printf "%-20s %-14s %-10s\n" "$user" "${user_count} / ${LIMIT_IP}" "Openssh"
     done
     echo ""
 }

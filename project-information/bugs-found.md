@@ -2395,3 +2395,5 @@ Found 446. **Main-menu lifetime line breaks label alignment (operator list)** �
 `full/menu.sh:77` pads sibling labels (`Username     :`, `IPv4         :`, `Expired      :`) but the lifetime branch printed bare `Expired: lifetime`, so the bottom auth card in the main menu sits crooked next to padded rows.
 Found 447. **SSH online check needs 3 columns (operator direction)** —
 `full/cek-login-ssh.sh` showed two 5-column tables (Username|IP|Login Count|PID|Limit IP, dropbear + openssh blocks). Specced shape is one table: `Username | Login (count/limit, e.g. 2/3) | Type (dropbear/openssh)`, one row per user.
+Found 448. **SSH table refinements (operator direction)** —
+title card still reads `SSH LOGIN CHECK`; a second `SSH USER LOGIN` header repeats below it; table uses `|` separators; login shows `count/limit` with no spaces and mixed-case limits (`No Limit`); type prints lowercase (`dropbear/openssh`). Specced: title `SSH USER LOGIN`, no repeat header, no pipes, `count / limit` spaced with lowercase hyphen limits (`32 / no-limit`), capitalized type (`Dropbear/Openssh`).

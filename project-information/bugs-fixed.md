@@ -2853,3 +2853,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 428 (Found 447):** `full/cek-login-ssh.sh` two 5-column per-line tables replaced by one `show_logins`: unique users per daemon, rows `Username | count/limit | dropbear|openssh`, same theme (title card, blue rules, purple header), same log sources/counts/limit lookup/total. PID/IP columns dropped per spec.
 - **Verified live:** `cek-login-ssh` on 157.10.253.95 prints `Username | Login | Type` with real rows (e.g. `root | 31/No Limit | openssh`); `bash -n` clean; zips repacked (0755, IN-SYNC).
+### Fix 429 - SSH table refinements (Found 448)
+
+- **Fix 429 (Found 448):** `full/cek-login-ssh.sh`: title card renamed to `SSH USER LOGIN`; duplicate section header removed (table follows title card); header/rows printed space-aligned with no `|`; login is `${count} / ${limit}` with limit lowercased and spaces hyphenated (`no-limit`, `unlimited`); type is `Dropbear`/`Openssh`. Sources/counts/total untouched.
+- **Verified live:** `cek-login-ssh` on 157.10.253.95 prints the specced shape with real rows (`root  34 / no-limit  Openssh`); `bash -n` clean; zips repacked (0755, IN-SYNC).

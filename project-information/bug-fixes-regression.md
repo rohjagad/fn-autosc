@@ -2492,3 +2492,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | No new exits; empty log still lists nothing + total 0. |
 | **Over-engineering** | One function replacing two; no new deps. |
 | **vs the source** | Specced `Username|Login|Type` shape; theme kept. |
+
+## 214. SSH Table Refinements — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Same sources, counts, limits and total; display formatting only. |
+| **Over-strictness** | Display only. |
+| **Over-engineering** | Format strings only. |
+| **vs the source** | Specced title/columns/spacing/case. |
