@@ -2141,3 +2141,13 @@ Section 35's four-check rule applied to Fix 392:
 | **Over-strictness** | Nothing rejected; text-scoped change. |
 | **Over-engineering** | Reorders plus label/dash normalizations, no new machinery. |
 | **vs the source** | References predate sectioned cards; the canonical skeleton is this repo's own direction per operator request. |
+## 177. Change TUI Restyle — Four Checks (October 7, 2026)
+
+Section 35's four-check rule applied to Fix 393:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Display text only; selection/validation/persistence logic untouched. Credit removals keep the same exit points. |
+| **Over-strictness** | Nothing rejected; text-scoped change. |
+| **Over-engineering** | Literal title/error/label swaps. |
+| **vs the source** | References predate styled change tools; short banners match this repo's short-code titles per operator request. |

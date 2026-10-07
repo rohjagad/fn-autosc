@@ -62,13 +62,10 @@ func clearScreen() {
 
 func rerechanBanner() {
 	barisPanjang()
-	fmt.Println("          Menu Change Limit IP X-Ray WebSocket")
+	fmt.Println("               Change Limit IP WS")
 	barisPanjang()
 }
 
-func Credit() {
-	fmt.Println("   Powered by FN AutoSC")
-}
 
 func loadingAnimasi() {
 	for i := 0; i < 3; i++ {
@@ -116,7 +113,7 @@ func getUsernames() []string {
 
 	files, err := os.ReadDir(dir)
 	if err != nil {
-		fmt.Println(Red + "Error membaca direktori log: " + err.Error() + Xark)
+		fmt.Println(Red + "Error reading log directory: " + err.Error() + Xark)
 		return usernames
 	}
 
@@ -132,7 +129,7 @@ func getUsernames() []string {
 func updateLog(logFile string, newIPLimit string) {
 	content, err := os.ReadFile(logFile)
 	if err != nil {
-		fmt.Println(Red + "Error membaca file log: " + err.Error() + Xark)
+		fmt.Println(Red + "Error reading log file: " + err.Error() + Xark)
 		return
 	}
 
@@ -145,7 +142,7 @@ func updateLog(logFile string, newIPLimit string) {
 
 	err = os.WriteFile(logFile, []byte(strings.Join(lines, "\n")), 0644)
 	if err != nil {
-		fmt.Println(Red + "Error memperbarui file log: " + err.Error() + Xark)
+		fmt.Println(Red + "Error updating log file: " + err.Error() + Xark)
 	}
 }
 
@@ -220,17 +217,16 @@ func main() {
 
 	logFile := "/var/log/create/xray/ws/" + user + ".log"
 	if _, err := os.Stat(logFile); os.IsNotExist(err) {
-		fmt.Println("Error: File log " + user + ".log tidak ditemukan.")
-		Credit()
+		fmt.Println("Error: log file " + user + ".log not found.")
 		return
 	}
 
 	currentIPLimit := getIPLimit(logFile)
 	rerechanBanner()
 	fmt.Println(Yellow + " Before " + Xark)
-	fmt.Printf(" Username   : %s\n", user)
-	fmt.Printf(" Exp Date   : %s\n", getAccountExpiry(logFile))
-	fmt.Printf(" Ip Limit   : %s\n", currentIPLimit)
+	fmt.Printf(" Username : %s\n", user)
+	fmt.Printf(" Exp Date : %s\n", getAccountExpiry(logFile))
+	fmt.Printf(" IP Limit : %s\n", currentIPLimit)
 	barisPanjang()
 
 	fmt.Println()
@@ -257,8 +253,7 @@ func main() {
 		fmt.Println(Yellow + " After " + Xark)
 		fmt.Printf(" Username : %s\n", user)
 		fmt.Printf(" Exp Date : %s\n", getAccountExpiry(logFile))
-		fmt.Printf(" New IP   : %s\n", newIPLimit)
+		fmt.Printf(" IP Limit : %s\n", newIPLimit)
 		barisPanjang()
-		Credit()
 	}
 }

@@ -2313,3 +2313,5 @@ Found 406. **Detail Port suffixes look off** —
 `Detail Port WS` / `Detail Port HU` / `Detail Port XHTTP` / `Detail Port GRPC` repeat the transport after a generic header. Operator direction: bare `Detail Port`.
 Found 407. **Whole-card sections hold different fields per builder** —
 vless ws/http/xhttp lump ports+path+network under one header, all three grpc cards lump ports+service+network, while vmess/trojan split ports from details; `Service Name` vs `Service` and `Port gRPC` vs `Port` labels disagree; separator runs use four different dash lengths. Operator direction: one canonical skeleton, same rows in the same order everywhere.
+Found 408. **Change-limit / change-quota TUIs unstyled** —
+the Go limit banners read `Menu Change Limit IP X-Ray WebSocket` (and HTTP Upgrade/gRPC variants), print `Powered by FN AutoSC` credits, mix Indonesian errors, and misalign Before (`Username   :`/`Ip Limit`) against After (`Username :`/`New IP`); the shell quota banners carry the same long titles plus a `Terimakasih … FN AutoSC` credit block.

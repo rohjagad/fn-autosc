@@ -157,19 +157,8 @@ function FN_Banner() {
   echo ""
   echo ""
   echo -e "${separator}"
-  echo -e "   Menu Change Quota X-Ray XHTTP"
+  echo -e "   Change Quota XHTTP"
   echo -e "${separator}"
-}
-
-# Kredit
-function Sc_Credit(){
-  sleep 1
-  echo -e "${separator}"
-  echo -e "${ungu}    Terimakasih Telah Menggunakan ${Xark}"
-  echo -e "${ungu}             Script  Credit ${Xark}"
-  echo -e "${ungu}               FN AutoSC ${Xark}"
-  echo -e "${separator}"
-  exit 0
 }
 
 # Animasi Loading
@@ -302,14 +291,14 @@ function change_quota() {
             echo ""
  #           baris_panjang
 	    send_log
-            Sc_Credit
+            exit 0
     else
         FN_Banner
         echo ""
         echo -e "${Red} Error: Invalid username or quota file does not exist. ${Xark}"
         echo ""
 #        baris_panjang
-        Sc_Credit
+        exit 0
     fi
 }
 
