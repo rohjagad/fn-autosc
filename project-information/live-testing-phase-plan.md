@@ -21,10 +21,11 @@ VM-3 ──┘                      ▲
 ### Channel K: KVM clients (`/dev/kvm`)
 
 - Host always has `/dev/kvm` ready. Multi-VM allowed (VM-1, VM-2, ...). **`/dev/kvm` VMs are the required traffic clients for every phase with K steps — no phase passes on Channel S alone where K steps exist.**
-- Simple setup: 1 Debian 12 VM per test role (e.g. VM-1 = xray client, VM-2 = second IP for limit test).
-- Each VM needs: `curl`, `xray-core` (same version as VPS), `ssh`, `wg-quick`, `noobz` client where needed.
-- One VM is enough for most phases. Use 2 VMs only for: IP-limit (Fase 9), concurrency (Fase 16/20).
+- Standard build (proven 2026-10-07): plain `qemu-system-x86_64` (no libvirt), Debian 12 cloud image + cloud-init seed (`tester`/`testpass`, SSH forwarded: VM-1 → `127.0.0.1:2221`, VM-2 → `127.0.0.1:2222`), 2 GB RAM each. Client tooling per VM: `curl`, `sshpass`, `xray-core` 25.3.6 (same as VPS), `wg-quick`, `openvpn` as the phase needs.
+- Asset688888volatility: VM disks/seeds lived in `/tmp/opencode/kvm` (wiped on host reboot) — rebuild from base image + seeds if gone, or persist outside `/tmp` before the next round.
+- One VM is enough for most phases. Use 2 VMs for: IP-limit (Fase 9), concurrency/loadbalance (Fase 20 + LB), parallel transport testing (Fase 6 went 2× faster split HU/XHTTP across VMs).
 - KVM is also the fault-injection box: DROP/slow network mocks (Fase 18/19/22) run here, never on the VPS data path.
+- Session hygiene (learned hard): NEVER `pkill -f "xray run"` over SSH — the pattern matches your own remote command line and kills the session; use `pkill -9 -x xray`. A backgrounded xray holds the SSH session open on exit — start clients in a held (background-shell) session and drive tests from separate calls.
 
 ### Channel S: SSH TUI (pure keyboard)
 
@@ -147,8 +148,8 @@ Each phase below lists: **Goal**, **K** (client traffic), **S** (menu walk), **P
 ### Fase 9: IP-limit + lock/unlock
 
 - **Goal:** concurrent-IP abuse locks, unlock restores.
-- **K:** account limit-IP=1 (or 2); hold slow downloads from VM-1 + VM-2 at the same time; run `limit-ip-*`; expect card → `.locked`, JSON entry removed, sessions cut.
-- **S:** do lock + `unlock-*` via TUI only (direct unlock, no confirmation). Multilogin locks auto-lift (~15 min via cron sweeper); manual locks stay indefinite. Confirm re-unlock of already-present account prints skip message (no duplicate JSON).
+- **K:** account limit-IP=1 (or 2); hold slow downloads (`curl --limit-rate`, 10 MB file) from VM-1 + VM-2 at the same time; confirm `statsonline` reads 2, then run `limit-ip-*`; expect card → `.locked`, JSON entry removed, sessions cut. Same-NAT caveat: two VMs behind one host egress share ONE source IP — route VM-2 through a WG tunnel account so the VPS sees tunnel IP as the 2nd address (proven 2026-10-07); restart VM-2's xray AFTER `wg-quick up` so its connection actually traverses the tunnel.
+- **S:** do lock + `unlock-*` via TUI only (direct unlock, no confirmation). Multilogin locks auto-lift (~15 min via cron sweeper — verify due-epoch file in `/etc/xray/autounlock/<t>/`); manual locks stay indefinite. Confirm re-unlock of already-present account prints skip message (no duplicate JSON).
 - **PASS:** lock file exists, unlock restores same UUID, `Configuration OK.`
 
 ### Fase 10: Quota + full delete
@@ -181,8 +182,9 @@ Each phase below lists: **Goal**, **K** (client traffic), **S** (menu walk), **P
 
 ### Fase 14: Domain list, rotation, and cert safety
 
+- **Rotation semantics (operator rule):** rotation is link-text insertion ONLY — the rotated domain is substituted into link hosts on the card; no connection/server-side change (all domains terminate on the same VPS/nginx). There is NO default domain: the installer domain is the primary entry, extras round-robin via `/etc/xray/.domainseq` with no implicit default. Telegram cards show `Domains :` (full list) only; TUI/`.log` keep `Domain :` + `Domains :`.
 - **Goal:** extra domains add cleanly, rotation spreads, TLS never bricks.
-- **K:** add a nip.io-style test domain pointing here; `openssl s_client` shows it in SANs after the auto self-sign; remove it; LE cert restored byte-identical after (back up `/etc/xray/xray.crt/.key` before, restore + reload after).
+- **K:** add nip.io-style or operator test domains pointing here (proven set: primary + 2 extras); `openssl s_client` shows each in SANs after the auto self-sign; decode N sequential links to prove round-robin across ALL domains with no stickiness; remove extras one by one; LE cert restored byte-identical after (back up `/etc/xray/xray.crt/.key` before, restore + reload after).
 - **S:** `dm-menu`: options 1–6 present; `bad domain` rejected, files unchanged; add validates + dedupes; list shows one shared-framed card per domain with matching protocol counts; remove empties the file and restores single `server_name` (no `.tmp` leftovers). Options 4–6 pick a domain first — test ONLY the cancel path (invalid choice returns clean, no issuance ever runs in tests: LE rate limits); unpointed domains print the skip notice instead of failing issuance.
 - **PASS:** add/remove/list round-trip clean; cancel paths write nothing; cert identical after restore; nginx -t clean throughout.
 
@@ -190,11 +192,12 @@ Each phase below lists: **Goal**, **K** (client traffic), **S** (menu walk), **P
 
 - **Goal:** backup arrives, restore needs the key.
 - **K:** none (server-side + Telegram client).
-- **S:** `bmenu` → backup: zip arrives as Telegram document with Domain/IP/Date caption, no public link. Restore page `:855/upload.php`: no token → 401, wrong token → 401, right token (`/etc/funny/.restore.key`) → extracted; restored `.key` back to `0600`.
+- **S:** `bmenu` → backup: zip arrives as Telegram document with Domain/IP/Date caption, no public link. Without bot creds the backup must fail safe: archive staged, clear `Telegram credentials are not configured` message, archive KEPT at `/root/backup.zip`, exit 0, no hang. Restore page `:855/upload.php`: no token → 401, wrong token → 401, right token (`/etc/funny/.restore.key`) → extracted; restored `.key` back to `0600`.
 - **PASS:** 401/401/ok, modes correct. (Destructive: snapshot first, restore to test box if possible.)
 
 ### Fase 16: REST API suite (FN-API)
 
+- **Install:** the API is NOT in this repo — clone `rohjagad/fn-autosc-api` on the VPS and run its `menu-api` option 1 (install). Token lands in `/etc/xray/.key` (`0600`); service `api.service` binds `127.0.0.1:9000`.
 - **Goal:** headless contract holds + concurrent safe.
 - **K:** VM sends HTTP to `https://<domain>/api/*`: no-auth → 401, bad token → 401, traversal `..%2f` → deny (400 edge / 404 app, both deny); CRUD `ping`, `add-vmess`, `list-xray`, `renew-xray`, `delete-xray`; `add-ss`/`add-socks` → explicit unsupported error; 5× parallel `add-vmess` all succeed, JSON valid (single-threaded design).
 - **S:** `menu-api status/install` screens: counts honest, `0` exits, invalid re-shows.
@@ -239,13 +242,15 @@ Each phase below lists: **Goal**, **K** (client traffic), **S** (menu walk), **P
 
 ## 6. Run Order & Cleanup
 
-1. F1 → F2 → F3 (infra first; stop on red).
-2. F4 → F5 → F6 → F7 (transports; one VM per proto set, reuse accounts).
-3. F8 → F9 → F10 → F11 → F12 (lifecycle/enforcement; clean accounts between phases).
-4. F13 (TUI sweep; can run in parallel with KVM transfers from another terminal).
-5. F14 → F15 (domain/backup; snapshot first, most disruptive last among panel phases).
-6. F16 (API; needs token from `/etc/xray/.key`, shred local copy after).
-7. F17 → F18 → F19 (migration + auth; network mocks removed immediately after).
-8. F20 → F21 (race + honesty; final `box-as-found`: 0 test accounts, valid JSONs, 0 failed units).
+1. F0 fresh-install baseline (when re-imaging): wipe via `bin456789/reinstall` (preserve root password with `--password`), `apt install curl screen`, pipe `full` + Domain + Email + `dual` + SlowDNS-NS into `install.sh` from `main` HEAD. Verify F1 before any traffic.
+2. F1 → F2 → F3 (infra first; stop on red).
+3. F4 → F5 → F6 → F7 (transports; one VM per proto set, reuse accounts; split across 2 VMs for speed).
+4. F8 → F9 → F10 → F11 → F12 (lifecycle/enforcement; clean accounts between phases).
+5. F13 (TUI sweep; can run in parallel with KVM transfers from another terminal).
+6. F14 → F15 (domain/backup; snapshot first, most disruptive last among panel phases).
+7. F16 (API; needs token from `/etc/xray/.key`, shred local copy after).
+8. F17 → F18 → F19 (migration + auth; network mocks removed immediately after).
+9. F20 → F21 (race + honesty; final `box-as-found`: 0 test accounts, valid JSONs, 0 failed units).
+10. LB (loadbalance = nginx active): 4 concurrent 10 MB downloads across WS+HU+XHTTP+gRPC from both VMs, all checksums match — proves the 443/80 frontend fans out under load.
 
 Log per phase: commands/keys pressed, expected vs actual, checksums, journal counts, and any TUI wording/layout photo or pasted screen.
