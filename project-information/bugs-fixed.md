@@ -2749,3 +2749,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 404 (Found 420):** all 8 multilogin lock notices restyled to the account-deleted shape: bare `<b>ACCOUNT LOCKED</b>` with `Date/Username/Type/Login/Status` (Type `WS/HU/XHTTP/GRPC`, col 10).
 - **Verified:** restyled preview delivered live (`ok:true`); `bash -n` clean; zips repacked (0755, parity rechecked); one-bundle deploy with hash verify.
+### Fix 405 - Split lock titles (Found 421)
+
+- **Fix 405 (Found 421):** manual notices retitled bare `ACCOUNT LOCKED` (was `XRAY <T> LOCKED ACCOUNT`); multilogin notices retitled `MULTILOGIN LOCKED`. 16 files, both editions.
+- **Verified:** restyled preview delivered live (`ok:true`); `bash -n` clean; zips repacked (0755, parity rechecked); one-bundle deploy with hash verify.

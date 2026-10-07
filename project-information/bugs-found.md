@@ -2339,3 +2339,5 @@ Found 419. **Xray multilogin locks never lift on their own** —
 a breach removes the account into `.locked` with no timer, unlike SSH which auto-unlocks after 15 minutes. Operator direction: Xray multilogin locks auto-unlock after ~15 minutes; manual locks stay indefinite (same split as SSH). Drive it off the 5-minute cron, not `at`: this box's `atd` demonstrably stalls new jobs until restarted.
 Found 420. **Multilogin lock cards messy vs the delete pattern** —
 per-transport mixed titles (`XTLS gRPC Locked` vs `… MULTILOGIN`, missing `XTLS`, mixed case) and no Type row, while delete/extend use bare titles plus Type.
+Found 421. **Manual and multilogin locks share one title** —
+both read `ACCOUNT LOCKED`, hiding which path locked the account. Operator direction: manual `ACCOUNT LOCKED`, multilogin `MULTILOGIN LOCKED`.

@@ -2261,3 +2261,13 @@ Section 35's four-check rule applied to Fix 404:
 | **Over-strictness** | Nothing rejected; text-scoped change. |
 | **Over-engineering** | Literal title/row swaps mirroring Fix 390. |
 | **vs the source** | No ruling; delete-style cards per operator request. |
+## 190. Split Lock Titles — Four Checks (October 7, 2026)
+
+Section 35's four-check rule applied to Fix 405:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Header text only; lock/unlock mechanics untouched. |
+| **Over-strictness** | Nothing rejected; text-scoped change. |
+| **Over-engineering** | Literal title swaps. |
+| **vs the source** | No ruling; split titles per operator request. |

@@ -93,7 +93,7 @@ DATE=$(date +"%d-%b-%Y %H:%M:%S")
 
         TEXT="
 <b>-----------------------</b>
-<b>ACCOUNT LOCKED</b>
+<b>MULTILOGIN LOCKED</b>
 <b>-----------------------</b>
 <code>Date     : $DATE</code>
 <code>Username : $user</code>

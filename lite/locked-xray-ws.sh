@@ -127,7 +127,7 @@ send_log() {
 
     TEXT="
 <b>-----------------------</b>
-<b>XRAY WS LOCKED ACCOUNT</b>
+<b>ACCOUNT LOCKED</b>
 <b>-----------------------</b>
 <code>Date     : $DATE</code>
 <code>Username : $name</code>
