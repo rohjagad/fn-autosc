@@ -2857,3 +2857,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 429 (Found 448):** `full/cek-login-ssh.sh`: title card renamed to `SSH USER LOGIN`; duplicate section header removed (table follows title card); header/rows printed space-aligned with no `|`; login is `${count} / ${limit}` with limit lowercased and spaces hyphenated (`no-limit`, `unlimited`); type is `Dropbear`/`Openssh`. Sources/counts/total untouched.
 - **Verified live:** `cek-login-ssh` on 157.10.253.95 prints the specced shape with real rows (`root  34 / no-limit  Openssh`); `bash -n` clean; zips repacked (0755, IN-SYNC).
+### Fix 430 - SSH table equal gaps (Found 449)
+
+- **Fix 430 (Found 449):** `full/cek-login-ssh.sh` `show_logins` now sizes columns from the longest content and prints both gaps as exactly 4 spaces (`%-<wu>s    %-<wl>s    %s`). Rows collected first, then header + rows share the format.
+- **Verified live:** `cek-login-ssh` on 157.10.253.95 shows equal 4-space gaps; `bash -n` clean; zips repacked (0755, IN-SYNC).

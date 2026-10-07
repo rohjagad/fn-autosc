@@ -147,21 +147,33 @@ grep -E "Accepted password for" "$LOG" > "$SSH_SRC"
 countdb=$(wc -l < "$DB_SRC")
 countsh=$(wc -l < "$SSH_SRC")
 
-# 3-column table, no pipe separators: Username Login (count / limit) Type (Dropbear/Openssh)
+# 3-column table, no pipe separators, equal gaps (4 spaces) between columns
 function show_logins {
-    printf "${purple}%-20s %-14s %-10s${NC}\n" "Username" "Login" "Type"
-    echo -e "${blue_sep}"
+    local rows=() user LIMIT_IP user_count l wu=8 wl=5 fmt
     for user in $(sed -n "s/.*Password auth succeeded for '\([^']*\)' from.*/\1/p" "$DB_SRC" 2>/dev/null | sort -u); do
         [ -n "$user" ] || continue
         LIMIT_IP=$(get_limit_ip "$user" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
         user_count=$(grep -c "for '$user' from" "$DB_SRC" 2>/dev/null || echo 0)
-        printf "%-20s %-14s %-10s\n" "$user" "${user_count} / ${LIMIT_IP}" "Dropbear"
+        l="${user_count} / ${LIMIT_IP}"
+        rows+=("${user}|${l}|Dropbear")
+        (( ${#user} > wu )) && wu=${#user}
+        (( ${#l} > wl )) && wl=${#l}
     done
     for user in $(sed -n "s/.*Accepted password for \([^ ]*\) from .*/\1/p" "$SSH_SRC" 2>/dev/null | sort -u); do
         [ -n "$user" ] || continue
         LIMIT_IP=$(get_limit_ip "$user" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
         user_count=$(grep -c "for $user from" "$SSH_SRC" 2>/dev/null || echo 0)
-        printf "%-20s %-14s %-10s\n" "$user" "${user_count} / ${LIMIT_IP}" "Openssh"
+        l="${user_count} / ${LIMIT_IP}"
+        rows+=("${user}|${l}|Openssh")
+        (( ${#user} > wu )) && wu=${#user}
+        (( ${#l} > wl )) && wl=${#l}
+    done
+    fmt="%-${wu}s    %-${wl}s    %s\n"
+    # shellcheck disable=SC2059
+    printf "${purple}${fmt}${NC}" "Username" "Login" "Type"
+    echo -e "${blue_sep}"
+    for r in ${rows[@]+"${rows[@]}"}; do
+        printf "$fmt" "${r%%|*}" "$(echo "$r" | cut -d'|' -f2)" "${r##*|}"
     done
     echo ""
 }

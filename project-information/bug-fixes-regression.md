@@ -2501,3 +2501,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | Display only. |
 | **Over-engineering** | Format strings only. |
 | **vs the source** | Specced title/columns/spacing/case. |
+
+## 215. SSH Equal Gaps — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Same rows, values and order; spacing only. |
+| **Over-strictness** | Display only. |
+| **Over-engineering** | Width scan + one format; no new deps. |
+| **vs the source** | Specced equal gaps. |
