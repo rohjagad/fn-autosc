@@ -2717,3 +2717,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 396 (Found 411, Found 412):** `format_display` centers title lines (main, section, link headers, wide-emoji compensated) using terminal width — Telegram payloads untouched and verified still left. All inline prompt rainbows regenerated to 35 segments in the main-menu gradient (26 files); Go rainbow/blue runs cut to 35 (change-limit ×8, limit-ip, delete/list/pwd-ssh); 7 binaries rebuilt. Deployed scripts + binaries (one bundle, hash-verified) and the renderer copy.
 - **Verified:** live card shows centered titles in TUI with left payload on disk; `bash -n` clean; zips repacked (0755, parity rechecked); box left with 0 test residue.
+### Fix 397 - Card-relative title centering (Found 413)
+
+- **Fix 397 (Found 413):** renderer centers on width 35 (wide-emoji compensated); Go limit + shell quota banners re-padded to 35; all 24 `Create …` prompt titles recentered to 35. Telegram payloads still left (re-verified). Binaries rebuilt, one-bundle deploy with hash verify.
+- **Verified:** live card title sits centered over the 35-dash body; `bash -n` clean; zips repacked (0755, parity rechecked); box left with 0 test residue (one `trial452` present is operator-made, preserved).

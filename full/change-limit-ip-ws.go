@@ -62,7 +62,7 @@ func clearScreen() {
 
 func rerechanBanner() {
 	barisPanjang()
-	fmt.Println("               Change Limit IP WS")
+	fmt.Println("        Change Limit IP WS")
 	barisPanjang()
 }
 

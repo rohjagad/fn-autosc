@@ -157,7 +157,7 @@ function FN_Banner() {
   echo ""
   echo ""
   echo -e "${separator}"
-  echo -e "   Change Quota HU"
+  echo -e "          Change Quota HU"
   echo -e "${separator}"
 }
 

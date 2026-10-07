@@ -62,7 +62,7 @@ func clearScreen() {
 
 func rerechanBanner() {
 	barisPanjang()
-	fmt.Println("              Change Limit IP GRPC")
+	fmt.Println("       Change Limit IP GRPC")
 	barisPanjang()
 }
 

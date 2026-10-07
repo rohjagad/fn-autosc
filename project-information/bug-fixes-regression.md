@@ -2181,3 +2181,13 @@ Section 35's four-check rule applied to Fix 396:
 | **Over-strictness** | Nothing rejected; text-scoped change. |
 | **Over-engineering** | One centering branch plus literal dash swaps. |
 | **vs the source** | References predate styled renderers; centered TUI titles and the 35 standard are this repo's own direction per operator request. |
+## 181. Card-Relative Centering — Four Checks (October 7, 2026)
+
+Section 35's four-check rule applied to Fix 397:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Padding-only changes; payload bytes and tool logic untouched. |
+| **Over-strictness** | Nothing rejected; text-scoped change. |
+| **Over-engineering** | Arithmetic swaps plus re-padding. |
+| **vs the source** | References have no centering rule; card-relative centering is this repo's own direction per operator request. |
