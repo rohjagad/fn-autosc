@@ -2341,3 +2341,13 @@ Section 35's four-check rule applied to Fix 412:
 | **Over-strictness** | Nothing rejected; text-scoped change. |
 | **Over-engineering** | Four label swaps. |
 | **vs the source** | No ruling; capitalization per operator request. |
+## 198. Fetch Timeout + Go Errors — Four Checks (October 7, 2026)
+
+Section 35's four-check rule applied to Fix 413–414:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Timeout only bounds hangs; Go paths now fail loudly instead of false-success. No logic change on happy path. |
+| **Over-strictness** | Nothing rejected; `-m 10` matches existing restore-ftp value. |
+| **Over-engineering** | Flag addition + error returns; no helpers. |
+| **vs the source** | Upstream has bare curl; divergence is fail-fast hardening per Fase 19/24. |

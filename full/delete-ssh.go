@@ -151,9 +151,17 @@ func deleteUser(username string) error {
     if err := exec.Command("userdel", "-f", username).Run(); err != nil {
         return err
     }
-    exec.Command("rm", "-fr", fmt.Sprintf("/etc/xray/limit/ip/ssh/%s", username)).Run()
-    exec.Command("rm", "-fr", fmt.Sprintf("/var/log/create/ssh/%s.log", username)).Run()
-    exec.Command("systemctl", "restart", "dropbear", "ssh", "sshd").Run()
-    exec.Command("systemctl", "restart", "ws").Run()
+    if err := exec.Command("rm", "-fr", fmt.Sprintf("/etc/xray/limit/ip/ssh/%s", username)).Run(); err != nil {
+        return err
+    }
+    if err := exec.Command("rm", "-fr", fmt.Sprintf("/var/log/create/ssh/%s.log", username)).Run(); err != nil {
+        return err
+    }
+    if err := exec.Command("systemctl", "restart", "dropbear", "ssh", "sshd").Run(); err != nil {
+        return err
+    }
+    if err := exec.Command("systemctl", "restart", "ws").Run(); err != nil {
+        return err
+    }
     return nil
 }

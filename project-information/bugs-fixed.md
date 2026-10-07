@@ -2781,3 +2781,11 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 412 (Found 431):** expiry rows now `Username/Protocol/Transport/Expired at`, same columns and code wrap.
 - **Verified live:** expiry run notifies in final shape and cleans up; `bash -n` clean; zips repacked (0755, parity rechecked); deployed + grep-verified; box left with 0 test residue.
+### Fix 413 - bmenu curl timeout (Found 432)
+
+- **Fix 413 (Found 432):** added `-m 10` to all 12 icanhazip fetches in `full/bmenu.sh` + `lite/bmenu.sh`, matching `restore-ftp.sh`.
+- **Verified:** `bash -n` clean; zips repacked (0755, parity rechecked).
+### Fix 414 - SSH Go error propagation (Found 433)
+
+- **Fix 414 (Found 433):** `delete-ssh.go` returns `err` on any failed `rm`/`systemctl restart`; `extend-ssh.go` prints `Error unlocking account` and returns on failed `passwd -u` instead of claiming success.
+- **Verified:** both binaries cross-compile (`GOOS=linux GOARCH=amd64`); `gofmt` drift pre-existing, untouched; zips repacked (0755, parity rechecked).

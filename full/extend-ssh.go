@@ -104,7 +104,14 @@ func main() {
 	// Bug 72: expire-ssh locks expired accounts at the next cron tick; a
 	// renewal that moves expiry back into the future must restore login.
 	if newExpiration.After(time.Now()) {
-		exec.Command("passwd", "-u", username).Run()
+		if err := exec.Command("passwd", "-u", username).Run(); err != nil {
+			clearScreen()
+			fmt.Println()
+			fmt.Println()
+			fmt.Println()
+			fmt.Println("\033[31mError unlocking account\033[0m")
+			return
+		}
 	}
 
 	logFilePath := fmt.Sprintf("/var/log/create/ssh/%s.log", username)

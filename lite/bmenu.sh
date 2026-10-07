@@ -117,8 +117,8 @@ blue_sep="${blue}-----------------------------------${NC}"
 
 restore() {
 # Detail Informasi
-ip4=$(curl -sS ipv4.icanhazip.com)
-ip6=$(curl -sS ipv6.icanhazip.com)
+ip4=$(curl -sS -m 10 ipv4.icanhazip.com)
+ip6=$(curl -sS -m 10 ipv6.icanhazip.com)
 ip="$ip4 / $ip6"
 date=$(date)
 domain=$(cat /etc/xray/domain)
@@ -201,8 +201,8 @@ rm -fr /root/backup*
 
 restf() {
 # Detail Informasi
-ip4=$(curl -sS ipv4.icanhazip.com)
-ip6=$(curl -sS ipv6.icanhazip.com)
+ip4=$(curl -sS -m 10 ipv4.icanhazip.com)
+ip6=$(curl -sS -m 10 ipv6.icanhazip.com)
 ip="$ip4 / $ip6"
 date=$(date)
 domain=$(cat /etc/xray/domain)
@@ -288,8 +288,8 @@ rm -fr /root/backup*
 
 resold() {
 # Detail Informasi
-ip4=$(curl -sS ipv4.icanhazip.com)
-ip6=$(curl -sS ipv6.icanhazip.com)
+ip4=$(curl -sS -m 10 ipv4.icanhazip.com)
+ip6=$(curl -sS -m 10 ipv6.icanhazip.com)
 ip="$ip4 / $ip6"
 date=$(date)
 domain=$(cat /etc/xray/domain)
