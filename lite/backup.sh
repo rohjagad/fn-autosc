@@ -122,7 +122,7 @@ TEKS="
 [ Information Your Backup Data ]
 --------------------------------
 
-Domain : $domain
+Username : $USERNAME
 IP     : $MYIP
 ISP    : $isp
 Region : $region

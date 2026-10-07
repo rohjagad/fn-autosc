@@ -2865,3 +2865,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 431 (Found 450-451):** deleted the singular `Domain   :` TEKS line in all 50 card files (48 Xray + `addssh`/`trial-ssh`); every card now shows only `Domains  :`. TUI, Telegram and `.log` all follow (same `TEKS`); Telegram strips kept as no-op safety. Rotation re-verified: all links use `$rdomain`, none use `$domain`.
 - **Verified live:** created `trial261` on 157.10.253.95 — card shows `Domains` only, link uses rotated domain + color path (`...@autosc.rohcuan.dpdns.org:443?path=/lime...`); account deleted after, 0 residue (no log, 0 refs in `ws.json`); `bash -n` clean on all 50; zips repacked (0755, IN-SYNC).
+### Fix 432 - Backup shows auth username (Found 452)
+
+- **Fix 432 (Found 452):** `full/backup.sh` + `lite/backup.sh` caption row now `Username : $USERNAME` (izIN.txt owner, same gate that prints it at startup); `Domain` row gone. Caption `<code>` pipeline, log append and TUI echoes follow (shared `TEKS`).
+- **Verified:** caption pipeline renders `<code>Username : ID2</code>`; live `/usr/bin/backup` carries the row, 0 `Domain` rows; `bash -n` clean; zips repacked (0755, IN-SYNC).

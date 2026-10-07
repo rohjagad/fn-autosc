@@ -2403,3 +2403,5 @@ Found 450. **Account cards still show singular Domain despite no default (operat
 all 48 Xray creation cards + 2 SSH cards printed both `Domain : <used>` and `Domains : <all>` in TUI and `.log` (Telegram already stripped). With round-robin rotation there is no default domain, so the used line must go everywhere, not just Telegram. Non-card `Domain` uses (`backup.sh`, `xl2tp.sh`) are single-domain and out of scope.
 Found 451. **Rotation in xray link insertion must hold (operator reminder)** —
 verified all 48 Xray creation scripts build links from `$rdomain` (`.domainseq` round-robin), zero links use bare `$domain`; trial scripts rotate the same way as add scripts.
+Found 452. **Backup Telegram shows domain (operator direction)** —
+`full/backup.sh:133` + `lite/backup.sh:125` caption row reads `Domain : $domain`. With no default domain, the backup notice should identify the auth owner instead: the izin.txt username already extracted as `$USERNAME` by the same gate.

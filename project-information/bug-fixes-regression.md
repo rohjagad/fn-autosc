@@ -2519,3 +2519,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | Only dual-line cards touched; single-domain backup/xl2tp kept. |
 | **Over-engineering** | Line deletions only. |
 | **vs the source** | No-default rotation rule (Telegram already Domains-only since Fix 415). |
+
+## 217. Backup Username Row — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | One caption row swapped; archive build, upload, log and cleanup untouched. |
+| **Over-strictness** | Display only. |
+| **Over-engineering** | One line per edition. |
+| **vs the source** | Owner identity instead of non-default domain. |
