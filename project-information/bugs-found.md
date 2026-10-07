@@ -2293,3 +2293,5 @@ Found 396. **Trojan cards diverge from the shared layout** —
 trojan ws/http/xhttp keep Limit IP/Quota inside the top block with no `Limit Detail` split and mix Path/Network/Ports in one untitled block (no `Detail Port …` title); vless ws/http/xhttp and all grpc cards are likewise missing their `Detail Port …` title, so 9 of 12 builders disagree with the vmess pattern.
 Found 397. **Card title names inconsistent** —
 some carry the `Xray` prefix and some do not; transports mix `WS`/`WebSocket`, `HU`/`HTTP Upgrade`, `gRPC`/`GRPC`, `xhttp`/`XHTTP`. Operator direction: single scheme — `Xray` + short codes (`WS`, `HU`, `XHTTP`, `GRPC`).
+Found 398. **Link-row icons share the title color** —
+link headers use the same green circle as the double-icon card titles, so the title and the copyable-link rows are visually indistinguishable. Operator direction: link area blue, titles stay green.

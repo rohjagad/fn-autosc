@@ -264,11 +264,11 @@ Path     : /trws
 Path Alt : /blue /navy /azure
 Network  : WebSocket
 ----------------------
-🟢 Trojan WS TLS
+🔵 Trojan WS TLS
 
 $link1
 ----------------------
-🟢 Trojan WS none
+🔵 Trojan WS none
 
 $link2
 ----------------------

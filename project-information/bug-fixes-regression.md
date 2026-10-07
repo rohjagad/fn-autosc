@@ -2091,3 +2091,13 @@ Section 35's four-check rule applied to Fix 387:
 | **Over-strictness** | Nothing rejected; text-scoped change. |
 | **Over-engineering** | Literal title/space swaps plus section splits mirroring the existing vmess pattern. |
 | **vs the source** | References predate the shared layout; unified cards are this repo's own direction per operator request. |
+## 172. Blue Link Icons — Four Checks (October 7, 2026)
+
+Section 35's four-check rule applied to Fix 388:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Emoji-only swap on header lines; no parser reads these lines (parsers match `Remarks/UUID/Expired/Protokol/Limit IP`). Old cards unaffected. |
+| **Over-strictness** | Nothing rejected; text-scoped change. |
+| **Over-engineering** | Literal single-character swaps. |
+| **vs the source** | References predate the two-color scheme; blue-links/green-titles is this repo's own direction per operator request. |

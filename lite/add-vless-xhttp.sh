@@ -264,11 +264,11 @@ Path Alt : /cyan /teal /turquoise
 NoneTLS  : 80, 8880, 2052, 2082, 2095
 Network  : XHTTP
 -----------------------
-🟢 VLess XHTTP TLS
+🔵 VLess XHTTP TLS
 
 $vlesslink1
 -----------------------
-🟢 VLess XHTTP none
+🔵 VLess XHTTP none
 
 $vlesslink2
 -----------------------

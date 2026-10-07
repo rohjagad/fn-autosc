@@ -304,11 +304,11 @@ Network  : WebSocket
 Alpn     : - [ None ]
 Decrypt  : auto
 -----------------------
-🟢 VMess WS TLS
+🔵 VMess WS TLS
 
 $vmesslink1
 -----------------------
-🟢 VMess WS none
+🔵 VMess WS none
 
 $vmesslink2
 -----------------------

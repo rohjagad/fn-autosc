@@ -261,7 +261,7 @@ Service Alt : magenta / plum / orchid
 Network     : gRPC GUN
 Port gRPC   : 443, 2053, 2083, 2087, 2096
 -----------------------
-🟢 Trojan GRPC
+🔵 Trojan GRPC
 
 $link1
 -----------------------

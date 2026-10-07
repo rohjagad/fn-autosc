@@ -185,11 +185,11 @@ Path     : /trhu
 Path Alt : /orange /amber /chocolate
 Network  : HTTP Upgrade
 -------------------------
-🟢 Trojan HU TLS
+🔵 Trojan HU TLS
 
 $link1
 -------------------------
-🟢 Trojan HU none
+🔵 Trojan HU none
 
 $link2
 -------------------------

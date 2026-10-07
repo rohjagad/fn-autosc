@@ -220,11 +220,11 @@ Network  : XHTTP
 Alpn     : - [ None ]
 Decrypt  : auto
 ----------------------
-🟢 VMess XHTTP TLS
+🔵 VMess XHTTP TLS
 
 $vmesslink1
 ----------------------
-🟢 VMess XHTTP none
+🔵 VMess XHTTP none
 
 $vmesslink2
 ----------------------

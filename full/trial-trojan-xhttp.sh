@@ -185,11 +185,11 @@ Path     : /trxh
 Path Alt : /brown /tan /beige
 Network  : XHTTP
 ----------------------
-🟢 Trojan XHTTP TLS
+🔵 Trojan XHTTP TLS
 
 $link1
 ----------------------
-🟢 Trojan XHTTP none
+🔵 Trojan XHTTP none
 
 $link2
 ----------------------

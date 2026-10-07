@@ -180,7 +180,7 @@ Network     : gRPC
 Service Name: vlgr
 Service Alt : white / ivory / snow
 ----------------------
-🟢 VLess GRPC
+🔵 VLess GRPC
 
 $vlesslink1
 ----------------------

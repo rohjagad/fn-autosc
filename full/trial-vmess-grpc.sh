@@ -200,7 +200,7 @@ Network     : gRPC
 Alpn        : - [ None ]
 Decrypt     : auto
 -----------------------
-🟢 VMess GRPC
+🔵 VMess GRPC
 
 $vmesslink1
 -----------------------

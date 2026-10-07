@@ -184,11 +184,11 @@ Path Alt : /pink /coral /salmon
 NoneTLS  : 80, 8880, 2052, 2082, 2095
 Network  : HTTP Upgrade
 ------------------------
-🟢 VLess HU TLS
+🔵 VLess HU TLS
 
 $vlesslink1
 ------------------------
-🟢 VLess HU none
+🔵 VLess HU none
 
 $vlesslink2
 ------------------------

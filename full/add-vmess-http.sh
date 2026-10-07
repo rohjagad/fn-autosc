@@ -304,11 +304,11 @@ Network  : HTTP Upgrade
 Alpn     : - [ None ]
 Decrypt  : auto
 ------------------------
-🟢 VMess HU TLS
+🔵 VMess HU TLS
 
 $vmesslink1
 ------------------------
-🟢 VMess HU none
+🔵 VMess HU none
 
 $vmesslink2
 ------------------------

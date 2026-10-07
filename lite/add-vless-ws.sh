@@ -264,11 +264,11 @@ Path Alt : /green /lime /emerald
 NoneTLS  : 80, 8880, 2052, 2082, 2095
 Network  : WebSocket
 -----------------------
-🟢 VLess WS TLS
+🔵 VLess WS TLS
 
 $vlesslink1
 -----------------------
-🟢 VLess WS none
+🔵 VLess WS none
 
 $vlesslink2
 -----------------------
