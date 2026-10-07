@@ -2968,4 +2968,4 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 ### Fix 453 - XHTTP rewrite keeps suffix (Found 473)
 
 - **Fix 453 (Found 473):** 12 XHTTP rewrite lines per template changed `rewrite /(.*) /<canon>` to `rewrite ^.*\/<name>(/.*)?$ /<canon>$1`; WS/HU form untouched (proven working, no session suffix there).
-- **Verified live:** same 12-line patch on `/etc/nginx/nginx.conf`, `nginx -t` ok, reload clean; retest pending in F6 loop.
+- **Verified live:** same 12-line patch on `/etc/nginx/nginx.conf`, `nginx -t` ok, reload clean; color `/purple` streams 5 MB matching `dffac395ec4b`.
