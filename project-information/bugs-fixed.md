@@ -2757,3 +2757,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 406 (Found 422, Found 423):** all 48 cards carry `Protocol : <UPPER>` + `Transport : <SHORT>`; every `Protokol:` reader (shell + Go) accepts both spellings, extraction fixed to last-field (the spaced new rows broke `$2`), values uppercased at read, restore branches uppercased. 8 unlock notices retitled `ACCOUNT UNLOCKED`. 3 cek binaries rebuilt.
 - **Verified live:** new card shows both rows; old-format lock→unlock cycle restores correctly (compat proven); `bash -n` clean; zips repacked (0755, parity rechecked); one-bundle deploy with hash verify; box left with 0 test residue.
+### Fix 407 - Bare card titles (Found 424)
+
+- **Fix 407 (Found 424):** all 48 cards titled `🟢 ACCOUNT DETAIL 🟢`; type info lives in Protocol/Transport rows and link headers. SSH card untouched.
+- **Verified live:** new card renders bare title + both rows; `bash -n` clean; zips repacked (0755, parity rechecked); one-bundle deploy; box left with 0 test residue.

@@ -2281,3 +2281,13 @@ Section 35's four-check rule applied to Fix 406:
 | **Over-strictness** | Nothing rejected; additions only. |
 | **Over-engineering** | Row swap plus reader widening, no new machinery. |
 | **vs the source** | No ruling; explicit rows per operator request. |
+## 192. Bare Card Titles — Four Checks (October 7, 2026)
+
+Section 35's four-check rule applied to Fix 407:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Title text only; parsers never read titles. |
+| **Over-strictness** | Nothing rejected; text-scoped change. |
+| **Over-engineering** | Literal title swaps. |
+| **vs the source** | No ruling; bare titles extend the operator-chosen notice pattern to cards. |

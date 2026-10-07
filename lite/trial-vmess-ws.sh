@@ -191,7 +191,7 @@ echo ""
 echo ""
 TEKS="
 -----------------------
-🟢 XRAY VMESS WS 🟢
+🟢 ACCOUNT DETAIL 🟢
 -----------------------
 
 Remarks : $user

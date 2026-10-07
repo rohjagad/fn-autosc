@@ -2345,3 +2345,5 @@ Found 422. **No explicit Protocol/Transport rows** —
 cards bury transport in `Path`/`Network` rows and spell the key `Protokol`, while every other notice uses plain `label : value` pairs. Operator direction: `Protocol : VMESS/VLESS/TROJAN` + `Transport : WS/HU/XHTTP/GRPC` rows (col 9), with all readers kept backward-compatible.
 Found 423. **Unlock titles still transport-flavored** —
 `XRAY WS UNLOCK ACCOUNT` / `UNLOCK XRAY HTTP UPGRADE` / `gRPC UNLOCK ACCOUNT`. Operator direction: bare `ACCOUNT UNLOCKED`.
+Found 424. **Card titles repeat what the rows say** —
+`XRAY VMESS WS` etc. restate the new Protocol/Transport rows. Operator direction: bare `ACCOUNT DETAIL` everywhere.

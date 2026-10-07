@@ -159,7 +159,7 @@ link2="trojan://${uuid}@${rdomain}:80?path=$opath&security=none&host=${rdomain}&
 
 TEKS="
 -----------------------
-🟢 XRAY TROJAN HU 🟢
+🟢 ACCOUNT DETAIL 🟢
 -----------------------
 
 Remarks : $user
