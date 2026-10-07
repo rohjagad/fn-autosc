@@ -2699,3 +2699,21 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | N/A. |
 | **Over-engineering** | Sentence-level corrections. |
 | **vs the source** | Each claim verified against cited code. |
+
+## 237. gRPC Rewrite Slash — Four Checks (October 8, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Canonical paths rewrite to themselves; native behavior unchanged (`nginx -t` ok). |
+| **Over-strictness** | Pattern widened (single slash), nothing newly rejected. |
+| **Over-engineering** | One-char deletion per line, 36 lines. |
+| **vs the source** | Matches the plan's specified `rewrite ^.*\/<nama>(.*)$` form. |
+
+## 238. XHTTP Suffix Keep — Four Checks (October 8, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Bare paths rewrite to themselves (`$1` empty); WS/HU untouched. |
+| **Over-strictness** | Pattern widened, nothing rejected. |
+| **Over-engineering** | Same suffix-preserving idiom as the gRPC fix. |
+| **vs the source** | Matches upstream intent (session in path). |

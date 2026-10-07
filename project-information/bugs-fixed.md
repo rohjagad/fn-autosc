@@ -2961,3 +2961,11 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 451 (Found 471):** docs-only — rotation (colors-only), backup caption (Username + adjustable interval), installer (self-signed default, manual 4/5), 6-row domain table, renewal (pick + 4/5), single dual-stack cert, random PSK, Noobz domain pair, restore key-auth, Telegram-only delivery.
 - **Verified:** each claim cross-checked against code cited in the entry.
+### Fix 452 - gRPC rewrite single-slash (Found 472)
+
+- **Fix 452 (Found 472):** 12 gRPC rewrite lines per template (`config/4.conf`, `config/6.conf`, `config/dual.conf`) changed `^.*/\/<name>(.*)$` to `^.*\/<name>(.*)$`, preserving the method-suffix `$1`. WS/HU/XHTTP form untouched.
+- **Verified live:** same 12-line patch on `/etc/nginx/nginx.conf`, `nginx -t` ok, reload clean; color `black` + `orchid` then stream 5 MB matching `dffac395ec4b`.
+### Fix 453 - XHTTP rewrite keeps suffix (Found 473)
+
+- **Fix 453 (Found 473):** 12 XHTTP rewrite lines per template changed `rewrite /(.*) /<canon>` to `rewrite ^.*\/<name>(/.*)?$ /<canon>$1`; WS/HU form untouched (proven working, no session suffix there).
+- **Verified live:** same 12-line patch on `/etc/nginx/nginx.conf`, `nginx -t` ok, reload clean; retest pending in F6 loop.
