@@ -130,7 +130,7 @@ DATE=$(date +"%d-%b-%Y %H:%M:%S")
 
         TEXT="
 <b>-----------------------</b>
-<b>UNLOCK XRAY HTTP UPGRADE</b>
+<b>ACCOUNT UNLOCKED</b>
 <b>-----------------------</b>
 <code>Date     : $DATE</code>
 <code>Username : $name</code>
@@ -160,7 +160,8 @@ ${separator}"
         username=$(basename "$file" .locked)
         uid=$(grep "UUID" "$file" | awk '{print $3}')
         exp=$(grep "Expired" "$file" | awk '{print $3}')
-        protokol=$(grep "Protokol:" "$file" | awk '{print $2}')
+        protokol=$(grep -E "^(Protokol|Protocol) *:" "$file" | awk '{print $NF}')
+        protokol=${protokol^^}
         count=$((count+1))
         names+=("$username")
 
@@ -199,7 +200,8 @@ fi
 # Menampilkan detail akun yang akan di-unlock
 uuid=$(grep "UUID" /var/log/create/xray/http/${name}.locked | awk '{print $3}')
 exp2=$(grep "Expired" /var/log/create/xray/http/${name}.locked | awk '{print $3}')
-protokol2=$(grep "Protokol:" /var/log/create/xray/http/${name}.locked | awk '{print $2}')
+protokol2=$(grep -E "^(Protokol|Protocol) *:" /var/log/create/xray/http/${name}.locked | awk '{print $NF}')
+protokol2=${protokol2^^}
 
 clear
 echo ""
@@ -225,11 +227,11 @@ if [[ "$confirm" == "y" || "$confirm" == "Y" ]]; then
     # never append a second copy - it would invalidate the JSON.
     if [ -n "$exp2" ] && grep -qxF "### $name $exp2" /etc/xray/json/upgrade.json 2>/dev/null; then
         echo "Account '$name' already present in config - skipping re-add."
-    elif [ "$protokol2" == "Vmess" ]; then
+    elif [ "$protokol2" == "VMESS" ]; then
         sed -i '/#vmess$/{n;s/}/},\n### '"$name $exp2"'\n{"id": "'""$uuid""'","alterid": 0,"email": "'""$name""'","level": 0}/}' /etc/xray/json/upgrade.json
-    elif [ "$protokol2" == "Vless" ]; then
+    elif [ "$protokol2" == "VLESS" ]; then
         sed -i '/#vless$/{n;s/}/},\n### '"$name $exp2"'\n{"id": "'""$uuid""'","email": "'""$name""'","level": 0}/}' /etc/xray/json/upgrade.json
-    elif [ "$protokol2" == "Trojan" ]; then
+    elif [ "$protokol2" == "TROJAN" ]; then
         sed -i '/#trojan$/{n;s/}/},\n### '"$name $exp2"'\n{"password": "'""$uuid""'","email": "'""$name""'","level": 0}/}' /etc/xray/json/upgrade.json
     else
         echo "Protokol tidak dikenal"

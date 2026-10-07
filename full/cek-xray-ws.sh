@@ -106,7 +106,8 @@ for user in "${users[@]}"; do
 
     # Protocol (if available in custom logs)
     protocol_log_path="/var/log/create/xray/ws/${user}.log"
-    protocol=$(grep "Protokol:" "$protocol_log_path" | awk '{print $2}' 2>/dev/null)
+    protocol=$(grep -E "^(Protokol|Protocol) *:" "$protocol_log_path" | awk '{print $NF}' 2>/dev/null)
+    protocol=${protocol^^}
     [[ -z "$protocol" ]] && protocol="Not available"
     echo "Protocol Account: $protocol"
 

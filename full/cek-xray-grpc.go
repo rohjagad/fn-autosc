@@ -98,10 +98,10 @@ func ReadProtocolFromLog(logFile string) string {
 
 	lines := strings.Split(string(content), "\n")
 	for _, line := range lines {
-		if strings.Contains(line, "Protokol:") {
+		if strings.Contains(line, "Protokol:") || strings.Contains(line, "Protocol :") {
 			fields := strings.Fields(line)
 			if len(fields) >= 2 {
-				return fields[1]
+				return strings.ToUpper(fields[len(fields)-1])
 			}
 		}
 	}

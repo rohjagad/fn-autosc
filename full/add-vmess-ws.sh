@@ -285,7 +285,8 @@ ISP     : $isp
 Region  : $region
 UUID    : $uuid
 Expired : $exp
-Protokol: Vmess
+Protocol : VMESS
+Transport: WS
 -----------------------
 Limit Detail
 

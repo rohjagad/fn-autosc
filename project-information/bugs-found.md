@@ -2341,3 +2341,7 @@ Found 420. **Multilogin lock cards messy vs the delete pattern** —
 per-transport mixed titles (`XTLS gRPC Locked` vs `… MULTILOGIN`, missing `XTLS`, mixed case) and no Type row, while delete/extend use bare titles plus Type.
 Found 421. **Manual and multilogin locks share one title** —
 both read `ACCOUNT LOCKED`, hiding which path locked the account. Operator direction: manual `ACCOUNT LOCKED`, multilogin `MULTILOGIN LOCKED`.
+Found 422. **No explicit Protocol/Transport rows** —
+cards bury transport in `Path`/`Network` rows and spell the key `Protokol`, while every other notice uses plain `label : value` pairs. Operator direction: `Protocol : VMESS/VLESS/TROJAN` + `Transport : WS/HU/XHTTP/GRPC` rows (col 9), with all readers kept backward-compatible.
+Found 423. **Unlock titles still transport-flavored** —
+`XRAY WS UNLOCK ACCOUNT` / `UNLOCK XRAY HTTP UPGRADE` / `gRPC UNLOCK ACCOUNT`. Operator direction: bare `ACCOUNT UNLOCKED`.

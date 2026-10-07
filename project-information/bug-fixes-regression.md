@@ -2271,3 +2271,13 @@ Section 35's four-check rule applied to Fix 405:
 | **Over-strictness** | Nothing rejected; text-scoped change. |
 | **Over-engineering** | Literal title swaps. |
 | **vs the source** | No ruling; split titles per operator request. |
+## 191. Protocol Rows — Four Checks (October 7, 2026)
+
+Section 35's four-check rule applied to Fix 406:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Readers match both spellings and both cases; old cards (still on disk) restore byte-identically. New rows verified on a fresh card. |
+| **Over-strictness** | Nothing rejected; additions only. |
+| **Over-engineering** | Row swap plus reader widening, no new machinery. |
+| **vs the source** | No ruling; explicit rows per operator request. |

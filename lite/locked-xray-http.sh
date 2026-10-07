@@ -157,7 +157,8 @@ ${separator}"
         username=$(basename "$file" .log)
         uid=$(grep "UUID" "$file" | awk '{print $3}')
         exp=$(grep "Expired" "$file" | awk '{print $3}')
-        protokol=$(grep "Protokol:" "$file" | awk '{print $2}')
+        protokol=$(grep -E "^(Protokol|Protocol) *:" "$file" | awk '{print $NF}')
+        protokol=${protokol^^}
         count=$((count+1))
         names+=("$username")
 
@@ -192,7 +193,8 @@ fi
 # Menampilkan detail akun yang akan di-unlock
 uuid=$(grep "UUID" /var/log/create/xray/http/${name}.log | awk '{print $3}')
 exp2=$(grep "Expired" /var/log/create/xray/http/${name}.log | awk '{print $3}')
-protokol2=$(grep "Protokol:" /var/log/create/xray/http/${name}.log | awk '{print $2}')
+protokol2=$(grep -E "^(Protokol|Protocol) *:" /var/log/create/xray/http/${name}.log | awk '{print $NF}')
+protokol2=${protokol2^^}
 
 clear
 echo ""

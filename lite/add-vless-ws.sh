@@ -249,7 +249,8 @@ ISP     : $isp
 Region  : $region
 UUID    : $uuid
 Expired : $exp
-Protokol: Vless
+Protocol : VLESS
+Transport: WS
 -----------------------
 Limit Detail
 

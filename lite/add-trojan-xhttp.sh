@@ -249,7 +249,8 @@ ISP     : $isp
 Region  : $region
 UUID    : $uuid
 Expired : $exp
-Protokol: Trojan
+Protocol : TROJAN
+Transport: XHTTP
 -----------------------
 Limit Detail
 

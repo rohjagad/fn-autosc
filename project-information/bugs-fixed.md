@@ -2753,3 +2753,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 405 (Found 421):** manual notices retitled bare `ACCOUNT LOCKED` (was `XRAY <T> LOCKED ACCOUNT`); multilogin notices retitled `MULTILOGIN LOCKED`. 16 files, both editions.
 - **Verified:** restyled preview delivered live (`ok:true`); `bash -n` clean; zips repacked (0755, parity rechecked); one-bundle deploy with hash verify.
+### Fix 406 - Protocol/Transport rows, bare unlock title (Found 422, Found 423)
+
+- **Fix 406 (Found 422, Found 423):** all 48 cards carry `Protocol : <UPPER>` + `Transport : <SHORT>`; every `Protokol:` reader (shell + Go) accepts both spellings, extraction fixed to last-field (the spaced new rows broke `$2`), values uppercased at read, restore branches uppercased. 8 unlock notices retitled `ACCOUNT UNLOCKED`. 3 cek binaries rebuilt.
+- **Verified live:** new card shows both rows; old-format lock→unlock cycle restores correctly (compat proven); `bash -n` clean; zips repacked (0755, parity rechecked); one-bundle deploy with hash verify; box left with 0 test residue.

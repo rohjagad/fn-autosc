@@ -12,7 +12,8 @@ locked="/var/log/create/xray/grpc/${user}.locked"
 [ -f "$locked" ] || exit 0
 uuid=$(grep "UUID" "$locked" | awk '{print $3}')
 exp2=$(grep "Expired" "$locked" | awk '{print $3}')
-protokol2=$(grep "Protokol:" "$locked" | awk '{print $2}')
+protokol2=$(grep -E "^(Protokol|Protocol) *:" "$locked" | awk '{print $NF}')
+protokol2=${protokol2^^}
 [ -n "$uuid" ] && [ -n "$exp2" ] && [ -n "$protokol2" ] || exit 0
 # Already active: never append a second copy, and unlike the manual
 # unlock do not touch files either - just leave quietly.
@@ -21,11 +22,11 @@ if [ -z "$XRAY_BATCH" ]; then
     exec 9>/tmp/xray-json-grpc.lock
     flock -w 30 9 || exit 0
 fi
-if [ "$protokol2" == "Vmess" ]; then
+if [ "$protokol2" == "VMESS" ]; then
     sed -i '/#vmess$/{n;s/}/},\n### '"$user $exp2"'\n{"id": "'""$uuid""'","alterid": 0,"email": "'""$user""'","level": 0}/}' /etc/xray/json/grpc.json
-elif [ "$protokol2" == "Vless" ]; then
+elif [ "$protokol2" == "VLESS" ]; then
     sed -i '/#vless$/{n;s/}/},\n### '"$user $exp2"'\n{"id": "'""$uuid""'","email": "'""$user""'","level": 0}/}' /etc/xray/json/grpc.json
-elif [ "$protokol2" == "Trojan" ]; then
+elif [ "$protokol2" == "TROJAN" ]; then
     sed -i '/#trojan$/{n;s/}/},\n### '"$user $exp2"'\n{"password": "'""$uuid""'","email": "'""$user""'","level": 0}/}' /etc/xray/json/grpc.json
 else
     exit 0

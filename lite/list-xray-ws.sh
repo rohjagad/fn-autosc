@@ -161,7 +161,8 @@ if [[ "$status" == "unlocked" ]]; then
     top=$(cat /etc/xray/quota/ws/$user 2>/dev/null || echo 0)
     quota=$(bytes "$top")
     uid=$(grep -F "\"email\": \"${user}\"" /etc/xray/json/ws.json | sed -nE 's/.*"(id|password)": "([^"]+)".*/\2/p' | sort -u | head -1)
-    protokol=$(grep "Protokol:" /var/log/create/xray/ws/${user}.log | awk '{print $2}')
+    protokol=$(grep -E "^(Protokol|Protocol) *:" /var/log/create/xray/ws/${user}.log | awk '{print $NF}')
+    protokol=${protokol^^}
     exp=$(grep "Expired" /var/log/create/xray/ws/${user}.log | awk '{print $3}')
     echo -e "\e[33;1mUser\e[32;1m: $user"
     echo -e "\e[33;1mExpired\e[32;1m: $exp"
