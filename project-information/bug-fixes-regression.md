@@ -2546,3 +2546,156 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | `|| true`; non-tty use unaffected. |
 | **Over-engineering** | Same one-liner as every other pause. |
 | **vs the source** | Matches pause pattern across all menus. |
+
+## 220. addssh Recall — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Error branches now re-prompt via `main`; success path untouched. |
+| **Over-strictness** | No validation change. |
+| **Over-engineering** | Two-word call swap + `|| true`. |
+| **vs the source** | Matches submenu-recall pattern everywhere. |
+
+## 221. dm-menu Invalid Recall — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Invalid input returns to `dm1`; valid 4/6 flows untouched. |
+| **Over-strictness** | No input rejected that worked before. |
+| **Over-engineering** | One call swap + `return`. |
+| **vs the source** | Removes dangling caller of deleted submenu. |
+
+## 222. SlowDNS Key Perms — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Additive path in existing `chmod` lines; nothing else changes. |
+| **Over-strictness** | N/A (permissions, not input). |
+| **Over-engineering** | Same one-line list extension, 9 sites. |
+| **vs the source** | Extends Fix 305/334 hardening to the missed key. |
+
+## 223. Restore Guards — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Valid zips flow identically; corrupt input now aborts before `cp`. |
+| **Over-strictness** | Only invalid archives and missing dirs rejected. |
+| **Over-engineering** | Reuses the existing `-tq` idiom from sibling blocks. |
+| **vs the source** | Mirrors Fix 213/270 guard style. |
+
+## 224. menu-api Exact Match — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Exact IPs match as before; substring false-positives gone. |
+| **Over-strictness** | `-wF` matches panel-gate semantics. |
+| **Over-engineering** | Two-flag addition. |
+| **vs the source** | Same as every panel gate post-Fix 346. |
+
+## 225. SSH Limiter Batching — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Same locks (`passwd -l` per user); restarts collapse N×3 to 1. |
+| **Over-strictness** | No threshold change. |
+| **Over-engineering** | Init + flag + post-loop block (xp.sh pattern). |
+| **vs the source** | Extends Fix 349 batching to the SSH limiter. |
+
+## 226. Quota/Kill Guards — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Numeric files behave identically; corrupt files skip instead of erroring. |
+| **Over-strictness** | Only non-numeric values skipped. |
+| **Over-engineering** | Regex guard + `continue`, no helpers. |
+| **vs the source** | Extends Fix 46/206 guards to all operands. |
+
+## 227. Fetch Caps — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Reachable hosts unaffected; hung hosts fail fast with clear errors. |
+| **Over-strictness** | 15–60s budgets exceed normal latency. |
+| **Over-engineering** | Flag-only additions. |
+| **vs the source** | Extends Found-348 cap pattern to uncovered lines. |
+
+## 228. Go Error Surfacing — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Healthy reads render as before; failures now say `Error`/`Not available`. |
+| **Over-strictness** | N/A (output honesty, not input). |
+| **Over-engineering** | `err != nil` branches only; no refactor. |
+| **vs the source** | Fixes the exact misreports the plan names. |
+
+## 229. Timeout Parity + Installer Cert — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Live `nginx -t` ok, reload clean, WS 400 + prefixed 400 verified. |
+| **Over-strictness** | Timeouts widened, nothing tightened. |
+| **Over-engineering** | Directive parity with XHTTP blocks; temp+mv per Fix 417. |
+| **vs the source** | Dual-stack single cert matches `gen_selfsigned_all`. |
+
+## 230. dm-menu Cert Flow — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Same issuance sequence; email now real, paths quoted, writes atomic. |
+| **Over-strictness** | No new rejection. |
+| **Over-engineering** | Reuses existing `gen_selfsigned_all`; no new helpers. |
+| **vs the source** | Completes Fix 375/417 coverage on leftover lines. |
+
+## 231. Empty-IP Guard — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Non-empty IP writes the identical rule; empty writes a no-op. |
+| **Over-strictness** | N/A. |
+| **Over-engineering** | One `[ -n ]` wrapper mirroring fixnet. |
+| **vs the source** | Same guard the helper already had. |
+
+## 232. UUID Charset Gate — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Standard UUIDs pass; dangerous input falls back to generated (existing UX). |
+| **Over-strictness** | Trojan custom passwords limited to `A-Za-z0-9_.-`; JSON/sed-breaking chars must be rejected to avoid silent config corruption. |
+| **Over-engineering** | One regex in the existing fallback branch. |
+| **vs the source** | Strengthens the space-only check both upstreams share. |
+
+## 233. Name Gate — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Real names (lowercase per add-gate) resolve as before; metachars hit not-found. |
+| **Over-strictness** | Gate is a superset of creatable names. |
+| **Over-engineering** | Three-line reset reusing the empty branch. |
+| **vs the source** | Same charset class as creation. |
+
+## 234. Menu Retention + Quoting — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Success paths unchanged; error paths return to menus instead of shells. |
+| **Over-strictness** | `|| return` only triggers on EOF/empty. |
+| **Over-engineering** | One-liners matching sibling menus. |
+| **vs the source** | Same recall/quote idioms as fixed menus. |
+
+## 235. Result Pauses — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Pause before redraw only; actions untouched. |
+| **Over-strictness** | `|| true`; non-tty unaffected. |
+| **Over-engineering** | Same one-liner as every other pause. |
+| **vs the source** | Extends Fix 293/299 pause coverage. |
+
+## 236. README Truth — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Docs-only; no code touched. |
+| **Over-strictness** | N/A. |
+| **Over-engineering** | Sentence-level corrections. |
+| **vs the source** | Each claim verified against cited code. |

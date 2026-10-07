@@ -195,7 +195,7 @@ KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
-    curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "disable_web_page_preview=1" --data-urlencode "parse_mode=html" --data-urlencode "text=$(printf '%s' $TEKS | sed -e 's|^[A-Za-z][^:]*: .*|<code>&</code>|')" $URL >/dev/null 2>&1
+    curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "disable_web_page_preview=1" --data-urlencode "parse_mode=html" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's|^[A-Za-z][^:]*: .*|<code>&</code>|')" $URL >/dev/null 2>&1
 fi
 clear
 echo ""
@@ -245,7 +245,7 @@ KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
-    curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "disable_web_page_preview=1" --data-urlencode "parse_mode=html" --data-urlencode "text=$(printf '%s' $TEKS | sed -e 's|^[A-Za-z][^:]*: .*|<code>&</code>|')" $URL >/dev/null 2>&1
+    curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "disable_web_page_preview=1" --data-urlencode "parse_mode=html" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's|^[A-Za-z][^:]*: .*|<code>&</code>|')" $URL >/dev/null 2>&1
 fi
 clear
 echo ""

@@ -123,6 +123,7 @@ clear
 echo ""
 echo ""
 domain="${CHOSEN:-$(cat /etc/xray/domain)}"
+email=$(cat /etc/funny/.email 2>/dev/null || echo "admin@$domain")
 clear
 echo ""
 echo ""
@@ -142,17 +143,19 @@ if [[ $ip_version == "4" ]]; then
     chmod +x /root/.acme.sh/acme.sh
     /root/.acme.sh/acme.sh --upgrade --auto-upgrade
     /root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
-    if ! /root/.acme.sh/acme.sh --issue -d $domain --force --standalone -k ec-256; then
+    if ! /root/.acme.sh/acme.sh --issue -d "$domain" --force --standalone -k ec-256; then
         echo "Let's Encrypt failed/rate-limited, falling back to ZeroSSL..."
         /root/.acme.sh/acme.sh --set-default-ca --server zerossl
         /root/.acme.sh/acme.sh --register-account -m "${email:-admin@$domain}" --server zerossl 2>/dev/null || true
-        /root/.acme.sh/acme.sh --issue -d $domain --force --standalone -k ec-256 --server zerossl || true
+        /root/.acme.sh/acme.sh --issue -d "$domain" --force --standalone -k ec-256 --server zerossl || true
     fi
-    /root/.acme.sh/acme.sh --installcert -d $domain --force --fullchainpath /etc/xray/xray.crt --keypath /etc/xray/xray.key --ecc || true
+    /root/.acme.sh/acme.sh --installcert -d "$domain" --force --fullchainpath /etc/xray/xray.crt --keypath /etc/xray/xray.key --ecc || true
     if [[ ! -s /etc/xray/xray.crt || ! -s /etc/xray/xray.key ]]; then
         echo "ACME verification failed. Generating self-signed SSL certificate fallback..."
         openssl req -new -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -days 365 -nodes -x509 \
-            -subj "/CN=$domain" -keyout /etc/xray/xray.key -out /etc/xray/xray.crt 2>/dev/null
+            -subj "/CN=$domain" -keyout /etc/xray/.xray-fallback.key.tmp -out /etc/xray/.xray-fallback.crt.tmp 2>/dev/null \
+            && mv -f /etc/xray/.xray-fallback.crt.tmp /etc/xray/xray.crt \
+            && mv -f /etc/xray/.xray-fallback.key.tmp /etc/xray/xray.key || rm -f /etc/xray/.xray-fallback.crt.tmp /etc/xray/.xray-fallback.key.tmp
     fi
     mkdir -p /etc/haproxy
     cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem
@@ -171,17 +174,19 @@ elif [[ $ip_version == "6" ]]; then
     chmod +x /root/.acme.sh/acme.sh
     /root/.acme.sh/acme.sh --upgrade --auto-upgrade
     /root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
-    if ! /root/.acme.sh/acme.sh --issue -d $domain --force --standalone -k ec-256 --listen-v6; then
+    if ! /root/.acme.sh/acme.sh --issue -d "$domain" --force --standalone -k ec-256 --listen-v6; then
         echo "Let's Encrypt failed/rate-limited, falling back to ZeroSSL..."
         /root/.acme.sh/acme.sh --set-default-ca --server zerossl
         /root/.acme.sh/acme.sh --register-account -m "${email:-admin@$domain}" --server zerossl 2>/dev/null || true
-        /root/.acme.sh/acme.sh --issue -d $domain --force --standalone -k ec-256 --listen-v6 --server zerossl || true
+        /root/.acme.sh/acme.sh --issue -d "$domain" --force --standalone -k ec-256 --listen-v6 --server zerossl || true
     fi
-    /root/.acme.sh/acme.sh --installcert -d $domain --force --fullchainpath /etc/xray/xray.crt --keypath /etc/xray/xray.key --ecc || true
+    /root/.acme.sh/acme.sh --installcert -d "$domain" --force --fullchainpath /etc/xray/xray.crt --keypath /etc/xray/xray.key --ecc || true
     if [[ ! -s /etc/xray/xray.crt || ! -s /etc/xray/xray.key ]]; then
         echo "ACME verification failed. Generating self-signed SSL certificate fallback..."
         openssl req -new -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -days 365 -nodes -x509 \
-            -subj "/CN=$domain" -keyout /etc/xray/xray.key -out /etc/xray/xray.crt 2>/dev/null
+            -subj "/CN=$domain" -keyout /etc/xray/.xray-fallback.key.tmp -out /etc/xray/.xray-fallback.crt.tmp 2>/dev/null \
+            && mv -f /etc/xray/.xray-fallback.crt.tmp /etc/xray/xray.crt \
+            && mv -f /etc/xray/.xray-fallback.key.tmp /etc/xray/xray.key || rm -f /etc/xray/.xray-fallback.crt.tmp /etc/xray/.xray-fallback.key.tmp
     fi
     mkdir -p /etc/haproxy
     cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem
@@ -196,7 +201,8 @@ elif [[ $ip_version == "6" ]]; then
 else
     echo "Invalid IP version. Please choose '4' for IPv4 or '6' for IPv6."
     sleep 3
-    cert
+    dm1
+    return
 fi
 }
 
@@ -217,10 +223,10 @@ clear
 echo ""
 echo ""
 echo "Starting... Port 80 will be stopped during SSL certificate installation"
-certbot certonly --standalone --preferred-challenges http --agree-tos --email "$(cat /etc/funny/.email 2>/dev/null || echo "admin@example.com")" -d $domain 
-if [[ -s /etc/letsencrypt/live/$domain/fullchain.pem && -s /etc/letsencrypt/live/$domain/privkey.pem ]]; then
-    cp /etc/letsencrypt/live/$domain/fullchain.pem /etc/xray/xray.crt
-    cp /etc/letsencrypt/live/$domain/privkey.pem /etc/xray/xray.key
+certbot certonly --standalone --preferred-challenges http --agree-tos --email "$(cat /etc/funny/.email 2>/dev/null || echo "admin@example.com")" -d "$domain" 
+if [[ -s "/etc/letsencrypt/live/$domain/fullchain.pem" && -s "/etc/letsencrypt/live/$domain/privkey.pem" ]]; then
+    cp "/etc/letsencrypt/live/$domain/fullchain.pem" /etc/xray/xray.crt
+    cp "/etc/letsencrypt/live/$domain/privkey.pem" /etc/xray/xray.key
     mkdir -p /etc/haproxy
     cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem
     chmod 644 /etc/xray/xray.crt
@@ -250,17 +256,8 @@ organizationalunit="99999"
 commonname="${CHOSEN:-FN}"
 email=$(cat /etc/funny/.email 2>/dev/null || echo "admin@example.com")
 
-# delete
-rm -fr /etc/xray/xray.*
-rm -f /etc/haproxy/funny.pem
-
-# make a certificate
-openssl genrsa -out /etc/xray/xray.key 2048
-openssl req -new -x509 -key /etc/xray/xray.key -out /etc/xray/xray.crt -days 1095 \
--subj "/C=$country/ST=$state/L=$locality/O=$organization/OU=$organizationalunit/CN=$commonname/emailAddress=$email"
-cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem 2>/dev/null
-chmod 644 /etc/xray/xray.crt 2>/dev/null
-chmod 600 /etc/xray/xray.key /etc/haproxy/funny.pem 2>/dev/null
+# multi-SAN self-signed via shared generator (atomic temp+mv, no live delete)
+gen_selfsigned_all || { echo "Self-signed generation failed - keeping existing certificate."; read -n 1 -s -r -p "Press any key to return..." || true; echo ""; return 1; }
 systemctl daemon-reload
 # haproxy not used in lite edition
 systemctl restart noobzvpns 2>/dev/null || true

@@ -171,11 +171,11 @@ ${orange}Press [Ctrl + C] to exit${NC}"
         5|05) clearScreen; trial-vless-ws ; xws ;;
         6|06) clearScreen; trial-trojan-ws ; xws ;;
         7|07) clearScreen; cek-xray-ws  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xws ;;
-        8|08) clearScreen; delete-ws ; xws ;;
-        9|09) clearScreen; extend-ws ; xws ;;
+        8|08) clearScreen; delete-ws ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xws ;;
+        9|09) clearScreen; extend-ws ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xws ;;
         10) clearScreen; log-database-xray-ws  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xws ;;
         11) clearScreen; list-xray-ws  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xws ;;
-        12) clearScreen; change-id-ws ; xws ;;
+        12) clearScreen; change-id-ws ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xws ;;
         13) clearScreen; unlock-ws ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xws ;;
         14) clearScreen; routing-ws ; xws ;;
         15) clearScreen; change-limit-ip-ws ; xws ;;

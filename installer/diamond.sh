@@ -142,11 +142,14 @@ issue_certificate() {
 
     echo "Generating default self-signed certificate for $domain ..."
     openssl req -new -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -days 365 -nodes -x509 \
-        -subj "/CN=$domain" -addext "subjectAltName=DNS:$domain" -keyout "$key_path" -out "$crt_path" 2>/dev/null
-    if [[ ! -s "$crt_path" || ! -s "$key_path" ]]; then
+        -subj "/CN=$domain" -addext "subjectAltName=DNS:$domain" -keyout "${key_path}.tmp" -out "${crt_path}.tmp" 2>/dev/null
+    if [[ ! -s "${crt_path}.tmp" || ! -s "${key_path}.tmp" ]]; then
         echo "Self-signed generation failed."
+        rm -f "${crt_path}.tmp" "${key_path}.tmp"
         return 1
     fi
+    mv -f "${crt_path}.tmp" "$crt_path"
+    mv -f "${key_path}.tmp" "$key_path"
 }
 
 # Pemilihan Opsi Generate Certificate
@@ -177,11 +180,7 @@ elif [[ $ips == "6" ]]; then
     echo "Cert installed for IPv6."
 elif [[ $ips == "dual" ]]; then
     systemctl stop nginx
-    issue_certificate "" "/etc/xray/xray4.crt" "/etc/xray/xray4.key"
-    issue_certificate "--listen-v6" "/etc/xray/xray6.crt" "/etc/xray/xray6.key"
-    cat /etc/xray/xray4.crt /etc/xray/xray6.crt > /etc/xray/xray.crt
-    cat /etc/xray/xray4.key /etc/xray/xray6.key > /etc/xray/xray.key
-    rm -f /etc/xray/xray4.crt /etc/xray/xray6.crt /etc/xray/xray4.key /etc/xray/xray6.key
+    issue_certificate "" "/etc/xray/xray.crt" "/etc/xray/xray.key"
     chmod 644 /etc/xray/xray.crt
     chmod 600 /etc/xray/xray.key
     mkdir -p /etc/haproxy

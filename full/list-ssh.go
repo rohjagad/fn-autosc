@@ -89,7 +89,10 @@ func clearScreen() {
 }
 
 func getAccountExpireDate(username string) string {
-    out, _ := exec.Command("chage", "-l", username).Output()
+    out, err := exec.Command("chage", "-l", username).Output()
+    if err != nil {
+        return "Error"
+    }
     for _, line := range strings.Split(string(out), "\n") {
         if strings.Contains(line, "Account expires") {
             return strings.TrimSpace(strings.Split(line, ":")[1])
@@ -99,7 +102,10 @@ func getAccountExpireDate(username string) string {
 }
 
 func getAccountLockStatus(username string) string {
-    out, _ := exec.Command("passwd", "-S", username).Output()
+    out, err := exec.Command("passwd", "-S", username).Output()
+    if err != nil {
+        return "Error"
+    }
     if strings.Contains(string(out), " L ") {
         return "LOCKED"
     }

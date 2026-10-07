@@ -854,7 +854,7 @@ Press CTRL + C to Exit
         15) clear ; cd /root ; curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root gentoo && reboot  ;;
         16) clear ; cd /root ;curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root opencloudos 8 && reboot ;;
         17) clear ; cd /root ; curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root kali rolling && reboot  ;;
-        *) clear ; echo "Invalid option. Please select a valid number.";;
+        *) clear ; echo "Invalid option. Please select a valid number."; sleep 2; os ;;
     esac
 }
 

@@ -148,12 +148,12 @@ read -p "Input option: " aws || exit 0
     case $aws in
     1) clear ; addssh ; menu-ssh ;;
     2) clear ; trial-ssh ; menu-ssh ;;
-    3) clear ; delete-ssh ; menu-ssh ;;
+    3) clear ; delete-ssh ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; menu-ssh ;;
     4) clear ; cek-login-ssh ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; menu-ssh ;;
     5) clear ; log-acc-ssh ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; menu-ssh ;;
-    6) clear ; extend-ssh ; menu-ssh ;;
+    6) clear ; extend-ssh ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; menu-ssh ;;
     7) clear ; list-ssh ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; menu-ssh ;;
-    8) clear ; pwd-ssh ; menu-ssh ;;
+    8) clear ; pwd-ssh ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; menu-ssh ;;
     9) clear ; limit-ip ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; menu-ssh ;;
     0|00) clear ; menu ;;
     *) clear ; menu-ssh ;;

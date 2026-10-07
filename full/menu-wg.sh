@@ -273,7 +273,7 @@ echo ""
 echo "This will take 3-5 minutes, wait until the process is finished..."
 echo ""
 
-curl -d '{"key":"'$PUBLICKEY'", "install_id":"", "warp_enabled":true, "tos":"2019-11-17T00:00:00.000+01:00", "type":"Android", "locale":"en_GB"}' https://api.cloudflareclient.com/v0a2169/reg | tee warp.json > /dev/null
+curl --max-time 30 -d '{"key":"'$PUBLICKEY'", "install_id":"", "warp_enabled":true, "tos":"2019-11-17T00:00:00.000+01:00", "type":"Android", "locale":"en_GB"}' https://api.cloudflareclient.com/v0a2169/reg | tee warp.json > /dev/null
 CLOUDFLAREKEY=$(jq -r '.config.peers[0].public_key // empty' warp.json 2>/dev/null)
 if [ -z "$CLOUDFLAREKEY" ]; then
     echo "Failed to register with Cloudflare WARP API."

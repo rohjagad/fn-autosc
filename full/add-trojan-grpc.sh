@@ -183,8 +183,8 @@ done
     read -p "Input UUID (Empty Default): " uuid
 
 # Validasi UUID
-if [[ "$uuid" =~ [[:space:]] || -z "$uuid" ]]; then
-    echo "UUID empty or contains spaces, generating new UUID..."
+if [[ -z "$uuid" ]] || ! [[ "$uuid" =~ ^[A-Za-z0-9_.-]+$ ]]; then
+    echo "UUID empty or has unsafe characters, generating new UUID..."
     uuid=$(xray uuid)
     echo "New UUID: $uuid"
 else

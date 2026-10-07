@@ -163,7 +163,7 @@ echo -e "${separator}"
 
 # Prompt user input for username and validate
 while true; do
-    read -p "Input Username or number: " _input || exit 1
+    read -p "Input Username or number: " _input || { clear; return 0; }
     user="$_input"
     if [[ "$_input" =~ ^[0-9]+$ ]]; then
         _n=$((10#$_input))
@@ -183,8 +183,13 @@ done
 # GET OLD UUID
 old=$(grep -F "\"email\": \"${user}\"" /etc/xray/json/upgrade.json | sed -nE 's/.*"(id|password)": "([^"]+)".*/\2/p' | sort -u | head -1)
 echo -e "Old UUID: $old"
-read -p "New UUID (Enter for random): " new
+read -p "New UUID (Enter for random): " new || { clear; return 0; }
 if [[ -z "$new" ]]; then
+    new=$(xray uuid)
+    echo -e "Generated new UUID: $new"
+    sleep 2
+elif ! [[ "$new" =~ ^[A-Za-z0-9_.-]+$ ]]; then
+    echo -e "UUID has unsafe characters, generating new UUID..."
     new=$(xray uuid)
     echo -e "Generated new UUID: $new"
     sleep 2

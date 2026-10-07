@@ -132,11 +132,17 @@ sleep 2
 clear
 echo ""
 echo ""
+if ! unzip -tq backup.zip >/dev/null 2>&1; then
+    echo "Error: file is not a valid zip archive."
+    rm -f backup.zip
+    sleep 2
+    return
+fi
 unzip -o backup.zip
 rm -f backup.zip
 sleep 1
 echo "Restoring backup data..."
-cd /root/backup
+cd /root/backup || { echo "Error: backup dir missing."; sleep 2; return; }
 cp passwd /etc/
 cp group /etc/
 cp shadow /etc/
@@ -178,7 +184,7 @@ mkdir -p /etc/haproxy
 cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem 2>/dev/null
 chmod 644 /etc/xray/xray.crt 2>/dev/null || true
 chmod 600 /etc/xray/xray.key /etc/haproxy/funny.pem 2>/dev/null || true
-chmod 600 /etc/wireguard/wg0.conf /etc/wireguard/params /etc/ipsec.secrets* /etc/ppp/chap-secrets* /etc/ipsec.d/passwd* /etc/funny/.keybot /etc/funny/.chatid /etc/funny/.l2tp 2>/dev/null || true
+chmod 600 /etc/wireguard/wg0.conf /etc/wireguard/params /etc/ipsec.secrets* /etc/ppp/chap-secrets* /etc/ipsec.d/passwd* /etc/funny/.keybot /etc/funny/.chatid /etc/funny/.l2tp /etc/slowdns/server.key 2>/dev/null || true
 chmod 640 /etc/funny/.restore.key 2>/dev/null || true
 chmod 600 /etc/xray/.key 2>/dev/null || true
 chown root:www-data /etc/funny/.restore.key 2>/dev/null || true

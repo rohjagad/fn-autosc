@@ -131,7 +131,7 @@ cekws() {
         outb=$(xray api stats --server=127.0.0.1:10080 -name "user>>>${user}>>>traffic>>>downlink" 2>/dev/null | grep value | awk '{gsub(/[",]/,"",$2); print $2}')
 
         # Validasi data inb dan outb
-        if [[ -z "$inb" || -z "$outb" ]]; then
+        if ! [[ "$inb" =~ ^[0-9]+$ && "$outb" =~ ^[0-9]+$ ]]; then
             # No counters for this user in this interval - nothing to charge.
             # Stay quiet: the old message spammed the journal every 30s per idle
             # account.
@@ -152,6 +152,9 @@ cekws() {
 
         if [[ -f "$quota_file" ]]; then
         quota_limit=$(cat "$quota_file")
+        if ! [[ "$quota_limit" =~ ^[0-9]+$ ]]; then
+            continue
+        fi
         if [[ "$quota_used" -gt "$quota_limit" ]]; then
             echo "$(date '+%F %T') quota-ws: deleted $user (usage $quota_used > quota $quota_limit)" >> /etc/xray/.quota.logs
             exp=$(grep -w "^### $user" "/etc/xray/json/ws.json" | awk '{print $3}' | sort -u | head -n 1)

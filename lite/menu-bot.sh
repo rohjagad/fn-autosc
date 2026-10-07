@@ -141,11 +141,13 @@ ${separator}
 [ 设置机器人通知 ]
 ${separator}
 "
-    read -p "API Key Bot: " api
-    read -p "Your Chat ID: " itd
+    read -p "API Key Bot: " api || return
+    [ -z "$api" ] && { echo "API Key cannot be empty."; sleep 2; return; }
+    read -p "Your Chat ID: " itd || return
     if ! [[ "$itd" =~ ^-?[0-9]+$ ]]; then
         echo "Chat ID must be a numeric value (e.g. 123456789 or -100123456789)."
-        exit 1
+        sleep 2
+        return 1
     fi
     
     # [ Menyimpan API Key dan Chat ID ke file ]

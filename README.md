@@ -320,7 +320,7 @@ to `127.0.0.1` only and are never reachable from outside.
 Every canonical path above has three color aliases (e.g. `/vmws` also
 answers on `/red`, `/crimson`, `/scarlet`). Nginx rewrites them to the
 canonical path upstream, so they behave identically. New account links
-rotate across canonical + colors (round-robin via `/etc/xray/.colorseq`)
+rotate across colors (round-robin via `/etc/xray/.colorseq`; canonical stays the default path and never appears in links)
 to spread usage; the card description always shows the canonical path.
 
 | Canonical | Colors |
@@ -511,8 +511,7 @@ The staged tree is zipped to `/root/backup.zip`.
 ### Where It Goes
 
 - **`backup`** — sends the archive to **Telegram as a document attachment**,
-  captioned with the domain, server IP and date. Runs on the 4×/day cron
-  schedule.
+  captioned with the auth username, server IP and date. Runs on the adjustable auto-backup interval (menu-bot option 3, 1-24h).
 - **Telegram is the only delivery channel.** There is no file-host upload and
   therefore no expiring public link, no Google Drive variant, and no email
   notification. The Google Drive and email paths were removed, and the
@@ -556,15 +555,16 @@ This is convenient for recovering a server whose SSH access is broken, but see
 
 ### Certificate Flow
 
-`diamond.sh` obtains a certificate using a three-tier fallback, so a wedged
-service can never be caused by a missing certificate:
+`diamond.sh` installs a self-signed EC certificate by default (atomic temp+move,
+never truncating the live pair), so install never depends on the network.
+Trusted issuance is manual via the Domain menu:
 
-1. **Let's Encrypt** via acme.sh (standalone, EC-256).
-2. **ZeroSSL** if Let's Encrypt fails — typically a `429` rate limit.
-3. **Self-signed** EC certificate if both fail.
+1. **Let's Encrypt** via acme.sh (standalone, EC-256, option 4).
+2. **ZeroSSL** fallback if Let's Encrypt fails — typically a `429` rate limit.
+3. **Certbot** standalone (option 5).
 
 Certificates land in `/etc/xray/xray.crt` (`0644`) and `/etc/xray/xray.key`
-(`0600`). For dual-stack servers the two chains are concatenated.
+(`0600`). Dual-stack uses a single certificate (one key, one chain).
 
 Nginx reads the pair directly. HAProxy instead needs a single file containing
 the chain followed by the key, so the pair is concatenated to
@@ -575,18 +575,21 @@ key and is mode `0600`.
 
 | Option | Action |
 | :---: | :--- |
-| 1 | Change the server domain |
-| 2 | Renew via acme.sh (IPv4 or IPv6) |
-| 3 | Renew via Certbot (IPv4 only) |
-| 4 | Generate a self-signed certificate |
+| 1 | Add domain (auto self-signed multi-SAN) |
+| 2 | Remove domain (rebuilds SAN cert + `server_name`) |
+| 3 | List domains |
+| 4 | Renew via acme.sh for the chosen domain (IPv4 or IPv6) |
+| 5 | Renew via Certbot for the chosen domain |
+| 6 | Generate a self-signed certificate (all domains via SAN) |
 
-Changing the domain rewrites `/etc/xray/domain` and the Nginx `server_name`,
-backs up the old value, and can renew the certificate in the same step.
+Adding/removing a domain rewrites `/etc/xray/domain` + `/etc/xray/domains` and
+rebuilds the Nginx `server_name`, backs up the old value, and reinstalls the
+certificate atomically in the same step.
 
 ### Renewing After Certificate Expiry
 
-Open `dm-menu`, choose option 2, pick `4` or `6`, and wait. The fallback chain
-handles rate limits automatically.
+Open `dm-menu`, pick the domain first, then choose option 4 (acme.sh) or 5
+(certbot). The fallback chain handles rate limits automatically.
 
 ---
 
@@ -624,8 +627,8 @@ Client subnet `192.168.42.0/24`.
 Accounts are stored in `/etc/funny/.l2tp`, with credentials mirrored into
 `/etc/ppp/chap-secrets` and `/etc/ipsec.d/passwd`.
 
-> The IPsec pre-shared key is a fixed value (`myvpn`) and is shown in the
-> account card.
+> The IPsec pre-shared key is generated randomly per install and stored mode
+> `0600`; it is shown in the account card.
 
 ### OpenVPN
 
@@ -640,8 +643,8 @@ WebSocket service on `2086`.
 
 ### NoobzVPN — `menu-noobz`
 
-Dual-mode TCP tunnel: plain on `8080`, TLS on `8443`. Uses a bundled
-certificate (not the domain certificate).
+Dual-mode TCP tunnel: plain on `8080`, TLS on `8443`. TLS uses the domain
+ACME pair (symlinked, refreshed on renewal).
 
 ### UDP Custom & UDP Request
 
@@ -844,16 +847,15 @@ file-host upload has been removed entirely in favour of Telegram attachments).
 
 Read these before exposing a server to the internet.
 
-- **The web restore endpoint is unauthenticated.** Anyone who can reach port
-  `855` can upload a `backup.zip` and trigger a full restore as root, which
-  overwrites `/etc/passwd` and `/etc/shadow`. Block port `855` at the firewall
-  when not actively using it, or restrict it by source IP.
+- **The web restore endpoint requires the key in `/etc/funny/.restore.key`.**
+  Uploads without (or with a wrong) token get `401`; only a matching token
+  triggers extraction. Still, block port `855` at the firewall when not
+  actively using it, or restrict it by source IP.
 - **Backups contain password hashes.** The archive includes `/etc/shadow` and
-  `/etc/gshadow`, and `backup` uploads it to a public file host and Telegram.
-  Treat backup links as secrets.
-- **A secret is still committed to the repository** — the L2TP pre-shared key
-  (`installer/l2tp.sh`). Rotate it, and do not reuse this repository's default
-  on a production server. (The Telegram bot token and the Gmail app password
+  `/etc/gshadow`, and `backup` sends it as a Telegram document attachment only
+  (no public link, no file host). Treat the delivered archive as a secret.
+- **No secret is committed to the repository** — the L2TP pre-shared key is
+  generated randomly at install time (`installer/l2tp.sh`). (The Telegram bot token and the Gmail app password
   that used to be listed here are both gone: install notifications use the
   operator's own `/etc/funny/` credentials, and the email and Google Drive
   backup paths have been removed.)

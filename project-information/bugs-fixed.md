@@ -2877,3 +2877,87 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 434 (Found 454):** `havecreds` (both editions) now waits `Press any key` before returning, covering callers option 2 (`notif`) and option 3 (`setbotup`). Bodies otherwise untouched.
 - **Verified live:** notice + pause present in `/usr/bin/menu-bot`; `bash -n` clean; zips repacked (0755, IN-SYNC).
+### Fix 435 - addssh recall (Found 455)
+
+- **Fix 435 (Found 455):** `full/addssh.sh` invalid/duplicate branches call `main` (was undefined `add_ssh`) and pauses carry `|| true`. Lite has no SSH builder.
+- **Verified:** `bash -n` clean.
+
+### Fix 436 - dm-menu invalid-branch recall (Found 456)
+
+- **Fix 436 (Found 456):** both editions `acme()` invalid IP branch runs `dm1` + `return` (was bare `cert`). Bodies otherwise untouched.
+- **Verified:** `bash -n` clean both editions.
+
+### Fix 437 - SlowDNS key chmod (Found 457)
+
+- **Fix 437 (Found 457):** appended `/etc/slowdns/server.key` to the `chmod 600` private-key lists in `full/bmenu.sh` (3x), `lite/bmenu.sh` (3x), `full/restore-ftp.sh`, `lite/restore-ftp.sh`, `website/restore-ftp.sh`.
+- **Verified:** `bash -n` clean all five; live restore entries updated via tarball deploy.
+
+### Fix 438 - Restore zip/cd guards (Found 458)
+
+- **Fix 438 (Found 458):** `resold()` aborts when the `outbounds` marker is missing; `restf()` (both bmenus) plus all three `restore-ftp.sh` validate `unzip -tq` before unpacking and guard `cd /root/backup`; URL-based blocks also got the `cd` guard. No SUCCESS on corrupt input.
+- **Verified:** `bash -n` clean; deployed live.
+
+### Fix 439 - menu-api exact IP match (Found 459)
+
+- **Fix 439 (Found 459):** `fn-autosc-api/menu-api:42` uses `grep -wF "$LOCAL_IP"` like the panel gates (was substring `grep`).
+- **Verified:** `bash -n` clean; committed in `fn-autosc-api` repo scope (sibling checkout).
+
+### Fix 440 - limit-ip-ssh init + batched restarts (Found 460)
+
+- **Fix 440 (Found 460):** `full/limit-ip-ssh.sh` initializes `nais=0`, collects `need_restart`, and runs one `daemon-reload + restart ssh/sshd/ws` after the loop; `passwd -l` stays per-user. `at`-based unlock kept (sweeper migration noted as follow-up).
+- **Verified:** `bash -n` clean.
+
+### Fix 441 - quota/kill numeric guards (Found 461)
+
+- **Fix 441 (Found 461):** 8 `quota-*.sh` skip non-numeric `inb/outb` and non-numeric `quota_limit`; 8 `kill-*.sh` skip unless both `usage` and `quota_limit` match `^[0-9]+$`. Idle-user `continue` semantics unchanged.
+- **Verified:** `bash -n` clean all 16.
+
+### Fix 442 - Fetch timeout caps (Found 462)
+
+- **Fix 442 (Found 462):** added `--max-time 15/30/60` to the `delete-*` date probe, `menu-wg` Cloudflare reg, installer IP fetches/summaries, `xray.sh` piped installer, `menu-system` repo/warp fetches; `wget` warp uses `--timeout=30`. No URL or logic changes.
+- **Verified:** `bash -n` clean.
+
+### Fix 443 - Go error surfacing (Found 463)
+
+- **Fix 443 (Found 463):** `delete-ssh.go`/`list-ssh.go` return `"Error"` when `chage`/`passwd` fail (was fake `No Expiry`/`UNLOCKED`); 6 `cek-xray-*.go` report `Error reading config` to stderr on `ReadFile` failure and render `Not available` on bad quota integers.
+- **Verified:** all 8 rebuild with `CGO_ENABLED=0 GOOS=linux GOARCH=amd64` (exit 0); new binaries carry the error strings; repacked into `menu/full.zip`/`menu/lite.zip` (0755); deployed live.
+
+### Fix 444 - WS/HU parity + installer cert atomicity (Found 464)
+
+- **Fix 444 (Found 464):** `config/{4,6,dual}.conf` WS/HU locations (canonical + 18 color aliases, 24 blocks per template) gain the XHTTP streaming set (`proxy_request_buffering off`, `client_max_body_size 0`, `proxy_buffering off`, 300s/300s/60s timeouts, `client_body_timeout 300s`); `installer/diamond.sh` writes via `.tmp` + `mv -f` and dual-stack installs a single cert (was concatenated two-cert bundle).
+- **Verified live:** same patch applied to `/etc/nginx/nginx.conf` (24 blocks), `nginx -t` ok, reload clean, canonical `:443/vlws` and prefixed `:443/a/green` both `400`.
+
+### Fix 445 - dm-menu cert/email/quoting/dmsl (Found 465)
+
+- **Fix 445 (Found 465):** both editions — `acme()` initializes `email` from `/etc/funny/.email`, quotes `"$domain"` in acme/certbot/live paths, fallback writes via `.tmp` + `mv`; `dmsl()` delegates to `gen_selfsigned_all` (multi-SAN, atomic, no live delete) instead of single-CN `rm -fr` + direct write.
+- **Verified:** `bash -n` clean both editions; deployed live.
+
+### Fix 446 - udp-request empty-IP guard (Found 466)
+
+- **Fix 446 (Found 466):** `installer/request.sh` `ExecStartPost` wraps the RETURN rules in `[ -n "$ip_nat" ]` (interpolated at generation), mirroring the fixnet helper; empty management IP now yields sleep+exit instead of an invalid rule.
+- **Verified:** `bash -n` clean.
+
+### Fix 447 - UUID/password charset gate (Found 467)
+
+- **Fix 447 (Found 467):** 24 `add-*.sh` accept custom UUID only if `^[A-Za-z0-9_.-]+$`, else generate with the same fallback UX; 8 `change-id-*.sh` add EOF guard on the prompt and regenerate on unsafe input instead of interpolating raw across all four JSONs.
+- **Verified:** `bash -n` clean all 32; standard `xray uuid` output passes the gate.
+
+### Fix 448 - delete/extend name gate (Found 468)
+
+- **Fix 448 (Found 468):** 16 `delete-*`/`extend-*` reset `user=""` when the resolved name fails `^[a-zA-Z0-9_]+$`, so metachar input (`.*`) lands in the existing not-found branch with no mutation, no restart. Numeric picks map through `users[]` first and are unaffected.
+- **Verified:** `bash -n` clean all 16; deployed live.
+
+### Fix 449 - Menu retention + quoting (Found 469)
+
+- **Fix 449 (Found 469):** `menu-noobz.sh` quotes `"$TEKS"` in both Telegram sends; `xl2tp.sh` in-function `exit 0/1` become `return` (empty password now errors + returns); `os()` invalid branch loops with `sleep 2`; `menu-bot install()` adds EOF guards, empty-key rejection, and `return 1` instead of `exit 1` on bad chat ID.
+- **Verified:** `bash -n` clean; deployed live.
+
+### Fix 450 - Result pauses (Found 470)
+
+- **Fix 450 (Found 470):** `x-{ws,http,grpc,xhttp}.sh` options 8/9/12 (both editions, 8 files) and `full/menu-ssh.sh` options 3/6/8 pause `Press any key` before redrawing. Same one-liner as every other pause.
+- **Verified live:** `/usr/bin/x-ws` carries 8 pauses, `/usr/bin/menu-bot` 7; `bash -n` clean.
+
+### Fix 451 - README truth refresh (Found 471)
+
+- **Fix 451 (Found 471):** docs-only — rotation (colors-only), backup caption (Username + adjustable interval), installer (self-signed default, manual 4/5), 6-row domain table, renewal (pick + 4/5), single dual-stack cert, random PSK, Noobz domain pair, restore key-auth, Telegram-only delivery.
+- **Verified:** each claim cross-checked against code cited in the entry.

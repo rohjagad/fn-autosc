@@ -122,7 +122,7 @@ clear
 echo ""
 echo ""
 until [[ $VPN_USER =~ ^[a-zA-Z0-9_]+$ && ${CLIENT_EXISTS} == '0' ]]; do
-		read -rp "Username : " -e VPN_USER || exit 0
+		read -rp "Username : " -e VPN_USER || return
 		CLIENT_EXISTS=$(grep -w "$VPN_USER" /etc/funny/.l2tp | wc -l)
 
 		if [[ ${CLIENT_EXISTS} -gt 0 ]]; then
@@ -133,14 +133,14 @@ until [[ $VPN_USER =~ ^[a-zA-Z0-9_]+$ && ${CLIENT_EXISTS} == '0' ]]; do
 			continue
 		fi
 	done
-read -p "Password : " VPN_PASSWORD || exit 0
-[ -z "$VPN_PASSWORD" ] && exit 0
+read -p "Password : " VPN_PASSWORD || return
+[ -z "$VPN_PASSWORD" ] && { echo -e "\033[0;31mPassword cannot be empty.\033[0m"; sleep 2; return; }
 echo ""
 echo -e "\033[38;5;208m0 not allowed\033[0m"
 read -p "Duration (Days) : " masaaktif
 while ! [[ "$masaaktif" =~ ^[1-9][0-9]*$ ]]; do
     echo -e "\033[0;31mValue must be a whole number greater than 0.\033[0m"
-    read -p "Duration (Days) : " masaaktif || exit 1
+    read -p "Duration (Days) : " masaaktif || return
 done
 hariini=`date -d "0 days" +"%Y-%m-%d"`
 exp=`date -d "$masaaktif days" +"%d-%b-%Y"`
@@ -198,7 +198,7 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/funny/.l2tp")
 		echo "You have no existing clients!"
 		read -n 1 -s -r -p "Press any key to return..." || true
 		echo ""
-		exit 1
+		return
 	fi
 
 	echo ""
@@ -209,9 +209,9 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/funny/.l2tp")
 	grep -E "^### " "/etc/funny/.l2tp" | cut -d ' ' -f 2-3 | nl -s ') '
 	until [[ ${CLIENT_NUMBER} -ge 1 && ${CLIENT_NUMBER} -le ${NUMBER_OF_CLIENTS} ]] 2>/dev/null; do
 		if [[ ${CLIENT_NUMBER} == '1' ]]; then
-			read -rp "Select One Client[1]: " CLIENT_NUMBER || exit 0
+			read -rp "Select One Client[1]: " CLIENT_NUMBER || return
 		else
-			read -rp "Select One Client [1-${NUMBER_OF_CLIENTS}]: " CLIENT_NUMBER || exit 0
+			read -rp "Select One Client [1-${NUMBER_OF_CLIENTS}]: " CLIENT_NUMBER || return
 		fi
 	done
 # match the selected number to a client name
@@ -253,7 +253,7 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/funny/.l2tp")
 		echo "You have no existing clients!"
 		read -n 1 -s -r -p "Press any key to return..." || true
 		echo ""
-		exit 1
+		return
 	fi
 
 	clear
@@ -265,9 +265,9 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/funny/.l2tp")
 	grep -E "^### " "/etc/funny/.l2tp" | cut -d ' ' -f 2-3 | nl -s ') '
 	until [[ ${CLIENT_NUMBER} -ge 1 && ${CLIENT_NUMBER} -le ${NUMBER_OF_CLIENTS} ]] 2>/dev/null; do
 		if [[ ${CLIENT_NUMBER} == '1' ]]; then
-			read -rp "Select one client [1]: " CLIENT_NUMBER || exit 0
+			read -rp "Select one client [1]: " CLIENT_NUMBER || return
 		else
-			read -rp "Select one client [1-${NUMBER_OF_CLIENTS}]: " CLIENT_NUMBER || exit 0
+			read -rp "Select one client [1-${NUMBER_OF_CLIENTS}]: " CLIENT_NUMBER || return
 		fi
 	done
 echo ""
@@ -275,7 +275,7 @@ echo -e "\033[38;5;208m0 not allowed\033[0m"
 read -p "Expired (Days) : " masaaktif
 while ! [[ "$masaaktif" =~ ^[1-9][0-9]*$ ]]; do
     echo -e "\033[0;31mValue must be a whole number greater than 0.\033[0m"
-    read -p "Expired (Days) : " masaaktif || exit 1
+    read -p "Expired (Days) : " masaaktif || return
 done
 user=$(grep -E "^### " "/etc/funny/.l2tp" | cut -d ' ' -f 2 | sed -n "${CLIENT_NUMBER}"p)
 exp=$(grep -E "^### " "/etc/funny/.l2tp" | cut -d ' ' -f 3 | sed -n "${CLIENT_NUMBER}"p)

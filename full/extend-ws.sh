@@ -176,6 +176,9 @@ read -rp "Input Username or number: " _input || { clear; return 0; }
             user="${_users[$((_n-1))]}"
         fi
     fi
+    if ! [[ "$user" =~ ^[a-zA-Z0-9_]+$ ]]; then
+        user=""
+    fi
 if [ -z "$user" ]; then
     x-ws
 else

@@ -123,7 +123,7 @@ done
 # Menyimpan Domain
 mkdir -p /etc/xray
 echo -e "${domain}" > /etc/xray/domain
-curl -4 -sS ipinfo.io/ip > /etc/.ip
+curl -4 -sS --max-time 15 ipinfo.io/ip > /etc/.ip
 
 # Menyimpan Email
 mkdir -p /etc/funny
@@ -251,7 +251,7 @@ echo -e "1.23" > /etc/funny/version
 OUTPUT="
 DETAIL INSTALL SCRIPT 1.23
 -------------------------
-IP: $(curl -4 ifconfig.me)
+IP: $(curl -4 -s --max-time 15 ifconfig.me)
 Domain: $domain
 Email Own: $email
 Type IP: $ips

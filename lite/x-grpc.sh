@@ -173,11 +173,11 @@ ${orange}Press [Ctrl + C] to exit${NC}"
         5|05) clearScreen; trial-vless-grpc ; xgrpc ;;
         6|06) clearScreen; trial-trojan-grpc ; xgrpc ;;
         7|07) clearScreen; cek-xray-grpc  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xgrpc ;;
-        8|08) clearScreen; delete-grpc ; xgrpc ;;
-        9|09) clearScreen; extend-grpc ; xgrpc ;;
+        8|08) clearScreen; delete-grpc ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xgrpc ;;
+        9|09) clearScreen; extend-grpc ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xgrpc ;;
         10) clearScreen; log-database-xray-grpc  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xgrpc ;;
         11) clearScreen; list-xray-grpc  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xgrpc ;;
-        12) clearScreen; change-id-grpc ; xgrpc ;;
+        12) clearScreen; change-id-grpc ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xgrpc ;;
         13) clearScreen; unlock-grpc ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xgrpc ;;
         14) clearScreen; routing-grpc ; xgrpc ;;
         15) clearScreen; change-limit-ip-grpc ; xgrpc ;;

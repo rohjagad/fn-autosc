@@ -163,7 +163,11 @@ func main() {
 		return
 	}
 
-	configData, _ := ioutil.ReadFile(configPath)
+	configData, err := ioutil.ReadFile(configPath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error reading config: %v\n", err)
+		return
+	}
 	lines := strings.Split(string(configData), "\n")
 	userSet := make(map[string]bool) // Avoid duplicate users
 	users := []string{}
@@ -216,9 +220,13 @@ func main() {
 		if quotaUsage == "" || quotaLimit == "" {
 			quota = "Not available"
 		} else {
-			usage, _ := strconv.ParseInt(quotaUsage, 10, 64)
-			limit, _ := strconv.ParseInt(quotaLimit, 10, 64)
-			quota = fmt.Sprintf("%s / %s", FormatBytes(usage), FormatBytes(limit))
+			usage, uerr := strconv.ParseInt(quotaUsage, 10, 64)
+			limit, lerr := strconv.ParseInt(quotaLimit, 10, 64)
+			if uerr != nil || lerr != nil {
+				quota = "Not available"
+			} else {
+				quota = fmt.Sprintf("%s / %s", FormatBytes(usage), FormatBytes(limit))
+			}
 		}
 
 		// IP limit

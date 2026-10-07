@@ -293,6 +293,8 @@ fi
 mulog=$(mesinssh)
 rm -f "$recent_auth" "$DB_LOG" "$SSH_LOG"
 date=$(date)
+nais=0
+need_restart=0
 
 for user in $username
 do
@@ -319,11 +321,8 @@ do
 
     # Pastikan user root tidak dikunci
     if [[ $user != "root" && $cekcek -gt $iplimit ]]; then
-        systemctl daemon-reload
-        systemctl restart ssh
-        systemctl restart sshd
-        systemctl restart ws
         passwd -l "$user"
+        need_restart=1
         echo "$user dikunci karena melebihi batas login."
         unlock_time=$(date -d "15 minutes" "+%Y-%m-%d %H:%M:%S")
         echo "passwd -u $user" | at now + 15 minutes
@@ -335,6 +334,12 @@ do
     sleep 0.1
 done
 
+if [[ $need_restart -eq 1 ]]; then
+    systemctl daemon-reload
+    systemctl restart ssh
+    systemctl restart sshd
+    systemctl restart ws
+fi
 if [[ $nais -gt 1 ]]; then
     clear
     echo ""

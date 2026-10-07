@@ -232,7 +232,7 @@ elif [[ $OS == 'debian' ]]; then
                 apt install -y linux-headers-$(uname -r)
         fi
 elif [[ ${OS} == 'centos' ]]; then
-        curl -Lo /etc/yum.repos.d/wireguard.repo https://copr.fedorainfracloud.org/coprs/jdoss/wireguard/repo/epel-7/jdoss-wireguard-epel-7.repo
+        curl --max-time 30 -Lo /etc/yum.repos.d/wireguard.repo https://copr.fedorainfracloud.org/coprs/jdoss/wireguard/repo/epel-7/jdoss-wireguard-epel-7.repo
         yum -y update
         yum -y install wireguard-dkms wireguard-tools
         fi
@@ -245,7 +245,7 @@ if [[ -e /usr/bin/warp.sh ]]; then
  echo -e "${Info} Warp already Install,."
 else
 cd /usr/bin
-wget -O warp.sh https://raw.githubusercontent.com/P3TERX/warp.sh/main/warp.sh
+wget --timeout=30 -O warp.sh https://raw.githubusercontent.com/P3TERX/warp.sh/main/warp.sh
 bash warp.sh install
 bash warp.sh wgd
 fi
@@ -874,7 +874,7 @@ Press CTRL + C to Exit
         15) clear ; cd /root ; curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root gentoo && reboot  ;;
         16) clear ; cd /root ;curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root opencloudos 8 && reboot ;;
         17) clear ; cd /root ; curl --max-time 120 -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && bash reinstall.sh --username root kali rolling && reboot  ;;
-        *) clear ; echo "Invalid option. Please select a valid number.";;
+        *) clear ; echo "Invalid option. Please select a valid number."; sleep 2; os ;;
     esac
 }
 

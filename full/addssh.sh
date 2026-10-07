@@ -155,14 +155,14 @@ alldom=$(printf '%s,' "${rdomains[@]}" | sed 's/,$//; s/,/, /g')
     read -p "Username: " username || exit 0
     if ! [[ "$username" =~ ^[a-z][a-z0-9_]{0,31}$ ]]; then
         echo -e "\033[0;31mUsername must be lowercase alphanumeric/underscore, start with a letter, max 32 chars.\033[0m"
-        read -n 1 -s -r -p "Press any key to return"
-        add_ssh
+        read -n 1 -s -r -p "Press any key to return" || true
+        main
         return
     fi
     if id "$username" &>/dev/null; then
         echo -e "\033[0;31mUser '$username' already exists.\033[0m"
-        read -n 1 -s -r -p "Press any key to return"
-        add_ssh
+        read -n 1 -s -r -p "Press any key to return" || true
+        main
         return
     fi
     read -p "Password: " password

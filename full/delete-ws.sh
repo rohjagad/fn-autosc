@@ -101,7 +101,7 @@ DATE=$(date +"%d-%b-%Y %H:%M:%S")
         curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$TEXT" $URL >/dev/null
 }
 
-dateFromServer=$(curl -v --insecure --silent https://google.com/ 2>&1 | grep Date | sed -e 's/< Date: //')
+dateFromServer=$(curl -v --max-time 15 --insecure --silent https://google.com/ 2>&1 | grep Date | sed -e 's/< Date: //')
 biji=`date +"%Y-%m-%d" -d "$dateFromServer"`
 RED='\033[0;31m'
 NC='\033[0m'
@@ -183,6 +183,9 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/ws.json")
         if [ "$_n" -ge 1 ] && [ "$_n" -le "${#_users[@]}" ]; then
             user="${_users[$((_n-1))]}"
         fi
+    fi
+    if ! [[ "$user" =~ ^[a-zA-Z0-9_]+$ ]]; then
+        user=""
     fi
     if [ -z "$user" ]; then
     x-ws

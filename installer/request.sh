@@ -131,7 +131,7 @@ Type=simple
 User=root
 WorkingDirectory=/root/udp-request/
 ExecStart=/root/udp-request/udp-request-linux-amd64 -ip=$public_ip -net=$interface -mode=system
-ExecStartPost=/bin/bash -c 'sleep 2; iptables -t nat -D POSTROUTING -s $ip_nat -j RETURN 2>/dev/null; iptables -t nat -I POSTROUTING 1 -s $ip_nat -j RETURN; exit 0'
+ExecStartPost=/bin/bash -c 'sleep 2; [ -n "$ip_nat" ] && { iptables -t nat -D POSTROUTING -s $ip_nat -j RETURN 2>/dev/null; iptables -t nat -I POSTROUTING 1 -s $ip_nat -j RETURN; }; exit 0'
 Restart=always
 RestartSec=3s
 

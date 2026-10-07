@@ -159,7 +159,7 @@ check_install wireguard
 sleep 1
 server_priv_key=$(wg genkey)
 server_pub_key=$(echo "${server_priv_key}" | wg pubkey)
-ip=$(curl -4 -s ipinfo.io/ip 2>/dev/null || cat /etc/.ip 2>/dev/null || echo "$LOCAL_IP")
+ip=$(curl -4 -s --max-time 15 ipinfo.io/ip 2>/dev/null || cat /etc/.ip 2>/dev/null || echo "$LOCAL_IP")
 netinfo=$(ip -o -4 route show to default | awk '{print $5}')
 echo -e "ip=${ip}
 server_priv_key=${server_priv_key}

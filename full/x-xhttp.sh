@@ -173,11 +173,11 @@ ${orange}Press [Ctrl + C] to exit${NC}"
         5|05) clearScreen; trial-vless-xhttp ; xxhttp ;;
         6|06) clearScreen; trial-trojan-xhttp ; xxhttp ;;
         7|07) clearScreen; cek-xray-xhttp  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xxhttp ;;
-        8|08) clearScreen; delete-xhttp ; xxhttp ;;
-        9|09) clearScreen; extend-xhttp ; xxhttp ;;
+        8|08) clearScreen; delete-xhttp ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xxhttp ;;
+        9|09) clearScreen; extend-xhttp ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xxhttp ;;
         10) clearScreen; log-database-xray-xhttp  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xxhttp ;;
         11) clearScreen; list-xray-xhttp  ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xxhttp ;;
-        12) clearScreen; change-id-xhttp ; xxhttp ;;
+        12) clearScreen; change-id-xhttp ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xxhttp ;;
         13) clearScreen; unlock-xhttp ; echo "" ; read -n 1 -s -r -p "Press any key to return..." || true ; xxhttp ;;
         14) clearScreen; routing-xhttp ; xxhttp ;;
         15) clearScreen; change-limit-ip-xhttp ; xxhttp ;;

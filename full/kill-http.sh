@@ -126,6 +126,9 @@ function check_quota() {
     if [[ -f "$quota_file" && -f "$usage_file" ]]; then
         quota_limit=$(cat "$quota_file")
         usage=$(cat "$usage_file")
+        if ! [[ "$usage" =~ ^[0-9]+$ && "$quota_limit" =~ ^[0-9]+$ ]]; then
+            continue
+        fi
 
         if [[ $usage -ge $quota_limit ]]; then
             exp=$(grep -w "^### $user" "/etc/xray/json/upgrade.json" | cut -d ' ' -f 3 | sort | uniq | head -n 1)
