@@ -236,7 +236,7 @@ vlesslink1="vless://$uuid@$rdomain:443?mode=gun&security=tls&encryption=none&aut
 
 TEKS="
 ----------------------
-🟢 Xray VLess GRPC 🟢
+🟢 XRAY VLESS GRPC 🟢
 ----------------------
 
 Remarks : $user

@@ -238,7 +238,7 @@ link2="trojan://${uuid}@${rdomain}:80?path=$opath&security=none&host=${rdomain}&
 
 TEKS="
 ----------------------
-🟢 Xray Trojan WS 🟢
+🟢 XRAY TROJAN WS 🟢
 ----------------------
 
 Remarks : $user

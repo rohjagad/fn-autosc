@@ -191,7 +191,7 @@ echo ""
 echo ""
 TEKS="
 -----------------------
-🟢 Xray VMess WS 🟢
+🟢 XRAY VMESS WS 🟢
 -----------------------
 
 Remarks : $user

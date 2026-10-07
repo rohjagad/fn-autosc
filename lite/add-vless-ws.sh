@@ -239,7 +239,7 @@ vlesslink2="vless://${uuid}@${rdomain}:80?path=$opath&security=none&encryption=n
 
 TEKS="
 -----------------------
-🟢 Xray VLess WS 🟢
+🟢 XRAY VLESS WS 🟢
 -----------------------
 
 Remarks : $user

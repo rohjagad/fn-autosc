@@ -173,7 +173,7 @@ echo ""
 echo ""
 TEKS="
 -----------------------
-🟢 Xray VMess GRPC 🟢
+🟢 XRAY VMESS GRPC 🟢
 -----------------------
 
 Remarks : $user

@@ -2301,3 +2301,9 @@ Found 400. **Dates mix three shapes** —
 cards stamp `26-10-07` (2-digit year, numeric month), stamps use `2026-10-07 10:00:00`, extend/WG show `07 Oct 2026`, SSH shows chage raw (`Nov 06, 2026`), Go tools print `Jan 02, 2006` / `2006-01-02`, and the auth repo documents `YYYY-MM-DD`. Operator direction: one shape everywhere — `07-Oct-2026` (4-digit year, 3-letter month, 2-digit day), including TUI and the auth repo.
 Found 401. **Delete notices carry transport in the title instead of the body** —
 `X-RAY WS ACCOUNT DELETED` bakes the transport into the header and the body has no type row (`Date/Username/Expired` only), so the kind of account deleted is header-only. Operator direction: header just `ACCOUNT DELETED`, body rows `Date/Username/Type/Expired` with `WS/HU/XHTTP/GRPC`.
+Found 402. **Extend titles still transport-specific mixed-case** —
+`X-RAY Extend WEBSOCKET ACCOUNT` (and http/xhttp/grpc siblings) bakes the transport into the header in mixed case, and the body has no type row. Operator direction: bare `EXTEND EXPIRATION`, all uppercase, `Type` below `Username` — mirroring the delete pattern.
+Found 403. **Extend DATE stamps missed the unification** —
+the 8 extend scripts stamp `DATE` with 2-digit-year numeric (`%y-%m-%d %H:%M:%S`), left behind by the Fix 389 sweep which only covered the `%Y` variant.
+Found 404. **Green-circle titles not uppercase** —
+`🟢 Xray VMess WS 🟢` mixes case while notice titles (`ACCOUNT DELETED`, `EXTEND EXPIRATION`) are all caps. Operator direction: every green-circle title all uppercase.

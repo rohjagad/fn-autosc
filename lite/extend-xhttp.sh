@@ -119,14 +119,15 @@ send_log() {
     [ -z "$CHATID" ] || [ -z "$KEY" ] && return 0
     URL="https://api.telegram.org/bot$KEY/sendMessage"
     TIME="10"
-    DATE=$(date +"%y-%m-%d %H:%M:%S") # Format tahun menjadi 2 digit
+    DATE=$(date +"%d-%b-%Y %H:%M:%S")
 
     TEXT="
 <b>-----------------------</b>
-<b>X-RAY Extend XHTTP ACCOUNT</b>
+<b>EXTEND EXPIRATION</b>
 <b>-----------------------</b>
 <code>Date         : $DATE</code>
 <code>Username     : $user</code>
+<code>Type         : XHTTP</code>
 <code>Old Expired  : $exp</code>
 <code>New Expired  : $exp4</code>
 <code>Status Quota : $quota_status</code>
@@ -211,6 +212,7 @@ else
     echo -e "         ${GB}XTLS X-RAY XHTTP${NC}         "
     echo -e "${separator}"
     echo -e " ${YB}Client Name :${NC} $user"
+    echo -e " ${YB}Type        :${NC} XHTTP"
     echo -e " ${YB}Expired On  :${NC} $exp4"
     echo -e " ${YB}Status Quota:${NC} $quota_status"
     echo -e "${separator}"

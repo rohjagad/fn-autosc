@@ -156,7 +156,7 @@ link1="trojan://${uuid}@${rdomain}:443?mode=gun&security=tls&authority=${rdomain
 
 TEKS="
 -----------------------
-🟢 Xray Trojan GRPC 🟢
+🟢 XRAY TROJAN GRPC 🟢
 -----------------------
 
 Remarks : $user

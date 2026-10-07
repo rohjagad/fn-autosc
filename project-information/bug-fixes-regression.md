@@ -2121,3 +2121,13 @@ Section 35's four-check rule applied to Fix 390:
 | **Over-strictness** | Nothing rejected; text-scoped change. |
 | **Over-engineering** | Literal title swap plus one inserted row per transport. |
 | **vs the source** | References predate typed delete bodies; bare-title-plus-Type is this repo's own direction per operator request. |
+## 175. Extend Title + Uppercase — Four Checks (October 7, 2026)
+
+Section 35's four-check rule applied to Fix 391:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Header/body text only; extend math stays epoch-based and the new `Type` row is body-only. Old cards unaffected. |
+| **Over-strictness** | Nothing rejected; text-scoped change. |
+| **Over-engineering** | Literal title/row/format swaps mirroring Fix 390. |
+| **vs the source** | References predate typed extend bodies; bare-title-plus-Type and all-caps circle titles are this repo's own direction per operator request. |

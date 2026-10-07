@@ -2693,3 +2693,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 390 (Found 401):** all 8 delete notices retitled to bare `<b>ACCOUNT DELETED</b>`; body now `Date/Username/Type/Expired` (`Type: WS/HU/XHTTP/GRPC` per transport, colon-aligned col 10) in both the Telegram card and the TUI echo.
 - **Verified:** live delete shows `Client Name/Type: WS/Expired On: 06-Nov-2026` in TUI and fires the titled card; `bash -n` clean; zips repacked (0755, parity rechecked); deployed scripts verified; box left with 0 test residue.
+### Fix 391 - Bare extend title, uppercase circle titles (Found 402–404)
+
+- **Fix 391 (Found 402–404):** all 8 extend notices retitled to bare `<b>EXTEND EXPIRATION</b>` with `Type: WS/HU/XHTTP/GRPC` below `Username` (colon-aligned col 14) in card and TUI; extend `DATE` stamps converted to `%d-%b-%Y %H:%M:%S` (the `%y` variant Fix 389 missed); all 12 green-circle card titles uppercased (`🟢 XRAY VMESS WS 🟢`, …, `🟢 SSH ACCOUNT 🟢`). Blue link rows untouched by design.
+- **Verified:** live extend shows `Type: WS` in TUI and fires the titled card; `bash -n` clean; zips repacked (0755, parity rechecked); deployed scripts verified; box left with 0 test residue.

@@ -278,7 +278,7 @@ echo ""
 echo ""
 TEKS="
 ----------------------
-🟢 Xray VMess XHTTP 🟢
+🟢 XRAY VMESS XHTTP 🟢
 ----------------------
 
 Remarks : $user

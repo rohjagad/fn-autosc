@@ -202,7 +202,7 @@ alldom=$(printf '%s,' "${rdomains[@]}" | sed 's/,$//; s/,/, /g')
 
     local message=$(cat <<EOF
 -------------------
-🟢 SSH Account 🟢
+🟢 SSH ACCOUNT 🟢
 -------------------
 Domain     : ${rdomain}
 Domains    : $alldom

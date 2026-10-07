@@ -145,7 +145,7 @@ fi
 # Buat pesan notifikasi
 message=$(cat <<EOF
 -------------------
-🟢 SSH Account 🟢
+🟢 SSH ACCOUNT 🟢
 -------------------
 Domain     : ${rdomain}
 Domains    : $alldom
