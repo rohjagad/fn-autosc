@@ -1,6 +1,6 @@
 # Live-Testing Phase Plan
 
-Live test for `fn-autosc` on VPS `202.155.17.126` (domain `autosc.rohcuan.dpdns.org`, SSH port `3303`).
+Live test for `fn-autosc` on VPS `157.10.253.95` (domain `autosc.rohcuan.dpdns.org`, SSH port `3303`). Previous VPS `202.155.17.126` is dead (no route); all references below mean the new IP unless stated.
 
 Two test channels. Every phase uses both:
 
@@ -9,7 +9,7 @@ Two test channels. Every phase uses both:
 
 ```
 VM-1 ──┐
-VM-2 ──┼──(internet)──► VPS 202.155.17.126 (nginx, haproxy, xray, daemons)
+VM-2 ──┼──(internet)──► VPS 157.10.253.95 (nginx, haproxy, xray, daemons)
 VM-3 ──┘                      ▲
                               │ SSH -p 3303, run `menu`, press keys only
 ```
@@ -29,7 +29,7 @@ VM-3 ──┘                      ▲
 
 ### Channel S: SSH TUI (pure keyboard)
 
-- Connect: `ssh -p 3303 root@202.155.17.126`, then run `menu`.
+- Connect: `ssh -p 3303 root@157.10.253.95`, then run `menu`.
 - Rule: **keys only** — type menu numbers, `0` back, `Enter`, `Ctrl+D`. Do NOT run `/usr/bin/add-*` directly in this channel. If the menu cannot do it, that is a finding.
 - Use a normal terminal (min 80x24, `TERM=xterm`). Screenshot or copy text for every screen you check.
 
@@ -41,7 +41,7 @@ Check these three on every screen you open:
 
 1. **Wording:** simple words a junior IT understands. No typo. Same term everywhere (e.g. do not mix `Expired` / `Kadaluarsa` on one screen). Units shown (`GB`, `days`, `IP`).
 2. **Navigation:** every number works. `0` goes back to parent, never drops to shell. Wrong number re-shows the menu. Empty `Enter` is rejected with a clear message, no crash. `Ctrl+D` (EOF) exits cleanly (`exit 0`).
-3. **Layout tidiness:** header centered, separator lines same length, `Label : value` colons aligned, no wrapped/truncated lines at 80 cols, colors reset at end, account card stays on screen (pause) before clear. Title/bottom separators rainbow `---` 35, inner dividers blue `---` 35, exactly 3 blank lines after each `clear`, picker lists green-numbered (`01.`) with `Total Accounts` and number-or-name input. Cards/notices: bare uppercase titles, `Protocol :` + `Transport:` rows, `DD-Mon-YYYY` dates, `XRAY` spelling, green-double titles / blue-single links in Telegram, titles centered on card width in TUI with left payload.
+3. **Layout tidiness:** header centered, separator lines same length, `Label : value` colons aligned, no wrapped/truncated lines at 80 cols, colors reset at end, account card stays on screen (pause) before clear. Title/bottom separators rainbow `---` 35, inner dividers blue `---` 35, exactly 2 blank lines after each `clear`, picker lists green-numbered (`01.`) with `Total Accounts` and number-or-name input. Cards/notices: bare uppercase titles, `Protocol :` + `Transport:` rows, `DD-Mon-YYYY` dates, `XRAY` spelling, green-double titles / blue-single links in Telegram, titles centered on card width in TUI with left payload.
 
 If any screen fails one of the three, note: menu name + option + what you typed + what you saw.
 
@@ -142,7 +142,7 @@ Each phase below lists: **Goal**, **K** (client traffic), **S** (menu walk), **P
 
 - **Goal:** accounts created cleanly, doubles refused.
 - **K:** none extra (accounts from F4–F7 reused).
-- **S:** in each `add-*` screen: try empty name (rejected), bad chars (rejected, no shell eval), existing name (duplicate message), `0` for limit/quota/days (`0 not allowed`, Decision 4). Verify JSON has `"level": 0`. Rotation: sequential creates spread across canonical + colors (`/etc/xray/.colorseq` advances; decode links to confirm), and across domains when extras exist (`/etc/xray/.domainseq`; card shows used `Domain` + available `Domains`).
+- **S:** in each `add-*` screen: try empty name (rejected), bad chars (rejected, no shell eval), existing name (duplicate message), `0` for limit/quota/days (`0 not allowed`, Decision 4). Verify JSON has `"level": 0`. Rotation: sequential creates spread across canonical + colors (`/etc/xray/.colorseq` advances; decode links to confirm), and across domains when extras exist (`/etc/xray/.domainseq`; cards show `Domains` list only, never a `Domain` line).
 - **PASS:** all rejections clean, JSON valid.
 
 ### Fase 9: IP-limit + lock/unlock
@@ -182,7 +182,7 @@ Each phase below lists: **Goal**, **K** (client traffic), **S** (menu walk), **P
 
 ### Fase 14: Domain list, rotation, and cert safety
 
-- **Rotation semantics (operator rule):** rotation is link-text insertion ONLY — the rotated domain is substituted into link hosts on the card; no connection/server-side change (all domains terminate on the same VPS/nginx). There is NO default domain: the installer domain is the primary entry, extras round-robin via `/etc/xray/.domainseq` with no implicit default. Telegram cards show `Domains :` (full list) only; TUI/`.log` keep `Domain :` + `Domains :`.
+- **Rotation semantics (operator rule):** rotation is link-text insertion ONLY — the rotated domain is substituted into link hosts on the card; no connection/server-side change (all domains terminate on the same VPS/nginx). There is NO default domain: the installer domain is the primary entry, extras round-robin via `/etc/xray/.domainseq` with no implicit default. All account cards (TUI, Telegram, `.log`) show `Domains :` (full list) only, never a `Domain :` line.
 - **Goal:** extra domains add cleanly, rotation spreads, TLS never bricks.
 - **K:** add nip.io-style or operator test domains pointing here (proven set: primary + 2 extras); `openssl s_client` shows each in SANs after the auto self-sign; decode N sequential links to prove round-robin across ALL domains with no stickiness; remove extras one by one; LE cert restored byte-identical after (back up `/etc/xray/xray.crt/.key` before, restore + reload after).
 - **S:** `dm-menu`: options 1–6 present; `bad domain` rejected, files unchanged; add validates + dedupes; list shows one shared-framed card per domain with matching protocol counts; remove empties the file and restores single `server_name` (no `.tmp` leftovers). Options 4–6 pick a domain first — test ONLY the cancel path (invalid choice returns clean, no issuance ever runs in tests: LE rate limits); unpointed domains print the skip notice instead of failing issuance.
@@ -192,7 +192,7 @@ Each phase below lists: **Goal**, **K** (client traffic), **S** (menu walk), **P
 
 - **Goal:** backup arrives, restore needs the key.
 - **K:** none (server-side + Telegram client).
-- **S:** `bmenu` → backup: zip arrives as Telegram document with Domain/IP/Date caption, no public link. Without bot creds the backup must fail safe: archive staged, clear `Telegram credentials are not configured` message, archive KEPT at `/root/backup.zip`, exit 0, no hang. Restore page `:855/upload.php`: no token → 401, wrong token → 401, right token (`/etc/funny/.restore.key`) → extracted; restored `.key` back to `0600`.
+- **S:** `bmenu` → backup: zip arrives as Telegram document with Username/IP/Date caption, no public link. Without bot creds the backup must fail safe: archive staged, clear `Telegram credentials are not configured` message, archive KEPT at `/root/backup.zip`, exit 0, no hang. Restore page `:855/upload.php`: no token → 401, wrong token → 401, right token (`/etc/funny/.restore.key`) → extracted; restored `.key` back to `0600`.
 - **PASS:** 401/401/ok, modes correct. (Destructive: snapshot first, restore to test box if possible.)
 
 ### Fase 16: REST API suite (FN-API)
@@ -254,3 +254,15 @@ Each phase below lists: **Goal**, **K** (client traffic), **S** (menu walk), **P
 10. LB (loadbalance = nginx active): 4 concurrent 10 MB downloads across WS+HU+XHTTP+gRPC from both VMs, all checksums match — proves the 443/80 frontend fans out under load.
 
 Log per phase: commands/keys pressed, expected vs actual, checksums, journal counts, and any TUI wording/layout photo or pasted screen.
+
+---
+
+## 7. Execution Discipline (Anti-Stall)
+
+Remote commands and file transfers to the VPS must use **short/small timeouts**, and the AI agent must **check progress often**, so a long timeout never causes stalling:
+
+1. **Small timeout per call:** one SSH step max 25–30s; small up/downloads max 60s; only proven-slow ops (big-zip push, service restart) may go to 120s and must run in background.
+2. **Split big commands:** one shell call = one logical step (download ONLY, or install ONLY, or restart ONLY) — never bundle download + install + restart + verify under one giant timeout.
+3. **Check progress often:** after a background/long command, verify the result (file hash, `systemctl is-active`, marker `grep`) before the next step; never stack "surely worked" assumptions.
+4. **Hash-verify every transfer:** each file `scp`-ed to the VPS gets a local-vs-remote `sha256sum` check before use; hash mismatch = re-transfer, never proceed to install.
+5. **Keep bundles small:** `scp` only changed files, not tens of MB of unchanged binaries, so transfers finish far below the timeout.
