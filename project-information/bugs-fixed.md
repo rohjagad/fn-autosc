@@ -2729,3 +2729,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 399 (Found 415):** change-id lists numbered usernames only; after picking, the flow prints `Old UUID:` then prompts `New UUID:` (empty still auto-generates). Number mapping re-proven live across two accounts: pick `2` rotated only the displayed second user.
 - **Verified:** `bash -n` clean; zips repacked (0755, parity rechecked); deployed scripts hash-verified; box left with 0 test residue (`trial452` is operator-made, preserved).
+### Fix 400 - Random hint on UUID prompt (Found 416)
+
+- **Fix 400 (Found 416):** prompt now `New UUID (Enter for random): ` in all 8 change-id scripts.
+- **Verified:** `bash -n` clean; zips repacked (0755, parity rechecked); deployed scripts grep-verified.

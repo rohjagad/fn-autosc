@@ -2329,3 +2329,5 @@ Found 414. **Account pickers username-only, lists unnumbered** —
 delete/extend/change-id show plain unnumbered tables and accept only usernames; lock/unlock show numbers but ignore them. Operator direction: every picker numbers its list and takes a number OR a username.
 Found 415. **Change-UUID table shows UUIDs nobody compares** —
 the picker prints a `Username | UUID` table, yet the operator picks by name/number and the flow never asks to confirm against the shown value; the wide table also crowds small terminals.
+Found 416. **New-UUID prompt hides the random-on-empty behavior** —
+`New UUID:` gives no hint that an empty answer auto-generates a randomized UUID.

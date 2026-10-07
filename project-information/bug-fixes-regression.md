@@ -2211,3 +2211,13 @@ Section 35's four-check rule applied to Fix 399:
 | **Over-strictness** | Nothing rejected; text-scoped change. |
 | **Over-engineering** | Row removal plus two-line old/new display. |
 | **vs the source** | References predate numbered pickers; names-only with old/new confirmation is this repo's own direction per operator request. |
+## 184. UUID Prompt Hint — Four Checks (October 7, 2026)
+
+Section 35's four-check rule applied to Fix 400:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Prompt text only; empty-means-random logic untouched. |
+| **Over-strictness** | Nothing rejected; text-scoped change. |
+| **Over-engineering** | One prompt string. |
+| **vs the source** | No ruling; hint restores info the old long prompt carried, per operator request. |

@@ -183,7 +183,7 @@ done
 # GET OLD UUID
 old=$(grep -F "\"email\": \"${user}\"" /etc/xray/json/xhttp.json | sed -nE 's/.*"(id|password)": "([^"]+)".*/\2/p' | sort -u | head -1)
 echo -e "Old UUID: $old"
-read -p "New UUID: " new
+read -p "New UUID (Enter for random): " new
 if [[ -z "$new" ]]; then
     new=$(xray uuid)
     echo -e "Generated new UUID: $new"
