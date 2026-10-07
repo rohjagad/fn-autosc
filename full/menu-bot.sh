@@ -311,6 +311,8 @@ ${separator}
  then come back to this menu.
 ${separator}
 "
+read -n 1 -s -r -p "Press any key to return..." || true
+echo ""
 return 1
 }
 

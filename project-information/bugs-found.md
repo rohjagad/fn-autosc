@@ -2407,3 +2407,5 @@ Found 452. **Backup Telegram shows domain (operator direction)** —
 `full/backup.sh:133` + `lite/backup.sh:125` caption row reads `Domain : $domain`. With no default domain, the backup notice should identify the auth owner instead: the izin.txt username already extracted as `$USERNAME` by the same gate.
 Found 453. **Auto backup interval not adjustable (operator direction)** —
 `full/menu-bot.sh` + `lite/menu-bot.sh` option 3 (`setbotup`) only ensured a hardcoded `0 0,6,12,18` cron exists and showed a static info card. Specced: `SETUP AUTO BACKUP` screen showing `Current interval  : every h hour` plus a `New interval      :` prompt accepting 1-24 (blank keeps current).
+Found 454. **Bot menu option 3 flashes without creds (operator report)** —
+`havecreds` in `full/menu-bot.sh` + `lite/menu-bot.sh` prints `Bot Credentials Not Set` and returns with no pause, so options 2 and 3 flash the notice and redraw instantly when credentials were never set up. Same flash class as Found 442/445.

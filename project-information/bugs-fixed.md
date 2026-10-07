@@ -2873,3 +2873,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 433 (Found 453):** `full/menu-bot.sh` + `lite/menu-bot.sh` `setbotup` now parses the live cron line (`*/h` / legacy `0,6,12,18` / hourly / none) into `Current interval  : ...`, prompts `New interval      :` (blank keeps, `^[1-9][0-9]*$` capped 24, re-prompts), rewrites the cron line to `0 */h * * *` (old lines removed, no duplicates) and restarts cron. Title block per sketch: full rainbow, `SETUP AUTO BACKUP`, short rainbow, blue rule.
 - **Verified live:** drove `menu-bot` on 157.10.253.95 with dummy creds (removed after): legacy cron parsed as `every 6 hour`, entering 6 wrote `0 */6`; crontab restored to legacy after, creds removed; `bash -n` clean; zips repacked (0755, IN-SYNC).
+### Fix 434 - Bot creds notice pauses (Found 454)
+
+- **Fix 434 (Found 454):** `havecreds` (both editions) now waits `Press any key` before returning, covering callers option 2 (`notif`) and option 3 (`setbotup`). Bodies otherwise untouched.
+- **Verified live:** notice + pause present in `/usr/bin/menu-bot`; `bash -n` clean; zips repacked (0755, IN-SYNC).

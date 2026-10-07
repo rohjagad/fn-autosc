@@ -2537,3 +2537,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | Blank keeps current; invalid re-prompts; 1-24 cap keeps cron valid. |
 | **Over-engineering** | One function reworked; no new deps. |
 | **vs the source** | New capability per operator sketch. |
+
+## 219. Bot Creds Pause — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Pause before return only; credential check and callers untouched. |
+| **Over-strictness** | `|| true`; non-tty use unaffected. |
+| **Over-engineering** | Same one-liner as every other pause. |
+| **vs the source** | Matches pause pattern across all menus. |
