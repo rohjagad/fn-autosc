@@ -2869,3 +2869,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 432 (Found 452):** `full/backup.sh` + `lite/backup.sh` caption row now `Username : $USERNAME` (izIN.txt owner, same gate that prints it at startup); `Domain` row gone. Caption `<code>` pipeline, log append and TUI echoes follow (shared `TEKS`).
 - **Verified:** caption pipeline renders `<code>Username : ID2</code>`; live `/usr/bin/backup` carries the row, 0 `Domain` rows; `bash -n` clean; zips repacked (0755, IN-SYNC).
+### Fix 433 - Adjustable auto-backup interval (Found 453)
+
+- **Fix 433 (Found 453):** `full/menu-bot.sh` + `lite/menu-bot.sh` `setbotup` now parses the live cron line (`*/h` / legacy `0,6,12,18` / hourly / none) into `Current interval  : ...`, prompts `New interval      :` (blank keeps, `^[1-9][0-9]*$` capped 24, re-prompts), rewrites the cron line to `0 */h * * *` (old lines removed, no duplicates) and restarts cron. Title block per sketch: full rainbow, `SETUP AUTO BACKUP`, short rainbow, blue rule.
+- **Verified live:** drove `menu-bot` on 157.10.253.95 with dummy creds (removed after): legacy cron parsed as `every 6 hour`, entering 6 wrote `0 */6`; crontab restored to legacy after, creds removed; `bash -n` clean; zips repacked (0755, IN-SYNC).

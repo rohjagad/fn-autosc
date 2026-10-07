@@ -2528,3 +2528,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | Display only. |
 | **Over-engineering** | One line per edition. |
 | **vs the source** | Owner identity instead of non-default domain. |
+
+## 218. Backup Interval Setup — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Same cron command and Telegram delivery; schedule value only. Legacy line recognized, never duplicated. |
+| **Over-strictness** | Blank keeps current; invalid re-prompts; 1-24 cap keeps cron valid. |
+| **Over-engineering** | One function reworked; no new deps. |
+| **vs the source** | New capability per operator sketch. |

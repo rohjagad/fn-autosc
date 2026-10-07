@@ -411,22 +411,40 @@ echo ""
 }
 
 setbotup() {
-# Uses the saved credentials; additionally guarantees the scheduled backup
-# exists, so the archive is delivered to Telegram automatically.
+# Uses the saved credentials; sets how often the scheduled backup runs,
+# so the archive is delivered to Telegram automatically.
 havecreds || return
-grep -q 'flock -n /tmp/backup.lock backup' /etc/crontab 2>/dev/null || \
-    echo '0 0,6,12,18 * * * root flock -n /tmp/backup.lock backup' >> /etc/crontab
+short_sep=$(rainbow_sep '-----------------')
+cronline=$(grep 'flock -n /tmp/backup.lock backup' /etc/crontab 2>/dev/null | head -n 1)
+cur="not set"
+if echo "$cronline" | grep -q '0 \*/\([0-9][0-9]*\) '; then
+    cur="every $(echo "$cronline" | sed -n 's/.*0 \*\/\([0-9][0-9]*\) .*/\1/p') hour"
+elif echo "$cronline" | grep -q '0 0,6,12,18'; then
+    cur="every 6 hour"
+elif echo "$cronline" | grep -q '0 \* '; then
+    cur="every 1 hour"
+fi
 clear
 echo ""
 echo ""
 echo -e "${separator}
- Bot Auto Backup
-${separator}
- Chat ID  : $(cat /etc/funny/.chatid 2>/dev/null)
- Schedule : 0 0,6,12,18 (4x daily)
- Delivery : Telegram document
-${separator}
-"
+SETUP AUTO BACKUP
+${short_sep}
+${blue_sep}
+Current interval  : $cur"
+read -p "New interval      : " hours || return
+[ -z "$hours" ] && return
+while ! [[ "$hours" =~ ^[1-9][0-9]*$ ]] || [ "$hours" -gt 24 ]; do
+    echo -e "\033[0;31mValue must be a whole number 1-24.\033[0m"
+    read -p "New interval      : " hours || return
+    [ -z "$hours" ] && return
+done
+sed -i '/flock -n \/tmp\/backup.lock backup/d' /etc/crontab
+echo "0 */$hours * * * root flock -n /tmp/backup.lock backup" >> /etc/crontab
+systemctl restart cron 2>/dev/null || service cron restart 2>/dev/null || true
+echo -e "${blue_sep}
+Auto backup set to every $hours hour
+${separator}"
 read -n 1 -s -r -p "Press any key to return..." || true
 echo ""
 }

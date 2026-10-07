@@ -2405,3 +2405,5 @@ Found 451. **Rotation in xray link insertion must hold (operator reminder)** —
 verified all 48 Xray creation scripts build links from `$rdomain` (`.domainseq` round-robin), zero links use bare `$domain`; trial scripts rotate the same way as add scripts.
 Found 452. **Backup Telegram shows domain (operator direction)** —
 `full/backup.sh:133` + `lite/backup.sh:125` caption row reads `Domain : $domain`. With no default domain, the backup notice should identify the auth owner instead: the izin.txt username already extracted as `$USERNAME` by the same gate.
+Found 453. **Auto backup interval not adjustable (operator direction)** —
+`full/menu-bot.sh` + `lite/menu-bot.sh` option 3 (`setbotup`) only ensured a hardcoded `0 0,6,12,18` cron exists and showed a static info card. Specced: `SETUP AUTO BACKUP` screen showing `Current interval  : every h hour` plus a `New interval      :` prompt accepting 1-24 (blank keeps current).
