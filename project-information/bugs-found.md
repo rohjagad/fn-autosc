@@ -2371,3 +2371,5 @@ Found 434 follow-up. **SSH cards same used-Domain line** —
 `addssh.sh`/`trial-ssh.sh` carry the same `Domain : <used>` + `Domains : <all>` pair; same no-default rule applies.
 Found 435. **Template default clients lack `level` (Fase 6)** —
 `json/{ws,grpc,upgrade,xhttp}.json` ship 12 default clients (3 each) with no `"level": 0`, while every created account carries it (Decision 23). Xray only emits per-user uplink/downlink counters for clients with explicit level, so the always-active template defaults are invisible to quota accounting.
+Found 436. **Self-signed install truncates live cert paths (Fase 12)** —
+`gen_selfsigned_all` in `full/dm-menu.sh:321-330` (`lite/` identical) publishes the fresh key/cert with `cat /tmp/xray-selfsigned.crt > /etc/xray/xray.crt` (same for the key and `funny.pem`): each live path is truncated first, then filled. A kill/power-loss/disk-full in between leaves a corrupt live cert/key, and nginx + haproxy fail to boot on it. Violates the Fase 12 standard (write temp, then move — never truncate the live path). The `openssl` step itself is guarded (`|| return 1`); only the publish step is racy.

@@ -2374,3 +2374,13 @@ Section 35's four-check rule applied to Fix 416:
 | **Over-strictness** | Nothing rejected; additive field. |
 | **Over-engineering** | One line per default client. |
 | **vs the source** | References lack it too; divergence is Decision-23 compliance (quota counters). |
+## 201. Atomic Cert Publish — Four Checks (October 7, 2026)
+
+Section 35's four-check rule applied to Fix 417:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Same openssl args and outputs; `mv` replaces cat-to-live; haproxy-absent path equally silent. Service restarts untouched. |
+| **Over-strictness** | Nothing rejected; publish path only. |
+| **Over-engineering** | Same line-count class; no helpers, no traps. |
+| **vs the source** | References predate multi-domain self-sign; divergence is Fase 12 temp-then-move compliance. |

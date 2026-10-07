@@ -2801,3 +2801,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 416 (Found 435):** added `"level": 0` to all 12 default clients in `json/*.json` (last-property rule, marker comments preserved); same patch applied to live `/etc/xray/json/*.json` (snapshot first), all 4 `xray run -test` OK, daemons restarted, 0 failed.
 - **Verified:** templates parse as JSONC (12/12 level 0); created accounts already carried it (live `livetest_lv1` proof); routing unchanged (0 is the default level per Decision 23).
+### Fix 417 - Atomic self-signed publish (Found 436)
+
+- **Fix 417 (Found 436):** `gen_selfsigned_all` (full + lite `dm-menu.sh`) now has openssl write same-directory temps (`/etc/xray/.xray-selfsigned.{crt,key}.tmp`, removed on failure) and publishes via `mv -f` (same-filesystem rename is atomic); `funny.pem` rebuilt via same-dir temp + `mv`, keeping the best-effort silent semantics when `/etc/haproxy` is absent (lite). No `/tmp` litter; surrounding perms/restarts untouched.
+- **Verified:** `bash -n` clean on both files; sandbox replay of the exact new sequence (multi-SAN cert verifies via openssl, 644/600, no leftover tmps); openssl-failure path leaves no tmps; both zips repacked single-entry, IN-SYNC, 0755.

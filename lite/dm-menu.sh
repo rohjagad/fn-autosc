@@ -320,13 +320,13 @@ gen_selfsigned_all() {
     [ -z "$san" ] && { echo "No domain configured."; return 1; }
     openssl req -new -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -days 365 -nodes -x509 \
         -subj "/CN=$primary" -addext "subjectAltName=$san" \
-        -keyout /tmp/xray-selfsigned.key -out /tmp/xray-selfsigned.crt 2>/dev/null || return 1
-    cat /tmp/xray-selfsigned.crt > /etc/xray/xray.crt
-    cat /tmp/xray-selfsigned.key > /etc/xray/xray.key
-    rm -f /tmp/xray-selfsigned.crt /tmp/xray-selfsigned.key
+        -keyout /etc/xray/.xray-selfsigned.key.tmp -out /etc/xray/.xray-selfsigned.crt.tmp 2>/dev/null || { rm -f /etc/xray/.xray-selfsigned.key.tmp /etc/xray/.xray-selfsigned.crt.tmp; return 1; }
+    mv -f /etc/xray/.xray-selfsigned.crt.tmp /etc/xray/xray.crt
+    mv -f /etc/xray/.xray-selfsigned.key.tmp /etc/xray/xray.key
     chmod 644 /etc/xray/xray.crt
     chmod 600 /etc/xray/xray.key
-    cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem 2>/dev/null
+    cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/.funny.pem.tmp 2>/dev/null \
+        && mv -f /etc/haproxy/.funny.pem.tmp /etc/haproxy/funny.pem 2>/dev/null
     chmod 600 /etc/haproxy/funny.pem 2>/dev/null || true
     systemctl reload nginx 2>/dev/null || systemctl restart nginx 2>/dev/null || true
     # haproxy not used in lite edition
