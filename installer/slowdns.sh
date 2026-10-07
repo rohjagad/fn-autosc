@@ -139,8 +139,7 @@ install_slowdns() {
   echo ""
   echo ""
   echo ""
-  echo -e "
-------------------------
+  echo -e "------------------------
 SlowDNS / DNSTT Settings
 ------------------------"
   if [[ -s /etc/slowdns/nsdomain ]]; then
@@ -257,7 +256,6 @@ clear
 echo ""
 echo ""
 echo ""
-echo -e ""
 echo -e "Installing Patch SlowDNS Autoscript done..."
 echo "done .."
 #reboot

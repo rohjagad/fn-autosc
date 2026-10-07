@@ -2474,3 +2474,21 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | Display only; no reads changed. |
 | **Over-engineering** | Line joins only. |
 | **vs the source** | Standard is `clear`+3x everywhere else. |
+
+## 212. Lifetime Padding — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | One label string; values and gate untouched. |
+| **Over-strictness** | Display only. |
+| **Over-engineering** | Six spaces added. |
+| **vs the source** | Matches sibling padded labels in the same card. |
+
+## 213. SSH 3-Column Table — Four Checks (October 7, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Same log sources, message-body parse, per-user counts, limit lookup and total; rows deduped per user. |
+| **Over-strictness** | No new exits; empty log still lists nothing + total 0. |
+| **Over-engineering** | One function replacing two; no new deps. |
+| **vs the source** | Specced `Username|Login|Type` shape; theme kept. |

@@ -147,65 +147,25 @@ grep -E "Accepted password for" "$LOG" > "$SSH_SRC"
 countdb=$(wc -l < "$DB_SRC")
 countsh=$(wc -l < "$SSH_SRC")
 
-# Fungsi untuk menampilkan login Dropbear dengan PID dan Limit IP
-function show_dropbear_logins {
+# Single 3-column table: Username | Login (count/limit) | Type (dropbear/openssh)
+function show_logins {
     echo -e "${blue_sep}
-${purple}DROPBEAR USER LOGIN${NC}
+${purple}SSH USER LOGIN${NC}
 ${blue_sep}"
-    printf "${purple}%-20s| %-20s| %-12s| %-8s| %-8s${NC}\n" "Username" "IP Address" "Login Count" "PID" "Limit IP"
+    printf "${purple}%-20s| %-12s| %-10s${NC}\n" "Username" "Login" "Type"
     echo -e "${blue_sep}"
-    while IFS= read -r line; do
-        # Bug 70/71: message-body parse - works for classic and RFC3339 prefixes
-        user=$(sed -n "s/.*Password auth succeeded for '\([^']*\)' from.*/\1/p" <<< "$line")
-        hostport=$(sed -n "s/.*Password auth succeeded for '[^']*' from \([^ ]*\).*/\1/p" <<< "$line")
+    for user in $(sed -n "s/.*Password auth succeeded for '\([^']*\)' from.*/\1/p" "$DB_SRC" 2>/dev/null | sort -u); do
         [ -n "$user" ] || continue
-
-        # Mendapatkan limit IP dari file terkait
         LIMIT_IP=$(get_limit_ip "$user")
-
-        # Per-user login count from dropbear source
         user_count=$(grep -c "for '$user' from" "$DB_SRC" 2>/dev/null || echo 0)
-
-        # PID dari tag dropbear[PID]
-        PID=$(sed -n "s/.*dropbear\[\([0-9][0-9]*\)\].*/\1/p" <<< "$line")
-
-        if [ -z "$PID" ]; then
-            printf "%-20s| %-20s| %-12s| %-8s| %-8s\n" "$user" "$hostport" "$user_count" "N/A" "$LIMIT_IP"
-        else
-            printf "%-20s| %-20s| %-12s| %-8s| %-8s\n" "$user" "$hostport" "$user_count" "$PID" "$LIMIT_IP"
-        fi
-    done < "$DB_SRC"
-    echo ""
-}
-
-# Fungsi untuk menampilkan login OpenSSH dengan PID dan Limit IP
-function show_openssh_logins {
-    echo -e "${blue_sep}
-${purple}OPENSSH USER LOGIN${NC}
-${blue_sep}"
-    printf "${purple}%-20s| %-20s| %-12s| %-8s| %-8s${NC}\n" "Username" "IP Address" "Login Count" "PID" "Limit IP"
-    echo -e "${blue_sep}"
-    while IFS= read -r line; do
-        # Bug 70/71: message-body parse - works for classic and RFC3339 prefixes
-        user=$(sed -n "s/.*Accepted password for \([^ ]*\) from .*/\1/p" <<< "$line")
-        ip=$(sed -n "s/.*Accepted password for [^ ]* from \([^ ]*\) port.*/\1/p" <<< "$line")
+        printf "%-20s| %-12s| %-10s\n" "$user" "${user_count}/${LIMIT_IP}" "dropbear"
+    done
+    for user in $(sed -n "s/.*Accepted password for \([^ ]*\) from .*/\1/p" "$SSH_SRC" 2>/dev/null | sort -u); do
         [ -n "$user" ] || continue
-
-        # Mendapatkan limit IP dari file terkait
         LIMIT_IP=$(get_limit_ip "$user")
-
-        # Per-user login count from openssh source
         user_count=$(grep -c "for $user from" "$SSH_SRC" 2>/dev/null || echo 0)
-
-        # PID dari tag sshd[PID]
-        PID=$(sed -n "s/.*sshd\[\([0-9][0-9]*\)\].*/\1/p" <<< "$line")
-
-        if [ -z "$PID" ]; then
-            printf "%-20s| %-20s| %-12s| %-8s| %-8s\n" "$user" "$ip" "$user_count" "N/A" "$LIMIT_IP"
-        else
-            printf "%-20s| %-20s| %-12s| %-8s| %-8s\n" "$user" "$ip" "$user_count" "$PID" "$LIMIT_IP"
-        fi
-    done < "$SSH_SRC"
+        printf "%-20s| %-12s| %-10s\n" "$user" "${user_count}/${LIMIT_IP}" "openssh"
+    done
     echo ""
 }
 
@@ -238,7 +198,6 @@ ${separator}"
 }
 
 # Bug 70/71: count both daemons' events (dropbear logins were invisible)
-show_dropbear_logins
-show_openssh_logins
+show_logins
 show_total_users
 rm -f "$DB_SRC" "$SSH_SRC" /tmp/login-ssh.txt /tmp/login-db.txt

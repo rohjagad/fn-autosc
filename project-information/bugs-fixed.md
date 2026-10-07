@@ -2845,3 +2845,11 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 419 follow-up (Found 438):** 40 more `clear`+3x+extra-blank spots merged: `menu-dnstt` (4), `menu-argo` (2+2 lite), `menu-noobz` (2), `menu-system`/`lite` (add/menuwg/detail/information/os/tampilan), `menu-bot`/`lite` (3+2 extra), 8 `routing-*.sh` (both editions). Bare `echo -e "` / `echo -e "\n` opening lines joined with next content line; inner message spacing kept.
 - **Verified:** repo-wide audit of every `clear` in `full/*.sh`+`lite/*.sh`: all upper spacings exactly 3; `bash -n` clean; zips repacked (0755, IN-SYNC).
+### Fix 427 - Main-menu lifetime padding (Found 446)
+
+- **Fix 427 (Found 446):** `full/menu.sh:77` lifetime branch now `Expired      : lifetime`, aligned with the padded siblings. Other editions print unpadded labels throughout, so only the main menu needed it.
+- **Verified live:** `/usr/bin/menu` carries the padded line; `bash -n` clean; zips repacked (0755, IN-SYNC).
+### Fix 428 - SSH check 3-column table (Found 447)
+
+- **Fix 428 (Found 447):** `full/cek-login-ssh.sh` two 5-column per-line tables replaced by one `show_logins`: unique users per daemon, rows `Username | count/limit | dropbear|openssh`, same theme (title card, blue rules, purple header), same log sources/counts/limit lookup/total. PID/IP columns dropped per spec.
+- **Verified live:** `cek-login-ssh` on 157.10.253.95 prints `Username | Login | Type` with real rows (e.g. `root | 31/No Limit | openssh`); `bash -n` clean; zips repacked (0755, IN-SYNC).
