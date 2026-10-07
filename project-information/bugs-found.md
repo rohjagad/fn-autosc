@@ -2359,3 +2359,5 @@ Found 429. **Expiry notices use arrow lines** —
 `-> user / exp` with per-transport mixed titles. Operator spec: `EXPIRED ACCOUNT` with lowercase `username/protocol/transport/expired at` rows.
 Found 430. **Expiry rows unaligned, plain title, no HTML mode** —
 the specced lowercase rows shipped ragged without code tags, the title unbolder, and xp sends without `parse_mode` so tags would print literally.
+Found 431. **Expiry labels lowercase** —
+`username/protocol/...` read sloppy next to every other notice's labels. Operator direction: `Username/Protocol/Transport/Expired at`.

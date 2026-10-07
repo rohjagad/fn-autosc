@@ -120,10 +120,10 @@ TEKS="
 <b>EXPIRED ACCOUNT</b>
 --------------------
 
-<code>username   : $user</code>
-<code>protocol   : $proto</code>
-<code>transport  : WS</code>
-<code>expired at : $exp</code>
+<code>Username   : $user</code>
+<code>Protocol   : $proto</code>
+<code>Transport  : WS</code>
+<code>Expired at : $exp</code>
 --------------------"
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
@@ -174,10 +174,10 @@ TEKS="
 <b>EXPIRED ACCOUNT</b>
 --------------------
 
-<code>username   : $user</code>
-<code>protocol   : $proto</code>
-<code>transport  : HU</code>
-<code>expired at : $exp</code>
+<code>Username   : $user</code>
+<code>Protocol   : $proto</code>
+<code>Transport  : HU</code>
+<code>Expired at : $exp</code>
 --------------------"
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
@@ -228,10 +228,10 @@ TEKS="
 <b>EXPIRED ACCOUNT</b>
 --------------------
 
-<code>username   : $user</code>
-<code>protocol   : $proto</code>
-<code>transport  : XHTTP</code>
-<code>expired at : $exp</code>
+<code>Username   : $user</code>
+<code>Protocol   : $proto</code>
+<code>Transport  : XHTTP</code>
+<code>Expired at : $exp</code>
 --------------------"
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
@@ -282,10 +282,10 @@ TEKS="
 <b>EXPIRED ACCOUNT</b>
 --------------------
 
-<code>username   : $user</code>
-<code>protocol   : $proto</code>
-<code>transport  : GRPC</code>
-<code>expired at : $exp</code>
+<code>Username   : $user</code>
+<code>Protocol   : $proto</code>
+<code>Transport  : GRPC</code>
+<code>Expired at : $exp</code>
 --------------------"
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)

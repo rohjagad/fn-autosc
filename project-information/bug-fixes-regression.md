@@ -2331,3 +2331,13 @@ Section 35's four-check rule applied to Fix 411:
 | **Over-strictness** | Nothing rejected; text-scoped change. |
 | **Over-engineering** | Literal row/title/send-flag swaps. |
 | **vs the source** | No ruling; final shape per operator spec. |
+## 197. Expiry Labels — Four Checks (October 7, 2026)
+
+Section 35's four-check rule applied to Fix 412:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Label text only. |
+| **Over-strictness** | Nothing rejected; text-scoped change. |
+| **Over-engineering** | Four label swaps. |
+| **vs the source** | No ruling; capitalization per operator request. |

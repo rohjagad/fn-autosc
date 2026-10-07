@@ -2777,3 +2777,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 411 (Found 430):** expiry rows colon-aligned at 12 inside whole-row `<code>`; title `<b>EXPIRED ACCOUNT</b>`; `parse_mode=html` added to the 4 Xray expiry sends (other xp sends untouched).
 - **Verified live:** expiry run deletes and notifies in the final shape; `bash -n` clean; zips repacked (0755, parity rechecked); deployed + grep-verified; box left with 0 test residue.
+### Fix 412 - Capitalized expiry labels (Found 431)
+
+- **Fix 412 (Found 431):** expiry rows now `Username/Protocol/Transport/Expired at`, same columns and code wrap.
+- **Verified live:** expiry run notifies in final shape and cleans up; `bash -n` clean; zips repacked (0755, parity rechecked); deployed + grep-verified; box left with 0 test residue.
