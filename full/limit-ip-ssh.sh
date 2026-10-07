@@ -182,16 +182,18 @@ echo ""
 
 logs() {
     TEKS="
-Log Multi Login SSH
------------------
-Username   : $user
-Limit IP   : $iplimit
-Total Login: $cekcek
-Unlock Time: $unlock_time
------------------
+<b>-----------------------</b>
+<b>MULTILOGIN LOCKED</b>
+<b>-----------------------</b>
+<code>Username    : $user</code>
+<code>Type        : SSH</code>
+<code>Login       : $cekcek / $iplimit</code>
+<code>Status      : Locked</code>
+<code>Unlock Time : $unlock_time</code>
+<b>-----------------------</b>
   [ Time Login ]
 $ip_list
------------------
+<b>-----------------------</b>
 The account will be locked for 15 minutes and will be unlocked automatically.
 "
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)

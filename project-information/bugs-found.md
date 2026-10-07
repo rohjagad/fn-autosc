@@ -2351,3 +2351,9 @@ Found 425. **Top-block colons split 9/10 after the row change** —
 new `Protocol :`/`Transport:` rows sit at col 10 against the col-9 block. Fix by widening the block to col 10 (and teaching the extend swap both spacings so old single-space logs still update).
 Found 426. **Notices carry type info unevenly** —
 extend/delete/multilogin show only `Type`, lock/unlock only `Protokol`, change-id/quota only in titles. Operator direction: every notice shows `Protocol :` + `Transport:` rows; transport comes out of titles.
+Found 427. **Unlock confirmation exists on 6 of 8 scripts** —
+http/xhttp/grpc unlocks (both editions) demand an Indonesian `yakin? (y/n)` confirmation while ws unlocks directly, silently cancelling piped/unchosen runs.
+Found 428. **SSH notices off-pattern** —
+the change notice title is mixed-case (`Change Limit IP SSH`) and the multilogin lock card uses its own shape instead of the shared `MULTILOGIN LOCKED` rows.
+Found 429. **Expiry notices use arrow lines** —
+`-> user / exp` with per-transport mixed titles. Operator spec: `EXPIRED ACCOUNT` with lowercase `username/protocol/transport/expired at` rows.

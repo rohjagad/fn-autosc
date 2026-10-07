@@ -108,6 +108,7 @@ fi
 d2=$(date -d "$now" +%s)
 exp2=$(( (d1 - d2) / 86400 ))
 if [[ "$exp2" -le "0" ]]; then
+    proto=$(grep -E "^(Protokol|Protocol) *:" "/var/log/create/xray/ws/${user}.log" | awk '{print $NF}'); proto=${proto^^}
     xp_log "deleted $user (expiry $exp)"
 sed -i "/^### $user $exp/ {N;d}" /etc/xray/json/ws.json
 sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/ws.json
@@ -116,10 +117,13 @@ sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/ws.json
         rm -f /etc/xray/limit/ip/xray/ws/$user
 TEKS="
 --------------------
-XRAY WS Account Expired
+EXPIRED ACCOUNT
 --------------------
 
--> $user / $exp
+username : $user
+protocol : $proto
+transport : WS
+expired at : $exp
 --------------------"
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
@@ -158,6 +162,7 @@ fi
 d2=$(date -d "$now" +%s)
 exp2=$(( (d1 - d2) / 86400 ))
 if [[ "$exp2" -le "0" ]]; then
+    proto=$(grep -E "^(Protokol|Protocol) *:" "/var/log/create/xray/http/${user}.log" | awk '{print $NF}'); proto=${proto^^}
     xp_log "deleted $user (expiry $exp)"
 sed -i "/^### $user $exp/ {N;d}" /etc/xray/json/upgrade.json
 sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/upgrade.json
@@ -166,10 +171,13 @@ sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/upgrade.json
         rm -f /etc/xray/limit/ip/xray/http/$user
 TEKS="
 --------------------
-XRAY http Account Expired
+EXPIRED ACCOUNT
 --------------------
 
--> $user / $exp
+username : $user
+protocol : $proto
+transport : HU
+expired at : $exp
 --------------------"
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
@@ -208,6 +216,7 @@ fi
 d2=$(date -d "$now" +%s)
 exp2=$(( (d1 - d2) / 86400 ))
 if [[ "$exp2" -le "0" ]]; then
+    proto=$(grep -E "^(Protokol|Protocol) *:" "/var/log/create/xray/xhttp/${user}.log" | awk '{print $NF}'); proto=${proto^^}
     xp_log "deleted $user (expiry $exp)"
 sed -i "/^### $user $exp/ {N;d}" /etc/xray/json/xhttp.json
 sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/xhttp.json
@@ -216,10 +225,13 @@ sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/xhttp.json
         rm -f /etc/xray/limit/ip/xray/xhttp/$user
 TEKS="
 --------------------
-XRAY xhttp Account Expired
+EXPIRED ACCOUNT
 --------------------
 
--> $user / $exp
+username : $user
+protocol : $proto
+transport : XHTTP
+expired at : $exp
 --------------------"
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
@@ -258,6 +270,7 @@ fi
 d2=$(date -d "$now" +%s)
 exp2=$(( (d1 - d2) / 86400 ))
 if [[ "$exp2" -le "0" ]]; then
+    proto=$(grep -E "^(Protokol|Protocol) *:" "/var/log/create/xray/grpc/${user}.log" | awk '{print $NF}'); proto=${proto^^}
     xp_log "deleted $user (expiry $exp)"
 sed -i "/^### $user $exp/ {N;d}" /etc/xray/json/grpc.json
 sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/grpc.json
@@ -266,10 +279,13 @@ sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/grpc.json
         rm -f /etc/xray/limit/ip/xray/grpc/$user
 TEKS="
 --------------------
-XRAY grpc Account Expired
+EXPIRED ACCOUNT
 --------------------
 
--> $user / $exp
+username : $user
+protocol : $proto
+transport : GRPC
+expired at : $exp
 --------------------"
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)

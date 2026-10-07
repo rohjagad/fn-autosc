@@ -2311,3 +2311,13 @@ Section 35's four-check rule applied to Fix 409:
 | **Over-strictness** | Nothing rejected; additions only. |
 | **Over-engineering** | One read plus row swaps per notice, mirroring the card labels. |
 | **vs the source** | No ruling; row parity per operator request. |
+## 195. Notice Parity Batch — Four Checks (October 7, 2026)
+
+Section 35's four-check rule applied to Fix 410:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Unlock restore logic untouched (wrapper only); SSH/Go logic untouched; expiry deletion math untouched. |
+| **Over-strictness** | Nothing rejected; text-scoped changes. |
+| **Over-engineering** | Literal title/row/wrapper swaps. |
+| **vs the source** | No ruling; uniform notices per operator request. |

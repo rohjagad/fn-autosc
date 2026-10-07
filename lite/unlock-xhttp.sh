@@ -217,33 +217,25 @@ Protocol : $protokol2
 Status   : ${green}Unlocked${NC}
 ${separator}"
 
-# Konfirmasi dari pengguna sebelum melakukan unlock
-read -p "Apakah Anda yakin ingin unlock akun ini? (y/n): " confirm
-
-if [[ "$confirm" == "y" || "$confirm" == "Y" ]]; then
-    # Logika melakukan unlock
-    # Already present (restored by hand or a previous run):
-    # never append a second copy - it would invalidate the JSON.
-    if [ -n "$exp2" ] && grep -qxF "### $name $exp2" /etc/xray/json/xhttp.json 2>/dev/null; then
-        echo "Account '$name' already present in config - skipping re-add."
-    elif [ "$protokol2" == "VMESS" ]; then
-        sed -i '/#vmess$/{n;s/}/},\n### '"$name $exp2"'\n{"id": "'""$uuid""'","alterid": 0,"email": "'""$name""'","level": 0}/}' /etc/xray/json/xhttp.json
-    elif [ "$protokol2" == "VLESS" ]; then
-        sed -i '/#vless$/{n;s/}/},\n### '"$name $exp2"'\n{"id": "'""$uuid""'","email": "'""$name""'","level": 0}/}' /etc/xray/json/xhttp.json
-    elif [ "$protokol2" == "TROJAN" ]; then
-        sed -i '/#trojan$/{n;s/}/},\n### '"$name $exp2"'\n{"password": "'""$uuid""'","email": "'""$name""'","level": 0}/}' /etc/xray/json/xhttp.json
-    else
-        echo "Protokol tidak dikenal"
-    fi
-
-    if xray run -test -config /etc/xray/json/xhttp.json >/dev/null 2>&1; then
-        mv /var/log/create/xray/xhttp/${name}.locked /var/log/create/xray/xhttp/${name}.log
-        systemctl daemon-reload
-        systemctl restart xray@xhttp
-        # Send Notif Telegram
-        send_log
-    fi
-
+# Already present (restored by hand or a previous run):
+# never append a second copy - it would invalidate the JSON.
+if [ -n "$exp2" ] && grep -qxF "### $name $exp2" /etc/xray/json/xhttp.json 2>/dev/null; then
+    echo "Account '$name' already present in config - skipping re-add."
+elif [ "$protokol2" == "VMESS" ]; then
+    sed -i '/#vmess$/{n;s/}/},\n### '"$name $exp2"'\n{"id": "'""$uuid""'","alterid": 0,"email": "'""$name""'","level": 0}/}' /etc/xray/json/xhttp.json
+elif [ "$protokol2" == "VLESS" ]; then
+    sed -i '/#vless$/{n;s/}/},\n### '"$name $exp2"'\n{"id": "'""$uuid""'","email": "'""$name""'","level": 0}/}' /etc/xray/json/xhttp.json
+elif [ "$protokol2" == "TROJAN" ]; then
+    sed -i '/#trojan$/{n;s/}/},\n### '"$name $exp2"'\n{"password": "'""$uuid""'","email": "'""$name""'","level": 0}/}' /etc/xray/json/xhttp.json
 else
-    echo "Proses unlock dibatalkan."
+    echo "Protokol tidak dikenal"
 fi
+
+if xray run -test -config /etc/xray/json/xhttp.json >/dev/null 2>&1; then
+    mv /var/log/create/xray/xhttp/${name}.locked /var/log/create/xray/xhttp/${name}.log
+    systemctl daemon-reload
+    systemctl restart xray@xhttp
+    # Send Notif Telegram
+    send_log
+fi
+

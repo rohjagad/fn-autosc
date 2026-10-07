@@ -2769,3 +2769,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 409 (Found 426):** delete/extend/multilogin `Type` replaced by the pair; lock/unlock `Protokol` renamed with `Transport` added; change-id/quota titles bared (`CHANGE UUID`/`CHANGE QUOTA`) with the pair added. Protocol read from the account log (both spellings, uppercased); Transport static per script. TUI echoes mirror. 64 files, both editions.
 - **Verified live:** extend-by-name flows with new rows; `bash -n` clean; zips repacked (0755, parity rechecked); one-bundle deploy with hash verify; box left with 0 test residue.
+### Fix 410 - Unlock parity, SSH notices, expiry spec (Found 427–429)
+
+- **Fix 410 (Found 427–429):** Indonesian unlock confirmations removed (all unlocks direct like ws); SSH change title uppercased (`CHANGE LIMIT IP SSH`, binary rebuilt); SSH multilogin lock restyled to the shared `MULTILOGIN LOCKED` rows (`Type: SSH`, `Login: n / limit`, `Unlock Time` kept); expiry notices rewritten to the specced lowercase rows (8 sections, both editions).
+- **Verified live:** direct unlock works; SSH layout + title in new binary; expiry run deletes and notifies in the new shape; `bash -n` clean; zips repacked (0755, parity rechecked); one-bundle deploys with hash verify; box left with 0 test residue.
