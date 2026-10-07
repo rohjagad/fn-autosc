@@ -274,9 +274,10 @@ Limit Detail
 Limit IP: $ip
 Quota   : $quota GB
 -----------------------
-Detail Port GRPC
+Detail Port
 
 Port        : 443, 2053, 2083, 2087, 2096
+-----------------------
 AlterID     : 0
 Service     : vmgr
 Service Alt : black / gray / silver

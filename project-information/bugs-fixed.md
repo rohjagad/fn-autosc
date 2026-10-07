@@ -2697,3 +2697,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 391 (Found 402–404):** all 8 extend notices retitled to bare `<b>EXTEND EXPIRATION</b>` with `Type: WS/HU/XHTTP/GRPC` below `Username` (colon-aligned col 14) in card and TUI; extend `DATE` stamps converted to `%d-%b-%Y %H:%M:%S` (the `%y` variant Fix 389 missed); all 12 green-circle card titles uppercased (`🟢 XRAY VMESS WS 🟢`, …, `🟢 SSH ACCOUNT 🟢`). Blue link rows untouched by design.
 - **Verified:** live extend shows `Type: WS` in TUI and fires the titled card; `bash -n` clean; zips repacked (0755, parity rechecked); deployed scripts verified; box left with 0 test residue.
+### Fix 392 - Flush limit notice, bare Detail Port, canonical card skeleton (Found 405–407)
+
+- **Fix 392 (Found 405–407):** Go SSH notice raw string dedented (payload now flush-left; binary rebuilt, redeployed hash-first after killing the stale uploader holding the old inode busy, exec verified live). All 48 `Detail Port …` headers trimmed to bare `Detail Port`. Canonical skeleton in all 12 builders (both editions, add+trial): title → 8-row account block → `Limit Detail` → port-only `Detail Port` → detail rows (`AlterID?/Path|Service`, `Path Alt|Service Alt`, `Network`, `Alpn?/Decrypt?`) → links; labels unified (`Service`, `Port`); every separator run normalized to 23 dashes.
+- **Verified:** live VLess WS + Trojan GRPC cards show the canonical layout; `bash -n` + column audit clean; zips repacked (0755, parity rechecked); deployed scripts verified; box left with 0 test residue.

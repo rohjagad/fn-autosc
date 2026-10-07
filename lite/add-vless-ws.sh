@@ -256,12 +256,13 @@ Limit Detail
 Limit IP: $ip
 Quota   : $quota GB
 -----------------------
-Detail Port WS
+Detail Port
 
 TLS      : 443, 2053, 2083, 2087, 2096
+NoneTLS  : 80, 8880, 2052, 2082, 2095
+-----------------------
 Path     : /vlws
 Path Alt : /green /lime /emerald
-NoneTLS  : 80, 8880, 2052, 2082, 2095
 Network  : WebSocket
 -----------------------
 🔵 VLess WS TLS

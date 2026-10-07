@@ -2307,3 +2307,9 @@ Found 403. **Extend DATE stamps missed the unification** —
 the 8 extend scripts stamp `DATE` with 2-digit-year numeric (`%y-%m-%d %H:%M:%S`), left behind by the Fix 389 sweep which only covered the `%Y` variant.
 Found 404. **Green-circle titles not uppercase** —
 `🟢 Xray VMess WS 🟢` mixes case while notice titles (`ACCOUNT DELETED`, `EXTEND EXPIRATION`) are all caps. Operator direction: every green-circle title all uppercase.
+Found 405. **Change-limit-IP notice indented right** —
+the Go SSH notice payload lines carry their source indentation (two tabs inside the raw string literal), so Telegram renders the whole card shifted right unlike every shell notice.
+Found 406. **Detail Port suffixes look off** —
+`Detail Port WS` / `Detail Port HU` / `Detail Port XHTTP` / `Detail Port GRPC` repeat the transport after a generic header. Operator direction: bare `Detail Port`.
+Found 407. **Whole-card sections hold different fields per builder** —
+vless ws/http/xhttp lump ports+path+network under one header, all three grpc cards lump ports+service+network, while vmess/trojan split ports from details; `Service Name` vs `Service` and `Port gRPC` vs `Port` labels disagree; separator runs use four different dash lengths. Operator direction: one canonical skeleton, same rows in the same order everywhere.

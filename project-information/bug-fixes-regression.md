@@ -2131,3 +2131,13 @@ Section 35's four-check rule applied to Fix 391:
 | **Over-strictness** | Nothing rejected; text-scoped change. |
 | **Over-engineering** | Literal title/row/format swaps mirroring Fix 390. |
 | **vs the source** | References predate typed extend bodies; bare-title-plus-Type and all-caps circle titles are this repo's own direction per operator request. |
+## 176. Canonical Card Skeleton — Four Checks (October 7, 2026)
+
+Section 35's four-check rule applied to Fix 392:
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Row moves only; parsers match `Username/Expired/Protokol/Limit IP` prefixes regardless of order, and `Service`/`Port` values are unchanged. Old cards keep working. |
+| **Over-strictness** | Nothing rejected; text-scoped change. |
+| **Over-engineering** | Reorders plus label/dash normalizations, no new machinery. |
+| **vs the source** | References predate sectioned cards; the canonical skeleton is this repo's own direction per operator request. |

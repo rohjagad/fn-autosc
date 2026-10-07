@@ -254,12 +254,13 @@ Limit Detail
 Limit IP: $ip
 Quota   : $quota GB
 -----------------------
-Detail Port GRPC
+Detail Port
 
-Service Name: trgr
+Port        : 443, 2053, 2083, 2087, 2096
+-----------------------
+Service     : trgr
 Service Alt : magenta / plum / orchid
 Network     : gRPC GUN
-Port gRPC   : 443, 2053, 2083, 2087, 2096
 -----------------------
 🔵 Trojan GRPC
 

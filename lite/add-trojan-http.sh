@@ -238,9 +238,9 @@ link1="trojan://${uuid}@${rdomain}:443?path=$opath&security=tls&host=${rdomain}&
 link2="trojan://${uuid}@${rdomain}:80?path=$opath&security=none&host=${rdomain}&type=httpupgrade#${user}"
 
 TEKS="
--------------------------
+-----------------------
 🟢 XRAY TROJAN HU 🟢
--------------------------
+-----------------------
 
 Remarks : $user
 Domain  : ${rdomain}
@@ -250,29 +250,29 @@ Region  : $region
 UUID    : $uuid
 Expired : $exp
 Protokol: Trojan
--------------------------
+-----------------------
 Limit Detail
 
 Limit IP: $ip
 Quota   : $quota GB
-----------------------
-Detail Port HU
+-----------------------
+Detail Port
 
 Port TLS : 443, 2053, 2083, 2087, 2096
 Port None: 80, 8880, 2052, 2082, 2095
-----------------------
+-----------------------
 Path     : /trhu
 Path Alt : /orange /amber /chocolate
 Network  : HTTP Upgrade
--------------------------
+-----------------------
 🔵 Trojan HU TLS
 
 $link1
--------------------------
+-----------------------
 🔵 Trojan HU none
 
 $link2
--------------------------
+-----------------------
 "
 if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
     curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "disable_web_page_preview=1" --data-urlencode "parse_mode=html" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's/&/\&amp;/g' -e 's/\\033\[[0-9;]*m//g' -e 's/\x1b\[[0-9;]*m//g' -e 's|^\(vmess://[^ ]*\)$|<code>\1</code>|' -e 's|^\(vless://[^ ]*\)$|<code>\1</code>|' -e 's|^\(trojan://[^ ]*\)$|<code>\1</code>|' -e 's|^\([A-Za-z][^:]*: \)\(.*\)$|<code>\1\2</code>|')" $URL >/dev/null 2>&1

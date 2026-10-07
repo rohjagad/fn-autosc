@@ -176,16 +176,16 @@ func sendTelegramNotification(username, oldLimit, newLimit, expiry string) {
 
 	date := time.Now().Format("02-Jan-2006")
 	message := fmt.Sprintf(`
-		<b>Change Limit IP SSH</b>
-		<b>-----------------------</b>
-		<code>Username      : %s</code>
-		<code>Old Limit IP  : %s</code>
-		<code>New Limit IP  : %s</code>
-		<code>Expiry        : %s</code>
-		<code>Change Date   : %s</code>
-		<b>-----------------------</b>
-		<b>Update Successful!</b>
-	`, username, oldLimit, newLimit, expiry, date)
+<b>Change Limit IP SSH</b>
+<b>-----------------------</b>
+<code>Username      : %s</code>
+<code>Old Limit IP  : %s</code>
+<code>New Limit IP  : %s</code>
+<code>Expiry        : %s</code>
+<code>Change Date   : %s</code>
+<b>-----------------------</b>
+<b>Update Successful!</b>
+`, username, oldLimit, newLimit, expiry, date)
 
 	data := url.Values{}
 	data.Set("chat_id", CHATID)

@@ -158,9 +158,9 @@ vlesslink1="vless://${uuid}@${rdomain}:443?path=$opath&security=tls&encryption=n
 vlesslink2="vless://${uuid}@${rdomain}:80?path=$opath&security=none&encryption=none&host=${rdomain}&type=httpupgrade#${user}"
 
 TEKS="
-------------------------
+-----------------------
 🟢 XRAY VLESS HU 🟢
-------------------------
+-----------------------
 
 Remarks : $user
 Domain  : ${rdomain}
@@ -170,28 +170,29 @@ Region  : $region
 UUID    : $uuid
 Expired : $exp
 Protokol: Vless
-------------------------
+-----------------------
 Limit Detail
 
 Limit IP: $ip
 Quota   : $quota GB
-------------------------
-Detail Port HU
+-----------------------
+Detail Port
 
 TLS      : 443, 2053, 2083, 2087, 2096
+NoneTLS  : 80, 8880, 2052, 2082, 2095
+-----------------------
 Path     : /vlhu
 Path Alt : /pink /coral /salmon
-NoneTLS  : 80, 8880, 2052, 2082, 2095
 Network  : HTTP Upgrade
-------------------------
+-----------------------
 🔵 VLess HU TLS
 
 $vlesslink1
-------------------------
+-----------------------
 🔵 VLess HU none
 
 $vlesslink2
-------------------------
+-----------------------
 "
 if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
     curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "disable_web_page_preview=1" --data-urlencode "parse_mode=html" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's/&/\&amp;/g' -e 's/\\033\[[0-9;]*m//g' -e 's/\x1b\[[0-9;]*m//g' -e 's|^\(vmess://[^ ]*\)$|<code>\1</code>|' -e 's|^\(vless://[^ ]*\)$|<code>\1</code>|' -e 's|^\(trojan://[^ ]*\)$|<code>\1</code>|' -e 's|^\([A-Za-z][^:]*: \)\(.*\)$|<code>\1\2</code>|')" $URL >/dev/null 2>&1

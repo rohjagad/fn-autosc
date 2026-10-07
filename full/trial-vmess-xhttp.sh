@@ -190,9 +190,9 @@ echo ""
 echo ""
 echo ""
 TEKS="
-----------------------
+-----------------------
 🟢 XRAY VMESS XHTTP 🟢
-----------------------
+-----------------------
 
 Remarks : $user
 Domain  : ${rdomain}
@@ -202,32 +202,32 @@ Region  : $region
 UUID    : $uuid
 Expired : $exp
 Protokol: Vmess
-----------------------
+-----------------------
 Limit Detail
 
 Limit IP: $ip
 Quota   : $quota GB
-----------------------
-Detail Port XHTTP
+-----------------------
+Detail Port
 
 TLS     : 443, 2053, 2083, 2087, 2096
 NoneTLS : 80, 8880, 2052, 2082, 2095
-----------------------
+-----------------------
 AlterID  : 0
 Path     : /vmxh
 Path Alt : /purple /violet /indigo
 Network  : XHTTP
 Alpn     : - [ None ]
 Decrypt  : auto
-----------------------
+-----------------------
 🔵 VMess XHTTP TLS
 
 $vmesslink1
-----------------------
+-----------------------
 🔵 VMess XHTTP none
 
 $vmesslink2
-----------------------
+-----------------------
 "
 if [ -n "$CHATID" ] && [ -n "$KEY" ]; then
     curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "disable_web_page_preview=1" --data-urlencode "parse_mode=html" --data-urlencode "text=$(printf '%s' "$TEKS" | sed -e 's/&/\&amp;/g' -e 's/\\033\[[0-9;]*m//g' -e 's/\x1b\[[0-9;]*m//g' -e 's|^\(vmess://[^ ]*\)$|<code>\1</code>|' -e 's|^\(vless://[^ ]*\)$|<code>\1</code>|' -e 's|^\(trojan://[^ ]*\)$|<code>\1</code>|' -e 's|^\([A-Za-z][^:]*: \)\(.*\)$|<code>\1\2</code>|')" $URL >/dev/null 2>&1
