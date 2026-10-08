@@ -74,3 +74,20 @@ Schedules observed live: `backup 0 0,6,12,18`, `xp 0,15,30,45`,
   are correct.
 - Still required for real clients: a live `slowdns` NS delegation (globally
   NXDOMAIN at time of writing) plus a standard SlowDNS client app.
+
+## Untested-Areas Round (October 8, 2026)
+
+- **SSH multilogin lock (new Fix-455 code):** 2 logins (VPS-local + host,
+  distinct IPs) vs limit 1 → `passwd -l` locked + due file armed. Sweeper
+  half already proven. PASS. (Note: `addssh` rejects uppercase — operator
+  typo, not a bug.)
+- **WARP:** Found 476 fixed (persist + keepalive + IPv4), peer survives
+  restart as a single block, keepalives egress. Cloudflare handshake
+  unanswered — external. Test peer removed.
+- **Scheduled backup:** temporary `*/2` cron fired, zip gone afterwards =
+  Telegram `ok:true` (code deletes only on receipt). Cron restored.
+- **Argo:** needs interactive Cloudflare OAuth — operator step, not run.
+- **VM lab note:** `pkill -x` cannot match >15-char names (use `pkill -f`
+  with bracket guard, or PIDs); QEMU guests need `-device virtio-rng-pci`
+  or first boot stalls silently; `kill -9` on VM disks risks auth DB
+  damage (rebuilt both from base).

@@ -21,7 +21,7 @@ VM-3 ──┘                      ▲
 ### Channel K: KVM clients (`/dev/kvm`)
 
 - Host always has `/dev/kvm` ready. Multi-VM allowed (VM-1, VM-2, ...). **`/dev/kvm` VMs are the required traffic clients for every phase with K steps — no phase passes on Channel S alone where K steps exist.**
-- Standard build (proven 2026-10-07): plain `qemu-system-x86_64` (no libvirt), Debian 12 cloud image + cloud-init seed (`tester`/`testpass`, SSH forwarded: VM-1 → `127.0.0.1:2221`, VM-2 → `127.0.0.1:2222`), 2 GB RAM each. Client tooling per VM: `curl`, `sshpass`, `xray-core` 25.3.6 (same as VPS), `wg-quick`, `openvpn` as the phase needs.
+- Standard build (proven 2026-10-07): plain `qemu-system-x86_64` (no libvirt), Debian 12 cloud image + cloud-init seed (`tester`/`testpass`, SSH forwarded: VM-1 → `127.0.0.1:2221`, VM-2 → `127.0.0.1:2222`), 2 GB RAM each. Always pass `-device virtio-rng-pci`: without host entropy the first boot stalls (sshd accepts but never sends a banner) and looks like a dead VM. Client tooling per VM: `curl`, `sshpass`, `xray-core` 25.3.6 (same as VPS), `wg-quick`, `openvpn` as the phase needs.
 - Asset688888volatility: VM disks/seeds lived in `/tmp/opencode/kvm` (wiped on host reboot) — rebuild from base image + seeds if gone, or persist outside `/tmp` before the next round.
 - One VM is enough for most phases. Use 2 VMs for: IP-limit (Fase 9), concurrency/loadbalance (Fase 20 + LB), parallel transport testing (Fase 6 went 2× faster split HU/XHTTP across VMs).
 - KVM is also the fault-injection box: DROP/slow network mocks (Fase 18/19/22) run here, never on the VPS data path.
