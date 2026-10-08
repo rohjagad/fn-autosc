@@ -56,3 +56,21 @@ Schedules observed live: `backup 0 0,6,12,18`, `xp 0,15,30,45`,
   daemons too (client and server share the process name). Recovered both
   times via `systemctl restart xray@*` (all active, configs re-validated).
   Lesson: never `pkill -x xray` on the VPS; kill clients from the VM side.
+
+## SlowDNS End-to-End Proof (October 8, 2026)
+
+- Built `dnstt-client` from the operator fork (`rohjagad/dnstt`, same source
+  the installer builds the server from) plus upstream master for comparison.
+- Red herrings killed along the way: client "begin session" prints
+  unilaterally (no server contact needed); direct-resolver, resolver-chain
+  simulation, version match, and MTU tweaks all behaved identically.
+- Root cause of all remote failures: **this lab network filters QTYPE=TXT**
+  (TXT to 8.8.8.8 also unanswered, A fine) — every remote tunnel query died
+  on our side, never the server.
+- Proof run **on the VPS via loopback** (no network filtering involved):
+  fork-built client → `:5300` → banner
+  `SSH-2.0-OpenSSH_9.2p1 Debian-2+deb12u10` received through the tunnel.
+  Same pair also round-trips locally (echo target). SlowDNS panel/server/keys
+  are correct.
+- Still required for real clients: a live `slowdns` NS delegation (globally
+  NXDOMAIN at time of writing) plus a standard SlowDNS client app.
