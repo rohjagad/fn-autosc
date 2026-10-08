@@ -403,7 +403,8 @@ in the config file.
 
 Locking renames the account log from `{username}.log` to `{username}.locked`.
 Unlocking reverses it. Both operations restart the service. Locked accounts are
-skipped by auto-delete.
+skipped by auto-delete. Multilogin locks lift themselves (Xray ~10–15 min,
+SSH ~15 min via due-epoch sweeper files); manual locks stay until unlocked.
 
 ### Changing UUID / Password
 
@@ -466,7 +467,7 @@ These jobs are added to `/etc/crontab` during installation. Each runs under
 
 | Schedule | Command | Purpose |
 | :--- | :--- | :--- |
-| `0 0,6,12,18 * * *` | `backup` | Back up four times daily |
+| `0 0,6,12,18 * * *` (default; adjustable 1–24 h via bot menu option 3) | `backup` | Back up to Telegram |
 | `0,15,30,45 * * * *` | `sleep 300 && xp` | Expiry sweep every 15 min (delayed 5 min) |
 | `*/5 * * * *` | `limit-ip-ssh` | SSH IP limit |
 | `*/5 * * * *` | `limit-ip-ws` | WebSocket IP limit |
@@ -617,7 +618,8 @@ Create, delete, extend, list, and show client configs (with QR codes). Client
 IPs are allocated from `10.66.66.2` to `10.66.66.254` — 253 clients maximum.
 Configs are written to `/var/www/html/wireguard-<user>.conf` for download.
 
-Also includes a Cloudflare WARP helper.
+Also includes a Cloudflare WARP helper (peer persisted in `wg0.conf` with
+keepalive, IPv4 endpoint resolved at setup).
 
 ### L2TP / IPsec — `xl2tp`
 

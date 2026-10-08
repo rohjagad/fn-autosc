@@ -189,7 +189,7 @@ Fase 27: Review Kriptografi Final (setelah semua perubahan)
   - Ganti `os.Exit(1)` dengan `os.Exit(0)` pada penyelesaian normal di `limit-ip.go`.
   - Guard pengiriman notifikasi Telegram: lewati jika `/etc/funny/.chatid` atau `.keybot` tidak ada atau kosong.
   - Pastikan `unlock-*` membaca kredensial dari file `.locked` dan meregenerasi baris klien ke file JSON terkait.
-  - Kunci multilogin Xray auto-unlock ~15 menit via sweeper cron (state due-epoch, tanpa `at` — `atd` terbukti macet di lingkungan ini, Found 419); kunci manual tetap indefinit. Kartu kunci mengikuti bentuk delete: `<b>MULTILOGIN LOCKED</b>` vs manual `<b>ACCOUNT LOCKED</b>, baris `Date/Username/Protocol/Transport/...`.
+  - Kunci multilogin auto-unlock via sweeper cron (state due-epoch: Xray lock + 10 menit, SSH lock + 15 menit; tanpa `at` — `atd` terbukti macet di lingkungan ini, Found 419/475); kunci manual tetap indefinit. Kartu kunci mengikuti bentuk delete: `<b>MULTILOGIN LOCKED</b>` vs manual `<b>ACCOUNT LOCKED</b>, baris `Date/Username/Protocol/Transport/...`.
 
 ---
 
