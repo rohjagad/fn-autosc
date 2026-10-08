@@ -2726,3 +2726,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | N/A. |
 | **Over-engineering** | Two lines (`mkdir`, conditional `apt-get`). |
 | **vs the source** | Completes the Found-328 intent the old idiom failed. |
+
+## 240. SSH Unlock Sweeper — Four Checks (October 8, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Lock path untouched; sweeper shares the run, no new daemon. |
+| **Over-strictness** | Only flag-locked accounts lifted; others just drop stale state. |
+| **Over-engineering** | Mirrors the Xray sweeper lines, no `atd` dependency. |
+| **vs the source** | Completes the Found-419 migration for the last `at` user. |

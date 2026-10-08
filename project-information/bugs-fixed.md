@@ -2973,3 +2973,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 454 (Found 474):** `website/install.sh` now `mkdir -p /etc/sudoers.d` and installs `sudo` (for `visudo`) before writing the drop-in. Live VPS got the drop-in directly (`visudo -c` ok).
 - **Verified live:** right-token POST of the same-box backup returns `SUCCESSFULLY RESTORED YOUR VPS`; all 4 JSONs `Configuration OK`, 0 failed units, accounts intact, `600` key / `640` restore key preserved.
+### Fix 455 - SSH unlock sweeper (Found 475)
+
+- **Fix 455 (Found 475):** `full/limit-ip-ssh.sh` writes a due-epoch file (`/etc/xray/autounlock/ssh/$user`, lock + 900 s) instead of the `at` job, plus an end-of-run sweeper that `passwd -u`s due users still flag-locked and drops stale state. Lite ships no SSH limiter (single-edition change).
+- **Verified live:** planted flag-lock + 20 s fuse → daemon run restored `P` status and consumed state; deployed to `/usr/bin` (hash-verified); zips repacked (0755).

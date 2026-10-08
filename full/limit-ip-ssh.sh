@@ -325,7 +325,8 @@ do
         need_restart=1
         echo "$user dikunci karena melebihi batas login."
         unlock_time=$(date -d "15 minutes" "+%Y-%m-%d %H:%M:%S")
-        echo "passwd -u $user" | at now + 15 minutes
+        mkdir -p /etc/xray/autounlock/ssh
+        echo $(( $(date +%s) + 900 )) > /etc/xray/autounlock/ssh/$user
         logs >/dev/null 2>&1
         nais=3
     else
@@ -340,6 +341,19 @@ if [[ $need_restart -eq 1 ]]; then
     systemctl restart sshd
     systemctl restart ws
 fi
+for _sf in /etc/xray/autounlock/ssh/*; do
+    [ -e "$_sf" ] || continue
+    _au=$(basename "$_sf")
+    if passwd -S "$_au" 2>/dev/null | grep -q " L "; then
+        _due=$(cat "$_sf" 2>/dev/null)
+        if [[ "$_due" =~ ^[0-9]+$ ]] && [ "$(date +%s)" -ge "$_due" ]; then
+            rm -f "$_sf"
+            passwd -u "$_au"
+        fi
+    else
+        rm -f "$_sf"
+    fi
+done
 if [[ $nais -gt 1 ]]; then
     clear
     echo ""
