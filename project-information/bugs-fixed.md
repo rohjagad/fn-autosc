@@ -2977,3 +2977,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 455 (Found 475):** `full/limit-ip-ssh.sh` writes a due-epoch file (`/etc/xray/autounlock/ssh/$user`, lock + 900 s) instead of the `at` job, plus an end-of-run sweeper that `passwd -u`s due users still flag-locked and drops stale state. Lite ships no SSH limiter (single-edition change).
 - **Verified live:** planted flag-lock + 20 s fuse → daemon run restored `P` status and consumed state; deployed to `/usr/bin` (hash-verified); zips repacked (0755).
+### Fix 456 - WARP persist + keepalive + IPv4 (Found 476)
+
+- **Fix 456 (Found 476):** `warp()` writes the peer block (`### WARP`, keepalive 25) into `wg0.conf` with idempotent replace, resolving the endpoint to IPv4 at setup (hostname fallback kept), then restarts. Full edition only (WG menu is full-only).
+- **Verified live:** single `### WARP` block after 3 runs, peer present post-restart, keepalive traffic egressing; Cloudflare-side handshake completion unproven (no reply observed — external). Test peer removed after; zips repacked (0755).

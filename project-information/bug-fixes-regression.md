@@ -2735,3 +2735,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | Only flag-locked accounts lifted; others just drop stale state. |
 | **Over-engineering** | Mirrors the Xray sweeper lines, no `atd` dependency. |
 | **vs the source** | Completes the Found-419 migration for the last `at` user. |
+
+## 241. WARP Persist — Four Checks (October 8, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Only the peer-install lines changed; registration flow untouched. |
+| **Over-strictness** | Hostname fallback kept when v4 resolution fails. |
+| **Over-engineering** | Conf block + one resolution line; no new deps. |
+| **vs the source** | Upstream warp flow preserved, persistence added. |

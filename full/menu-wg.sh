@@ -281,7 +281,24 @@ if [ -z "$CLOUDFLAREKEY" ]; then
     goback
     return
 fi
-sudo wg set wg0 peer "$CLOUDFLAREKEY" endpoint engage.cloudflareclient.com:51820 allowed-ips 172.16.0.0/24 > out.log 2> /dev/null
+# Persist the WARP peer in wg0.conf so the down/up below (and any reboot)
+# keeps it: a runtime-only `wg set` is wiped by the restart. Re-runs replace
+# the old block instead of stacking duplicates.
+sed -i '/^### WARP$/,/^$/d' /etc/wireguard/wg0.conf
+warp_endpoint="engage.cloudflareclient.com:51820"
+warp_host="${warp_endpoint%%:*}"
+warp_ip=$(getent ahostsv4 "$warp_host" 2>/dev/null | awk '{print $1; exit}')
+[ -n "$warp_ip" ] && warp_endpoint="${warp_ip}:${warp_endpoint##*:}"
+cat >> /etc/wireguard/wg0.conf <<WGEOF
+
+### WARP
+[Peer]
+PublicKey = ${CLOUDFLAREKEY}
+Endpoint = ${warp_endpoint}
+AllowedIPs = 172.16.0.0/24
+PersistentKeepalive = 25
+WGEOF
+chmod 600 /etc/wireguard/wg0.conf 2>/dev/null || true
 wg-quick down wg0 > out.log 2> /dev/null
 wg-quick up wg0 > out.log 2> /dev/null
 
