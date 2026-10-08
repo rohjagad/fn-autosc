@@ -35,3 +35,24 @@ panel `full` installed from `main` (`full` + `autosc.rohcuan.dpdns.org` +
 Cleanup: all 14 Xray + SSH + 2 WG + L2TP + Noobz test accounts deleted via menus,
 test bins + zips removed, 4/4 JSONs `Configuration OK`, 0 failed units, 0
 `livetest` residue, no `.locked` leftovers.
+
+## Time/Scheduling Audit (October 8, 2026, follow-up)
+
+Schedules observed live: `backup 0 0,6,12,18`, `xp 0,15,30,45`,
+`limit-ip`/`auto-delete`/`kill`/`expire-ssh` every 5 min (16 `flock` lines in
+`/etc/crontab`), fixnet timers, self-signed cert 1 year (Oct 2026–2027).
+
+- **Multilogin auto-lift watched end-to-end:** daemon-identical lock planted
+  with 90 s fuse (`sed` remove + card to `.locked` + due epoch); the `*/5`
+  cron tick restored the account with the **identical UUID** and consumed the
+  state file. Real due (`+600`) therefore lifts within ~10–15 min. PASS.
+- **Manual lock indefinite:** locked via menu (no due file written); survived
+  the next cron tick still locked; TUI unlock restored same UUID. PASS.
+- **statsonline semantics (note, not a bug):** the `online` value counts
+  distinct source IPs with live traffic — idle clients and same-IP sessions
+  read 1/empty. F9-style triggering needs 2 IPs or lucky CGNAT rotation.
+- **atd active** on fresh install; SSH limiter still uses `at` (unchanged).
+- **Operator error (twice):** `pkill -x xray` on the VPS kills the server
+  daemons too (client and server share the process name). Recovered both
+  times via `systemctl restart xray@*` (all active, configs re-validated).
+  Lesson: never `pkill -x xray` on the VPS; kill clients from the VM side.
