@@ -2717,3 +2717,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | Pattern widened, nothing rejected. |
 | **Over-engineering** | Same suffix-preserving idiom as the gRPC fix. |
 | **vs the source** | Matches upstream intent (session in path). |
+
+## 239. Website Sudoers Prereqs — Four Checks (October 8, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Drop-in content unchanged; only its prerequisites added. |
+| **Over-strictness** | N/A. |
+| **Over-engineering** | Two lines (`mkdir`, conditional `apt-get`). |
+| **vs the source** | Completes the Found-328 intent the old idiom failed. |

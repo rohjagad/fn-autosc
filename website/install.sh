@@ -32,6 +32,8 @@ echo -e "Listen 855" > /etc/apache2/ports.conf
 # www-data may run only restore-ftp, without a password. Use a sudoers
 # drop-in (Found 328): the old `EDITOR='tee -a' visudo` idiom never wrote the
 # rule, so every authenticated restore died at sudo.
+mkdir -p /etc/sudoers.d
+command -v visudo >/dev/null 2>&1 || apt-get install -y -qq sudo >/dev/null 2>&1 || true
 printf '%s\n' 'www-data ALL=(ALL) NOPASSWD: /usr/bin/restore-ftp' > /etc/sudoers.d/restore-ftp
 chmod 0440 /etc/sudoers.d/restore-ftp
 visudo -c -q -f /etc/sudoers.d/restore-ftp || rm -f /etc/sudoers.d/restore-ftp

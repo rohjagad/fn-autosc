@@ -2969,3 +2969,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 453 (Found 473):** 12 XHTTP rewrite lines per template changed `rewrite /(.*) /<canon>` to `rewrite ^.*\/<name>(/.*)?$ /<canon>$1`; WS/HU form untouched (proven working, no session suffix there).
 - **Verified live:** same 12-line patch on `/etc/nginx/nginx.conf`, `nginx -t` ok, reload clean; color `/purple` streams 5 MB matching `dffac395ec4b`.
+### Fix 454 - Website sudoers prerequisites (Found 474)
+
+- **Fix 454 (Found 474):** `website/install.sh` now `mkdir -p /etc/sudoers.d` and installs `sudo` (for `visudo`) before writing the drop-in. Live VPS got the drop-in directly (`visudo -c` ok).
+- **Verified live:** right-token POST of the same-box backup returns `SUCCESSFULLY RESTORED YOUR VPS`; all 4 JSONs `Configuration OK`, 0 failed units, accounts intact, `600` key / `640` restore key preserved.
