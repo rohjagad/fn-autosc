@@ -74,6 +74,7 @@ multiplexer — a dropped SSH connection then cannot interrupt it:
 # a stripped image may ship no downloader at all - install one first, since
 # fetching the installer below is itself a download
 command -v curl >/dev/null 2>&1 || { apt-get update -qq && apt-get install -y curl; }
+command -v screen >/dev/null 2>&1 || { apt-get update -qq && apt-get install -y screen; }
 
 # start a persistent session (screen is installed for you if it is missing)
 screen -S fninstall
