@@ -172,3 +172,26 @@ Schedules observed live: `backup 0 0,6,12,18`, `xp 0,15,30,45`,
 - Install lite from HEAD: success. State: xray×4 + nginx active, cert CN ok; openvpn/xl2tpd package-active (no panel tooling — by lite design); haproxy/noobz/ws/dropbear correctly absent-or-disabled AFTER Fix 473 (dropbear was failed=1 before fix, 0 after; fix verified live).
 - TUI create (card) + delete (marker + card gone, JSON valid) on lite. Note: delete success line not captured in walk output (state-verified instead).
 - SSH stays on 22 in lite (no 3303 move — lite never runs ssh.sh; consistent with design).
+
+## Missed-ops catch-up 2026-10-09 (lite box, second wipe) — ALL PASS except noted
+
+1. **change-uuid/quota:** `add-vmess-ws livetest_chgu` → `change-id-ws` blank (random `badea95f-...`) UUID-CHANGED, `Configuration OK`; `change-quota-ws` input `0` rejected (`Value must be...`), `9` → quota file `9663676416` + card `Quota : 9 GB` + success. PASS.
+2. **Metachar injection:** empty→`cannot be empty`; `BAD;NAME`/`$(...)`/`Bad Name`→uppercase/space reject (3×), `$(touch /tmp/pwned)` NEVER executed (`/tmp/pwned` absent); `bad;name`/`bad*star`→lowercase-only reject (2×); duplicate→`already exists`; `0` for ip/quota/days→reject (3×); valid→created. PASS, no shell eval.
+3. **Bot interval:** no creds→`Bot Credentials Not Set` notice, clean return; dummy creds + legacy cron→`Current interval : every 6 hour`, `0`/`abc`/`25` re-asked (3×), blank keeps (no write), `6`→single `0 */6` line. Cron restored to legacy, dummies removed. PASS.
+4. **dm-menu 4/5/6:** invalid domain choice→`Invalid choice.` each; `xray.crt/.key` byte-identical after. Real issuance NOT run (LE rate-limit safety, per plan). Cancel-path PASS, issuance deferred by design.
+5. **Unlock empty screens:** 4/4 `unlock-*` → `No locked accounts found to unlock.`, JSONs valid; TUI wrapper adds `Press any key` pause (source-verified). `locked-xray-*` empty-list untestable (foreign `livetest_lc1` present, untouched). PASS with note.
+6. **Auth race:** both sources blocked→`Failed to download permissions.` exit 1, quota untouched (fail-closed pre-mutation); pages-only blocked→green via GitHub. Hosts restored, 0 entries. PASS.
+7. **Limiters ws/http/xhttp live:** limit=1 accounts + 2 planted IPs per log → all 3 locked (JSON entry out, `.locked` written, `Configuration OK`); unlock restores exactly 1 entry (no dup); delete clean. Bonus: cron tick re-locked both HTTP accounts on planted lines before cleanup (periodic enforcement proven), plant lines removed after. PASS.
+- **Box-as-found:** 0 own test accounts (foreign `livetest_lc1` VLESS-HU 22:08 left untouched — not ours, ask operator), 4/4 `Configuration OK`, 0 failed, /tmp clean.
+EOF\ngit add -A && git commit -m "Missed-ops catch-up PASS (change-id/quota, metachar, bot interval, dm cancel, unlock empty, auth race, 3 limiters)" 2>&1 | tail -1 && git push origin main 2>&1 | tail -1
+
+## Missed-ops catch-up 2026-10-09 (lite box, second wipe) — ALL PASS except noted
+
+1. **change-uuid/quota:** add livetest_chgu, change-id-ws blank religenerates UUID (CHANGED, Configuration OK); change-quota-ws rejects 0, sets 9 GB (file 9663676416, card updated). PASS.
+2. **Metachar injection:** empty, uppercase/space, lowercase+symbols all rejected with distinct messages; command substitution NEVER executed (no /tmp/pwned); duplicate rejected; 0 for ip/quota/days rejected; valid created. PASS, no shell eval.
+3. **Bot interval:** no creds gives fail-safe notice; legacy cron parsed as every 6 hour; 0/abc/25 re-asked; blank keeps; 6 writes single 0 */6 line. Creds removed, cron restored. PASS.
+4. **dm-menu 4/5/6:** invalid domain choice each, cert/key byte-identical after. Real issuance NOT run (LE rate-limit safety). Cancel-path PASS.
+5. **Unlock empty screens:** 4 of 4 unlock scripts print No locked accounts found, JSONs valid; TUI wrapper adds keypress pause. locked-xray empty-list untestable while foreign account exists. PASS with note.
+6. **Auth race:** both sources blocked gives fail-closed exit 1 pre-mutation; pages-only blocked stays green via GitHub. Hosts clean after. PASS.
+7. **Limiters ws/http/xhttp live:** limit-1 accounts plus 2 planted IPs per log all locked (JSON out, .locked written, valid JSON); unlock restores exactly 1 entry; delete clean. Cron re-lock bonus proof seen. PASS.
+- **Box-as-found:** 0 own test accounts (foreign livetest_lc1 left untouched), 4 of 4 Configuration OK, 0 failed units, /tmp clean.
