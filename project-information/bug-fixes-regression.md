@@ -2807,3 +2807,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | N/A. |
 | **Over-engineering** | Rename mekanis. |
 | **vs the source** | Menegakkan aturan no-primary/default/extra. |
+
+## 249. Restore Username + WG Rotation — Four Checks (October 9, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | USERNAME global dari gate di semua 4 file; endpoint lama kosong → kini eksplisit. |
+| **Over-strictness** | N/A. |
+| **Over-engineering** | Pola rotasi yang sama dengan xray; baris mati dibuang. |
+| **vs the source** | Konsisten caption backup (Fix 432) dan aturan rotasi. |

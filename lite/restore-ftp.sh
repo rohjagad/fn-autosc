@@ -115,7 +115,6 @@ ip4=$(curl -sS -m 10 ipv4.icanhazip.com)
 ip6=$(curl -sS -m 10 ipv6.icanhazip.com)
 ip="$ip4 / $ip6"
 date=$(date)
-domain=$(cat /etc/xray/domain)
 cd /root
 # Check both upload and root locations
 newest=$(ls -t /var/www/uploads/*.zip 2>/dev/null | head -1)
@@ -198,7 +197,7 @@ echo -e "SUCCESSFULL RESTORE YOUR VPS"
 echo -e "Please Save The Following Data"
 echo -e "${separator}"
 echo -e "Your VPS IP : $ip"
-echo -e "DOMAIN      : $domain"
+echo -e "Username    : $USERNAME"
 echo -e "DATE        : $date"
 echo -e "${separator}"
 else
