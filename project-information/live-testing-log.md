@@ -183,3 +183,17 @@ Schedules observed live: `backup 0 0,6,12,18`, `xp 0,15,30,45`,
 6. **Auth race:** both sources blocked→`Failed to download permissions.` exit 1, quota untouched (fail-closed pre-mutation); pages-only blocked→green via GitHub. Hosts restored, 0 entries. PASS.
 7. **Limiters ws/http/xhttp live:** limit=1 accounts + 2 planted IPs per log → all 3 locked (JSON entry out, `.locked` written, `Configuration OK`); unlock restores exactly 1 entry (no dup); delete clean. Bonus: cron tick re-locked both HTTP accounts on planted lines before cleanup (periodic enforcement proven), plant lines removed after. PASS.
 - **Box-as-found:** 0 own test accounts (foreign `livetest_lc1` VLESS-HU 22:08 left untouched — not ours, ask operator), 4/4 `Configuration OK`, 0 failed, /tmp clean.
+
+## Full-round 2026-10-09/10 (wiped box 3, full edition) — PASS + 1 typo fix
+
+- Fresh Debian 12.15 + full install HEAD: F1 16/16 active, 0 failed.
+- OpenVPN penuh via KVM: UDP 2200 login (tun0 10.7.0.6, ping 10.7.0.1 ok) + TCP 1194 via squid (tun0 10.6.0.10, ping 10.6.0.1 ok); SSH-auth THROUGH tunnel sukses (chdir cosmetic per F3); akun dihapus via delete-ssh. UDP HTTP-data via :80 tak valid (port itu menyajikan banner SSH, bukan HTTP — bukan bug OVPN).
+- SlowDNS loopback: dnstt-client 14 MB hash-mismatch saat transfer pertama (re-transfer ok) lalu session 425b100d dua-arah (client + server journal id sama) via :5300. Remote publik tetap terfilter lab.
+- Restore round-trip token-asli: backup fail-safe staged, 401/401 tanpa-salah token, token benar SUCCESSFULLY RESTORED, 0 hash mismatch (11 berkas), 4/4 valid, .restore.key tetap 640.
+- change-limit-ip live: 0 ditolak Invalid input, 7 tersimpan sinkron (file + kartu, Bug 62 terbukti).
+- locked-xray kosong 4/4 + delete-ws no-clients + phantom-lock guard (JSON byte-identik).
+- Issuance LE betulan (opsi 4 + IPv4): SUKSES, issuer Lets Encrypt 90 hari, s_client Verify return code 0; traffic vmess-WS via rantai LE asli (tanpa allowInsecure) checksum MATCH.
+- Typo Ceritificate: Found 496 / Fix 474 / Section 260.
+- L2TP tetap control-only (no /dev/ppp di box maupun kernel cloud, no IPsec): xl2tpd active + LNS valid, data path mustahil — blocker struktural.
+- Noobz login penuh tetap butuh aplikasi resmi (port up, tanpa-auth fail-closed/timeout — partial).
+- Box-as-found: 0 akun uji, 4/4 Configuration OK, 0 failed; VM-2 powered off bersih.

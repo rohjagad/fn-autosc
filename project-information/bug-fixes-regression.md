@@ -2915,3 +2915,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | N/A. |
 | **Over-engineering** | Satu baris ikut preseden Fix 166; tanpa logika baru. |
 | **vs the source** | Referensi tak punya konsep disable-ini (era V2Ray/dropbear-penuh); divergensi khusus lite yang memang memangkas SSH tooling. |
+
+## 260. Issuance Prompt Typo — Four Checks (October 10, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Teks prompt saja; alur issuance tak tersentuh. |
+| **Over-strictness** | N/A. |
+| **Over-engineering** | Satu kata × 2 berkas. |
+| **vs the source** | N/A (prompt panel, bukan upstream). |

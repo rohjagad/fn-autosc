@@ -3084,3 +3084,6 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 ### Fix 473 - Disable akhir dropbear di lite (Found 495)
 
 - **Fix 473 (Found 495):** tambah `systemctl disable --now dropbear` di akhir `installer/lite.sh` (samping disable-haproxy Fix 166), setelah semua aktivitas apt. Verified live: `disabled` + `--failed` 0 dan bertahan.
+### Fix 474 - Typo Ceritificate (Found 496)
+
+- **Fix 474 (Found 496):** `Ceritificate` -> `Certificate` di `full/dm-menu.sh` + `lite/dm-menu.sh` baris 137. Satu kata, tanpa logika.

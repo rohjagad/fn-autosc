@@ -134,7 +134,7 @@ Your Domain: $domain
 ${blue_sep}
 4 For IPv4 &  For IPv6
 "
-echo -e "Generate new Ceritificate Please Input Type Your VPS"
+echo -e "Generate new Certificate Please Input Type Your VPS"
 read -p "Input Your Type Pointing ( 4 / 6 ): " ip_version
 if [[ $ip_version == "4" ]]; then
     systemctl stop nginx
