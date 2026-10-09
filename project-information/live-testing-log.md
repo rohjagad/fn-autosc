@@ -160,3 +160,9 @@ Schedules observed live: `backup 0 0,6,12,18`, `xp 0,15,30,45`,
 ## F17 alias 2026-10-09 (test box) — PASS
 
 - API installed (service active, `.key` 0600). `add-vmess core=xhttp` → success, link decodes `net=xhttp path=/purple`, 2 MB traffic checksum MATCH direct. `core=split` → success normalized to `core=xhttp` (legacy alias live). Both deleted via API (`deleted_from:["xhttp"]`), JSON clean. API uninstalled after (service gone, token/handlers/menu removed).
+
+## F0 fresh install 2026-10-09 (test box wiped, Debian 12.15 via reinstall.sh)
+
+- Wipe authorized (no backup). `reinstall.sh --username root --password ... debian 12` → netboot → d-i preseed → fresh Debian (hostname `localhost`, port 22).
+- Panel install from main HEAD (`full`, fntest domain, dual, NS): ~10 min, INSTALL SUCCESS. F1 on fresh box: 16/16 active, 0 failed, modes 600/600/640/644, sysctl exact, self-signed CN=installer domain, TLS 1.3.
+- Smoke: TUI create (card) + TUI delete (gone). F0 PASS — first end-to-end installer validation with all current fixes native (no sync drift).
