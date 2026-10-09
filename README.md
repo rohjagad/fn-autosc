@@ -219,7 +219,7 @@ change quota, and lock.
 
 | Command | Purpose |
 | :--- | :--- |
-| `dm-menu` | Change domain, renew certificates, self-signed cert |
+| `dm-menu` | Add/remove/list domains, renew certificates, self-signed cert |
 | `bmenu` | Backup and restore |
 | `menu-bot` | Telegram notifications and terminal bot |
 | `menu-dnstt` | SlowDNS nameserver and keys |
@@ -321,7 +321,7 @@ to `127.0.0.1` only and are never reachable from outside.
 Every canonical path above has three color aliases (e.g. `/vmws` also
 answers on `/red`, `/crimson`, `/scarlet`). Nginx rewrites them to the
 canonical path upstream, so they behave identically. New account links
-rotate across colors (round-robin via `/etc/xray/.colorseq`; canonical stays the default path and never appears in links)
+rotate across colors (round-robin via `/etc/xray/.colorseq`; canonical never appears in links)
 to spread usage; the card description always shows the canonical path.
 
 | Canonical | Colors |
@@ -338,6 +338,15 @@ to spread usage; the card description always shows the canonical path.
 | `vmgr` | `black`, `gray`, `silver` |
 | `vlgr` | `white`, `ivory`, `snow` |
 | `trgr` | `magenta`, `plum`, `orchid` |
+
+### Domain rotation (no primary / default / extra domain)
+
+Every configured domain serves every account equally. There is no primary,
+default, or extra domain — the installer domain is only the first entry of
+the rotation set. New account links rotate across domains (round-robin via
+`/etc/xray/.domainseq`) exactly like colors, and account cards show the full
+set in a `Domains :` row. Single-domain inventory screens (domain list menu)
+use the singular `Domain :` label because one card holds one domain.
 
 ### Why arbitrary paths are unstable
 
@@ -599,8 +608,8 @@ Open `dm-menu`, pick the domain first, then choose option 4 (acme.sh) or 5
 
 ### SlowDNS (DNSTT)
 
-Tunnels SSH over DNS. The server listens on UDP `5300`, and an iptables rule
-redirects UDP `53` to it.
+Tunnels SSH over DNS. Clients connect to UDP `53`; an iptables rule
+redirects it internally to the server on UDP `5300`.
 
 **Requirement:** you must delegate a nameserver subdomain (NS record) to this
 VPS, for example `slowdns.example.com`. Without it, `dnstt.service` runs but
@@ -618,6 +627,8 @@ Interface `wg0`, UDP `51820`, subnet `10.66.66.0/24`, server address
 Create, delete, extend, list, and show client configs (with QR codes). Client
 IPs are allocated from `10.66.66.2` to `10.66.66.254` — 253 clients maximum.
 Configs are written to `/var/www/html/wireguard-<user>.conf` for download.
+The client endpoint rotates over the domain set (round-robin via
+`/etc/xray/.domainseq`), same as Xray links; the card shows the full list.
 
 Also includes a Cloudflare WARP helper (peer persisted in `wg0.conf` with
 keepalive, IPv4 endpoint resolved at setup).
