@@ -321,7 +321,10 @@ to `127.0.0.1` only and are never reachable from outside.
 Every canonical path above has three color aliases (e.g. `/vmws` also
 answers on `/red`, `/crimson`, `/scarlet`). Nginx rewrites them to the
 canonical path upstream, so they behave identically. New account links
-rotate across colors (round-robin via `/etc/xray/.colorseq`; canonical never appears in links)
+rotate across colors (round-robin via `/etc/xray/.colorseq`)
+to spread usage. Paths do have a default: the canonical path always works
+when typed manually and is what the card description shows (`Path`/`Service`
+rows) — but copy-able links never use it, only colors.
 to spread usage; the card description always shows the canonical path.
 
 | Canonical | Colors |
