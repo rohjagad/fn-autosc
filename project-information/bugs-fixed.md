@@ -2995,3 +2995,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 459 (Found 479):** info screen now `Port : 53` (what clients use); 5300 stays only in the service unit where it belongs.
 - **Verified live (test box):** row aligned, service ON.
+### Fix 460 - Hapus kata "default" di installer (Found 480)
+
+- **Fix 460 (Found 480):** `installer/diamond.sh` mencetak "Generating self-signed certificate" (maksudnya jenis sertifikat, bukan domain default).
+- **Verified:** `bash -n` bersih.

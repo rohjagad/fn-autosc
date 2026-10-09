@@ -140,7 +140,7 @@ issue_certificate() {
     local crt_path="$2"
     local key_path="$3"
 
-    echo "Generating default self-signed certificate for $domain ..."
+    echo "Generating self-signed certificate for $domain ..."
     openssl req -new -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -days 365 -nodes -x509 \
         -subj "/CN=$domain" -addext "subjectAltName=DNS:$domain" -keyout "${key_path}.tmp" -out "${crt_path}.tmp" 2>/dev/null
     if [[ ! -s "${crt_path}.tmp" || ! -s "${key_path}.tmp" ]]; then

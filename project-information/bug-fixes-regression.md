@@ -2771,3 +2771,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | N/A. |
 | **Over-engineering** | One-line change. |
 | **vs the source** | Matches card (`Slowdns : 53`) and redirect reality. |
+
+## 245. Installer Wording — Four Checks (October 9, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Satu string echo; alur sertifikat utuh. |
+| **Over-strictness** | N/A. |
+| **Over-engineering** | Satu kata dihapus. |
+| **vs the source** | N/A (wording). |
