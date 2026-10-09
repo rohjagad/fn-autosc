@@ -2780,3 +2780,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | N/A. |
 | **Over-engineering** | Satu kata dihapus. |
 | **vs the source** | N/A (wording). |
+
+## 246. Rename Primary — Four Checks (October 9, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Rename + 1 cabang input; logika rotasi/sync/sertifikat utuh. |
+| **Over-strictness** | Batal-kosong hanya di picker sertifikat; tidak ada jalan sah tertolak. |
+| **Over-engineering** | Rename + hapus 1 baris default. |
+| **vs the source** | Menegakkan aturan no-default operator. |

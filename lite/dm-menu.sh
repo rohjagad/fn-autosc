@@ -268,10 +268,11 @@ echo ""
 }
 
 domain_sync_nginx() {
-    # Rebuild the 443 server_name from primary + extras, then reload.
-    local primary names
-    primary=$(cat /etc/xray/domain 2>/dev/null)
-    names="$primary $(tr '\n' ' ' < /etc/xray/domains 2>/dev/null)"
+    # Rebuild the 443 server_name from the rotation set, then reload.
+    # No primary/default domain: installer domain + extras rotate equally.
+    local installer_domain names
+    installer_domain=$(cat /etc/xray/domain 2>/dev/null)
+    names="$installer_domain $(tr '\n' ' ' < /etc/xray/domains 2>/dev/null)"
     names=$(echo "$names" | tr -s ' ' | sed 's/^ //; s/ $//')
     [ -z "$names" ] && { echo "No domain configured."; return 1; }
     python3 - "$names" <<'PYEOF2'
@@ -291,10 +292,10 @@ PYEOF2
 }
 
 gen_selfsigned_all() {
-    # Self-signed covering primary + extras (auto on domain add).
-    local primary all san seen d
-    primary=$(cat /etc/xray/domain 2>/dev/null)
-    all="$primary $(tr '\n' ' ' < /etc/xray/domains 2>/dev/null)"
+    # Self-signed covering the rotation set (auto on domain add).
+    local installer_domain all san seen d
+    installer_domain=$(cat /etc/xray/domain 2>/dev/null)
+    all="$installer_domain $(tr '\n' ' ' < /etc/xray/domains 2>/dev/null)"
     san=""
     seen=""
     for d in $all; do
@@ -308,7 +309,7 @@ gen_selfsigned_all() {
     san="${san#,}"
     [ -z "$san" ] && { echo "No domain configured."; return 1; }
     openssl req -new -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -days 365 -nodes -x509 \
-        -subj "/CN=$primary" -addext "subjectAltName=$san" \
+        -subj "/CN=$installer_domain" -addext "subjectAltName=$san" \
         -keyout /etc/xray/.xray-selfsigned.key.tmp -out /etc/xray/.xray-selfsigned.crt.tmp 2>/dev/null || { rm -f /etc/xray/.xray-selfsigned.key.tmp /etc/xray/.xray-selfsigned.crt.tmp; return 1; }
     mv -f /etc/xray/.xray-selfsigned.crt.tmp /etc/xray/xray.crt
     mv -f /etc/xray/.xray-selfsigned.key.tmp /etc/xray/xray.key
@@ -395,7 +396,7 @@ domain_extra_del() {
 
 
 pick_domain() {
-    # Choose a domain first (primary + extras, no default). Sets CHOSEN.
+    # Choose a domain first (rotation set, no default). Sets CHOSEN.
     unset CHOSEN
     local _all _d
     _all=()
@@ -420,8 +421,7 @@ pick_domain() {
     done
     echo -e "${separator}"
     echo ""
-    read -p "Choose domain [1]: " nn || return 1
-    [ -z "$nn" ] && nn=1
+    read -p "Choose domain: " nn || return 1
     if ! [[ "$nn" =~ ^[0-9]+$ ]] || [ "$nn" -lt 1 ] || [ "$nn" -gt "${#_all[@]}" ]; then
         echo "Invalid choice."
         return 1
@@ -438,10 +438,10 @@ pick_domain() {
 }
 
 all_domains() {
-    local primary
-    primary=$(cat /etc/xray/domain 2>/dev/null)
+    local installer_domain
+    installer_domain=$(cat /etc/xray/domain 2>/dev/null)
     {
-        [ -n "$primary" ] && echo "$primary"
+        [ -n "$installer_domain" ] && echo "$installer_domain"
         [ -s /etc/xray/domains ] && grep -v '^[[:space:]]*$' /etc/xray/domains | sed 's/[[:space:]]//g'
     } | awk '$0 != "" && !seen[$0]++'
 }
@@ -480,10 +480,10 @@ count_lines() {
 }
 
 all_domains() {
-    local primary
-    primary=$(cat /etc/xray/domain 2>/dev/null)
+    local installer_domain
+    installer_domain=$(cat /etc/xray/domain 2>/dev/null)
     {
-        [ -n "$primary" ] && echo "$primary"
+        [ -n "$installer_domain" ] && echo "$installer_domain"
         [ -s /etc/xray/domains ] && grep -v '^[[:space:]]*$' /etc/xray/domains | sed 's/[[:space:]]//g'
     } | awk '$0 != "" && !seen[$0]++'
 }

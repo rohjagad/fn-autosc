@@ -2999,3 +2999,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 460 (Found 480):** `installer/diamond.sh` mencetak "Generating self-signed certificate" (maksudnya jenis sertifikat, bukan domain default).
 - **Verified:** `bash -n` bersih.
+### Fix 461 - Rename primary jadi installer_domain (Found 481)
+
+- **Fix 461 (Found 481):** `primary` → `installer_domain` di 4 fungsi × 2 edisi + komentar aturan "no primary/default, rotate equally"; `pick_domain` kosong kini batal ("Invalid choice"), bukan default #1. `primary group` Unix di limit-ip-ssh dan `PERMISSION_PRIMARY` (URL auth) bukan konsep domain — dipertahankan.
+- **Verified live (test box):** kosong → batal tanpa mutasi; pilih 1 → jalan normal; zips repacked (0755).
