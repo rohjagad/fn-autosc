@@ -128,3 +128,11 @@ Schedules observed live: `backup 0 0,6,12,18`, `xp 0,15,30,45`,
 - **Findings this round:** 487 (delete stderr leak) → Fix 467; 488 (tunnel cards singular) → Fix 468; 489 (xray IP-limit unreachable, DEFERRED — needs PROXY protocol); 490 (retracted by 491); 491 (kill-ws enforces WS quota — correction, no code); 492 (phantom lock) → Fix 469.
 - **Box-as-found:** 0 test accounts, JSONs valid, 0 failed units, server_name 2-domain, wg 0 peers active, no artifacts (self-match lesson: never `pkill -f` a pattern appearing in your own rm/scp args — use `pkill -x`).
 - **Lab notes:** both VM images had aborted journals (unclean Oct-8 host shutdown) — rebuilt from base; kill stale QEMUs before reboot (port conflicts); QEMU `-nographic`+`-daemonize` incompatible; VM needs `-device virtio-rng-pci` + `media=cdrom` seed.
+
+## Sync + re-verify 2026-10-09 (test box, operator: box is test-only, safe)
+
+- Full `/usr/bin` sync from repo (138 KB tarball, sha256 match both ends, `bash -n` per file pre-install). Guard strings present in deployed `quota-grpc`/`limit-ip-ssh`/`bmenu`.
+- Fix 466 re-proven ON BOX with deployed code: `calculate_remaining_days "garbage-date"` → `Permission data invalid.` + exit 1, no fall-through. F19 closed.
+- Fix 467 re-proven ON BOX: `delete notarealuser999` (non-empty DB) → `not found` ×1, zero `cannot stat`/`No such file`. (Two earlier "0" readings were artifacts: empty-DB early-exit path + piped-stdin-never-echoed check.)
+- VM-2 rebuilt from base image (old disk had same aborted journal), provisioned xray 25.3.6, UP on :2222. Both VMs warm.
+- Lesson: never `pkill -f` a pattern that also appears in your own command's rm/scp args — it kills your own session (hit twice: `18081:` forward spec, `/tmp/dnstt-client` rm path). Use `pkill -x` (exact, ≤15 chars) or bracket-guards on BOTH sides.
