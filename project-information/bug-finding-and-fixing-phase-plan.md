@@ -249,8 +249,10 @@ Fase 27: Review Kriptografi Final (setelah semua perubahan)
 - **Komponen Target:** `full/menu-wg.sh`, `full/menu-noobz.sh`, `full/xl2tp.sh`, `full/menu-dnstt.sh`.
 - **Finding (Metodologi Penemuan):**
   - WireGuard: uji input username kosong dan uji duplikasi. Periksa apakah setelah fungsi `goback` dipanggil, eksekusi jatuh ke bawah (fall-through) dan tetap menulis ke `/etc/wireguard/wg0.conf` (Found 300, 301).
+  - WireGuard endpoint: pastikan endpoint client ikut rotasi domain (seperti link xray, Found 484) — bukan `$ip` misterius yang tak pernah diisi. Pindai variabel dipakai-tapi-tak-pernah-diisi (`grep -n 'endpoint='` lalu lacak assignment-nya; pola bug Found 484).
+  - WARP: peer yang ditambah runtime-only (`wg set`) akan terhapus oleh restart `wg-quick down/up` di baris berikutnya — wajib persist ke `wg0.conf` + `PersistentKeepalive` + endpoint IPv4 (host tanpa v6 melempar handshake ke lubang hitam bila hostname resolve IPv6 duluan, Found 476).
   - NoobzVPN: uji username panjang (>16 karakter). Periksa apakah saat biner `noobzvpns add` gagal, skrip menu tetap menulis akun ke `/etc/funny/.noob` (Found 302).
-  - SlowDNS: uji masukan nama server SlowDNS dengan string sembarang (misal: `"bad name"`, karakter spasi, atau newline). Periksa apakah masukan langsung diinjeksi ke baris `ExecStart` service systemd tanpa validasi FQDN (Found 303).
+  - SlowDNS: uji masukan nama server SlowDNS dengan string sembarang (misal: `"bad name"`, karakter spasi, atau newline). Periksa apakah masukan langsung diinjeksi ke baris `ExecStart` service systemd tanpa validasi FQDN (Found 303). Port user-facing adalah 53 (5300 internal via redirect) — label TUI wajib 53, bukan 5300 (Found 479).
   - L2TP/IPsec: audit penulisan `/etc/ppp/chap-secrets` dan `/etc/ipsec.d/passwd` terhadap izin berkas dan sanitasi masukan.
 - **Fixing (Standar Perbaikan):**
   - Tambahkan `return` eksplisit segera setelah pemanggilan `goback` pada alur error WireGuard.
@@ -271,7 +273,7 @@ Fase 27: Review Kriptografi Final (setelah semua perubahan)
   - Tambahkan opsi `${green}0${NC}. Back to Main Menu` dan penanganan `0|00) clear ; menu ;;` pada semua dispatcher yang kehilangan opsi 0.
   - Panggil ulang fungsi submenu (misal: `xws`, `xhttp`, `xxhttp`, `xgrpc`, `menu-ssh`) di setiap akhir eksekusi case aksi.
   - Pertahankan display versi pada submenunya dengan fallback aman `2>/dev/null || echo "n/a"`.
-  - Standar TUI (hasil Found 361–375 dan 393–413, berlaku untuk semua layar baru): pemisah judul/bawah rainbow `---` 35 (`${separator}`), pemisah dalam biru `---` 35 (`${blue_sep}`), tepat 2 baris kosong setelah setiap `clear`, daftar bernomor hijau (`%02d`) dengan Total +/total, dan input nomor-atau-nama. Judul TUI rata-tengah selebar pemisah; setiap layar hasil (limit/kuota/kosong) wajib jeda `Press any key` agar tak flashing. Tanpa `===`, tanpa `━━━`/`───`/`═══` di output terminal. Label menu XTLS tanpa akhiran kurung (`WebSocket`, `gRPC`); tabel login SSH `Username Login Type` tanpa pipa, celah sama, `count / limit`, tipe kapital.
+  - Standar TUI (hasil Found 361–375 dan 393–413, berlaku untuk semua layar baru): pemisah judul/bawah rainbow `---` 35 (`${separator}`), pemisah dalam biru `---` 35 (`${blue_sep}`), tepat 2 baris kosong setelah setiap `clear`, daftar bernomor hijau (`%02d`) dengan Total +/total, dan input nomor-atau-nama. Judul TUI rata-tengah selebar pemisah; setiap layar hasil (limit/kuota/kosong) wajib jeda `Press any key` agar tak flashing. Tanpa `===`, tanpa `━━━`/`───`/`═══` di output terminal. Label menu XTLS tanpa akhiran kurung (`WebSocket`, `gRPC`); tabel login SSH `Username Login Type` tanpa pipa, celah sama, `count / limit`, tipe kapital. Aturan kata domain (Found 477–484): tanpa `Primary`/`Default`/`Extra` di semua string terlihat; kartu akun `Domains` jamak, inventori 1-kartu-1-domain `Domain` singular, layar restore `Username`; port user-facing (SlowDNS `53`, bukan `5300` internal).
 
 ---
 
@@ -314,6 +316,7 @@ Fase 27: Review Kriptografi Final (setelah semua perubahan)
   - Audit saluran backup: pastikan tidak ada URL file hosting publik pihak ketiga (seperti file.io, catbox) atau kredensial Google Drive committed yang tersisa di kode (Decision 11, 12).
   - Audit keamanan upload web restore (`website/upload.php`): periksa apakah endpoint menerima upload file `.zip` tanpa otentikasi token yang sah (Decision 19, Found 138).
   - Periksa izin berkas kunci privat setelah pemulihan (restore): pastikan berkas `/etc/xray/xray.key` dan `funny.pem` tidak tereksploitasi menjadi `0644` setelah unpack zip.
+  - Layar sukses restore wajib identitas `Username` (konsisten caption backup, Found 464) — bukan baris `DOMAIN` singular.
 - **Fixing (Standar Perbaikan):**
   - Kirim arsip backup murni sebagai dokumen Telegram attachment dengan informasi caption minimalis (Username pemilik auth, IP, Date).
   - Wajibkan otentikasi kunci `/etc/funny/.restore.key` menggunakan `hash_equals` sebelum menerima arsip di `upload.php`.
@@ -462,7 +465,7 @@ Fase 27: Review Kriptografi Final (setelah semua perubahan)
   - Uji `routing-*.sh` `sed "${line},$d"`: batas rentang harus tepat, bukan sampai EOF.
   - Audit alias warna (36 lokasi, 3 per backend): tiap `/warna` wajib rewrite/proxy ke upstream kanonisnya dan mengembalikan status yang sama dengan kanonisnya; tanpa tabrakan antar-lokasi (`location =` eksak untuk WS/HU/XHTTP, prefix `^~` untuk gRPC). Pola `rewrite…break` sebelum guard `if` pada lokasi eksak HU terbukti 502 — untuk HU wajib bentuk URI `proxy_pass …/<kanonis>`.
   - Audit rotasi link: counter `/etc/xray/.colorseq` maju per akun tercipta; kartu menampilkan path kanonis di deskripsi dan path terotasi di link salin; `/.domainseq` dan `/etc/xray/domains` untuk rotasi domain dengan aturan yang sama (tanpa default).
-  - Audit sinkron `server_name`: penambahan/penghapusan domain wajib membangun ulang `server_name` blok 443 + reload; penghapusan terakhir mengembalikan nama primer tunggal.
+  - Audit sinkron `server_name`: penambahan/penghapusan domain wajib membangun ulang `server_name` blok 443 + reload; penghapusan terakhir mengembalikan satu nama installer tunggal.
 - **Fixing (Standar Perbaikan):**
   - Selaraskan ketiga sisi ke satu sumber kebenaran (template); tambah uji komparasi otomatis bila murah, bukan framework baru.
   - Blok lokasi warna wajib meniru blok kanonisnya baris-per-baris (header/proxy sama), hanya baris `location` + rewrite/URI yang berbeda; sisipkan berkelompok sebelum penutup blok server.
@@ -497,12 +500,15 @@ Fase 27: Review Kriptografi Final (setelah semua perubahan)
 
 ### Fase 26: Rotasi Multi-Domain & Inventaris Per-Domain
 
-- **Komponen Target:** `full/dm-menu.sh`, `lite/dm-menu.sh` (opsi 1–6, `pick_domain`, `domain_extra_*`, `gen_selfsigned_all`, `all_domains`, counter), `/etc/xray/domains`, `/etc/xray/.domainseq`, `installer/diamond.sh` (`issue_certificate`).
+- **Komponen Target:** `full/dm-menu.sh`, `lite/dm-menu.sh` (opsi 1–6, `pick_domain`, `domain_add/del/list`, `gen_selfsigned_all`, `all_domains`, counter), `full/menu-wg.sh` (rotasi endpoint), `/etc/xray/domains`, `/etc/xray/.domainseq`, `installer/diamond.sh` (`issue_certificate`).
 - **Finding (Metodologi Penemuan):**
   - Struktur menu wajib Add / Remove / List / Acme-per-pilihan / Certbot-per-pilihan / SelfSign-per-pilihan; pengubah domain-tunggal lama (`dm`), submenu `cert`, dan duplikat `cert2` wajib sudah tiada; helper yatim (`start_services`, `copy_certificates`) wajib tiada pemanggil.
-  - Rotasi tanpa default: berkas hilang/kosong → perilaku domain-tunggal lama; berkas ada → round-robin atas primer + ekstra terdedup; kartu menampilkan HANYA baris `Domains` tersedia (tanpa `Domain` terpakai); host link mengikuti rotasi.
+  - Sapu kata (Found 477–484): grep semua variasi — `primary`, `default`, `extra`, `utama`, `single`, `tunggal`, `main/master domain` — di `full/`, `lite/`, `installer/`. Yang boleh tersisa hanya komentar aturan + konsep non-domain (Unix primary group, `PERMISSION_*` URL). Setiap string terlihat operator wajib netral: tidak ada Primary/Default/Extra; picker kosong wajib batal (bukan default #1).
+  - Singular-vs-plural: kartu akun (TUI/Telegram/`.log`) HANYA baris `Domains` (himpunan penuh); layar inventori 1-kartu-1-domain memakai `Domain` singular; layar restore/backup memakai `Username` (konsisten caption, Found 432/464).
+  - Rotasi tanpa default: berkas hilang/kosong → perilaku domain-tunggal lama; berkas ada → round-robin atas installer domain + extras terdedup; host link mengikuti rotasi. Berlaku juga untuk endpoint WireGuard (bukan cuma link xray, Found 484) — buktikan dengan 2 akun berurutan (domain + warna/endpoint beda).
+  - Variabel misterius: setiap variabel yang dipakai di path/endpoint/link (`endpoint=`, `domain=`) wajib punya assignment yang terlacak; `$ip` tak-terisi adalah pola bug (Found 484).
   - Batas fungsi bersarang: penghapusan fungsi wajib berjangkar pada definisi sibling berikutnya, bukan `}` pertama (kegagalan pola ini merusak `dm-menu.sh`, Found 378) — verifikasi silang terhadap `original-source-do-not-edit` untuk lingkup yang dihapus.
-  - Self-signed default: installer tanpa fetch acme; penambahan domain otomatis self-signed multi-SAN (CN primer); penerbitan tepercaya hanya mencakup domain yang DNS-nya menunjuk ke sini (lewati sisanya, jangan gagal total); tulis ke berkas temp lalu pindah (jangan truncate path live).
+  - Self-signed default: installer tanpa fetch acme; penambahan domain otomatis self-signed multi-SAN (CN = domain installer, tanpa makna primer); penerbitan tepercaya hanya mencakup domain yang DNS-nya menunjuk ke sini (lewati sisanya, jangan gagal total); tulis ke berkas temp lalu pindah (jangan truncate path live).
 - **Fixing (Standar Perbaikan):**
   - Satu `pick_domain` dipakai tiga alur sertifikat; CN self-signed mengikuti pilihan; peringatan DNS sebelum penerbitan; pembatalan kembali ke menu tanpa mutasi.
   - Kartu inventaris per domain (SSH/VMess/VLess/Trojan/WireGuard/L2TP/NoobzVPN) dihitung sekali dan dibagi semua kartu; bingkai bersama tanpa garis ganda.

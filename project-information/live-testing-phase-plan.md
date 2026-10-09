@@ -25,7 +25,8 @@ VM-3 ──┘                      ▲
 - Asset688888volatility: VM disks/seeds lived in `/tmp/opencode/kvm` (wiped on host reboot) — rebuild from base image + seeds if gone, or persist outside `/tmp` before the next round.
 - One VM is enough for most phases. Use 2 VMs for: IP-limit (Fase 9), concurrency/loadbalance (Fase 20 + LB), parallel transport testing (Fase 6 went 2× faster split HU/XHTTP across VMs).
 - KVM is also the fault-injection box: DROP/slow network mocks (Fase 18/19/22) run here, never on the VPS data path.
-- Session hygiene (learned hard): NEVER `pkill -f "xray run"` over SSH — the pattern matches your own remote command line and kills the session; use `pkill -9 -x xray`. A backgrounded xray holds the SSH session open on exit — start clients in a held (background-shell) session and drive tests from separate calls.
+- Session hygiene (learned hard): NEVER `pkill -f "xray run"` over SSH — the pattern matches your own remote command line and kills the session; use `pkill -9 -x xray`. NEVER `pkill -x <name-longer-than-15-chars>` — the kernel truncates process names, so it silently matches nothing (kill QEMU by PID, or `pkill -f "[s]eed1.iso"` bracket-guard so the pattern can't match your own command). NEVER `pkill -x xray` on the VPS — client and server share the process name; kill clients from the VM side. A backgrounded xray holds the SSH session open on exit — start clients in a held (background-shell) session and drive tests from separate calls.
+- SlowDNS lab caveats: this lab's network filters QTYPE=TXT, so every remote tunnel query dies locally — verify with `TXT via 8.8.8.8` control probe before blaming the server. dnstt "begin session" prints unilaterally (no server contact needed) — only a returned banner/data proves the tunnel. When remote is filtered, the VPS-loopback proof (client on VPS → `:5300`) is the valid substitute.
 
 ### Channel S: SSH TUI (pure keyboard)
 
@@ -39,7 +40,7 @@ VM-3 ──┘                      ▲
 
 Check these three on every screen you open:
 
-1. **Wording:** simple words a junior IT understands. No typo. Same term everywhere (e.g. do not mix `Expired` / `Kadaluarsa` on one screen). Units shown (`GB`, `days`, `IP`).
+1. **Wording:** simple words a junior IT understands. No typo. Same term everywhere (e.g. do not mix `Expired` / `Kadaluarsa` on one screen). Units shown (`GB`, `days`, `IP`). Domain rule: no `Primary`/`Default`/`Extra` anywhere user-visible; account cards show `Domains` (plural, full set), single-domain inventory screens show `Domain` (singular) — grep every wording change against all variants (`primary`, `default`, `extra`, `utama`, singular vs plural).
 2. **Navigation:** every number works. `0` goes back to parent, never drops to shell. Wrong number re-shows the menu. Empty `Enter` is rejected with a clear message, no crash. `Ctrl+D` (EOF) exits cleanly (`exit 0`).
 3. **Layout tidiness:** header centered, separator lines same length, `Label : value` colons aligned, no wrapped/truncated lines at 80 cols, colors reset at end, account card stays on screen (pause) before clear. Title/bottom separators rainbow `---` 35, inner dividers blue `---` 35, exactly 2 blank lines after each `clear`, picker lists green-numbered (`01.`) with `Total Accounts` and number-or-name input. Cards/notices: bare uppercase titles, `Protocol :` + `Transport:` rows, `DD-Mon-YYYY` dates, `XRAY` spelling, green-double titles / blue-single links in Telegram, titles centered on card width in TUI with left payload. SSH online table: `Username Login Type`, no pipes, equal gaps, `n / limit`, `Dropbear`/`Openssh`.
 
@@ -134,21 +135,21 @@ Each phase below lists: **Goal**, **K** (client traffic), **S** (menu walk), **P
 ### Fase 7: Tunnels (WireGuard, Noobz, SlowDNS, L2TP, OpenVPN)
 
 - **Goal:** each tunnel connects (or fails only for documented reason).
-- **K:** WG: `wg-quick up`, ping `10.66.66.1`. Noobz on 8080/8443 with payload auth. SlowDNS via UDP 53 (needs public NS delegation — note if skipped). L2TP: SA forms (cloud kernel has no PPP data path — note if control-only). OpenVPN TCP 1194 + UDP 2200, TLS handshake ok.
-- **S:** `menu-wg`, `menu-noobz`, `menu-dnstt` → create `livetest_*` via TUI; card per tunnel complete and pause-readable.
+- **K:** WG: `wg-quick up`, ping `10.66.66.1`; create 2 WG accounts sequentially and confirm endpoints + config URLs rotate domains (same `.domainseq` as xray). WARP: after setup, exactly one `### WARP` block survives restart with keepalive + IPv4 endpoint. Noobz on 8080/8443 with payload auth. SlowDNS via UDP 53 (needs public NS delegation — note if skipped; server-side proof via VPS-loopback tunnel is acceptable when the lab filters TXT). L2TP: SA forms (cloud kernel has no PPP data path — note if control-only). OpenVPN TCP 1194 + UDP 2200, TLS handshake ok.
+- **S:** `menu-wg`, `menu-noobz`, `menu-dnstt` → create `livetest_*` via TUI; card per tunnel complete and pause-readable. WG card shows `Domains` list; SlowDNS info shows port `53` (user-facing), never `5300`.
 - **PASS:** WG + Noobz + OpenVPN live; SlowDNS/L2TP judged per known-limitation note, not as fail.
 
 ### Fase 8: Create cycle + duplicate guard
 
 - **Goal:** accounts created cleanly, doubles refused.
 - **K:** none extra (accounts from F4–F7 reused).
-- **S:** in each `add-*` screen: try empty name (rejected), bad chars (rejected, no shell eval), existing name (duplicate message), `0` for limit/quota/days (`0 not allowed`, Decision 4). Verify JSON has `"level": 0`. Rotation: sequential creates spread across canonical + colors (`/etc/xray/.colorseq` advances; decode links to confirm), and across domains when extras exist (`/etc/xray/.domainseq`; cards show `Domains` list only, never a `Domain` line).
+- **S:** in each `add-*` screen: try empty name (rejected), bad chars (rejected, no shell eval), existing name (duplicate message), `0` for limit/quota/days (`0 not allowed`, Decision 4). Verify JSON has `"level": 0`. Rotation: sequential creates spread across canonical + colors (`/etc/xray/.colorseq` advances; decode links to confirm), and across domains when extras exist (`/etc/xray/.domainseq`; cards show `Domains` list only, never a `Domain` line; WG endpoints rotate the same way — prove with 2 accounts).
 - **PASS:** all rejections clean, JSON valid.
 
 ### Fase 9: IP-limit + lock/unlock
 
 - **Goal:** concurrent-IP abuse locks, unlock restores.
-- **K:** account limit-IP=1 (or 2); hold slow downloads (`curl --limit-rate`, 10 MB file) from VM-1 + VM-2 at the same time; confirm `statsonline` reads 2, then run `limit-ip-*`; expect card → `.locked`, JSON entry removed, sessions cut. Same-NAT caveat: two VMs behind one host egress share ONE source IP — route VM-2 through a WG tunnel account so the VPS sees tunnel IP as the 2nd address (proven 2026-10-07); restart VM-2's xray AFTER `wg-quick up` so its connection actually traverses the tunnel.
+- **K:** account limit-IP=1 (or 2); hold slow downloads (`curl --limit-rate`, 10 MB file) from VM-1 + VM-2 at the same time; confirm `statsonline` reads 2, then run `limit-ip-*`; expect card → `.locked`, JSON entry removed, sessions cut. `statsonline` semantics (proven): counts distinct source IPs with live traffic — idle clients read empty, same-IP sessions read 1, one client multiplexes to 1 (use two single-port clients, never one client with two inbounds). Same-NAT caveat: two VMs behind one host egress share ONE source IP — route VM-2 through a WG tunnel account so the VPS sees tunnel IP as the 2nd address (proven 2026-10-07); restart VM-2's xray AFTER `wg-quick up` so its connection actually traverses the tunnel. Deterministic alternative: VPS-local client (egress = VPS IP) + one VM session.
 - **S:** do lock + `unlock-*` via TUI only (direct unlock, no confirmation). Multilogin locks auto-lift (~15 min via cron sweeper — verify due-epoch file in `/etc/xray/autounlock/<t>/`); manual locks stay indefinite. Confirm re-unlock of already-present account prints skip message (no duplicate JSON).
 - **PASS:** lock file exists, unlock restores same UUID, `Configuration OK.`
 
@@ -193,7 +194,7 @@ Each phase below lists: **Goal**, **K** (client traffic), **S** (menu walk), **P
 - **Goal:** backup arrives, restore needs the key.
 - **K:** none (server-side + Telegram client).
 - **S:** `bmenu` → backup: zip arrives as Telegram document with Username/IP/Date caption, no public link. Without bot creds the backup must fail safe: archive staged, clear `Telegram credentials are not configured` message, archive KEPT at `/root/backup.zip`, exit 0, no hang. `menu-bot` option 3 shows `Current interval` parsed from the live cron, accepts 1–24 (`0`/text/25+ re-asked, blank keeps), writes a single `0 */h` line. Restore page `:855/upload.php`: no token → 401, wrong token → 401, right token (`/etc/funny/.restore.key`) → extracted; restored `.key` back to `0600`.
-- **PASS:** 401/401/ok, modes correct. (Destructive: snapshot first, restore to test box if possible.)
+- **PASS:** 401/401/ok, modes correct. Restore success screens show `Username` (same identity as the backup caption), never a singular `DOMAIN` row. (Destructive: snapshot first, restore to test box if possible.)
 
 ### Fase 16: REST API suite (FN-API)
 
