@@ -3003,3 +3003,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 461 (Found 481):** `primary` → `installer_domain` di 4 fungsi × 2 edisi + komentar aturan "no primary/default, rotate equally"; `pick_domain` kosong kini batal ("Invalid choice"), bukan default #1. `primary group` Unix di limit-ip-ssh dan `PERMISSION_PRIMARY` (URL auth) bukan konsep domain — dipertahankan.
 - **Verified live (test box):** kosong → batal tanpa mutasi; pilih 1 → jalan normal; zips repacked (0755).
+### Fix 462 - Gate auth dinamai sumbernya (Found 482)
+
+- **Fix 462 (Found 482):** `PERMISSION_PRIMARY` → `PERMISSION_CFPAGES`, `PERMISSION_FALLBACK` → `PERMISSION_GITHUB` di semua gate (193 file, kedua edisi + installer) dan `menu-api`; komentar + dokumen fase/is-decision ditulis ulang sebagai race. Mekanisme tidak berubah (sudah race).
+- **Verified:** `bash -n` semua file; grep sisa nol; zips repacked (0755).

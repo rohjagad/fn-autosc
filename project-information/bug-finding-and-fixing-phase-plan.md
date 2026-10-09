@@ -91,7 +91,7 @@ Fase 15: Sinkronisasi Paket Dual-Edition (full.zip & lite.zip)
    │
 Fase 16: Inspeksi Migrasi SplitHTTP → XHTTP
    │
-Fase 17: Inspeksi Fallback URL Otorisasi (Pages + GitHub)
+Fase 17: Inspeksi Race URL Otorisasi (Pages + GitHub)
    │
 Fase 18: Quoting & Word-Splitting pada rm/sed/grep
    │
@@ -371,9 +371,9 @@ Fase 27: Review Kriptografi Final (setelah semua perubahan)
 
 ---
 
-### Fase 17: Inspeksi Fallback URL Otorisasi (Pages + GitHub)
+### Fase 17: Inspeksi Race URL Otorisasi (Pages + GitHub)
 
-- **Komponen Target:** 193 blok gate (`PERMISSION_PRIMARY`/`PERMISSION_FALLBACK`) di `full/`, `lite/`, `installer/`, `install.sh`, plus `menu-api` di `fn-autosc-api`.
+- **Komponen Target:** 193 blok gate (`PERMISSION_CFPAGES`/`PERMISSION_GITHUB`) di `full/`, `lite/`, `installer/`, `install.sh`, plus `menu-api` di `fn-autosc-api`.
 - **Finding (Metodologi Penemuan):**
   - Pindai variabel gate lama yang tersisa: `PERMISSION_URL=` (harus 0, kecuali referensi non-kanonis yang disengaja) dan fetch tanpa fallback (`curl -s "$PERMISSION_URL"`).
   - Verifikasi kesetaraan konten: jumlah baris `###` dari Pages vs GitHub harus sama (sumber berbeda, data sama).
@@ -386,7 +386,7 @@ Fase 27: Review Kriptografi Final (setelah semua perubahan)
   - Audit hitung mundur expiry: tanggal `lifetime` vs `YYYY-MM-DD` vs format rusak — expiry rusak harus gagal tertutup, bukan lolos terbuka.
   - Audit perilaku cron: gate di daemon 5-menitan tidak boleh membanjiri log atau memakan waktu melebihi interval saat network lambat.
 - **Fixing (Standar Perbaikan):**
-  - Bentuk kanonis dua baris: `PERMISSION_PRIMARY` (Pages) + `PERMISSION_FALLBACK` (GitHub raw); fetch `primary || fallback || { fail }`. Tanpa timeout baru, tanpa helper baru.
+  - Bentuk kanonis dua baris: `PERMISSION_CFPAGES` (Pages) + `PERMISSION_GITHUB` (GitHub raw); fetch paralel, balasan valid pertama menang, keduanya mati → fail-closed. Tanpa timeout baru, tanpa helper baru.
   - Bug umum ikut standar fasenya (hang→cap waktu ala Fase 13 API; parsing→validasi eksak); fase ini mengoordinasi temuan area-gate.
   - Repack zip karena skrip gate ikut berubah; catat append-only.
 
@@ -411,7 +411,7 @@ Fase 27: Review Kriptografi Final (setelah semua perubahan)
   - Pindai fetch tanpa `--max-time`: gate 5-menitan yang hang melewati interval; kirim Telegram tanpa timeout menggantung daemon.
   - Pindai sumber tunggal tanpa fallback (`icanhazip`, `ipinfo.io`, `bin456789/reinstall` tanpa pin/checksum, `request.sh` URL 404).
   - Uji host mati/lambat (DROP sementara di KVM): skrip wajib gagal-cepat dengan pesan jelas, bukan hang; instalasi setengah jalan wajib dilaporkan bukan sukses.
-  - Bandingkan dengan referensi: gate tanpa timeout adalah warisan; fallback Pages+GitHub adalah pola kanonis baru (Fase 17).
+  - Bandingkan dengan referensi: gate tanpa timeout adalah warisan; race Pages+GitHub adalah pola kanonis baru (Fase 17).
 - **Fixing (Standar Perbaikan):**
   - Tambah `--max-time` wajar + fallback sumber di mana ada mirror; pin atau checksum untuk fetch kode yang di-`bash` langsung. Tanpa framework retry.
 

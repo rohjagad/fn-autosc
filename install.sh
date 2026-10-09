@@ -68,9 +68,9 @@ BlueCyan="\033[5;36m"
 
 function permision() {
 
-    # Konfigurasi URL izin
-    PERMISSION_PRIMARY="https://fn-autosc-auth.pages.dev/izin.txt"
-    PERMISSION_FALLBACK="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt"
+    # Auth sources race: same izin.txt on Pages + GitHub (synced), first valid reply wins; no primary/secondary.
+    PERMISSION_CFPAGES="https://fn-autosc-auth.pages.dev/izin.txt"
+    PERMISSION_GITHUB="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt"
     LOCAL_IP=$(curl -4 -s --max-time 15 ifconfig.me 2>/dev/null || wget -qO- -4 --timeout=15 ifconfig.me 2>/dev/null) # Mendapatkan IP lokal
     if [ -z "$LOCAL_IP" ]; then
         echo "Could not determine your public IPv4 - check that curl/wget is installed and the network is up."
@@ -91,7 +91,7 @@ function permision() {
 
     # Unduh izin dan validasi
     clear
-    PERMISSION_DATA=$(curl -s --max-time 15 "$PERMISSION_PRIMARY" || curl -s --max-time 15 "$PERMISSION_FALLBACK") || { echo "Failed to download permissions."; exit 1; }
+    PERMISSION_DATA=$(curl -s --max-time 15 "$PERMISSION_CFPAGES" || curl -s --max-time 15 "$PERMISSION_GITHUB") || { echo "Failed to download permissions."; exit 1; }
 
     # Mencocokkan data berdasarkan IP lokal
     MATCH=$(echo "$PERMISSION_DATA" | grep "###" | grep -wF "$LOCAL_IP")

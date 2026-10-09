@@ -2789,3 +2789,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | Batal-kosong hanya di picker sertifikat; tidak ada jalan sah tertolak. |
 | **Over-engineering** | Rename + hapus 1 baris default. |
 | **vs the source** | Menegakkan aturan no-default operator. |
+
+## 247. Gate Race Naming — Four Checks (October 9, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Rename + komentar; logika fetch utuh. |
+| **Over-strictness** | N/A. |
+| **Over-engineering** | Rename mekanis via sed. |
+| **vs the source** | Nama sesuai sumber; perilaku race tak berubah. |
