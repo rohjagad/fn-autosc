@@ -194,6 +194,25 @@ func main() {
 		return
 	}
 
+	// Found 494: without the API every per-user read below fails and the loop
+	// would silently show nothing. Fail explicitly instead.
+	statsUp := false
+	if out, err := ExecuteCommand("xray", "api", "statsquery", "--server=127.0.0.1:10082"); err == nil {
+		var probe struct {
+			Stat []struct {
+				Name  string `json:"name"`
+				Value int64  `json:"value"`
+			} `json:"stat"`
+		}
+		if json.Unmarshal([]byte(out), &probe) == nil {
+			statsUp = true
+		}
+	}
+	if !statsUp {
+		fmt.Println("Traffic stats: unavailable (xray API unreachable) — online check skipped.")
+		return
+	}
+
 	// Process each user
 	for _, user := range users {
 		ipCountOutput, err := ExecuteCommand("xray", "api", "statsonline", "--server=127.0.0.1:10082", "-email", user)

@@ -2897,3 +2897,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | N/A — warning informatif, bukan penolakan. |
 | **Over-engineering** | Satu `if` + satu redirect; tanpa helper. |
 | **vs the source** | Warisan fallback-0 diam; divergensi untuk kejujuran tampilan (aturan F21/Fase 24). |
+
+## 258. Go Cek API-Down Warning — Four Checks (October 9, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Probe baca-saja; jalur normal byte-identik (up-state tanpa warning, terbukti). |
+| **Over-strictness** | N/A — warning + stop, bukan penolakan. |
+| **Over-engineering** | Satu probe + early return per tool; tanpa dependensi baru. |
+| **vs the source** | Warisan skip-diam; divergensi untuk kejujuran tampilan (aturan F21/Fase 24). |

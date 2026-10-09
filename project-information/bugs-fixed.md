@@ -3076,3 +3076,8 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 471 (Found 494):** `cek-xray-ws.sh` (full+lite) tulis baris eksplisit `Traffic stats: unavailable (xray API unreachable) — 0 shown is not measured.` bila probe API gagal, bukan 0 diam-diam; `grep` kartu protokol dibungkam (`2>/dev/null`, sekelas Found 487).
 - **Verified live (test box):** biner ada → baris normal + kuota riil; biner disembunyikan → baris warning muncul; biner dikembalikan. `.go` sekelas antre recompile. Zips repacked (0755).
+
+### Fix 471 follow-up - .go cek-tools jujur juga (Found 494)
+
+- **Follow-up (Found 494):** `cek-xray-{grpc,http,xhttp}.go` (full+lite, 6 berkas) probe API sekali di depan; bila mati tulis `Traffic stats: unavailable (xray API unreachable) — online check skipped.` dan berhenti — tak ada baris 0 palsu. Penempatan pertama (di dalam loop, setelah skip) terbukti tak terjangkau; dipindah ke early-return.
+- **Verified live (test box):** biner disembunyikan → warning muncul; biner ada → jalan normal tanpa warning. Biner recompile (`CGO_ENABLED=0`, 2.3 MB) + hash terverifikasi dua sisi; zips repacked (0755).
