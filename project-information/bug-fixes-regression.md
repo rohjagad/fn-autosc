@@ -2879,3 +2879,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | Window 10 menit (R12) cegah kunci basi; evasion via spoof tertutup (terbukti). |
 | **Over-engineering** | Satu blok awk per daemon + replace mekanis 50 header; tanpa inbound/daemon baru. |
 | **vs the source** | Referensi tak punya pola ini (era V2Ray tanpa counter); divergensi atas kebutuhan enforcement + bukti live. |
+
+## 257. Cek Honesty Warning — Four Checks (October 9, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Probe baca-saja; tampilan normal tak berubah bila API hidup (terbukti). |
+| **Over-strictness** | N/A — warning informatif, bukan penolakan. |
+| **Over-engineering** | Satu `if` + satu redirect; tanpa helper. |
+| **vs the source** | Warisan fallback-0 diam; divergensi untuk kejujuran tampilan (aturan F21/Fase 24). |
