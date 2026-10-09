@@ -328,23 +328,24 @@ domain_extra_add() {
     clear
     echo ""
     echo ""
-    local primary cur
-    primary=$(cat /etc/xray/domain 2>/dev/null)
-    cur=$(tr '\n' ' ' < /etc/xray/domains 2>/dev/null)
     echo -e "${separator}"
-    echo -e "Add Extra Domain (rotation)"
+    echo -e "Add Domain (rotation)"
     echo -e "${separator}"
-    echo -e "Primary : $primary"
-    echo -e "Extras  : ${cur:-<none>}"
+    echo -e "Domains (all rotate, no default):"
+    local _i=1
+    for _d in $(all_domains); do
+        printf "\e[32;1m%02d\e[0m. %s\n" "$_i" "$_d"
+        _i=$((_i+1))
+    done
     echo -e "${separator}"
     echo ""
-    read -p "New extra domain: " nd || return
+    read -p "New domain: " nd || return
     if ! [[ "$nd" =~ ^([[:alnum:]]([[:alnum:]-]{0,61}[[:alnum:]])?\.)+[[:alpha:]]{2,63}$ ]]; then
         echo "Domain must be a valid DNS hostname."
         sleep 2
         return
     fi
-    if [ "$nd" = "$primary" ] || grep -qxF "$nd" /etc/xray/domains 2>/dev/null; then
+    if all_domains | grep -qxF "$nd"; then
         echo "Domain already listed."
         sleep 2
         return

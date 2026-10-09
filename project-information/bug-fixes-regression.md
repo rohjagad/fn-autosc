@@ -2744,3 +2744,30 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | Hostname fallback kept when v4 resolution fails. |
 | **Over-engineering** | Conf block + one resolution line; no new deps. |
 | **vs the source** | Upstream warp flow preserved, persistence added. |
+
+## 242. No-Primary Domain Page — Four Checks (October 9, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Display + dup check only; rotation, sync, cert flows untouched. |
+| **Over-strictness** | Same FQDN + dup rules, same set. |
+| **Over-engineering** | Reuses `all_domains()`; no new helpers. |
+| **vs the source** | Matches the no-default rotation rule. |
+
+## 243. SlowDNS Alignment — Four Checks (October 9, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Text layout only; validation, unit rewrite, keys untouched. |
+| **Over-strictness** | N/A. |
+| **Over-engineering** | Spacing to match sibling screens. |
+| **vs the source** | Same house style as delete/result cards. |
+
+## 244. SlowDNS Port Truth — Four Checks (October 9, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | One label; unit file and card untouched. |
+| **Over-strictness** | N/A. |
+| **Over-engineering** | One-line change. |
+| **vs the source** | Matches card (`Slowdns : 53`) and redirect reality. |

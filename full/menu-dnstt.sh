@@ -148,11 +148,12 @@ ${orange}Press [Ctrl + C] to exit${NC}"
                 clear
                 echo ""
                 echo ""
-                echo -e "                ${separator}
-                Change Nameserver
-                ${separator}
-                Nameserver: $nsd
-                "
+                echo -e "${separator}
+         Change Nameserver
+${separator}
+Nameserver   : $nsd
+${separator}"
+                echo ""
                 read -p "Input Nameserver: " nsdomen || return
                 if [ -z "$nsdomen" ]; then
                     echo "Nameserver cannot be empty."
@@ -202,10 +203,11 @@ SVCEOF
                 clear
                 echo ""
                 echo ""
-                echo -e "                Nameserver Updated Successfully
-                ${separator}
-                New Nameserver: $nsdomen
-                ${separator}"
+                echo -e "${separator}
+   Nameserver Updated Successfully
+${separator}
+ Nameserver   : $nsdomen
+${separator}"
                 read -n 1 -s -r -p "Press any key to return..." || true
                 mna89
                 ;;
@@ -227,8 +229,9 @@ SVCEOF
                 clear
                 echo ""
                 echo ""
-                echo -e "                Server Keys Renewed Successfully
-                ${separator}"
+                echo -e "${separator}
+  Server Keys Renewed Successfully
+${separator}"
                 read -n 1 -s -r -p "Press any key to return..." || true
                 mna89
                 ;;
@@ -241,8 +244,9 @@ SVCEOF
                 clear
                 echo ""
                 echo ""
-                echo -e "                SlowDNS Restarted Successfully
-                ${separator}"
+                echo -e "${separator}
+  SlowDNS Restarted Successfully
+${separator}"
                 read -n 1 -s -r -p "Press any key to return..." || true
                 mna89
                 ;;
@@ -257,7 +261,7 @@ SVCEOF
 ${separator}
 Nameserver   : ${green}$nsd${NC}
 Public Key   : ${green}$pubkey${NC}
-Port Target  : 5300 (DNS -> 22 OpenSSH)
+Port         : 53
 Service      : $stat_msg
 ${separator}"
                 read -n 1 -s -r -p "Press any key to return..." || true

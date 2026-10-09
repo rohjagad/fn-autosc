@@ -2981,3 +2981,17 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 456 (Found 476):** `warp()` writes the peer block (`### WARP`, keepalive 25) into `wg0.conf` with idempotent replace, resolving the endpoint to IPv4 at setup (hostname fallback kept), then restarts. Full edition only (WG menu is full-only).
 - **Verified live:** single `### WARP` block after 3 runs, peer present post-restart, keepalive traffic egressing; Cloudflare-side handshake completion unproven (no reply observed — external). Test peer removed after; zips repacked (0755).
+### Fix 457 - No-primary domain add page (Found 477)
+
+- **Fix 457 (Found 477):** both editions list `Domains (all rotate, no default)` numbered via `all_domains()`; duplicate check uses the same set. Rotation code untouched (already unbiased).
+- **Verified live (test box):** numbered set shown, no Primary; two sequential accounts rotated domain AND color (`fntest`+`/red`, `test`+`/crimson`); card `Domains :` plural; zips repacked (0755).
+
+### Fix 458 - SlowDNS menu alignment (Found 478)
+
+- **Fix 458 (Found 478):** change screen + 3 success notices follow house style (separators col 0, centered titles, colons at 14, 2 blanks). Full edition only (no SlowDNS menu in lite).
+- **Verified live (test box):** screens render aligned; empty input rejected with no mutation.
+
+### Fix 459 - SlowDNS port truth (Found 479)
+
+- **Fix 459 (Found 479):** info screen now `Port : 53` (what clients use); 5300 stays only in the service unit where it belongs.
+- **Verified live (test box):** row aligned, service ON.
