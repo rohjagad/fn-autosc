@@ -2798,3 +2798,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | N/A. |
 | **Over-engineering** | Rename mekanis via sed. |
 | **vs the source** | Nama sesuai sumber; perilaku race tak berubah. |
+
+## 248. No-Extra Wording — Four Checks (October 9, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Rename + label; logika add/del/list utuh. |
+| **Over-strictness** | N/A. |
+| **Over-engineering** | Rename mekanis. |
+| **vs the source** | Menegakkan aturan no-primary/default/extra. |

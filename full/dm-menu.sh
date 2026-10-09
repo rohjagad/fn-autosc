@@ -269,7 +269,7 @@ echo ""
 
 domain_sync_nginx() {
     # Rebuild the 443 server_name from the rotation set, then reload.
-    # No primary/default domain: installer domain + extras rotate equally.
+    # No primary/default/extra domain: the rotation set rotates equally.
     local installer_domain names
     installer_domain=$(cat /etc/xray/domain 2>/dev/null)
     names="$installer_domain $(tr '\n' ' ' < /etc/xray/domains 2>/dev/null)"
@@ -325,7 +325,7 @@ gen_selfsigned_all() {
 }
 
 
-domain_extra_add() {
+domain_add() {
     clear
     echo ""
     echo ""
@@ -362,17 +362,17 @@ domain_extra_add() {
     echo ""
 }
 
-domain_extra_del() {
+domain_del() {
     clear
     echo ""
     echo ""
     if [ ! -s /etc/xray/domains ]; then
-        echo "No extra domains."
+        echo "No domains yet."
         sleep 2
         return
     fi
     echo -e "${separator}"
-    echo -e "Remove Extra Domain"
+    echo -e "Remove Domain"
     echo -e "${separator}"
     local i=1
     while IFS= read -r _d; do
@@ -521,7 +521,7 @@ count_lines() {
     echo "${c:-0}"
 }
 
-domain_extra_list() {
+domain_list() {
     clear
     echo ""
     echo ""
@@ -545,7 +545,7 @@ domain_extra_list() {
     _l2=$(count_mark /etc/funny/.l2tp)
     _nb=$(count_mark /etc/funny/.noob)
     for d in "${_all[@]}"; do
-        echo -e "Domain : $d"
+        echo -e "Domains : $d"
         printf "%-9s : %s\\n" "SSH" "$_ssh"
         printf "%-9s : %s\\n" "VMess" "$_vm"
         printf "%-9s : %s\\n" "VLess" "$_vl"
@@ -580,9 +580,9 @@ ${separator}
 ${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input option: " apw || exit 0
 case $apw in
-1) clear ; domain_extra_add ; dm1 ;;
-2) clear ; domain_extra_del ; dm1 ;;
-3) clear ; domain_extra_list ; dm1 ;;
+1) clear ; domain_add ; dm1 ;;
+2) clear ; domain_del ; dm1 ;;
+3) clear ; domain_list ; dm1 ;;
 4) clear ; pick_domain && acme ; dm1 ;;
 5) clear ; pick_domain && fn ; dm1 ;;
 6) clear ; pick_domain && dmsl ; dm1 ;;

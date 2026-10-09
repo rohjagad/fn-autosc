@@ -3007,3 +3007,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 462 (Found 482):** `PERMISSION_PRIMARY` → `PERMISSION_CFPAGES`, `PERMISSION_FALLBACK` → `PERMISSION_GITHUB` di semua gate (193 file, kedua edisi + installer) dan `menu-api`; komentar + dokumen fase/is-decision ditulis ulang sebagai race. Mekanisme tidak berubah (sudah race).
 - **Verified:** `bash -n` semua file; grep sisa nol; zips repacked (0755).
+### Fix 463 - Hapus konsep extra (Found 483)
+
+- **Fix 463 (Found 483):** fungsi jadi `domain_add/del/list`, judul "Remove Domain", "No domains yet.", label kartu `Domains :`. Komentar aturan menyebut ketiganya sekaligus.
+- **Verified live (test box):** list tampil `Domains : fntest...`, tanpa Extra; zips repacked (0755).
