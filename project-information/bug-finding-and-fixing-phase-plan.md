@@ -239,6 +239,7 @@ Fase 27: Review Kriptografi Final (setelah semua perubahan)
 - **Komponen Target:** `full/delete-*`, `lite/delete-*`, `full/extend-*`, `lite/extend-*`, `full/change-id-*`, `full/change-quota-*`.
 - **Finding (Metodologi Penemuan):**
   - Uji penghapusan pengguna fiktif: jalankan `delete-* notarealuser999` dan pantau apakah service direstart, file dihapus, atau notifikasi sukses palsu dikirim (Found 306).
+  - Uji penguncian manual fiktif: jalankan `locked-xray-*` dengan nama fiktif — wajib `User not found` sebelum kartu/mutasi, tanpa restart dan tanpa notifikasi (Found 492; guard satu baris setelah resolusi nama, pola Fix 306).
   - Uji input EOF (`Ctrl+D`) pada prompt pemilihan pengguna untuk perpanjangan atau penggantian UUID: periksa apakah terjadi error syntax sed.
   - Audit kode keluar `Sc_Credit()` pada skrip `change-quota-*.sh`: periksa apakah menghasilkan `exit 1` saat berhasil (Found 290).
 - **Fixing (Standar Perbaikan):**

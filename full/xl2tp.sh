@@ -166,13 +166,25 @@ systemctl restart xl2tpd
 clear
 echo ""
 echo ""
+# No primary/default domain: card lists the whole rotation set (any entry works).
+_alldom="$domain"
+if [ -s /etc/xray/domains ]; then
+	_l2seen="|$domain|"
+	while IFS= read -r _l2d || [ -n "$_l2d" ]; do
+		_l2d=$(echo "$_l2d" | tr -d '[:space:]')
+		if [ -n "$_l2d" ] && [[ "$_l2seen" != *"|$_l2d|"* ]]; then
+			_alldom="$_alldom, $_l2d"
+			_l2seen="$_l2seen$_l2d|"
+		fi
+	done < /etc/xray/domains
+fi
 PSK=$(grep -oP '(?<=: PSK ")\S+(?=")' /etc/ipsec.secrets 2>/dev/null || echo "myvpn")
 cat <<EOF
 
 ${separator}
 L2TP/IPSEC XAuth PSK VPN
 ${separator}
-Domain     : $domain
+Domains    : $_alldom
 IPsec PSK  : $PSK
 Username   : $VPN_USER
 Password   : $VPN_PASSWORD

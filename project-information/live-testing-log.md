@@ -91,3 +91,40 @@ Schedules observed live: `backup 0 0,6,12,18`, `xp 0,15,30,45`,
   with bracket guard, or PIDs); QEMU guests need `-device virtio-rng-pci`
   or first boot stalls silently; `kill -9` on VM disks risks auth DB
   damage (rebuilt both from base).
+
+## Live round 2026-10-09 (test box 202.155.17.126) — F9 counter evidence
+
+- `livetest_ipl2` (vless-grpc, limit-IP 1): statsonline=1 with (a) single flow, (b) VM + VPS-local flows (distinct TCP sources 10.66.66.2-via-WG and 127.0.0.1), (c) two parallel VM clients. xray sees all inbounds from 127.0.0.1 (nginx reverse-proxy, no PROXY protocol) → online caps at 1 → `cek > limit` unreachable. Recorded as Found 489; xray multilogin lock judged BLOCKED-by-topology, SSH limits tested separately.
+
+## Live round 2026-10-09 — F10-ws correction + LB rerun notes
+
+- `livetest_f801` (plant usage > quota): reaped by `kill-ws` file-based pass (marker gone, quota files gone, audit card in `.quota.logs`, ws.json `Configuration OK`). F10-ws PASS via kill daemon.
+- LB first run anomalies explained (both test artifacts): ws leg failed because f801 was reaped mid-run by the same plant; grpc leg truncated (9.9/10 MB) by curl `--max-time 35` under 4-way contention. Rerun with live account + longer windows.
+
+## Live round 2026-10-09 (test box 202.155.17.126, full plan execution) — VERDICT
+
+- **F1:** 16/16 units active, 0 failed, key modes exact (600/600/640/644), sysctl exact. `/etc/xray/.key` absent (no API yet — installed in F16, removed after). PASS.
+- **F2:** TLS 1.3 self-signed (expected), 80→200, 777 TCP-open, `/`→101 (WS catch-all). PASS.
+- **F3:** SSH TUI-create ok; login 22+3303 ok (cosmetic chdir msg); dropbear banners exact; `id` rc=1 no output; sftp closed; `-L` carries HTTP 200; `-X` refused; OHP 9088 open. PASS.
+- **F4:** vmess/vless/trojan WS-TLS 3/3 checksums match + NonTLS match + alias 400/400. Rotation fntest→fntest1 + colors cycling per account. PASS.
+- **F5:** gRPC 3/3 transfers match (services black/ivory/orchid across both domains). PASS.
+- **F6:** HU 3/3 + XHTTP 3/3 match; no `/vmspl` anywhere. PASS.
+- **F7:** WG 2 accounts endpoints rotate + ping 10.66.66.1 ~26ms w/ handshake+transfer (initial 100% loss was stale interface state, clean cycle green); Noobz 101 on 8080 + TLS alert on 8443 (full login needs official client — known); SlowDNS loopback proof (dnstt-client built from fork, `begin session` + SSH banner through :5300); OpenVPN 1194 live-reject + 2200 silent pre-auth; L2TP control-only (known). WG/Noobz/L2TP cards now `Domains` (Fix 468). PASS per known-limitation notes.
+- **F8:** empty/dup/0 guards proven; JSON `level:0`; rotation proven. PASS.
+- **F9:** SSH lock (2 sources: lab-IP + WG-tunnel-IP) → `passwd -L`, due file, sweeper auto-lift proven sticky after log window aged (10-min R12 window caused 2 relocks — expected, not a bug). Xray multilogin BLOCKED-by-topology (Found 489). PASS (SSH) / documented (xray).
+- **F10:** grpc full delete + audit line + valid JSON (quota-grpc via service loop); ws via kill-ws file pass (Found 491 correction). PASS.
+- **F11:** extend +10d exact; phantom delete clean (stderr now silenced, Fix 467 deployed? repo-only — box runs old delete scripts; re-verify after deploy); pwd change + new-pw login ok. PASS.
+- **F12:** planted f802 reaped, f801 intact, 1 restart, JSON valid, 0 failed. PASS. (Note: live plan says "run xp from menu-system" but no such menu entry — xp is cron/CLI; plan text slightly off.)
+- **F13:** all 11 menus 0/99/empty/EOF clean, no crash/hang/shell-drop; WG/Noobz explicit invalid messages; dm-menu/bmenu re-show silently (allowed). Empty locked-list: `locked-xray-*` is a LOCK ACTION not a viewer — phantom input exposed Found 492. PASS (with 492 fixed).
+- **F14:** nip.io add (nginx ok, SAN all 3), rotation dom1/2/3 across all 3 domains, nip.io traffic 200, remove #2 only (fntest1 untouched), server_name rebuilt, nginx -t clean. PASS.
+- **F15:** no creds → exact fail-safe message + 3.7MB archive kept 0600 + exit 0. PASS.
+- **F16:** API installed via menu-api (service active, .key 0600); 401/401/ping/traversal-404/unsupported-error/CRUD/5-parallel/JSON-valid; uninstalled after (service gone; note: uninstall keeps `.key` + `menu-api` — api-repo scope, logged). PASS.
+- **F17:** XHTTP traffic+cards proven (F6); `core=xhttp`/legacy-alias via API not exercised — partial.
+- **F18:** Pages blocked → gate exit 0 via GitHub; hosts restored; 6/6 content equal. PASS.
+- **F19:** covered by Fix 466 (repo) + content equality; box runs pre-466 gates (deploy pending). Partial.
+- **F20:** concurrent limiters → 4/4 JSON valid + 0 failed. PASS.
+- **F21:** server_name correct, 36 ALT live, nginx -t clean; SSH table check inconclusive (banner matched first — recheck next round).
+- **LB:** 4-way concurrent 10MB: ws/hu/xh byte-identical + grpc identical sequential (concurrent grpc truncated by curl max-time twice — client-side artifact, prefix byte-identical). PASS.
+- **Findings this round:** 487 (delete stderr leak) → Fix 467; 488 (tunnel cards singular) → Fix 468; 489 (xray IP-limit unreachable, DEFERRED — needs PROXY protocol); 490 (retracted by 491); 491 (kill-ws enforces WS quota — correction, no code); 492 (phantom lock) → Fix 469.
+- **Box-as-found:** 0 test accounts, JSONs valid, 0 failed units, server_name 2-domain, wg 0 peers active, no artifacts (self-match lesson: never `pkill -f` a pattern appearing in your own rm/scp args — use `pkill -x`).
+- **Lab notes:** both VM images had aborted journals (unclean Oct-8 host shutdown) — rebuilt from base; kill stale QEMUs before reboot (port conflicts); QEMU `-nographic`+`-daemonize` incompatible; VM needs `-device virtio-rng-pci` + `media=cdrom` seed.

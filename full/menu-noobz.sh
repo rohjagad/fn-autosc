@@ -170,6 +170,18 @@ if ! noobz_add_user "$user" "$pass" "$masaaktif"; then
     sleep 2
     return
 fi
+# No primary/default domain: card lists the whole rotation set (any entry works).
+_alldom="$domain"
+if [ -s /etc/xray/domains ]; then
+    _nbseen="|$domain|"
+    while IFS= read -r _nbd || [ -n "$_nbd" ]; do
+        _nbd=$(echo "$_nbd" | tr -d '[:space:]')
+        if [ -n "$_nbd" ] && [[ "$_nbseen" != *"|$_nbd|"* ]]; then
+            _alldom="$_alldom, $_nbd"
+            _nbseen="$_nbseen$_nbd|"
+        fi
+    done < /etc/xray/domains
+fi
 expi=`date -d "$masaaktif days" +"%d-%b-%Y"`
 echo "### ${user} ${expi}" >>/etc/funny/.noob
 clear
@@ -179,7 +191,7 @@ TEKS="
 ----------------------------
 NoobzVPN Account
 ----------------------------
-Hostname        : $domain
+Domains         : $_alldom
 Username        : $user
 Password        : $pass
 ----------------------------

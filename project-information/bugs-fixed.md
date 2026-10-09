@@ -3028,3 +3028,25 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 466 (Found 486):** 180 berkas gate ditambah `|| { echo "Permission data invalid."; exit 1; }` pada assignment `REMAINING_DAYS` — status keluar subshell yang selama ini terabaikan kini menutup skrip.
 - **Verified local:** tanggal sampah dulu lolos (fail-open terbukti) kini `Permission data invalid.` + exit 1; tanggal valid/expired/lifetime tidak berubah (2030 ok, 2000 expired, lifetime ok). `bash -n` lolos 180/180; zips repacked (0755).
+### Fix 467 - Stderr hapus-fiktif dibungkam (Found 487)
+
+- **Fix 467 (Found 487):** tambah `2>/dev/null` pada baca kartu di 8 berkas `delete-*` (full+lite); pesan `User not found` tetap, baris grep hilang.
+- **Verified live (test box):** `delete notarealuser999` bersih; zips repacked (0755).
+
+### Fix 468 - Kartu Noobz/L2TP jadi Domains (Found 488)
+
+- **Fix 468 (Found 488):** kartu Noobz + L2TP bangun daftar dedup (`$domain` + `/etc/xray/domains`) dan tampil `Domains :` penuh; tanpa counter baru (kartu tanpa link — semua entri valid, tak ada yang diutamakan). Full-only (lite tak punya Noobz/L2TP).
+- **Verified live (test box):** akun `livetest_nb02` + `livetest_l201` tampil `Domains : fntest..., fntest1...`; zips repacked (0755).
+
+### Deferred - Found 489/490: enforcement xray di balik nginx/V2Ray (putusan, bukan Fix)
+
+- **Deferred (Found 489: IP-limit xray; Found 490: kuota WS):** keduanya butuh perubahan arsitektur (PROXY protocol nginx→xray untuk IP; pemindahan WS ke core ber-counter untuk kuota), bukan diff kecil. Buktinya live dan tercatat; perilaku SSH (limit + lock + auto-lift) dan kuota grpc/http/xhttp terbukti jalan dan menutup kebutuhan enforcement.
+- **Alasan deferral (gate §5.5):** menyentuh 3 template + semua inbound + nginx live; salah langkah memutus semua trafik TLS. Wajib sesi khusus dengan snapshot + jendela traffic, bukan tembakan dalam run ini.
+
+### Koreksi - Found 490 ditarik (Found 491)
+
+- **Koreksi (Found 491):** Found 490 salah simpul — enforcement kuota WS jalan via `kill-*`, bukan `quota-*`. Deferral 489/490 di atas dikoreksi: yang deferred hanya Found 489 (IP-limit xray); kuota semua transport (termasuk WS) terbukti enforced. Tak ada perubahan kode.
+### Fix 469 - Guard kunci-fiktif (Found 492)
+
+- **Fix 469 (Found 492):** 8 berkas `locked-xray-*` ditambah guard `grep -qwE "^### $name" ... || { echo "User $name not found."; sleep 2; exit 0; }` tepat setelah resolusi nama (sebelum kartu/mutasi) — pola guard Fix 306.
+- **Verified live (test box):** kunci `notarealuser999` → `not found` ×1, tanpa kartu, tanpa stderr, timestamp restart service sama (tak restart); kunci akun nyata `livetest_dom1` tetap jalan (kartu Locked, marker keluar JSON, `.locked` tertulis); zips repacked (0755).

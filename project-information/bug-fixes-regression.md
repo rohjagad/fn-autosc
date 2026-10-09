@@ -2834,3 +2834,30 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | N/A — menolak hanya data rusak yang sebelumnya lolos diam-diam. |
 | **Over-engineering** | Satu klausa `||` per berkas; tanpa helper/lib baru. |
 | **vs the source** | Warisan V23/1.20 (fungsi sama, tanpa guard); divergensi untuk fail-closed sesuai Fase 17. |
+
+## 252. Phantom-Delete Stderr Silence — Four Checks (October 9, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Redirect stderr saja; alur tolak + tanpa-restart tak berubah. |
+| **Over-strictness** | N/A. |
+| **Over-engineering** | Satu redirect per berkas. |
+| **vs the source** | Warisan tanpa guard; divergensi kosmetik aman. |
+
+## 253. Tunnel Cards Domains List — Four Checks (October 9, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Daftar dibangun dari sumber yang sama dengan rotasi xray; tanpa counter/mutasi baru. |
+| **Over-strictness** | N/A. |
+| **Over-engineering** | Pola WG disederhanakan (tanpa seq karena kartu tanpa link). |
+| **vs the source** | Referensi kartu tunggal; divergensi atas aturan operator (kartu = Domains). |
+
+## 254. Phantom-Lock Guard — Four Checks (October 9, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Guard sebelum mutasi; akun nyata terkunci normal (kontrol live). Pola `-wE "^### $name"` sama dengan delete (tanpa false-positive prefix). |
+| **Over-strictness** | N/A — menolak hanya nama yang memang tak ada. |
+| **Over-engineering** | Satu baris per berkas. |
+| **vs the source** | Warisan tanpa guard; divergensi sekelas Fix 306. |

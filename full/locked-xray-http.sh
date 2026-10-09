@@ -180,6 +180,7 @@ ${separator}"
         fi
     fi
     [ -z "$name" ] && exit 0
+    grep -qwE "^### $name" "/etc/xray/json/upgrade.json" 2>/dev/null || { echo "User $name not found."; sleep 2; exit 0; }
 else
     clear
     echo ""

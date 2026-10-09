@@ -191,7 +191,7 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/xhttp.json")
     x-xhttp
     else
         exp=$(grep -wE "^### $user" "/etc/xray/json/xhttp.json" | cut -d ' ' -f 3 | sort | uniq | head -n 1)
-    proto=$(grep -E "^(Protokol|Protocol) *:" "/var/log/create/xray/xhttp/${user}.log" | awk '{print $NF}'); proto=${proto^^}
+    proto=$(grep -E "^(Protokol|Protocol) *:" "/var/log/create/xray/xhttp/${user}.log" 2>/dev/null | awk '{print $NF}'); proto=${proto^^}
 
     if [ -n "$exp" ]; then
         sed -i "/^### $user $exp/ {N;d}" /etc/xray/json/xhttp.json
