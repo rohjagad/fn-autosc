@@ -189,6 +189,11 @@ rm -f /root/diamond.sh
 # dropbear:109. Lite does not run dropbear, so the frontend has no backend;
 # disable it as intended by Fix 166.
 systemctl disable --now haproxy >/dev/null 2>&1 || true
+# Dropbear, same story one layer deeper: the early disable (above, after
+# package.sh) does not stick — some later apt run reinstalls/re-enables it and
+# it dies on port 22 forever (Found 495, one permanent --failed unit). Disable
+# again here, after every installer that could have pulled it.
+systemctl disable --now dropbear >/dev/null 2>&1 || true
 
 # Fix Xray setelah seluruh instalasi selesai.
 wget --no-check-certificate ${hosting}/fix/fix.sh >> /dev/null 2>&1

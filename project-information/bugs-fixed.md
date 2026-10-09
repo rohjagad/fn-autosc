@@ -3081,3 +3081,6 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Follow-up (Found 494):** `cek-xray-{grpc,http,xhttp}.go` (full+lite, 6 berkas) probe API sekali di depan; bila mati tulis `Traffic stats: unavailable (xray API unreachable) — online check skipped.` dan berhenti — tak ada baris 0 palsu. Penempatan pertama (di dalam loop, setelah skip) terbukti tak terjangkau; dipindah ke early-return.
 - **Verified live (test box):** biner disembunyikan → warning muncul; biner ada → jalan normal tanpa warning. Biner recompile (`CGO_ENABLED=0`, 2.3 MB) + hash terverifikasi dua sisi; zips repacked (0755).
+### Fix 473 - Disable akhir dropbear di lite (Found 495)
+
+- **Fix 473 (Found 495):** tambah `systemctl disable --now dropbear` di akhir `installer/lite.sh` (samping disable-haproxy Fix 166), setelah semua aktivitas apt. Verified live: `disabled` + `--failed` 0 dan bertahan.

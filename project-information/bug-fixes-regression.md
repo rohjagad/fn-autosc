@@ -2906,3 +2906,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | N/A — warning + stop, bukan penolakan. |
 | **Over-engineering** | Satu probe + early return per tool; tanpa dependensi baru. |
 | **vs the source** | Warisan skip-diam; divergensi untuk kejujuran tampilan (aturan F21/Fase 24). |
+
+## 259. Lite Dropbear Late Disable — Four Checks (October 9, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Full tak tersentuh (ssh.sh sudah pindahkan port); lite tak pakai dropbear sama sekali. |
+| **Over-strictness** | N/A. |
+| **Over-engineering** | Satu baris ikut preseden Fix 166; tanpa logika baru. |
+| **vs the source** | Referensi tak punya konsep disable-ini (era V2Ray/dropbear-penuh); divergensi khusus lite yang memang memangkas SSH tooling. |
