@@ -61,7 +61,7 @@
     if [ "$EXPIRED_DATE" = "lifetime" ]; then
         REMAINING_DAYS="lifetime"
     else
-        REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
+        REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE") || { echo "Permission data invalid."; exit 1; }
     fi
     if [ "$REMAINING_DAYS" != "lifetime" ] && [ "$REMAINING_DAYS" -lt 0 ]; then
         echo "Permission expired."
@@ -179,7 +179,7 @@ done
         echo -e "\033[0;31mValue must be a whole number greater than 0.\033[0m"
         read -p "Active Time (days): " masaaktif || exit 1
     done
-    read -p "Input UUID (Empty Default): " uuid
+    read -p "Input UUID (Empty = Auto): " uuid
 
 # Validasi UUID
 if [[ -z "$uuid" ]] || ! [[ "$uuid" =~ ^[A-Za-z0-9_.-]+$ ]]; then

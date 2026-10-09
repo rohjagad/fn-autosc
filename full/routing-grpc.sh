@@ -61,7 +61,7 @@
     if [ "$EXPIRED_DATE" = "lifetime" ]; then
         REMAINING_DAYS="lifetime"
     else
-        REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
+        REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE") || { echo "Permission data invalid."; exit 1; }
     fi
     if [ "$REMAINING_DAYS" != "lifetime" ] && [ "$REMAINING_DAYS" -lt 0 ]; then
         echo "Permission expired."
@@ -680,7 +680,7 @@ systemctl restart xray@grpc
 clear
 echo ""
 echo ""
-echo -e "Success Back To Default Routing"
+echo -e "Success Back To Normal Routing"
 }
 
 restore-route() {
@@ -752,7 +752,7 @@ ${separator}
 
 1. Add Account
 2. Create Rules
-3. Back To Default Routing
+3. Back To Normal Routing
 4. Back To Menu
 ${blue_sep}
 Press CTRL + C to Exit

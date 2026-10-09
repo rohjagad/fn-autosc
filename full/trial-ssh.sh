@@ -48,7 +48,7 @@ create_ssh_user() {
         return 1
     fi
 
-    # The card advertises "Limit IP: 1"; without this file limit-ip-ssh defaults
+    # The card advertises "Limit IP: 1"; without this file limit-ip-ssh falls back to
     # the account to a limit of 2, so the printed limit would never match what is
     # enforced (addssh does write it).
     mkdir -p /etc/xray/limit/ip/ssh

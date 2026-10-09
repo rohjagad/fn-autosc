@@ -2816,3 +2816,21 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | N/A. |
 | **Over-engineering** | Pola rotasi yang sama dengan xray; baris mati dibuang. |
 | **vs the source** | Konsisten caption backup (Fix 432) dan aturan rotasi. |
+
+## 250. Operator-Visible Default Wording — Four Checks (October 9, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Hanya string tampilan + komentar; logika nol berubah. Routing `Normal` bukan istilah domain. |
+| **Over-strictness** | N/A (kosmetik). |
+| **Over-engineering** | Ganti kata sebaris; tanpa helper. |
+| **vs the source** | Referensi memang memakai kata itu; divergensi atas arahan operator (tanpa Default di mana pun). |
+
+## 251. Expiry Fail-Closed Guard — Four Checks (October 9, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Guard hanya aktif bila subshell gagal (sebelumnya string sampah); jalur valid/expired/lifetime teruji identik. |
+| **Over-strictness** | N/A — menolak hanya data rusak yang sebelumnya lolos diam-diam. |
+| **Over-engineering** | Satu klausa `||` per berkas; tanpa helper/lib baru. |
+| **vs the source** | Warisan V23/1.20 (fungsi sama, tanpa guard); divergensi untuk fail-closed sesuai Fase 17. |

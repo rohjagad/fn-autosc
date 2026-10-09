@@ -3019,3 +3019,12 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Follow-up (Found 483):** kartu list domain 1 kartu = 1 domain, jadi label kembali singular `Domain :` — hanya di menu list, hanya kosmetik. Akun kartu tetap `Domains`.
 - **Verified live (test box):** tampil `Domain : fntest...`.
+### Fix 465 - Kata Default terlihat operator (Found 485)
+
+- **Fix 465 (Found 485):** `Back To Default Routing` → `Back To Normal Routing` (8 berkas routing); `Input UUID (Empty Default)` → `Input UUID (Empty = Auto)` (24 berkas add); 2 komentar (`defaults` → netral) agar grep masa depan bersih.
+- **Verified live (test box):** teks menu + prompt terbukti via TUI walk; zips repacked (0755).
+
+### Fix 466 - Fail-closed tanggal izin rusak (Found 486)
+
+- **Fix 466 (Found 486):** 180 berkas gate ditambah `|| { echo "Permission data invalid."; exit 1; }` pada assignment `REMAINING_DAYS` — status keluar subshell yang selama ini terabaikan kini menutup skrip.
+- **Verified local:** tanggal sampah dulu lolos (fail-open terbukti) kini `Permission data invalid.` + exit 1; tanggal valid/expired/lifetime tidak berubah (2030 ok, 2000 expired, lifetime ok). `bash -n` lolos 180/180; zips repacked (0755).

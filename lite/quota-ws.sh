@@ -61,7 +61,7 @@ EXPIRED_DATE=$(echo "$MATCH" | awk '{print $4}')
 if [ -n "$SKIP_AUTH" ] || [ "$EXPIRED_DATE" = "lifetime" ]; then
     REMAINING_DAYS="lifetime"
 else
-REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
+REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE") || { echo "Permission data invalid."; exit 1; }
 fi
 if [ "$REMAINING_DAYS" != "lifetime" ] && [ "$REMAINING_DAYS" -lt 0 ]; then
     echo "Permission expired."

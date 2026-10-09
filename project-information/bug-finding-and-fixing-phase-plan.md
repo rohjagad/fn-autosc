@@ -272,7 +272,7 @@ Fase 27: Review Kriptografi Final (setelah semua perubahan)
 
 - **Komponen Target:** `full/menu.sh`, `lite/menu.sh`, `full/menu-x.sh`, `full/menu-ssh.sh`, `full/x-*.sh`, `lite/x-*.sh`.
 - **Finding (Metodologi Penemuan):**
-  - Audit ketersediaan Opsi `0`: periksa setiap blok `case $aws in` di seluruh submenu untuk memastikan opsi `0` terdefinisi dan kembali ke menu induk (`grep -n 'read -p "Input option' full/menu-*.sh full/x-*.sh`).
+  - Audit ketersediaan Opsi `0`: periksa setiap blok `case $aws in` di seluruh submenu untuk memastikan opsi `0` terdefinisi dan kembali ke menu induk (`grep -n 'read -p "Input option' full/menu-*.sh full/x-*.sh`, lalu cocokkan `0|00` TANPA kurung-tutup — varian `0|00|7)` ada dan sah, pola grep `0|00)` memberi false-positive).
   - Uji retensi submenu: eksekusi opsi di dalam submenu transport (misal: list, create, check), periksa apakah setelah aksi selesai operator tetap berada di submenu atau terlempar keluar ke shell prompt (Found 294, 299).
   - Periksa lokasi tampilan versi: pastikan versi XTLS dan Dropbear tidak memadati menu utama melainkan tampil di submenunya masing-masing (Decision 26, 27).
 - **Fixing (Standar Perbaikan):**
@@ -417,7 +417,7 @@ Fase 27: Review Kriptografi Final (setelah semua perubahan)
 
 - **Komponen Target:** semua `curl`/`wget` di gate lisensi, `send_log` Telegram (`quota-*.sh:80`), `restore-ftp.sh` (`icanhazip`), `diamond.sh` (`ipinfo.io`), fetch `reinstall.sh` di `menu-system.sh`, `hosting=` raw triangle.
 - **Finding (Metodologi Penemuan):**
-  - Pindai fetch tanpa `--max-time`: gate 5-menitan yang hang melewati interval; kirim Telegram tanpa timeout menggantung daemon.
+  - Pindai fetch tanpa batas waktu (`--max-time` maupun `-m`; `-m 10` sudah terhitung timeout, bukan temuan): gate 5-menitan yang hang melewati interval; kirim Telegram tanpa timeout menggantung daemon.
   - Pindai sumber tunggal tanpa fallback (`icanhazip`, `ipinfo.io`, `bin456789/reinstall` tanpa pin/checksum, `request.sh` URL 404).
   - Uji host mati/lambat (DROP sementara di KVM): skrip wajib gagal-cepat dengan pesan jelas, bukan hang; instalasi setengah jalan wajib dilaporkan bukan sukses.
   - Bandingkan dengan referensi: gate tanpa timeout adalah warisan; race Pages+GitHub adalah pola kanonis baru (Fase 17).

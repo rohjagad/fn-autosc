@@ -62,7 +62,7 @@
     if [ "$EXPIRED_DATE" = "lifetime" ]; then
         REMAINING_DAYS="lifetime"
     else
-        REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE")
+        REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE") || { echo "Permission data invalid."; exit 1; }
     fi
     if [ "$REMAINING_DAYS" != "lifetime" ] && [ "$REMAINING_DAYS" -lt 0 ]; then
         echo "Authorization has expired."
@@ -339,7 +339,7 @@ chown root:www-data /etc/funny/.restore.key 2>/dev/null || true
 # placeholder, then re-append the standard outbounds/routing/stats block below.
 # The config is already at the path the service reads, so nothing is moved.
 cd /etc/xray/json
-# A restored archive can still carry the committed defaults; replace all of them
+# A restored archive can still carry the committed built-in values; replace all of them
 # (not just "rerechan-store") with per-install random values, as the installer does.
 for def in "rerechan-store" \
            "cfbbaafc-8d52-450c-9fb0-145bc8221e6d" \
