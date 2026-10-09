@@ -1,6 +1,6 @@
 # Live-Testing Phase Plan
 
-Live test for `fn-autosc` on VPS `157.10.253.95` (domain `autosc.rohcuan.dpdns.org`, SSH port `3303`). Previous VPS `202.155.17.126` is dead (no route); all references below mean the new IP unless stated.
+Live test for `fn-autosc` on test VPS `202.155.17.126` (domain `fntest.rohcuan.dpdns.org`; fresh full installs answer on SSH port `22`, panel installs move operator SSH to `3303`). The box is test-only and may be wiped/reinstalled at will (proven 3× via `bin456789/reinstall`, Debian 12 + panel from `main` HEAD in ~20 min). Live/prod VPS `157.10.253.95` rejects our credentials — untouched, out of scope.
 
 Two test channels. Every phase uses both:
 
@@ -135,7 +135,7 @@ Each phase below lists: **Goal**, **K** (client traffic), **S** (menu walk), **P
 ### Fase 7: Tunnels (WireGuard, Noobz, SlowDNS, L2TP, OpenVPN)
 
 - **Goal:** each tunnel connects (or fails only for documented reason).
-- **K:** WG: `wg-quick up`, ping `10.66.66.1`; create 2 WG accounts sequentially and confirm endpoints + config URLs rotate domains (same `.domainseq` as xray). WARP: after setup, exactly one `### WARP` block survives restart with keepalive + IPv4 endpoint. Noobz on 8080/8443 with payload auth. SlowDNS via UDP 53 (needs public NS delegation — note if skipped; server-side proof via VPS-loopback tunnel is acceptable when the lab filters TXT). L2TP: SA forms (cloud kernel has no PPP data path — note if control-only). OpenVPN TCP 1194 + UDP 2200, TLS handshake ok.
+- **K:** WG: `wg-quick up`, ping `10.66.66.1`; create 2 WG accounts sequentially and confirm endpoints + config URLs rotate domains (same `.domainseq` as xray). WARP: after setup, exactly one `### WARP` block survives restart with keepalive + IPv4 endpoint. Noobz on 8080/8443 with payload auth (full login needs the official client — proven partial: ports open, unauthenticated use refused). SlowDNS via UDP 53 (needs public NS delegation; lab filters TXT, so remote is unprovable here — VPS-loopback tunnel PROVEN 2026-10-10: dnstt-client → `:5300`, same session id on client + server journal). L2TP: control-plane only — no `/dev/ppp` on box or cloud kernel and no IPsec, so no data path can exist here (not a panel defect). OpenVPN TCP 1194 + UDP 2200 full logins PROVEN 2026-10-10 via KVM (tun IPs, ping, SSH-auth through tunnel; shared-cert + PAM password).
 - **S:** `menu-wg`, `menu-noobz`, `menu-dnstt` → create `livetest_*` via TUI; card per tunnel complete and pause-readable. WG card shows `Domains` list; SlowDNS info shows port `53` (user-facing), never `5300`.
 - **PASS:** WG + Noobz + OpenVPN live; SlowDNS/L2TP judged per known-limitation note, not as fail.
 
@@ -186,7 +186,7 @@ Each phase below lists: **Goal**, **K** (client traffic), **S** (menu walk), **P
 - **Rotation semantics (operator rule):** rotation is link-text insertion ONLY — the rotated domain is substituted into link hosts on the card; no connection/server-side change (all domains terminate on the same VPS/nginx). There is NO default domain: the installer domain is the primary entry, extras round-robin via `/etc/xray/.domainseq` with no implicit default. All account cards (TUI, Telegram, `.log`) show `Domains :` (full list) only, never a `Domain :` line.
 - **Goal:** extra domains add cleanly, rotation spreads, TLS never bricks.
 - **K:** add nip.io-style or operator test domains pointing here (proven set: primary + 2 extras); `openssl s_client` shows each in SANs after the auto self-sign; decode N sequential links to prove round-robin across ALL domains with no stickiness; remove extras one by one; LE cert restored byte-identical after (back up `/etc/xray/xray.crt/.key` before, restore + reload after).
-- **S:** `dm-menu`: options 1–6 present; `bad domain` rejected, files unchanged; add validates + dedupes; list shows one shared-framed card per domain with matching protocol counts; remove empties the file and restores single `server_name` (no `.tmp` leftovers). Options 4–6 pick a domain first — test ONLY the cancel path (invalid choice returns clean, no issuance ever runs in tests: LE rate limits); unpointed domains print the skip notice instead of failing issuance.
+- **S:** `dm-menu`: options 1–6 present; `bad domain` rejected, files unchanged; add validates + dedupes; list shows one shared-framed card per domain with matching protocol counts; remove empties the file and restores single `server_name` (no `.tmp` leftovers). Options 4–6 pick a domain first — cancel paths verified clean (no issuance); ONE real Acme issuance (option 4, IPv4) executed 2026-10-10 on the test box and SUCCEEDED (LE 90-day cert, public chain verifies, traffic checksum match) — repeat sparingly (LE rate limits), always from a cancel-safe state.
 - **PASS:** add/remove/list round-trip clean; cancel paths write nothing; cert identical after restore; nginx -t clean throughout.
 
 ### Fase 15: Telegram backup + web restore
@@ -194,7 +194,7 @@ Each phase below lists: **Goal**, **K** (client traffic), **S** (menu walk), **P
 - **Goal:** backup arrives, restore needs the key.
 - **K:** none (server-side + Telegram client).
 - **S:** `bmenu` → backup: zip arrives as Telegram document with Username/IP/Date caption, no public link. Without bot creds the backup must fail safe: archive staged, clear `Telegram credentials are not configured` message, archive KEPT at `/root/backup.zip`, exit 0, no hang. `menu-bot` option 3 shows `Current interval` parsed from the live cron, accepts 1–24 (`0`/text/25+ re-asked, blank keeps), writes a single `0 */h` line. Restore page `:855/upload.php`: no token → 401, wrong token → 401, right token (`/etc/funny/.restore.key`) → extracted; restored `.key` back to `0600`.
-- **PASS:** 401/401/ok, modes correct. Restore success screens show `Username` (same identity as the backup caption), never a singular `DOMAIN` row. (Destructive: snapshot first, restore to test box if possible.)
+- **PASS:** 401/401/ok, modes correct. Real-token round-trip PROVEN 2026-10-10 (fresh backup restored onto itself: SUCCESS, 0 hash mismatches, services green). Restore success screens show `Username` (same identity as the backup caption), never a singular `DOMAIN` row. (Destructive: snapshot first; safe form is the same-state round-trip.)
 
 ### Fase 16: REST API suite (FN-API)
 
