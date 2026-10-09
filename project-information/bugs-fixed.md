@@ -3072,3 +3072,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Koreksi (Fix 472):** overwrite `$remote_addr` di-revert total (repo via checkout, live byte-identik snapshot + reload) — overwrite membutakan instalasi Cloudflare (semua user = IP edge → false lock massal), melanggar trade-off yang diputuskan owner di Decision 24 (spoof-evasion diterima; false lock tidak). Yang dipertahankan: hitung IP-dari-access-log + max() statsonline (jalan untuk trafik jujur di semua topologi).
 - **Status:** lock proof pertama jalan di bawah overwrite; re-proof pasca-revert HIJAU (lck2, 2 IP jujur di log append → terkunci, marker keluar, `.locked` tertulis).
+### Fix 471 - Cek-xray jujur saat API mati (Found 494)
+
+- **Fix 471 (Found 494):** `cek-xray-ws.sh` (full+lite) tulis baris eksplisit `Traffic stats: unavailable (xray API unreachable) — 0 shown is not measured.` bila probe API gagal, bukan 0 diam-diam; `grep` kartu protokol dibungkam (`2>/dev/null`, sekelas Found 487).
+- **Verified live (test box):** biner ada → baris normal + kuota riil; biner disembunyikan → baris warning muncul; biner dikembalikan. `.go` sekelas antre recompile. Zips repacked (0755).
