@@ -142,3 +142,13 @@ Schedules observed live: `backup 0 0,6,12,18`, `xp 0,15,30,45`,
 - Manual lock (`locked-xray-ws` #17) on `livetest_mlk1`: Locked card, marker out of JSON, `.locked` written, NO autounlock due file. Survived `limit-ip-ws` sweep (STILL-LOCKED) → indefinite proven.
 - Unlock #13: `Unlocked` card (Status: Unlocked), marker restored 1×. Second unlock: `No locked accounts found to unlock.`, marker count stays 1 (no duplicate JSON). Skip-message proven.
 - Account deleted via TUI after. Only F9-xray end-to-end remains blocked (Found 489); 16/16 inbounds bind 127.0.0.1 — verified no direct-traffic shortcut exists.
+
+## Canary 489 2026-10-09 — PROXY protocol impossible on this nginx
+
+- Patched live `nginx.conf` (4 trojan-ws locations) + `ws.json` (25432 inbound `acceptProxyProtocol`), snapshot first. `xray -test` OK, `nginx -t` emerg: unknown directive. Minimal-conf proof: binary lacks it. Reverted from snapshot, both tests green, no reload ever happened. 489 stays deferred with exact blockers (nginx replacement or stream-frontend redesign).
+
+## Fix 472 proof 2026-10-09 — xray multilogin lock end-to-end (test box)
+
+- `livetest_lck1` (vless-grpc, limit-IP 1): log tunjukkan 2 IP (`112.215.153.156` VM + `127.0.0.1` lokal); `limit-ip-grpc` → marker keluar JSON + `.locked` tertulis. F9-xray PASS. Statuses: statsonline tetap 1 (API buta, sesuai teori); enforcement kini via log.
+- Spoof control (XFF 9.9.9.9, trafik jalan): log catat IP asli — overwrite `$remote_addr` unspoofable.
+- Koreksi peta: 112.215.x.x adalah egress NAT lab sendiri (berubah-ubah antar sesi: .139.236 → .172.26 → .153.156), BUKAN operator lain. Histeria "intruder" dicabut; satu-satunya sesi asing terkonfirmasi hanya root pts dari 112.215.240.106.

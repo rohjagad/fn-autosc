@@ -2861,3 +2861,21 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | N/A — menolak hanya nama yang memang tak ada. |
 | **Over-engineering** | Satu baris per berkas. |
 | **vs the source** | Warisan tanpa guard; divergensi sekelas Fix 306. |
+
+## 255. SSH Login Ghost Filter — Four Checks (October 9, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Filter hanya buang nama tanpa akun; akun ada (termasuk root/expired) tetap tampil. |
+| **Over-strictness** | N/A. |
+| **Over-engineering** | Dua baris guard + hitung total jujur; tanpa helper. |
+| **vs the source** | Warisan baca-log-mentah; divergensi untuk kejujuran tampilan (aturan plan F21). |
+
+## 256. Xray IP-Limit via Access Log — Four Checks (October 9, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Header overwrite hanya memurnikan IP yang xray catat; max() preservasi perilaku API lama; limit 0/malformed tetap unlimited (Bug 68). |
+| **Over-strictness** | Window 10 menit (R12) cegah kunci basi; evasion via spoof tertutup (terbukti). |
+| **Over-engineering** | Satu blok awk per daemon + replace mekanis 50 header; tanpa inbound/daemon baru. |
+| **vs the source** | Referensi tak punya pola ini (era V2Ray tanpa counter); divergensi atas kebutuhan enforcement + bukti live. |

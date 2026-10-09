@@ -105,7 +105,7 @@ for user in "${users[@]}"; do
 
     # Protocol (if available in custom logs)
     protocol_log_path="/var/log/create/xray/ws/${user}.log"
-    protocol=$(grep -E "^(Protokol|Protocol) *:" "$protocol_log_path" | awk '{print $NF}' 2>/dev/null)
+    protocol=$(grep -E "^(Protokol|Protocol) *:" "$protocol_log_path" 2>/dev/null | awk '{print $NF}' 2>/dev/null)
     protocol=${protocol^^}
     [[ -z "$protocol" ]] && protocol="Not available"
     echo "Protocol Account: $protocol"
@@ -115,8 +115,12 @@ for user in "${users[@]}"; do
     # (patterns also stop one username from matching another). Counters are bytes.
     uplink=$(xray api statsquery --server=127.0.0.1:10080 -pattern "user>>>${user}>>>traffic>>>uplink" 2>/dev/null | jq -r '.stat[0].value // 0' 2>/dev/null)
     downlink=$(xray api statsquery --server=127.0.0.1:10080 -pattern "user>>>${user}>>>traffic>>>downlink" 2>/dev/null | jq -r '.stat[0].value // 0' 2>/dev/null)
-    echo "Traffic Uplink: ${uplink:-0} bytes ($(format_bytes "${uplink:-0}"))"
-    echo "Traffic Downlink: ${downlink:-0} bytes ($(format_bytes "${downlink:-0}"))"
+    if ! xray api statsquery --server=127.0.0.1:10080 -pattern "user>>>${user}>>>traffic>>>uplink" >/dev/null 2>&1; then
+        echo "Traffic stats: unavailable (xray API unreachable) — 0 shown is not measured."
+    else
+        echo "Traffic Uplink: ${uplink:-0} bytes ($(format_bytes "${uplink:-0}"))"
+        echo "Traffic Downlink: ${downlink:-0} bytes ($(format_bytes "${downlink:-0}"))"
+    fi
     echo "Quota: $quota"
 
     echo -e "${separator}"

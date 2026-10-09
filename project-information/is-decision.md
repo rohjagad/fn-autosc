@@ -19,6 +19,7 @@ This document tracks intentional design decisions, configurations, and behaviors
 - **Component:** `full/limit-ip-*.sh`, `lite/limit-ip-*.sh` (transports served by V2Ray, e.g. WS on `127.0.0.1:10080`).
 - **Decision:** When the stats endpoint does not expose the Xray StatsService, the limiter prints a single `IP limit check skipped: online statistics unavailable ...` line and exits 0 instead of attempting enforcement.
 - **Reason:** V2Ray exposes no per-user online-session metric, so there is no data source to enforce WS IP limits against; pointing the Xray API client at a V2Ray port only produced `Unimplemented ... unknown service xray.app.stats.command.StatsService` responses and integer-expression errors on every 5-minute cron run. Xray-backed transports (gRPC/split/HTTP on ports 10083/10082) still enforce for real behind the same probe guard.
+- **SUPERSEDED 2026-09-25 (commit `73ace38`, engine swap; note added 2026-10-09):** V2Ray was removed — Xray now serves WS (`xray@ws` on `/etc/xray/json/ws.json`, same ports, nginx untouched) precisely because Xray exposes the per-user online stat. The probe guard above stays as harmless safety (fail-closed to skip), but its V2Ray rationale no longer applies: WS enforcement is now expected to work, limited only by source-IP visibility behind nginx (Found 489 — all inbounds see 127.0.0.1 without PROXY protocol).
 
 ## 4. Quantity Fields Reject 0 Instead of Treating It as "Unlimited"
 - **Component:** all quantity input prompts - the IP limit, quota and duration fields throughout `full/` and `lite/`.

@@ -3050,3 +3050,16 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 469 (Found 492):** 8 berkas `locked-xray-*` ditambah guard `grep -qwE "^### $name" ... || { echo "User $name not found."; sleep 2; exit 0; }` tepat setelah resolusi nama (sebelum kartu/mutasi) — pola guard Fix 306.
 - **Verified live (test box):** kunci `notarealuser999` → `not found` ×1, tanpa kartu, tanpa stderr, timestamp restart service sama (tak restart); kunci akun nyata `livetest_dom1` tetap jalan (kartu Locked, marker keluar JSON, `.locked` tertulis); zips repacked (0755).
+
+### Canary 489 - PROXY protocol DIBATALKAN (bukan Fix; bedroom-scene)
+
+- **Canary 489 (2026-10-09, test box):** 4 lokasi trojan-ws + inbound 25432 dipatch (`proxy_protocol on` + `acceptProxyProtocol`), `xray -test` LOLOS tapi `nginx -t` GAGAL: biner nginx box (`1.22.1` Debian) tak mengenal direktif `proxy_protocol` (dibuktikan via conf minimal) — modul http-proxy build ini tanpa fitur itu. File langsung di-revert dari snapshot (`nginx -t` + `xray -test` bersih, 0 sisa); daemon tak pernah reload config rusak.
+- **Kesimpulan:** IP-visibility butuh (a) ganti biner nginx, atau (b) rombak frontend ke stream/ssl_preread — keduanya operasi arsitektur di luar sesi ini. Deferral 489 tetap dengan alasan presisi ini (bukan sekadar "butuh PROXY protocol"). Bonus presisi: modul grpc nginx upstream pun tak punya proxy_protocol, jadi gRPC butuh jalur lain apa pun yang terjadi.
+### Fix 470 - Filter akun hantu di tabel login (Found 493)
+
+- **Fix 470 (Found 493):** `full/cek-login-ssh.sh` lewati nama tanpa akun (`id "$user" || continue`) di kedua loop + total dihitung dari akun ada yang terdedup lintas sumber (bukan hit log mentah).
+- **Verified live (test box):** hantu hilang (tinggal root), total 3 → 1; zips repacked (0755).
+### Fix 472 - IP-limit xray via log + XFF overwrite (Found 489, deferral lifted)
+
+- **Fix 472 (Found 489):** 50 header `X-Forwarded-For` (3 template + live) dari append (`$proxy_add_x_forwarded_for`) jadi overwrite (`$remote_addr`); 8 `limit-ip-*` hitung IP distinct dari access log (window 10 menit, pola R12) dan ambil max() dengan statsonline. Tanpa PROXY protocol (biner nginx tak kenal direktif itu — canary revert tercatat).
+- **Verified live (test box):** spoof XFF 9.9.9.9 → log tetap IP asli (unspoofable); akun limit-1 dua sumber (VM + lokal) → TERKUNCI (marker keluar, `.locked` tertulis). Canary PROXY dibatalkan bersih (dua `-t` hijau, 0 sisa).

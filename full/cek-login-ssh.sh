@@ -150,6 +150,7 @@ function show_logins {
     local rows=() user LIMIT_IP user_count l wu=8 wl=5 fmt
     for user in $(sed -n "s/.*Password auth succeeded for '\([^']*\)' from.*/\1/p" "$DB_SRC" 2>/dev/null | sort -u); do
         [ -n "$user" ] || continue
+        id "$user" &>/dev/null || continue  # skip names with no account (deleted users leave log lines)
         LIMIT_IP=$(get_limit_ip "$user" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
         user_count=$(grep -c "for '$user' from" "$DB_SRC" 2>/dev/null || echo 0)
         l="${user_count} / ${LIMIT_IP}"
@@ -159,6 +160,7 @@ function show_logins {
     done
     for user in $(sed -n "s/.*Accepted password for \([^ ]*\) from .*/\1/p" "$SSH_SRC" 2>/dev/null | sort -u); do
         [ -n "$user" ] || continue
+        id "$user" &>/dev/null || continue  # skip names with no account (deleted users leave log lines)
         LIMIT_IP=$(get_limit_ip "$user" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
         user_count=$(grep -c "for $user from" "$SSH_SRC" 2>/dev/null || echo 0)
         l="${user_count} / ${LIMIT_IP}"
@@ -195,10 +197,15 @@ function get_limit_ip {
 
 # Fungsi untuk menampilkan total aktif user
 function show_total_users {
-    local uniq_db uniq_ssh
-    uniq_db=$(sed -n "s/.*Password auth succeeded for '\([^']*\)' from.*/\1/p" "$DB_SRC" 2>/dev/null | sort -u | wc -l)
-    uniq_ssh=$(sed -n "s/.*Accepted password for \([^ ]*\) from .*/\1/p" "$SSH_SRC" 2>/dev/null | sort -u | wc -l)
-    total_users=$((uniq_db + uniq_ssh))
+    local uniq_db uniq_ssh _all _u
+    uniq_db=$(sed -n "s/.*Password auth succeeded for '\([^']*\)' from.*/\1/p" "$DB_SRC" 2>/dev/null | sort -u)
+    uniq_ssh=$(sed -n "s/.*Accepted password for \([^ ]*\) from .*/\1/p" "$SSH_SRC" 2>/dev/null | sort -u)
+    # Same honesty rule as the table: count existing accounts only, deduped across both sources.
+    _all=$(printf "%s\n%s" "$uniq_db" "$uniq_ssh" | sort -u)
+    total_users=0
+    while IFS= read -r _u; do
+        [ -n "$_u" ] && id "$_u" &>/dev/null && total_users=$((total_users+1))
+    done <<< "$_all"
     echo -e "${separator}
 ${purple}Total Active Users: ${green}$total_users${NC}
 ${separator}"
