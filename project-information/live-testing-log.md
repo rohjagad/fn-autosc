@@ -156,3 +156,7 @@ Schedules observed live: `backup 0 0,6,12,18`, `xp 0,15,30,45`,
 ## Re-proof 472 pasca-revert (append semantics, trafik jujur)
 
 - `livetest_lck2` (limit 1): log `112.215.153.156` (VM-2) + `127.0.0.1` (lokal); limiter → TERKUNCI. Fix 472 final: counting dipertahankan, overwrite dibuang, D24 patuh.
+
+## F17 alias 2026-10-09 (test box) — PASS
+
+- API installed (service active, `.key` 0600). `add-vmess core=xhttp` → success, link decodes `net=xhttp path=/purple`, 2 MB traffic checksum MATCH direct. `core=split` → success normalized to `core=xhttp` (legacy alias live). Both deleted via API (`deleted_from:["xhttp"]`), JSON clean. API uninstalled after (service gone, token/handlers/menu removed).
