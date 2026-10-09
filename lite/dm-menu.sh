@@ -545,7 +545,7 @@ domain_list() {
     _l2=$(count_mark /etc/funny/.l2tp)
     _nb=$(count_mark /etc/funny/.noob)
     for d in "${_all[@]}"; do
-        echo -e "Domains : $d"
+        echo -e "Domain : $d"
         printf "%-9s : %s\\n" "SSH" "$_ssh"
         printf "%-9s : %s\\n" "VMess" "$_vm"
         printf "%-9s : %s\\n" "VLess" "$_vl"

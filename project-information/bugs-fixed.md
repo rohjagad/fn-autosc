@@ -3015,3 +3015,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 464 (Found 484):** layar restore tampil `Username : $USERNAME` (konsisten caption backup, tersedia global dari gate); endpoint WG rotasi via `.domainseq` + kartu `Domains :`; `$ip` misterius diganti penentuan eksplisit; baris mati `domain=$(...)` dibuang.
 - **Verified live (test box):** 2 akun WG berurutan endpoint + URL beda (`fntest`/`test`); zips repacked (0755).
+### Fix 463 follow-up - Domain singular di list (Found 483)
+
+- **Follow-up (Found 483):** kartu list domain 1 kartu = 1 domain, jadi label kembali singular `Domain :` — hanya di menu list, hanya kosmetik. Akun kartu tetap `Domains`.
+- **Verified live (test box):** tampil `Domain : fntest...`.
