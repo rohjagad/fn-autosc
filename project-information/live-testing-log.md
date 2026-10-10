@@ -255,3 +255,9 @@ Schedules observed live: `backup 0 0,6,12,18`, `xp 0,15,30,45`,
 - gRPC via CDN flaky di sisi Cloudflare: 18× `HTTP/2.0→200` vs 13× `HTTP/1.1→415` untuk request identik (toggle h2-to-origin ON; flap koneksi CF, bukan config origin — tak ada baris lain). Direct gRPC 3/3 `200`.
 - Metodologi: bukti WS batch-1 dimakan truncate `kill-ws` cron (`> ws.log`, tiap 5 mnt) — diulang sinkron pasca-tick, terkumpul 00:23:12. File terbuat ulang milik www-data (temuan lama).
 - Box-as-found: 12 akun cdn utuh, 0 klien tersisa, VM kvmcdn hidup.
+
+## Edge-IP comparison for grpc-CDN flap (2026-10-11)
+- 104.17.3.81 (pinned): h2/h1.1 flap (18×200 vs 13×415), kini 6/6 415.
+- 104.17.70.206: TLS ok (cert ours) tapi frame h2 rusak di `/`, gRPC stall tanpa jejak di origin — PoP sakit/rute buruk, unusable.
+- 104.21.83.135 (edge bimbel.ruangguru.com, SNI/host tetap fntest): gRPC 3/3 `HTTP/2.0→200`, xray log IP riil. Flap = spesifik edge, bukan zone.
+- Kesimpulan: jangan pin satu edge IP; klien normal via DNS anycast dapat edge sehat otomatis. Tak ada perubahan panel (link akun pakai domain).
