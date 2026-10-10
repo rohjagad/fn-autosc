@@ -149,12 +149,14 @@ function check_quota() {
             -----------------
             " >> /etc/xray/.quota.logs
 
-            send_log "$user" "$readable_limit" "$readable_usage"
-
+            # Found 500: finish ALL file removals BEFORE the blocking
+            # Telegram call (same race as limit-ip-* vs auto-delete-*).
             rm -rf "$quota_file"
             rm -rf "$usage_file"
             rm -fr /var/log/create/xray/grpc/${user}.log
             rm -f "/etc/xray/limit/ip/xray/grpc/${user}"
+
+            send_log "$user" "$readable_limit" "$readable_usage"
         fi
     fi
 }

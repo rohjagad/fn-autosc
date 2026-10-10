@@ -155,10 +155,16 @@ for user in $username; do
             sed -i "/^### $user $exp/ {N;d}" /etc/xray/json/xhttp.json
             sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/xhttp.json
             need_restart=1
-            send_log
+            # Found 500: finish ALL state changes (.log -> .locked + unlock
+            # state) BEFORE the blocking Telegram call. auto-delete-* takes
+            # no lock; notify-first leaves a window where the card exists
+            # without JSON entry or lock, and a concurrent auto-delete run
+            # wipes the account ("Log Cleanup") - proven live 2026-10-10
+            # (lock + cleanup telegrams stamped the same second).
             mv /var/log/create/xray/xhttp/${user}.log /var/log/create/xray/xhttp/${user}.locked
             mkdir -p /etc/xray/autounlock/xhttp
             echo $(( $(date +%s) + 600 )) > /etc/xray/autounlock/xhttp/$user
+            send_log
         fi
 
     else

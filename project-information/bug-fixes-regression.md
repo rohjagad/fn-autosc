@@ -2942,3 +2942,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | Skip sementara selama state ada; sweeper menghapus state yatim sendiri (tanpa `.locked` -> state dibuang) sehingga cleanup tertunda, bukan batal. |
 | **Over-engineering** | 2 blok kecil (baca dir + 1 cek loop) per berkas, pola grep sama dengan cek `.locked` di sebelahnya. |
 | **vs the source** | Upstream tak punya konsep ini; guard khusus panel. |
+
+## 263. Notify-Last Reorder — Four Checks (October 10, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Urutan Anzeige saja; kondisi, pesan, restart, dan file yang ditulis sama persis. Lock/kuota/delete tetap bekerja (verified live). |
+| **Over-strictness** | N/A — tidak ada penolakan baru. |
+| **Over-engineering** | Pindah baris + komentar; nol logika baru di 24 berkas. |
+| **vs the source** | Upstream tak punya daemon/notify ini; reorder khusus panel. |

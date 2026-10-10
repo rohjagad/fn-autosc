@@ -3093,3 +3093,6 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 ### Fix 499 - Auto-delete lewati lock-in-flight (Found 497, lapis kedua)
 
 - **Fix 499 (Found 497):** 8 berkas (`auto-delete-*`, full + lite, 4 transport): pengguna dengan state auto-unlock pending (`/etc/xray/autounlock/<t>/user`) bukan orphan — di-skip meskipun `.locked` sesaat hilang. Multilogin = lock, tidak pernah delete. Verified live: state mangsa (.log ada, JSON kosong, `.locked` nihil) + state -> SKIP + pesan lock-in-flight, kartu + kuota selamat; tanpa state -> cleanup normal tetap jalan.
+### Fix 501 - Mutasi dulu, notifikasi terakhir (Found 500)
+
+- **Fix 501 (Found 500):** 24 berkas (`limit-ip-*`, `kill-*`, `quota-*`, full + lite, 4 transport): seluruh mutasi file (hapus JSON, `mv` .locked, tulis state, hapus kuota/kartu/limit) SELESAI SEBELUM `send_log`. Jendela orphan tertutup (tersisa mikrodetik tanpa blocking call). Verified live di test box: lock normal (JSON out + `.locked` + state), auto-delete skip, unlock 1 entri, delete bersih, 4/4 valid.

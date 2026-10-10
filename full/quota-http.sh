@@ -160,10 +160,11 @@ function cekhttp() {
             sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/upgrade.json
             total_usage=$(con "$quota_used")
             total_limit=$(con "$quota_limit")
-            send_log
+            # Found 500: removals BEFORE notify (same race as limit-ip-*).
             rm -f "$usage_file" "$quota_file"
             rm -f /var/log/create/xray/http/${user}.log
             rm -f /etc/xray/limit/ip/xray/http/${user}
+            send_log
             need_restart=1
             echo "User $user reached quota limit and has been deleted."
         fi

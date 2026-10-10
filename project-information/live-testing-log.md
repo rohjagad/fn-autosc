@@ -222,3 +222,11 @@ Schedules observed live: `backup 0 0,6,12,18`, `xp 0,15,30,45`,
 - WS end-to-end: lock -> hapus `#vmess` -> unlock-ws-auto FIXED gagal LOUD (exit 1, `.locked` utuh, auto-delete 0 hapus, kuota utuh) -> anchor pulih -> unlock 1 entri -> delete bersih.
 - Kesimpulan skop: ws/grpc/http/xhttp × vmess/vless/trojan semua berbentuk sama; guard menutup semuanya (16/16 + 8/8). FIX untuk add-*/trial-* sekelas masih follow-up.
 - Box-as-found: 0 akun uji, 4/4 Configuration OK, 0 failed.
+
+## Found 500 RACE + Fix 501 (2026-10-10) — root cause insiden kaya88, PROVEN + FIXED
+
+- Bukti (forward telegram operator + mailbox live box): kaya88 VLESS/XHTTP limit 3->5. Lock 12:30:03 (4/3), lock 12:50:03 (10/3), unlock manual 12:50:30 (by owner), lock 12:55:02 (10/5), cleanup 12:55:02 (Deleted Users: kaya88). Mailbox 12:55:05: `Memeriksa kaya88.log` -> `Menghapus data...` + restart.
+- Mekanisme: limit-ip hapus JSON -> curl telegram (blokir s/d 10 dtk) -> mv/state. auto-delete se-tick mendarat di jendela itu -> orphan -> habisi. Tanpa anchor rusak, tanpa quota, tanpa tangan manusia.
+- Fix 501: 24 berkas reorder (mutasi dulu, notify terakhir). locked-xray/delete/xp sudah aman (terverifikasi urutannya).
+- Sisaplay di box operator: deploy 24 skrip (limit-ip/kill/quota) + 24 sebelumnya (unlock/auto-delete) = 48 berkas ke /usr/bin; buat ulang kaya88.
+- Box-as-found (test): 0 akun uji, 4/4 Configuration OK, 0 failed.
