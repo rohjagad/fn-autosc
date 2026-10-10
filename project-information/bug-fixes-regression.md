@@ -2969,3 +2969,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | N/A — limit 5 dua sumber tidak terkunci. |
 | **Over-engineering** | 1 map + 12 baris per berkas; tanpa range list (spoof-direct diterima, sekelas Decision 24). |
 | **vs the source** | Sengaja menyimpang dari reference untuk gRPC: reference (`X-Real-IP $remote_addr`) terbukti mencatat edge via CDN. Didokumentasikan di is-decision 24. |
+
+## 266. gRPC Uniform First-Entry — Four Checks (October 11, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Jujur: sama persis dengan Fix 504 (single/dual/direct IP riil, re-proof penuh). Palsu: kini lolos di gRPC seperti WS — trade yang dipilih operator. |
+| **Over-strictness** | N/A — limit 5 dua sumber tidak terkunci. |
+| **Over-engineering** | 1 map ganti 1 map + 12 baris per berkas; tanpa sisa `grpcRealIp` (0 remnant). |
+| **vs the source** | Menyimpang untuk gRPC seperti 265, dengan aturan sama dengan 3 transport lain. |

@@ -3104,3 +3104,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 504 (Found 502):** `config/4.conf`, `config/6.conf`, `config/dual.conf`: map baru `$grpcRealIp` (`CF-Connecting-IP`, fallback `$remote_addr`) + 12 `grpc_set_header X-Real-IP` per berkas pakai map itu. Sebab: xray 25.3.6 grpc (`transport/internet/grpc/encoding/hunkconn.go`) HANYA baca metadata `x-real-ip`, abaikan XFF — jadi Fix 503 tak menyentuh gRPC (log tetap edge). Deployed ke test box (`nginx -t` clean, reload).
 - **Verified live:** gRPC CDN single -> IP riil; dual 2 sumber -> distinct riil (1 edge basi di window), statsonline 2, `limit-ip-grpc` manual TIDAK lock (limit 5); direct -> IP riil via fallback. 1=1 di semua transport.
+### Fix 505 - gRPC uniform first-entry, gantikan map CF-IP (Found 502)
+
+- **Fix 505 (Found 502):** operator pilih uniformitas: map `$grpcRealIp` (Fix 504) diganti map `$xffFirst` (entri pertama XFF, fallback peer) + 12 `grpc_set_header X-Real-IP` per berkas pakai itu. Trafik jujur identik (terbukti: single/dual/direct semua IP riil); entri pertama palsu dihitung apa adanya — trade Decision 24 kini seragam 4 transport. Deployed ke test box (`nginx -t` clean, reload).
+- **Verified live:** gRPC CDN single -> IP riil; dual 2 sumber -> TEPAT 2 IP riil, limiter manual no-lock (limit 5); direct -> IP riil (fallback). 0 sisa klien.

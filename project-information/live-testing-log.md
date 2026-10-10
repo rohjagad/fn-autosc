@@ -245,3 +245,6 @@ Schedules observed live: `backup 0 0,6,12,18`, `xp 0,15,30,45`,
 ## gRPC accuracy Fix 504 retest (2026-10-10, test box, via CDN)
 - Deploy map + 12 baris, nginx -t OK + reload. Single CDN -> IP riil; dual (lab 140.213.x + VPS 202.x) -> distinct riil + 1 edge basi, statsonline 2, limiter manual no-lock; direct -> IP riil (fallback). Sisa VPS klien: 0.
 - Box-as-found: 4 akun cdn utuh, 4/4 Configuration OK, servis + nginx active. VM kvmcdn hidup (1222).
+
+## gRPC uniform Fix 505 retest (2026-10-11, test box, via CDN)
+- Deploy map + 12 baris ×3, nginx -t OK + reload. Single CDN -> IP riil; dual -> TEPAT 2 IP riil, limiter no-lock; direct -> IP riil. 4 akun cdn utuh, 0 klien, VM kvmcdn hidup.

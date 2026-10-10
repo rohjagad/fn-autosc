@@ -483,3 +483,11 @@ all three configs add a `$grpcRealIp` map (`CF-Connecting-IP`, falling back to
 `$remote_addr` for direct traffic) and the 12 `grpc_set_header X-Real-IP` lines use it.
 No proxy range list is involved; a direct client forging the header is the same accepted
 trade as the XFF rule above. WS/HTTPUpgrade/XHTTP keep the references' form untouched.
+
+### Addendum 2 to section 24 - operator chose uniformity (Fix 505)
+
+Fix 504's `$grpcRealIp` (`CF-Connecting-IP`) map is replaced by `$xffFirst` (first XFF
+entry, peer fallback): same honest-traffic accuracy (re-proven live: single, dual-source,
+and direct all log real IPs; limiter stays quiet), with forged first entries now counted
+as-is on gRPC exactly as on WS/HTTPUpgrade/XHTTP. One trust rule on all four transports,
+no Cloudflare-only header anywhere, zero `grpcRealIp` remnants in tree or test box.
