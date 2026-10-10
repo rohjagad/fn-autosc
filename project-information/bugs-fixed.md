@@ -3087,3 +3087,6 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 ### Fix 474 - Typo Ceritificate (Found 496)
 
 - **Fix 474 (Found 496):** `Ceritificate` -> `Certificate` di `full/dm-menu.sh` + `lite/dm-menu.sh` baris 137. Satu kata, tanpa logika.
+### Fix 498 - Guard verifikasi restore unlock (Found 497)
+
+- **Fix 498 (Found 497):** 16 berkas (`unlock-*-auto` + `unlock-*` manual, full + lite, 4 transport): setelah sed re-add, verifikasi `grep -qxF "### user exp" JSON` SEBELUM `mv .locked -> .log`. Gagal = pesan LOUD ke stderr + exit 1 + lock dipertahankan (stuck-locked, bukan terhapus; operator perbaiki anchor lalu unlock manual). Verified live: rantai yang kemarin menghapus akun kini berhenti di unlock (exit 1, `.locked` utuh, auto-delete skip, kartu + kuota selamat); dengan anchor utuh unlock normal 1 entri + delete bersih.

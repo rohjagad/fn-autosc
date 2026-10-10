@@ -197,3 +197,12 @@ Schedules observed live: `backup 0 0,6,12,18`, `xp 0,15,30,45`,
 - L2TP tetap control-only (no /dev/ppp di box maupun kernel cloud, no IPsec): xl2tpd active + LNS valid, data path mustahil — blocker struktural.
 - Noobz login penuh tetap butuh aplikasi resmi (port up, tanpa-auth fail-closed/timeout — partial).
 - Box-as-found: 0 akun uji, 4/4 Configuration OK, 0 failed; VM-2 powered off bersih.
+
+## Found 497 kill-chain + Fix 498 (2026-10-10, test box full) — PROVEN + FIXED LIVE
+
+- Laporan operator: 2 akun xhttp lenyap total setelah multilogin, pesan "XRAY XHTTP Log Cleanup".
+- Rantai terbukti: lock (JSON out + `.locked`) -> anchor `#vmess` hilang -> `unlock-xhttp-auto` exit 2 tapi JSON tetap 0 (insert sunyi gagal, `.locked` tetap dipindah) -> `auto-delete-xhttp` "Menghapus data..." (kartu + kuota + limit lenyap, telegram Log Cleanup).
+- Akar: sed anchor-insert tanpa verifikasi di 16 berkas unlock (auto + manual). Pemicu anchor-hilang di box operator masih perlu dicek (`grep -c "^#vmess$" /etc/xray/json/*.json`;versi panel lama? kerusakan Bug-68 lama?).
+- Fix 498: guard `grep -qxF` sebelum `mv`, gagal = LOUD + exit 1 + lock dipertahankan. Verified: rantai berhenti di unlock, akun selamat-terkunci; jalur normal utuh.
+- Box-as-found: JSON backup dipulihkan, 0 akun uji, 4/4 Configuration OK, 0 failed, /tmp bersih.
+- Follow-up sekelas (belum di-fix): `add-*`/`trial-*` insert sunyi saat anchor hilang (kartu tanpa JSON); cek anchor + hardening terpisah.

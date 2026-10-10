@@ -31,6 +31,16 @@ elif [ "$protokol2" == "TROJAN" ]; then
 else
     exit 0
 fi
+# Found 497 guard: the re-add above is a silent no-op when the section
+# anchor (#vmess/#vless/#trojan) is missing from the JSON. Moving .locked
+# to .log without a JSON entry hands the account to auto-delete-*, which
+# wipes card + quota + limit files ("Log Cleanup") - a locked account would
+# be silently DELETED instead of unlocked. Verify the entry landed; if not,
+# keep the lock and fail LOUD so the operator repairs the anchors first.
+if ! grep -qxF "### $user $exp2" /etc/xray/json/upgrade.json 2>/dev/null; then
+    echo "unlock-http-auto: FAILED to restore $user - JSON section anchor missing, lock kept. Repair anchors, then unlock manually." >&2
+    exit 1
+fi
 if xray run -test -config /etc/xray/json/upgrade.json >/dev/null 2>&1; then
     mv "$locked" "/var/log/create/xray/http/${user}.log"
     [ -n "$XRAY_BATCH" ] && exit 2

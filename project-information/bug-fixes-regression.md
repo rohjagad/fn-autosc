@@ -2924,3 +2924,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | N/A. |
 | **Over-engineering** | Satu kata × 2 berkas. |
 | **vs the source** | N/A (prompt panel, bukan upstream). |
+
+## 261. Unlock Restore Verification — Four Checks (October 10, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Jalur normal tak berubah (guard lolos saat entri ada; pola `### user exp` sama dengan guard anti-duplikat yang sudah ada). |
+| **Over-strictness** | Gagal-hanya-saat-insert-buntu (sebelumnya = hapus diam-diam). Stuck-locked > deleted. |
+| **Over-engineering** | 9 baris per berkas, tanpa logika baru selain grep yang sudah dipakai di skrip yang sama. |
+| **vs the source** | Upstream tak punya konsep lock/unlock ini; guard khusus panel. |

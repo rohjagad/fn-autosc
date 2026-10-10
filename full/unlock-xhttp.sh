@@ -226,6 +226,14 @@ else
     echo "Protokol tidak dikenal"
 fi
 
+# Found 497 guard (same class as unlock-*-auto): the re-add above is a
+# silent no-op when the JSON section anchor is missing. Never move .locked
+# to .log without a JSON entry - auto-delete-* would wipe the account
+# ("Log Cleanup") instead of unlocking it. Fail LOUD, keep the lock.
+if ! grep -qxF "### $name $exp2" /etc/xray/json/xhttp.json 2>/dev/null; then
+    echo "unlock-xhttp: FAILED to restore $name - JSON section anchor missing, lock kept. Repair anchors, then retry." >&2
+    exit 1
+fi
 if xray run -test -config /etc/xray/json/xhttp.json >/dev/null 2>&1; then
     mv /var/log/create/xray/xhttp/${name}.locked /var/log/create/xray/xhttp/${name}.log
     systemctl daemon-reload
