@@ -248,3 +248,10 @@ Schedules observed live: `backup 0 0,6,12,18`, `xp 0,15,30,45`,
 
 ## gRPC uniform Fix 505 retest (2026-10-11, test box, via CDN)
 - Deploy map + 12 baris ×3, nginx -t OK + reload. Single CDN -> IP riil; dual -> TEPAT 2 IP riil, limiter no-lock; direct -> IP riil. 4 akun cdn utuh, 0 klien, VM kvmcdn hidup.
+
+## Full matrix retest 3 proto x 4 transport x CDN/direct (2026-10-11, test box)
+- Akun: vmess/vless/trojan × ws/grpc/hu/xhttp (12 akun, limit-ip 5). Klien lab-host via edge 104.17.3.81 (CDN) dan direct 202.155.17.126, SNI/host fntest.
+- Direct: 12/12 `200`. CDN: 9/12 `200` (ws/hu/xhttp semua proto); semua yang konek mencatat IP RIIL di xray log (CGNAT lab 140.213.x, 0 edge).
+- gRPC via CDN flaky di sisi Cloudflare: 18× `HTTP/2.0→200` vs 13× `HTTP/1.1→415` untuk request identik (toggle h2-to-origin ON; flap koneksi CF, bukan config origin — tak ada baris lain). Direct gRPC 3/3 `200`.
+- Metodologi: bukti WS batch-1 dimakan truncate `kill-ws` cron (`> ws.log`, tiap 5 mnt) — diulang sinkron pasca-tick, terkumpul 00:23:12. File terbuat ulang milik www-data (temuan lama).
+- Box-as-found: 12 akun cdn utuh, 0 klien tersisa, VM kvmcdn hidup.
