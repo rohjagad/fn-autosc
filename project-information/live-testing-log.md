@@ -241,3 +241,7 @@ Schedules observed live: `backup 0 0,6,12,18`, `xp 0,15,30,45`,
 - Deploy: 50/50 append, nginx -t OK + reload. Lab egress sempat pindah 157.15.139.236 -> 140.213.x (CGNAT) di tengah sesi — tercatat.
 - WS dual: distinct 3 riil, statsonline 3, limiter manual no-lock, akun utuh. HU/XHTTP CDN: IP riil. Direct: IP riil. gRPC CDN: masih 415 (terpisah).
 - Box-as-found: 4 akun cdn utuh, 4/4 Configuration OK, xray@ws/grpc/xhttp + nginx active, 0 klien tersisa, VM kvmcdn hidup (1222).
+
+## gRPC accuracy Fix 504 retest (2026-10-10, test box, via CDN)
+- Deploy map + 12 baris, nginx -t OK + reload. Single CDN -> IP riil; dual (lab 140.213.x + VPS 202.x) -> distinct riil + 1 edge basi, statsonline 2, limiter manual no-lock; direct -> IP riil (fallback). Sisa VPS klien: 0.
+- Box-as-found: 4 akun cdn utuh, 4/4 Configuration OK, servis + nginx active. VM kvmcdn hidup (1222).

@@ -3100,3 +3100,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 503 (Found 502):** `config/4.conf`, `config/6.conf`, `config/dual.conf`: 150 baris `X-Forwarded-For $remote_addr` (proxy + grpc) kembali ke `$proxy_add_x_forwarded_for` — revert byte-exact Fix 472 (diff XFF vs `c7dea7a^` = 0; `X-Real-IP $remote_addr` tak berubah). Deployed ke test box (`/etc/nginx/nginx.conf` 50/50, `nginx -t` clean, reload).
 - **Verified live via CDN (proxy 104.17.3.81):** WS dual 2 user riil -> distinct TEPAT 3 IP riil (2 CGNAT lab + 1 VPS, 0 edge; dulu 22 edge), statsonline 3, `limit-ip-ws` manual TIDAK lock (dulu false lock limit-5); HU 3 req -> IP riil; XHTTP 3x200 -> IP riil; direct WS tetap IP riil. gRPC via CDN tetap 415 (isu CF->origin HTTP/1.1 terpisah, direct 200, out of scope).
+### Fix 504 - gRPC X-Real-IP ikut IP riil (Found 502, lanjutan)
+
+- **Fix 504 (Found 502):** `config/4.conf`, `config/6.conf`, `config/dual.conf`: map baru `$grpcRealIp` (`CF-Connecting-IP`, fallback `$remote_addr`) + 12 `grpc_set_header X-Real-IP` per berkas pakai map itu. Sebab: xray 25.3.6 grpc (`transport/internet/grpc/encoding/hunkconn.go`) HANYA baca metadata `x-real-ip`, abaikan XFF — jadi Fix 503 tak menyentuh gRPC (log tetap edge). Deployed ke test box (`nginx -t` clean, reload).
+- **Verified live:** gRPC CDN single -> IP riil; dual 2 sumber -> distinct riil (1 edge basi di window), statsonline 2, `limit-ip-grpc` manual TIDAK lock (limit 5); direct -> IP riil via fallback. 1=1 di semua transport.

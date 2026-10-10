@@ -2960,3 +2960,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | N/A — limit 5 dua user riil tidak terkunci (dulu terkunci). |
 | **Over-engineering** | Sed satu pola × 3 berkas; nol logika baru. |
 | **vs the source** | Bentuk reference V23/1.20 dipulihkan ("\`X-Forwarded-For $proxy_add_x_forwarded_for\` + Xray ambil entri pertama"). |
+
+## 265. gRPC X-Real-IP — Four Checks (October 10, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Direct tanpa header -> peer (terbukti IP riil); header sampah -> peer (kode xray menolak parse). WS/HU/XHTTP tak tersentuh (abaikan X-Real-IP). |
+| **Over-strictness** | N/A — limit 5 dua sumber tidak terkunci. |
+| **Over-engineering** | 1 map + 12 baris per berkas; tanpa range list (spoof-direct diterima, sekelas Decision 24). |
+| **vs the source** | Sengaja menyimpang dari reference untuk gRPC: reference (`X-Real-IP $remote_addr`) terbukti mencatat edge via CDN. Didokumentasikan di is-decision 24. |

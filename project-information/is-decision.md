@@ -471,3 +471,15 @@ goes in the same `if`, and any new feature that moves egress must take the same 
 - **Decision:** Xray 25.x renamed SplitHTTP to XHTTP, so the panel follows completely rather than keeping a dual vocabulary that would confuse every future change. Wire strings (`network: xhttp`, `xhttpSettings`, paths `/vmxh`, `/vlxh`, `/trxh`, link `type=xhttp`) and all identifiers move together. The single exception is a one-line legacy alias in the API handlers (`split` → `xhttp`) so old API clients keep working; language builtins (`strings.Split`, awk `split()`) are untouched.
 - **Reason:** a half-rename (wire-only, as first done) leaves two names for one thing across scripts, units, JSON, cron and API — precisely the kind of drift that causes future bugs. One name everywhere costs a data-preserving migration once and ends the ambiguity permanently.
 - **Verified live:** migrated account intact, new account card shows `/vmxh` + `XHTTP`, 5 MB traffic checksum-identical, `xray@xhttp` active, 0 failed units.
+
+### Addendum to section 24 - gRPC is the exception (Found 502, Fix 504)
+
+The correction above says the references' header form suffices everywhere. Live-proven
+2026-10-10 it does not for gRPC: xray 25.3.6's grpc transport reads ONLY the `x-real-ip`
+metadata (`transport/internet/grpc/encoding/hunkconn.go`) and ignores `X-Forwarded-For`,
+so with the reference form (`X-Real-IP $remote_addr`) gRPC via CDN still logs the edge
+(`from 104.23.232.44`, never the client). The owner's accuracy rule (1 = 1) wins here:
+all three configs add a `$grpcRealIp` map (`CF-Connecting-IP`, falling back to
+`$remote_addr` for direct traffic) and the 12 `grpc_set_header X-Real-IP` lines use it.
+No proxy range list is involved; a direct client forging the header is the same accepted
+trade as the XFF rule above. WS/HTTPUpgrade/XHTTP keep the references' form untouched.
