@@ -3090,3 +3090,6 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 ### Fix 498 - Guard verifikasi restore unlock (Found 497)
 
 - **Fix 498 (Found 497):** 16 berkas (`unlock-*-auto` + `unlock-*` manual, full + lite, 4 transport): setelah sed re-add, verifikasi `grep -qxF "### user exp" JSON` SEBELUM `mv .locked -> .log`. Gagal = pesan LOUD ke stderr + exit 1 + lock dipertahankan (stuck-locked, bukan terhapus; operator perbaiki anchor lalu unlock manual). Verified live: rantai yang kemarin menghapus akun kini berhenti di unlock (exit 1, `.locked` utuh, auto-delete skip, kartu + kuota selamat); dengan anchor utuh unlock normal 1 entri + delete bersih.
+### Fix 499 - Auto-delete lewati lock-in-flight (Found 497, lapis kedua)
+
+- **Fix 499 (Found 497):** 8 berkas (`auto-delete-*`, full + lite, 4 transport): pengguna dengan state auto-unlock pending (`/etc/xray/autounlock/<t>/user`) bukan orphan — di-skip meskipun `.locked` sesaat hilang. Multilogin = lock, tidak pernah delete. Verified live: state mangsa (.log ada, JSON kosong, `.locked` nihil) + state -> SKIP + pesan lock-in-flight, kartu + kuota selamat; tanpa state -> cleanup normal tetap jalan.

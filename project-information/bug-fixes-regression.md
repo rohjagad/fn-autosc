@@ -2933,3 +2933,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | Gagal-hanya-saat-insert-buntu (sebelumnya = hapus diam-diam). Stuck-locked > deleted. |
 | **Over-engineering** | 9 baris per berkas, tanpa logika baru selain grep yang sudah dipakai di skrip yang sama. |
 | **vs the source** | Upstream tak punya konsep lock/unlock ini; guard khusus panel. |
+
+## 262. Auto-delete Lock-in-flight Skip — Four Checks (October 10, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Orphan sejati (tanpa state, tanpa `.locked`, tanpa JSON) tetap dibersihkan seperti semula; hanya lock-in-flight yang dikecualikan. |
+| **Over-strictness** | Skip sementara selama state ada; sweeper menghapus state yatim sendiri (tanpa `.locked` -> state dibuang) sehingga cleanup tertunda, bukan batal. |
+| **Over-engineering** | 2 blok kecil (baca dir + 1 cek loop) per berkas, pola grep sama dengan cek `.locked` di sebelahnya. |
+| **vs the source** | Upstream tak punya konsep ini; guard khusus panel. |

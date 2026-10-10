@@ -206,3 +206,11 @@ Schedules observed live: `backup 0 0,6,12,18`, `xp 0,15,30,45`,
 - Fix 498: guard `grep -qxF` sebelum `mv`, gagal = LOUD + exit 1 + lock dipertahankan. Verified: rantai berhenti di unlock, akun selamat-terkunci; jalur normal utuh.
 - Box-as-found: JSON backup dipulihkan, 0 akun uji, 4/4 Configuration OK, 0 failed, /tmp bersih.
 - Follow-up sekelas (belum di-fix): `add-*`/`trial-*` insert sunyi saat anchor hilang (kartu tanpa JSON); cek anchor + hardening terpisah.
+
+## Fix 499 lapis kedua + skop 4 transport (2026-10-10, test box full)
+
+- Kebijakan operator: multilogin = lock 15 mnt, TIDAK PERNAH delete. Sudah sesuai desain; Fix 498 + 499 menegakkannya dua lapis.
+- Skop: kelas silent-insert ada di SEMUA transport (ws/grpc/http/xhttp) — 16/16 guard unlock + 8/8 guard auto-delete terpasang (full + lite).
+- Verified live lapis kedua: mangsa + state -> SKIP (lock-in-flight), kartu + kuota selamat; tanpa state -> "Menghapus data..." normal (orphan cleanup utuh).
+- Penyebab di box operator belum pasti multilogin — butuh forensik box: anchor (`grep -c "^#vmess$" JSON`), `.quota.logs` (quota-delete by design?), urutan pesan telegram (MULTILOGIN LOCKED? Quota Exhausted? Log Cleanup?), versi panel.
+- Box-as-found: 0 akun uji, 4/4 Configuration OK, 0 failed, /tmp bersih.

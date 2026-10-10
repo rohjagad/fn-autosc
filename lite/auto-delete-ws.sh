@@ -92,6 +92,10 @@ users=$(grep '^###' /etc/xray/json/ws.json | cut -d ' ' -f 2 | sort | uniq)
 
 # Daftar pengguna yang terkunci (cek file dengan ekstensi .locked)
 userlock=$(ls /var/log/create/xray/ws/ | grep '.locked$' | sed 's/\.locked$//')
+# Found 497 second layer: a user with a pending auto-unlock state is a
+# multilogin lock in flight - never treat it as an orphan even if the
+# .locked file is momentarily missing. Multilogin must lock, never delete.
+userstate=$(ls /etc/xray/autounlock/ws/ 2>/dev/null)
 
 # Variabel untuk mencatat file yang dihapus
 deleted_users=""
@@ -112,6 +116,12 @@ else
         # Periksa jika pengguna terkunci
         if echo "$userlock" | grep -q "^$user$"; then
             echo "Pengguna $user terkunci, file log tidak akan dihapus."
+            continue
+        fi
+
+        # Found 497: lock-in-flight (ada state auto-unlock) bukan orphan.
+        if echo "$userstate" | grep -q "^$user$"; then
+            echo "Pengguna $user lock-in-flight (auto-unlock state), file log tidak akan dihapus."
             continue
         fi
 
