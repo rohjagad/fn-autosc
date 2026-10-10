@@ -2951,3 +2951,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | N/A — tidak ada penolakan baru. |
 | **Over-engineering** | Pindah baris + komentar; nol logika baru di 24 berkas. |
 | **vs the source** | Upstream tak punya daemon/notify ini; reorder khusus panel. |
+
+## 264. CDN Header Revert — Four Checks (October 10, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Nilai header = persis pre-472 per baris (diff 0); direct + CDN diuji live per transport. Spoof-XFF tetap mungkin (diterima Decision 24). |
+| **Over-strictness** | N/A — limit 5 dua user riil tidak terkunci (dulu terkunci). |
+| **Over-engineering** | Sed satu pola × 3 berkas; nol logika baru. |
+| **vs the source** | Bentuk reference V23/1.20 dipulihkan ("\`X-Forwarded-For $proxy_add_x_forwarded_for\` + Xray ambil entri pertama"). |

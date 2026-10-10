@@ -3096,3 +3096,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 ### Fix 501 - Mutasi dulu, notifikasi terakhir (Found 500)
 
 - **Fix 501 (Found 500):** 24 berkas (`limit-ip-*`, `kill-*`, `quota-*`, full + lite, 4 transport): seluruh mutasi file (hapus JSON, `mv` .locked, tulis state, hapus kuota/kartu/limit) SELESAI SEBELUM `send_log`. Jendela orphan tertutup (tersisa mikrodetik tanpa blocking call). Verified live di test box: lock normal (JSON out + `.locked` + state), auto-delete skip, unlock 1 entri, delete bersih, 4/4 valid.
+### Fix 503 - Header CDN kembali ke bentuk reference (Found 502)
+
+- **Fix 503 (Found 502):** `config/4.conf`, `config/6.conf`, `config/dual.conf`: 150 baris `X-Forwarded-For $remote_addr` (proxy + grpc) kembali ke `$proxy_add_x_forwarded_for` — revert byte-exact Fix 472 (diff XFF vs `c7dea7a^` = 0; `X-Real-IP $remote_addr` tak berubah). Deployed ke test box (`/etc/nginx/nginx.conf` 50/50, `nginx -t` clean, reload).
+- **Verified live via CDN (proxy 104.17.3.81):** WS dual 2 user riil -> distinct TEPAT 3 IP riil (2 CGNAT lab + 1 VPS, 0 edge; dulu 22 edge), statsonline 3, `limit-ip-ws` manual TIDAK lock (dulu false lock limit-5); HU 3 req -> IP riil; XHTTP 3x200 -> IP riil; direct WS tetap IP riil. gRPC via CDN tetap 415 (isu CF->origin HTTP/1.1 terpisah, direct 200, out of scope).

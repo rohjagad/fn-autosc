@@ -236,3 +236,8 @@ Schedules observed live: `backup 0 0,6,12,18`, `xp 0,15,30,45`,
 - WS dual (2 user riil, 12 req): distinct 22 edge, statsonline 12, `limit-ip-ws` MANUAL -> `.locked` (false lock limit-5); unlock ok (JSON 2 baris). HU single: 3 req -> 3 edge. XHTTP: direct 200 (UUID baru), CDN 3x200 -> 1 edge (salah alamat). gRPC: CDN 415 (dir+CF), direct 200.
 - Samping: (a) recreate-xhttp yatim oleh operator (COLD2 hapus JSON entry yang baru dibuat + add gagal kartu-ada -> auto-delete sapu 22:30:12 — rantai orphan->cleanup terkonfirmasi lagi, no bug); (b) gRPC CDN 415; (c) guest KVM (SLIRP) TLS ke CF edge gagal (TCP ok, handshake ok, h2 stall) — butuh tap/passt untuk klien-penuh-dari-guest.
 - Box-as-found: 4 akun uji utuh (terkunci: tidak ada), 4/4 Configuration OK, 0 klien tersisa. VM kvmcdn dibiarkan hidup (ssh 1222).
+
+## CDN retest pasca-Fix 503 (2026-10-10, test box)
+- Deploy: 50/50 append, nginx -t OK + reload. Lab egress sempat pindah 157.15.139.236 -> 140.213.x (CGNAT) di tengah sesi — tercatat.
+- WS dual: distinct 3 riil, statsonline 3, limiter manual no-lock, akun utuh. HU/XHTTP CDN: IP riil. Direct: IP riil. gRPC CDN: masih 415 (terpisah).
+- Box-as-found: 4 akun cdn utuh, 4/4 Configuration OK, xray@ws/grpc/xhttp + nginx active, 0 klien tersisa, VM kvmcdn hidup (1222).
