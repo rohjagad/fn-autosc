@@ -468,8 +468,9 @@ the larger of (a) the live session count from the Xray stats API and
 > gRPC carries it in `X-Real-IP`). gRPC additionally needs Cloudflare to
 > speak HTTP/2 to the origin: on edges that downgrade to HTTP/1.1 the tunnel
 > fails with `415` while WS/HU/XHTTP are unaffected. This varies per edge —
-> clients should use normal DNS (anycast picks healthy edges); pinning a
-> single edge IP is not recommended. If gRPC-over-CDN stays broken on your
+> prefer normal DNS (anycast picks healthy edges); if you dial edge IPs
+> directly, don't stick to one — a sick edge fails while others work, so
+> switch edges when a path misbehaves. If gRPC-over-CDN stays broken on your
 > route, serve gRPC users a direct (grey-cloud) hostname.
 
 ### The Four Maintenance Jobs
