@@ -214,3 +214,11 @@ Schedules observed live: `backup 0 0,6,12,18`, `xp 0,15,30,45`,
 - Verified live lapis kedua: mangsa + state -> SKIP (lock-in-flight), kartu + kuota selamat; tanpa state -> "Menghapus data..." normal (orphan cleanup utuh).
 - Penyebab di box operator belum pasti multilogin — butuh forensik box: anchor (`grep -c "^#vmess$" JSON`), `.quota.logs` (quota-delete by design?), urutan pesan telegram (MULTILOGIN LOCKED? Quota Exhausted? Log Cleanup?), versi panel.
 - Box-as-found: 0 akun uji, 4/4 Configuration OK, 0 failed, /tmp bersih.
+
+## VLESS + cross-transport proof, 24-script sync (2026-10-10, test box full)
+
+- VLESS/xhttp rantai penuh dengan kode LAMA: lock -> hapus `#vless` -> unlock-auto exit 2 sunyi (JSON 0) -> auto-delete "Menghapus data..." (lenyap total). Guard baru: +state -> SKIP lock-in-flight; tanpa state -> cleanup normal. Kelas bug sama persis lintas protokol.
+- 24 skrip fix (16 unlock + 8 auto-delete) di-sync ke /usr/bin test box (cmp- diverifikasi, 11 updated + 3 sudah).
+- WS end-to-end: lock -> hapus `#vmess` -> unlock-ws-auto FIXED gagal LOUD (exit 1, `.locked` utuh, auto-delete 0 hapus, kuota utuh) -> anchor pulih -> unlock 1 entri -> delete bersih.
+- Kesimpulan skop: ws/grpc/http/xhttp × vmess/vless/trojan semua berbentuk sama; guard menutup semuanya (16/16 + 8/8). FIX untuk add-*/trial-* sekelas masih follow-up.
+- Box-as-found: 0 akun uji, 4/4 Configuration OK, 0 failed.
