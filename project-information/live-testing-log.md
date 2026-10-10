@@ -261,3 +261,9 @@ Schedules observed live: `backup 0 0,6,12,18`, `xp 0,15,30,45`,
 - 104.17.70.206: TLS ok (cert ours) tapi frame h2 rusak di `/`, gRPC stall tanpa jejak di origin — PoP sakit/rute buruk, unusable.
 - 104.21.83.135 (edge bimbel.ruangguru.com, SNI/host tetap fntest): gRPC 3/3 `HTTP/2.0→200`, xray log IP riil. Flap = spesifik edge, bukan zone.
 - Kesimpulan: jangan pin satu edge IP; klien normal via DNS anycast dapat edge sehat otomatis. Tak ada perubahan panel (link akun pakai domain).
+
+## CDN investigation closure (2026-10-11)
+- Pertanyaan awal ("limit IP via CDN seems not accurate") terjawab tuntas: YA, dulu menghitung edge (Found 502) -> Fix 503 (3 transport) + Fix 505 (gRPC uniform, gantikan Fix 504). Re-proof 1=1 semua transport × kedua path, matrix 24 kombinasi (direct 12/12, CDN 9/12).
+- 3 non-terbukti-bug panel: (1) gRPC 415 = flap h2/h1.1 per-edge Cloudflare (18 vs 13, toggle ON) — 104.21.83.135 bersih, 104.17.70.206 sakit; (2) guest KVM SLIRP tak bisa TLS-penuh ke edge (handshake ok, h2 stall) — butuh tap/passt; (3) `kill-ws` cron truncate ws.log tiap 5 mnt (memakan batch bukti sekali; www-data ownership).
+- Pelajaran uji: jangan pin satu edge IP (matikan self-healing anycast); sinkronkan batch ws dengan tick cron; dua sumber (lab + VPS) untuk klaim multilogin.
+- Status akhir: repo `main` bersih pushed; test box 12 akun cdn + VM kvmcdn hidup; live box BELUM terima Fix 503/505 (tunggu operator).

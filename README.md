@@ -457,9 +457,20 @@ Each account with an IP limit has one file:
 /etc/xray/limit/ip/xray/<protocol>/<username>   # max concurrent IPs
 ```
 
-The `limit-ip-*` jobs run every 5 minutes, compare the number of live
-connections from the Xray stats API against the stored limit, and disconnect
-excess sessions.
+The `limit-ip-*` jobs run every 5 minutes. For each limited account they take
+the larger of (a) the live session count from the Xray stats API and
+(b) the distinct source IPs in the transport's access log over the last
+10 minutes, and lock the account when that exceeds the stored limit
+(card moved to `.locked`, auto-unlock ~15 min later).
+
+> CDN note (measured live, Oct 2026): behind Cloudflare the limiter counts
+> real client IPs on all four transports (nginx forwards the address chain;
+> gRPC carries it in `X-Real-IP`). gRPC additionally needs Cloudflare to
+> speak HTTP/2 to the origin: on edges that downgrade to HTTP/1.1 the tunnel
+> fails with `415` while WS/HU/XHTTP are unaffected. This varies per edge —
+> clients should use normal DNS (anycast picks healthy edges); pinning a
+> single edge IP is not recommended. If gRPC-over-CDN stays broken on your
+> route, serve gRPC users a direct (grey-cloud) hostname.
 
 ### The Four Maintenance Jobs
 
