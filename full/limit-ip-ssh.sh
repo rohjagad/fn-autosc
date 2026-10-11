@@ -205,6 +205,28 @@ echo ""
 echo ""
 }
 
+unlocked() {
+    local _u="${1:-}"
+    [ -n "$_u" ] || return 0
+    local _t=$(date +"%d-%b-%Y %H:%M:%S")
+    local _msg="
+<b>-----------------------</b>
+<b>MULTILOGIN UNLOCKED</b>
+<b>-----------------------</b>
+<code>Username    : $_u</code>
+<code>Type        : SSH</code>
+<code>Time        : $_t</code>
+<code>Status      : Unlocked</code>
+<b>-----------------------</b>
+The lock period ended and the account can be used again."
+    CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
+    KEY=$(cat /etc/funny/.keybot 2>/dev/null)
+    [ -z "$CHATID" ] || [ -z "$KEY" ] && return 0
+    TIME="10"
+    URL="https://api.telegram.org/bot$KEY/sendMessage"
+    curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$_msg" $URL >/dev/null
+}
+
 clear
 echo ""
 echo ""
@@ -349,7 +371,9 @@ for _sf in /etc/xray/autounlock/ssh/*; do
         _due=$(cat "$_sf" 2>/dev/null)
         if [[ "$_due" =~ ^[0-9]+$ ]] && [ "$(date +%s)" -ge "$_due" ]; then
             rm -f "$_sf"
-            passwd -u "$_au"
+            if passwd -u "$_au" >/dev/null 2>&1; then
+                unlocked "$_au" >/dev/null 2>&1
+            fi
         fi
     else
         rm -f "$_sf"
