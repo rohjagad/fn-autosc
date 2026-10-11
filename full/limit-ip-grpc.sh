@@ -134,7 +134,7 @@ for user in $username; do
     # mirrors limit-ip-ssh R12; header spoof-evasion accepted per Decision 24).
     # Take the larger of the two.
     _cut=$(date -d '10 minutes ago' '+%Y/%m/%d %H:%M:%S')
-    _logc=$(awk -v cut="$_cut" -v u="$user" '$1" "$2 >= cut && match($0, "email: "u"([^A-Za-z0-9_]|$)") {for(i=1;i<=NF;i++) if($i=="from"){s=$(i+1); sub(/:[0-9]*$/,"",s); if(s!="") print s; break}}' "/var/log/xray/grpc.log" 2>/dev/null | sort -u | wc -l)
+    _logc=$(awk -v cut="$_cut" -v u="$user" '$1" "$2 >= cut && match($0, "email: "u"([^A-Za-z0-9_]|$)") {for(i=1;i<=NF;i++) if($i=="from"){s=$(i+1); sub(/^(tcp|udp):/,"",s); sub(/:[0-9]*$/,"",s); if(s!="") print s; break}}' "/var/log/xray/grpc.log" 2>/dev/null | sort -u | wc -l)
     [[ "$_logc" =~ ^[0-9]+$ ]] || _logc=0
     [ "$_logc" -gt "$cek" ] && cek="$_logc"
     

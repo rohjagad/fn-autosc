@@ -3108,3 +3108,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 505 (Found 502):** operator pilih uniformitas: map `$grpcRealIp` (Fix 504) diganti map `$xffFirst` (entri pertama XFF, fallback peer) + 12 `grpc_set_header X-Real-IP` per berkas pakai itu. Trafik jujur identik (terbukti: single/dual/direct semua IP riil); entri pertama palsu dihitung apa adanya — trade Decision 24 kini seragam 4 transport. Deployed ke test box (`nginx -t` clean, reload).
 - **Verified live:** gRPC CDN single -> IP riil; dual 2 sumber -> TEPAT 2 IP riil, limiter manual no-lock (limit 5); direct -> IP riil (fallback). 0 sisa klien.
+### Fix 506 - Strip prefiks `tcp:`/`udp:` sebelum hitung distinct (Found 506)
+
+- **Fix 506 (Found 506):** 8 berkas `limit-ip-{ws,http,xhttp,grpc}.sh` (full+lite, baris 137): `s=$(i+1); sub(/:[0-9]*$/,"",s);` menjadi `s=$(i+1); sub(/^(tcp|udp):/,"",s); sub(/:[0-9]*$/,"",s);`. Satu baris per berkas, `bash -n` bersih 8/8.
+- **Verified lokal:** 1 perangkat + DNS -> OLD 2 / NEW 1; 2 IP riil -> OLD 4 / NEW 2. Live-fire di test box dengan kode lama sudah membuktikan lock palsu + unlock UUID sama; hitungan NEW adalah ekspresi identik yang dipakai skrip. Belum di-deploy ke box mana pun (tunggu operator).
