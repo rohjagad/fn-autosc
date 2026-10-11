@@ -41,8 +41,31 @@ if ! grep -qxF "### $user $exp2" /etc/xray/json/ws.json 2>/dev/null; then
     echo "unlock-ws-auto: FAILED to restore $user - JSON section anchor missing, lock kept. Repair anchors, then unlock manually." >&2
     exit 1
 fi
+# Multilogin auto-unlock notice (timer-expired locks only; the manual
+# unlock keeps its own message). Sent after the restore is verified below.
+send_unlocked() {
+CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
+KEY=$(cat /etc/funny/.keybot 2>/dev/null)
+[ -z "$CHATID" ] || [ -z "$KEY" ] && return 0
+URL="https://api.telegram.org/bot$KEY/sendMessage"
+TIME="10"
+DATE=$(date +"%d-%b-%Y %H:%M:%S")
+TEXT="
+<b>-----------------------</b>
+<b>MULTILOGIN UNLOCKED</b>
+<b>-----------------------</b>
+<code>Date     : $DATE</code>
+<code>Username : $user</code>
+<code>Protocol : $protokol2</code>
+<code>Transport: WS</code>
+<code>Status   : Unlocked</code>
+<b>-----------------------</b>
+<i>Catatan:</i> The lock period ended and the account can be used again."
+curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$TEXT" $URL >/dev/null
+}
 if xray run -test -config /etc/xray/json/ws.json >/dev/null 2>&1; then
     mv "$locked" "/var/log/create/xray/ws/${user}.log"
+    send_unlocked
     [ -n "$XRAY_BATCH" ] && exit 2
     systemctl daemon-reload
     systemctl restart xray@ws
