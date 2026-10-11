@@ -114,9 +114,31 @@ separator=$(rainbow_sep '-----------------------------------')
 blue_sep="${blue}-----------------------------------${NC}"
 
 bnnr() {
-read -p "Input Your Banner: " bns || return
-echo -e "$bns" > /etc/issue.net
+# Banner editor: opens the current /etc/issue.net in nano (vi fallback)
+# so multi-line banners - including HTML styling for apps that render
+# it - can be edited freely. The file is written raw: backslashes are
+# kept as-is and no tag is stripped.
+tmp=$(mktemp /tmp/issue.net.XXXXXX) || return
+cp -f /etc/issue.net "$tmp" 2>/dev/null || : > "$tmp"
+if command -v nano >/dev/null 2>&1; then
+    nano "$tmp"
+else
+    vi "$tmp"
+fi
+if [ -s "$tmp" ]; then
+    cat "$tmp" > /etc/issue.net
+    echo "Banner saved."
+else
+    echo "Empty file - old banner kept."
+fi
+rm -f "$tmp"
+# OpenSSH shows the banner only when sshd_config names it. The installer
+# never set it, so port 22/3303 logins ignored every banner change.
+if ! grep -qE "^[[:space:]]*Banner[[:space:]]+" /etc/ssh/sshd_config 2>/dev/null; then
+    echo "Banner /etc/issue.net" >> /etc/ssh/sshd_config
+fi
 systemctl daemon-reload
+systemctl restart ssh 2>/dev/null || true
 systemctl restart dropbear 2>/dev/null || true
 systemctl restart ws 2>/dev/null || true
 clear
