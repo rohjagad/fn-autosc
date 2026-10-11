@@ -1,11 +1,12 @@
 #!/bin/bash
 #
-# FN AutoSC updater: b91281c -> 5c48741
+# FN AutoSC updater: b6d1a97 -> 5c48741
 #
-# Applies all fix commits on top of b91281c (Fix 506 tcp: counter,
-# delete-screen titles, nano SSH banner, VMess SNI, SSH Rotated line,
-# LOCKED IPs block, MULTILOGIN UNLOCKED notices, SSH Time Login block)
-# to a live install. Safe to run: files are backed up first, every
+# Applies the notice-improvement commits on top of b6d1a97 (LOCKED IPs
+# block, MULTILOGIN UNLOCKED notices for Xray + SSH, SSH Time Login
+# block) to a live install. The file set is a superset that also covers
+# the earlier b91281c range, so older installs are brought fully up to
+# date in one run. Safe to run: files are backed up first, every
 # download is syntax-checked before it replaces anything, and no
 # service restart is needed (cron jobs and menus read these files
 # fresh on every run).
@@ -19,7 +20,7 @@
 
 set -u
 
-FROM="b91281c7b42f5a5e50324831cf106796f1b7a0b4"
+FROM="b6d1a97376979c8ef7aea51a5ef10aed65ae1437"
 TARGET="${1:-5c487410db77000968450495a615f8e7971f376a}"
 FORCE=0
 [ "${2:-}" = "--force" ] && FORCE=1
