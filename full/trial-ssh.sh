@@ -146,6 +146,7 @@ message=$(cat <<EOF
 🟢 SSH ACCOUNT 🟢
 -------------------
 Domains    : $alldom
+Rotated    : $rdomain
 ISP        : $isp
 Region     : $region
 Username   : $username

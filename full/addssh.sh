@@ -202,6 +202,7 @@ alldom=$(printf '%s,' "${rdomains[@]}" | sed 's/,$//; s/,/, /g')
 🟢 SSH ACCOUNT 🟢
 -------------------
 Domains    : $alldom
+Rotated    : $rdomain
 ISP        : $isp
 Region     : $region
 Username   : $username
