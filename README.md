@@ -30,6 +30,7 @@ Supported operating systems: Debian 10–12 and Ubuntu 20.04–24.04.
 15. [Bugs Fixed](#bugs-fixed)
 16. [Known Issues](#known-issues)
 17. [Security Notes](#security-notes)
+18. [Updating an Existing Install](#updating-an-existing-install)
 
 ---
 
@@ -890,6 +891,32 @@ Read these before exposing a server to the internet.
   backup paths have been removed.)
 - **Authorization is remote and IP-based.** If GitHub is unreachable, or the
   IP is not listed, scripts fail closed and exit.
+
+---
+
+## Updating an Existing Install
+
+A server installed from an older commit can be brought up to date
+without reinstalling. Run as `root`:
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/rohjagad/fn-autosc/main/update.sh)
+```
+
+What it does:
+
+- Detects the installed edition (`full` vs `lite`) and fetches the 17
+  changed scripts for it from the target commit (default `b6d1a97`).
+- Downloads everything first, then syntax-checks (`bash -n`) and
+  fix-marker-checks every file. If any check fails, **nothing is
+  changed**.
+- Backs up the replaced files to `/root/fn-update-backup-<date>/`,
+  installs the new ones as `0755` into `/usr/bin`, and records the
+  commit in `/etc/funny/.update-commit` (re-running is a no-op unless
+  `--force` is passed).
+- Needs **no service restart**: cron jobs and menus read these scripts
+  fresh on every run, so the next 5-minute tick already uses the new
+  code and no customer is disconnected.
 
 ---
 
