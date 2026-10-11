@@ -157,6 +157,7 @@ grpc=`cat<<eof
 "path": "$opath",
 "type": "none",
 "host": "${rdomain}",
+"sni": "${rdomain}",
 "tls": "tls"
 }
 eof`
