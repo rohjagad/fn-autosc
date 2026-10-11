@@ -188,7 +188,8 @@ logs() {
 <code>Status      : Locked</code>
 <code>Unlock Time : $unlock_time</code>
 <b>-----------------------</b>
-  [ Time Login ]
+Time Login
+
 $ip_list
 <b>-----------------------</b>
 The account will be locked for 15 minutes and will be unlocked automatically.
@@ -317,7 +318,7 @@ do
     # Mendapatkan daftar IP untuk pengguna
     # Bug 75: the log line format is "PID - USER - IP - TIME", so the IP is
     # always field 5. $NF returned a fragment of the timestamp instead.
-    ip_list=$(echo -e "$mulog" | grep -F " - $user - " | awk '{print $5}' | sort | uniq | tr '\n' ', ' | sed 's/, $//')
+    ip_list=$(echo -e "$mulog" | grep -F " - $user - " | awk '{t=""; for(i=7;i<=NF;i++) t=t (i>7?" ":"") $i; print $5" - "t}' | sort -u)
 
     # Pastikan user root tidak dikunci
     if [[ $user != "root" && $cekcek -gt $iplimit ]]; then
