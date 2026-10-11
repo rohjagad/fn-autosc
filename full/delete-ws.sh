@@ -150,7 +150,7 @@ echo ""
 NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/ws.json")
 	if [[ ${NUMBER_OF_CLIENTS} == '0' ]]; then
 		echo -e "${separator}"
-        echo -e "       Delete Vmess Account       "
+        echo -e "       Delete WS Account       "
         echo -e "${separator}"
 		echo ""
 		echo "You have no existing clients!"
@@ -164,7 +164,7 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/ws.json")
 	echo ""
 	echo ""
 	echo -e "${separator}"
-    echo -e "       Delete Vmess Account       "
+    echo -e "       Delete WS Account       "
     echo -e "${separator}"
     _users=( $(grep -E "^### " "/etc/xray/json/ws.json" | awk '{print $2}' | sort -u) )
     _i=1
@@ -205,7 +205,7 @@ NUMBER_OF_CLIENTS=$(grep -c -E "^### " "/etc/xray/json/ws.json")
         echo ""
         echo ""
         echo -e "${separator}"
-        echo " Vmess Account Deleted Successfully"
+        echo " WS Account Deleted Successfully"
         echo -e "${separator}"
         echo " Client Name : $user"
         echo " Protocol    : $proto"
