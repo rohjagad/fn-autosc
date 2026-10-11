@@ -98,6 +98,8 @@ DATE=$(date +"%d-%b-%Y %H:%M:%S")
 <code>Protocol : $proto</code>
 <code>Transport: WS</code>
 <code>Login    : $cek / $limit</code>
+<code>IPs      : ${_iplist:--}</code>
+<code>Unlock   : ${_unlock_at:--}</code>
 <code>Status   : Locked</code>
 <b>-----------------------</b>
 <i>Catatan:</i> The user account has been locked and total usage bandwidth will not be reset on the server. The account will be automatically unlocked in 15 minutes."
@@ -134,8 +136,10 @@ for user in $username; do
     # mirrors limit-ip-ssh R12; header spoof-evasion accepted per Decision 24).
     # Take the larger of the two.
     _cut=$(date -d '10 minutes ago' '+%Y/%m/%d %H:%M:%S')
-    _logc=$(awk -v cut="$_cut" -v u="$user" '$1" "$2 >= cut && match($0, "email: "u"([^A-Za-z0-9_]|$)") {for(i=1;i<=NF;i++) if($i=="from"){s=$(i+1); sub(/^(tcp|udp):/,"",s); sub(/:[0-9]*$/,"",s); if(s!="") print s; break}}' "/var/log/xray/ws.log" 2>/dev/null | sort -u | wc -l)
+    _logips=$(awk -v cut="$_cut" -v u="$user" '$1" "$2 >= cut && match($0, "email: "u"([^A-Za-z0-9_]|$)") {for(i=1;i<=NF;i++) if($i=="from"){s=$(i+1); sub(/^(tcp|udp):/,"",s); sub(/:[0-9]*$/,"",s); if(s!="") print s; break}}' "/var/log/xray/ws.log" 2>/dev/null | sort -u)
+    if [ -z "$_logips" ]; then _logc=0; else _logc=$(printf '%s\n' "$_logips" | wc -l); fi
     [[ "$_logc" =~ ^[0-9]+$ ]] || _logc=0
+    _iplist=$(printf '%s\n' "$_logips" | paste -sd, - | sed 's/,/, /g')
     [ "$_logc" -gt "$cek" ] && cek="$_logc"
     
     # Clear screen
@@ -164,6 +168,8 @@ for user in $username; do
             mv /var/log/create/xray/ws/${user}.log /var/log/create/xray/ws/${user}.locked
             mkdir -p /etc/xray/autounlock/ws
             echo $(( $(date +%s) + 600 )) > /etc/xray/autounlock/ws/$user
+            _unlock_due=$(cat /etc/xray/autounlock/ws/$user 2>/dev/null)
+            _unlock_at=$(date -d "@$_unlock_due" "+%d-%b-%Y %H:%M:%S" 2>/dev/null || echo "-")
             send_log
         fi
 
