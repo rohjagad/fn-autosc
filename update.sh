@@ -1,16 +1,17 @@
 #!/bin/bash
 #
-# FN AutoSC updater: b91281c -> b6d1a97
+# FN AutoSC updater: b91281c -> 5c48741
 #
-# Applies the 5 fix commits on top of b91281c (Fix 506 tcp: counter,
-# delete-screen titles, nano SSH banner, VMess SNI, SSH Rotated line)
+# Applies all fix commits on top of b91281c (Fix 506 tcp: counter,
+# delete-screen titles, nano SSH banner, VMess SNI, SSH Rotated line,
+# LOCKED IPs block, MULTILOGIN UNLOCKED notices, SSH Time Login block)
 # to a live install. Safe to run: files are backed up first, every
 # download is syntax-checked before it replaces anything, and no
 # service restart is needed (cron jobs and menus read these files
 # fresh on every run).
 #
 # Usage:
-#   bash update.sh                  # update to b6d1a97 (default)
+#   bash update.sh                  # update to 5c48741 (default)
 #   bash update.sh <commit> --force  # re-apply even if already recorded
 #
 # One-line remote run:
@@ -19,7 +20,7 @@
 set -u
 
 FROM="b91281c7b42f5a5e50324831cf106796f1b7a0b4"
-TARGET="${1:-b6d1a97376979c8ef7aea51a5ef10aed65ae1437}"
+TARGET="${1:-5c487410db77000968450495a615f8e7971f376a}"
 FORCE=0
 [ "${2:-}" = "--force" ] && FORCE=1
 
@@ -60,15 +61,18 @@ echo "Edition detected: $EDITION"
 FILES="limit-ip-ws limit-ip-http limit-ip-xhttp limit-ip-grpc
 delete-ws delete-xhttp menu-system
 add-vmess-ws add-vmess-http add-vmess-xhttp add-vmess-grpc
-trial-vmess-ws trial-vmess-http trial-vmess-xhttp trial-vmess-grpc"
+trial-vmess-ws trial-vmess-http trial-vmess-xhttp trial-vmess-grpc
+unlock-ws-auto unlock-http-auto unlock-xhttp-auto unlock-grpc-auto"
 if [ "$EDITION" = "full" ]; then
-    FILES="$FILES addssh trial-ssh"
+    FILES="$FILES addssh trial-ssh limit-ip-ssh"
 fi
 
 # Expected marker per file: proves the download is the fixed version.
 marker_for() {
     case "$1" in
-        limit-ip-*) echo 'sub(/^(tcp|udp):/' ;;
+        limit-ip-ssh) echo 'MULTILOGIN UNLOCKED' ;;
+        limit-ip-*) echo 'IPs (${_logc})' ;;
+        unlock-*-auto) echo 'MULTILOGIN UNLOCKED' ;;
         delete-ws) echo 'Delete WS Account' ;;
         delete-xhttp) echo 'Delete XHTTP Account' ;;
         menu-system) echo 'Banner /etc/issue.net' ;;

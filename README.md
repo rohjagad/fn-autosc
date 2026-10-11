@@ -905,8 +905,9 @@ bash <(curl -fsSL https://raw.githubusercontent.com/rohjagad/fn-autosc/main/upda
 
 What it does:
 
-- Detects the installed edition (`full` vs `lite`) and fetches the 17
-  changed scripts for it from the target commit (default `b6d1a97`).
+- Detects the installed edition (`full` vs `lite`) and fetches the changed
+  scripts for it from the target commit (default `5c48741`): 22 files on
+  full, 19 on lite.
 - Downloads everything first, then syntax-checks (`bash -n`) and
   fix-marker-checks every file. If any check fails, **nothing is
   changed**.
