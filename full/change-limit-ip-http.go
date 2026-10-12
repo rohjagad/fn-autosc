@@ -86,8 +86,13 @@ func getAccountExpiry(logFile string) string {
 	}
 
 	for _, line := range strings.Split(string(content), "\n") {
-		if strings.HasPrefix(line, "Expired :") {
-			return strings.TrimSpace(strings.Split(line, ":")[1])
+		// Card labels are column-aligned ("Expired  :"), so match the word
+		// and split on the first colon instead of an exact spacing.
+		if strings.HasPrefix(line, "Expired") {
+			parts := strings.SplitN(line, ":", 2)
+			if len(parts) == 2 {
+				return strings.TrimSpace(parts[1])
+			}
 		}
 	}
 	return "N/A"
