@@ -909,8 +909,8 @@ bash <(curl -fsSL https://raw.githubusercontent.com/rohjagad/fn-autosc/main/upda
 What it does:
 
 - Detects the installed edition (`full` vs `lite`) and fetches the changed
-  files for it from the target commit (default `90c88b2`): 26 files on
-  full, 23 on lite. The four `change-limit-ip` tools ship as compiled
+  files for it from the target commit (default `6b967af`): 27 files on
+  full, 24 on lite. The four `change-limit-ip` tools ship as compiled
   binaries, so they are fingerprint-checked against the edition's menu
   zip instead of syntax-checked.
 - Downloads everything first, then verifies every file. If any check

@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# FN AutoSC updater: 5c48741 -> 90c88b2
+# FN AutoSC updater: 5c48741 -> 6b967af
 #
 # Applies the commits on top of b6d1a97 (1-minute evidence window,
 # Exp-Date-N/A binary fix, LOCKED IPs block, MULTILOGIN UNLOCKED
@@ -13,7 +13,7 @@
 # missing).
 #
 # Usage:
-#   bash update.sh                  # update to 90c88b2 (default)
+#   bash update.sh                  # update to 6b967af (default)
 #   bash update.sh <commit> --force  # re-apply even if already recorded
 #
 # One-line remote run:
@@ -22,7 +22,7 @@
 set -u
 
 FROM="5c487410db77000968450495a615f8e7971f376a"
-TARGET="${1:-90c88b221ad64936d5d6ecf4b5c0beb983e56351}"
+TARGET="${1:-6b967af9e0ebadc76a265132e49d62a27ad72235}"
 FORCE=0
 [ "${2:-}" = "--force" ] && FORCE=1
 
@@ -64,7 +64,7 @@ echo "Edition detected: $EDITION"
 
 # Deployed name (no .sh) -> repo source name.
 FILES="limit-ip-ws limit-ip-http limit-ip-xhttp limit-ip-grpc
-delete-ws delete-xhttp menu-system
+delete-ws delete-xhttp menu-system menu
 add-vmess-ws add-vmess-http add-vmess-xhttp add-vmess-grpc
 trial-vmess-ws trial-vmess-http trial-vmess-xhttp trial-vmess-grpc
 unlock-ws-auto unlock-http-auto unlock-xhttp-auto unlock-grpc-auto"
@@ -81,6 +81,7 @@ marker_for() {
         delete-ws) echo 'Delete WS Account' ;;
         delete-xhttp) echo 'Delete XHTTP Account' ;;
         menu-system) echo 'Banner /etc/issue.net' ;;
+        menu) echo 'Installed version' ;;
         add-vmess-* | trial-vmess-*) echo '"sni": "${rdomain}"' ;;
         addssh | trial-ssh) echo 'Rotated' ;;
     esac
