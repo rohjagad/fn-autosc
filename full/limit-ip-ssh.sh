@@ -257,10 +257,10 @@ for limit_file in /etc/xray/limit/ip/ssh/*; do
     fi
 done
 
-# Regression fix R12: only count logins from the last 10 minutes. Removing the
+# Regression fix R12: only count logins from the last 1 minute. Removing the
 # old auth.log truncation (Bug 19 / R7) made every historical login count
 # forever, so a user who once exceeded the limit was re-locked every 5 minutes
-# after each automatic unlock. The 10-minute window stays below the 15-minute
+# after each automatic unlock. The 1-minute window stays below the 15-minute
 # unlock delay, so unlocked accounts stay unlocked unless they exceed the
 # limit again with fresh logins.
 #
@@ -270,7 +270,7 @@ done
 recent_auth=$(mktemp)
 DB_LOG=$(mktemp)
 SSH_LOG=$(mktemp)
-cut_ref=$(date -d '10 minutes ago' '+%Y %m %d %H %M %S')
+cut_ref=$(date -d '1 minute ago' '+%Y %m %d %H %M %S')
 now_ref=$(date '+%Y %m %d')
 read -r cutY cutM cutD cutH cutMin cutS <<< "$cut_ref"
 read -r nowY nowM nowD <<< "$now_ref"
@@ -304,11 +304,11 @@ awk -v cy="$nowY" -v cm="$nowM" -v cd="$nowD" \
 # /var/log/secure on CentOS); the message-body parser handles both formats.
 grep -E "Accepted password for" "$recent_auth" > "$SSH_LOG"
 
-# Dropbear events: prefer the systemd journal (native 10-minute window).
+# Dropbear events: prefer the systemd journal (native 1-minute window).
 # Fall back to the auth log when journalctl is unavailable or has never seen
 # the dropbear unit.
 if command -v journalctl >/dev/null 2>&1 && journalctl -u dropbear -n 20 --no-pager 2>/dev/null | grep -q .; then
-    journalctl -u dropbear --since "-10 minutes" --no-pager 2>/dev/null | grep -E "Password auth succeeded" > "$DB_LOG"
+    journalctl -u dropbear --since "-1 minute" --no-pager 2>/dev/null | grep -E "Password auth succeeded" > "$DB_LOG"
 else
     grep -E "Password auth succeeded" "$recent_auth" > "$DB_LOG"
 fi

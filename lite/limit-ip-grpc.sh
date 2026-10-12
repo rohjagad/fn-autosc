@@ -133,10 +133,10 @@ for user in $username; do
     [[ "$cek" =~ ^[0-9]+$ ]] || cek=0
     # Found 489: the API sees every inbound from 127.0.0.1 behind nginx, so its
     # online count caps at 1. Count distinct source IPs from the access log as
-    # well (first X-Forwarded-For entry, as xray logs it; 10-minute window
+    # well (first X-Forwarded-For entry, as xray logs it; 1-minute window
     # mirrors limit-ip-ssh R12; header spoof-evasion accepted per Decision 24).
     # Take the larger of the two.
-    _cut=$(date -d '10 minutes ago' '+%Y/%m/%d %H:%M:%S')
+    _cut=$(date -d '1 minute ago' '+%Y/%m/%d %H:%M:%S')
     _logips=$(awk -v cut="$_cut" -v u="$user" '$1" "$2 >= cut && match($0, "email: "u"([^A-Za-z0-9_]|$)") {for(i=1;i<=NF;i++) if($i=="from"){s=$(i+1); sub(/^(tcp|udp):/,"",s); sub(/:[0-9]*$/,"",s); if(s!="") print s; break}}' "/var/log/xray/grpc.log" 2>/dev/null | sort -u)
     if [ -z "$_logips" ]; then _logc=0; else _logc=$(printf '%s\n' "$_logips" | wc -l); fi
     [[ "$_logc" =~ ^[0-9]+$ ]] || _logc=0

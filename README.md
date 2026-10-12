@@ -461,7 +461,7 @@ Each account with an IP limit has one file:
 The `limit-ip-*` jobs run every 5 minutes. For each limited account they take
 the larger of (a) the live session count from the Xray stats API and
 (b) the distinct source IPs in the transport's access log over the last
-10 minutes, and lock the account when that exceeds the stored limit
+1 minute, and lock the account when that exceeds the stored limit
 (card moved to `.locked`, auto-unlock ~15 min later).
 
 > CDN note (measured live, Oct 2026): behind Cloudflare the limiter counts
