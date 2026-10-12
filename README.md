@@ -180,7 +180,8 @@ Every menu is a command. Type it in the terminal to open it.
 ### Main Menu — `menu`
 
 The dashboard. Shows the SSH version, domain, IP, uptime, ISP/region, account
-counts per protocol, service status, and recent traffic.
+counts per protocol, service status, recent traffic, and the installed /
+updated panel commits (from `update.sh`).
 
 | Option | Opens |
 | :---: | :--- |
@@ -762,6 +763,8 @@ Files are named `{username}.log`. Locking renames them to `{username}.locked`.
 | HAProxy bundle | `/etc/haproxy/funny.pem` |
 | Telegram | `/etc/funny/.keybot`, `/etc/funny/.chatid` |
 | Version | `/etc/funny/version` |
+| Install commit | `/etc/funny/.install-commit` (`Unknown` when recorded by no installer yet) |
+| Update commit | `/etc/funny/.update-commit` (written by `update.sh`; `Unknown` when never updated) |
 
 ### Quota & IP Limit Files
 

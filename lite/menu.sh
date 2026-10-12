@@ -181,9 +181,15 @@ rainbow_sep() {
 
     # Output informasi izin
     output() {
-        echo "Username: $USERNAME"
-        echo "IPv4: $PERMISSION_IP"
-        if [ "$REMAINING_DAYS" = "lifetime" ]; then echo "Expired: lifetime"; else echo "Expired: $EXPIRED_DATE ($REMAINING_DAYS days)"; fi
+        echo "Username          : $USERNAME"
+        echo "IPv4              : $PERMISSION_IP"
+        if [ "$REMAINING_DAYS" = "lifetime" ]; then echo "Expired           : lifetime"; else echo "Expired           : $EXPIRED_DATE ($REMAINING_DAYS days)"; fi
+        _installed=$(cat /etc/funny/.install-commit 2>/dev/null)
+        [ -n "$_installed" ] && [ "$_installed" != "Unknown" ] && _installed="${_installed:0:7}" || _installed="Unknown"
+        _updated=$(cat /etc/funny/.update-commit 2>/dev/null)
+        [ -n "$_updated" ] && [ "$_updated" != "Unknown" ] && _updated="${_updated:0:7}" || _updated="Unknown"
+        echo "Installed version: $_installed"
+        echo "Updated version: $_updated"
     }
 
 clear
