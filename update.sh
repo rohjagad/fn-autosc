@@ -39,10 +39,13 @@ command -v unzip >/dev/null 2>&1 || {
     apt-get update -qq && apt-get install -y unzip
 }
 fetch() {
+    # $1=url $2=dest $3=timeout seconds (default 60; the ~60 MB menu zip
+    # gets a long one - VPS links to GitHub are sometimes slow).
+    local _timeout="${3:-60}"
     if command -v curl >/dev/null 2>&1; then
-        curl -fsSL --max-time 60 "$1" -o "$2"
+        curl -fsSL --max-time "$_timeout" --retry 2 --retry-delay 5 "$1" -o "$2"
     else
-        wget -q --timeout=60 -O "$2" "$1"
+        wget -q --timeout="$_timeout" --tries=3 -O "$2" "$1"
     fi
 }
 
@@ -142,7 +145,7 @@ done
 
 # Phase 1b: binaries via the edition menu zip (integrity + md5 verified).
 echo "Downloading menu zip (${EDITION})..."
-fetch "$ZIPURL" "${STAGE}/menu.zip" || {
+fetch "$ZIPURL" "${STAGE}/menu.zip" 600 || {
     echo "FAILED to download menu zip - aborting, nothing changed."
     rm -rf "$STAGE"
     exit 1
