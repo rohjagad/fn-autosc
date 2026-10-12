@@ -94,6 +94,11 @@ for _port in 22 3303; do
         echo "Port ${_port}" >> /etc/ssh/sshd_config
 done
 unset _port
+# The login banner (/etc/issue.net, HTML-styled for apps that render it)
+# is shown on 22/3303 only when sshd_config names it - without this line
+# every banner change is silently invisible on OpenSSH.
+grep -qE "^[[:space:]]*Banner[[:space:]]+" /etc/ssh/sshd_config || \
+    echo "Banner /etc/issue.net" >> /etc/ssh/sshd_config
 # VPN users are forwarding-only credentials (Decision 7): no X sessions,
 # no agent sockets. Forwarding itself stays on - it IS the product.
 for _k in X11Forwarding AllowAgentForwarding; do
@@ -164,11 +169,31 @@ fi
 rm /etc/default/dropbear
 rm /etc/issue.net
 cat> /etc/issue.net << END
-</strong> <p style="text-align:center"><b> <br><font color="#00FFE2"<br>┏━━━━━━━━━━━━━━━┓<br> RERECHAN STORE<br>┗━━━━━━━━━━━━━━━┛<br></font><br><font color="#00FF00"></strong> <p style="text-align:center"><b> <br><font color="#00FFE2">क═══════क⊹⊱✫⊰⊹क═══════क</font><br><font color='#FFFF00'><b> ★ [ ༆Hʸᵖᵉʳ᭄W̺͆E̺͆L̺͆C̺͆O̺͆M̺͆E̺͆
-T̺͆O̺͆ M̺͆Y̺͆ S̺͆E̺͆R̺͆V̺͆E̺͆R̺͆ V͇̿I͇̿P͇̿ ] ★ </b></font><br><font color="#FFF00">ℝ𝕖𝕣𝕖𝕔𝕙𝕒𝕟 𝕊𝕥𝕠𝕣𝕖</font><br> <font color="#FF00FF">❖Ƭʜᴇ No DDOS</font><br> <font color="#FF0000">❖Ƭʜᴇ No Torrent</font><br> <font color="#FFB1C2">❖Ƭʜᴇ No Bokep </font><br> <font color="#FFFFFF">❖Ƭʜᴇ No Hacking</font><br>
-<font color="#00FF00">❖Ƭʜᴇ No Mining</font><br> <font color="#00FF00">➳ᴹᴿ᭄ Oder / Trial :
-https://wa.me/6289512992313 </font><br>
-<font color="#00FFE2">क═══════क⊹⊱✫⊰⊹क═══════क</font><br></font><br><font color="FFFF00">❖Ƭʜᴇ TELEGRAM => https://t.me/rohcuan</font><br>
+<br>
+<font color="red">===</font><font color="#FF7F00">===</font><font color="yellow">===</font><font color="#00FF00">===</font><font color="#0000FF">===</font><font color="#4B0082">===</font><font color="#EE82EE">===</font><font color="cyan">===</font><br><br>
+<b>
+  <font color="red">R</font>
+  <font color="#FF7F00">o</font>
+  <font color="yellow">h</font>
+  <font color="#00FF00">C</font>
+  <font color="#0000FF">u</font>
+  <font color="#4B0082">a</font>
+  <font color="#EE82EE">n</font>
+  
+  <font color="cyan">S</font>
+  <font color="red">t</font>
+  <font color="#FF7F00">o</font>
+  <font color="yellow">r</font>
+  <font color="#00FF00">e</font>
+</b>
+
+<br><br>
+<b><font color="#00FF00">Hubungi untuk pemesanan :</font></b><br>
+<b><font color="#800080">WA =</font></b> <font color="cyan">089512992313</font><br>
+<b><font color="#800080">TELE =</font></b> <font color="cyan">@rohcuan</font>
+<br><br>
+<font color="red">===</font><font color="#FF7F00">===</font><font color="yellow">===</font><font color="#00FF00">===</font><font color="#0000FF">===</font><font color="#4B0082">===</font><font color="#EE82EE">===</font><font color="cyan">===</font>
+<br>
 END
 clear
 echo ""
@@ -181,7 +206,7 @@ NO_START=0
 DROPBEAR_PORT=111
 
 # any additional arguments for Dropbear
-DROPBEAR_EXTRA_ARGS="-p 109 -p 69 "
+DROPBEAR_EXTRA_ARGS="-p 109 -p 69 -b /etc/issue.net"
 
 # specify an optional banner file containing a message to be
 # sent to clients before they connect, such as "/etc/issue.net"

@@ -137,6 +137,16 @@ rm -f "$tmp"
 if ! grep -qE "^[[:space:]]*Banner[[:space:]]+" /etc/ssh/sshd_config 2>/dev/null; then
     echo "Banner /etc/issue.net" >> /etc/ssh/sshd_config
 fi
+# Dropbear serves the banner only when its command line carries -b: the
+# systemd unit never passes DROPBEAR_BANNER, so make sure it travels
+# inside DROPBEAR_EXTRA_ARGS (old installs lack it; then restart below
+# actually serves the new file).
+if grep -qE '^DROPBEAR_EXTRA_ARGS=' /etc/default/dropbear 2>/dev/null; then
+    grep -qE '\-b[[:space:]]+/etc/issue.net' /etc/default/dropbear 2>/dev/null || \
+        sed -i -E 's|^(DROPBEAR_EXTRA_ARGS="[^"]*)"|\1 -b /etc/issue.net"|' /etc/default/dropbear
+elif [ -f /etc/default/dropbear ]; then
+    echo 'DROPBEAR_EXTRA_ARGS="-b /etc/issue.net"' >> /etc/default/dropbear
+fi
 systemctl daemon-reload
 systemctl restart ssh 2>/dev/null || true
 systemctl restart dropbear 2>/dev/null || true
