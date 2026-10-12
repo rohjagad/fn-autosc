@@ -1,18 +1,19 @@
 #!/bin/bash
 #
-# FN AutoSC updater: b6d1a97 -> 5c48741
+# FN AutoSC updater: b6d1a97 -> 90c88b2
 #
-# Applies the notice-improvement commits on top of b6d1a97 (LOCKED IPs
-# block, MULTILOGIN UNLOCKED notices for Xray + SSH, SSH Time Login
-# block) to a live install. The file set is a superset that also covers
-# the earlier b91281c range, so older installs are brought fully up to
-# date in one run. Safe to run: files are backed up first, every
-# download is syntax-checked before it replaces anything, and no
-# service restart is needed (cron jobs and menus read these files
-# fresh on every run).
+# Applies the commits on top of b6d1a97 (1-minute evidence window,
+# Exp-Date-N/A binary fix, LOCKED IPs block, MULTILOGIN UNLOCKED
+# notices, SSH Time Login block, working SSH banner wiring + default)
+# to a live install. The file set is a superset covering the earlier
+# ranges too, so older installs are brought fully up to date in one
+# run. Safe to run: files are backed up first, every download is
+# verified before it replaces anything, and cron/menu scripts need no
+# restart (only ssh/dropbear restart, and only if banner wiring was
+# missing).
 #
 # Usage:
-#   bash update.sh                  # update to 5c48741 (default)
+#   bash update.sh                  # update to 90c88b2 (default)
 #   bash update.sh <commit> --force  # re-apply even if already recorded
 #
 # One-line remote run:
@@ -21,7 +22,7 @@
 set -u
 
 FROM="b6d1a97376979c8ef7aea51a5ef10aed65ae1437"
-TARGET="${1:-5c487410db77000968450495a615f8e7971f376a}"
+TARGET="${1:-90c88b221ad64936d5d6ecf4b5c0beb983e56351}"
 FORCE=0
 [ "${2:-}" = "--force" ] && FORCE=1
 
@@ -33,6 +34,9 @@ fi
 # Downloader (same bootstrap the README install command uses).
 command -v curl >/dev/null 2>&1 || command -v wget >/dev/null 2>&1 || {
     apt-get update -qq && apt-get install -y curl
+}
+command -v unzip >/dev/null 2>&1 || {
+    apt-get update -qq && apt-get install -y unzip
 }
 fetch() {
     if command -v curl >/dev/null 2>&1; then
@@ -85,6 +89,29 @@ marker_for() {
 BACKUP="/root/fn-update-backup-$(date +%Y%m%d-%H%M%S)"
 STAGE=$(mktemp -d) || { echo "Cannot create staging dir."; exit 1; }
 BASE="https://raw.githubusercontent.com/rohjagad/fn-autosc/${TARGET}/${EDITION}"
+ZIPURL="https://raw.githubusercontent.com/rohjagad/fn-autosc/${TARGET}/menu/${EDITION}.zip"
+
+# change-limit-ip tools ship as compiled binaries inside the menu zip
+# (no .sh to syntax-check), so they travel separately with pinned
+# md5 fingerprints per edition instead of text markers.
+BINARIES="change-limit-ip-ws change-limit-ip-http change-limit-ip-xhttp change-limit-ip-grpc"
+bin_md5() {
+    if [ "$EDITION" = "full" ]; then
+        case "$1" in
+            change-limit-ip-ws) echo '98f5d2f80b41a8ad348514638c0120be' ;;
+            change-limit-ip-http) echo 'fd1a02d7e522c9e7d89b1bee07e0a5e8' ;;
+            change-limit-ip-xhttp) echo '3bf12a8521c3577abb3400400effeff3' ;;
+            change-limit-ip-grpc) echo '5ed18b1ac5a98ef47531cd01474b08ed' ;;
+        esac
+    else
+        case "$1" in
+            change-limit-ip-ws) echo 'a4b054fae469ab64422a3909a59488ff' ;;
+            change-limit-ip-http) echo 'd4e7995e106878381bd3a0b6df95418a' ;;
+            change-limit-ip-xhttp) echo 'b27c49c60f092e664a9d786eaaeaf2ab' ;;
+            change-limit-ip-grpc) echo 'cefb9eb84c13b252ea0e21524e8ec9bb' ;;
+        esac
+    fi
+}
 
 # Phase 1: download everything, syntax-check + marker-check everything.
 echo "Downloading ${TARGET} (${EDITION})..."
@@ -112,13 +139,60 @@ for name in $FILES; do
     echo "  ok: $name"
 done
 
+# Phase 1b: binaries via the edition menu zip (integrity + md5 verified).
+echo "Downloading menu zip (${EDITION})..."
+fetch "$ZIPURL" "${STAGE}/menu.zip" || {
+    echo "FAILED to download menu zip - aborting, nothing changed."
+    rm -rf "$STAGE"
+    exit 1
+}
+unzip -t -q "${STAGE}/menu.zip" >/dev/null 2>&1 || {
+    echo "Menu zip failed integrity test - aborting, nothing changed."
+    rm -rf "$STAGE"
+    exit 1
+}
+for b in $BINARIES; do
+    unzip -q -p "${STAGE}/menu.zip" "$b" > "${STAGE}/${b}" 2>/dev/null || {
+        echo "FAILED to extract $b - aborting, nothing changed."
+        rm -rf "$STAGE"
+        exit 1
+    }
+    [ "$(md5sum < "${STAGE}/${b}" | cut -d' ' -f1)" = "$(bin_md5 "$b")" ] || {
+        echo "$b fingerprint mismatch - aborting, nothing changed."
+        rm -rf "$STAGE"
+        exit 1
+    }
+    echo "  ok: $b"
+done
+
 # Phase 2: back up current files, then install.
 mkdir -p "$BACKUP"
 for name in $FILES; do
     [ -e "/usr/bin/${name}" ] && cp -f "/usr/bin/${name}" "${BACKUP}/${name}"
     install -m 0755 "${STAGE}/${name}" "/usr/bin/${name}"
 done
+for b in $BINARIES; do
+    [ -e "/usr/bin/${b}" ] && cp -f "/usr/bin/${b}" "${BACKUP}/${b}"
+    install -m 0755 "${STAGE}/${b}" "/usr/bin/${b}"
+done
 rm -rf "$STAGE"
+
+# Banner wiring (installer/ssh.sh equivalent for existing boxes):
+# OpenSSH shows /etc/issue.net only when named; Dropbear only with -b.
+# The banner CONTENT is never touched here (operator custom stays).
+wired=0
+if [ -f /etc/ssh/sshd_config ] && ! grep -qE "^[[:space:]]*Banner[[:space:]]+" /etc/ssh/sshd_config 2>/dev/null; then
+    echo "Banner /etc/issue.net" >> /etc/ssh/sshd_config && wired=1
+fi
+if grep -qE '^DROPBEAR_EXTRA_ARGS=' /etc/default/dropbear 2>/dev/null && \
+   ! grep -qE '\-b[[:space:]]+/etc/issue.net' /etc/default/dropbear 2>/dev/null; then
+    sed -i -E 's|^(DROPBEAR_EXTRA_ARGS="[^"]*)"|\1 -b /etc/issue.net"|' /etc/default/dropbear && wired=1
+fi
+if [ "$wired" -eq 1 ]; then
+    if command -v sshd >/dev/null 2>&1; then sshd -t 2>/dev/null && systemctl restart ssh 2>/dev/null || true; fi
+    command -v systemctl >/dev/null 2>&1 && systemctl restart dropbear 2>/dev/null || true
+    echo "Banner wiring applied (ssh/dropbear restarted; dropbear clients reconnect)."
+fi
 
 echo "$TARGET" > /etc/funny/.update-commit
 chmod 600 /etc/funny/.update-commit 2>/dev/null || true
@@ -126,4 +200,4 @@ chmod 600 /etc/funny/.update-commit 2>/dev/null || true
 echo ""
 echo "UPDATE SUCCESS: ${FROM:0:7} -> ${TARGET:0:7} ($EDITION)"
 echo "Backup of replaced files: $BACKUP"
-echo "No service restart was needed (cron/menu scripts load fresh)."
+echo "Cron/menu scripts need no restart; ssh/dropbear restarted only if banner wiring was missing."

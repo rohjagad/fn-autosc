@@ -906,18 +906,21 @@ bash <(curl -fsSL https://raw.githubusercontent.com/rohjagad/fn-autosc/main/upda
 What it does:
 
 - Detects the installed edition (`full` vs `lite`) and fetches the changed
-  scripts for it from the target commit (default `5c48741`): 22 files on
-  full, 19 on lite.
-- Downloads everything first, then syntax-checks (`bash -n`) and
-  fix-marker-checks every file. If any check fails, **nothing is
-  changed**.
+  files for it from the target commit (default `90c88b2`): 26 files on
+  full, 23 on lite. The four `change-limit-ip` tools ship as compiled
+  binaries, so they are fingerprint-checked against the edition's menu
+  zip instead of syntax-checked.
+- Downloads everything first, then verifies every file. If any check
+  fails, **nothing is changed**.
 - Backs up the replaced files to `/root/fn-update-backup-<date>/`,
-  installs the new ones as `0755` into `/usr/bin`, and records the
-  commit in `/etc/funny/.update-commit` (re-running is a no-op unless
-  `--force` is passed).
-- Needs **no service restart**: cron jobs and menus read these scripts
-  fresh on every run, so the next 5-minute tick already uses the new
-  code and no customer is disconnected.
+  installs the new ones as `0755` into `/usr/bin`, wires the SSH banner
+  (`Banner` in `sshd_config`, `-b` in Dropbear args — banner content
+  itself is never touched), and records the commit in
+  `/etc/funny/.update-commit` (re-running is a no-op unless `--force`
+  is passed).
+- Cron/menu scripts need no restart. Only `ssh`/`dropbear` restart, and
+  only when banner wiring was missing (SSH sessions survive; Dropbear
+  clients reconnect).
 
 ---
 
