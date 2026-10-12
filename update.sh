@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# FN AutoSC updater: b6d1a97 -> 90c88b2
+# FN AutoSC updater: 5c48741 -> 90c88b2
 #
 # Applies the commits on top of b6d1a97 (1-minute evidence window,
 # Exp-Date-N/A binary fix, LOCKED IPs block, MULTILOGIN UNLOCKED
@@ -21,7 +21,7 @@
 
 set -u
 
-FROM="b6d1a97376979c8ef7aea51a5ef10aed65ae1437"
+FROM="5c487410db77000968450495a615f8e7971f376a"
 TARGET="${1:-90c88b221ad64936d5d6ecf4b5c0beb983e56351}"
 FORCE=0
 [ "${2:-}" = "--force" ] && FORCE=1
