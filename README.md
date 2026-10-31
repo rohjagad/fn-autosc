@@ -546,6 +546,12 @@ The backup command stages:
 
 The staged tree is zipped to `/root/backup.zip`.
 
+> Version markers (`.install-commit`, `.update-commit`, `version`) are
+> deliberately left out of the archive. `format.sh` stays in the archive as a
+> fallback, but restore keeps the running copy when present. This prevents a
+> data restore from rolling the menu version or the account-card renderer back
+> to an older panel.
+
 ### Where It Goes
 
 - **`backup`** — sends the archive to **Telegram as a document attachment**,
@@ -776,6 +782,9 @@ Files are named `{username}.log`. Locking renames them to `{username}.locked`.
 | Install commit | `/etc/funny/.install-commit` (`Unknown` when recorded by no installer yet) |
 | Update commit | `/etc/funny/.update-commit` (written by `update.sh`; `Unknown` when never updated) |
 
+The three version markers above are not archived; restore keeps the running
+copies so an old backup cannot make the menu display an older panel version.
+
 ### Quota & IP Limit Files
 
 ```text
@@ -919,14 +928,16 @@ bash <(curl -fsSL https://raw.githubusercontent.com/rohjagad/fn-autosc/main/upda
 What it does:
 
 - Detects the installed edition (`full` vs `lite`) and fetches the changed
-  files for it from the target commit (default `55d6a2c`): 28 files on
-  full, 26 on lite. The four `change-limit-ip` tools ship as compiled
+  files for it from the target commit (default `55d6a2c`): 32 files on
+  full, 30 on lite. The four `change-limit-ip` tools ship as compiled
   binaries, so they are fingerprint-checked against the edition's menu
-  zip instead of syntax-checked.
+  zip instead of syntax-checked. The account-card formatter
+  `/etc/funny/format.sh` is fetched from `config/` and refreshed too.
 - Downloads everything first, then verifies every file. If any check
   fails, **nothing is changed**.
 - Backs up the replaced files to `/root/fn-update-backup-<date>/`,
-  installs the new ones as `0755` into `/usr/bin`, wires the SSH banner
+  installs the new ones as `0755` into `/usr/bin` (the formatter into
+  `/etc/funny`), wires the SSH banner
   (`Banner` in `sshd_config`, `-b` in Dropbear args — banner content
   itself is never touched), and records the commit in
   `/etc/funny/.update-commit` (re-running is a no-op unless `--force`

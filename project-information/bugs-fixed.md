@@ -3140,3 +3140,11 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
   2. Sweeper memakai effective due: jika `due < mtime state + 800` (ciri state lama `+600`), due diganti `mtime + 900`; due baru `+900` tidak diubah (toleransi pembulatan detik). Jadi state lama tidak bisa memperpendek lock di bawah 15 menit sejak file state ditulis.
   3. Notice diubah menjadi `automatically unlocked after at least 15 minutes`.
 - **Verified lokal:** harness bwrap: lock baru menulis due `now+900`; state lama due `now+600` dengan mtime sekarang tidak unlock; state lama dengan mtime 16 menit lalu unlock, card `.locked` -> `.log`, dan entry JSON kembali. `bash -n` 8/8 bersih. `limit-ip-ssh` memang sudah `+900` dan tidak diubah. Belum di-deploy ke VPS (read-only).
+
+### Fix 511 - Restore tidak menurunkan versi marker/formatter (Found 511)
+
+- **Fix 511 (Found 511):**
+  1. Lima restore script (`full/restore-ftp.sh`, `lite/restore-ftp.sh`, `website/restore-ftp.sh`, `full/bmenu.sh`, `lite/bmenu.sh`) memakai helper `restore_funny_data`: simpan current `.install-commit`, `.update-commit`, `version`, dan `format.sh`, copy `funny`, lalu kembalikan current. Marker yang tidak ada di current dihapus; `format.sh` fallback ke arsip bila current tidak ada.
+  2. `full/backup.sh` + `lite/backup.sh` tidak lagi memasukkan tiga marker versi ke arsip; `format.sh` tetap disimpan sebagai fallback.
+  3. `update.sh` menambahkan `backup`, `restore-ftp`, `bmenu` ke FILES dan menyegarkan `/etc/funny/format.sh` dari `config/format.sh` (marker `Press any key to return...`).
+- **Verified lokal:** harness restore dengan arsip berisi marker/format lama dan current baru -> current dipertahankan; current marker tidak ada -> marker lama dihapus, format lama tetap sebagai fallback; `bash -n` 5 restore + 2 backup + `update.sh` bersih. Belum di-deploy ke VPS (read-only).

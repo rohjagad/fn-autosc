@@ -3014,3 +3014,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | Unlock baru terjadi pada tick cron pertama setelah 15 menit, jadi 15–20 menit; tidak pernah lebih cepat. Ini disengaja sesuai janji notice. |
 | **Over-engineering** | Satu `stat` per state file due; tanpa file/daemon baru. |
 | **vs the source** | Fix 403 memakai `+600` agar unlock “dalam 15 menit”; Fix 510 mengoreksi sisi awalnya agar minimal 15 menit. |
+
+## 271. Restore tidak menurunkan versi panel — Four Checks (November 1, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Data akun, kredensial, config Xray, dan `format.sh` fallback tetap direstore; marker/current formatter dipertahankan; backup baru tetap memuat seluruh data non-versi. |
+| **Over-strictness** | Jika current marker tidak ada, marker lama dari arsip dihapus (menu menampilkan Unknown), bukan dipakai; `format.sh` tetap memakai arsip bila current tidak ada. Tidak ada data akun yang dihapus. |
+| **Over-engineering** | Satu helper per script restore (5 script, 9 call site), 3 baris `rm` di backup, dan satu fetch/install config di `update.sh`; tanpa daemon/file state baru. |
+| **vs the source** | V23/1.20 dan repo sebelumnya menyalin `/etc/funny` wholesale; divergensi ini memisahkan data akun dari versi panel. |

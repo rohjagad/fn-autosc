@@ -106,6 +106,12 @@ cp /etc/gshadow /root/backup/
 cp -r /etc/xray /root/backup/xray
 cp -r /var/log/create /root/backup/create
 cp -r /etc/funny /root/backup/funny
+# Found 511: version markers are system state, not account data. Do not put
+# them in a backup that may be restored onto a newer panel. format.sh stays
+# in the archive as a fallback; restore keeps the running copy when present.
+rm -f /root/backup/funny/.install-commit \
+      /root/backup/funny/.update-commit \
+      /root/backup/funny/version
 cp /etc/crontab /root/backup/
 cp -r /etc/wireguard /root/backup/wireguard 2>/dev/null || true
 cp -r /etc/slowdns /root/backup/slowdns 2>/dev/null || true

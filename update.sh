@@ -69,10 +69,12 @@ echo "Edition detected: $EDITION"
 
 # Deployed name (no .sh) -> repo source name.
 FILES="xp limit-ip-ws limit-ip-http limit-ip-xhttp limit-ip-grpc
-delete-ws delete-xhttp menu-system menu
+delete-ws delete-xhttp menu-system menu backup restore-ftp bmenu
 add-vmess-ws add-vmess-http add-vmess-xhttp add-vmess-grpc
 trial-vmess-ws trial-vmess-http trial-vmess-xhttp trial-vmess-grpc
 unlock-ws-auto unlock-http-auto unlock-xhttp-auto unlock-grpc-auto"
+# format.sh lives in config/ and installs to /etc/funny, not /usr/bin.
+CONFIG_FILES="format.sh"
 if [ "$EDITION" = "full" ]; then
     FILES="$FILES addssh trial-ssh limit-ip-ssh"
 else
@@ -86,6 +88,8 @@ marker_for() {
         xp) echo 'xp_lock_in_flight' ;;
         limit-ip-ssh) echo 'MULTILOGIN UNLOCKED' ;;
         cek-xray-ws) echo 'Found 508: keep the access log' ;;
+        backup | restore-ftp | bmenu) echo 'Found 511' ;;
+        format.sh) echo 'Press any key to return...' ;;
         limit-ip-*) echo 'statsonlineiplist' ;;
         unlock-*-auto) echo 'MULTILOGIN UNLOCKED' ;;
         delete-ws) echo 'Delete WS Account' ;;
@@ -100,6 +104,7 @@ marker_for() {
 BACKUP="/root/fn-update-backup-$(date +%Y%m%d-%H%M%S)"
 STAGE=$(mktemp -d) || { echo "Cannot create staging dir."; exit 1; }
 BASE="https://raw.githubusercontent.com/rohjagad/fn-autosc/${TARGET}/${EDITION}"
+CONFIG_BASE="https://raw.githubusercontent.com/rohjagad/fn-autosc/${TARGET}/config"
 ZIPURL="https://raw.githubusercontent.com/rohjagad/fn-autosc/${TARGET}/menu/${EDITION}.zip"
 
 # change-limit-ip tools ship as compiled binaries inside the menu zip
@@ -150,6 +155,31 @@ for name in $FILES; do
     echo "  ok: $name"
 done
 
+# Phase 1a: config files installed outside /usr/bin (currently format.sh).
+for name in $CONFIG_FILES; do
+    fetch "${CONFIG_BASE}/${name}" "${STAGE}/${name}" || {
+        echo "FAILED to download config/${name} - aborting, nothing changed."
+        rm -rf "$STAGE"
+        exit 1
+    }
+    [ -s "${STAGE}/${name}" ] || {
+        echo "Downloaded config/${name} is empty - aborting, nothing changed."
+        rm -rf "$STAGE"
+        exit 1
+    }
+    bash -n "${STAGE}/${name}" || {
+        echo "config/${name} failed syntax check - aborting, nothing changed."
+        rm -rf "$STAGE"
+        exit 1
+    }
+    grep -qF "$(marker_for "$name")" "${STAGE}/${name}" || {
+        echo "config/${name} lacks its fix marker - aborting, nothing changed."
+        rm -rf "$STAGE"
+        exit 1
+    }
+    echo "  ok: $name"
+done
+
 # Phase 1b: binaries via the edition menu zip (integrity + md5 verified).
 echo "Downloading menu zip (${EDITION})..."
 fetch "$ZIPURL" "${STAGE}/menu.zip" 600 || {
@@ -185,6 +215,11 @@ done
 for b in $BINARIES; do
     [ -e "/usr/bin/${b}" ] && cp -f "/usr/bin/${b}" "${BACKUP}/${b}"
     install -m 0755 "${STAGE}/${b}" "/usr/bin/${b}"
+done
+mkdir -p /etc/funny
+for name in $CONFIG_FILES; do
+    [ -e "/etc/funny/${name}" ] && cp -f "/etc/funny/${name}" "${BACKUP}/funny-${name}"
+    install -m 0755 "${STAGE}/${name}" "/etc/funny/${name}"
 done
 rm -rf "$STAGE"
 

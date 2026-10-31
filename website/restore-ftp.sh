@@ -1,4 +1,27 @@
 #!/bin/bash
+
+# Found 511: /etc/funny contains version markers and the formatter. A data
+# backup must not roll the running panel back; keep the current copies
+# across the restore, and drop restored markers when no current copy exists.
+restore_funny_data() {
+    local keep f
+    keep=$(mktemp -d 2>/dev/null) || keep="/tmp/fn-funny-keep.$$"
+    mkdir -p "$keep" 2>/dev/null || { cp -r funny /etc/; return; }
+    for f in .install-commit .update-commit version format.sh; do
+        [ -f "/etc/funny/$f" ] && cp -a "/etc/funny/$f" "$keep/"
+    done
+    cp -r funny /etc/
+    for f in .install-commit .update-commit version; do
+        if [ -f "$keep/$f" ]; then
+            cp -a "$keep/$f" "/etc/funny/$f"
+        else
+            rm -f "/etc/funny/$f"
+        fi
+    done
+    [ -f "$keep/format.sh" ] && cp -a "$keep/format.sh" "/etc/funny/format.sh"
+    rm -rf "$keep"
+}
+
 # Detail Informasi
 ip4=$(curl -sS -m 10 ipv4.icanhazip.com)
 ip6=$(curl -sS -m 10 ipv6.icanhazip.com)
@@ -36,7 +59,7 @@ cp shadow /etc/ >/dev/null 2>&1
 cp gshadow /etc/ >/dev/null 2>&1
 cp crontab /etc/ >/dev/null 2>&1
 cp -r xray /etc/ >/dev/null 2>&1
-cp -r funny /etc/ >/dev/null 2>&1
+restore_funny_data >/dev/null 2>&1
 cp -r create /var/log/ >/dev/null 2>&1
 cp -r wireguard /etc/ >/dev/null 2>&1 || true
 cp -r slowdns /etc/ >/dev/null 2>&1 || true
