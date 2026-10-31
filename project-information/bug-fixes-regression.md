@@ -2987,3 +2987,21 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | Tidak menolak expiry valid; hanya skip data yang memang tidak bisa dihitung. Lock manual tetap indefinite; auto-lock tetap 15 menit lalu diproses normal. |
 | **Over-engineering** | Satu helper 3 baris + 2 guard per blok; tanpa daemon/file baru. Snapshot WS dipindah 2 baris ke dalam lock. |
 | **vs the source** | V23/1.20 `xp` tanpa guard (empty expiry -> hapus), dan lock-nya tanpa auto-unlock; divergensi ini menutup kerusakan yang muncul dari kombinasi xp lama + auto-unlock baru. |
+
+## 268. IP evidence + notice — Four Checks (October 31, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Akun dengan 2+ IP nyata tetap di-lock setelah set stabil 5 menit; akun 1 IP / under limit tidak di-lock; lock manual dan auto-unlock tidak berubah. |
+| **Over-strictness** | Semua pelanggaran (termasuk multilogin nyata) tertunda satu tick 5 menit; ini disengaja agar CGNAT tidak langsung lock. Tidak ada expiry/quota yang berubah. |
+| **Over-engineering** | Satu panggilan `statsonlineiplist` + satu state file per user over-limit; tanpa daemon atau file baru di `/etc`. |
+| **vs the source** | V23/1.20 hanya memakai statsonline/log dan lock pada sampel pertama; divergensi ini menutup false positive CGNAT dan notice `IPs (0)`. |
+
+## 269. CGNAT stable-set gate — Four Checks (October 31, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Dua perangkat nyata dengan set IP stabil tetap di-lock pada run kedua; satu perangkat dengan satu IP tidak pernah di-lock; set yang berputar tidak membentuk state stabil. |
+| **Over-strictness** | Perangkat kedua yang baru join menunggu satu tick sebelum lock; lock manual tetap indefinite, auto-unlock tetap 15 menit. |
+| **Over-engineering** | Satu file state berisi epoch + IP per user; dibersihkan saat under-limit, limit invalid, lock, atau user hilang dari JSON. |
+| **vs the source** | V23/1.20 lock langsung pada hitungan IP; divergensi ini menambahkan konfirmasi dua sampel khusus untuk CGNAT. |

@@ -459,11 +459,19 @@ Each account with an IP limit has one file:
 /etc/xray/limit/ip/xray/<protocol>/<username>   # max concurrent IPs
 ```
 
-The `limit-ip-*` jobs run every 5 minutes. For each limited account they take
-the larger of (a) the live session count from the Xray stats API and
-(b) the distinct source IPs in the transport's access log over the last
-1 minute, and lock the account when that exceeds the stored limit
-(card moved to `.locked`, auto-unlock ~15 min later).
+The `limit-ip-*` jobs run every 5 minutes. For each limited account they merge
+the per-IP online map from `xray api statsonlineiplist` with the distinct
+source IPs in the transport's access log over the last minute, and lock only
+when the same over-limit IP set is seen on two consecutive runs (at least
+4 minutes apart). The confirmation window keeps a single CGNAT device that
+rotates addresses from looking like several devices; a real multi-device set
+stays stable and locks on the second run. The lock notice lists the measured
+IPs, or says `IP evidence unavailable` when both sources are empty instead of
+showing `IPs (0)`. Per-user confirmation state lives in
+`/var/lib/fn-autosc/limit-ip/<protocol>/<username>` and is removed when the
+account is under the limit or gone. The access log is only a fallback:
+`kill-ws` truncates `ws.log` every 5 minutes, so the limiter never relies on
+it alone. Locked cards still auto-unlock ~15 minutes later.
 
 > CDN note (measured live, Oct 2026): behind Cloudflare the limiter counts
 > real client IPs on all four transports (nginx forwards the address chain;

@@ -100,7 +100,7 @@ DATE=$(date +"%d-%b-%Y %H:%M:%S")
 <code>Login    : $cek / $limit</code>
 <code>Status   : Locked</code>
 <b>-----------------------</b>
-<code>IPs (${_logc}):</code>
+${_ipline}
 $_ipblock
 <b>-----------------------</b>
 <i>Catatan:</i> The user account has been locked and total usage bandwidth will not be reset on the server. The account will be automatically unlocked in 15 minutes."
@@ -125,23 +125,64 @@ if flock -w 30 9; then
 for user in $username; do
     # Get the limit and current online stats for each user
     limit=$(cat "/etc/xray/limit/ip/xray/ws/${user}" 2>/dev/null)
+    _state="/var/lib/fn-autosc/limit-ip/ws/${user}"
     # Bug 68 guard: 0 / missing / malformed limit = unlimited, never enforced
     if ! [[ "$limit" =~ ^[1-9][0-9]*$ ]]; then
+        rm -f "$_state"
         continue
     fi
-    cek=$(xray api statsonline --server=127.0.0.1:10080 -email "$user" 2>/dev/null | jq -r '.stat.value // empty' 2>/dev/null)
-    [[ "$cek" =~ ^[0-9]+$ ]] || cek=0
-    # Found 489: the API sees every inbound from 127.0.0.1 behind nginx, so its
-    # online count caps at 1. Count distinct source IPs from the access log as
-    # well (first X-Forwarded-For entry, as xray logs it; 1-minute window
-    # mirrors limit-ip-ssh R12; header spoof-evasion accepted per Decision 24).
-    # Take the larger of the two.
+
+    # Found 508: statsonlineiplist exposes the actual per-IP map. The old
+    # statsonline count alone cannot tell real multi-device use from one
+    # CGNAT device rotating addresses, and the access log is truncated by
+    # kill-ws every 5 minutes (which produced the misleading "IPs (0)").
+    # Merge both sources: the map covers idle sessions, the 1-minute log
+    # covers a map that is momentarily empty. The 5-minute stability gate
+    # below stops a handover address from becoming a stable extra IP.
+    _iplist=$(xray api statsonlineiplist --server=127.0.0.1:10080 -email "$user" 2>/dev/null | jq -r 'if (.ips|type)=="object" then (.ips|keys[]) else empty end' 2>/dev/null | sort -u)
+    _statc=$(xray api statsonline --server=127.0.0.1:10080 -email "$user" 2>/dev/null | jq -r '.stat.value // empty' 2>/dev/null)
+    [[ "$_statc" =~ ^[0-9]+$ ]] || _statc=0
     _cut=$(date -d '1 minute ago' '+%Y/%m/%d %H:%M:%S')
     _logips=$(awk -v cut="$_cut" -v u="$user" '$1" "$2 >= cut && match($0, "email: "u"([^A-Za-z0-9_]|$)") {for(i=1;i<=NF;i++) if($i=="from"){s=$(i+1); sub(/^(tcp|udp):/,"",s); sub(/:[0-9]*$/,"",s); if(s!="") print s; break}}' "/var/log/xray/ws.log" 2>/dev/null | sort -u)
-    if [ -z "$_logips" ]; then _logc=0; else _logc=$(printf '%s\n' "$_logips" | wc -l); fi
-    [[ "$_logc" =~ ^[0-9]+$ ]] || _logc=0
-    if [ -z "$_logips" ]; then _ipblock="<code>-</code>"; else _ipblock=$(printf '%s\n' "$_logips" | sed 's/.*/<code>&<\/code>/'); fi
-    [ "$_logc" -gt "$cek" ] && cek="$_logc"
+    _curips=$(printf '%s\n%s\n' "$_iplist" "$_logips" | sed '/^$/d' | sort -u)
+    if [ -n "$_curips" ]; then
+        _ipc=$(printf '%s\n' "$_curips" | wc -l)
+        _ipblock=$(printf '%s\n' "$_curips" | sed 's/.*/<code>&<\/code>/')
+        _ipline="<code>IPs (${_ipc}):</code>"
+    else
+        _ipc=0
+        _ipblock="<code>-</code>"
+        _ipline="<code>IPs: evidence unavailable (stats empty, log rotated)</code>"
+        if [ "$_statc" -gt "$limit" ]; then
+            echo "IP limit: $user statsonline=$_statc but no IP evidence; skipping lock this cycle"
+        fi
+    fi
+    [[ "$_ipc" =~ ^[0-9]+$ ]] || _ipc=0
+    cek="$_ipc"
+
+    # Found 509: CGNAT handover can make one device look like N IPs for a
+    # few seconds. Lock only when the SAME over-limit IP set is seen on two
+    # consecutive 5-minute runs (>=240s), so a rotating address never forms
+    # a stable set. The state is a two-sample gate only; it never fabricates
+    # IP evidence when both the map and the log are empty.
+    if [ "$_ipc" -gt "$limit" ]; then
+        _prev_epoch=""
+        _prev_ips=""
+        if [ -f "$_state" ]; then
+            _prev_epoch=$(sed -n '1p' "$_state" 2>/dev/null)
+            _prev_ips=$(sed -n '2,$p' "$_state" 2>/dev/null)
+        fi
+        if [ "$_curips" = "$_prev_ips" ] && [[ "$_prev_epoch" =~ ^[0-9]+$ ]] && [ $(( $(date +%s) - _prev_epoch )) -ge 240 ]; then
+            rm -f "$_state"
+        else
+            mkdir -p "$(dirname "$_state")"
+            { echo "$(date +%s)"; printf '%s\n' "$_curips"; } > "$_state"
+            echo "IP limit: $user has $_ipc IPs (> $limit), waiting for a stable second sample"
+            continue
+        fi
+    else
+        rm -f "$_state"
+    fi
     
     # Clear screen
     clear
@@ -177,6 +218,15 @@ for user in $username; do
         clear
         echo ""
         echo ""
+    fi
+done
+
+# Drop per-user IP-evidence state for accounts that no longer exist.
+for _st in /var/lib/fn-autosc/limit-ip/ws/*; do
+    [ -e "$_st" ] || continue
+    _su=$(basename "$_st")
+    if ! printf '%s\n' "$username" | grep -qxF -- "$_su"; then
+        rm -f "$_st"
     fi
 done
 

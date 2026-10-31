@@ -267,3 +267,10 @@ Schedules observed live: `backup 0 0,6,12,18`, `xp 0,15,30,45`,
 - 3 non-terbukti-bug panel: (1) gRPC 415 = flap h2/h1.1 per-edge Cloudflare (18 vs 13, toggle ON) — 104.21.83.135 bersih, 104.17.70.206 sakit; (2) guest KVM SLIRP tak bisa TLS-penuh ke edge (handshake ok, h2 stall) — butuh tap/passt; (3) `kill-ws` cron truncate ws.log tiap 5 mnt (memakan batch bukti sekali; www-data ownership).
 - Pelajaran uji: jangan pin satu edge IP (matikan self-healing anycast); sinkronkan batch ws dengan tick cron; dua sumber (lab + VPS) untuk klaim multilogin.
 - Status akhir: repo `main` bersih pushed; test box 12 akun cdn + VM kvmcdn hidup; live box BELUM terima Fix 503/505 (tunggu operator).
+
+## IP evidence + CGNAT investigation (2026-10-31, live read-only)
+
+- `senar90` lock 19:45:04 menampilkan `IPs (0)`; `ws.log` memang di-truncate `kill-ws` tiap 5 menit (baris 216), sedangkan notice membaca jendela 1 menit. `lite/cek-xray-ws.sh` juga men-truncate log yang sama (baris 129); full tidak.
+- `xray api statsonlineiplist` mengembalikan map IP nyata untuk user aktif: `palem99` 2 IP, `pandan8` 1-2 IP, `senar90` 1 IP, `lantai9` 2 IP (berubah antar query). Ini sumber bukti yang dipakai Fix 508.
+- `tuna88` punya 3 alamat `112.215.x` berbeda di log dan lock pada 12:10 (bukan menit `xp`); konsisten dengan satu perangkat CGNAT yang berputar IP, bukan bukti tiga perangkat. Fix 509 menunda lock sampai set IP yang sama stabil dua run 5 menit.
+- Tidak ada perubahan live: hanya `cat`, `ls`, `grep`, `xray api` read-only. Enam akun korban `xp` (Found 507) masih kehilangan quota/IP limit sampai operator mengizinkan repair.

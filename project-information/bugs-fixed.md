@@ -3119,3 +3119,16 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
   2. Helper `xp_lock_in_flight <transport> <user>`: cek `.../<user>.locked` atau `/etc/xray/autounlock/<t>/<user>`; keempat blok Xray skip user lock-in-flight (paritas Fix 499 di auto-delete).
   3. Guard `[ -z "$exp" ] && continue` SEBELUM `date -d` di semua blok bertanggal: WS/HU/XHTTP/gRPC/L2TP/Noobz, full+lite. Ini menutup celah `date -d ""` = 00:00 hari ini yang tidak ditangkap guard `[ -z "$d1" ]` lama.
 - **Verified lokal:** `bash -n` full+lite bersih; harness membuktikan `date -d ""` -> `exp2=0` (jalur lama) sedangkan guard baru skip; helper true untuk `.locked`/state, false untuk akun normal. Menu zip full/lite di-repack dengan `xp` baru (0755). Belum di-deploy ke VPS (read-only).
+
+### Fix 508 - IP evidence: statsonlineiplist + log fallback, no `IPs (0)` (Found 508)
+
+- **Fix 508 (Found 508):** 8 berkas `limit-ip-{ws,http,xhttp,grpc}.sh` (full+lite):
+  1. `_iplist` dari `xray api statsonlineiplist` (jq `.ips|keys[]`) digabung dengan `_logips` 1 menit (`sort -u`), jadi map IP tetap jadi sumber utama saat log baru di-truncate.
+  2. Notice memakai `${_ipline}`; bila map dan log sama-sama kosong, teksnya `IPs: evidence unavailable (stats empty, log rotated)`, bukan `IPs (0)`.
+  3. `lite/cek-xray-ws.sh`: hapus `> /var/log/xray/ws.log` di akhir tampilan (full sudah tidak men-truncate).
+- **Verified lokal:** harness bwrap dengan fake xray/jq: 2 IP -> notice `IPs (2)` + dua baris `<code>`; tanpa bukti + statsonline=3 -> skip + pesan, JSON utuh, tidak ada notice 0. `bash -n` 9/9 bersih. Belum di-deploy ke VPS (read-only).
+
+### Fix 509 - CGNAT: two-sample stable IP set before lock (Found 509)
+
+- **Fix 509 (Found 509):** 8 berkas `limit-ip-{ws,http,xhttp,grpc}.sh` (full+lite) memakai state `/var/lib/fn-autosc/limit-ip/<transport>/<user>` berisi epoch + set IP. Bila `_ipc > limit`: set yang sama dan umur >=240 detik -> lock; set berbeda -> tulis state baru dan `continue` (satu tick grace). State dihapus saat under-limit, limit invalid, atau lock; loop cleanup menghapus state user yang sudah tidak ada di JSON.
+- **Verified lokal:** harness bwrap: set {A,B} -> state, no lock; set berubah {C,D} setelah 5 menit -> no lock, state reset; set {C,D} stabil 5 menit -> lock, JSON keluar, card `.locked`, autounlock ditulis, state hilang; under-limit -> state hilang; user hantu -> state dibersihkan. `bash -n` 8/8 bersih. Belum di-deploy ke VPS (read-only).

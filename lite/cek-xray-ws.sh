@@ -126,4 +126,5 @@ for user in "${users[@]}"; do
     echo -e "${separator}"
 done
 
-> /var/log/xray/ws.log
+# Found 508: keep the access log. limit-ip-ws uses it as fallback evidence
+# when statsonlineiplist is empty; truncating here made "IPs (0)" common.
