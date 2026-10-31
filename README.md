@@ -418,8 +418,9 @@ in the config file.
 
 Locking renames the account log from `{username}.log` to `{username}.locked`.
 Unlocking reverses it. Both operations restart the service. Locked accounts are
-skipped by auto-delete. Multilogin locks lift themselves (Xray ~10–15 min,
-SSH ~15 min via due-epoch sweeper files); manual locks stay until unlocked.
+skipped by auto-delete. Multilogin locks lift themselves (Xray at least
+15 min, SSH ~15 min via due-epoch sweeper files); manual locks stay until
+unlocked.
 
 ### Changing UUID / Password
 
@@ -471,7 +472,8 @@ showing `IPs (0)`. Per-user confirmation state lives in
 `/var/lib/fn-autosc/limit-ip/<protocol>/<username>` and is removed when the
 account is under the limit or gone. The access log is only a fallback:
 `kill-ws` truncates `ws.log` every 5 minutes, so the limiter never relies on
-it alone. Locked cards still auto-unlock ~15 minutes later.
+it alone. Locked cards auto-unlock after at least 15 minutes (15–20 min
+on the 5-minute cron), never earlier.
 
 > CDN note (measured live, Oct 2026): behind Cloudflare the limiter counts
 > real client IPs on all four transports (nginx forwards the address chain;

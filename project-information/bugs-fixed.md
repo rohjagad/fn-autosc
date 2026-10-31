@@ -3132,3 +3132,11 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 509 (Found 509):** 8 berkas `limit-ip-{ws,http,xhttp,grpc}.sh` (full+lite) memakai state `/var/lib/fn-autosc/limit-ip/<transport>/<user>` berisi epoch + set IP. Bila `_ipc > limit`: set yang sama dan umur >=240 detik -> lock; set berbeda -> tulis state baru dan `continue` (satu tick grace). State dihapus saat under-limit, limit invalid, atau lock; loop cleanup menghapus state user yang sudah tidak ada di JSON.
 - **Verified lokal:** harness bwrap: set {A,B} -> state, no lock; set berubah {C,D} setelah 5 menit -> no lock, state reset; set {C,D} stabil 5 menit -> lock, JSON keluar, card `.locked`, autounlock ditulis, state hilang; under-limit -> state hilang; user hantu -> state dibersihkan. `bash -n` 8/8 bersih. Belum di-deploy ke VPS (read-only).
+
+### Fix 510 - Auto-unlock Xray minimal 15 menit (Found 510)
+
+- **Fix 510 (Found 510):** 8 berkas `limit-ip-{ws,http,xhttp,grpc}.sh` (full+lite):
+  1. Due state diubah dari `+ 600` (10 menit) menjadi `+ 900` (15 menit).
+  2. Sweeper memakai effective due: jika `due < mtime state + 800` (ciri state lama `+600`), due diganti `mtime + 900`; due baru `+900` tidak diubah (toleransi pembulatan detik). Jadi state lama tidak bisa memperpendek lock di bawah 15 menit sejak file state ditulis.
+  3. Notice diubah menjadi `automatically unlocked after at least 15 minutes`.
+- **Verified lokal:** harness bwrap: lock baru menulis due `now+900`; state lama due `now+600` dengan mtime sekarang tidak unlock; state lama dengan mtime 16 menit lalu unlock, card `.locked` -> `.log`, dan entry JSON kembali. `bash -n` 8/8 bersih. `limit-ip-ssh` memang sudah `+900` dan tidak diubah. Belum di-deploy ke VPS (read-only).

@@ -273,4 +273,5 @@ Schedules observed live: `backup 0 0,6,12,18`, `xp 0,15,30,45`,
 - `senar90` lock 19:45:04 menampilkan `IPs (0)`; `ws.log` memang di-truncate `kill-ws` tiap 5 menit (baris 216), sedangkan notice membaca jendela 1 menit. `lite/cek-xray-ws.sh` juga men-truncate log yang sama (baris 129); full tidak.
 - `xray api statsonlineiplist` mengembalikan map IP nyata untuk user aktif: `palem99` 2 IP, `pandan8` 1-2 IP, `senar90` 1 IP, `lantai9` 2 IP (berubah antar query). Ini sumber bukti yang dipakai Fix 508.
 - `tuna88` punya 3 alamat `112.215.x` berbeda di log dan lock pada 12:10 (bukan menit `xp`); konsisten dengan satu perangkat CGNAT yang berputar IP, bukan bukti tiga perangkat. Fix 509 menunda lock sampai set IP yang sama stabil dua run 5 menit.
+- Auto-unlock: state due ditulis `lock + 600` (10 menit), jadi pada cron 5 menit lock bisa lepas 10–15 menit — lebih cepat dari notice 15 menit. Fix 510 mengubahnya ke `+900` plus guard `mtime + 900` untuk state lama.
 - Tidak ada perubahan live: hanya `cat`, `ls`, `grep`, `xray api` read-only. Enam akun korban `xp` (Found 507) masih kehilangan quota/IP limit sampai operator mengizinkan repair.

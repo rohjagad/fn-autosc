@@ -3005,3 +3005,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | Perangkat kedua yang baru join menunggu satu tick sebelum lock; lock manual tetap indefinite, auto-unlock tetap 15 menit. |
 | **Over-engineering** | Satu file state berisi epoch + IP per user; dibersihkan saat under-limit, limit invalid, lock, atau user hilang dari JSON. |
 | **vs the source** | V23/1.20 lock langsung pada hitungan IP; divergensi ini menambahkan konfirmasi dua sampel khusus untuk CGNAT. |
+
+## 270. Xray auto-unlock minimal 15 menit — Four Checks (October 31, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Lock baru menulis due `now+900`; state lama `+600` tetap ditahan sampai `mtime+900`; manual lock tetap indefinite; SSH tetap `+900` dan tidak berubah. |
+| **Over-strictness** | Unlock baru terjadi pada tick cron pertama setelah 15 menit, jadi 15–20 menit; tidak pernah lebih cepat. Ini disengaja sesuai janji notice. |
+| **Over-engineering** | Satu `stat` per state file due; tanpa file/daemon baru. |
+| **vs the source** | Fix 403 memakai `+600` agar unlock “dalam 15 menit”; Fix 510 mengoreksi sisi awalnya agar minimal 15 menit. |

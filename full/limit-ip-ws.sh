@@ -103,7 +103,7 @@ DATE=$(date +"%d-%b-%Y %H:%M:%S")
 ${_ipline}
 $_ipblock
 <b>-----------------------</b>
-<i>Catatan:</i> The user account has been locked and total usage bandwidth will not be reset on the server. The account will be automatically unlocked in 15 minutes."
+<i>Catatan:</i> The user account has been locked and total usage bandwidth will not be reset on the server. The account will be automatically unlocked after at least 15 minutes."
         curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$TEXT" $URL >/dev/null
 }
 
@@ -209,7 +209,7 @@ for user in $username; do
             # (lock + cleanup telegrams stamped the same second).
             mv /var/log/create/xray/ws/${user}.log /var/log/create/xray/ws/${user}.locked
             mkdir -p /etc/xray/autounlock/ws
-            echo $(( $(date +%s) + 600 )) > /etc/xray/autounlock/ws/$user
+            echo $(( $(date +%s) + 900 )) > /etc/xray/autounlock/ws/$user
             send_log
         fi
 
@@ -231,9 +231,9 @@ for _st in /var/lib/fn-autosc/limit-ip/ws/*; do
 done
 
 # Auto-unlock sweeper: multilogin state written at lock time carries
-# the due epoch (lock + 10 min, so the unlock lands within 15 min on
-# the 5-minute cron). Manual locks never write state, so they stay
-# indefinite. Shares this flock and the single restart below.
+# the due epoch (lock + 15 min; the 5-minute cron can only unlock at or
+# after that, never before). Manual locks never write state, so they
+# stay indefinite. Shares this flock and the single restart below.
 for _sf in /etc/xray/autounlock/ws/*; do
     [ -e "$_sf" ] || continue
     _au=$(basename "$_sf")
@@ -242,6 +242,12 @@ for _sf in /etc/xray/autounlock/ws/*; do
         continue
     fi
     _due=$(cat "$_sf" 2>/dev/null)
+    _since=$(stat -c %Y -- "$_sf" 2>/dev/null)
+    # Fix 510: older builds wrote lock+600. A new lock+900 is within a
+    # second of mtime+900, so only a gap below 800s marks an old state.
+    if [[ "$_since" =~ ^[0-9]+$ ]] && [[ "$_due" =~ ^[0-9]+$ ]] && [ "$_due" -lt $(( _since + 800 )) ]; then
+        _due=$(( _since + 900 ))
+    fi
     if [[ "$_due" =~ ^[0-9]+$ ]] && [ "$(date +%s)" -ge "$_due" ]; then
         rm -f "$_sf"
         XRAY_BATCH=1 "/usr/bin/unlock-ws-auto" "$_au"
