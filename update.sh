@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# FN AutoSC updater: 5c48741 -> faa7f8c
+# FN AutoSC updater: 5c48741 -> 394059b
 #
 # Applies the commits on top of b6d1a97 (1-minute evidence window,
 # Exp-Date-N/A binary fix, LOCKED IPs block, MULTILOGIN UNLOCKED
@@ -16,7 +16,7 @@
 # missing).
 #
 # Usage:
-#   bash update.sh                  # update to faa7f8c (default)
+#   bash update.sh                  # update to 394059b (default)
 #   bash update.sh <commit> --force  # re-apply even if already recorded
 #
 # One-line remote run:
@@ -25,7 +25,7 @@
 set -u
 
 FROM="5c487410db77000968450495a615f8e7971f376a"
-TARGET="${1:-faa7f8c6154588a7762a0f0881dc1942efbbaedf}"
+TARGET="${1:-394059bf79ee2d0501998b98234e7866ccfd971f}"
 FORCE=0
 [ "${2:-}" = "--force" ] && FORCE=1
 
