@@ -928,7 +928,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/rohjagad/fn-autosc/main/upda
 What it does:
 
 - Detects the installed edition (`full` vs `lite`) and fetches the changed
-  files for it from the target commit (default `55d6a2c`): 32 files on
+  files for it from the target commit (default `1daf4aa`): 32 files on
   full, 30 on lite. The four `change-limit-ip` tools ship as compiled
   binaries, so they are fingerprint-checked against the edition's menu
   zip instead of syntax-checked. The account-card formatter
