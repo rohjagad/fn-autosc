@@ -240,7 +240,13 @@ do
     fi
 
     # Non-numeric limits (bad manual edit) fall back to the default of 2.
+    # "Unlimited" is the same sentinel cek-login-ssh displays; never rewrite
+    # it to 2 or enforce it.
     iplimit=$(cat "$file_path")
+    if [ "$iplimit" = "Unlimited" ]; then
+        rm -f "/var/lib/fn-autosc/limit-ip/ssh/${user}"
+        continue
+    fi
     if ! [[ "$iplimit" =~ ^[0-9]+$ ]]; then
         iplimit=2
         echo "$iplimit" > "$file_path"
