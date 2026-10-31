@@ -1,11 +1,12 @@
 #!/bin/bash
 #
-# FN AutoSC updater: 5c48741 -> 089e722
+# FN AutoSC updater: 5c48741 -> c5ae9b1
 #
 # Applies the commits on top of b6d1a97 (1-minute evidence window,
 # Exp-Date-N/A binary fix, LOCKED IPs block, MULTILOGIN UNLOCKED
 # notices, SSH Time Login block, working SSH banner wiring + default,
-# xp lock-in-flight + empty-expiry guard)
+# xp lock-in-flight + empty-expiry guard, IP evidence map + CGNAT
+# stable-set gate)
 # to a live install. The file set is a superset covering the earlier
 # ranges too, so older installs are brought fully up to date in one
 # run. Safe to run: files are backed up first, every download is
@@ -14,7 +15,7 @@
 # missing).
 #
 # Usage:
-#   bash update.sh                  # update to 089e722 (default)
+#   bash update.sh                  # update to c5ae9b1 (default)
 #   bash update.sh <commit> --force  # re-apply even if already recorded
 #
 # One-line remote run:
@@ -23,7 +24,7 @@
 set -u
 
 FROM="5c487410db77000968450495a615f8e7971f376a"
-TARGET="${1:-089e722017a89e33d1444a7dfd64e54307b19269}"
+TARGET="${1:-c5ae9b184f9764ee6a724a94a11399ab821aa857}"
 FORCE=0
 [ "${2:-}" = "--force" ] && FORCE=1
 
@@ -74,6 +75,9 @@ trial-vmess-ws trial-vmess-http trial-vmess-xhttp trial-vmess-grpc
 unlock-ws-auto unlock-http-auto unlock-xhttp-auto unlock-grpc-auto"
 if [ "$EDITION" = "full" ]; then
     FILES="$FILES addssh trial-ssh limit-ip-ssh"
+else
+    # Lite only: this viewer used to truncate ws.log at the end (Found 508).
+    FILES="$FILES cek-xray-ws"
 fi
 
 # Expected marker per file: proves the download is the fixed version.
@@ -81,7 +85,8 @@ marker_for() {
     case "$1" in
         xp) echo 'xp_lock_in_flight' ;;
         limit-ip-ssh) echo 'MULTILOGIN UNLOCKED' ;;
-        limit-ip-*) echo 'IPs (${_logc})' ;;
+        cek-xray-ws) echo 'Found 508: keep the access log' ;;
+        limit-ip-*) echo 'statsonlineiplist' ;;
         unlock-*-auto) echo 'MULTILOGIN UNLOCKED' ;;
         delete-ws) echo 'Delete WS Account' ;;
         delete-xhttp) echo 'Delete XHTTP Account' ;;
