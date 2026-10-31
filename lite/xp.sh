@@ -88,6 +88,12 @@ echo ""
 # vanished account can always be attributed to xp.
 xp_log() { echo "$(date '+%F %T') xp: $*" >> /etc/xray/.quota.logs; }
 
+# A multilogin lock removes the JSON entry and renames the card to .locked.
+# xp must treat that as lock-in-flight, never as an expired account.
+xp_lock_in_flight() {
+    [ -f "/var/log/create/xray/$1/$2.locked" ] || [ -f "/etc/xray/autounlock/$1/$2" ]
+}
+
 ##----- Auto Remove Xray Websocket
 ws_expired=0
 exec 9>/tmp/xray-json-ws.lock
@@ -96,7 +102,15 @@ data=( `cat /etc/xray/json/ws.json | grep '^###' | cut -d ' ' -f 2 | sort | uniq
 now=`date +"%Y-%m-%d"`
 for user in "${data[@]}"
 do
+if xp_lock_in_flight ws "$user"; then
+    echo "Skipping $user: multilogin lock in flight"
+    continue
+fi
 exp=$(grep -w "^### $user" "/etc/xray/json/ws.json" | cut -d ' ' -f 3 | sort | uniq | head -n 1)
+if [ -z "$exp" ]; then
+    echo "Skipping $user: empty expiry (locked or deleted?)"
+    continue
+fi
 d1=$(date -d "$exp" +%s 2>/dev/null)
 if [ -z "$d1" ]; then
     echo "Skipping $user: unparseable expiry '$exp'"
@@ -150,7 +164,15 @@ data=( `cat /etc/xray/json/upgrade.json | grep '^###' | cut -d ' ' -f 2 | sort |
 now=`date +"%Y-%m-%d"`
 for user in "${data[@]}"
 do
+if xp_lock_in_flight http "$user"; then
+    echo "Skipping $user: multilogin lock in flight"
+    continue
+fi
 exp=$(grep -w "^### $user" "/etc/xray/json/upgrade.json" | cut -d ' ' -f 3 | sort | uniq | head -n 1)
+if [ -z "$exp" ]; then
+    echo "Skipping $user: empty expiry (locked or deleted?)"
+    continue
+fi
 d1=$(date -d "$exp" +%s 2>/dev/null)
 if [ -z "$d1" ]; then
     echo "Skipping $user: unparseable expiry '$exp'"
@@ -204,7 +226,15 @@ data=( `cat /etc/xray/json/xhttp.json | grep '^###' | cut -d ' ' -f 2 | sort | u
 now=`date +"%Y-%m-%d"`
 for user in "${data[@]}"
 do
+if xp_lock_in_flight xhttp "$user"; then
+    echo "Skipping $user: multilogin lock in flight"
+    continue
+fi
 exp=$(grep -w "^### $user" "/etc/xray/json/xhttp.json" | cut -d ' ' -f 3 | sort | uniq | head -n 1)
+if [ -z "$exp" ]; then
+    echo "Skipping $user: empty expiry (locked or deleted?)"
+    continue
+fi
 d1=$(date -d "$exp" +%s 2>/dev/null)
 if [ -z "$d1" ]; then
     echo "Skipping $user: unparseable expiry '$exp'"
@@ -258,7 +288,15 @@ data=( `cat /etc/xray/json/grpc.json | grep '^###' | cut -d ' ' -f 2 | sort | un
 now=`date +"%Y-%m-%d"`
 for user in "${data[@]}"
 do
+if xp_lock_in_flight grpc "$user"; then
+    echo "Skipping $user: multilogin lock in flight"
+    continue
+fi
 exp=$(grep -w "^### $user" "/etc/xray/json/grpc.json" | cut -d ' ' -f 3 | sort | uniq | head -n 1)
+if [ -z "$exp" ]; then
+    echo "Skipping $user: empty expiry (locked or deleted?)"
+    continue
+fi
 d1=$(date -d "$exp" +%s 2>/dev/null)
 if [ -z "$d1" ]; then
     echo "Skipping $user: unparseable expiry '$exp'"
@@ -371,6 +409,10 @@ now=`date +"%Y-%m-%d"`
 for user in "${data[@]}"
 do
 exp=$(grep -w "^### $user" "/etc/funny/.l2tp" | cut -d ' ' -f 3)
+if [ -z "$exp" ]; then
+    echo "Skipping $user: empty expiry (locked or deleted?)"
+    continue
+fi
 d1=$(date -d "$exp" +%s 2>/dev/null)
 if [ -z "$d1" ]; then
     echo "Skipping $user: unparseable expiry '$exp'"
@@ -459,6 +501,10 @@ noobz_restarted=0
 for user in "${data[@]}"; do
     # Membaca Masa Aktif Username
     exp=$(grep -w "^### $user" /etc/funny/.noob | awk '{print $3}' | sort | uniq | head -n 1) 
+    if [ -z "$exp" ]; then
+        echo "Skipping $user: empty expiry (locked or deleted?)"
+        continue
+    fi
     
     # Menampilkan Masa Aktif Sesuai Username
     d1=$(date -d "$exp" +%s 2>/dev/null)

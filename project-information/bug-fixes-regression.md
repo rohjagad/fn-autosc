@@ -2978,3 +2978,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | N/A — limit 5 dua sumber tidak terkunci. |
 | **Over-engineering** | 1 map ganti 1 map + 12 baris per berkas; tanpa sisa `grpcRealIp` (0 remnant). |
 | **vs the source** | Menyimpang untuk gRPC seperti 265, dengan aturan sama dengan 3 transport lain. |
+
+## 267. xp lock-in-flight + empty expiry guard — Four Checks (October 31, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Akun expired normal tetap dihapus (expiry valid, `exp2 <= 0`); akun future tetap hidup. Yang berubah hanya akun dengan entry JSON hilang/expiry kosong atau sedang `.locked`/autounlock: sekarang skip, bukan hapus. |
+| **Over-strictness** | Tidak menolak expiry valid; hanya skip data yang memang tidak bisa dihitung. Lock manual tetap indefinite; auto-lock tetap 15 menit lalu diproses normal. |
+| **Over-engineering** | Satu helper 3 baris + 2 guard per blok; tanpa daemon/file baru. Snapshot WS dipindah 2 baris ke dalam lock. |
+| **vs the source** | V23/1.20 `xp` tanpa guard (empty expiry -> hapus), dan lock-nya tanpa auto-unlock; divergensi ini menutup kerusakan yang muncul dari kombinasi xp lama + auto-unlock baru. |

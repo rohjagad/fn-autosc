@@ -3112,3 +3112,10 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Fix 506 (Found 506):** 8 berkas `limit-ip-{ws,http,xhttp,grpc}.sh` (full+lite, baris 137): `s=$(i+1); sub(/:[0-9]*$/,"",s);` menjadi `s=$(i+1); sub(/^(tcp|udp):/,"",s); sub(/:[0-9]*$/,"",s);`. Satu baris per berkas, `bash -n` bersih 8/8.
 - **Verified lokal:** 1 perangkat + DNS -> OLD 2 / NEW 1; 2 IP riil -> OLD 4 / NEW 2. Live-fire di test box dengan kode lama sudah membuktikan lock palsu + unlock UUID sama; hitungan NEW adalah ekspresi identik yang dipakai skrip. Belum di-deploy ke box mana pun (tunggu operator).
+### Fix 507 - xp: snapshot di dalam lock, guard expiry kosong, skip lock-in-flight (Found 507)
+
+- **Fix 507 (Found 507):** `full/xp.sh` + `lite/xp.sh`:
+  1. Blok WS `full/`: `data=(...)` + `now=...` dipindah ke dalam `if flock` (setelah lock didapat), sehingga snapshot tidak bisa basi terhadap `limit-ip-*` yang memegang lock yang sama.
+  2. Helper `xp_lock_in_flight <transport> <user>`: cek `.../<user>.locked` atau `/etc/xray/autounlock/<t>/<user>`; keempat blok Xray skip user lock-in-flight (paritas Fix 499 di auto-delete).
+  3. Guard `[ -z "$exp" ] && continue` SEBELUM `date -d` di semua blok bertanggal: WS/HU/XHTTP/gRPC/L2TP/Noobz, full+lite. Ini menutup celah `date -d ""` = 00:00 hari ini yang tidak ditangkap guard `[ -z "$d1" ]` lama.
+- **Verified lokal:** `bash -n` full+lite bersih; harness membuktikan `date -d ""` -> `exp2=0` (jalur lama) sedangkan guard baru skip; helper true untuk `.locked`/state, false untuk akun normal. Menu zip full/lite di-repack dengan `xp` baru (0755). Belum di-deploy ke VPS (read-only).
