@@ -68,6 +68,13 @@ else
 fi
 echo "Edition detected: $EDITION"
 
+# Found 512: the SSH IP limiter/menu use the ssh-online helper (stdlib Python)
+# to resolve WS/CDN clients to their real IPs.
+if [ "$EDITION" = "full" ] && ! command -v python3 >/dev/null 2>&1; then
+    echo "python3 is required for ssh-online (SSH IP limit). Install python3 first." >&2
+    exit 1
+fi
+
 # Deployed name (no .sh) -> repo source name.
 FILES="xp limit-ip-ws limit-ip-http limit-ip-xhttp limit-ip-grpc
 delete-ws delete-xhttp menu-system menu backup restore-ftp bmenu
@@ -77,7 +84,7 @@ unlock-ws-auto unlock-http-auto unlock-xhttp-auto unlock-grpc-auto"
 # format.sh lives in config/ and installs to /etc/funny, not /usr/bin.
 CONFIG_FILES="format.sh"
 if [ "$EDITION" = "full" ]; then
-    FILES="$FILES addssh trial-ssh limit-ip-ssh"
+    FILES="$FILES addssh trial-ssh limit-ip-ssh cek-login-ssh ssh-online"
 else
     # Lite only: this viewer used to truncate ws.log at the end (Found 508).
     FILES="$FILES cek-xray-ws"
@@ -88,6 +95,7 @@ marker_for() {
     case "$1" in
         xp) echo 'xp_lock_in_flight' ;;
         limit-ip-ssh) echo 'MULTILOGIN UNLOCKED' ;;
+        cek-login-ssh | ssh-online) echo 'Found 512' ;;
         cek-xray-ws) echo 'Found 508: keep the access log' ;;
         backup | restore-ftp | bmenu) echo 'Found 511' ;;
         format.sh) echo 'Press any key to return...' ;;

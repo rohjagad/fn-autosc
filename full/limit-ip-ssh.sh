@@ -83,14 +83,18 @@ NC='\033[0m'
 clear
 echo ""
 echo ""
-# Membaca File Log
-LOG=""
-if [ -e "/var/log/auth.log" ]; then
-    LOG="/var/log/auth.log"
-elif [ -e "/var/log/secure" ]; then
-    LOG="/var/log/secure"
-else
-    echo "Log file not found!"
+# Found 512: the limiter counts unique active client IPs from the shared
+# ssh-online helper.  The helper resolves WS/CDN sessions (Dropbear sees
+# 127.0.0.1 behind ws:2080) to the real client IP; see full/ssh-online.sh.
+SSH_ONLINE_BIN="${SSH_ONLINE_BIN:-$(command -v ssh-online 2>/dev/null || true)}"
+if [ -z "$SSH_ONLINE_BIN" ] || [ ! -x "$SSH_ONLINE_BIN" ]; then
+    echo "limit-ip-ssh: ssh-online helper not found; run update.sh." >&2
+    exit 1
+fi
+SSH_ONLINE=$(mktemp) || { echo "limit-ip-ssh: cannot create temporary file." >&2; exit 1; }
+trap 'rm -f "$SSH_ONLINE"' EXIT
+if ! "$SSH_ONLINE_BIN" > "$SSH_ONLINE" 2>/dev/null; then
+    echo "limit-ip-ssh: ssh-online failed; no changes made." >&2
     exit 1
 fi
 
@@ -111,48 +115,13 @@ echo ""
 echo " "
 echo " "
 
-# Dropbear
-echo -e "${blue}----------=[ Dropbear User Login ]=-----------${NC}"
-echo "ID  |  Username  |  IP Address  |  Time"
+# Found 512: one active-session table for both daemons.  The old code parsed
+# raw login events, so a user with several sessions from one IP looked like
+# several IPs and every WS/CDN session looked like 127.0.0.1.
+echo -e "${blue}----------=[ Active SSH Sessions ]=-----------${NC}"
+echo "ID  |  Username  |  IP Address  |  Type"
 echo -e "${blue}----------------------------------------------${NC}"
-# Bug 70/71: dropbear (the daemon serving SSH accounts on port 109) starts with
-# -E and logs only to the systemd journal on Debian 12 - /var/log/auth.log
-# contains zero dropbear lines - and rsyslog there writes RFC3339 timestamps
-# the old fixed field offsets cannot parse. Pull both sources for the last 10
-# minutes and parse the username/IP out of the message body, which is
-# identical in every log format.
-grep -E "Password auth succeeded" "$DB_LOG" > /tmp/login-db.txt
-
-# Bug 70/71: extract fields from the message body (works for classic syslog and
-# RFC3339 prefixes alike): "Password auth succeeded for 'user' from ip:port"
-while IFS= read -r line; do
-    [[ "$line" =~ \[([0-9]+)\] ]] && PID="${BASH_REMATCH[1]}" || PID="-"
-    USER=$(sed -n "s/.*Password auth succeeded for '\([^']*\)' from.*/\1/p" <<< "$line")
-    HOSTPORT=$(sed -n "s/.*Password auth succeeded for '[^']*' from \([^ ]*\).*/\1/p" <<< "$line")
-    [ -n "$USER" ] || continue
-    IP="${HOSTPORT%:*}"
-    IP="${IP%\]}"
-    TIME=$(awk '{ if ($1 ~ /^[A-Z][a-z][a-z]$/) print $1" "$2" "$3; else { ts=$1; sub(/\.[0-9]+\+/, "+", ts); print ts } }' <<< "$line")
-    echo "$PID - $USER - $IP - $TIME"
-done < /tmp/login-db.txt
-
-echo " "
-echo -e "${blue}----------=[ OpenSSH User Login ]=------------${NC}"
-echo "ID  |  Username  |  IP Address  |  Time"
-echo -e "${blue}----------------------------------------------${NC}"
-# Bug 70/71: same for OpenSSH - parse from the message body so RFC3339 and
-# classic syslog prefixes both work.
-grep -E "Accepted password for" "$SSH_LOG" > /tmp/login-ssh.txt
-
-# Bug 70/71: message-body parse - "Accepted password for user from ip port n"
-while IFS= read -r line; do
-    [[ "$line" =~ sshd\[([0-9]+)\] ]] && PID="${BASH_REMATCH[1]}" || PID="-"
-    USER=$(sed -n "s/.*Accepted password for \([^ ]*\) from .*/\1/p" <<< "$line")
-    IP=$(sed -n "s/.*Accepted password for [^ ]* from \([^ ]*\) port.*/\1/p" <<< "$line")
-    [ -n "$USER" ] || continue
-    TIME=$(awk '{ if ($1 ~ /^[A-Z][a-z][a-z]$/) print $1" "$2" "$3; else { ts=$1; sub(/\.[0-9]+\+/, "+", ts); print ts } }' <<< "$line")
-    echo "$PID - $USER - $IP - $TIME"
-done < /tmp/login-ssh.txt
+awk -F'\t' '{ print $4" - "$1" - "$2" - "$3 }' "$SSH_ONLINE"
 
 # OpenVPN TCP Log
 if [ -f "/etc/openvpn/server/openvpn-tcp.log" ]; then
@@ -188,7 +157,7 @@ logs() {
 <code>Status      : Locked</code>
 <code>Unlock Time : $unlock_time</code>
 <b>-----------------------</b>
-Time Login
+Active IPs
 
 $ip_list
 <b>-----------------------</b>
@@ -239,9 +208,7 @@ username=$(while IFS=: read -r username _ uid _ _ _ _; do
         echo "$username"
     fi
 done < /etc/passwd)
-clear
-echo ""
-echo ""
+
 # Membuat direktori jika belum ada
 if [ ! -d "/etc/xray/limit/ip/ssh" ]; then
     mkdir -p "/etc/xray/limit/ip/ssh"
@@ -257,64 +224,9 @@ for limit_file in /etc/xray/limit/ip/ssh/*; do
     fi
 done
 
-# Regression fix R12: only count logins from the last 1 minute. Removing the
-# old auth.log truncation (Bug 19 / R7) made every historical login count
-# forever, so a user who once exceeded the limit was re-locked every 5 minutes
-# after each automatic unlock. The 1-minute window stays below the 15-minute
-# unlock delay, so unlocked accounts stay unlocked unless they exceed the
-# limit again with fresh logins.
-#
-# Bug 70/71 sources: dropbear login events only exist in the systemd journal on
-# Debian 12 (the -E flag keeps them out of /var/log/auth.log), and OpenSSH
-# events live in the auth log with either classic or RFC3339 timestamps.
-recent_auth=$(mktemp)
-DB_LOG=$(mktemp)
-SSH_LOG=$(mktemp)
-cut_ref=$(date -d '1 minute ago' '+%Y %m %d %H %M %S')
-now_ref=$(date '+%Y %m %d')
-read -r cutY cutM cutD cutH cutMin cutS <<< "$cut_ref"
-read -r nowY nowM nowD <<< "$now_ref"
-awk -v cy="$nowY" -v cm="$nowM" -v cd="$nowD" \
-    -v wy="$cutY" -v wm="$cutM" -v wd="$cutD" -v wh="$cutH" -v wmi="$cutMin" -v ws="$cutS" '
-    BEGIN {
-        split("Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec", mons, " ")
-        for (i = 1; i <= 12; i++) mon[mons[i]] = i
-        cm += 0; cd += 0
-        cut = ((((wy * 12 + wm) * 32 + wd) * 24 + wh) * 60 + wmi) * 60 + ws
-    }
-    # Bug 70/71: RFC3339 prefix, e.g. 2026-09-23T23:02:44.123456+08:00
-    $1 ~ /^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T/ {
-        y = substr($1, 1, 4) + 0; mo = substr($1, 6, 2) + 0; d = substr($1, 9, 2) + 0
-        hh = substr($1, 12, 2) + 0; mi = substr($1, 15, 2) + 0; s = substr($1, 18, 2) + 0
-        k = ((((y * 12 + mo) * 32 + d) * 24 + hh) * 60 + mi) * 60 + s
-        if (k >= cut) print
-        next
-    }
-    # Classic syslog prefix: Sep 23 23:02:44 ...
-    ($1 in mon) {
-        if ($3 !~ /^[0-9]+:[0-9]+:[0-9]+$/) next
-        split($3, t, ":")
-        y = cy
-        if (mon[$1] > cm || (mon[$1] == cm && ($2 + 0) > cd)) y = cy - 1
-        k = ((((y * 12 + mon[$1]) * 32 + ($2 + 0)) * 24 + (t[1] + 0)) * 60 + (t[2] + 0)) * 60 + (t[3] + 0)
-        if (k >= cut) print
-    }' "$LOG" > "$recent_auth"
-
-# OpenSSH events: the system auth log always has them (rsyslog on Debian,
-# /var/log/secure on CentOS); the message-body parser handles both formats.
-grep -E "Accepted password for" "$recent_auth" > "$SSH_LOG"
-
-# Dropbear events: prefer the systemd journal (native 1-minute window).
-# Fall back to the auth log when journalctl is unavailable or has never seen
-# the dropbear unit.
-if command -v journalctl >/dev/null 2>&1 && journalctl -u dropbear -n 20 --no-pager 2>/dev/null | grep -q .; then
-    journalctl -u dropbear --since "-1 minute" --no-pager 2>/dev/null | grep -E "Password auth succeeded" > "$DB_LOG"
-else
-    grep -E "Password auth succeeded" "$recent_auth" > "$DB_LOG"
-fi
-
-mulog=$(mesinssh)
-rm -f "$recent_auth" "$DB_LOG" "$SSH_LOG"
+# Found 512: the 1-minute login-event window is gone.  Count unique active
+# client IPs per account from ssh-online, which is also what the menu shows.
+mesinssh
 date=$(date)
 nais=0
 need_restart=0
@@ -327,20 +239,48 @@ do
         echo "File untuk pengguna $user dibuat dan diisi dengan 2."
     fi
 
-    # Bug 64: match the exact username field (" - user - ") so a short name
-    # (or a numeric name inside an IP address) never counts other logins.
     # Non-numeric limits (bad manual edit) fall back to the default of 2.
     iplimit=$(cat "$file_path")
     if ! [[ "$iplimit" =~ ^[0-9]+$ ]]; then
         iplimit=2
         echo "$iplimit" > "$file_path"
     fi
-    cekcek=$(echo -e "$mulog" | grep -F " - $user - " | awk '{print $5}' | sort -u | wc -l)
 
-    # Mendapatkan daftar IP untuk pengguna
-    # Bug 75: the log line format is "PID - USER - IP - TIME", so the IP is
-    # always field 5. $NF returned a fragment of the timestamp instead.
-    ip_list=$(echo -e "$mulog" | grep -F " - $user - " | awk '{t=""; for(i=7;i<=NF;i++) t=t (i>7?" ":"") $i; print $5" - "t}' | sort -u)
+    # Found 512: an account already locked by passwd -l keeps its original
+    # 15-minute auto-unlock due.  Re-locking every 5 minutes would reset the
+    # timer and spam the operator while the old sessions are still connected.
+    if passwd -S "$user" 2>/dev/null | grep -q " L "; then
+        continue
+    fi
+
+    _curips=$(awk -F'\t' -v u="$user" '$1==u {print $2}' "$SSH_ONLINE" | sort -u)
+    cekcek=$(printf '%s\n' "$_curips" | sed '/^$/d' | wc -l)
+
+    # Mendapatkan daftar IP untuk pengguna (unique active client IPs)
+    ip_list=$(awk -F'\t' -v u="$user" '$1==u {print $2" - " $3}' "$SSH_ONLINE" | sort -u)
+
+    # Found 512: CGNAT handover can make one device look like N IPs for a few
+    # seconds.  Like the Xray limiters (Found 509), lock only when the SAME
+    # over-limit IP set is seen on two consecutive 5-minute runs (>=240s).
+    _state="/var/lib/fn-autosc/limit-ip/ssh/${user}"
+    if [[ $user != "root" && $cekcek -gt $iplimit ]]; then
+        _prev_epoch=""
+        _prev_ips=""
+        if [ -f "$_state" ]; then
+            _prev_epoch=$(sed -n '1p' "$_state" 2>/dev/null)
+            _prev_ips=$(sed -n '2,$p' "$_state" 2>/dev/null)
+        fi
+        if [ "$_curips" = "$_prev_ips" ] && [[ "$_prev_epoch" =~ ^[0-9]+$ ]] && [ $(( $(date +%s) - _prev_epoch )) -ge 240 ]; then
+            rm -f "$_state"
+        else
+            mkdir -p "$(dirname "$_state")"
+            { echo "$(date +%s)"; printf '%s\n' "$_curips"; } > "$_state"
+            echo "$user: $cekcek IPs (> $iplimit), waiting for a stable second sample"
+            continue
+        fi
+    else
+        rm -f "$_state"
+    fi
 
     # Pastikan user root tidak dikunci
     if [[ $user != "root" && $cekcek -gt $iplimit ]]; then
@@ -356,6 +296,15 @@ do
         echo > /dev/null
     fi
     sleep 0.1
+done
+
+# Drop per-user IP-evidence state for accounts that no longer exist.
+for _st in /var/lib/fn-autosc/limit-ip/ssh/*; do
+    [ -e "$_st" ] || continue
+    _su=$(basename "$_st")
+    if ! printf '%s\n' "$username" | grep -qxF -- "$_su"; then
+        rm -f "$_st"
+    fi
 done
 
 if [[ $need_restart -eq 1 ]]; then
@@ -387,11 +336,5 @@ else
     echo > /dev/null
 fi
 
-# Membersihkan log SSH setelah pemrosesan
-echo "" > /tmp/login-db.txt
-echo "" > /tmp/login-ssh.txt
-echo "" > /tmp/vpn-login-tcp.txt
-echo "" > /tmp/vpn-login-udp.txt
-# echo "" > /var/log/auth.log
-# Membersihkan log asli dari file $LOG
-# echo "" > ${LOG}
+# Membersihkan file sementara setelah pemrosesan
+rm -f /tmp/login-db.txt /tmp/login-ssh.txt /tmp/vpn-login-tcp.txt /tmp/vpn-login-udp.txt

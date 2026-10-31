@@ -118,65 +118,24 @@ echo -e "${NC}${separator}
           SSH USER LOGIN
 ${separator}"
 
-# Memeriksa apakah file log tersedia
-LOG=""
-if [ -e "/var/log/auth.log" ]; then
-    LOG="/var/log/auth.log"
-elif [ -e "/var/log/secure" ]; then
-    LOG="/var/log/secure"
-else
-    echo "Log file not found!"
+
+# Found 512: the old table counted every historical "Password auth succeeded"
+# line (10,000 journal lines / the whole auth.log) and printed it as the login
+# count.  That is why an account with one real client IP could show 3/2, 6/2,
+# or 481/2.  Use the same active-session view as limit-ip-ssh: unique real
+# client IPs per account, including WS/CDN sessions mapped by ssh-online.
+SSH_ONLINE_BIN="${SSH_ONLINE_BIN:-$(command -v ssh-online 2>/dev/null || true)}"
+if [ -z "$SSH_ONLINE_BIN" ] || [ ! -x "$SSH_ONLINE_BIN" ]; then
+    echo "ssh-online helper not found; run update.sh to install it." >&2
     exit 1
 fi
 
-# Bug 70/71: same log-source and log-format fixes as limit-ip-ssh.sh - on
-# Debian 12 dropbear (the daemon serving SSH accounts) only logs to the
-# systemd journal so /var/log/auth.log has zero dropbear lines, and rsyslog
-# writes RFC3339 timestamps the old fixed field offsets cannot parse. Pull
-# dropbear from the journal when available and parse both formats from the
-# message body.
-DB_SRC=$(mktemp)
-SSH_SRC=$(mktemp)
-grep -E "Password auth succeeded" "$LOG" > "$DB_SRC"
-if command -v journalctl >/dev/null 2>&1 && journalctl -u dropbear -n 20 --no-pager 2>/dev/null | grep -q .; then
-    journalctl -u dropbear -n 10000 --no-pager 2>/dev/null | grep -E "Password auth succeeded" > "$DB_SRC"
+SSH_ONLINE=$(mktemp) || { echo "Cannot create temporary file." >&2; exit 1; }
+trap 'rm -f "$SSH_ONLINE"' EXIT
+if ! "$SSH_ONLINE_BIN" > "$SSH_ONLINE" 2>/dev/null; then
+    echo "ssh-online failed; cannot read active SSH sessions." >&2
+    exit 1
 fi
-grep -E "Accepted password for" "$LOG" > "$SSH_SRC"
-countdb=$(wc -l < "$DB_SRC")
-countsh=$(wc -l < "$SSH_SRC")
-
-# 3-column table, no pipe separators, equal gaps (4 spaces) between columns
-function show_logins {
-    local rows=() user LIMIT_IP user_count l wu=8 wl=5 fmt
-    for user in $(sed -n "s/.*Password auth succeeded for '\([^']*\)' from.*/\1/p" "$DB_SRC" 2>/dev/null | sort -u); do
-        [ -n "$user" ] || continue
-        id "$user" &>/dev/null || continue  # skip names with no account (deleted users leave log lines)
-        LIMIT_IP=$(get_limit_ip "$user" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
-        user_count=$(grep -c "for '$user' from" "$DB_SRC" 2>/dev/null || echo 0)
-        l="${user_count} / ${LIMIT_IP}"
-        rows+=("${user}|${l}|Dropbear")
-        (( ${#user} > wu )) && wu=${#user}
-        (( ${#l} > wl )) && wl=${#l}
-    done
-    for user in $(sed -n "s/.*Accepted password for \([^ ]*\) from .*/\1/p" "$SSH_SRC" 2>/dev/null | sort -u); do
-        [ -n "$user" ] || continue
-        id "$user" &>/dev/null || continue  # skip names with no account (deleted users leave log lines)
-        LIMIT_IP=$(get_limit_ip "$user" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
-        user_count=$(grep -c "for $user from" "$SSH_SRC" 2>/dev/null || echo 0)
-        l="${user_count} / ${LIMIT_IP}"
-        rows+=("${user}|${l}|Openssh")
-        (( ${#user} > wu )) && wu=${#user}
-        (( ${#l} > wl )) && wl=${#l}
-    done
-    fmt="%-${wu}s    %-${wl}s    %s\n"
-    # shellcheck disable=SC2059
-    printf "${purple}${fmt}${NC}" "Username" "Login" "Type"
-    echo -e "${blue_sep}"
-    for r in ${rows[@]+"${rows[@]}"}; do
-        printf "$fmt" "${r%%|*}" "$(echo "$r" | cut -d'|' -f2)" "${r##*|}"
-    done
-    echo ""
-}
 
 # Fungsi untuk mendapatkan Limit IP dari file tertentu
 function get_limit_ip {
@@ -195,23 +154,60 @@ function get_limit_ip {
     fi
 }
 
-# Fungsi untuk menampilkan total aktif user
+# One row per user: unique active client IPs and the daemon(s) used.
+declare -A ip_seen=()
+declare -A ip_count=()
+declare -A user_types=()
+unresolved=0
+while IFS=$'\t' read -r _user _ip _kind _pid; do
+    [ -n "$_user" ] || continue
+    id "$_user" &>/dev/null || continue  # skip names with no account
+    [ "$_ip" = "127.0.0.1" ] && unresolved=$((unresolved+1))
+    if [ -z "${ip_seen["$_user|$_ip"]+x}" ]; then
+        ip_seen["$_user|$_ip"]=1
+        ip_count["$_user"]=$(( ${ip_count["$_user"]:-0} + 1 ))
+    fi
+    case " ${user_types["$_user"]:-} " in
+        *" $_kind "*) ;;
+        *) user_types["$_user"]="${user_types["$_user"]:+${user_types["$_user"]}+}$_kind" ;;
+    esac
+done < "$SSH_ONLINE"
+
+function show_logins {
+    local rows=() user LIMIT_IP l wu=8 wl=5 fmt
+    local -a users
+    mapfile -t users < <(printf '%s\n' "${!ip_count[@]}" | sort)
+    for user in "${users[@]}"; do
+        [ -n "$user" ] || continue
+        LIMIT_IP=$(get_limit_ip "$user" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+        l="${ip_count[$user]} / ${LIMIT_IP}"
+        rows+=("${user}|${l}|${user_types[$user]}")
+        (( ${#user} > wu )) && wu=${#user}
+        (( ${#l} > wl )) && wl=${#l}
+    done
+    fmt="%-${wu}s    %-${wl}s    %s\n"
+    echo -e "${purple}Unique active client IPs (same view as limit-ip-ssh)${NC}"
+    # shellcheck disable=SC2059
+    printf "${purple}${fmt}${NC}" "Username" "IP" "Type"
+    echo -e "${blue_sep}"
+    for r in ${rows[@]+"${rows[@]}"}; do
+        printf "$fmt" "${r%%|*}" "$(echo "$r" | cut -d'|' -f2)" "${r##*|}"
+    done
+    if [ "$unresolved" -gt 0 ]; then
+        echo ""
+        echo -e "${orange}Warning: ${unresolved} session(s) still show 127.0.0.1 (ws mapping unavailable).${NC}"
+        echo -e "${orange}Each such session counts as one IP, the same as limit-ip-ssh.${NC}"
+    fi
+    echo ""
+}
+
 function show_total_users {
-    local uniq_db uniq_ssh _all _u
-    uniq_db=$(sed -n "s/.*Password auth succeeded for '\([^']*\)' from.*/\1/p" "$DB_SRC" 2>/dev/null | sort -u)
-    uniq_ssh=$(sed -n "s/.*Accepted password for \([^ ]*\) from .*/\1/p" "$SSH_SRC" 2>/dev/null | sort -u)
-    # Same honesty rule as the table: count existing accounts only, deduped across both sources.
-    _all=$(printf "%s\n%s" "$uniq_db" "$uniq_ssh" | sort -u)
-    total_users=0
-    while IFS= read -r _u; do
-        [ -n "$_u" ] && id "$_u" &>/dev/null && total_users=$((total_users+1))
-    done <<< "$_all"
+    local total_users
+    total_users=${#ip_count[@]}
     echo -e "${separator}
-${purple}Total Active Users: ${green}$total_users${NC}
+${purple}Total Active Users: ${green}${total_users}${NC}
 ${separator}"
 }
 
-# Bug 70/71: count both daemons' events (dropbear logins were invisible)
 show_logins
 show_total_users
-rm -f "$DB_SRC" "$SSH_SRC" /tmp/login-ssh.txt /tmp/login-db.txt

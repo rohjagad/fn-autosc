@@ -485,6 +485,23 @@ on the 5-minute cron), never earlier.
 > switch edges when a path misbehaves. If gRPC-over-CDN stays broken on your
 > route, serve gRPC users a direct (grey-cloud) hostname.
 
+### SSH IP Limiting
+
+SSH accounts store their maximum concurrent client IPs in
+`/etc/xray/limit/ip/ssh/<username>`. `limit-ip-ssh` runs every 5 minutes and
+counts unique **active** client IPs per account. As with the Xray limiters, an
+over-limit set must be seen on two consecutive runs (at least 4 minutes apart)
+before the account is locked, so one CGNAT device that rotates addresses is
+not mistaken for several devices. Direct Dropbear/OpenSSH connections expose
+the client IP directly. SSH-over-WebSocket/CDN
+connections reach Dropbear from `127.0.0.1`, so the `ssh-online` helper pairs
+each Dropbear child connection with the matching `ws` log entry (`client:
+<ip>` and `opened :2080 >>>> 127.0.0.1:109`) by timestamp. `cek-login-ssh`
+uses the same helper, so the menu's `IP / limit` column cannot disagree with
+the limiter. It counts unique active IPs, not historical login events; a
+session that cannot be mapped is shown as `127.0.0.1` with a warning and
+counts as one IP.
+
 ### The Four Maintenance Jobs
 
 | Command | Protocol | What it does |

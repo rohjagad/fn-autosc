@@ -3023,3 +3023,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | Jika current marker tidak ada, marker lama dari arsip dihapus (menu menampilkan Unknown), bukan dipakai; `format.sh` tetap memakai arsip bila current tidak ada. Tidak ada data akun yang dihapus. |
 | **Over-engineering** | Satu helper per script restore (5 script, 9 call site), 3 baris `rm` di backup, dan satu fetch/install config di `update.sh`; tanpa daemon/file state baru. |
 | **vs the source** | V23/1.20 dan repo sebelumnya menyalin `/etc/funny` wholesale; divergensi ini memisahkan data akun dari versi panel. |
+
+## 272. SSH IP limit/display memakai IP aktif riil — Four Checks (November 1, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Sesi Dropbear/OpenSSH langsung tetap dihitung dengan IP peer riil; sesi CDN/WS kini dipetakan ke IP klien yang sama. Tiga sesi dari satu IP = 1; tiga sesi dari tiga IP = 3. State auto-unlock 15 menit tidak di-reset untuk akun yang sudah locked. |
+| **Over-strictness** | Window login 1 menit diganti sesi aktif: sesi yang tetap terhubung berjam-jam terus dihitung (sesuai arti "concurrent IP"), sedangkan login singkat yang sudah putus sebelum cron 5 menit tidak dihitung. Set over-limit ditunda satu tick (>=240 detik) seperti gate CGNAT Xray, jadi multilogin nyata baru lock pada run kedua. Bila pemetaan `ws` gagal, sesi jatuh ke `127.0.0.1` (satu IP) dan `cek-login-ssh` menampilkan warning; ini tidak bisa menciptakan lock palsu baru. |
+| **Over-engineering** | Satu helper (`ssh-online`, ~200 baris Python stdlib di dalam shell wrapper), tanpa daemon/state file baru. `limit-ip-ssh`/`cek-login-ssh` kehilangan parser log duplikat. |
+| **vs the source** | V23/1.20 menghitung event login dari auth.log; repo ini sudah pindah ke IP unik + window 1 menit. Helper ini menutup bagian yang hilang untuk SSH ber-proxy: daemon tidak bisa melihat klien riil di balik `ws`, dan log `ws` tidak memuat username, jadi pencocokan timestamp adalah bukti lokal yang tersedia. |
