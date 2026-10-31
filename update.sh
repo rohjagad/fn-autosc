@@ -1,10 +1,11 @@
 #!/bin/bash
 #
-# FN AutoSC updater: 5c48741 -> 6b967af
+# FN AutoSC updater: 5c48741 -> 089e722
 #
 # Applies the commits on top of b6d1a97 (1-minute evidence window,
 # Exp-Date-N/A binary fix, LOCKED IPs block, MULTILOGIN UNLOCKED
-# notices, SSH Time Login block, working SSH banner wiring + default)
+# notices, SSH Time Login block, working SSH banner wiring + default,
+# xp lock-in-flight + empty-expiry guard)
 # to a live install. The file set is a superset covering the earlier
 # ranges too, so older installs are brought fully up to date in one
 # run. Safe to run: files are backed up first, every download is
@@ -13,7 +14,7 @@
 # missing).
 #
 # Usage:
-#   bash update.sh                  # update to 6b967af (default)
+#   bash update.sh                  # update to 089e722 (default)
 #   bash update.sh <commit> --force  # re-apply even if already recorded
 #
 # One-line remote run:
@@ -22,7 +23,7 @@
 set -u
 
 FROM="5c487410db77000968450495a615f8e7971f376a"
-TARGET="${1:-6b967af9e0ebadc76a265132e49d62a27ad72235}"
+TARGET="${1:-089e722017a89e33d1444a7dfd64e54307b19269}"
 FORCE=0
 [ "${2:-}" = "--force" ] && FORCE=1
 
@@ -66,7 +67,7 @@ fi
 echo "Edition detected: $EDITION"
 
 # Deployed name (no .sh) -> repo source name.
-FILES="limit-ip-ws limit-ip-http limit-ip-xhttp limit-ip-grpc
+FILES="xp limit-ip-ws limit-ip-http limit-ip-xhttp limit-ip-grpc
 delete-ws delete-xhttp menu-system menu
 add-vmess-ws add-vmess-http add-vmess-xhttp add-vmess-grpc
 trial-vmess-ws trial-vmess-http trial-vmess-xhttp trial-vmess-grpc
@@ -78,6 +79,7 @@ fi
 # Expected marker per file: proves the download is the fixed version.
 marker_for() {
     case "$1" in
+        xp) echo 'xp_lock_in_flight' ;;
         limit-ip-ssh) echo 'MULTILOGIN UNLOCKED' ;;
         limit-ip-*) echo 'IPs (${_logc})' ;;
         unlock-*-auto) echo 'MULTILOGIN UNLOCKED' ;;
