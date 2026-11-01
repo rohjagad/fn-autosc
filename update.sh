@@ -96,9 +96,8 @@ fi
 
 # Deployed name (no .sh) -> repo source name.
 FILES="xp limit-ip-ws limit-ip-http limit-ip-xhttp limit-ip-grpc
-delete-ws delete-xhttp menu-system menu backup bmenu
-add-vmess-ws add-vmess-http add-vmess-xhttp add-vmess-grpc
-trial-vmess-ws trial-vmess-http trial-vmess-xhttp trial-vmess-grpc
+delete-ws delete-xhttp menu-system menu backup bmenu dm-menu
+add-trojan-grpc add-trojan-http add-trojan-ws add-trojan-xhttp add-vless-grpc add-vless-http add-vless-ws add-vless-xhttp add-vmess-grpc add-vmess-http add-vmess-ws add-vmess-xhttp trial-trojan-grpc trial-trojan-http trial-trojan-ws trial-trojan-xhttp trial-vless-grpc trial-vless-http trial-vless-ws trial-vless-xhttp trial-vmess-grpc trial-vmess-http trial-vmess-ws trial-vmess-xhttp
 unlock-ws-auto unlock-http-auto unlock-xhttp-auto unlock-grpc-auto"
 # format.sh lives in config/ and installs to /etc/funny, not /usr/bin.
 CONFIG_FILES="format.sh"
@@ -108,7 +107,7 @@ CONFIG_FILES="format.sh"
 # must not overwrite it on a live box.
 WEB_FILES="restore-ftp"
 if [ "$EDITION" = "full" ]; then
-    FILES="$FILES addssh trial-ssh limit-ip-ssh cek-login-ssh ssh-online menu-ssh"
+    FILES="$FILES addssh trial-ssh menu-wg xl2tp menu-noobz limit-ip-ssh cek-login-ssh ssh-online menu-ssh"
 else
     # Lite only: this viewer used to truncate ws.log at the end (Found 508).
     FILES="$FILES cek-xray-ws"
@@ -131,8 +130,9 @@ marker_for() {
         delete-xhttp) echo 'Delete XHTTP Account' ;;
         menu-system) echo 'Banner /etc/issue.net' ;;
         menu) echo 'Installed version' ;;
-        add-vmess-* | trial-vmess-*) echo '"sni": "${rdomain}"' ;;
-        addssh | trial-ssh) echo 'Rotated' ;;
+        dm-menu | menu-wg | xl2tp | menu-noobz) echo 'Installer Domain' ;;
+        add-* | trial-*) echo 'Rotated Domain' ;;
+        addssh | trial-ssh) echo 'Rotated Domain' ;;
     esac
 }
 
@@ -147,6 +147,9 @@ BIN_BASE="https://raw.githubusercontent.com/rohjagad/fn-autosc/${TARGET}/bin/${E
 # syntax-check), so they travel separately with pinned md5 fingerprints per
 # edition instead of text markers. Found 513: no menu zip anymore.
 BINARIES="change-limit-ip-ws change-limit-ip-http change-limit-ip-xhttp change-limit-ip-grpc"
+if [ "$EDITION" = "full" ]; then
+    BINARIES="$BINARIES limit-ip"
+fi
 bin_md5() {
     if [ "$EDITION" = "full" ]; then
         case "$1" in
@@ -154,6 +157,7 @@ bin_md5() {
             change-limit-ip-http) echo 'fd1a02d7e522c9e7d89b1bee07e0a5e8' ;;
             change-limit-ip-xhttp) echo '3bf12a8521c3577abb3400400effeff3' ;;
             change-limit-ip-grpc) echo '5ed18b1ac5a98ef47531cd01474b08ed' ;;
+            limit-ip) echo '5ec7165a8c912c0b00184b1f1ea73c8e' ;;
         esac
     else
         case "$1" in
@@ -163,6 +167,35 @@ bin_md5() {
             change-limit-ip-grpc) echo 'cefb9eb84c13b252ea0e21524e8ec9bb' ;;
         esac
     fi
+}
+
+# Found 521: the domain files were renamed.  Copy legacy files to the new
+# names before new scripts are installed, keep the legacy names until the
+# install succeeds, and only then remove them.
+migrate_domain_layout() {
+    local old new base
+    mkdir -p "$BACKUP/domain-files" || return 1
+    for pair in \
+        "/etc/xray/domain:/etc/xray/installer-domain" \
+        "/etc/xray/domains:/etc/xray/rotated-domains" \
+        "/etc/xray/.domainseq:/etc/xray/.rotated-domainseq"; do
+        old=${pair%%:*}
+        new=${pair##*:}
+        [ -f "$old" ] || continue
+        base=$(basename "$old")
+        cp -a "$old" "$BACKUP/domain-files/$base" || return 1
+        if [ ! -f "$new" ]; then
+            cp -a "$old" "$new" || return 1
+        fi
+    done
+    return 0
+}
+
+remove_legacy_domain_files() {
+    [ -f /etc/xray/installer-domain ] && rm -f /etc/xray/domain
+    [ -f /etc/xray/rotated-domains ] && rm -f /etc/xray/domains
+    [ -f /etc/xray/.rotated-domainseq ] && rm -f /etc/xray/.domainseq
+    return 0
 }
 
 # Phase 1: download everything, syntax-check + marker-check everything.
@@ -263,6 +296,11 @@ for name in $WEB_FILES; do
 done
 
 # Phase 2: back up current files, then install.
+if ! migrate_domain_layout; then
+    echo "Domain file migration failed - aborting, nothing installed."
+    rm -rf "$STAGE"
+    exit 1
+fi
 mkdir -p "$BACKUP"
 for name in $FILES; do
     [ -e "/usr/bin/${name}" ] && cp -f "/usr/bin/${name}" "${BACKUP}/${name}"
@@ -282,6 +320,7 @@ for name in $CONFIG_FILES; do
     install -m 0755 "${STAGE}/${name}" "/etc/funny/${name}"
 done
 rm -rf "$STAGE"
+remove_legacy_domain_files || true
 
 # Banner wiring (installer/ssh.sh equivalent for existing boxes):
 # OpenSSH shows /etc/issue.net only when named; Dropbear only with -b.

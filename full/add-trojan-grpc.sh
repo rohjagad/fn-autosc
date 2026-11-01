@@ -80,23 +80,22 @@
 clear
 echo ""
 echo ""
-domain=$(cat /etc/xray/domain)
-# Alternate domain, rotated for balance (no default; list order only)
-rdomains=("$domain")
-if [ -s /etc/xray/domains ]; then
-    _seen="|$domain|"
+installer_domain=$(cat /etc/xray/installer-domain)
+# Rotated domain: round-robin over installer + rotated domains (no default).
+rotated_domains=("$installer_domain")
+if [ -s /etc/xray/rotated-domains ]; then
+    _seen="|$installer_domain|"
     while IFS= read -r _d || [ -n "$_d" ]; do
         _d=$(echo "$_d" | tr -d '[:space:]')
         if [ -n "$_d" ] && [[ "$_seen" != *"|$_d|"* ]]; then
-            rdomains+=("$_d")
+            rotated_domains+=("$_d")
             _seen="$_seen$_d|"
         fi
-    done < /etc/xray/domains
+    done < /etc/xray/rotated-domains
 fi
-dseq=$(cat /etc/xray/.domainseq 2>/dev/null || echo 0)
-rdomain="${rdomains[$((dseq % ${#rdomains[@]}))]}"
-echo $((dseq+1)) > /etc/xray/.domainseq
-alldom=$(printf '%s,' "${rdomains[@]}" | sed 's/,$//; s/,/, /g')
+rotated_domain_seq=$(cat /etc/xray/.rotated-domainseq 2>/dev/null || echo 0)
+rotated_domain="${rotated_domains[$((rotated_domain_seq % ${#rotated_domains[@]}))]}"
+echo $((rotated_domain_seq+1)) > /etc/xray/.rotated-domainseq
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 isp=$(cat /root/.isp 2>/dev/null)
@@ -224,7 +223,7 @@ if xray run -test -config /etc/xray/json/grpc.json >/dev/null 2>&1; then
 fi
 
 # Konfigurasi Trojan gRPC TLS
-link1="trojan://${uuid}@${rdomain}:443?mode=gun&security=tls&authority=${rdomain}&type=grpc&serviceName=$opath&sni=${rdomain}#${user}"
+link1="trojan://${uuid}@${rotated_domain}:443?mode=gun&security=tls&authority=${rotated_domain}&type=grpc&serviceName=$opath&sni=${rotated_domain}#${user}"
 
 TEKS="
 -----------------------
@@ -232,7 +231,8 @@ TEKS="
 -----------------------
 
 Remarks  : $user
-Domains  : $alldom
+Installer Domain : $installer_domain
+Rotated Domain   : $rotated_domain
 ISP      : $isp
 Region   : $region
 UUID     : $uuid

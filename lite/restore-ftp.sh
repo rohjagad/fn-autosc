@@ -133,6 +133,33 @@ restore_funny_data() {
 clear
 echo ""
 echo ""
+# Found 521: backups made before the domain rename carry /etc/xray/domain,
+# /etc/xray/domains, and /etc/xray/.domainseq.  Normalize the unpacked copy
+# before it lands in /etc/xray; when both names exist, the new one wins.
+normalize_backup_domains() {
+    local b="/root/backup/xray"
+    [ -d "$b" ] || return 0
+    if [ -f "$b/domain" ]; then
+        [ -f "$b/installer-domain" ] || cp -a "$b/domain" "$b/installer-domain"
+        rm -f "$b/domain"
+    fi
+    if [ -f "$b/domains" ]; then
+        [ -f "$b/rotated-domains" ] || cp -a "$b/domains" "$b/rotated-domains"
+        rm -f "$b/domains"
+    fi
+    if [ -f "$b/.domainseq" ]; then
+        [ -f "$b/.rotated-domainseq" ] || cp -a "$b/.domainseq" "$b/.rotated-domainseq"
+        rm -f "$b/.domainseq"
+    fi
+}
+
+cleanup_legacy_domain_files() {
+    [ -f /etc/xray/installer-domain ] && rm -f /etc/xray/domain
+    [ -f /etc/xray/rotated-domains ] && rm -f /etc/xray/domains
+    [ -f /etc/xray/.rotated-domainseq ] && rm -f /etc/xray/.domainseq
+    return 0
+}
+
 # Detail Informasi
 ip4=$(curl -sS -m 10 ipv4.icanhazip.com)
 ip6=$(curl -sS -m 10 ipv6.icanhazip.com)
@@ -165,12 +192,14 @@ rm -f backup.zip
 sleep 1
 echo "Restoring backup data..."
 cd /root/backup || { echo "Error: backup dir missing."; sleep 2; return; }
+normalize_backup_domains
 cp passwd /etc/
 cp group /etc/
 cp shadow /etc/
 cp gshadow /etc/
 cp crontab /etc/
 cp -r xray /etc/
+cleanup_legacy_domain_files
 restore_funny_data
 cp -r create /var/log/
 cp -r wireguard /etc/ 2>/dev/null || true

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-[[ -e $(which curl) ]] && grep -q "1.1.1.1" /etc/resolv.conf || { 
+[[ -e $(which curl) ]] && grep -q "1.1.1.1" /etc/resolv.conf || {
     echo "nameserver 1.1.1.1" | cat - /etc/resolv.conf >> /etc/resolv.conf.tmp && mv /etc/resolv.conf.tmp /etc/resolv.conf
 }
 
@@ -122,15 +122,15 @@ echo start
 clear
 echo ""
 echo ""
-domain="${CHOSEN:-$(cat /etc/xray/domain)}"
-email=$(cat /etc/funny/.email 2>/dev/null || echo "admin@$domain")
+selected_domain="${SELECTED_DOMAIN:-$(cat /etc/xray/installer-domain)}"
+email=$(cat /etc/funny/.email 2>/dev/null || echo "admin@$selected_domain")
 clear
 echo ""
 echo ""
 echo "
 L FN 项目更新证书
 ${separator}
-Your Domain: $domain
+Selected Domain: $selected_domain
 ${blue_sep}
 4 For IPv4 &  For IPv6
 "
@@ -143,17 +143,17 @@ if [[ $ip_version == "4" ]]; then
     chmod +x /root/.acme.sh/acme.sh
     /root/.acme.sh/acme.sh --upgrade --auto-upgrade
     /root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
-    if ! /root/.acme.sh/acme.sh --issue -d "$domain" --force --standalone -k ec-256; then
+    if ! /root/.acme.sh/acme.sh --issue -d "$selected_domain" --force --standalone -k ec-256; then
         echo "Let's Encrypt failed/rate-limited, falling back to ZeroSSL..."
         /root/.acme.sh/acme.sh --set-default-ca --server zerossl
-        /root/.acme.sh/acme.sh --register-account -m "${email:-admin@$domain}" --server zerossl 2>/dev/null || true
-        /root/.acme.sh/acme.sh --issue -d "$domain" --force --standalone -k ec-256 --server zerossl || true
+        /root/.acme.sh/acme.sh --register-account -m "${email:-admin@$selected_domain}" --server zerossl 2>/dev/null || true
+        /root/.acme.sh/acme.sh --issue -d "$selected_domain" --force --standalone -k ec-256 --server zerossl || true
     fi
-    /root/.acme.sh/acme.sh --installcert -d "$domain" --force --fullchainpath /etc/xray/xray.crt --keypath /etc/xray/xray.key --ecc || true
+    /root/.acme.sh/acme.sh --installcert -d "$selected_domain" --force --fullchainpath /etc/xray/xray.crt --keypath /etc/xray/xray.key --ecc || true
     if [[ ! -s /etc/xray/xray.crt || ! -s /etc/xray/xray.key ]]; then
         echo "ACME verification failed. Generating self-signed SSL certificate fallback..."
         openssl req -new -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -days 365 -nodes -x509 \
-            -subj "/CN=$domain" -keyout /etc/xray/.xray-fallback.key.tmp -out /etc/xray/.xray-fallback.crt.tmp 2>/dev/null \
+            -subj "/CN=$selected_domain" -keyout /etc/xray/.xray-fallback.key.tmp -out /etc/xray/.xray-fallback.crt.tmp 2>/dev/null \
             && mv -f /etc/xray/.xray-fallback.crt.tmp /etc/xray/xray.crt \
             && mv -f /etc/xray/.xray-fallback.key.tmp /etc/xray/xray.key || rm -f /etc/xray/.xray-fallback.crt.tmp /etc/xray/.xray-fallback.key.tmp
     fi
@@ -174,17 +174,17 @@ elif [[ $ip_version == "6" ]]; then
     chmod +x /root/.acme.sh/acme.sh
     /root/.acme.sh/acme.sh --upgrade --auto-upgrade
     /root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
-    if ! /root/.acme.sh/acme.sh --issue -d "$domain" --force --standalone -k ec-256 --listen-v6; then
+    if ! /root/.acme.sh/acme.sh --issue -d "$selected_domain" --force --standalone -k ec-256 --listen-v6; then
         echo "Let's Encrypt failed/rate-limited, falling back to ZeroSSL..."
         /root/.acme.sh/acme.sh --set-default-ca --server zerossl
-        /root/.acme.sh/acme.sh --register-account -m "${email:-admin@$domain}" --server zerossl 2>/dev/null || true
-        /root/.acme.sh/acme.sh --issue -d "$domain" --force --standalone -k ec-256 --listen-v6 --server zerossl || true
+        /root/.acme.sh/acme.sh --register-account -m "${email:-admin@$selected_domain}" --server zerossl 2>/dev/null || true
+        /root/.acme.sh/acme.sh --issue -d "$selected_domain" --force --standalone -k ec-256 --listen-v6 --server zerossl || true
     fi
-    /root/.acme.sh/acme.sh --installcert -d "$domain" --force --fullchainpath /etc/xray/xray.crt --keypath /etc/xray/xray.key --ecc || true
+    /root/.acme.sh/acme.sh --installcert -d "$selected_domain" --force --fullchainpath /etc/xray/xray.crt --keypath /etc/xray/xray.key --ecc || true
     if [[ ! -s /etc/xray/xray.crt || ! -s /etc/xray/xray.key ]]; then
         echo "ACME verification failed. Generating self-signed SSL certificate fallback..."
         openssl req -new -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -days 365 -nodes -x509 \
-            -subj "/CN=$domain" -keyout /etc/xray/.xray-fallback.key.tmp -out /etc/xray/.xray-fallback.crt.tmp 2>/dev/null \
+            -subj "/CN=$selected_domain" -keyout /etc/xray/.xray-fallback.key.tmp -out /etc/xray/.xray-fallback.crt.tmp 2>/dev/null \
             && mv -f /etc/xray/.xray-fallback.crt.tmp /etc/xray/xray.crt \
             && mv -f /etc/xray/.xray-fallback.key.tmp /etc/xray/xray.key || rm -f /etc/xray/.xray-fallback.crt.tmp /etc/xray/.xray-fallback.key.tmp
     fi
@@ -216,17 +216,17 @@ clear
 echo ""
 echo ""
 echo start
-domain="${CHOSEN:-$(cat /etc/xray/domain)}"
+selected_domain="${SELECTED_DOMAIN:-$(cat /etc/xray/installer-domain)}"
 systemctl stop nginx
 cd /root/
 clear
 echo ""
 echo ""
 echo "Starting... Port 80 will be stopped during SSL certificate installation"
-certbot certonly --standalone --preferred-challenges http --agree-tos --email "$(cat /etc/funny/.email 2>/dev/null || echo "admin@example.com")" -d "$domain" 
-if [[ -s "/etc/letsencrypt/live/$domain/fullchain.pem" && -s "/etc/letsencrypt/live/$domain/privkey.pem" ]]; then
-    cp "/etc/letsencrypt/live/$domain/fullchain.pem" /etc/xray/xray.crt
-    cp "/etc/letsencrypt/live/$domain/privkey.pem" /etc/xray/xray.key
+certbot certonly --standalone --preferred-challenges http --agree-tos --email "$(cat /etc/funny/.email 2>/dev/null || echo "admin@example.com")" -d "$selected_domain"
+if [[ -s "/etc/letsencrypt/live/$selected_domain/fullchain.pem" && -s "/etc/letsencrypt/live/$selected_domain/privkey.pem" ]]; then
+    cp "/etc/letsencrypt/live/$selected_domain/fullchain.pem" /etc/xray/xray.crt
+    cp "/etc/letsencrypt/live/$selected_domain/privkey.pem" /etc/xray/xray.key
     mkdir -p /etc/haproxy
     cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/funny.pem
     chmod 644 /etc/xray/xray.crt
@@ -253,7 +253,7 @@ state="Central Kalimantan"
 locality="Kab. Kota Waringin Timur"
 organization="FN AutoSC"
 organizationalunit="99999"
-commonname="${CHOSEN:-FN}"
+commonname="${SELECTED_DOMAIN:-FN}"
 email=$(cat /etc/funny/.email 2>/dev/null || echo "admin@example.com")
 
 # multi-SAN self-signed via shared generator (atomic temp+mv, no live delete)
@@ -267,12 +267,32 @@ read -n 1 -s -r -p "Press any key to return..." || true
 echo ""
 }
 
-domain_sync_nginx() {
-    # Rebuild the 443 server_name from the rotation set, then reload.
-    # No primary/default/extra domain: the rotation set rotates equally.
+read_installer_domain() {
+    [ -s /etc/xray/installer-domain ] && tr -d '[:space:]' < /etc/xray/installer-domain
+}
+
+all_rotated_domains() {
+    local installer_domain
+    installer_domain=$(read_installer_domain)
+    {
+        [ -n "$installer_domain" ] && echo "$installer_domain"
+        [ -s /etc/xray/rotated-domains ] && grep -v '^[[:space:]]*$' /etc/xray/rotated-domains | sed 's/[[:space:]]//g'
+    } | awk '$0 != "" && !seen[$0]++'
+}
+
+rotated_only_domains() {
+    local installer_domain d
+    installer_domain=$(read_installer_domain)
+    while IFS= read -r d; do
+        [ -n "$d" ] && [ "$d" != "$installer_domain" ] && printf '%s\n' "$d"
+    done < <(all_rotated_domains)
+}
+
+rotated_domains_sync_nginx() {
+    # Rebuild the 443 server_name from installer + rotated domains.
     local installer_domain names
-    installer_domain=$(cat /etc/xray/domain 2>/dev/null)
-    names="$installer_domain $(tr '\n' ' ' < /etc/xray/domains 2>/dev/null)"
+    installer_domain=$(read_installer_domain)
+    names="$installer_domain $(tr '\n' ' ' < /etc/xray/rotated-domains 2>/dev/null)"
     names=$(echo "$names" | tr -s ' ' | sed 's/^ //; s/ $//')
     [ -z "$names" ] && { echo "No domain configured."; return 1; }
     python3 - "$names" <<'PYEOF2'
@@ -292,10 +312,10 @@ PYEOF2
 }
 
 gen_selfsigned_all() {
-    # Self-signed covering the rotation set (auto on domain add).
+    # Self-signed covering the rotation set (auto on rotated-domain add).
     local installer_domain all san seen d
-    installer_domain=$(cat /etc/xray/domain 2>/dev/null)
-    all="$installer_domain $(tr '\n' ' ' < /etc/xray/domains 2>/dev/null)"
+    installer_domain=$(read_installer_domain)
+    all="$installer_domain $(tr '\n' ' ' < /etc/xray/rotated-domains 2>/dev/null)"
     san=""
     seen=""
     for d in $all; do
@@ -324,60 +344,62 @@ gen_selfsigned_all() {
     echo "Self-signed installed for: $(echo "$san" | sed 's/DNS://g; s/,/, /g')"
 }
 
-
-domain_add() {
+rotated_domain_add() {
     clear
     echo ""
     echo ""
     echo -e "${separator}"
-    echo -e "Add Domain (rotation)"
+    echo -e "Add Rotated Domain"
     echo -e "${separator}"
-    echo -e "Domains (all rotate, no default):"
-    local _i=1
-    for _d in $(all_domains); do
+    echo -e "Installer Domain : $(read_installer_domain)"
+    echo -e "Rotated Domains (all rotate, no default):"
+    local _i=1 _d
+    while IFS= read -r _d; do
+        [ -n "$_d" ] || continue
         printf "\e[32;1m%02d\e[0m. %s\n" "$_i" "$_d"
         _i=$((_i+1))
-    done
+    done < <(rotated_only_domains)
+    [ "$_i" -eq 1 ] && echo "  (none)"
     echo -e "${separator}"
     echo ""
-    read -p "New domain: " nd || return
+    read -p "New rotated domain: " nd || return
     if ! [[ "$nd" =~ ^([[:alnum:]]([[:alnum:]-]{0,61}[[:alnum:]])?\.)+[[:alpha:]]{2,63}$ ]]; then
-        echo "Domain must be a valid DNS hostname."
+        echo "Rotated domain must be a valid DNS hostname."
         sleep 2
         return
     fi
-    if all_domains | grep -qxF "$nd"; then
-        echo "Domain already listed."
+    if all_rotated_domains | grep -qxF "$nd"; then
+        echo "Rotated domain already listed."
         sleep 2
         return
     fi
-    echo "$nd" >> /etc/xray/domains
-    domain_sync_nginx
+    echo "$nd" >> /etc/xray/rotated-domains
+    rotated_domains_sync_nginx
     echo ""
     gen_selfsigned_all
     echo ""
-    echo "Note: live certificate is now self-signed (covers all domains)."
+    echo "Note: live certificate is now self-signed (covers installer + rotated domains)."
     echo "Point DNS for $nd at this VPS IP; trusted certs via options 4/5."
     read -n 1 -s -r -p "Press any key to return..." || true
     echo ""
 }
 
-domain_del() {
+rotated_domain_remove() {
     clear
     echo ""
     echo ""
-    if [ ! -s /etc/xray/domains ]; then
-        echo "No domains yet."
+    if [ ! -s /etc/xray/rotated-domains ]; then
+        echo "No rotated domains yet."
         sleep 2
         return
     fi
     echo -e "${separator}"
-    echo -e "Remove Domain"
+    echo -e "Remove Rotated Domain"
     echo -e "${separator}"
     local i=1
     while IFS= read -r _d; do
         [ -n "$_d" ] && { echo -e "${green}$i${NC}. $_d"; i=$((i+1)); }
-    done < /etc/xray/domains
+    done < /etc/xray/rotated-domains
     echo -e "${separator}"
     echo ""
     read -p "Number to remove (0 cancels): " nn || return
@@ -385,34 +407,33 @@ domain_del() {
         return
     fi
     local target
-    target=$(grep -v '^\s*$' /etc/xray/domains | sed -n "${nn}p")
+    target=$(grep -v '^\s*$' /etc/xray/rotated-domains | sed -n "${nn}p")
     [ -z "$target" ] && return
-    grep -vxF "$target" /etc/xray/domains > /etc/xray/domains.tmp || true
-    mv /etc/xray/domains.tmp /etc/xray/domains
-    domain_sync_nginx
+    grep -vxF "$target" /etc/xray/rotated-domains > /etc/xray/rotated-domains.tmp || true
+    mv /etc/xray/rotated-domains.tmp /etc/xray/rotated-domains
+    rotated_domains_sync_nginx
     echo "Removed $target."
     sleep 1
 }
 
-
-pick_domain() {
-    # Choose a domain first (rotation set, no default). Sets CHOSEN.
-    unset CHOSEN
+pick_rotated_domain() {
+    # Choose one rotation entry first. Sets SELECTED_DOMAIN.
+    unset SELECTED_DOMAIN
     local _all _d
     _all=()
-    _all+=("$(cat /etc/xray/domain 2>/dev/null)")
-    if [ -s /etc/xray/domains ]; then
+    _all+=("$(read_installer_domain)")
+    if [ -s /etc/xray/rotated-domains ]; then
         while IFS= read -r _d || [ -n "$_d" ]; do
             _d=$(echo "$_d" | tr -d '[:space:]')
             [ -n "$_d" ] && [ "$_d" != "${_all[0]}" ] && _all+=("$_d")
-        done < /etc/xray/domains
+        done < /etc/xray/rotated-domains
     fi
     [ -z "${_all[0]}" ] && { echo "No domain configured."; return 1; }
     clear
     echo ""
     echo ""
     echo -e "${separator}"
-    echo -e "Choose Domain"
+    echo -e "Choose Rotated Domain"
     echo -e "${separator}"
     local i=1
     for _d in "${_all[@]}"; do
@@ -421,156 +442,178 @@ pick_domain() {
     done
     echo -e "${separator}"
     echo ""
-    read -p "Choose domain: " nn || return 1
+    read -p "Choose rotated domain: " nn || return 1
     if ! [[ "$nn" =~ ^[0-9]+$ ]] || [ "$nn" -lt 1 ] || [ "$nn" -gt "${#_all[@]}" ]; then
         echo "Invalid choice."
         return 1
     fi
-    CHOSEN="${_all[$((nn-1))]}"
+    SELECTED_DOMAIN="${_all[$((nn-1))]}"
     local MYIP RIP
     MYIP=$(curl -4 -s --max-time 10 ifconfig.me 2>/dev/null)
-    RIP=$(getent hosts "$CHOSEN" 2>/dev/null | awk '$1 ~ /^[0-9.]+$/ {print $1; exit}')
+    RIP=$(getent hosts "$SELECTED_DOMAIN" 2>/dev/null | awk '$1 ~ /^[0-9.]+$/ {print $1; exit}')
     if [ -n "$MYIP" ] && [ "$RIP" != "$MYIP" ]; then
-        echo "Warning: $CHOSEN does not resolve here yet - issuance will fail."
+        echo "Warning: $SELECTED_DOMAIN does not resolve here yet - issuance will fail."
         read -p "Continue anyway? (y/N): " yy || return 1
         [[ "$yy" == "y" || "$yy" == "Y" ]] || return 1
     fi
 }
 
-all_domains() {
-    local installer_domain
-    installer_domain=$(cat /etc/xray/domain 2>/dev/null)
-    {
-        [ -n "$installer_domain" ] && echo "$installer_domain"
-        [ -s /etc/xray/domains ] && grep -v '^[[:space:]]*$' /etc/xray/domains | sed 's/[[:space:]]//g'
-    } | awk '$0 != "" && !seen[$0]++'
-}
-
-count_ssh() {
-    awk -F: '$3 >= 1000 && $1 != "nobody" {c++} END {print c+0}' /etc/passwd
-}
-
-count_xray() {
-    local total=0 f sec line
-    for f in /etc/xray/json/ws.json /etc/xray/json/upgrade.json /etc/xray/json/grpc.json /etc/xray/json/xhttp.json; do
-        [ -f "$f" ] || continue
-        sec=""
-        while IFS= read -r line; do
-            case "$line" in
-                "#vmess") sec=vmess ;;
-                "#vless") sec=vless ;;
-                "#trojan") sec=trojan ;;
-                "### "*) [ "$sec" = "$1" ] && total=$((total+1)) ;;
-            esac
-        done < "$f"
-    done
-    echo "$total"
-}
-
 count_mark() {
     local c
     c=$(grep -c "^### " "$1" 2>/dev/null || true)
     echo "${c:-0}"
 }
 
-count_lines() {
-    local c
-    c=$(grep -cve '^\s*$' "$1" 2>/dev/null || true)
-    echo "${c:-0}"
+card_rotated_domain() {
+    local file="$1" d="" json="" link=""
+    [ -f "$file" ] || { echo ""; return; }
+    d=$(sed -n 's/^[[:space:]]*Rotated Domain[[:space:]]*:[[:space:]]*//p' "$file" 2>/dev/null | head -1 | tr -d '\r' | sed 's/[[:space:]]*$//')
+    [ -z "$d" ] && d=$(sed -n 's/^[[:space:]]*Rotated[[:space:]]*:[[:space:]]*//p' "$file" 2>/dev/null | head -1 | tr -d '\r' | sed 's/[[:space:]]*$//')
+    if [ -z "$d" ]; then
+        link=$(grep -m1 '^vmess://' "$file" 2>/dev/null || true)
+        if [ -n "$link" ]; then
+            json=$(printf '%s' "${link#vmess://}" | base64 -d 2>/dev/null || true)
+            d=$(printf '%s' "$json" | sed -n 's/.*"add"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -1)
+            [ -z "$d" ] && d=$(printf '%s' "$json" | sed -n 's/.*"host"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -1)
+        fi
+    fi
+    if [ -z "$d" ]; then
+        link=$(grep -m1 -E '^(vless|trojan)://' "$file" 2>/dev/null || true)
+        if [ -n "$link" ]; then
+            d=$(printf '%s' "$link" | sed -n 's|^[a-z]*://[^@]*@\([^:/?#]*\).*|\1|p')
+            [ -z "$d" ] && d=$(printf '%s' "$link" | sed -n 's/.*[?&]host=\([^&]*\).*/\1/p')
+            [ -z "$d" ] && d=$(printf '%s' "$link" | sed -n 's/.*[?&]sni=\([^&]*\).*/\1/p')
+        fi
+    fi
+    printf '%s\n' "$d"
 }
 
-all_domains() {
-    local installer_domain
-    installer_domain=$(cat /etc/xray/domain 2>/dev/null)
-    {
-        [ -n "$installer_domain" ] && echo "$installer_domain"
-        [ -s /etc/xray/domains ] && grep -v '^[[:space:]]*$' /etc/xray/domains | sed 's/[[:space:]]//g'
-    } | awk '$0 != "" && !seen[$0]++'
+card_protocol() {
+    local p
+    p=$(sed -n 's/^[[:space:]]*\(Protocol\|Protokol\)[[:space:]]*:[[:space:]]*//p' "$1" 2>/dev/null | head -1 | tr -d '\r' | tr '[:lower:]' '[:upper:]' | tr -d '[:space:]')
+    case "$p" in
+        VMESS) echo "VMess" ;;
+        VLESS) echo "VLess" ;;
+        TROJAN) echo "Trojan" ;;
+        *) echo "" ;;
+    esac
 }
 
-count_ssh() {
-    awk -F: '$3 >= 1000 && $1 != "nobody" {c++} END {print c+0}' /etc/passwd
-}
+declare -A _DOMAIN_COUNTS=()
 
-count_xray() {
-    local total=0 f sec line
-    for f in /etc/xray/json/ws.json /etc/xray/json/upgrade.json /etc/xray/json/grpc.json /etc/xray/json/xhttp.json; do
-        [ -f "$f" ] || continue
-        sec=""
-        while IFS= read -r line; do
-            case "$line" in
-                "#vmess") sec=vmess ;;
-                "#vless") sec=vless ;;
-                "#trojan") sec=trojan ;;
-                "### "*) [ "$sec" = "$1" ] && total=$((total+1)) ;;
-            esac
-        done < "$f"
+domain_counts_collect() {
+    _DOMAIN_COUNTS=()
+    local f dir p d
+    for f in /var/log/create/ssh/*.log /var/log/create/ssh/*.locked; do
+        [ -e "$f" ] || continue
+        d=$(card_rotated_domain "$f")
+        [ -n "$d" ] || d="__unknown__"
+        _DOMAIN_COUNTS["SSH|$d"]=$(( ${_DOMAIN_COUNTS["SSH|$d"]:-0} + 1 ))
     done
-    echo "$total"
+    for dir in ws http grpc xhttp; do
+        for f in /var/log/create/xray/$dir/*.log /var/log/create/xray/$dir/*.locked; do
+            [ -e "$f" ] || continue
+            p=$(card_protocol "$f")
+            [ -n "$p" ] || continue
+            d=$(card_rotated_domain "$f")
+            [ -n "$d" ] || d="__unknown__"
+            _DOMAIN_COUNTS["$p|$d"]=$(( ${_DOMAIN_COUNTS["$p|$d"]:-0} + 1 ))
+        done
+    done
+    for f in /var/www/html/wireguard-*.conf; do
+        [ -e "$f" ] || continue
+        d=$(sed -n 's/^[[:space:]]*Endpoint[[:space:]]*=[[:space:]]*\([^:[:space:]]*\):.*/\1/p' "$f" 2>/dev/null | head -1)
+        [ -n "$d" ] || d="__unknown__"
+        _DOMAIN_COUNTS["WireGuard|$d"]=$(( ${_DOMAIN_COUNTS["WireGuard|$d"]:-0} + 1 ))
+    done
 }
 
-count_mark() {
-    local c
-    c=$(grep -c "^### " "$1" 2>/dev/null || true)
-    echo "${c:-0}"
+print_domain_counts() {
+    local label="$1" d="$2" p v total=0
+    echo -e "${label} : $d"
+    for p in SSH VMess VLess Trojan WireGuard; do
+        v=${_DOMAIN_COUNTS["$p|$d"]:-0}
+        printf "%-10s : %s\n" "$p" "$v"
+        total=$((total + v))
+    done
+    printf "%-10s : %s\n" "Total" "$total"
+    echo -e "${separator}"
 }
 
-count_lines() {
-    local c
-    c=$(grep -cve '^\s*$' "$1" 2>/dev/null || true)
-    echo "${c:-0}"
-}
-
-domain_list() {
+rotated_domains_report() {
     clear
     echo ""
     echo ""
     echo -e "${separator}"
-    echo -e "Domain List (all domains serve all accounts)"
+    echo -e "Domain List (per-domain account counts)"
     echo -e "${separator}"
-    local _all _ssh _vm _vl _tr _wg _l2 _nb d
-    mapfile -t _all < <(all_domains)
-    if [ ${#_all[@]} -eq 0 ]; then
+    local installer_domain d key
+    local _l2 _nb
+    local -a _domains=()
+    local -a _extra_list=()
+    local -A _known=() _extra=()
+    mapfile -t _domains < <(all_rotated_domains)
+    if [ ${#_domains[@]} -eq 0 ]; then
         echo -e "No domain configured."
         echo -e "${separator}"
         read -n 1 -s -r -p "Press any key to return..." || true
         echo ""
         return
     fi
-    _ssh=$(count_ssh)
-    _vm=$(count_xray vmess)
-    _vl=$(count_xray vless)
-    _tr=$(count_xray trojan)
-    _wg=$(count_lines /etc/funny/.wireguard)
+    installer_domain=$(read_installer_domain)
+    domain_counts_collect
+    for d in "${_domains[@]}"; do
+        _known["$d"]=1
+    done
+    if [ -n "$installer_domain" ]; then
+        print_domain_counts "Installer Domain" "$installer_domain"
+    fi
+    for d in "${_domains[@]}"; do
+        [ "$d" = "$installer_domain" ] && continue
+        print_domain_counts "Rotated Domain" "$d"
+    done
+    for key in "${!_DOMAIN_COUNTS[@]}"; do
+        d=${key#*|}
+        [ -n "${_known[$d]:-}" ] && continue
+        _extra["$d"]=1
+    done
+    mapfile -t _extra_list < <(printf '%s\n' "${!_extra[@]}" | sort)
+    for d in "${_extra_list[@]}"; do
+        [ -n "$d" ] || continue
+        if [ "$d" = "__unknown__" ]; then
+            print_domain_counts "Unknown Domain" "$d"
+        else
+            print_domain_counts "Removed / Unassigned Domain" "$d"
+        fi
+    done
     _l2=$(count_mark /etc/funny/.l2tp)
     _nb=$(count_mark /etc/funny/.noob)
-    for d in "${_all[@]}"; do
-        echo -e "Domain : $d"
-        printf "%-9s : %s\\n" "SSH" "$_ssh"
-        printf "%-9s : %s\\n" "VMess" "$_vm"
-        printf "%-9s : %s\\n" "VLess" "$_vl"
-        printf "%-9s : %s\\n" "Trojan" "$_tr"
-        printf "%-9s : %s\\n" "WireGuard" "$_wg"
-        printf "%-9s : %s\\n" "L2TP" "$_l2"
-        printf "%-9s : %s\\n" "NoobzVPN" "$_nb"
+    if [ "$_l2" -gt 0 ] || [ "$_nb" -gt 0 ]; then
+        echo -e "All-domain protocols (no single rotated domain)"
+        printf "%-10s : %s\n" "L2TP" "$_l2"
+        printf "%-10s : %s\n" "NoobzVPN" "$_nb"
         echo -e "${separator}"
-    done
-    echo -e "${separator}"
+    fi
     read -n 1 -s -r -p "Press any key to return..." || true
     echo ""
 }
 
-
 dm1() {
 clear
+local installer_domain rotated_list
+installer_domain=$(read_installer_domain)
+rotated_list=$(rotated_only_domains | awk 'NR>1{printf ", "} {printf "%s",$0}')
 echo ""
 echo ""
 echo -e "${NC}${separator}
             DOMAIN MENU
 ${separator}
-${green}1${NC}. Add Domain
-${green}2${NC}. Remove Domain
-${green}3${NC}. List Domain
+Installer Domain : ${installer_domain:-not set}
+Rotated Domains  : ${rotated_list:-none}
+${blue_sep}
+${green}1${NC}. Add Rotated Domain
+${green}2${NC}. Remove Rotated Domain
+${green}3${NC}. List Domains / Account Counts
 ${green}4${NC}. Renew Certificate (Acme) - choose domain first
 ${green}5${NC}. Renew Certificate (Certbot) - choose domain first
 ${green}6${NC}. Generate Self-Signed Certificate - choose domain first
@@ -580,12 +623,12 @@ ${separator}
 ${orange}Press [Ctrl + C] to exit${NC}"
 read -p "Input option: " apw || exit 0
 case $apw in
-1) clear ; domain_add ; dm1 ;;
-2) clear ; domain_del ; dm1 ;;
-3) clear ; domain_list ; dm1 ;;
-4) clear ; pick_domain && acme ; dm1 ;;
-5) clear ; pick_domain && fn ; dm1 ;;
-6) clear ; pick_domain && dmsl ; dm1 ;;
+1) clear ; rotated_domain_add ; dm1 ;;
+2) clear ; rotated_domain_remove ; dm1 ;;
+3) clear ; rotated_domains_report ; dm1 ;;
+4) clear ; pick_rotated_domain && acme ; dm1 ;;
+5) clear ; pick_rotated_domain && fn ; dm1 ;;
+6) clear ; pick_rotated_domain && dmsl ; dm1 ;;
 0|00) clear ; menu ;;
 *) clear ; dm1 ;;
 esac

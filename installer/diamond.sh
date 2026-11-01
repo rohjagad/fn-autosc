@@ -82,7 +82,7 @@ ips=$(cat /root/.ips)
 clear
 echo ""
 echo ""
-domain=$(cat /etc/xray/domain)
+installer_domain=$(cat /etc/xray/installer-domain)
 
 # Menginstall Package
 apt install socat -y
@@ -120,8 +120,8 @@ case $ips in
         ;;
 esac
 
-# Mengganti Domain Didalam Konfigurasi
-sed -i "s|server_name tes1.rohshop.cloud;|server_name $domain;|" /etc/nginx/nginx.conf
+# Mengganti Installer Domain Didalam Konfigurasi
+sed -i "s|server_name tes1.rohshop.cloud;|server_name $installer_domain;|" /etc/nginx/nginx.conf
 
 # Menyimpan Informasi detail ISP
 curl -m 10 ipinfo.io/region | cut -d ' ' -f 2-10 > /root/.region
@@ -140,9 +140,9 @@ issue_certificate() {
     local crt_path="$2"
     local key_path="$3"
 
-    echo "Generating self-signed certificate for $domain ..."
+    echo "Generating self-signed certificate for $installer_domain ..."
     openssl req -new -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -days 365 -nodes -x509 \
-        -subj "/CN=$domain" -addext "subjectAltName=DNS:$domain" -keyout "${key_path}.tmp" -out "${crt_path}.tmp" 2>/dev/null
+        -subj "/CN=$installer_domain" -addext "subjectAltName=DNS:$installer_domain" -keyout "${key_path}.tmp" -out "${crt_path}.tmp" 2>/dev/null
     if [[ ! -s "${crt_path}.tmp" || ! -s "${key_path}.tmp" ]]; then
         echo "Self-signed generation failed."
         rm -f "${crt_path}.tmp" "${key_path}.tmp"

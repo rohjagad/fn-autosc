@@ -93,36 +93,36 @@ echo -e "${ungu}            FN AutoSC      ${Xark} "
 echo -e "${BlueCyan} ——————————————————————————————————— ${Xark} "
 
 while true; do
-    read -p "Input Domain: " domain || exit 1
+    read -p "Input Installer Domain: " installer_domain || exit 1
     read -p "Input Email : " email || exit 1
     read -p "Input Type IP VPS (4/6/dual): " ips || exit 1
     read -p "Your SlowDNS Nameserver: " nsdomain || exit 1
     # Cek jika input kosong
-    if [[ -z "$domain" ]]; then
-        echo "Domain cannot be empty. Please try again."
+    if [[ -z "$installer_domain" ]]; then
+        echo "Installer domain cannot be empty. Please try again."
         continue
     fi
 
     # Cek jika input mengandung spasi
-    if [[ "$domain" =~ [[:space:]] ]]; then
-        echo "Domain cannot contain spaces. Please try again."
+    if [[ "$installer_domain" =~ [[:space:]] ]]; then
+        echo "Installer domain cannot contain spaces. Please try again."
         continue
     fi
 
     # Cek format FQDN (sama seperti dm-menu/menu-dnstt/menu-argo)
-    if ! [[ "$domain" =~ ^([[:alnum:]]([[:alnum:]-]{0,61}[[:alnum:]])?\.)+[[:alpha:]]{2,63}$ ]]; then
-        echo "Domain must be a valid DNS hostname. Please try again."
+    if ! [[ "$installer_domain" =~ ^([[:alnum:]]([[:alnum:]-]{0,61}[[:alnum:]])?\.)+[[:alpha:]]{2,63}$ ]]; then
+        echo "Installer domain must be a valid DNS hostname. Please try again."
         continue
     fi
 
     # Jika lolos validasi
-    echo "Domain valid: $domain"
+    echo "Installer domain valid: $installer_domain"
     break
 done
 
-# Menyimpan Domain
+# Menyimpan Installer Domain
 mkdir -p /etc/xray
-echo -e "${domain}" > /etc/xray/domain
+echo -e "${installer_domain}" > /etc/xray/installer-domain
 curl -4 -sS --max-time 15 ipinfo.io/ip > /etc/.ip
 
 # Menyimpan Email
@@ -264,7 +264,7 @@ OUTPUT="
 DETAIL INSTALL SCRIPT 1.23
 -------------------------
 IP: $(curl -4 -s --max-time 15 ifconfig.me)
-Domain: $domain
+Installer Domain: $installer_domain
 Email Own: $email
 Type IP: $ips
 Type Script: Full

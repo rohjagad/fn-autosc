@@ -369,14 +369,23 @@ to spread usage; the card description always shows the canonical path.
 | `vlgr` | `white`, `ivory`, `snow` |
 | `trgr` | `magenta`, `plum`, `orchid` |
 
-### Domain rotation (no primary / default / extra domain)
+### Domain naming: installer domain and rotated domains
 
-Every configured domain serves every account equally. There is no primary,
-default, or extra domain — the installer domain is only the first entry of
-the rotation set. New account links rotate across domains (round-robin via
-`/etc/xray/.domainseq`) exactly like colors, and account cards show the full
-set in a `Domains :` row. Single-domain inventory screens (domain list menu)
-use the singular `Domain :` label because one card holds one domain.
+`/etc/xray/installer-domain` holds the single installer domain. It is the first
+entry of the rotation set, not a privileged default. `/etc/xray/rotated-domains`
+holds the optional additional rotated domains, one per line. New account links
+rotate round-robin over both files via `/etc/xray/.rotated-domainseq`, exactly
+like colors.
+
+Every account card names the two values explicitly:
+
+- `Installer Domain :` — the domain the panel was installed with.
+- `Rotated Domain :` — the domain used by that account's links.
+
+L2TP and NoobzVPN have no per-account links, so their cards list the full
+rotation set as `Rotated Domains :`. The Domain Menu list reports per-domain
+account counts for each protocol instead of repeating the global total under
+every domain.
 
 ### Why arbitrary paths are unstable
 
@@ -676,16 +685,18 @@ key and is mode `0600`.
 
 | Option | Action |
 | :---: | :--- |
-| 1 | Add domain (auto self-signed multi-SAN) |
-| 2 | Remove domain (rebuilds SAN cert + `server_name`) |
-| 3 | List domains |
+| 1 | Add rotated domain (auto self-signed multi-SAN) |
+| 2 | Remove rotated domain (rebuilds SAN cert + `server_name`) |
+| 3 | List domains with per-domain account counts |
 | 4 | Renew via acme.sh for the chosen domain (IPv4 or IPv6) |
 | 5 | Renew via Certbot for the chosen domain |
 | 6 | Generate a self-signed certificate (all domains via SAN) |
 
-Adding/removing a domain rewrites `/etc/xray/domain` + `/etc/xray/domains` and
-rebuilds the Nginx `server_name`, backs up the old value, and reinstalls the
-certificate atomically in the same step.
+The installer domain is written once by the installer to
+`/etc/xray/installer-domain` and is never rewritten by the menu. Adding or
+removing a rotated domain only updates `/etc/xray/rotated-domains`, rebuilds
+the Nginx `server_name`, backs up the old value, and reinstalls the certificate
+atomically in the same step.
 
 ### Renewing After Certificate Expiry
 
@@ -717,8 +728,9 @@ Interface `wg0`, UDP `51820`, subnet `10.66.66.0/24`, server address
 Create, delete, extend, list, and show client configs (with QR codes). Client
 IPs are allocated from `10.66.66.2` to `10.66.66.254` — 253 clients maximum.
 Configs are written to `/var/www/html/wireguard-<user>.conf` for download.
-The client endpoint rotates over the domain set (round-robin via
-`/etc/xray/.domainseq`), same as Xray links; the card shows the full list.
+The client endpoint rotates over the installer + rotated domain set
+(round-robin via `/etc/xray/.rotated-domainseq`), same as Xray links; the card
+shows both `Installer Domain` and the assigned `Rotated Domain`.
 
 Also includes a Cloudflare WARP helper (peer persisted in `wg0.conf` with
 keepalive, IPv4 endpoint resolved at setup).
@@ -831,7 +843,9 @@ Files are named `{username}.log`. Locking renames them to `{username}.locked`.
 | Xray XHTTP | `/etc/xray/json/xhttp.json` |
 | Xray gRPC | `/etc/xray/json/grpc.json` |
 | Nginx | `/etc/nginx/nginx.conf` |
-| Domain | `/etc/xray/domain` |
+| Installer domain | `/etc/xray/installer-domain` |
+| Rotated domain list | `/etc/xray/rotated-domains` |
+| Rotation counter | `/etc/xray/.rotated-domainseq` |
 | Certificate | `/etc/xray/xray.crt`, `/etc/xray/xray.key` |
 | HAProxy bundle | `/etc/haproxy/funny.pem` |
 | Telegram | `/etc/funny/.keybot`, `/etc/funny/.chatid` |
@@ -1010,9 +1024,9 @@ What it does:
   `/etc/funny/.install-commit` (fresh install); `Unknown`/empty markers are
   ignored, and only when both are missing does it use the documented
   `6b967af` live v1.23 fallback. The target remains pinned in `update.sh`;
-  currently `01b9f71966190ee4b0bf02c1320b39ef4d8e2365` (Fix 518/519 content;
-  the updater script itself also carries Fix 520).
-  It fetches 35 files on full, 30 on lite. The four `change-limit-ip` tools ship as
+  currently `TARGET_PLACEHOLDER`.
+  It fetches `FULL_FILES_PLACEHOLDER` files on full, `LITE_FILES_PLACEHOLDER` on
+  lite. The four `change-limit-ip` tools ship as
   compiled binaries from `bin/<edition>/` and are checked against pinned md5
   fingerprints; shell files are syntax- and marker-checked. The account-card
   formatter `/etc/funny/format.sh` is fetched from `config/`, and the web

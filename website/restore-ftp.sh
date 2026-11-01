@@ -22,12 +22,39 @@ restore_funny_data() {
     rm -rf "$keep"
 }
 
+# Found 521: backups made before the domain rename carry /etc/xray/domain,
+# /etc/xray/domains, and /etc/xray/.domainseq.  Normalize the unpacked copy
+# before it lands in /etc/xray; when both names exist, the new one wins.
+normalize_backup_domains() {
+    local b="/root/backup/xray"
+    [ -d "$b" ] || return 0
+    if [ -f "$b/domain" ]; then
+        [ -f "$b/installer-domain" ] || cp -a "$b/domain" "$b/installer-domain"
+        rm -f "$b/domain"
+    fi
+    if [ -f "$b/domains" ]; then
+        [ -f "$b/rotated-domains" ] || cp -a "$b/domains" "$b/rotated-domains"
+        rm -f "$b/domains"
+    fi
+    if [ -f "$b/.domainseq" ]; then
+        [ -f "$b/.rotated-domainseq" ] || cp -a "$b/.domainseq" "$b/.rotated-domainseq"
+        rm -f "$b/.domainseq"
+    fi
+}
+
+cleanup_legacy_domain_files() {
+    [ -f /etc/xray/installer-domain ] && rm -f /etc/xray/domain
+    [ -f /etc/xray/rotated-domains ] && rm -f /etc/xray/domains
+    [ -f /etc/xray/.rotated-domainseq ] && rm -f /etc/xray/.domainseq
+    return 0
+}
+
 # Detail Informasi
 ip4=$(curl -sS -m 10 ipv4.icanhazip.com)
 ip6=$(curl -sS -m 10 ipv6.icanhazip.com)
 ip="$ip4 / $ip6"
 date=$(date)
-domain=$(cat /etc/xray/domain)
+installer_domain=$(cat /etc/xray/installer-domain)
 cd /root
 # Check both upload and root locations
 newest=$(ls -t /var/www/uploads/*.zip 2>/dev/null | head -1)
@@ -53,12 +80,14 @@ rm -f backup.zip
 sleep 1
 echo "Restoring backup data..."
 cd /root/backup || { echo "Error: backup dir missing."; sleep 2; return; }
+normalize_backup_domains
 cp passwd /etc/ >/dev/null 2>&1
 cp group /etc/ >/dev/null 2>&1
 cp shadow /etc/ >/dev/null 2>&1
 cp gshadow /etc/ >/dev/null 2>&1
 cp crontab /etc/ >/dev/null 2>&1
 cp -r xray /etc/ >/dev/null 2>&1
+cleanup_legacy_domain_files >/dev/null 2>&1
 restore_funny_data >/dev/null 2>&1
 cp -r create /var/log/ >/dev/null 2>&1
 cp -r wireguard /etc/ >/dev/null 2>&1 || true
@@ -109,7 +138,7 @@ echo -e "SUCCESSFULL RESTORE YOUR VPS"
 echo -e "Please Save The Following Data"
 echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo -e "Your VPS IP : $ip"
-echo -e "DOMAIN      : $domain"
+echo -e "INSTALLER DOMAIN : $installer_domain"
 echo -e "DATE        : $date"
 echo -e "━━━━━━━━━━━━━━━━━━━━━━━━━"
 else

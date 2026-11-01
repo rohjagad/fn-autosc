@@ -113,7 +113,7 @@ rainbow_sep() {
 separator=$(rainbow_sep '-----------------------------------')
 blue_sep="${blue}-----------------------------------${NC}"
 
-domain=$(cat /etc/xray/domain)
+installer_domain=$(cat /etc/xray/installer-domain)
 
 clear
 echo ""
@@ -171,16 +171,16 @@ if ! noobz_add_user "$user" "$pass" "$masaaktif"; then
     return
 fi
 # No primary/default domain: card lists the whole rotation set (any entry works).
-_alldom="$domain"
-if [ -s /etc/xray/domains ]; then
-    _nbseen="|$domain|"
+_rotated_domain_list="$installer_domain"
+if [ -s /etc/xray/rotated-domains ]; then
+    _nb_seen="|$installer_domain|"
     while IFS= read -r _nbd || [ -n "$_nbd" ]; do
         _nbd=$(echo "$_nbd" | tr -d '[:space:]')
-        if [ -n "$_nbd" ] && [[ "$_nbseen" != *"|$_nbd|"* ]]; then
-            _alldom="$_alldom, $_nbd"
-            _nbseen="$_nbseen$_nbd|"
+        if [ -n "$_nbd" ] && [[ "$_nb_seen" != *"|$_nbd|"* ]]; then
+            _rotated_domain_list="$_rotated_domain_list, $_nbd"
+            _nb_seen="$_nb_seen$_nbd|"
         fi
-    done < /etc/xray/domains
+    done < /etc/xray/rotated-domains
 fi
 expi=`date -d "$masaaktif days" +"%d-%b-%Y"`
 echo "### ${user} ${expi}" >>/etc/funny/.noob
@@ -191,7 +191,8 @@ TEKS="
 ----------------------------
 NoobzVPN Account
 ----------------------------
-Domains         : $_alldom
+Installer Domain : $installer_domain
+Rotated Domains  : $_rotated_domain_list
 Username        : $user
 Password        : $pass
 ----------------------------

@@ -79,23 +79,22 @@
 clear
 echo ""
 echo ""
-domain=$(cat /etc/xray/domain)
-# Alternate domain, rotated for balance (no default; list order only)
-rdomains=("$domain")
-if [ -s /etc/xray/domains ]; then
-    _seen="|$domain|"
+installer_domain=$(cat /etc/xray/installer-domain)
+# Rotated domain: round-robin over installer + rotated domains (no default).
+rotated_domains=("$installer_domain")
+if [ -s /etc/xray/rotated-domains ]; then
+    _seen="|$installer_domain|"
     while IFS= read -r _d || [ -n "$_d" ]; do
         _d=$(echo "$_d" | tr -d '[:space:]')
         if [ -n "$_d" ] && [[ "$_seen" != *"|$_d|"* ]]; then
-            rdomains+=("$_d")
+            rotated_domains+=("$_d")
             _seen="$_seen$_d|"
         fi
-    done < /etc/xray/domains
+    done < /etc/xray/rotated-domains
 fi
-dseq=$(cat /etc/xray/.domainseq 2>/dev/null || echo 0)
-rdomain="${rdomains[$((dseq % ${#rdomains[@]}))]}"
-echo $((dseq+1)) > /etc/xray/.domainseq
-alldom=$(printf '%s,' "${rdomains[@]}" | sed 's/,$//; s/,/, /g')
+rotated_domain_seq=$(cat /etc/xray/.rotated-domainseq 2>/dev/null || echo 0)
+rotated_domain="${rotated_domains[$((rotated_domain_seq % ${#rotated_domains[@]}))]}"
+echo $((rotated_domain_seq+1)) > /etc/xray/.rotated-domainseq
 CHATID=$(cat /etc/funny/.chatid 2>/dev/null)
 KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 isp=$(cat /root/.isp 2>/dev/null)
@@ -148,10 +147,10 @@ if xray run -test -config /etc/xray/json/upgrade.json >/dev/null 2>&1; then
 fi
 
 # Konfigurasi Vless WS TLS
-vlesslink1="vless://${uuid}@${rdomain}:443?path=$opath&security=tls&encryption=none&host=${rdomain}&type=httpupgrade&sni=${rdomain}#${user}"
+vlesslink1="vless://${uuid}@${rotated_domain}:443?path=$opath&security=tls&encryption=none&host=${rotated_domain}&type=httpupgrade&sni=${rotated_domain}#${user}"
 
 # Konfigurasi Vless WS NoneTLS
-vlesslink2="vless://${uuid}@${rdomain}:80?path=$opath&security=none&encryption=none&host=${rdomain}&type=httpupgrade#${user}"
+vlesslink2="vless://${uuid}@${rotated_domain}:80?path=$opath&security=none&encryption=none&host=${rotated_domain}&type=httpupgrade#${user}"
 
 TEKS="
 -----------------------
@@ -159,7 +158,8 @@ TEKS="
 -----------------------
 
 Remarks  : $user
-Domains  : $alldom
+Installer Domain : $installer_domain
+Rotated Domain   : $rotated_domain
 ISP      : $isp
 Region   : $region
 UUID     : $uuid

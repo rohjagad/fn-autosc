@@ -86,8 +86,8 @@ echo ""
 
 # Inisialisasi variabel
 date=$(date)
-domain=$(cat /etc/xray/domain)
-cpt="$date / $domain"
+installer_domain=$(cat /etc/xray/installer-domain)
+cpt="$date / $installer_domain"
 MYIP=$(curl -4 -s ifconfig.me)
 isp=$(cat /root/.isp 2>/dev/null)
 region=$(cat /root/.region 2>/dev/null)

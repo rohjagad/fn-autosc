@@ -3104,3 +3104,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | Marker kosong/`Unknown` tidak membuat updater gagal; ia mencoba marker berikutnya lalu fallback `6b967af`. Nilai `FROM` tidak pernah dipakai untuk mengunduh, jadi marker aneh tidak bisa mengubah file yang dipasang. |
 | **Over-engineering** | Satu loop dua marker + satu baris startup; tanpa file/daemon baru dan tanpa panggilan GitHub tambahan. |
 | **vs the source** | Updater lama meng-hardcode `5c48741` dari baseline live pertama dan tidak mengikuti `.update-commit`/`.install-commit` setelah box di-update. Divergensi ini melaporkan versi awal yang benar tanpa mengubah mekanisme deploy. |
+
+## 281. Installer domain vs rotated domain + hitungan per domain — Four Checks (November 1, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Rotasi tetap round-robin tanpa bobot dan tanpa default; urutan installer lalu daftar rotated dipertahankan. Auth gate, penerbitan sertifikat, self-signed SAN, Nginx `server_name`, payload 119/101, dan Fix 514–520 tidak berubah. Kartu lama tetap terbaca oleh delete/extend/change karena field `Protocol`/`UUID`/`Expired`/`Quota`/`Limit IP` tidak berubah. |
+| **Over-strictness** | Kartu tanpa baris `Rotated Domain` tidak dianggap rusak: parser membaca `Rotated` lama atau host link. Tidak ada log/kartu -> hitungan 0, bukan error. Domain yang sudah dihapus dan kartu tanpa domain ditampilkan sebagai kelompok terpisah, bukan dibuang. L2TP/NoobzVPN ditandai all-domain, bukan dipaksa punya satu domain. |
+| **Over-engineering** | Tanpa file map per akun dan tanpa daemon baru. Satu pass atas kartu/config saat menu dibuka; fungsi domain tetap di `dm-menu` dan blok rotasi tetap di tiap skrip akun. Migrasi memakai `cp`/`mv` biasa dan backup yang sudah ada. |
+| **vs the source** | Sumber lama mengulang total global di setiap blok domain dan hanya menampilkan himpunan domain di kartu. Divergensi ini memisahkan installer domain dari rotated domain, menampilkan domain yang dipakai akun, dan menghitung kartu per domain. |

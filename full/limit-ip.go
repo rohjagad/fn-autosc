@@ -112,9 +112,9 @@ func loadingSucces() {
 }
 
 func getDomain() string {
-	content, err := os.ReadFile("/etc/xray/domain")
+	content, err := os.ReadFile("/etc/xray/installer-domain")
 	if err != nil {
-		fmt.Println(Red + "Error membaca domain" + Xark)
+		fmt.Println(Red + "Error membaca installer domain" + Xark)
 		return ""
 	}
 	return strings.TrimSpace(string(content))
@@ -239,7 +239,7 @@ func main() {
 	fmt.Println()
 	fmt.Println()
 	fmt.Println()
-	fmt.Println("Domain:", getDomain())
+	fmt.Println("Installer Domain:", getDomain())
 	fmt.Println()
 	clearScreen()
 	fmt.Println()

@@ -93,29 +93,29 @@ echo -e "${ungu}            FN AutoSC      ${Xark} "
 echo -e "${BlueCyan} ——————————————————————————————————— ${Xark} "
 
 while true; do
-    read -p "Input Domain: " domain || exit 1
+    read -p "Input Installer Domain: " installer_domain || exit 1
     read -p "Input Email : " email || exit 1
     read -p "Input Type IP VPS (4/6/dual): " ips || exit 1
     # Cek jika input kosong
-    if [[ -z "$domain" ]]; then
-        echo "Domain tidak boleh kosong. Silakan coba lagi."
+    if [[ -z "$installer_domain" ]]; then
+        echo "Installer domain tidak boleh kosong. Silakan coba lagi."
         continue
     fi
 
     # Cek jika input mengandung spasi
-    if [[ "$domain" =~ [[:space:]] ]]; then
-        echo "Domain tidak boleh mengandung spasi. Silakan coba lagi."
+    if [[ "$installer_domain" =~ [[:space:]] ]]; then
+        echo "Installer domain tidak boleh mengandung spasi. Silakan coba lagi."
         continue
     fi
 
     # Cek format FQDN (sama seperti dm-menu/menu-dnstt/menu-argo)
-    if ! [[ "$domain" =~ ^([[:alnum:]]([[:alnum:]-]{0,61}[[:alnum:]])?\.)+[[:alpha:]]{2,63}$ ]]; then
-        echo "Domain harus berupa hostname DNS yang valid. Silakan coba lagi."
+    if ! [[ "$installer_domain" =~ ^([[:alnum:]]([[:alnum:]-]{0,61}[[:alnum:]])?\.)+[[:alpha:]]{2,63}$ ]]; then
+        echo "Installer domain harus berupa hostname DNS yang valid. Silakan coba lagi."
         continue
     fi
 
     # Jika lolos validasi
-    echo "Domain valid: $domain"
+    echo "Installer domain valid: $installer_domain"
     break
 done
 
@@ -141,9 +141,9 @@ systemctl disable --now haproxy >/dev/null 2>&1 || true
 cd
 rm -f /root/package.sh
 
-# Save Domain
+# Save Installer Domain
 mkdir -p /etc/xray
-echo -e "${domain}" > /etc/xray/domain
+echo -e "${installer_domain}" > /etc/xray/installer-domain
 
 # Menyimpan Email
 mkdir -p /etc/funny
@@ -219,7 +219,7 @@ OUTPUT="
 DETAIL INSTALL SCRIPT 1.23
 -------------------------
 IP: $(curl -4 -s --max-time 15 ifconfig.me)
-Domain: $domain
+Installer Domain: $installer_domain
 Email Own: $email
 Type IP: $ips
 Type Script: Lite

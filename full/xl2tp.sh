@@ -5,7 +5,7 @@
     echo "nameserver 1.1.1.1" | cat - /etc/resolv.conf >> /etc/resolv.conf.tmp && mv /etc/resolv.conf.tmp /etc/resolv.conf
 }
 
-domain=$(cat /etc/xray/domain)
+installer_domain=$(cat /etc/xray/installer-domain)
     # Auth sources race: same izin.txt on Pages + GitHub (synced), first valid reply wins; no primary/secondary.
     PERMISSION_CFPAGES="https://fn-autosc-auth.pages.dev/izin.txt"
     PERMISSION_GITHUB="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt"
@@ -113,7 +113,7 @@ rainbow_sep() {
 
 separator=$(rainbow_sep '-----------------------------------')
 blue_sep="${blue}-----------------------------------${NC}"
-domain=$(cat /etc/xray/domain)
+installer_domain=$(cat /etc/xray/installer-domain)
 
 
 
@@ -167,16 +167,16 @@ clear
 echo ""
 echo ""
 # No primary/default domain: card lists the whole rotation set (any entry works).
-_alldom="$domain"
-if [ -s /etc/xray/domains ]; then
-	_l2seen="|$domain|"
+_rotated_domain_list="$installer_domain"
+if [ -s /etc/xray/rotated-domains ]; then
+	_l2_seen="|$installer_domain|"
 	while IFS= read -r _l2d || [ -n "$_l2d" ]; do
 		_l2d=$(echo "$_l2d" | tr -d '[:space:]')
-		if [ -n "$_l2d" ] && [[ "$_l2seen" != *"|$_l2d|"* ]]; then
-			_alldom="$_alldom, $_l2d"
-			_l2seen="$_l2seen$_l2d|"
+		if [ -n "$_l2d" ] && [[ "$_l2_seen" != *"|$_l2d|"* ]]; then
+			_rotated_domain_list="$_rotated_domain_list, $_l2d"
+			_l2_seen="$_l2_seen$_l2d|"
 		fi
-	done < /etc/xray/domains
+	done < /etc/xray/rotated-domains
 fi
 PSK=$(grep -oP '(?<=: PSK ")\S+(?=")' /etc/ipsec.secrets 2>/dev/null || echo "myvpn")
 cat <<EOF
@@ -184,7 +184,8 @@ cat <<EOF
 ${separator}
 L2TP/IPSEC XAuth PSK VPN
 ${separator}
-Domains    : $_alldom
+Installer Domain : $installer_domain
+Rotated Domains  : $_rotated_domain_list
 IPsec PSK  : $PSK
 Username   : $VPN_USER
 Password   : $VPN_PASSWORD

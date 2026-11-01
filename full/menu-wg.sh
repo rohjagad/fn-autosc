@@ -80,7 +80,7 @@ clear
 echo ""
 echo ""
 # information
-domain=$(cat /etc/xray/domain)
+installer_domain=$(cat /etc/xray/installer-domain)
 source /etc/wireguard/params
 CLOUDFLAREKEY="bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=";
 
@@ -158,22 +158,21 @@ goback() {
 
 function create() {
 	# No primary/default domain: endpoint rotates over the set like xray links.
-	_wgdomains=("$domain")
-	if [ -s /etc/xray/domains ]; then
-		_wseen="|$domain|"
+	_wg_rotated_domains=("$installer_domain")
+	if [ -s /etc/xray/rotated-domains ]; then
+		_wg_seen="|$installer_domain|"
 		while IFS= read -r _wd || [ -n "$_wd" ]; do
 			_wd=$(echo "$_wd" | tr -d '[:space:]')
-			if [ -n "$_wd" ] && [[ "$_wseen" != *"|$_wd|"* ]]; then
-				_wgdomains+=("$_wd")
-				_wseen="$_wseen$_wd|"
+			if [ -n "$_wd" ] && [[ "$_wg_seen" != *"|$_wd|"* ]]; then
+				_wg_rotated_domains+=("$_wd")
+				_wg_seen="$_wg_seen$_wd|"
 			fi
-		done < /etc/xray/domains
+		done < /etc/xray/rotated-domains
 	fi
-	_wseq=$(cat /etc/xray/.domainseq 2>/dev/null || echo 0)
-	_wgdomain="${_wgdomains[$((_wseq % ${#_wgdomains[@]}))]}"
-	echo $((_wseq+1)) > /etc/xray/.domainseq
-	_alldom=$(printf '%s,' "${_wgdomains[@]}" | sed 's/,$//; s/,/, /g')
-	endpoint="${_wgdomain}:51820"
+	_wg_rotated_domain_seq=$(cat /etc/xray/.rotated-domainseq 2>/dev/null || echo 0)
+	_wg_rotated_domain="${_wg_rotated_domains[$((_wg_rotated_domain_seq % ${#_wg_rotated_domains[@]}))]}"
+	echo $((_wg_rotated_domain_seq+1)) > /etc/xray/.rotated-domainseq
+	endpoint="${_wg_rotated_domain}:51820"
 
 	clear
 	echo ""
@@ -252,7 +251,8 @@ AllowedIPs = ${client_ipv4}/32" >> /etc/wireguard/wg0.conf
 	echo ""
 	echo -e "WireGuard User Information"
 	echo -e "${separator}"
-	echo -e " Domains\t: $_alldom"
+	echo -e " Installer Domain : $installer_domain"
+	echo -e " Rotated Domain   : $_wg_rotated_domain"
 	echo -e " Username\t: $user"
 	echo -e " Expired Date\t: $expired"
 	echo -e "${blue_sep}"
@@ -261,7 +261,7 @@ AllowedIPs = ${client_ipv4}/32" >> /etc/wireguard/wg0.conf
 	echo -e "Private Key\t: ${client_priv_key}"
         echo -e "Publik Key\t: ${client_pub_key}"
 	echo -e "${blue_sep}"
-	echo -e "Link Config: http://${_wgdomain}/web/wireguard-${user}.conf"
+	echo -e "Link Config: http://${_wg_rotated_domain}/web/wireguard-${user}.conf"
         echo -e "${separator}"
 	newline
 	goback
