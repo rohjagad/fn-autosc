@@ -276,3 +276,11 @@ Schedules observed live: `backup 0 0,6,12,18`, `xp 0,15,30,45`,
 - Auto-unlock: state due ditulis `lock + 600` (10 menit), jadi pada cron 5 menit lock bisa lepas 10–15 menit — lebih cepat dari notice 15 menit. Fix 510 mengubahnya ke `+900` plus guard `mtime + 900` untuk state lama.
 - Restore: semua jalur menyalin `/etc/funny` wholesale, sehingga `.install-commit`, `.update-commit`, `version`, dan `format.sh` ikut rollback. `/usr/bin` tidak ada di arsip, jadi script utama tetap; Fix 511 mempertahankan current marker/formatter saat restore dan `update.sh` menyegarkan `format.sh`.
 - Tidak ada perubahan live: hanya `cat`, `ls`, `grep`, `xray api` read-only. Enam akun korban `xp` (Found 507) masih kehilangan quota/IP limit sampai operator mengizinkan repair.
+
+## Fix 514–516 read-only audit (2026-11-01, rohserver1/3/6)
+
+- `/usr/bin/restore-ftp` di ketiga box adalah varian web: head `#!/bin/bash` + `# Detail Informasi`, `PERMISSION_CFPAGES`/`Found 511` = 0. `update.sh` lama akan menimpanya dengan varian interaktif; Fix 514 memindahkan file ini ke `WEB_FILES` dan mengunduh `website/restore-ftp.sh`.
+- rohserver6: HAProxy aktif di `777`, `/var/log/haproxy.log` + `/etc/rsyslog.d/49-haproxy.conf` tersedia, tetapi config belum punya `log`/`option logasap`; sesi 777 karena itu tidak punya bukti IP saat masih aktif. Fix 514 menambahkan logging start-of-session + pemetaan timestamp di `ssh-online`.
+- Sesi WS aktif tetap memetakan ke IP riil (0 baris `127.0.0.1`); sesi 777 belum diuji live karena tidak ada klien 777 aktif dan box dijaga read-only.
+- Uji lokal Fix 514–516: HAProxy parser/patch, SSH limiter A–J, Xray limiter 1–6, auth window 1 jam, IPv6 normalization, `bash -n` 8 limiter + 8 unlock + helper, `python3 -m py_compile` embedded helper, `tools/verify-payload.sh` 220 entri. Semua lulus.
+- Tidak ada perubahan live: hanya `cat`, `ls`, `grep`, `journalctl`, `ss`, dan `xray api` read-only.

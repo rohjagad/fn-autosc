@@ -118,6 +118,9 @@ v_openssh=$(ssh -V 2>&1 | awk '{print $1}' | sed 's/^OpenSSH_//')
 v_dropbear=$(dropbear -V 2>&1 | awk '{print $2}')
 v_ws=$(timeout 5 ws version 2>/dev/null | head -n 1 | grep -oE 'v[0-9.]+' | head -n 1)
 v_stunnel=$(stunnel -version 2>&1 | grep -oE 'stunnel [0-9.]+' | head -n 1 | awk '{print $2}')
+# The 777 front-end is HAProxy in this panel (installer/stunnel5.sh), so fall
+# back to its version instead of showing n/a for an active service.
+[ -n "$v_stunnel" ] || v_stunnel=$(haproxy -v 2>&1 | grep -oE 'HAProxy version [0-9.]+' | head -n 1 | awk '{print $3}')
 
 clear
 echo ""

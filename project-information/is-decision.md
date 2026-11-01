@@ -491,3 +491,24 @@ entry, peer fallback): same honest-traffic accuracy (re-proven live: single, dua
 and direct all log real IPs; limiter stays quiet), with forged first entries now counted
 as-is on gRPC exactly as on WS/HTTPUpgrade/XHTTP. One trust rule on all four transports,
 no Cloudflare-only header anywhere, zero `grpcRealIp` remnants in tree or test box.
+
+## 31. 777 TLS Clients Are Mapped via HAProxy Start-of-Session Logs
+
+- **Component:** `installer/stunnel5.sh`, `update.sh`, `full/ssh-online.sh`, `full/menu-ssh.sh`.
+- **Decision:** the `777` front-end keeps HAProxy as the TLS terminator but enables `option logasap` plus a `local0` log target. HAProxy then emits the client address and accept timestamp as soon as the backend connection is established, not when the SSH session closes. `ssh-online` reads `/var/log/haproxy.log`, its `.1` rotation, and `journalctl -u haproxy`, then matches each `127.0.0.1` Dropbear child to a distinct accept line (accept <= child, 5 s tolerance, 6 s scan padding, 100 ms clock skew). The match is one-to-one, so two simultaneous 777 clients do not share one evidence line.
+- **Reason:** Dropbear cannot see the real client behind HAProxy; without start-of-session evidence, every 777 client collapses to `127.0.0.1`, bypassing the SSH IP limit and showing a false single IP in the menu. Enabling logging only on close would leave active sessions unmapped.
+- **Safety:** the updater validates the patched config with `haproxy -c` and restores the original on failure. If no evidence matches, the session stays `127.0.0.1` and the menu warns; the helper never invents an IP. The patch is full-edition only because lite ships no SSH menu/limiter.
+
+## 32. SSH IP-Lock Enforcement Is Per-Account, Not a Global Restart
+
+- **Component:** `full/limit-ip-ssh.sh`, `full/ssh-online.sh`, `full/cek-login-ssh.sh`.
+- **Decision:** when the stable over-limit IP set is confirmed, the limiter runs `passwd -l` and then `pkill -KILL -u <user>` for that account only. It does not restart `ssh`, `sshd`, or `ws`. The 15-minute auto-unlock sweeper runs before the `ssh-online` availability check, keeps its due file until `passwd -u` succeeds and the account is no longer `L`, and falls back to the due file mtime (or now + 900) when the content is corrupt.
+- **Reason:** `passwd -l` only blocks new authentications; existing over-limit sessions would keep running. The old global restart did terminate them, but it also dropped every other SSH/WS user. A targeted kill enforces the lock without collateral damage. Moving the sweeper ahead of the helper check prevents a missing/broken `ssh-online` from freezing every lock forever.
+- **Trade-off:** the offending account loses all its current sessions (including any allowed one) for the lock period. That is the intended meaning of an over-limit lock; manual locks still have no due file and remain indefinite.
+
+## 33. `/usr/bin/restore-ftp` Belongs to the Website Restore Path
+
+- **Component:** `update.sh`, `website/install.sh`, `website/upload.php`, `full/bmenu.sh`, `full/restore-ftp.sh`.
+- **Decision:** `/usr/bin/restore-ftp` is always the non-interactive `website/restore-ftp.sh` variant that reads `/var/www/uploads/*.zip`; `update.sh` downloads it from `website/` and keeps the interactive full/lite restore scripts out of that path. Interactive restore remains available through `bmenu`.
+- **Reason:** `website/upload.php` calls `sudo /usr/bin/restore-ftp`; replacing it with the license-gated TUI script breaks the web restore endpoint (the old updater did exactly that). The website variant also carries the Found 511 version-marker/formatter guard.
+- **Safety:** the updater backs up the current command and aborts before installing anything if the website script fails its syntax/marker check.

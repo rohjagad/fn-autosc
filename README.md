@@ -169,7 +169,8 @@ Development workflow:
   source or binary.
 
 `tools/verify-payload.sh` checks manifest duplicates, missing sources,
-`bash -n` on every script, and the ELF/execute bits on every binary.
+orphan scripts/binaries, `bash -n` on every script, and the ELF/execute bits
+on every binary.
 
 ---
 
@@ -524,6 +525,21 @@ uses the same helper, so the menu's `IP / limit` column cannot disagree with
 the limiter. It counts unique active IPs, not historical login events; a
 session that cannot be mapped is shown as `127.0.0.1` with a warning and
 counts as one IP.
+
+SSH-over-TLS on port `777` is the other proxied path: HAProxy forwards to
+Dropbear from `127.0.0.1`. The installer and updater enable `option logasap`
+with a local0 log target, so HAProxy records the client IP and accept
+timestamp at the start of the session; `ssh-online` matches that timestamp to
+the Dropbear child. Without the log patch the session stays `127.0.0.1` and
+the menu warns rather than inventing an IP.
+
+When the stable over-limit set locks an account, `limit-ip-ssh` runs
+`passwd -l` and kills only that account's processes (`pkill -KILL -u`); it
+does not restart `ssh`/`sshd`/`ws`, so other users' sessions survive. The
+15-minute auto-unlock sweeper runs even when `ssh-online` is missing or
+fails, and keeps its due file until `passwd -u` actually succeeds. A session
+that waits at the password prompt is still counted for the first day of the
+connection.
 
 ### The Four Maintenance Jobs
 
@@ -894,8 +910,8 @@ Binaries are built with `-ldflags='-s -w'` for a small footprint.
   `strongswan` + `xl2tpd`.
 - **SSL issuance failures on rate limits** — added the ZeroSSL and self-signed
   fallback chain, and synchronized `funny.pem` for HAProxy.
-- **Slow downloads from raw GitHub** — moved large binaries to the Fastly CDN
-  release.
+- **Slow downloads from raw GitHub** — payload files are fetched individually
+  with 120–600 s timeouts; large binaries live in `bin/<edition>/`.
 - **WireGuard interface collisions on reinstall** — config is now overwritten
   rather than appended.
 - **Remaining Indonesian user-facing text** translated to English.
@@ -905,6 +921,20 @@ Binaries are built with `-ldflags='-s -w'` for a small footprint.
 - **Menu wording and styling** — grammar fixes across all Full and Lite menus,
   removed `<= ... =>` delimiters, standardized rainbow/blue/green styling, and
   applied matching styling to account creation output.
+- **SSH IP display/limit counted history** — the menu and limiter now use
+  active unique client IPs; WS/CDN and `777` sessions are mapped to the real
+  client, and a slow password entry still counts.
+- **Auto-unlock could freeze or lose its due state** — the sweeper is
+  independent of `ssh-online`, the due file is kept until unlock succeeds,
+  corrupt due files fall back to `mtime`/now, and the stable-set grace no
+  longer resets on frequent manual runs.
+- **SSH lock no longer restarts every session** — a lock terminates only
+  the over-limit account's processes; other users keep their sessions.
+- **Updater no longer replaces the web restore command** —
+  `/usr/bin/restore-ftp` stays the website variant; interactive restore
+  remains in `bmenu`.
+- **IPv6 brackets counted twice** — normalized in the Xray limiters and the
+  SSH helper.
 
 ---
 
@@ -968,23 +998,26 @@ bash <(curl -fsSL https://raw.githubusercontent.com/rohjagad/fn-autosc/main/upda
 What it does:
 
 - Detects the installed edition (`full` vs `lite`) and fetches the changed
-  files for it from the target commit (default `1daf4aa`): 32 files on
-  full, 30 on lite. The four `change-limit-ip` tools ship as compiled
-  binaries, so they are fingerprint-checked against the edition's menu
-  zip instead of syntax-checked. The account-card formatter
-  `/etc/funny/format.sh` is fetched from `config/` and refreshed too.
+  files for it from the target commit (the default is pinned in `update.sh`):
+  35 files on full, 30 on lite. The four `change-limit-ip` tools ship as
+  compiled binaries from `bin/<edition>/` and are checked against pinned md5
+  fingerprints; shell files are syntax- and marker-checked. The account-card
+  formatter `/etc/funny/format.sh` is fetched from `config/`, and the web
+  restore command `/usr/bin/restore-ftp` from `website/`, then refreshed too.
 - Downloads everything first, then verifies every file. If any check
   fails, **nothing is changed**.
 - Backs up the replaced files to `/root/fn-update-backup-<date>/`,
   installs the new ones as `0755` into `/usr/bin` (the formatter into
   `/etc/funny`), wires the SSH banner
   (`Banner` in `sshd_config`, `-b` in Dropbear args — banner content
-  itself is never touched), and records the commit in
+  itself is never touched), enables HAProxy start-of-session logging for the
+  `777` front-end (full edition), and records the commit in
   `/etc/funny/.update-commit` (re-running is a no-op unless `--force`
   is passed).
-- Cron/menu scripts need no restart. Only `ssh`/`dropbear` restart, and
-  only when banner wiring was missing (SSH sessions survive; Dropbear
-  clients reconnect).
+- Cron/menu scripts need no restart. `ssh`/`dropbear` restart only when
+  banner wiring was missing (SSH sessions survive; Dropbear clients
+  reconnect); `haproxy` restarts only when the `777` logging patch was
+  applied.
 
 ---
 

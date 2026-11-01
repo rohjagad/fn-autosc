@@ -154,7 +154,7 @@ echo -e "${ips}" > /root/.ips
 
 # Payload: individual files (scripts + binaries), staged and verified before
 # replacing anything in /usr/bin. Found 513: no lite.zip download/repack.
-wget --no-check-certificate -O /root/payload.sh "${hosting}/installer/payload.sh" >> /dev/null 2>&1 || {
+wget --no-check-certificate --timeout=60 --tries=3 -O /root/payload.sh "${hosting}/installer/payload.sh" >> /dev/null 2>&1 || {
     echo "Failed to download the payload helper." >&2
     exit 1
 }

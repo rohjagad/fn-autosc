@@ -14,10 +14,18 @@ uuid=$(grep "UUID" "$locked" | awk '{print $3}')
 exp2=$(grep "Expired" "$locked" | awk '{print $3}')
 protokol2=$(grep -E "^(Protokol|Protocol) *:" "$locked" | awk '{print $NF}')
 protokol2=${protokol2^^}
-[ -n "$uuid" ] && [ -n "$exp2" ] && [ -n "$protokol2" ] || exit 0
-# Already active: never append a second copy, and unlike the manual
-# unlock do not touch files either - just leave quietly.
-grep -qxF "### $user $exp2" /etc/xray/json/xhttp.json 2>/dev/null && exit 0
+[ -n "$uuid" ] && [ -n "$exp2" ] && [ -n "$protokol2" ] || { echo "unlock-xhttp-auto: invalid locked card for $user; lock kept" >&2; exit 1; }
+# Already active: never append a second copy.  If a previous
+# partial unlock left the card as .locked, put the card back so the
+# caller can drop the due state without leaving a locked card.
+if grep -qxF "### $user $exp2" /etc/xray/json/xhttp.json 2>/dev/null; then
+    if [ -f "/var/log/create/xray/xhttp/${user}.log" ]; then
+        rm -f "$locked" || { echo "unlock-xhttp-auto: failed to remove locked card for $user; lock kept" >&2; exit 1; }
+    else
+        mv "$locked" "/var/log/create/xray/xhttp/${user}.log" || { echo "unlock-xhttp-auto: failed to move locked card for $user; lock kept" >&2; exit 1; }
+    fi
+    exit 0
+fi
 if [ -z "$XRAY_BATCH" ]; then
     exec 9>/tmp/xray-json-xhttp.lock
     flock -w 30 9 || exit 0
@@ -29,7 +37,8 @@ elif [ "$protokol2" == "VLESS" ]; then
 elif [ "$protokol2" == "TROJAN" ]; then
     sed -i '/#trojan$/{n;s/}/},\n### '"$user $exp2"'\n{"password": "'""$uuid""'","email": "'""$user""'","level": 0}/}' /etc/xray/json/xhttp.json
 else
-    exit 0
+    echo "unlock-xhttp-auto: unknown protocol for $user; lock kept" >&2
+    exit 1
 fi
 # Found 497 guard: the re-add above is a silent no-op when the section
 # anchor (#vmess/#vless/#trojan) is missing from the JSON. Moving .locked
@@ -64,9 +73,12 @@ TEXT="
 curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$TEXT" $URL >/dev/null
 }
 if xray run -test -config /etc/xray/json/xhttp.json >/dev/null 2>&1; then
-    mv "$locked" "/var/log/create/xray/xhttp/${user}.log"
+    mv "$locked" "/var/log/create/xray/xhttp/${user}.log" || { echo "unlock-xhttp-auto: failed to move locked card for $user; lock kept" >&2; exit 1; }
     send_unlocked
     [ -n "$XRAY_BATCH" ] && exit 2
     systemctl daemon-reload
     systemctl restart xray@xhttp
+else
+    echo "unlock-xhttp-auto: config test failed for $user; lock kept" >&2
+    exit 1
 fi

@@ -120,6 +120,7 @@ if ! xray api statsonline --server=127.0.0.1:10082 -email probe 2>&1 | grep -q "
     exit 0
 fi
 
+need_restart=0
 exec 9>/tmp/xray-json-xhttp.lock
 if flock -w 30 9; then
 for user in $username; do
@@ -139,11 +140,11 @@ for user in $username; do
     # Merge both sources: the map covers idle sessions, the 1-minute log
     # covers a map that is momentarily empty. The 5-minute stability gate
     # below stops a handover address from becoming a stable extra IP.
-    _iplist=$(xray api statsonlineiplist --server=127.0.0.1:10082 -email "$user" 2>/dev/null | jq -r 'if (.ips|type)=="object" then (.ips|keys[]) else empty end' 2>/dev/null | sort -u)
+    _iplist=$(xray api statsonlineiplist --server=127.0.0.1:10082 -email "$user" 2>/dev/null | jq -r 'if (.ips|type)=="object" then (.ips|keys[]) else empty end' 2>/dev/null | sed -e 's/^\[//' -e 's/\]$//' | sort -u)
     _statc=$(xray api statsonline --server=127.0.0.1:10082 -email "$user" 2>/dev/null | jq -r '.stat.value // empty' 2>/dev/null)
     [[ "$_statc" =~ ^[0-9]+$ ]] || _statc=0
     _cut=$(date -d '1 minute ago' '+%Y/%m/%d %H:%M:%S')
-    _logips=$(awk -v cut="$_cut" -v u="$user" '$1" "$2 >= cut && match($0, "email: "u"([^A-Za-z0-9_]|$)") {for(i=1;i<=NF;i++) if($i=="from"){s=$(i+1); sub(/^(tcp|udp):/,"",s); sub(/:[0-9]*$/,"",s); if(s!="") print s; break}}' "/var/log/xray/xhttp.log" 2>/dev/null | sort -u)
+    _logips=$(awk -v cut="$_cut" -v u="$user" '$1" "$2 >= cut && match($0, "email: "u"([^A-Za-z0-9_]|$)") {for(i=1;i<=NF;i++) if($i=="from"){s=$(i+1); sub(/^(tcp|udp):/,"",s); sub(/:[0-9]*$/,"",s); sub(/^\[/,"",s); sub(/\]$/,"",s); if(s!="") print s; break}}' "/var/log/xray/xhttp.log" 2>/dev/null | sort -u)
     _curips=$(printf '%s\n%s\n' "$_iplist" "$_logips" | sed '/^$/d' | sort -u)
     if [ -n "$_curips" ]; then
         _ipc=$(printf '%s\n' "$_curips" | wc -l)
@@ -172,8 +173,15 @@ for user in $username; do
             _prev_epoch=$(sed -n '1p' "$_state" 2>/dev/null)
             _prev_ips=$(sed -n '2,$p' "$_state" 2>/dev/null)
         fi
-        if [ "$_curips" = "$_prev_ips" ] && [[ "$_prev_epoch" =~ ^[0-9]+$ ]] && [ $(( $(date +%s) - _prev_epoch )) -ge 240 ]; then
-            rm -f "$_state"
+        if [ "$_curips" = "$_prev_ips" ] && [[ "$_prev_epoch" =~ ^[0-9]+$ ]]; then
+            if [ $(( $(date +%s) - _prev_epoch )) -ge 240 ]; then
+                rm -f "$_state"
+            else
+                # Same set, not old enough: keep the original epoch so a
+                # frequent manual run cannot reset the grace forever.
+                echo "IP limit: $user has $_ipc IPs (> $limit), waiting for a stable second sample"
+                continue
+            fi
         else
             mkdir -p "$(dirname "$_state")"
             { echo "$(date +%s)"; printf '%s\n' "$_curips"; } > "$_state"
@@ -237,27 +245,42 @@ done
 for _sf in /etc/xray/autounlock/xhttp/*; do
     [ -e "$_sf" ] || continue
     _au=$(basename "$_sf")
+    if ! [[ "$_au" =~ ^[a-z0-9_]+$ ]]; then
+        rm -f "$_sf"
+        continue
+    fi
     if [ ! -f "/var/log/create/xray/xhttp/${_au}.locked" ]; then
         rm -f "$_sf"
         continue
     fi
     _due=$(cat "$_sf" 2>/dev/null)
     _since=$(stat -c %Y -- "$_sf" 2>/dev/null)
-    # Fix 510: older builds wrote lock+600. A new lock+900 is within a
-    # second of mtime+900, so only a gap below 800s marks an old state.
-    if [[ "$_since" =~ ^[0-9]+$ ]] && [[ "$_due" =~ ^[0-9]+$ ]] && [ "$_due" -lt $(( _since + 800 )) ]; then
+    # Fix 510/515: older builds wrote lock+600, and a partial/corrupt due
+    # file must not freeze the lock forever. Fall back to mtime+900, then
+    # to now+900 when even the mtime is unavailable.
+    if ! [[ "$_due" =~ ^[0-9]+$ ]]; then
+        if [[ "$_since" =~ ^[0-9]+$ ]]; then
+            _due=$(( _since + 900 ))
+        else
+            _due=$(( $(date +%s) + 900 ))
+        fi
+    elif [[ "$_since" =~ ^[0-9]+$ ]] && [ "$_due" -lt $(( _since + 800 )) ]; then
         _due=$(( _since + 900 ))
     fi
     if [[ "$_due" =~ ^[0-9]+$ ]] && [ "$(date +%s)" -ge "$_due" ]; then
-        rm -f "$_sf"
-        XRAY_BATCH=1 "/usr/bin/unlock-xhttp-auto" "$_au"
-        [ "$?" -eq 2 ] && need_restart=1
+        XRAY_BATCH=1 "${UNLOCK_BIN:-/usr/bin/unlock-xhttp-auto}" "$_au"
+        _rc=$?
+        case "$_rc" in
+            0) rm -f "$_sf" ;;
+            2) rm -f "$_sf"; need_restart=1 ;;
+            *) echo "limit-ip-xhttp: auto-unlock $_au failed (rc=$_rc); will retry" >&2 ;;
+        esac
     fi
 done
 
 # One restart per run, not per locked user: N triggered users used
 # to mean N back-to-back restarts and tripped the start limiter.
-if [ -n "$need_restart" ]; then
+if [ "${need_restart:-0}" -eq 1 ]; then
     if xray run -test -config /etc/xray/json/xhttp.json >/dev/null 2>&1; then
         systemctl restart xray@xhttp >> /dev/null 2>&1
     fi

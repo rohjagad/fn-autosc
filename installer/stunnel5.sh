@@ -9,6 +9,7 @@ cat >/etc/haproxy/haproxy.cfg <<HAH
 global
     daemon
     maxconn 256
+    log /dev/log local0
 
 defaults
     mode http
@@ -20,11 +21,15 @@ frontend ssh-ssl
     bind *:777 ssl crt /etc/haproxy/funny.pem
     mode tcp
     option tcplog
+    # Found 514: ssh-online maps 777 sessions to real client IPs by matching
+    # the accept timestamp with the Dropbear child. Without logasap HAProxy
+    # logs only when the session closes, so active sessions have no evidence.
+    option logasap
+    log global
     default_backend ssh-backend
 
 backend ssh-backend
     mode tcp
-    option tcplog
     server ssh-server 127.0.0.1:109
 HAH
 clear

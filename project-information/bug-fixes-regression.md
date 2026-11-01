@@ -3041,3 +3041,30 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | Installer sekarang abort total kalau satu file gagal diunduh/diverifikasi, dan tidak mengganti file lama sama sekali; ini sengaja lebih ketat daripada `unzip -o` yang bisa meninggalkan `/usr/bin` setengah terisi. Tidak ada command yang dihapus dari payload. |
 | **Over-engineering** | Satu helper `payload.sh` + dua manifest + folder `bin/`; tanpa daemon, tanpa format baru selain `script`/`bin`. `build-binaries.sh` dan `verify-payload.sh` hanya tooling development. |
 | **vs the source** | V23/1.20 memakai arsip menu; repo ini mempertahankan arsip sampai Found 513. Payload per-file menghapus langkah repack/upload dan membuat drift zip tidak mungkin terjadi lagi. |
+
+## 274. Restore-ftp web + pemetaan 777 — Four Checks (November 1, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | `update.sh` tetap memasang seluruh script/binary yang berubah; `/usr/bin/restore-ftp` tetap varian web yang dipanggil `upload.php`, sedangkan restore interaktif tetap lewat `bmenu`. HAProxy hanya mendapat logging tambahan; routing 777 tetap ke `127.0.0.1:109`. Sesi ws dan Dropbear/OpenSSH langsung tidak berubah. |
+| **Over-strictness** | Patch HAProxy hanya jalan di edisi full, hanya bila config punya frontend `ssh-ssl`, dan dibatalkan bila `haproxy -c` menolak. Bila patch tidak tersedia, sesi 777 tetap `127.0.0.1` dan dihitung satu IP dengan warning — tidak ada IP yang dikarang. Update abort sebelum mengganti apa pun bila `website/restore-ftp.sh` gagal diunduh/diverifikasi. |
+| **Over-engineering** | Satu fungsi patch idempotent di `update.sh`, satu parser HAProxy di helper yang sudah ada, satu fallback versi di `menu-ssh`; tanpa daemon, file state, atau service baru. |
+| **vs the source** | V23/1.20 dan repo sebelum Fix 514 tidak memetakan 777 dan `update.sh` menimpa `restore-ftp` web dengan varian interaktif. Divergensi ini menjaga web restore dan menutup jalur SSH-over-TLS dari hitungan IP. |
+
+## 275. Auto-unlock tahan gagal + lock SSH mengakhiri sesi — Four Checks (November 1, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Lock manual tetap indefinite; lock otomatis tetap minimal 15 menit; unlock sukses mengembalikan card/JSON seperti sebelumnya. Lock SSH tetap memakai `passwd -l`, tetapi hanya proses akun over-limit yang dihentikan; sesi pengguna lain tidak lagi putus. Xray unlock sukses tetap me-restart unit sekali per run. |
+| **Over-strictness** | Due file dipertahankan bila `passwd -u`/`unlock-*-auto` gagal, jadi akun bisa terkunci lebih dari 15 menit sampai retry berhasil; ini disengaja agar lock tidak hilang diam-diam. Due rusak memakai `mtime+900`/`now+900`, bukan unlock instan. Card tidak valid/protokol tidak dikenal/config test gagal menahan lock dan menulis error. Manual lock tanpa due tidak tersentuh. |
+| **Over-engineering** | Satu sweeper SSH + satu `pkill -KILL -u`, penanganan rc di 8 limiter Xray, dan pemeriksaan `mv`/`rm` di 8 unlock helper; tanpa daemon/file state baru. |
+| **vs the source** | Source lama menghapus due sebelum unlock, me-restart seluruh `ssh`/`sshd`/`ws` saat lock, dan membiarkan helper exit 0 pada card rusak. Divergensi ini membuat retry, isolasi sesi, dan kegagalan lock terlihat. |
+
+## 276. Sesi lambat-auth, 777, dan IPv6 — Four Checks (November 1, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Auth cepat, sesi langsung IPv4, pemetaan ws, dan pemetaan 777 normal tetap bekerja. `normalize_ip` tidak mengubah IPv4; key map/log yang sudah sama tetap satu. AUTH_WINDOW lebih besar hanya menambah sesi yang sebelumnya terlewat. |
+| **Over-strictness** | Sesi yang menunggu di prompt password lebih dari 24 jam masih tidak terhitung; ini batas praktis, bukan jalur normal. Pencocokan HAProxy 5 detik dapat memilih accept terdekat yang salah bila ada dua sesi 777 yang mulai hampir bersamaan, tetapi pencocokan satu-ke-satu dan arah accept<=child mengurangi risiko; bila tidak yakin, IP tetap `127.0.0.1` dengan warning. |
+| **Over-engineering** | Satu fungsi `normalize_ip`, tiga konstanta toleransi, dan dua `sed`/`sub` untuk kurung IPv6; tanpa file/daemon baru. |
+| **vs the source** | Source memakai AUTH_WINDOW 10 menit, toleransi 777 500 ms, dan tidak menormalkan kurung IPv6. Divergensi ini menutup sesi lambat-auth, handshake TLS lambat, dan hitungan ganda IPv6. |

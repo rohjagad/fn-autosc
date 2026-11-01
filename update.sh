@@ -75,14 +75,19 @@ fi
 
 # Deployed name (no .sh) -> repo source name.
 FILES="xp limit-ip-ws limit-ip-http limit-ip-xhttp limit-ip-grpc
-delete-ws delete-xhttp menu-system menu backup restore-ftp bmenu
+delete-ws delete-xhttp menu-system menu backup bmenu
 add-vmess-ws add-vmess-http add-vmess-xhttp add-vmess-grpc
 trial-vmess-ws trial-vmess-http trial-vmess-xhttp trial-vmess-grpc
 unlock-ws-auto unlock-http-auto unlock-xhttp-auto unlock-grpc-auto"
 # format.sh lives in config/ and installs to /etc/funny, not /usr/bin.
 CONFIG_FILES="format.sh"
+# Found 514: /usr/bin/restore-ftp is the non-interactive website variant
+# installed by website/install.sh (it reads /var/www/uploads/*.zip).  The
+# full/lite restore-ftp.sh files carry the license gate and TUI prompts and
+# must not overwrite it on a live box.
+WEB_FILES="restore-ftp"
 if [ "$EDITION" = "full" ]; then
-    FILES="$FILES addssh trial-ssh limit-ip-ssh cek-login-ssh ssh-online"
+    FILES="$FILES addssh trial-ssh limit-ip-ssh cek-login-ssh ssh-online menu-ssh"
 else
     # Lite only: this viewer used to truncate ws.log at the end (Found 508).
     FILES="$FILES cek-xray-ws"
@@ -92,13 +97,15 @@ fi
 marker_for() {
     case "$1" in
         xp) echo 'xp_lock_in_flight' ;;
-        limit-ip-ssh) echo 'MULTILOGIN UNLOCKED' ;;
-        cek-login-ssh | ssh-online) echo 'Found 512' ;;
+        limit-ip-ssh) echo 'ssh_auto_unlock' ;;
+        cek-login-ssh) echo 'WS/HAProxy mapping unavailable' ;;
+        ssh-online) echo 'HAPROXY_TOL_US' ;;
+        menu-ssh) echo 'haproxy -v' ;;
         cek-xray-ws) echo 'Found 508: keep the access log' ;;
         backup | restore-ftp | bmenu) echo 'Found 511' ;;
         format.sh) echo 'Press any key to return...' ;;
-        limit-ip-*) echo 'statsonlineiplist' ;;
-        unlock-*-auto) echo 'MULTILOGIN UNLOCKED' ;;
+        limit-ip-*) echo 'keep the original epoch' ;;
+        unlock-*-auto) echo 'invalid locked card for $user' ;;
         delete-ws) echo 'Delete WS Account' ;;
         delete-xhttp) echo 'Delete XHTTP Account' ;;
         menu-system) echo 'Banner /etc/issue.net' ;;
@@ -112,6 +119,7 @@ BACKUP="/root/fn-update-backup-$(date +%Y%m%d-%H%M%S)"
 STAGE=$(mktemp -d) || { echo "Cannot create staging dir."; exit 1; }
 BASE="https://raw.githubusercontent.com/rohjagad/fn-autosc/${TARGET}/${EDITION}"
 CONFIG_BASE="https://raw.githubusercontent.com/rohjagad/fn-autosc/${TARGET}/config"
+WEB_BASE="https://raw.githubusercontent.com/rohjagad/fn-autosc/${TARGET}/website"
 BIN_BASE="https://raw.githubusercontent.com/rohjagad/fn-autosc/${TARGET}/bin/${EDITION}"
 
 # change-limit-ip tools ship as standalone compiled binaries (no .sh to
@@ -208,6 +216,31 @@ for b in $BINARIES; do
     echo "  ok: $b"
 done
 
+# Phase 1c: website files installed into /usr/bin (currently restore-ftp).
+for name in $WEB_FILES; do
+    fetch "${WEB_BASE}/${name}.sh" "${STAGE}/web-${name}" || {
+        echo "FAILED to download website/${name}.sh - aborting, nothing changed."
+        rm -rf "$STAGE"
+        exit 1
+    }
+    [ -s "${STAGE}/web-${name}" ] || {
+        echo "Downloaded website/${name}.sh is empty - aborting, nothing changed."
+        rm -rf "$STAGE"
+        exit 1
+    }
+    bash -n "${STAGE}/web-${name}" || {
+        echo "website/${name}.sh failed syntax check - aborting, nothing changed."
+        rm -rf "$STAGE"
+        exit 1
+    }
+    grep -qF "$(marker_for "$name")" "${STAGE}/web-${name}" || {
+        echo "website/${name}.sh lacks its fix marker - aborting, nothing changed."
+        rm -rf "$STAGE"
+        exit 1
+    }
+    echo "  ok: website/${name}.sh"
+done
+
 # Phase 2: back up current files, then install.
 mkdir -p "$BACKUP"
 for name in $FILES; do
@@ -217,6 +250,10 @@ done
 for b in $BINARIES; do
     [ -e "/usr/bin/${b}" ] && cp -f "/usr/bin/${b}" "${BACKUP}/${b}"
     install -m 0755 "${STAGE}/${b}" "/usr/bin/${b}"
+done
+for name in $WEB_FILES; do
+    [ -e "/usr/bin/${name}" ] && cp -f "/usr/bin/${name}" "${BACKUP}/${name}"
+    install -m 0755 "${STAGE}/web-${name}" "/usr/bin/${name}"
 done
 mkdir -p /etc/funny
 for name in $CONFIG_FILES; do
@@ -241,6 +278,96 @@ if [ "$wired" -eq 1 ]; then
     command -v systemctl >/dev/null 2>&1 && systemctl restart dropbear 2>/dev/null || true
     echo "Banner wiring applied (ssh/dropbear restarted; dropbear clients reconnect)."
 fi
+
+# Found 514: the 777 TLS front-end forwards to Dropbear from 127.0.0.1.
+# Enable HAProxy's start-of-session TCP log so ssh-online can map those
+# sessions to the real client IP, like it already does for ws.
+patch_haproxy_logging() {
+    local conf="${FN_HAPROXY_CONF:-/etc/haproxy/haproxy.cfg}"
+    [ "$EDITION" = "full" ] || return 0
+    [ -f "$conf" ] || return 0
+    local need_log=0 need_asap=0 need_global=0
+    grep -qE '^[[:space:]]*log[[:space:]]+/dev/log' "$conf" || need_log=1
+    grep -qE '^[[:space:]]*option[[:space:]]+logasap' "$conf" || need_asap=1
+    grep -qE '^[[:space:]]*log[[:space:]]+global' "$conf" || need_global=1
+    [ "${need_log}${need_asap}${need_global}" = "000" ] && return 0
+    cp -f "$conf" "$BACKUP/haproxy.cfg" || return 0
+
+    if [ "$need_log" -eq 1 ]; then
+        awk '
+            BEGIN { done = 0 }
+            /^[[:space:]]*global[[:space:]]*$/ && !done {
+                print
+                print "    log /dev/log local0"
+                done = 1
+                next
+            }
+            { print }
+        ' "$conf" > "$conf.fn-new" || { rm -f "$conf.fn-new"; return 0; }
+        mv "$conf.fn-new" "$conf"
+    fi
+
+    if [ "$need_asap" -eq 1 ]; then
+        awk -v add_global="$need_global" '
+            BEGIN { in_fe = 0; done = 0 }
+            /^[[:space:]]*frontend[[:space:]]+ssh-ssl[[:space:]]*$/ {
+                in_fe = 1
+                print
+                next
+            }
+            in_fe && /^[[:space:]]*backend[[:space:]]/ { in_fe = 0 }
+            in_fe && /^[[:space:]]*option[[:space:]]+tcplog[[:space:]]*$/ && !done {
+                print
+                print "    option logasap"
+                if (add_global == 1) print "    log global"
+                done = 1
+                next
+            }
+            in_fe && /^[[:space:]]*default_backend[[:space:]]/ && !done {
+                print "    option tcplog"
+                print "    option logasap"
+                if (add_global == 1) print "    log global"
+                done = 1
+            }
+            { print }
+        ' "$conf" > "$conf.fn-new" || { rm -f "$conf.fn-new"; return 0; }
+        mv "$conf.fn-new" "$conf"
+    elif [ "$need_global" -eq 1 ]; then
+        awk '
+            BEGIN { in_fe = 0; done = 0 }
+            /^[[:space:]]*frontend[[:space:]]+ssh-ssl[[:space:]]*$/ {
+                in_fe = 1
+                print
+                next
+            }
+            in_fe && /^[[:space:]]*backend[[:space:]]/ { in_fe = 0 }
+            in_fe && /^[[:space:]]*default_backend[[:space:]]/ && !done {
+                print "    log global"
+                done = 1
+            }
+            { print }
+        ' "$conf" > "$conf.fn-new" || { rm -f "$conf.fn-new"; return 0; }
+        mv "$conf.fn-new" "$conf"
+    fi
+
+    if ! grep -qE '^[[:space:]]*log[[:space:]]+/dev/log' "$conf" || \
+        ! grep -qE '^[[:space:]]*option[[:space:]]+logasap' "$conf" || \
+        ! grep -qE '^[[:space:]]*log[[:space:]]+global' "$conf"; then
+        cp -f "$BACKUP/haproxy.cfg" "$conf"
+        echo "HAProxy config has no frontend ssh-ssl; 777 mapping not enabled." >&2
+        return 0
+    fi
+    if command -v haproxy >/dev/null 2>&1 && ! haproxy -c -f "$conf" >/dev/null 2>&1; then
+        cp -f "$BACKUP/haproxy.cfg" "$conf"
+        echo "HAProxy logging patch rejected by haproxy -c; config restored." >&2
+        return 0
+    fi
+    if systemctl is-active --quiet haproxy 2>/dev/null; then
+        systemctl restart haproxy 2>/dev/null || true
+    fi
+    echo "HAProxy 777 logging enabled (client IP evidence for ssh-online)."
+}
+patch_haproxy_logging
 
 echo "$TARGET" > /etc/funny/.update-commit
 chmod 600 /etc/funny/.update-commit 2>/dev/null || true

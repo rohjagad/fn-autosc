@@ -84,6 +84,16 @@ for edition in full lite; do
             esac
         done
     fi
+    if [ -d "$edition" ]; then
+        for src in "$edition"/*.sh; do
+            [ -e "$src" ] || continue
+            name=$(basename "$src" .sh)
+            case "$seen" in
+                *" $name "*) ;;
+                *) echo "ORPHAN $src"; fail=1 ;;
+            esac
+        done
+    fi
     echo "${edition}: ${total} manifest entries checked"
 done
 

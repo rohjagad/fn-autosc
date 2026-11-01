@@ -162,7 +162,9 @@ unresolved=0
 while IFS=$'\t' read -r _user _ip _kind _pid; do
     [ -n "$_user" ] || continue
     id "$_user" &>/dev/null || continue  # skip names with no account
-    [ "$_ip" = "127.0.0.1" ] && unresolved=$((unresolved+1))
+    if [ "$_ip" = "127.0.0.1" ] && [ "$_kind" = "Dropbear" ]; then
+        unresolved=$((unresolved+1))
+    fi
     if [ -z "${ip_seen["$_user|$_ip"]+x}" ]; then
         ip_seen["$_user|$_ip"]=1
         ip_count["$_user"]=$(( ${ip_count["$_user"]:-0} + 1 ))
@@ -195,8 +197,8 @@ function show_logins {
     done
     if [ "$unresolved" -gt 0 ]; then
         echo ""
-        echo -e "${orange}Warning: ${unresolved} session(s) still show 127.0.0.1 (ws mapping unavailable).${NC}"
-        echo -e "${orange}Each such session counts as one IP, the same as limit-ip-ssh.${NC}"
+        echo -e "${orange}Warning: ${unresolved} Dropbear session(s) still show 127.0.0.1 (WS/HAProxy mapping unavailable).${NC}"
+        echo -e "${orange}They share one IP in this table, the same as limit-ip-ssh.${NC}"
     fi
     echo ""
 }

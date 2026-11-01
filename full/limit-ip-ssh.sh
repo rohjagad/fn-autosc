@@ -86,17 +86,8 @@ echo ""
 # Found 512: the limiter counts unique active client IPs from the shared
 # ssh-online helper.  The helper resolves WS/CDN sessions (Dropbear sees
 # 127.0.0.1 behind ws:2080) to the real client IP; see full/ssh-online.sh.
-SSH_ONLINE_BIN="${SSH_ONLINE_BIN:-$(command -v ssh-online 2>/dev/null || true)}"
-if [ -z "$SSH_ONLINE_BIN" ] || [ ! -x "$SSH_ONLINE_BIN" ]; then
-    echo "limit-ip-ssh: ssh-online helper not found; run update.sh." >&2
-    exit 1
-fi
-SSH_ONLINE=$(mktemp) || { echo "limit-ip-ssh: cannot create temporary file." >&2; exit 1; }
-trap 'rm -f "$SSH_ONLINE"' EXIT
-if ! "$SSH_ONLINE_BIN" > "$SSH_ONLINE" 2>/dev/null; then
-    echo "limit-ip-ssh: ssh-online failed; no changes made." >&2
-    exit 1
-fi
+# The helper check lives after unlocked() so an ssh-online failure can still
+# run the auto-unlock sweeper (Found 515).
 
 mesinssh() {
 RED='\033[0;31m'
@@ -153,7 +144,7 @@ logs() {
 <b>-----------------------</b>
 <code>Username    : $user</code>
 <code>Type        : SSH</code>
-<code>Login       : $cekcek / $iplimit</code>
+<code>Active IPs  : $cekcek / $iplimit</code>
 <code>Status      : Locked</code>
 <code>Unlock Time : $unlock_time</code>
 <b>-----------------------</b>
@@ -196,6 +187,69 @@ The lock period ended and the account can be used again."
     curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&parse_mode=html" --data-urlencode "text=$_msg" $URL >/dev/null
 }
 
+# Found 515: auto-unlock is independent of ssh-online.  A missing/broken
+# helper must not freeze every SSH lock forever; run this sweeper before the
+# helper check and keep the due file until passwd -u actually succeeds.
+ssh_auto_unlock() {
+    for _sf in /etc/xray/autounlock/ssh/*; do
+        [ -e "$_sf" ] || continue
+        _au=$(basename "$_sf")
+        if ! [[ "$_au" =~ ^[a-z0-9_]+$ ]]; then
+            rm -f "$_sf"
+            continue
+        fi
+        if passwd -S "$_au" 2>/dev/null | grep -q " L "; then
+            _due=$(cat "$_sf" 2>/dev/null)
+            _since=$(stat -c %Y -- "$_sf" 2>/dev/null)
+            # Found 515: a partial/corrupt due file must not freeze the lock
+            # forever. Fall back to mtime+900, then to now+900.
+            if ! [[ "$_due" =~ ^[0-9]+$ ]]; then
+                if [[ "$_since" =~ ^[0-9]+$ ]]; then
+                    _due=$(( _since + 900 ))
+                else
+                    _due=$(( $(date +%s) + 900 ))
+                fi
+            fi
+            if [[ "$_due" =~ ^[0-9]+$ ]] && [ "$(date +%s)" -ge "$_due" ]; then
+                if passwd -u "$_au" >/dev/null 2>&1 && \
+                    ! passwd -S "$_au" 2>/dev/null | grep -q " L "; then
+                    rm -f "$_sf"
+                    unlocked "$_au" >/dev/null 2>&1
+                else
+                    echo "limit-ip-ssh: failed to unlock $_au; will retry" >&2
+                fi
+            fi
+        else
+            rm -f "$_sf"
+        fi
+    done
+}
+
+# Found 515: passwd -l blocks new authentications but leaves the over-limit
+# sessions running.  The old code restarted ssh/sshd/ws to force them out,
+# which dropped every other user too.  Kill only the offending account's
+# processes; its Dropbear/OpenSSH children run as that UID, so the sessions
+# close while other accounts keep theirs.
+ssh_kick_user() {
+    local _u="$1"
+    command -v pkill >/dev/null 2>&1 || return 0
+    pkill -KILL -u "$_u" >/dev/null 2>&1 || true
+}
+
+SSH_ONLINE_BIN="${SSH_ONLINE_BIN:-$(command -v ssh-online 2>/dev/null || true)}"
+if [ -z "$SSH_ONLINE_BIN" ] || [ ! -x "$SSH_ONLINE_BIN" ]; then
+    echo "limit-ip-ssh: ssh-online helper not found; run update.sh." >&2
+    ssh_auto_unlock
+    exit 1
+fi
+SSH_ONLINE=$(mktemp) || { echo "limit-ip-ssh: cannot create temporary file." >&2; ssh_auto_unlock; exit 1; }
+trap 'rm -f "$SSH_ONLINE"' EXIT
+if ! "$SSH_ONLINE_BIN" > "$SSH_ONLINE" 2>/dev/null; then
+    echo "limit-ip-ssh: ssh-online failed; no lock changes made." >&2
+    ssh_auto_unlock
+    exit 1
+fi
+
 clear
 echo ""
 echo ""
@@ -229,7 +283,6 @@ done
 mesinssh
 date=$(date)
 nais=0
-need_restart=0
 
 for user in $username
 do
@@ -239,23 +292,28 @@ do
         echo "File untuk pengguna $user dibuat dan diisi dengan 2."
     fi
 
-    # Non-numeric limits (bad manual edit) fall back to the default of 2.
-    # "Unlimited" is the same sentinel cek-login-ssh displays; never rewrite
-    # it to 2 or enforce it.
+    # A limit of 0 is rejected by the limit-ip tool (it would lock every
+    # session). Treat it like any other malformed value and restore the
+    # default of 2. "Unlimited" is the same sentinel cek-login-ssh displays;
+    # never rewrite it to 2 or enforce it.
     iplimit=$(cat "$file_path")
     if [ "$iplimit" = "Unlimited" ]; then
         rm -f "/var/lib/fn-autosc/limit-ip/ssh/${user}"
         continue
     fi
-    if ! [[ "$iplimit" =~ ^[0-9]+$ ]]; then
+    if ! [[ "$iplimit" =~ ^[1-9][0-9]*$ ]]; then
         iplimit=2
         echo "$iplimit" > "$file_path"
+        rm -f "/var/lib/fn-autosc/limit-ip/ssh/${user}"
     fi
 
     # Found 512: an account already locked by passwd -l keeps its original
     # 15-minute auto-unlock due.  Re-locking every 5 minutes would reset the
     # timer and spam the operator while the old sessions are still connected.
+    # Found 515: drop any stale two-sample state as well; otherwise a manual
+    # unlock would re-lock on the first over-limit tick without a new grace.
     if passwd -S "$user" 2>/dev/null | grep -q " L "; then
+        rm -f "/var/lib/fn-autosc/limit-ip/ssh/${user}"
         continue
     fi
 
@@ -276,8 +334,15 @@ do
             _prev_epoch=$(sed -n '1p' "$_state" 2>/dev/null)
             _prev_ips=$(sed -n '2,$p' "$_state" 2>/dev/null)
         fi
-        if [ "$_curips" = "$_prev_ips" ] && [[ "$_prev_epoch" =~ ^[0-9]+$ ]] && [ $(( $(date +%s) - _prev_epoch )) -ge 240 ]; then
-            rm -f "$_state"
+        if [ "$_curips" = "$_prev_ips" ] && [[ "$_prev_epoch" =~ ^[0-9]+$ ]]; then
+            if [ $(( $(date +%s) - _prev_epoch )) -ge 240 ]; then
+                rm -f "$_state"
+            else
+                # Same set, not old enough: keep the original epoch.  A
+                # frequent manual run must not keep resetting the grace.
+                echo "$user: $cekcek IPs (> $iplimit), waiting for a stable second sample"
+                continue
+            fi
         else
             mkdir -p "$(dirname "$_state")"
             { echo "$(date +%s)"; printf '%s\n' "$_curips"; } > "$_state"
@@ -290,12 +355,15 @@ do
 
     # Pastikan user root tidak dikunci
     if [[ $user != "root" && $cekcek -gt $iplimit ]]; then
-        passwd -l "$user"
-        need_restart=1
+        if ! passwd -l "$user" >/dev/null 2>&1; then
+            echo "limit-ip-ssh: failed to lock $user; will retry" >&2
+            continue
+        fi
         echo "$user dikunci karena melebihi batas login."
         unlock_time=$(date -d "15 minutes" "+%Y-%m-%d %H:%M:%S")
         mkdir -p /etc/xray/autounlock/ssh
         echo $(( $(date +%s) + 900 )) > /etc/xray/autounlock/ssh/$user
+        ssh_kick_user "$user"
         logs >/dev/null 2>&1
         nais=3
     else
@@ -313,27 +381,11 @@ for _st in /var/lib/fn-autosc/limit-ip/ssh/*; do
     fi
 done
 
-if [[ $need_restart -eq 1 ]]; then
-    systemctl daemon-reload
-    systemctl restart ssh
-    systemctl restart sshd
-    systemctl restart ws
-fi
-for _sf in /etc/xray/autounlock/ssh/*; do
-    [ -e "$_sf" ] || continue
-    _au=$(basename "$_sf")
-    if passwd -S "$_au" 2>/dev/null | grep -q " L "; then
-        _due=$(cat "$_sf" 2>/dev/null)
-        if [[ "$_due" =~ ^[0-9]+$ ]] && [ "$(date +%s)" -ge "$_due" ]; then
-            rm -f "$_sf"
-            if passwd -u "$_au" >/dev/null 2>&1; then
-                unlocked "$_au" >/dev/null 2>&1
-            fi
-        fi
-    else
-        rm -f "$_sf"
-    fi
-done
+# Found 515: passwd -l takes effect on the next authentication; restarting
+# ssh/sshd/ws here is unnecessary and drops every other SSH/WS session when
+# one account is locked.  The auto-unlock sweeper is independent of
+# ssh-online and keeps its due file until passwd -u succeeds.
+ssh_auto_unlock
 if [[ $nais -gt 1 ]]; then
     clear
     echo ""
