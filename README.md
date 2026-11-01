@@ -371,21 +371,30 @@ to spread usage; the card description always shows the canonical path.
 
 ### Domain naming: installer domain and rotated domains
 
-`/etc/xray/installer-domain` holds the single installer domain. It is the first
-entry of the rotation set, not a privileged default. `/etc/xray/rotated-domains`
-holds the optional additional rotated domains, one per line. New account links
-rotate round-robin over both files via `/etc/xray/.rotated-domainseq`, exactly
-like colors.
+`/etc/xray/installer-domain` holds the single installer domain. It keeps Nginx
+and the certificate anchored even when the rotation list is empty, so it cannot
+be removed. `/etc/xray/rotated-domains` is the independent rotation list, one
+domain per line. New account links rotate only over that list via
+`/etc/xray/.rotated-domainseq`, exactly like colors; the installer domain is not
+implicitly added.
+
+On a fresh install the installer domain is written to both files, so the first
+rotated entry is the installer domain. That entry is ordinary and removable
+from the rotated list; the installer-domain file is unchanged. If every rotated
+entry is removed, Xray, SSH, and WireGuard account creation stops with a notice
+asking for a rotated domain instead of dividing by zero or silently using the
+installer domain.
 
 Every account card names the two values explicitly:
 
 - `Installer Domain :` — the domain the panel was installed with.
 - `Rotated Domain :` — the domain used by that account's links.
 
-L2TP and NoobzVPN have no per-account links, so their cards list the full
-rotation set as `Rotated Domains :`. The Domain Menu list reports per-domain
-account counts for each protocol instead of repeating the global total under
-every domain.
+L2TP and NoobzVPN have no per-account links, so their cards list the rotation
+list as `Rotated Domains :`. The Domain Menu list reports per-domain account
+counts for each protocol, marks the installer entry when it is in the rotated
+list, and shows the installer domain separately when it has been removed but
+legacy accounts still point at it.
 
 ### Why arbitrary paths are unstable
 
@@ -693,10 +702,13 @@ key and is mode `0600`.
 | 6 | Generate a self-signed certificate (all domains via SAN) |
 
 The installer domain is written once by the installer to
-`/etc/xray/installer-domain` and is never rewritten by the menu. Adding or
-removing a rotated domain only updates `/etc/xray/rotated-domains`, rebuilds
-the Nginx `server_name`, backs up the old value, and reinstalls the certificate
-atomically in the same step.
+`/etc/xray/installer-domain` and is never rewritten by the menu. On a fresh
+install it is also seeded into `/etc/xray/rotated-domains`; option 2 can remove
+it from that list. Adding or removing a rotated domain only updates
+`/etc/xray/rotated-domains`, rebuilds the Nginx `server_name`, backs up the old
+value, and reinstalls the certificate atomically in the same step. If the
+rotated list becomes empty, account creation for Xray, SSH, and WireGuard stops
+with a notice until option 1 adds a domain.
 
 ### Renewing After Certificate Expiry
 
@@ -728,9 +740,10 @@ Interface `wg0`, UDP `51820`, subnet `10.66.66.0/24`, server address
 Create, delete, extend, list, and show client configs (with QR codes). Client
 IPs are allocated from `10.66.66.2` to `10.66.66.254` — 253 clients maximum.
 Configs are written to `/var/www/html/wireguard-<user>.conf` for download.
-The client endpoint rotates over the installer + rotated domain set
-(round-robin via `/etc/xray/.rotated-domainseq`), same as Xray links; the card
-shows both `Installer Domain` and the assigned `Rotated Domain`.
+The client endpoint rotates over the rotated domain list (round-robin via
+`/etc/xray/.rotated-domainseq`), same as Xray links; if the list is empty,
+creation stops with the same notice. The card shows both `Installer Domain` and
+the assigned `Rotated Domain`.
 
 Also includes a Cloudflare WARP helper (peer persisted in `wg0.conf` with
 keepalive, IPv4 endpoint resolved at setup).

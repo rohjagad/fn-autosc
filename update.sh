@@ -170,11 +170,30 @@ bin_md5() {
     fi
 }
 
-# Found 521: the domain files were renamed.  Copy legacy files to the new
-# names before new scripts are installed, keep the legacy names until the
-# install succeeds, and only then remove them.
+# Found 521/522: the domain files were renamed and the installer domain is no
+# longer implicit in the rotation. Copy legacy files to the new names before
+# new scripts are installed, keep the legacy names until the install succeeds,
+# and seed the installer domain once when the rotated list is first created.
+seed_installer_rotated_domain() {
+    local inst="/etc/xray/installer-domain" rot="/etc/xray/rotated-domains" d
+    [ -s "$inst" ] || return 0
+    d=$(tr -d '[:space:]' < "$inst")
+    [ -n "$d" ] || return 0
+    mkdir -p /etc/xray || return 1
+    if ! grep -qxF "$d" "$rot" 2>/dev/null; then
+        {
+            printf '%s\n' "$d"
+            if [ -s "$rot" ]; then
+                awk 'NF' "$rot"
+            fi
+        } > "$rot.tmp" || return 1
+        mv -f "$rot.tmp" "$rot" || return 1
+    fi
+    return 0
+}
+
 migrate_domain_layout() {
-    local old new base
+    local old new base seed_rotated=0
     mkdir -p "$BACKUP/domain-files" || return 1
     for pair in \
         "/etc/xray/domain:/etc/xray/installer-domain" \
@@ -187,8 +206,12 @@ migrate_domain_layout() {
         cp -a "$old" "$BACKUP/domain-files/$base" || return 1
         if [ ! -f "$new" ]; then
             cp -a "$old" "$new" || return 1
+            [ "$new" = "/etc/xray/rotated-domains" ] && seed_rotated=1
         fi
     done
+    if [ "$seed_rotated" -eq 1 ] || [ ! -e /etc/xray/rotated-domains ]; then
+        seed_installer_rotated_domain || return 1
+    fi
     return 0
 }
 

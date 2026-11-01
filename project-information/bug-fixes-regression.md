@@ -3113,3 +3113,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | Kartu tanpa baris `Rotated Domain` tidak dianggap rusak: parser membaca `Rotated` lama atau host link. Tidak ada log/kartu -> hitungan 0, bukan error. Domain yang sudah dihapus dan kartu tanpa domain ditampilkan sebagai kelompok terpisah, bukan dibuang. L2TP/NoobzVPN ditandai all-domain, bukan dipaksa punya satu domain. |
 | **Over-engineering** | Tanpa file map per akun dan tanpa daemon baru. Satu pass atas kartu/config saat menu dibuka; fungsi domain tetap di `dm-menu` dan blok rotasi tetap di tiap skrip akun. Migrasi memakai `cp`/`mv` biasa dan backup yang sudah ada. |
 | **vs the source** | Sumber lama mengulang total global di setiap blok domain dan hanya menampilkan himpunan domain di kartu. Divergensi ini memisahkan installer domain dari rotated domain, menampilkan domain yang dipakai akun, dan menghitung kartu per domain. |
+
+## 282. Installer domain independent from the rotated list — Four Checks (November 1, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Fresh install still writes `/etc/xray/installer-domain` and seeds `/etc/xray/rotated-domains` with the same domain, so the first account still rotates over the same set as before. The rotation counter, link formats, certificate flow, Nginx `server_name`, per-domain counts, and Fix 514–521 are unchanged. Legacy migration preserves the old effective order (`installer, extra1, extra2`). |
+| **Over-strictness** | An empty rotated list is a valid state, not a corruption: the Domain Menu shows it and account creation stops with an actionable message. L2TP/NoobzVPN, which have no per-account domain, still work. An existing new-format list—including an empty file—is never re-seeded by `update.sh`, so deleting every entry stays deleted. Legacy backups are seeded only when the old `domain`/`domains` files are present. |
+| **Over-engineering** | No new state file and no daemon. The installer writes one extra line; each account script keeps the same local dedupe block and adds one emptiness check; `dm-menu` reuses the existing rotated file and certificate picker. Migration/restore reuse `awk`/`grep`/`mv` and the existing backup directory. |
+| **vs the source** | The source always prepended `$installer_domain` to the rotation list, so the installer domain could never be removed and the list was never empty. Divergence: the installer domain is a separate anchor for Nginx/certificates, while the rotated list is an independent, editable set. |

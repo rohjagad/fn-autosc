@@ -123,6 +123,11 @@ done
 # Menyimpan Installer Domain
 mkdir -p /etc/xray
 echo -e "${installer_domain}" > /etc/xray/installer-domain
+# The installer domain starts as the first rotated entry, but remains an
+# ordinary removable entry. Xray keeps working from the installer domain.
+if [ ! -e /etc/xray/rotated-domains ]; then
+    echo -e "${installer_domain}" > /etc/xray/rotated-domains
+fi
 curl -4 -sS --max-time 15 ipinfo.io/ip > /etc/.ip
 
 # Menyimpan Email

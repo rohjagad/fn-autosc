@@ -166,18 +166,19 @@ systemctl restart xl2tpd
 clear
 echo ""
 echo ""
-# No primary/default domain: card lists the whole rotation set (any entry works).
-_rotated_domain_list="$installer_domain"
+# Rotated domains are independent; the installer domain stays separate.
+_rotated_domain_list=""
 if [ -s /etc/xray/rotated-domains ]; then
-	_l2_seen="|$installer_domain|"
+	_l2_seen="|"
 	while IFS= read -r _l2d || [ -n "$_l2d" ]; do
 		_l2d=$(echo "$_l2d" | tr -d '[:space:]')
 		if [ -n "$_l2d" ] && [[ "$_l2_seen" != *"|$_l2d|"* ]]; then
-			_rotated_domain_list="$_rotated_domain_list, $_l2d"
+			if [ -n "$_rotated_domain_list" ]; then _rotated_domain_list="$_rotated_domain_list, $_l2d"; else _rotated_domain_list="$_l2d"; fi
 			_l2_seen="$_l2_seen$_l2d|"
 		fi
 	done < /etc/xray/rotated-domains
 fi
+[ -z "$_rotated_domain_list" ] && _rotated_domain_list="(none)"
 PSK=$(grep -oP '(?<=: PSK ")\S+(?=")' /etc/ipsec.secrets 2>/dev/null || echo "myvpn")
 cat <<EOF
 

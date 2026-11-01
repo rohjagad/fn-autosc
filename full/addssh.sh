@@ -126,10 +126,10 @@ main() {
     clear_screen
 
     local installer_domain=$(read_file "/etc/xray/installer-domain")
-# Alternate domain, rotated for balance (no default; list order only)
-rotated_domains=("$installer_domain")
+# Rotated domains are independent; the installer domain may be deleted from this list.
+rotated_domains=()
 if [ -s /etc/xray/rotated-domains ]; then
-    _seen="|$installer_domain|"
+    _seen="|"
     while IFS= read -r _d || [ -n "$_d" ]; do
         _d=$(echo "$_d" | tr -d '[:space:]')
         if [ -n "$_d" ] && [[ "$_seen" != *"|$_d|"* ]]; then
@@ -137,6 +137,13 @@ if [ -s /etc/xray/rotated-domains ]; then
             _seen="$_seen$_d|"
         fi
     done < /etc/xray/rotated-domains
+fi
+if [ ${#rotated_domains[@]} -eq 0 ]; then
+    echo ""
+    echo -e "\033[0;31mRotated domain is empty. Please add a rotated domain from Domain Menu first.\033[0m"
+    read -n 1 -s -r -p "Press any key to return..." || true
+    echo ""
+    exit 1
 fi
 rotated_domain_seq=$(cat /etc/xray/.rotated-domainseq 2>/dev/null || echo 0)
 rotated_domain="${rotated_domains[$((rotated_domain_seq % ${#rotated_domains[@]}))]}"

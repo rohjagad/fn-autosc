@@ -272,28 +272,21 @@ read_installer_domain() {
 }
 
 all_rotated_domains() {
-    local installer_domain
-    installer_domain=$(read_installer_domain)
-    {
-        [ -n "$installer_domain" ] && echo "$installer_domain"
-        [ -s /etc/xray/rotated-domains ] && grep -v '^[[:space:]]*$' /etc/xray/rotated-domains | sed 's/[[:space:]]//g'
-    } | awk '$0 != "" && !seen[$0]++'
-}
-
-rotated_only_domains() {
-    local installer_domain d
-    installer_domain=$(read_installer_domain)
-    while IFS= read -r d; do
-        [ -n "$d" ] && [ "$d" != "$installer_domain" ] && printf '%s\n' "$d"
-    done < <(all_rotated_domains)
+    # The rotation list is independent: the installer domain is not implicit.
+    [ -s /etc/xray/rotated-domains ] || return 0
+    grep -v '^[[:space:]]*$' /etc/xray/rotated-domains | sed 's/[[:space:]]//g' | awk '$0 != "" && !seen[$0]++'
 }
 
 rotated_domains_sync_nginx() {
     # Rebuild the 443 server_name from installer + rotated domains.
     local installer_domain names
     installer_domain=$(read_installer_domain)
-    names="$installer_domain $(tr '\n' ' ' < /etc/xray/rotated-domains 2>/dev/null)"
-    names=$(echo "$names" | tr -s ' ' | sed 's/^ //; s/ $//')
+    names=$(
+        {
+            [ -n "$installer_domain" ] && printf '%s\n' "$installer_domain"
+            [ -s /etc/xray/rotated-domains ] && cat /etc/xray/rotated-domains
+        } | sed 's/[[:space:]]//g' | awk 'NF && !seen[$0]++ {printf "%s%s", sep, $0; sep=" "}'
+    )
     [ -z "$names" ] && { echo "No domain configured."; return 1; }
     python3 - "$names" <<'PYEOF2'
 import re, sys
@@ -315,6 +308,7 @@ gen_selfsigned_all() {
     # Self-signed covering the rotation set (auto on rotated-domain add).
     local installer_domain all san seen d
     installer_domain=$(read_installer_domain)
+    [ -z "$installer_domain" ] && installer_domain=$(all_rotated_domains | head -1)
     all="$installer_domain $(tr '\n' ' ' < /etc/xray/rotated-domains 2>/dev/null)"
     san=""
     seen=""
@@ -358,7 +352,7 @@ rotated_domain_add() {
         [ -n "$_d" ] || continue
         printf "\e[32;1m%02d\e[0m. %s\n" "$_i" "$_d"
         _i=$((_i+1))
-    done < <(rotated_only_domains)
+    done < <(all_rotated_domains)
     [ "$_i" -eq 1 ] && echo "  (none)"
     echo -e "${separator}"
     echo ""
@@ -412,12 +406,20 @@ rotated_domain_remove() {
     grep -vxF "$target" /etc/xray/rotated-domains > /etc/xray/rotated-domains.tmp || true
     mv /etc/xray/rotated-domains.tmp /etc/xray/rotated-domains
     rotated_domains_sync_nginx
-    echo "Removed $target."
-    sleep 1
+    if [ "$target" = "$(read_installer_domain)" ]; then
+        echo "Removed $target from the rotated list; the installer domain itself is unchanged."
+    else
+        echo "Removed $target."
+    fi
+    if [ ! -s /etc/xray/rotated-domains ]; then
+        echo "Rotated list is now empty. Xray/SSH/WireGuard account creation will stop until a domain is added."
+    fi
+    sleep 2
 }
 
-pick_rotated_domain() {
-    # Choose one rotation entry first. Sets SELECTED_DOMAIN.
+pick_certificate_domain() {
+    # Certificate selection may include the installer domain even when the
+    # rotated list is empty. Sets SELECTED_DOMAIN.
     unset SELECTED_DOMAIN
     local _all _d _installer
     _all=()
@@ -434,7 +436,7 @@ pick_rotated_domain() {
     echo ""
     echo ""
     echo -e "${separator}"
-    echo -e "Choose Rotated Domain"
+    echo -e "Choose Certificate Domain"
     echo -e "${separator}"
     local i=1
     for _d in "${_all[@]}"; do
@@ -443,7 +445,7 @@ pick_rotated_domain() {
     done
     echo -e "${separator}"
     echo ""
-    read -p "Choose rotated domain: " nn || return 1
+    read -p "Choose certificate domain: " nn || return 1
     if ! [[ "$nn" =~ ^[0-9]+$ ]] || [ "$nn" -lt 1 ] || [ "$nn" -gt "${#_all[@]}" ]; then
         echo "Invalid choice."
         return 1
@@ -554,25 +556,47 @@ rotated_domains_report() {
     local -a _extra_list=()
     local -A _known=() _extra=()
     mapfile -t _domains < <(all_rotated_domains)
-    if [ ${#_domains[@]} -eq 0 ]; then
+    installer_domain=$(read_installer_domain)
+    if [ ${#_domains[@]} -eq 0 ] && [ -z "$installer_domain" ]; then
         echo -e "No domain configured."
         echo -e "${separator}"
         read -n 1 -s -r -p "Press any key to return..." || true
         echo ""
         return
     fi
-    installer_domain=$(read_installer_domain)
     domain_counts_collect
     for d in "${_domains[@]}"; do
         _known["$d"]=1
     done
-    if [ -n "$installer_domain" ]; then
-        print_domain_counts "Installer Domain" "$installer_domain"
+    [ -n "$installer_domain" ] && _known["$installer_domain"]=1
+
+    echo -e "Installer Domain : ${installer_domain:-not set}"
+    if [ ${#_domains[@]} -eq 0 ]; then
+        echo -e "Rotated Domains  : (empty)"
+        echo -e "Add a rotated domain before creating Xray, SSH, or WireGuard accounts."
+        echo -e "${separator}"
+    else
+        echo -e "Rotated Domains  :"
+        for d in "${_domains[@]}"; do
+            if [ "$d" = "$installer_domain" ]; then
+                print_domain_counts "Rotated Domain (installer domain, removable)" "$d"
+            else
+                print_domain_counts "Rotated Domain" "$d"
+            fi
+        done
     fi
-    for d in "${_domains[@]}"; do
-        [ "$d" = "$installer_domain" ] && continue
-        print_domain_counts "Rotated Domain" "$d"
-    done
+
+    # Accounts may still point at an installer domain removed from the rotated
+    # list. Show those counts separately instead of hiding them.
+    if [ -n "$installer_domain" ] && ! printf '%s\n' "${_domains[@]}" | grep -qxF "$installer_domain"; then
+        local _itotal=0 _p
+        for _p in SSH VMess VLess Trojan WireGuard; do
+            _itotal=$((_itotal + ${_DOMAIN_COUNTS["$_p|$installer_domain"]:-0}))
+        done
+        if [ "$_itotal" -gt 0 ]; then
+            print_domain_counts "Installer Domain (not in rotated list)" "$installer_domain"
+        fi
+    fi
     for key in "${!_DOMAIN_COUNTS[@]}"; do
         d=${key#*|}
         [ -n "${_known[$d]:-}" ] && continue
@@ -603,14 +627,14 @@ dm1() {
 clear
 local installer_domain rotated_list
 installer_domain=$(read_installer_domain)
-rotated_list=$(rotated_only_domains | awk 'NR>1{printf ", "} {printf "%s",$0}')
+rotated_list=$(all_rotated_domains | awk 'NR>1{printf ", "} {printf "%s",$0}')
 echo ""
 echo ""
 echo -e "${NC}${separator}
             DOMAIN MENU
 ${separator}
 Installer Domain : ${installer_domain:-not set}
-Rotated Domains  : ${rotated_list:-none}
+Rotated Domains  : ${rotated_list:-(empty)}
 ${blue_sep}
 ${green}1${NC}. Add Rotated Domain
 ${green}2${NC}. Remove Rotated Domain
@@ -627,9 +651,9 @@ case $apw in
 1) clear ; rotated_domain_add ; dm1 ;;
 2) clear ; rotated_domain_remove ; dm1 ;;
 3) clear ; rotated_domains_report ; dm1 ;;
-4) clear ; pick_rotated_domain && acme ; dm1 ;;
-5) clear ; pick_rotated_domain && fn ; dm1 ;;
-6) clear ; pick_rotated_domain && dmsl ; dm1 ;;
+4) clear ; pick_certificate_domain && acme ; dm1 ;;
+5) clear ; pick_certificate_domain && fn ; dm1 ;;
+6) clear ; pick_certificate_domain && dmsl ; dm1 ;;
 0|00) clear ; menu ;;
 *) clear ; dm1 ;;
 esac

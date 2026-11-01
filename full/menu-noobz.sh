@@ -170,18 +170,19 @@ if ! noobz_add_user "$user" "$pass" "$masaaktif"; then
     sleep 2
     return
 fi
-# No primary/default domain: card lists the whole rotation set (any entry works).
-_rotated_domain_list="$installer_domain"
+# Rotated domains are independent; the installer domain stays separate.
+_rotated_domain_list=""
 if [ -s /etc/xray/rotated-domains ]; then
-    _nb_seen="|$installer_domain|"
+    _nb_seen="|"
     while IFS= read -r _nbd || [ -n "$_nbd" ]; do
         _nbd=$(echo "$_nbd" | tr -d '[:space:]')
         if [ -n "$_nbd" ] && [[ "$_nb_seen" != *"|$_nbd|"* ]]; then
-            _rotated_domain_list="$_rotated_domain_list, $_nbd"
+            if [ -n "$_rotated_domain_list" ]; then _rotated_domain_list="$_rotated_domain_list, $_nbd"; else _rotated_domain_list="$_nbd"; fi
             _nb_seen="$_nb_seen$_nbd|"
         fi
     done < /etc/xray/rotated-domains
 fi
+[ -z "$_rotated_domain_list" ] && _rotated_domain_list="(none)"
 expi=`date -d "$masaaktif days" +"%d-%b-%Y"`
 echo "### ${user} ${expi}" >>/etc/funny/.noob
 clear

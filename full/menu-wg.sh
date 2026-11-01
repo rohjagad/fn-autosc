@@ -157,10 +157,10 @@ goback() {
 }
 
 function create() {
-	# No primary/default domain: endpoint rotates over the set like xray links.
-	_wg_rotated_domains=("$installer_domain")
+	# Rotated domains are independent; the installer domain may be deleted from this list.
+	_wg_rotated_domains=()
 	if [ -s /etc/xray/rotated-domains ]; then
-		_wg_seen="|$installer_domain|"
+		_wg_seen="|"
 		while IFS= read -r _wd || [ -n "$_wd" ]; do
 			_wd=$(echo "$_wd" | tr -d '[:space:]')
 			if [ -n "$_wd" ] && [[ "$_wg_seen" != *"|$_wd|"* ]]; then
@@ -168,6 +168,14 @@ function create() {
 				_wg_seen="$_wg_seen$_wd|"
 			fi
 		done < /etc/xray/rotated-domains
+	fi
+	if [ ${#_wg_rotated_domains[@]} -eq 0 ]; then
+		echo ""
+		echo -e "\033[0;31mRotated domain is empty. Please add a rotated domain from Domain Menu first.\033[0m"
+		read -n 1 -s -r -p "Press any key to return..." || true
+		echo ""
+		goback
+		return
 	fi
 	_wg_rotated_domain_seq=$(cat /etc/xray/.rotated-domainseq 2>/dev/null || echo 0)
 	_wg_rotated_domain="${_wg_rotated_domains[$((_wg_rotated_domain_seq % ${#_wg_rotated_domains[@]}))]}"

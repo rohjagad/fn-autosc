@@ -144,6 +144,11 @@ rm -f /root/package.sh
 # Save Installer Domain
 mkdir -p /etc/xray
 echo -e "${installer_domain}" > /etc/xray/installer-domain
+# The installer domain starts as the first rotated entry, but remains an
+# ordinary removable entry. Xray keeps working from the installer domain.
+if [ ! -e /etc/xray/rotated-domains ]; then
+    echo -e "${installer_domain}" > /etc/xray/rotated-domains
+fi
 
 # Menyimpan Email
 mkdir -p /etc/funny

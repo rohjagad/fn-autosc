@@ -141,19 +141,36 @@ restore() {
 # /etc/xray/domains, and /etc/xray/.domainseq.  Normalize the unpacked copy
 # before it lands in /etc/xray; when both names exist, the new one wins.
 normalize_backup_domains() {
-    local b="/root/backup/xray"
+    local b="/root/backup/xray" legacy=0 d
     [ -d "$b" ] || return 0
     if [ -f "$b/domain" ]; then
+        legacy=1
         [ -f "$b/installer-domain" ] || cp -a "$b/domain" "$b/installer-domain"
         rm -f "$b/domain"
     fi
     if [ -f "$b/domains" ]; then
+        legacy=1
         [ -f "$b/rotated-domains" ] || cp -a "$b/domains" "$b/rotated-domains"
         rm -f "$b/domains"
     fi
     if [ -f "$b/.domainseq" ]; then
         [ -f "$b/.rotated-domainseq" ] || cp -a "$b/.domainseq" "$b/.rotated-domainseq"
         rm -f "$b/.domainseq"
+    fi
+    # Old backups relied on the installer domain being implicit in the
+    # rotation. Seed it once so restored accounts keep a usable list; new
+    # backups are left as-is, so a deleted installer entry stays deleted.
+    if [ "$legacy" -eq 1 ] && [ -s "$b/installer-domain" ]; then
+        d=$(tr -d '[:space:]' < "$b/installer-domain")
+        if [ -n "$d" ] && ! grep -qxF "$d" "$b/rotated-domains" 2>/dev/null; then
+            {
+                printf '%s\n' "$d"
+                if [ -s "$b/rotated-domains" ]; then
+                    awk 'NF' "$b/rotated-domains"
+                fi
+            } > "$b/rotated-domains.tmp" || return 0
+            mv -f "$b/rotated-domains.tmp" "$b/rotated-domains"
+        fi
     fi
 }
 
