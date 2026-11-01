@@ -935,6 +935,9 @@ Binaries are built with `-ldflags='-s -w'` for a small footprint.
   `/usr/bin/restore-ftp` stays the website variant; interactive restore
   remains in `bmenu`. The installer manifest uses a `web` entry too, so a
   standalone payload run cannot reintroduce the TUI script.
+- **Updater starts from the live version marker** — `.update-commit`, then
+  `.install-commit`, with the documented `6b967af` live v1.23 fallback; the
+  stale `5c48741` baseline is gone.
 - **HAProxy 777 logging checks the `ssh-ssl` section** — a `log global` in
   another frontend no longer hides a missing directive, so 777 sessions map
   to their real client IPs.
@@ -1002,10 +1005,14 @@ bash <(curl -fsSL https://raw.githubusercontent.com/rohjagad/fn-autosc/main/upda
 
 What it does:
 
-- Detects the installed edition (`full` vs `lite`) and fetches the changed
-  files for it from the target commit (the default is pinned in `update.sh`;
-  currently `01b9f71966190ee4b0bf02c1320b39ef4d8e2365`, Fix 518/519):
-  35 files on full, 30 on lite. The four `change-limit-ip` tools ship as
+- Detects the installed edition (`full` vs `lite`) and the live starting
+  version: `/etc/funny/.update-commit` (last applied update), then
+  `/etc/funny/.install-commit` (fresh install); `Unknown`/empty markers are
+  ignored, and only when both are missing does it use the documented
+  `6b967af` live v1.23 fallback. The target remains pinned in `update.sh`;
+  currently `01b9f71966190ee4b0bf02c1320b39ef4d8e2365` (Fix 518/519 content;
+  the updater script itself also carries Fix 520).
+  It fetches 35 files on full, 30 on lite. The four `change-limit-ip` tools ship as
   compiled binaries from `bin/<edition>/` and are checked against pinned md5
   fingerprints; shell files are syntax- and marker-checked. The account-card
   formatter `/etc/funny/format.sh` is fetched from `config/`, and the web

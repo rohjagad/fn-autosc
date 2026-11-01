@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# FN AutoSC updater: 5c48741 -> 01b9f71
+# FN AutoSC updater: 6b967af -> 01b9f71
 #
 # Applies the commits on top of b6d1a97 (1-minute evidence window,
 # Exp-Date-N/A binary fix, LOCKED IPs block, MULTILOGIN UNLOCKED
@@ -20,7 +20,7 @@
 # missing).
 #
 # Usage:
-#   bash update.sh                  # update to 01b9f71 (default)
+#   bash update.sh                  # live marker -> 01b9f71 (default)
 #   bash update.sh <commit> --force  # re-apply even if already recorded
 #
 # One-line remote run:
@@ -28,7 +28,10 @@
 
 set -u
 
-FROM="5c487410db77000968450495a615f8e7971f376a"
+# Fallback baseline: the live v1.23 install (Found 520).  The real starting
+# version is read from the live panel below, so this value only appears when
+# both markers are missing.
+FROM="6b967af9e0ebadc76a265132e49d62a27ad72235"
 TARGET="${1:-01b9f71966190ee4b0bf02c1320b39ef4d8e2365}"
 FORCE=0
 [ "${2:-}" = "--force" ] && FORCE=1
@@ -37,6 +40,20 @@ if [ "$(id -u)" -ne 0 ]; then
     echo "Run as root."
     exit 1
 fi
+
+# Found 520: do not assume the live panel is at the historical 5c48741
+# baseline.  The last applied update is the current live version; a box that
+# was never updated falls back to its install commit.
+_live_from=""
+for _marker in /etc/funny/.update-commit /etc/funny/.install-commit; do
+    [ -s "$_marker" ] || continue
+    _candidate=$(tr -d '[:space:]' < "$_marker" 2>/dev/null)
+    case "$_candidate" in
+        "" | Unknown) continue ;;
+        *) _live_from="$_candidate"; break ;;
+    esac
+done
+[ -n "$_live_from" ] && FROM="$_live_from"
 
 # Downloader (same bootstrap the README install command uses).
 command -v curl >/dev/null 2>&1 || command -v wget >/dev/null 2>&1 || {
@@ -68,6 +85,7 @@ else
     EDITION="lite"
 fi
 echo "Edition detected: $EDITION"
+echo "Live version: ${FROM:0:7} -> ${TARGET:0:7}"
 
 # Found 512: the SSH IP limiter/menu use the ssh-online helper (stdlib Python)
 # to resolve WS/CDN clients to their real IPs.

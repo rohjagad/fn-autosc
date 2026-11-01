@@ -526,3 +526,10 @@ no Cloudflare-only header anywhere, zero `grpcRealIp` remnants in tree or test b
 - **Decision:** `restore-ftp` is a `web` manifest entry sourced from `website/restore-ftp.sh`; the payload helper downloads, syntax-checks, and installs that variant to `/usr/bin`. The interactive `full/restore-ftp.sh` and `lite/restore-ftp.sh` are not payload targets; interactive restore remains in `bmenu`.
 - **Reason:** Fix 514 fixed the updater but left the installer/standalone payload path able to overwrite the web command with the license-gated TUI script, breaking `website/upload.php`. One manifest kind makes fresh install, repair, and update agree. The same change raises every payload download timeout to 600 seconds.
 - **Safety:** a missing or invalid `website/restore-ftp.sh` aborts the whole payload before any destination file is replaced; the updater keeps its separate `WEB_FILES` verification.
+
+## 36. The Updater Starts From the Live Version Marker
+
+- **Component:** `update.sh`.
+- **Decision:** the starting version is read at runtime from `/etc/funny/.update-commit` (last applied update), then `/etc/funny/.install-commit` (fresh install). Empty and `Unknown` markers are skipped, and the documented `6b967af` live v1.23 value is only a fallback when neither marker is usable. The target stays pinned at `01b9f71`.
+- **Reason:** the full-file updater does not need a Git ancestry walk, but the header, startup line, and `UPDATE SUCCESS` message must report the actual live version. A hardcoded `5c48741` became stale once the live box moved to the v1.23 marker.
+- **Safety:** `FROM` is display/history only; it is never used to fetch files. A malformed marker cannot change which files are downloaded, verified, or installed, and the existing `Already at $TARGET` check still compares only `TARGET`.

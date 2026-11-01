@@ -3095,3 +3095,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | `log /dev/log` sekarang harus ada di section `global`, dan `logasap`/`log global` harus ada di frontend `ssh-ssl`; directive yang hanya ada di frontend lain tidak lagi dianggap cukup. Ini sengaja lebih ketat karena directive di section lain tidak menghasilkan log 777. |
 | **Over-engineering** | Dua helper awk kecil di dalam fungsi patch; tanpa file/daemon baru. Deteksi section memakai baris top-level (`^[^[:space:]#]`), bukan parser HAProxy penuh. |
 | **vs the source** | Fix 514 memakai `grep` global; satu `log global` di frontend `stats` membuat `ssh-ssl` tidak pernah mendapat `log global` dan verifikasi tetap lulus. Divergensi ini memeriksa section yang benar dan memverifikasi hasilnya di section yang sama. |
+
+## 280. Updater mulai dari marker versi live — Four Checks (November 1, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | `TARGET`, `FILES`, `WEB_FILES`, md5 pin, timeout 600, instalasi, dan patch HAProxy tidak berubah. Skip `Already at $TARGET` tetap membandingkan `TARGET`, bukan `FROM`; akun/menu tidak tersentuh. |
+| **Over-strictness** | Marker kosong/`Unknown` tidak membuat updater gagal; ia mencoba marker berikutnya lalu fallback `6b967af`. Nilai `FROM` tidak pernah dipakai untuk mengunduh, jadi marker aneh tidak bisa mengubah file yang dipasang. |
+| **Over-engineering** | Satu loop dua marker + satu baris startup; tanpa file/daemon baru dan tanpa panggilan GitHub tambahan. |
+| **vs the source** | Updater lama meng-hardcode `5c48741` dari baseline live pertama dan tidak mengikuti `.update-commit`/`.install-commit` setelah box di-update. Divergensi ini melaporkan versi awal yang benar tanpa mengubah mekanisme deploy. |
