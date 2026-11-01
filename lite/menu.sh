@@ -179,15 +179,24 @@ rainbow_sep() {
         exit 1
     fi
 
+    # Found 523: missing or invalid markers are explicit states, not "Unknown".
+    version_label() {
+        local file="$1" fallback="$2" value=""
+        [ -r "$file" ] && value=$(tr -d '[:space:]' < "$file" 2>/dev/null)
+        case "$value" in
+            ""|Unknown|unknown) printf '%s' "$fallback" ;;
+            *[!0-9a-f]*) printf '%s' "$fallback" ;;
+            *) printf '%s' "${value:0:7}" ;;
+        esac
+    }
+
     # Output informasi izin
     output() {
         echo "Username          : $USERNAME"
         echo "IPv4              : $PERMISSION_IP"
         if [ "$REMAINING_DAYS" = "lifetime" ]; then echo "Expired           : lifetime"; else echo "Expired           : $EXPIRED_DATE ($REMAINING_DAYS days)"; fi
-        _installed=$(cat /etc/funny/.install-commit 2>/dev/null)
-        [ -n "$_installed" ] && [ "$_installed" != "Unknown" ] && _installed="${_installed:0:7}" || _installed="Unknown"
-        _updated=$(cat /etc/funny/.update-commit 2>/dev/null)
-        [ -n "$_updated" ] && [ "$_updated" != "Unknown" ] && _updated="${_updated:0:7}" || _updated="Unknown"
+        _installed=$(version_label /etc/funny/.install-commit "not recorded")
+        _updated=$(version_label /etc/funny/.update-commit "not updated")
         echo "Installed version: $_installed"
         echo "Updated version: $_updated"
     }

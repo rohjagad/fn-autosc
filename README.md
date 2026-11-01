@@ -863,11 +863,20 @@ Files are named `{username}.log`. Locking renames them to `{username}.locked`.
 | HAProxy bundle | `/etc/haproxy/funny.pem` |
 | Telegram | `/etc/funny/.keybot`, `/etc/funny/.chatid` |
 | Version | `/etc/funny/version` |
-| Install commit | `/etc/funny/.install-commit` (`Unknown` when recorded by no installer yet) |
-| Update commit | `/etc/funny/.update-commit` (written by `update.sh`; `Unknown` when never updated) |
+| Install commit | `/etc/funny/.install-commit` (written by the installer) |
+| Update commit | `/etc/funny/.update-commit` (written by `update.sh`) |
 
 The three version markers above are not archived; restore keeps the running
 copies so an old backup cannot make the menu display an older panel version.
+
+The main menu shows the first seven characters of both markers. A fresh
+install resolves the current `main` SHA from the GitHub API
+(`/repos/rohjagad/fn-autosc/commits/main`), with `git ls-remote` as a fallback,
+so `Installed version` is populated immediately. `Updated version` shows
+`not updated` until `update.sh` records an update. Missing, empty, or invalid
+markers display `not recorded` / `not updated`, never `Unknown`; on the first
+update of an older box whose installer recorded `Unknown`, `update.sh`
+backfills the install marker from the detected live version.
 
 ### Quota & IP Limit Files
 

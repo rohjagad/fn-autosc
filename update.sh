@@ -478,6 +478,32 @@ patch_haproxy_logging() {
 }
 patch_haproxy_logging
 
+# Found 523: fresh installs before the fix wrote "Unknown" to .install-commit
+# because the GitHub API endpoint was wrong. When this is the first recorded
+# update, FROM is the best known installed version; record it so the menu can
+# show both the install and update versions.
+_prev_update=""
+[ -r /etc/funny/.update-commit ] && _prev_update=$(tr -d '[:space:]' < /etc/funny/.update-commit 2>/dev/null)
+case "$_prev_update" in
+    ""|Unknown)
+        case "$FROM" in
+            *[!0-9a-f]*|"") ;;
+            *)
+                if [ ${#FROM} -eq 40 ]; then
+                    _prev_install=""
+                    [ -r /etc/funny/.install-commit ] && _prev_install=$(tr -d '[:space:]' < /etc/funny/.install-commit 2>/dev/null)
+                    case "$_prev_install" in
+                        ""|Unknown)
+                            printf '%s\n' "$FROM" > /etc/funny/.install-commit
+                            chmod 600 /etc/funny/.install-commit 2>/dev/null || true
+                            ;;
+                    esac
+                fi
+                ;;
+        esac
+        ;;
+esac
+
 echo "$TARGET" > /etc/funny/.update-commit
 chmod 600 /etc/funny/.update-commit 2>/dev/null || true
 

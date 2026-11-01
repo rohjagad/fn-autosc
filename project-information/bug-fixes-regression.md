@@ -3122,3 +3122,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | An empty rotated list is a valid state, not a corruption: the Domain Menu shows it and account creation stops with an actionable message. L2TP/NoobzVPN, which have no per-account domain, still work. An existing new-format list—including an empty file—is never re-seeded by `update.sh`, so deleting every entry stays deleted. Legacy backups are seeded only when the old `domain`/`domains` files are present. |
 | **Over-engineering** | No new state file and no daemon. The installer writes one extra line; each account script keeps the same local dedupe block and adds one emptiness check; `dm-menu` reuses the existing rotated file and certificate picker. Migration/restore reuse `awk`/`grep`/`mv` and the existing backup directory. |
 | **vs the source** | The source always prepended `$installer_domain` to the rotation list, so the installer domain could never be removed and the list was never empty. Divergence: the installer domain is a separate anchor for Nginx/certificates, while the rotated list is an independent, editable set. |
+
+## 283. Fresh-install and update version markers — Four Checks (November 1, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Fresh installs write a real `main` SHA to `.install-commit`; `update.sh` still writes `.update-commit` only after a successful update; the menu still shows the first seven characters. Restore keeps the running markers (Fix 511), updater `FROM` detection (Fix 520), and domain migration (Fix 521/522) are unchanged. |
+| **Over-strictness** | Missing, empty, `Unknown`, whitespace-padded, or non-hex markers do not error: the menu prints `not recorded` / `not updated`. A short but valid hex marker is displayed as its first seven characters. If both the API and `git ls-remote` fail, the installer records `Unknown`, the menu shows `not recorded`, and installation continues. |
+| **Over-engineering** | No new files, daemons, or dependencies. The installer adds one resolver function, the menu adds one display helper, and the updater adds one guarded backfill block; all reuse the existing `.install-commit`/`.update-commit` markers. |
+| **vs the source** | The source used `api.github.com/rohjagad/...` (missing `/repos`, always 404), wrote `Unknown`, and the menu echoed it for both markers. Divergence: resolve the real commit through two independent paths and display explicit `not recorded`/`not updated` states. |

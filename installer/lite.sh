@@ -214,12 +214,27 @@ rm -f /root/fix.sh
 # Notifikasi
 echo -e "1.23" > /etc/funny/version
 # Record the installed panel commit for the main-menu version display.
-# Installs come from the main branch; best-effort only (API unreachable
-# keeps "Unknown" and the install continues).
-INSTALL_COMMIT=$(curl -fsSL --max-time 15 "https://api.github.com/rohjagad/fn-autosc/commits/main" 2>/dev/null | grep -m1 -o '"sha": "[0-9a-f]\+"' | cut -d'"' -f4)
-[ -z "$INSTALL_COMMIT" ] && INSTALL_COMMIT="Unknown"
-echo "$INSTALL_COMMIT" > /etc/funny/.install-commit
-chmod 600 /etc/funny/.install-commit 2>/dev/null || true
+# Found 523: the old endpoint omitted /repos, returned 404, and made every
+# fresh install show Unknown. Read the main branch SHA from the GitHub API,
+# then fall back to git ls-remote when the API is rate-limited or unreachable.
+record_install_commit() {
+    local sha=""
+    sha=$(curl -fsSL --max-time 15 \
+        -H 'Accept: application/vnd.github+json' \
+        "https://api.github.com/repos/rohjagad/fn-autosc/commits/main" 2>/dev/null \
+        | sed -n 's/.*"sha"[[:space:]]*:[[:space:]]*"\([0-9a-f]\{40\}\)".*/\1/p' | head -1)
+    if [ -z "$sha" ] && command -v git >/dev/null 2>&1; then
+        sha=$(GIT_TERMINAL_PROMPT=0 git ls-remote https://github.com/rohjagad/fn-autosc.git refs/heads/main 2>/dev/null | awk 'NR==1 {print $1}')
+    fi
+    case "$sha" in
+        *[!0-9a-f]*|"") sha="" ;;
+    esac
+    [ ${#sha} -eq 40 ] || sha="Unknown"
+    mkdir -p /etc/funny
+    printf '%s\n' "$sha" > /etc/funny/.install-commit
+    chmod 600 /etc/funny/.install-commit 2>/dev/null || true
+}
+record_install_commit
 OUTPUT="
 DETAIL INSTALL SCRIPT 1.23
 -------------------------
