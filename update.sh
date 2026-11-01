@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# FN AutoSC updater: 5c48741 -> e68a0b0
+# FN AutoSC updater: 5c48741 -> 01b9f71
 #
 # Applies the commits on top of b6d1a97 (1-minute evidence window,
 # Exp-Date-N/A binary fix, LOCKED IPs block, MULTILOGIN UNLOCKED
@@ -8,7 +8,7 @@
 # empty-expiry guard, IP evidence map + CGNAT stable-set gate, Xray
 # auto-unlock at least 15 minutes, restore version-marker/formatter
 # guard, SSH active-IP limit/display with real WS/CDN client IPs,
-# per-file payload instead of the menu zip, web restore-ftp kept,
+# per-file payload instead of the menu zip, payload web restore-ftp,
 # 777 HAProxy mapping with section-scoped logging checks, retry-safe
 # auto-unlock, slow-auth/IPv6 counts, scoped SSH expiry without a
 # global daemon restart)
@@ -20,7 +20,7 @@
 # missing).
 #
 # Usage:
-#   bash update.sh                  # update to e68a0b0 (default)
+#   bash update.sh                  # update to 01b9f71 (default)
 #   bash update.sh <commit> --force  # re-apply even if already recorded
 #
 # One-line remote run:
@@ -29,7 +29,7 @@
 set -u
 
 FROM="5c487410db77000968450495a615f8e7971f376a"
-TARGET="${1:-e68a0b092d733cc6fbc7c7618682894d6a87b2e2}"
+TARGET="${1:-01b9f71966190ee4b0bf02c1320b39ef4d8e2365}"
 FORCE=0
 [ "${2:-}" = "--force" ] && FORCE=1
 

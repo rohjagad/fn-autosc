@@ -1003,12 +1003,15 @@ bash <(curl -fsSL https://raw.githubusercontent.com/rohjagad/fn-autosc/main/upda
 What it does:
 
 - Detects the installed edition (`full` vs `lite`) and fetches the changed
-  files for it from the target commit (the default is pinned in `update.sh`):
+  files for it from the target commit (the default is pinned in `update.sh`;
+  currently `01b9f71966190ee4b0bf02c1320b39ef4d8e2365`, Fix 518/519):
   35 files on full, 30 on lite. The four `change-limit-ip` tools ship as
   compiled binaries from `bin/<edition>/` and are checked against pinned md5
   fingerprints; shell files are syntax- and marker-checked. The account-card
   formatter `/etc/funny/format.sh` is fetched from `config/`, and the web
   restore command `/usr/bin/restore-ftp` from `website/`, then refreshed too.
+  The payload manifest and `installer/payload.sh` are installer-only; the
+  updater already installs the website restore variant through `WEB_FILES`.
 - Downloads everything first, then verifies every file. If any check
   fails, **nothing is changed**.
 - Backs up the replaced files to `/root/fn-update-backup-<date>/`,
