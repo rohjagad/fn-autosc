@@ -1,0 +1,8 @@
+# Payload binaries are ELF files; keep Git from treating them as text.
+bin/** binary
+
+# Legacy menu archives (removed in Fix 513) are binary if they ever reappear.
+*.zip binary
+
+# Manifests are plain LF text.
+menu/*.manifest text eol=lf

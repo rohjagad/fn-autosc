@@ -130,7 +130,7 @@ The full installer runs these stages, in order:
 
 1. Save domain, email, and IP type.
 2. Install base packages, directories, Node.js 16, and vnStat (`package.sh`).
-3. Download and unpack the menu suite into `/usr/bin`.
+3. Download and install the menu payload one file at a time into `/usr/bin`.
 4. Install the terminal display formatter (`/etc/funny/format.sh`).
 5. Install SSH, Dropbear (pinned to 2019.78 — see decision 25), and SSH WebSocket (`ssh.sh`).
 6. Install Xray (`xray.sh`) — WebSocket, HTTP Upgrade, XHTTP, gRPC (all four transports).
@@ -147,6 +147,29 @@ The full installer runs these stages, in order:
 The Lite installer runs a smaller subset: packages, menu, SSH, Xray (all four transports),
 website, and Nginx/SSL. It **skips** OpenVPN, SlowDNS, L2TP, WireGuard,
 NoobzVPN, and UDP.
+
+### Payload Layout (No Menu Zip)
+
+The installer no longer downloads `menu/full.zip` or `menu/lite.zip`. It
+downloads `menu/<edition>.manifest` and then each file individually:
+
+- `script <name>` -> `<edition>/<name>.sh`
+- `bin <name>` -> `bin/<edition>/<name>`
+
+`installer/payload.sh` stages and verifies every file (`bash -n` for scripts,
+ELF magic for binaries) before replacing anything in `/usr/bin`, so a failed
+or truncated download leaves the current install untouched.
+
+Development workflow:
+
+- Shell change: edit `<edition>/<name>.sh` and commit it. No repack.
+- Go change: run `tools/build-binaries.sh`, commit the changed
+  `bin/<edition>/<name>`, then run `tools/verify-payload.sh`.
+- Add/remove a command: update `menu/<edition>.manifest` and the matching
+  source or binary.
+
+`tools/verify-payload.sh` checks manifest duplicates, missing sources,
+`bash -n` on every script, and the ELF/execute bits on every binary.
 
 ---
 

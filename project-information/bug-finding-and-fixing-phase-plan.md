@@ -571,3 +571,11 @@ Perintah jarak jauh dan transfer file ke VPS wajib memakai **timeout kecil/pende
 3. **Cek progres berkala:** setelah perintah background/lama, periksa hasilnya (hash file, `systemctl is-active`, `grep` penanda) sebelum lanjut ke langkah berikut; jangan menumpuk asumsi "pasti berhasil".
 4. **Verifikasi hash tiap transfer:** setiap file yang di-`scp` ke VPS dicek `sha256sum` lokal vs jarak jauh sebelum dipakai; hash beda = ulangi transfer, bukan lanjut install.
 5. **Batas ukuran perintah:** `scp` bundle sekecil mungkin (hanya berkas berubah, bukan puluhan MB yang tidak berubah) agar transfer selesai jauh di bawah timeout.
+
+## 7. Payload Per-File (Fix 513, menggantikan Fase 15 zip)
+
+- `menu/full.zip` dan `menu/lite.zip` sudah dihapus. Jangan membuat/merepack arsip menu lagi.
+- Setiap command terpasang terdaftar di `menu/<edition>.manifest`; script diambil dari `<edition>/<name>.sh`, binary dari `bin/<edition>/<name>`.
+- Perubahan shell: edit source + manifest (bila command baru) + `tools/verify-payload.sh`; tidak ada zip.
+- Perubahan Go: edit `.go`, jalankan `tools/build-binaries.sh`, commit binary yang berubah, lalu `tools/verify-payload.sh`.
+- Installer/updater memverifikasi staging sebelum mengganti `/usr/bin`; kegagalan satu file = abort tanpa perubahan.

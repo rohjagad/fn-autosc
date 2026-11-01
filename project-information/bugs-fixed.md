@@ -3157,3 +3157,14 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
   3. `full/cek-login-ssh.sh` menampilkan hitungan IP aktif yang sama (`IP / limit`), bukan event login historis. Satu baris per user, tipe `Dropbear`/`Openssh`/`Dropbear+Openssh`, warning bila masih ada `127.0.0.1`, dan total user aktif unik.
   4. `update.sh` men-deploy `cek-login-ssh` + `ssh-online` (plus cek python3); `menu/full.zip` mendapat helper baru dan sumber `cek-login-ssh`/`limit-ip-ssh` terbaru (entri `limit-ip-ssh` di zip sebelumnya stale dan tidak memuat `unlocked()`).
 - **Verified live (read-only):** `ssh-online` di rohserver1/3/6 memetakan seluruh sesi Dropbear WS aktif ke IP klien riil (tanpa baris `127.0.0.1`), termasuk `santai3` (beberapa sesi, 1-2 IP), `taman0` (2 IP), `layar7` (1 IP). Harness lokal: 3 sesi dari 2 IP -> count 2; 3 IP -> count 3; akun locked -> skip; helper kosong -> tidak lock. `bash -n` bersih 3/3; `python3 -m py_compile` bersih. Belum di-deploy ke VPS (read-only).
+
+### Fix 513 - Installer/updater memakai payload per-file, bukan menu zip (Found 513)
+
+- **Fix 513 (Found 513):**
+  1. `menu/full.manifest` + `menu/lite.manifest` mencantumkan setiap command yang dipasang: `script <name>` -> `<edition>/<name>.sh`, `bin <name>` -> `bin/<edition>/<name>`. 119 entri full (102 script + 17 binary) dan 101 entri lite (90 script + 11 binary).
+  2. `installer/payload.sh` mengunduh manifest lalu setiap file satu per satu. Semua masuk staging dulu; script diverifikasi `bash -n`, binary diverifikasi magic ELF; setelah semuanya valid baru `install -m 0755` ke `/usr/bin`. Download gagal/terpotong = abort tanpa mengganti file lama.
+  3. `installer/full.sh` dan `installer/lite.sh` memanggil `payload.sh <edition>`; tidak ada lagi `full.zip`/`lite.zip`, `unzip`, atau `chmod +x *` di `/usr/bin`.
+  4. `update.sh` mengunduh empat binary `change-limit-ip-*` langsung dari `bin/<edition>/`, bukan mengekstrak dari menu zip; bootstrap `unzip` dihapus.
+  5. `bin/full/` + `bin/lite/` menyimpan 28 binary standalone (mode 0755). `tools/build-binaries.sh` membangun ulang semua binary Go ke folder itu; `tools/verify-payload.sh` memeriksa manifest, duplikat, source hilang, `bash -n` semua script, dan ELF/execute bit semua binary.
+  6. `menu/full.zip` + `menu/lite.zip` dihapus dari tree; `menu/README.md` dan README menjelaskan workflow baru (edit script langsung; Go -> build -> commit binary -> verify).
+- **Verified lokal:** HTTP server lokal + `payload.sh` full/lite -> 119/101 file terpasang, 0 mismatch terhadap source/binary, 0 non-0755, 0 file ekstra. Simulasi manifest menunjuk file hilang -> exit 1 dan direktori tujuan tidak berubah (sentinel utuh). `tools/verify-payload.sh` -> 220 entri dicek, `payload verification OK`; `bash -n` pada `payload.sh`, `build-binaries.sh`, `verify-payload.sh`, `update.sh`, `full.sh`, `lite.sh` bersih. Belum di-deploy ke VPS (read-only).

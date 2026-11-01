@@ -149,14 +149,19 @@ chmod +x package.sh
 cd
 rm -f /root/package.sh
 
-# Copy Filer
-cd /usr/bin
-wget --no-check-certificate ${hosting}/menu/full.zip >> /dev/null 2>&1
-chmod +x full.zip
-unzip -o full.zip
-chmod +x *
-rm -f full.zip
-cd
+# Payload: individual files (scripts + binaries), staged and verified before
+# replacing anything in /usr/bin. Found 513: no full.zip download/repack.
+wget --no-check-certificate -O /root/payload.sh "${hosting}/installer/payload.sh" >> /dev/null 2>&1 || {
+    echo "Failed to download the payload helper." >&2
+    exit 1
+}
+chmod +x /root/payload.sh
+FN_HOSTING="$hosting" /root/payload.sh full || {
+    echo "Payload installation failed; /usr/bin was not partially replaced." >&2
+    exit 1
+}
+rm -f /root/payload.sh
+cd /root
 
 # Terminal display formatter
 wget --no-check-certificate -O /etc/funny/format.sh ${hosting}/config/format.sh >> /dev/null 2>&1

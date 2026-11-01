@@ -38,12 +38,9 @@ fi
 command -v curl >/dev/null 2>&1 || command -v wget >/dev/null 2>&1 || {
     apt-get update -qq && apt-get install -y curl
 }
-command -v unzip >/dev/null 2>&1 || {
-    apt-get update -qq && apt-get install -y unzip
-}
 fetch() {
-    # $1=url $2=dest $3=timeout seconds (default 60; the ~60 MB menu zip
-    # gets a long one - VPS links to GitHub are sometimes slow).
+    # $1=url $2=dest $3=timeout seconds (default 60; large payload binaries
+    # get a longer one - VPS links to GitHub are sometimes slow).
     local _timeout="${3:-60}"
     if command -v curl >/dev/null 2>&1; then
         curl -fsSL --max-time "$_timeout" --retry 2 --retry-delay 5 "$1" -o "$2"
@@ -114,11 +111,11 @@ BACKUP="/root/fn-update-backup-$(date +%Y%m%d-%H%M%S)"
 STAGE=$(mktemp -d) || { echo "Cannot create staging dir."; exit 1; }
 BASE="https://raw.githubusercontent.com/rohjagad/fn-autosc/${TARGET}/${EDITION}"
 CONFIG_BASE="https://raw.githubusercontent.com/rohjagad/fn-autosc/${TARGET}/config"
-ZIPURL="https://raw.githubusercontent.com/rohjagad/fn-autosc/${TARGET}/menu/${EDITION}.zip"
+BIN_BASE="https://raw.githubusercontent.com/rohjagad/fn-autosc/${TARGET}/bin/${EDITION}"
 
-# change-limit-ip tools ship as compiled binaries inside the menu zip
-# (no .sh to syntax-check), so they travel separately with pinned
-# md5 fingerprints per edition instead of text markers.
+# change-limit-ip tools ship as standalone compiled binaries (no .sh to
+# syntax-check), so they travel separately with pinned md5 fingerprints per
+# edition instead of text markers. Found 513: no menu zip anymore.
 BINARIES="change-limit-ip-ws change-limit-ip-http change-limit-ip-xhttp change-limit-ip-grpc"
 bin_md5() {
     if [ "$EDITION" = "full" ]; then
@@ -189,21 +186,16 @@ for name in $CONFIG_FILES; do
     echo "  ok: $name"
 done
 
-# Phase 1b: binaries via the edition menu zip (integrity + md5 verified).
-echo "Downloading menu zip (${EDITION})..."
-fetch "$ZIPURL" "${STAGE}/menu.zip" 600 || {
-    echo "FAILED to download menu zip - aborting, nothing changed."
-    rm -rf "$STAGE"
-    exit 1
-}
-unzip -t -q "${STAGE}/menu.zip" >/dev/null 2>&1 || {
-    echo "Menu zip failed integrity test - aborting, nothing changed."
-    rm -rf "$STAGE"
-    exit 1
-}
+# Phase 1b: standalone binaries (md5 verified individually).
+echo "Downloading ${EDITION} binaries..."
 for b in $BINARIES; do
-    unzip -q -p "${STAGE}/menu.zip" "$b" > "${STAGE}/${b}" 2>/dev/null || {
-        echo "FAILED to extract $b - aborting, nothing changed."
+    fetch "${BIN_BASE}/${b}" "${STAGE}/${b}" 600 || {
+        echo "FAILED to download $b - aborting, nothing changed."
+        rm -rf "$STAGE"
+        exit 1
+    }
+    [ -s "${STAGE}/${b}" ] || {
+        echo "Downloaded $b is empty - aborting, nothing changed."
         rm -rf "$STAGE"
         exit 1
     }

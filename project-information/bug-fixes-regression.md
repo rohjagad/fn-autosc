@@ -3032,3 +3032,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | Window login 1 menit diganti sesi aktif: sesi yang tetap terhubung berjam-jam terus dihitung (sesuai arti "concurrent IP"), sedangkan login singkat yang sudah putus sebelum cron 5 menit tidak dihitung. Set over-limit ditunda satu tick (>=240 detik) seperti gate CGNAT Xray, jadi multilogin nyata baru lock pada run kedua. Bila pemetaan `ws` gagal, sesi jatuh ke `127.0.0.1` (satu IP) dan `cek-login-ssh` menampilkan warning; ini tidak bisa menciptakan lock palsu baru. |
 | **Over-engineering** | Satu helper (`ssh-online`, ~200 baris Python stdlib di dalam shell wrapper), tanpa daemon/state file baru. `limit-ip-ssh`/`cek-login-ssh` kehilangan parser log duplikat. |
 | **vs the source** | V23/1.20 menghitung event login dari auth.log; repo ini sudah pindah ke IP unik + window 1 menit. Helper ini menutup bagian yang hilang untuk SSH ber-proxy: daemon tidak bisa melihat klien riil di balik `ws`, dan log `ws` tidak memuat username, jadi pencocokan timestamp adalah bukti lokal yang tersedia. |
+
+## 273. Payload per-file menggantikan menu zip — Four Checks (November 1, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Fresh install tetap memasang 119 command full / 101 lite ke `/usr/bin` dengan mode 0755; source script dan binary identik dengan yang diverifikasi. `update.sh` tetap memasang empat binary `change-limit-ip-*` dengan md5 yang sama. |
+| **Over-strictness** | Installer sekarang abort total kalau satu file gagal diunduh/diverifikasi, dan tidak mengganti file lama sama sekali; ini sengaja lebih ketat daripada `unzip -o` yang bisa meninggalkan `/usr/bin` setengah terisi. Tidak ada command yang dihapus dari payload. |
+| **Over-engineering** | Satu helper `payload.sh` + dua manifest + folder `bin/`; tanpa daemon, tanpa format baru selain `script`/`bin`. `build-binaries.sh` dan `verify-payload.sh` hanya tooling development. |
+| **vs the source** | V23/1.20 memakai arsip menu; repo ini mempertahankan arsip sampai Found 513. Payload per-file menghapus langkah repack/upload dan membuat drift zip tidak mungkin terjadi lagi. |
