@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# FN AutoSC updater: 6b967af -> 8d87c3e
+# FN AutoSC updater: 6b967af -> 2833d8d
 #
 # Applies the commits on top of b6d1a97 (1-minute evidence window,
 # Exp-Date-N/A binary fix, LOCKED IPs block, MULTILOGIN UNLOCKED
@@ -21,7 +21,7 @@
 # missing).
 #
 # Usage:
-#   bash update.sh                  # live marker -> 8d87c3e (default)
+#   bash update.sh                  # live marker -> 2833d8d (default)
 #   bash update.sh <commit> --force  # re-apply even if already recorded
 #
 # One-line remote run:
@@ -33,7 +33,7 @@ set -u
 # version is read from the live panel below, so this value only appears when
 # both markers are missing.
 FROM="6b967af9e0ebadc76a265132e49d62a27ad72235"
-TARGET="${1:-8d87c3e08847565efcbeabcdf9c3ec9fc49f7716}"
+TARGET="${1:-2833d8d03dc9f1cd22e0b2a130a417c18877be6a}"
 FORCE=0
 [ "${2:-}" = "--force" ] && FORCE=1
 

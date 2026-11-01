@@ -1046,8 +1046,8 @@ What it does:
   `/etc/funny/.install-commit` (fresh install); `Unknown`/empty markers are
   ignored, and only when both are missing does it use the documented
   `6b967af` live v1.23 fallback. The target remains pinned in `update.sh`;
-  currently `8d87c3e08847565efcbeabcdf9c3ec9fc49f7716` (Fix 522 content; the
-  updater script itself also carries Fix 520–522). It fetches 56 files on full,
+  currently `2833d8d03dc9f1cd22e0b2a130a417c18877be6a` (Fix 523 content; the
+  updater script itself also carries Fix 520–523). It fetches 56 files on full,
   47 on lite. The four `change-limit-ip` tools and the full `limit-ip` tool ship as
   compiled binaries from `bin/<edition>/` and are checked against pinned md5
   fingerprints; shell files are syntax- and marker-checked. The account-card
