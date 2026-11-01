@@ -349,7 +349,6 @@ exec 9>&-
 hariini=`date +%d-%m-%Y`
 cat /etc/shadow | cut -d: -f1,8 | sed /:$/d > /tmp/expirelist.txt
 totalaccounts=`cat /tmp/expirelist.txt | wc -l`
-ssh_expired=0
 for((i=1; i<=$totalaccounts; i++ ))
 do
 tuserval=`head -n $i /tmp/expirelist.txt | tail -n 1`
@@ -372,12 +371,18 @@ if [ $userexpireinseconds -ge $todaystime ] ;
 then
 :
 else
-userdel --force $username
+# Fix 517: kick only the expired account.  This block used to run
+# daemon-reload + restart ssh/sshd/ws/dropbear after ANY account
+# expired, disconnecting every other SSH user (live 2026-10-31
+# 08:00:35).  pkill -u is scoped to this username and works for both
+# OpenSSH and Dropbear sessions; the daemons pick up the deleted
+# account on the next login and need no restart.
+pkill -KILL -u "$username" 2>/dev/null || true
+userdel --force "$username"
 rm -fr /etc/xray/limit/ip/ssh/$username
 rm -f /var/log/create/ssh/${username}.log
 exp="$tgl $bulantahun"
 xp_log "deleted $username (expiry $exp)"
-ssh_expired=1
 TEKS="
 --------------------
 SSH Account Expired
@@ -395,13 +400,6 @@ echo ""
 echo ""
 fi
 done
-if [[ $ssh_expired -eq 1 ]]; then
-    systemctl daemon-reload
-    systemctl restart ssh
-    systemctl restart sshd
-    systemctl restart ws
-    systemctl restart dropbear 2>/dev/null || true
-fi
 
 # L2TP
 clear

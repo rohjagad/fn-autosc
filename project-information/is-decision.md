@@ -512,3 +512,10 @@ no Cloudflare-only header anywhere, zero `grpcRealIp` remnants in tree or test b
 - **Decision:** `/usr/bin/restore-ftp` is always the non-interactive `website/restore-ftp.sh` variant that reads `/var/www/uploads/*.zip`; `update.sh` downloads it from `website/` and keeps the interactive full/lite restore scripts out of that path. Interactive restore remains available through `bmenu`.
 - **Reason:** `website/upload.php` calls `sudo /usr/bin/restore-ftp`; replacing it with the license-gated TUI script breaks the web restore endpoint (the old updater did exactly that). The website variant also carries the Found 511 version-marker/formatter guard.
 - **Safety:** the updater backs up the current command and aborts before installing anything if the website script fails its syntax/marker check.
+
+## 34. Expired SSH Accounts Are Removed Without Restarting Shared Daemons
+
+- **Component:** `full/xp.sh`, `lite/xp.sh`.
+- **Decision:** the Auto Remove SSH branch kills only the expired account (`pkill -KILL -u <user>`) before `userdel --force`, then removes that account's limit/card files. It does not run `daemon-reload` or restart `ssh`, `sshd`, `ws`, or `dropbear`.
+- **Reason:** `passwd`/`userdel` do not terminate live sessions, so the old code restarted every daemon to kick one expired user. That dropped every other OpenSSH, SSH-over-WS, and Dropbear session, and on Dropbear it left the old child processes in the cgroup anyway. A targeted kill enforces the expiry without collateral damage; the daemons see the deleted account on the next authentication attempt.
+- **Trade-off:** all processes of the expired account are killed, including any non-SSH process it owns. The account is being deleted, so that is intended. The Xray expiry branches still restart their per-transport unit because Xray 25.3.6 has no per-user remove CLI; that remains a separate follow-up.

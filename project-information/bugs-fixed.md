@@ -3200,3 +3200,11 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
   3. `normalize_ip()` baru menormalkan kurung IPv6 dan bentuk alamat pada auth Dropbear/OpenSSH, auth.log/secure, baris `client:` ws, dan host HAProxy. Pencocokan ws hanya memakai baris `client:` yang muncul **sebelum** `opened` (baris setelahnya milik koneksi berikutnya).
   4. Delapan `limit-ip-{ws,http,xhttp,grpc}.sh`: key `statsonlineiplist` dan token `from` Xray sama-sama dinormalkan dengan membuang kurung IPv6 setelah port, sehingga satu klien IPv6 tidak dihitung dua.
 - **Verified lokal:** unit `normalize_ip` (IPv4, IPv6 berkurung/bare, hostname), regex `keyboard-interactive`, urutan `client:` sebelum/sesudah `opened`, AUTH_WINDOW auth 1 jam, HAProxy slow-handshake 2 detik, dan awk IPv6 `[2001:db8::1]`/`2001:db8::2`/`tcp:[2001:db8::3]` -> tiga IP bersih. `python3 -m py_compile` embedded helper bersih; `bash -n` 8 limiter bersih. Belum di-deploy ke VPS (read-only).
+
+### Fix 517 - Akun SSH expired hanya memutus akun itu (Found 517)
+
+- **Fix 517 (Found 517):**
+  1. `full/xp.sh` dan `lite/xp.sh`, blok Auto Remove SSH: sebelum `userdel --force`, jalankan `pkill -KILL -u "$username"` untuk akun yang benar-benar lewat expiry. Ini mengakhiri sesi OpenSSH dan Dropbear akun tersebut tanpa menyentuh pengguna lain.
+  2. Hapus variabel `ssh_expired` dan blok `daemon-reload + restart ssh/sshd/ws (+ dropbear)` setelah loop. Penghapusan akun sudah langsung berlaku untuk autentikasi berikutnya; tidak ada daemon yang perlu di-restart.
+  3. Jalur Xray (`xray@ws/http/xhttp/grpc`) tidak diubah: Xray 25.3.6 hanya punya `inbounduser`/`adi`/`rmi`, tidak ada perintah remove-user per akun, sehingga restart per transport masih diperlukan. Ini dicatat sebagai follow-up, bukan bagian Fix 517.
+- **Verified lokal:** harness blok SSH `xp` (full dan lite) dengan shadow palsu: akun expired `alice` -> `pkill -KILL -u alice` lalu `userdel --force alice`; akun `bob` yang belum expired tidak disentuh; tidak ada panggilan `systemctl`. `bash -n full/xp.sh lite/xp.sh` bersih; marker `xp_lock_in_flight` tetap ada. Belum di-deploy ke VPS (read-only).

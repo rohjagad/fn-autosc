@@ -3068,3 +3068,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | Sesi yang menunggu di prompt password lebih dari 24 jam masih tidak terhitung; ini batas praktis, bukan jalur normal. Pencocokan HAProxy 5 detik dapat memilih accept terdekat yang salah bila ada dua sesi 777 yang mulai hampir bersamaan, tetapi pencocokan satu-ke-satu dan arah accept<=child mengurangi risiko; bila tidak yakin, IP tetap `127.0.0.1` dengan warning. |
 | **Over-engineering** | Satu fungsi `normalize_ip`, tiga konstanta toleransi, dan dua `sed`/`sub` untuk kurung IPv6; tanpa file/daemon baru. |
 | **vs the source** | Source memakai AUTH_WINDOW 10 menit, toleransi 777 500 ms, dan tidak menormalkan kurung IPv6. Divergensi ini menutup sesi lambat-auth, handshake TLS lambat, dan hitungan ganda IPv6. |
+
+## 277. Akun SSH expired hanya memutus akun itu — Four Checks (November 1, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Akun yang lewat expiry tetap dihapus (`userdel --force`), card/log/limit SSH tetap dibersihkan, dan notice Telegram tetap dikirim. `pkill -KILL -u` hanya menyentuh proses akun itu; sesi OpenSSH/Dropbear pengguna lain tetap hidup karena tidak ada restart `ssh`/`sshd`/`ws`/`dropbear`. Akun yang belum expired tidak berubah. |
+| **Over-strictness** | `pkill -KILL` menghentikan **semua** proses milik akun expired, bukan hanya sesi SSH-nya; untuk akun yang memang dihapus ini disengaja. Bila `pkill` gagal (mis. proses sudah hilang), `userdel` tetap berjalan; sisa sesi akan berakhir saat klien memutus, tanpa memutus pengguna lain. |
+| **Over-engineering** | Satu `pkill` sebelum `userdel` dan penghapusan blok restart; tanpa daemon, file state, atau helper baru. Jalur Xray tidak diubah. |
+| **vs the source** | Source melakukan `userdel` lalu restart seluruh layanan SSH (dua kali untuk `ssh` karena alias `sshd`), sehingga satu expiry memutus semua pengguna. Divergensi ini membuat isolasi per-akun terlihat dan menghilangkan restart global. |
