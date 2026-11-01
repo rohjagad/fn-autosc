@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# FN AutoSC updater: 5c48741 -> 7aac677
+# FN AutoSC updater: 5c48741 -> e68a0b0
 #
 # Applies the commits on top of b6d1a97 (1-minute evidence window,
 # Exp-Date-N/A binary fix, LOCKED IPs block, MULTILOGIN UNLOCKED
@@ -9,7 +9,8 @@
 # auto-unlock at least 15 minutes, restore version-marker/formatter
 # guard, SSH active-IP limit/display with real WS/CDN client IPs,
 # per-file payload instead of the menu zip, web restore-ftp kept,
-# 777 HAProxy mapping, retry-safe auto-unlock, slow-auth/IPv6 counts)
+# 777 HAProxy mapping, retry-safe auto-unlock, slow-auth/IPv6 counts,
+# scoped SSH expiry without a global daemon restart)
 # to a live install. The file set is a superset covering the earlier
 # ranges too, so older installs are brought fully up to date in one
 # run. Safe to run: files are backed up first, every download is
@@ -18,7 +19,7 @@
 # missing).
 #
 # Usage:
-#   bash update.sh                  # update to 7aac677 (default)
+#   bash update.sh                  # update to e68a0b0 (default)
 #   bash update.sh <commit> --force  # re-apply even if already recorded
 #
 # One-line remote run:
@@ -27,7 +28,7 @@
 set -u
 
 FROM="5c487410db77000968450495a615f8e7971f376a"
-TARGET="${1:-7aac6772dc8b0a688f7e6864f7c9c3806a3eabb2}"
+TARGET="${1:-e68a0b092d733cc6fbc7c7618682894d6a87b2e2}"
 FORCE=0
 [ "${2:-}" = "--force" ] && FORCE=1
 
@@ -97,7 +98,7 @@ fi
 # Expected marker per file: proves the download is the fixed version.
 marker_for() {
     case "$1" in
-        xp) echo 'xp_lock_in_flight' ;;
+        xp) echo 'Fix 517' ;;
         limit-ip-ssh) echo 'ssh_auto_unlock' ;;
         cek-login-ssh) echo 'WS/HAProxy mapping unavailable' ;;
         ssh-online) echo 'HAPROXY_TOL_US' ;;
