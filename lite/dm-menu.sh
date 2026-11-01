@@ -419,16 +419,17 @@ rotated_domain_remove() {
 pick_rotated_domain() {
     # Choose one rotation entry first. Sets SELECTED_DOMAIN.
     unset SELECTED_DOMAIN
-    local _all _d
+    local _all _d _installer
     _all=()
-    _all+=("$(read_installer_domain)")
+    _installer=$(read_installer_domain)
+    [ -n "$_installer" ] && _all+=("$_installer")
     if [ -s /etc/xray/rotated-domains ]; then
         while IFS= read -r _d || [ -n "$_d" ]; do
             _d=$(echo "$_d" | tr -d '[:space:]')
-            [ -n "$_d" ] && [ "$_d" != "${_all[0]}" ] && _all+=("$_d")
+            [ -n "$_d" ] && [ "$_d" != "$_installer" ] && _all+=("$_d")
         done < /etc/xray/rotated-domains
     fi
-    [ -z "${_all[0]}" ] && { echo "No domain configured."; return 1; }
+    [ ${#_all[@]} -eq 0 ] && { echo "No domain configured."; return 1; }
     clear
     echo ""
     echo ""
