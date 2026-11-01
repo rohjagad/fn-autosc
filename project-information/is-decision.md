@@ -530,7 +530,7 @@ no Cloudflare-only header anywhere, zero `grpcRealIp` remnants in tree or test b
 ## 36. The Updater Starts From the Live Version Marker
 
 - **Component:** `update.sh`.
-- **Decision:** the starting version is read at runtime from `/etc/funny/.update-commit` (last applied update), then `/etc/funny/.install-commit` (fresh install). Empty and `Unknown` markers are skipped, and the documented `6b967af` live v1.23 value is only a fallback when neither marker is usable. The target stays pinned at the latest deployable commit (currently `72f8635ad99ba3caf44acc2438c3071579e14600`, Fix 521).
+- **Decision:** the starting version is read at runtime from `/etc/funny/.update-commit` (last applied update), then `/etc/funny/.install-commit` (fresh install). Empty and `Unknown` markers are skipped, and the documented `6b967af` live v1.23 value is only a fallback when neither marker is usable. The target stays pinned at the latest deployable commit (currently `0ff97a6b9390674f652c176a6107ac96cde13d17`, Fix 521).
 - **Reason:** the full-file updater does not need a Git ancestry walk, but the header, startup line, and `UPDATE SUCCESS` message must report the actual live version. A hardcoded `5c48741` became stale once the live box moved to the v1.23 marker.
 - **Safety:** `FROM` is display/history only; it is never used to fetch files. A malformed marker cannot change which files are downloaded, verified, or installed, and the existing `Already at $TARGET` check still compares only `TARGET`.
 
