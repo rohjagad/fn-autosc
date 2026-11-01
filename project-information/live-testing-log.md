@@ -298,7 +298,7 @@ Schedules observed live: `backup 0 0,6,12,18`, `xp 0,15,30,45`,
 
 - Rechecked Fix 507–517 against the current tree: `bash -n` for every shell file, `tools/verify-payload.sh` (119 full / 101 lite), full/lite payload install from a local HTTP server, the `xp` SSH-expiry harness (expired account only, no `systemctl`), the SSH limiter harness (stable set locks only the over-limit account; due retained on unlock failure; missing helper still sweeps; `Unlimited`/`0` handling), and the `limit-ip-ws` auto-unlock harness (two due users -> two unlocks + one restart; rc=1 keeps due; old `+600` due is not unlocked early).
 - Found and fixed Found 518 (manifest installed the interactive `restore-ftp`; payload script timeout was 120 s) and Found 519 (HAProxy patch checked `log global` anywhere, so another frontend could suppress 777 logging). Both are installer/updater-side only.
-- Deployment target pinned to `0ff97a6b9390674f652c176a6107ac96cde13d17` (Fix 521; includes Fix 514–520). The updater now starts from the live marker (`.update-commit`, then `.install-commit`; fallback `6b967af`, live v1.23) instead of the stale `5c48741`. Still pending live deployment of Fix 514–521, six WS accounts missing quota/IP-limit data, and Xray per-transport expiry restart.
+- Deployment target pinned to `8d87c3e08847565efcbeabcdf9c3ec9fc49f7716` (Fix 522; includes Fix 514–521). The updater now starts from the live marker (`.update-commit`, then `.install-commit`; fallback `6b967af`, live v1.23) instead of the stale `5c48741`. Still pending live deployment of Fix 514–522, six WS accounts missing quota/IP-limit data, and Xray per-transport expiry restart.
 
 ## Domain rename and per-domain counts (2026-11-01, no live changes)
 
