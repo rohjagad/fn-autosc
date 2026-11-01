@@ -1,13 +1,14 @@
 #!/bin/bash
 #
-# FN AutoSC updater: 5c48741 -> 394059b
+# FN AutoSC updater: 5c48741 -> 6cb56be
 #
 # Applies the commits on top of b6d1a97 (1-minute evidence window,
 # Exp-Date-N/A binary fix, LOCKED IPs block, MULTILOGIN UNLOCKED
 # notices, working SSH banner wiring + default, xp lock-in-flight +
 # empty-expiry guard, IP evidence map + CGNAT stable-set gate, Xray
 # auto-unlock at least 15 minutes, restore version-marker/formatter
-# guard, SSH active-IP limit/display with real WS/CDN client IPs)
+# guard, SSH active-IP limit/display with real WS/CDN client IPs,
+# per-file payload instead of the menu zip)
 # to a live install. The file set is a superset covering the earlier
 # ranges too, so older installs are brought fully up to date in one
 # run. Safe to run: files are backed up first, every download is
@@ -16,7 +17,7 @@
 # missing).
 #
 # Usage:
-#   bash update.sh                  # update to 394059b (default)
+#   bash update.sh                  # update to 6cb56be (default)
 #   bash update.sh <commit> --force  # re-apply even if already recorded
 #
 # One-line remote run:
@@ -25,7 +26,7 @@
 set -u
 
 FROM="5c487410db77000968450495a615f8e7971f376a"
-TARGET="${1:-394059bf79ee2d0501998b98234e7866ccfd971f}"
+TARGET="${1:-6cb56bec6264038f9a1378f57066c30ccc7bc61f}"
 FORCE=0
 [ "${2:-}" = "--force" ] && FORCE=1
 
