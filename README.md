@@ -874,9 +874,10 @@ install resolves the current `main` SHA from the GitHub API
 (`/repos/rohjagad/fn-autosc/commits/main`), with `git ls-remote` as a fallback,
 so `Installed version` is populated immediately. `Updated version` shows
 `not updated` until `update.sh` records an update. Missing, empty, or invalid
-markers display `not recorded` / `not updated`, never `Unknown`; on the first
-update of an older box whose installer recorded `Unknown`, `update.sh`
-backfills the install marker from the detected live version.
+markers display `not recorded` / `not updated`, never `Unknown`; when the
+install marker is missing or invalid and an update actually changes the
+version, `update.sh` records the detected live version as the baseline. A
+same-target rerun leaves the marker alone.
 
 ### Quota & IP Limit Files
 
@@ -1045,9 +1046,12 @@ What it does:
   version: `/etc/funny/.update-commit` (last applied update), then
   `/etc/funny/.install-commit` (fresh install); `Unknown`/empty markers are
   ignored, and only when both are missing does it use the documented
-  `6b967af` live v1.23 fallback. The target remains pinned in `update.sh`;
-  currently `2833d8d03dc9f1cd22e0b2a130a417c18877be6a` (Fix 523 content; the
-  updater script itself also carries Fix 520–523). It fetches 56 files on full,
+  `6b967af` live v1.23 fallback. If the install marker is missing or invalid
+  and the update changes the version, that detected live version is also
+  recorded in `.install-commit` as the install baseline. The target remains
+  pinned in `update.sh`; currently
+  `2833d8d03dc9f1cd22e0b2a130a417c18877be6a` (Fix 523 content; the updater
+  script itself also carries Fix 520–523). It fetches 56 files on full,
   47 on lite. The four `change-limit-ip` tools and the full `limit-ip` tool ship as
   compiled binaries from `bin/<edition>/` and are checked against pinned md5
   fingerprints; shell files are syntax- and marker-checked. The account-card
