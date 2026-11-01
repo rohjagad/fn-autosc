@@ -3119,6 +3119,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
   2. Helper `xp_lock_in_flight <transport> <user>`: cek `.../<user>.locked` atau `/etc/xray/autounlock/<t>/<user>`; keempat blok Xray skip user lock-in-flight (paritas Fix 499 di auto-delete).
   3. Guard `[ -z "$exp" ] && continue` SEBELUM `date -d` di semua blok bertanggal: WS/HU/XHTTP/gRPC/L2TP/Noobz, full+lite. Ini menutup celah `date -d ""` = 00:00 hari ini yang tidak ditangkap guard `[ -z "$d1" ]` lama.
 - **Verified lokal:** `bash -n` full+lite bersih; harness membuktikan `date -d ""` -> `exp2=0` (jalur lama) sedangkan guard baru skip; helper true untuk `.locked`/state, false untuk akun normal. Menu zip full/lite di-repack dengan `xp` baru (0755). Belum di-deploy ke VPS (read-only).
+- **Verified live (2026-11-01):** deployed to all three live VPS; repaired 25 WS accounts whose quota/IP-limit files had been removed by the old empty-expiry path. The next `xp` cron run added no new `(expiry )` entries and all repaired files stayed present.
 
 ### Fix 508 - IP evidence: statsonlineiplist + log fallback, no `IPs (0)` (Found 508)
 
