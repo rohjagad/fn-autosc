@@ -3161,7 +3161,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 ### Fix 513 - Installer/updater memakai payload per-file, bukan menu zip (Found 513)
 
 - **Fix 513 (Found 513):**
-  1. `menu/full.manifest` + `menu/lite.manifest` mencantumkan setiap command yang dipasang: `script <name>` -> `<edition>/<name>.sh`, `bin <name>` -> `bin/<edition>/<name>`. 119 entri full (102 script + 17 binary) dan 101 entri lite (90 script + 11 binary).
+  1. `menu/full.manifest` + `menu/lite.manifest` mencantumkan setiap command yang dipasang: `script <name>` -> `<edition>/<name>.sh`, `bin <name>` -> `bin/<edition>/<name>`. 119 entri full (102 script + 17 binary) dan 101 entri lite (90 script + 11 binary). Fix 518 kemudian memindahkan `restore-ftp` ke jenis `web`; totalnya tetap 119/101 (101 script + 1 web + 17 binary / 89 script + 1 web + 11 binary).
   2. `installer/payload.sh` mengunduh manifest lalu setiap file satu per satu. Semua masuk staging dulu; script diverifikasi `bash -n`, binary diverifikasi magic ELF; setelah semuanya valid baru `install -m 0755` ke `/usr/bin`. Download gagal/terpotong = abort tanpa mengganti file lama.
   3. `installer/full.sh` dan `installer/lite.sh` memanggil `payload.sh <edition>`; tidak ada lagi `full.zip`/`lite.zip`, `unzip`, atau `chmod +x *` di `/usr/bin`.
   4. `update.sh` mengunduh empat binary `change-limit-ip-*` langsung dari `bin/<edition>/`, bukan mengekstrak dari menu zip; bootstrap `unzip` dihapus.
@@ -3208,3 +3208,18 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
   2. Hapus variabel `ssh_expired` dan blok `daemon-reload + restart ssh/sshd/ws (+ dropbear)` setelah loop. Penghapusan akun sudah langsung berlaku untuk autentikasi berikutnya; tidak ada daemon yang perlu di-restart.
   3. Jalur Xray (`xray@ws/http/xhttp/grpc`) tidak diubah: Xray 25.3.6 hanya punya `inbounduser`/`adi`/`rmi`, tidak ada perintah remove-user per akun, sehingga restart per transport masih diperlukan. Ini dicatat sebagai follow-up, bukan bagian Fix 517.
 - **Verified lokal:** harness blok SSH `xp` (full dan lite) dengan shadow palsu: akun expired `alice` -> `pkill -KILL -u alice` lalu `userdel --force alice`; akun `bob` yang belum expired tidak disentuh; tidak ada panggilan `systemctl`. `bash -n full/xp.sh lite/xp.sh` bersih; marker `xp_lock_in_flight` tetap ada. Belum di-deploy ke VPS (read-only).
+
+### Fix 518 - Payload menjaga restore-ftp web + timeout 600 detik (Found 518)
+
+- **Fix 518 (Found 518):**
+  1. `menu/full.manifest` + `menu/lite.manifest` mendapat jenis `web <name>` -> `website/<name>.sh`; baris `restore-ftp` menjadi `web restore-ftp`. `installer/payload.sh` mengunduh, `bash -n`, dan memasang varian web ke `/usr/bin/restore-ftp`; varian interaktif `full/`/`lite/restore-ftp.sh` tidak pernah lagi menjadi tujuan payload. Fresh install dan payload mandiri kini konsisten dengan Decision 33.
+  2. `installer/payload.sh`: timeout unduhan script 120 -> 600 detik (sama dengan binary dan web), dan `installer/full.sh`/`installer/lite.sh` mengambil `payload.sh` dengan timeout 600 (dari 60). `update.sh` juga memakai default 600 untuk setiap unduhan. Hitungan payload tetap 119 full (101 script + 1 web + 17 binary) dan 101 lite (89 script + 1 web + 11 binary).
+  3. `tools/verify-payload.sh` memahami `web` (source `website/<name>.sh`, `bash -n`); `menu/README.md` + README mendokumentasikan jenis ini dan invariant `/usr/bin/restore-ftp`.
+- **Verified lokal:** HTTP server lokal + `payload.sh` full/lite -> 119/101 file terpasang, semua mode 0755; `/usr/bin/restore-ftp` adalah varian `website/` (tanpa `PERMISSION_CFPAGES`, membawa `Found 511`), bukan varian interaktif. `tools/verify-payload.sh` -> 119/101 entri, `payload verification OK`; `bash -n` payload/verify bersih. Belum di-deploy ke VPS (read-only).
+
+### Fix 519 - Patch HAProxy memeriksa section ssh-ssl (Found 519)
+
+- **Fix 519 (Found 519):**
+  1. `update.sh` `patch_haproxy_logging` menambahkan helper `_haproxy_global_has_log` (hanya section `global`) dan `_haproxy_sshssl_has` (hanya block `frontend ssh-ssl`). `need_log`/`need_asap`/`need_global` memakai helper ini, bukan `grep` seluruh file.
+  2. Sisipan `option logasap`/`log global` berhenti di section top-level berikutnya (bukan hanya `backend`), dan verifikasi pasca-patch memakai helper yang sama. Bila `ssh-ssl` tidak ada atau directive tidak bisa ditempatkan, config asli dikembalikan dan pesan error dicetak.
+- **Verified lokal:** config standar -> `log /dev/log local0` + `option logasap` + `log global` di ssh-ssl; run kedua tidak mengubah apa pun. Config dengan `log global` di frontend `stats` -> ssh-ssl tetap mendapat `log global` + `logasap`. Config yang hanya kurang `log global` -> ditambahkan. Tanpa frontend `ssh-ssl` -> config tidak berubah + pesan. Mock `haproxy -c` gagal -> config asli dikembalikan; edisi lite tidak menyentuh config. `bash -n update.sh` bersih. Belum di-deploy ke VPS (read-only).

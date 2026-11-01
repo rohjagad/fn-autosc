@@ -151,7 +151,7 @@ rm -f /root/package.sh
 
 # Payload: individual files (scripts + binaries), staged and verified before
 # replacing anything in /usr/bin. Found 513: no full.zip download/repack.
-wget --no-check-certificate --timeout=60 --tries=3 -O /root/payload.sh "${hosting}/installer/payload.sh" >> /dev/null 2>&1 || {
+wget --no-check-certificate --timeout=600 --tries=3 -O /root/payload.sh "${hosting}/installer/payload.sh" >> /dev/null 2>&1 || {
     echo "Failed to download the payload helper." >&2
     exit 1
 }

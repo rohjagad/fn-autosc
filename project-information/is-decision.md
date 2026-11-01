@@ -497,7 +497,7 @@ no Cloudflare-only header anywhere, zero `grpcRealIp` remnants in tree or test b
 - **Component:** `installer/stunnel5.sh`, `update.sh`, `full/ssh-online.sh`, `full/menu-ssh.sh`.
 - **Decision:** the `777` front-end keeps HAProxy as the TLS terminator but enables `option logasap` plus a `local0` log target. HAProxy then emits the client address and accept timestamp as soon as the backend connection is established, not when the SSH session closes. `ssh-online` reads `/var/log/haproxy.log`, its `.1` rotation, and `journalctl -u haproxy`, then matches each `127.0.0.1` Dropbear child to a distinct accept line (accept <= child, 5 s tolerance, 6 s scan padding, 100 ms clock skew). The match is one-to-one, so two simultaneous 777 clients do not share one evidence line.
 - **Reason:** Dropbear cannot see the real client behind HAProxy; without start-of-session evidence, every 777 client collapses to `127.0.0.1`, bypassing the SSH IP limit and showing a false single IP in the menu. Enabling logging only on close would leave active sessions unmapped.
-- **Safety:** the updater validates the patched config with `haproxy -c` and restores the original on failure. If no evidence matches, the session stays `127.0.0.1` and the menu warns; the helper never invents an IP. The patch is full-edition only because lite ships no SSH menu/limiter.
+- **Safety:** the updater validates the patched config with `haproxy -c` and restores the original on failure. It checks `log /dev/log` inside `global` and `logasap`/`log global` inside the `ssh-ssl` frontend, so a directive in another frontend cannot mask a missing 777 log. If no evidence matches, the session stays `127.0.0.1` and the menu warns; the helper never invents an IP. The patch is full-edition only because lite ships no SSH menu/limiter.
 
 ## 32. SSH IP-Lock Enforcement Is Per-Account, Not a Global Restart
 
@@ -519,3 +519,10 @@ no Cloudflare-only header anywhere, zero `grpcRealIp` remnants in tree or test b
 - **Decision:** the Auto Remove SSH branch kills only the expired account (`pkill -KILL -u <user>`) before `userdel --force`, then removes that account's limit/card files. It does not run `daemon-reload` or restart `ssh`, `sshd`, `ws`, or `dropbear`.
 - **Reason:** `passwd`/`userdel` do not terminate live sessions, so the old code restarted every daemon to kick one expired user. That dropped every other OpenSSH, SSH-over-WS, and Dropbear session, and on Dropbear it left the old child processes in the cgroup anyway. A targeted kill enforces the expiry without collateral damage; the daemons see the deleted account on the next authentication attempt.
 - **Trade-off:** all processes of the expired account are killed, including any non-SSH process it owns. The account is being deleted, so that is intended. The Xray expiry branches still restart their per-transport unit because Xray 25.3.6 has no per-user remove CLI; that remains a separate follow-up.
+
+## 35. The Payload Manifest Owns the Web Restore Command
+
+- **Component:** `menu/full.manifest`, `menu/lite.manifest`, `installer/payload.sh`, `tools/verify-payload.sh`.
+- **Decision:** `restore-ftp` is a `web` manifest entry sourced from `website/restore-ftp.sh`; the payload helper downloads, syntax-checks, and installs that variant to `/usr/bin`. The interactive `full/restore-ftp.sh` and `lite/restore-ftp.sh` are not payload targets; interactive restore remains in `bmenu`.
+- **Reason:** Fix 514 fixed the updater but left the installer/standalone payload path able to overwrite the web command with the license-gated TUI script, breaking `website/upload.php`. One manifest kind makes fresh install, repair, and update agree. The same change raises every payload download timeout to 600 seconds.
+- **Safety:** a missing or invalid `website/restore-ftp.sh` aborts the whole payload before any destination file is replaced; the updater keeps its separate `WEB_FILES` verification.

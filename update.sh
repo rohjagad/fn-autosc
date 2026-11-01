@@ -9,8 +9,9 @@
 # auto-unlock at least 15 minutes, restore version-marker/formatter
 # guard, SSH active-IP limit/display with real WS/CDN client IPs,
 # per-file payload instead of the menu zip, web restore-ftp kept,
-# 777 HAProxy mapping, retry-safe auto-unlock, slow-auth/IPv6 counts,
-# scoped SSH expiry without a global daemon restart)
+# 777 HAProxy mapping with section-scoped logging checks, retry-safe
+# auto-unlock, slow-auth/IPv6 counts, scoped SSH expiry without a
+# global daemon restart)
 # to a live install. The file set is a superset covering the earlier
 # ranges too, so older installs are brought fully up to date in one
 # run. Safe to run: files are backed up first, every download is
@@ -42,9 +43,9 @@ command -v curl >/dev/null 2>&1 || command -v wget >/dev/null 2>&1 || {
     apt-get update -qq && apt-get install -y curl
 }
 fetch() {
-    # $1=url $2=dest $3=timeout seconds (default 60; large payload binaries
-    # get a longer one - VPS links to GitHub are sometimes slow).
-    local _timeout="${3:-60}"
+    # $1=url $2=dest $3=timeout seconds (default 600; VPS links to GitHub
+    # are sometimes slow, and Found 518 applies the same bound to scripts).
+    local _timeout="${3:-600}"
     if command -v curl >/dev/null 2>&1; then
         curl -fsSL --max-time "$_timeout" --retry 2 --retry-delay 5 "$1" -o "$2"
     else
@@ -288,10 +289,35 @@ patch_haproxy_logging() {
     local conf="${FN_HAPROXY_CONF:-/etc/haproxy/haproxy.cfg}"
     [ "$EDITION" = "full" ] || return 0
     [ -f "$conf" ] || return 0
+    # Found 519: check the directives in the section that actually uses them.
+    # A `log global` in another frontend must not make the ssh-ssl frontend
+    # look configured; without its own `log global`, HAProxy emits no 777
+    # session line and ssh-online cannot map the client IP.
+    _haproxy_global_has_log() {
+        awk '
+            BEGIN { in_g = 0; found = 0 }
+            /^[[:space:]]*global[[:space:]]*$/ { in_g = 1; next }
+            in_g && /^[^[:space:]#]/ { in_g = 0 }
+            in_g && /^[[:space:]]*log[[:space:]]/ { found = 1 }
+            END { exit(found ? 0 : 1) }
+        ' "$conf"
+    }
+    _haproxy_sshssl_has() {
+        awk -v re="$1" '
+            BEGIN { in_fe = 0; found = 0 }
+            /^[[:space:]]*frontend[[:space:]]+ssh-ssl([[:space:]]|$)/ {
+                in_fe = 1
+                next
+            }
+            in_fe && /^[^[:space:]#]/ { in_fe = 0 }
+            in_fe && $0 ~ re { found = 1 }
+            END { exit(found ? 0 : 1) }
+        ' "$conf"
+    }
     local need_log=0 need_asap=0 need_global=0
-    grep -qE '^[[:space:]]*log[[:space:]]+/dev/log' "$conf" || need_log=1
-    grep -qE '^[[:space:]]*option[[:space:]]+logasap' "$conf" || need_asap=1
-    grep -qE '^[[:space:]]*log[[:space:]]+global' "$conf" || need_global=1
+    _haproxy_global_has_log || need_log=1
+    _haproxy_sshssl_has '^[[:space:]]*option[[:space:]]+logasap[[:space:]]*$' || need_asap=1
+    _haproxy_sshssl_has '^[[:space:]]*log[[:space:]]+global[[:space:]]*$' || need_global=1
     [ "${need_log}${need_asap}${need_global}" = "000" ] && return 0
     cp -f "$conf" "$BACKUP/haproxy.cfg" || return 0
 
@@ -312,12 +338,12 @@ patch_haproxy_logging() {
     if [ "$need_asap" -eq 1 ]; then
         awk -v add_global="$need_global" '
             BEGIN { in_fe = 0; done = 0 }
-            /^[[:space:]]*frontend[[:space:]]+ssh-ssl[[:space:]]*$/ {
+            /^[[:space:]]*frontend[[:space:]]+ssh-ssl([[:space:]]|$)/ {
                 in_fe = 1
                 print
                 next
             }
-            in_fe && /^[[:space:]]*backend[[:space:]]/ { in_fe = 0 }
+            in_fe && /^[^[:space:]#]/ { in_fe = 0 }
             in_fe && /^[[:space:]]*option[[:space:]]+tcplog[[:space:]]*$/ && !done {
                 print
                 print "    option logasap"
@@ -337,12 +363,12 @@ patch_haproxy_logging() {
     elif [ "$need_global" -eq 1 ]; then
         awk '
             BEGIN { in_fe = 0; done = 0 }
-            /^[[:space:]]*frontend[[:space:]]+ssh-ssl[[:space:]]*$/ {
+            /^[[:space:]]*frontend[[:space:]]+ssh-ssl([[:space:]]|$)/ {
                 in_fe = 1
                 print
                 next
             }
-            in_fe && /^[[:space:]]*backend[[:space:]]/ { in_fe = 0 }
+            in_fe && /^[^[:space:]#]/ { in_fe = 0 }
             in_fe && /^[[:space:]]*default_backend[[:space:]]/ && !done {
                 print "    log global"
                 done = 1
@@ -352,11 +378,11 @@ patch_haproxy_logging() {
         mv "$conf.fn-new" "$conf"
     fi
 
-    if ! grep -qE '^[[:space:]]*log[[:space:]]+/dev/log' "$conf" || \
-        ! grep -qE '^[[:space:]]*option[[:space:]]+logasap' "$conf" || \
-        ! grep -qE '^[[:space:]]*log[[:space:]]+global' "$conf"; then
+    if ! _haproxy_global_has_log || \
+        ! _haproxy_sshssl_has '^[[:space:]]*option[[:space:]]+logasap[[:space:]]*$' || \
+        ! _haproxy_sshssl_has '^[[:space:]]*log[[:space:]]+global[[:space:]]*$'; then
         cp -f "$BACKUP/haproxy.cfg" "$conf"
-        echo "HAProxy config has no frontend ssh-ssl; 777 mapping not enabled." >&2
+        echo "HAProxy logging directives could not be placed; 777 mapping not enabled." >&2
         return 0
     fi
     if command -v haproxy >/dev/null 2>&1 && ! haproxy -c -f "$conf" >/dev/null 2>&1; then

@@ -8,6 +8,7 @@
 # whole archive.  This helper reads menu/<edition>.manifest instead:
 #
 #     script  <name>   ->  <edition>/<name>.sh
+#     web     <name>   ->  website/<name>.sh   (e.g. the web restore command)
 #     bin     <name>   ->  bin/<edition>/<name>
 #
 # All files are downloaded to a staging directory and verified before any
@@ -57,11 +58,12 @@ echo "Downloading ${edition} payload manifest..."
 fetch "$manifest_url" "$stage/manifest" 60 || fail "cannot download $manifest_url"
 [ -s "$stage/manifest" ] || fail "empty manifest $manifest_url"
 
-total=$(grep -cE '^(script|bin)[[:space:]]' "$stage/manifest" 2>/dev/null || true)
+total=$(grep -cE '^(script|web|bin)[[:space:]]' "$stage/manifest" 2>/dev/null || true)
 scripts=$(grep -cE '^script[[:space:]]' "$stage/manifest" 2>/dev/null || true)
+webs=$(grep -cE '^web[[:space:]]' "$stage/manifest" 2>/dev/null || true)
 bins=$(grep -cE '^bin[[:space:]]' "$stage/manifest" 2>/dev/null || true)
 [ "$total" -gt 0 ] || fail "manifest has no entries"
-echo "Payload: ${total} files (${scripts} scripts, ${bins} binaries)"
+echo "Payload: ${total} files (${scripts} scripts, ${webs} web, ${bins} binaries)"
 
 mkdir -p "$dest" || fail "cannot create $dest"
 [ -w "$dest" ] || fail "$dest is not writable"
@@ -81,7 +83,19 @@ while IFS= read -r line || [ -n "${line:-}" ]; do
     case "$kind" in
         script)
             url="${hosting}/${edition}/${name}.sh"
-            limit=120
+            # Found 518: the slow-link timeout applies to every payload file,
+            # not only the binaries.  A 120-second limit could abort a fresh
+            # install on the same links that needed 600 seconds for the old
+            # menu archive.
+            limit=600
+            ;;
+        web)
+            # Found 518: /usr/bin/restore-ftp belongs to the website restore
+            # path, not to the interactive full/lite restore scripts.  Install
+            # the website variant from the same manifest so a standalone
+            # payload run cannot overwrite the web command.
+            url="${hosting}/website/${name}.sh"
+            limit=600
             ;;
         bin)
             url="${hosting}/bin/${edition}/${name}"
@@ -95,7 +109,7 @@ while IFS= read -r line || [ -n "${line:-}" ]; do
     printf '  [%3d/%3d] %-6s %s\n' "$i" "$total" "$kind" "$name"
     fetch "$url" "$stage/$name" "$limit" || fail "cannot download $url"
     [ -s "$stage/$name" ] || fail "empty download $url"
-    if [ "$kind" = "script" ]; then
+    if [ "$kind" = "script" ] || [ "$kind" = "web" ]; then
         bash -n "$stage/$name" || fail "syntax error in $url"
     else
         magic=$(od -An -tx1 -N4 "$stage/$name" 2>/dev/null | tr -d ' \n')

@@ -5,12 +5,18 @@
 
 ```text
 script  <name>     # installed from <edition>/<name>.sh
+web     <name>     # installed from website/<name>.sh
 bin     <name>     # installed from bin/<edition>/<name>
 ```
 
 The old `full.zip` / `lite.zip` archives were removed in Fix 513. The installer
 downloads the manifest and each file individually; `installer/payload.sh`
 stages and verifies everything before replacing anything in `/usr/bin`.
+
+`restore-ftp` is a `web` entry, not a `script` entry: `/usr/bin/restore-ftp`
+must always be the non-interactive `website/restore-ftp.sh` variant called by
+`website/upload.php`, never the interactive `full/restore-ftp.sh` /
+`lite/restore-ftp.sh` files. Found 518.
 
 ## Changing a shell command
 

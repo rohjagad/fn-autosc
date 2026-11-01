@@ -4,6 +4,7 @@
 #
 # For each menu/<edition>.manifest line:
 #   script <name> -> <edition>/<name>.sh must exist and pass bash -n
+#   web    <name> -> website/<name>.sh must exist and pass bash -n
 #   bin    <name> -> bin/<edition>/<name> must exist, be executable and ELF
 #
 # Also checks for duplicate manifest names and orphan binaries that are not
@@ -48,6 +49,16 @@ for edition in full lite; do
         case "$kind" in
             script)
                 src="${edition}/${name}.sh"
+                if [ ! -f "$src" ]; then
+                    echo "MISSING $src"
+                    fail=1
+                elif ! bash -n "$src"; then
+                    echo "SYNTAX $src"
+                    fail=1
+                fi
+                ;;
+            web)
+                src="website/${name}.sh"
                 if [ ! -f "$src" ]; then
                     echo "MISSING $src"
                     fail=1

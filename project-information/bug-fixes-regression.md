@@ -3077,3 +3077,21 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | `pkill -KILL` menghentikan **semua** proses milik akun expired, bukan hanya sesi SSH-nya; untuk akun yang memang dihapus ini disengaja. Bila `pkill` gagal (mis. proses sudah hilang), `userdel` tetap berjalan; sisa sesi akan berakhir saat klien memutus, tanpa memutus pengguna lain. |
 | **Over-engineering** | Satu `pkill` sebelum `userdel` dan penghapusan blok restart; tanpa daemon, file state, atau helper baru. Jalur Xray tidak diubah. |
 | **vs the source** | Source melakukan `userdel` lalu restart seluruh layanan SSH (dua kali untuk `ssh` karena alias `sshd`), sehingga satu expiry memutus semua pengguna. Divergensi ini membuat isolasi per-akun terlihat dan menghilangkan restart global. |
+
+## 278. Payload memasang restore-ftp web + timeout 600 — Four Checks (November 1, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Fresh full/lite tetap memasang 119/101 command; `restore-ftp` sekarang berasal dari `website/restore-ftp.sh` (non-interaktif) dan tidak lagi dari `full/`/`lite/`. `update.sh` tetap memakai `WEB_FILES`; empat binary dan seluruh script lain tidak berubah. |
+| **Over-strictness** | Payload mandiri sekarang ikut gagal total bila `website/restore-ftp.sh` hilang/rusak; ini disengaja agar tidak memasang command web yang salah. Timeout 600 detik hanya memperpanjang batas tunggu, bukan mengubah verifikasi. |
+| **Over-engineering** | Satu jenis manifest `web` + satu baris per edisi; tanpa file/daemon baru. Tidak ada perubahan pada format selain `script`/`web`/`bin`. |
+| **vs the source** | Fix 514 hanya membersihkan jalur updater; manifest installer masih memperlakukan `restore-ftp` sebagai script interaktif. Divergensi ini menyatukan kedua jalur pada varian web yang dipanggil `upload.php`. |
+
+## 279. Patch HAProxy section-scoped — Four Checks (November 1, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Config dengan satu frontend `ssh-ssl` tetap mendapat `log /dev/log local0`, `option logasap`, dan `log global`; run kedua idempotent; config tanpa `ssh-ssl` dan config yang ditolak `haproxy -c` dikembalikan utuh; edisi lite tidak disentuh. |
+| **Over-strictness** | `log /dev/log` sekarang harus ada di section `global`, dan `logasap`/`log global` harus ada di frontend `ssh-ssl`; directive yang hanya ada di frontend lain tidak lagi dianggap cukup. Ini sengaja lebih ketat karena directive di section lain tidak menghasilkan log 777. |
+| **Over-engineering** | Dua helper awk kecil di dalam fungsi patch; tanpa file/daemon baru. Deteksi section memakai baris top-level (`^[^[:space:]#]`), bukan parser HAProxy penuh. |
+| **vs the source** | Fix 514 memakai `grep` global; satu `log global` di frontend `stats` membuat `ssh-ssl` tidak pernah mendapat `log global` dan verifikasi tetap lulus. Divergensi ini memeriksa section yang benar dan memverifikasi hasilnya di section yang sama. |

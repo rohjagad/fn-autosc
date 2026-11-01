@@ -154,6 +154,7 @@ The installer no longer downloads `menu/full.zip` or `menu/lite.zip`. It
 downloads `menu/<edition>.manifest` and then each file individually:
 
 - `script <name>` -> `<edition>/<name>.sh`
+- `web <name>` -> `website/<name>.sh` (the web restore command)
 - `bin <name>` -> `bin/<edition>/<name>`
 
 `installer/payload.sh` stages and verifies every file (`bash -n` for scripts,
@@ -911,7 +912,7 @@ Binaries are built with `-ldflags='-s -w'` for a small footprint.
 - **SSL issuance failures on rate limits** — added the ZeroSSL and self-signed
   fallback chain, and synchronized `funny.pem` for HAProxy.
 - **Slow downloads from raw GitHub** — payload files are fetched individually
-  with 120–600 s timeouts; large binaries live in `bin/<edition>/`.
+  with 600 s timeouts; large binaries live in `bin/<edition>/`.
 - **WireGuard interface collisions on reinstall** — config is now overwritten
   rather than appended.
 - **Remaining Indonesian user-facing text** translated to English.
@@ -932,7 +933,11 @@ Binaries are built with `-ldflags='-s -w'` for a small footprint.
   the over-limit account's processes; other users keep their sessions.
 - **Updater no longer replaces the web restore command** —
   `/usr/bin/restore-ftp` stays the website variant; interactive restore
-  remains in `bmenu`.
+  remains in `bmenu`. The installer manifest uses a `web` entry too, so a
+  standalone payload run cannot reintroduce the TUI script.
+- **HAProxy 777 logging checks the `ssh-ssl` section** — a `log global` in
+  another frontend no longer hides a missing directive, so 777 sessions map
+  to their real client IPs.
 - **IPv6 brackets counted twice** — normalized in the Xray limiters and the
   SSH helper.
 

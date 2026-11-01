@@ -69,7 +69,7 @@ script	quota-grpc
 script	quota-http
 script	quota-ws
 script	quota-xhttp
-script	restore-ftp
+web	restore-ftp
 script	routing-grpc
 script	routing-http
 script	routing-ws
