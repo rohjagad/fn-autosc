@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# FN AutoSC updater: 6b967af -> 01b9f71
+# FN AutoSC updater: 6b967af -> 72f8635
 #
 # Applies the commits on top of b6d1a97 (1-minute evidence window,
 # Exp-Date-N/A binary fix, LOCKED IPs block, MULTILOGIN UNLOCKED
@@ -11,7 +11,8 @@
 # per-file payload instead of the menu zip, payload web restore-ftp,
 # 777 HAProxy mapping with section-scoped logging checks, retry-safe
 # auto-unlock, slow-auth/IPv6 counts, scoped SSH expiry without a
-# global daemon restart)
+# global daemon restart, installer-domain/rotated-domain separation
+# with per-domain account counts)
 # to a live install. The file set is a superset covering the earlier
 # ranges too, so older installs are brought fully up to date in one
 # run. Safe to run: files are backed up first, every download is
@@ -20,7 +21,7 @@
 # missing).
 #
 # Usage:
-#   bash update.sh                  # live marker -> 01b9f71 (default)
+#   bash update.sh                  # live marker -> 72f8635 (default)
 #   bash update.sh <commit> --force  # re-apply even if already recorded
 #
 # One-line remote run:
@@ -32,7 +33,7 @@ set -u
 # version is read from the live panel below, so this value only appears when
 # both markers are missing.
 FROM="6b967af9e0ebadc76a265132e49d62a27ad72235"
-TARGET="${1:-01b9f71966190ee4b0bf02c1320b39ef4d8e2365}"
+TARGET="${1:-72f8635ad99ba3caf44acc2438c3071579e14600}"
 FORCE=0
 [ "${2:-}" = "--force" ] && FORCE=1
 
