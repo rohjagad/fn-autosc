@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# FN AutoSC updater: live marker -> 24931ce
+# FN AutoSC updater: live marker -> 42af316
 #
 # Applies the commits on top of b6d1a97 (1-minute evidence window,
 # Exp-Date-N/A binary fix, LOCKED IPs block, MULTILOGIN UNLOCKED
@@ -20,7 +20,8 @@
 # cron output suppression when stdout is not a terminal, quota startup output
 # guarded for systemd, legacy dnstt/nsdomain synchronization, simpang32 quota
 # repair, published default-credential neutralization, root-mail archiving,
-# stale SSH-limit cleanup, and removal of the template client anchors)
+# stale SSH-limit cleanup, removal of the template client anchors, and
+# panel-account-only SSH IP limiting)
 # to a live install. The file set is a superset covering the earlier
 # ranges too, so older installs are brought fully up to date in one
 # run. Safe to run: files are backed up first, every download is
@@ -29,7 +30,7 @@
 # missing).
 #
 # Usage:
-#   bash update.sh                  # live marker -> 24931ce (default)
+#   bash update.sh                  # live marker -> 42af316 (default)
 #   bash update.sh <commit> --force  # re-apply even if already recorded
 #
 # One-line remote run:
@@ -41,7 +42,7 @@ set -u
 # version is read from the live panel below, so this value only appears when
 # both markers are missing.
 FROM="6b967af9e0ebadc76a265132e49d62a27ad72235"
-TARGET="${1:-24931ce37b27c9963600aeb2a29bbe198b697b6f}"
+TARGET="${1:-42af316784c87cf6fc8af3638b5fe02ef83caddd}"
 FORCE=0
 [ "${2:-}" = "--force" ] && FORCE=1
 
@@ -143,7 +144,7 @@ marker_for() {
         quota-xhttp | quota-ws | quota-http | quota-grpc) echo 'Found 533' ;;
         xray-add-client) echo 'Found 539' ;;
         kill-xhttp) echo 'Found 531' ;;
-        limit-ip-ssh) echo 'Found 532' ;;
+        limit-ip-ssh) echo 'Found 540' ;;
         cek-login-ssh) echo 'WS/HAProxy mapping unavailable' ;;
         ssh-online) echo 'HAPROXY_TOL_US' ;;
         menu-ssh) echo 'haproxy -v' ;;
@@ -685,10 +686,11 @@ cleanup_root_mail() {
     [ "$rc" -eq 0 ] && fix_marker .fix537-mail-cleared
 }
 
-# Found 538: a legacy panel limit file can outlive its account card.  Remove
-# only the limit file; the Linux user and its home directory are untouched.
+# Found 540: Fix 538 removed the stale rohcuan limit once, but the old
+# limit-ip-ssh enrolled every UID >= 1000 and recreated it on the next tick.
+# The new limiter only enrolls panel accounts; remove the recreated copy once.
 remove_stale_rohcuan_limit() {
-    local marker="/etc/funny/.fix538-rohcuan-limit"
+    local marker="/etc/funny/.fix540-rohcuan-limit"
     local limit="/etc/xray/limit/ip/ssh/rohcuan"
     local card="/var/log/create/ssh/rohcuan.log"
     [ -f "$marker" ] && return 0
@@ -707,9 +709,9 @@ remove_stale_rohcuan_limit() {
         echo "Fix 538: could not remove $limit; file left unchanged." >&2
         return 0
     fi
-    fix_log "fix538: removed stale rohcuan SSH IP limit"
-    fix_marker .fix538-rohcuan-limit
-    echo "Fix 538: removed stale rohcuan SSH IP limit (OS user untouched)."
+    fix_log "fix540: removed recreated rohcuan SSH IP limit"
+    fix_marker .fix540-rohcuan-limit
+    echo "Fix 540: removed recreated rohcuan SSH IP limit (OS user untouched)."
 }
 
 # Run the state migrations before the service restarts below.  Xray must be
