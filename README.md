@@ -534,9 +534,9 @@ IPs, or says `IP evidence unavailable` when both sources are empty instead of
 showing `IPs (0)`. Per-user confirmation state lives in
 `/var/lib/fn-autosc/limit-ip/<protocol>/<username>` and is removed when the
 account is under the limit or gone. The access log is only a fallback:
-`kill-ws` truncates `ws.log` every 5 minutes, so the limiter never relies on
-it alone. Locked cards auto-unlock after at least 15 minutes (15–20 min
-on the 5-minute cron), never earlier.
+`kill-ws` truncates `ws.log` and `kill-xhttp` truncates `xhttp.log` every
+5 minutes, so the limiter never relies on it alone. Locked cards auto-unlock
+after at least 15 minutes (15–20 min on the 5-minute cron), never earlier.
 
 > CDN note (measured live, Oct 2026): behind Cloudflare the limiter counts
 > real client IPs on all four transports (nginx forwards the address chain;
@@ -597,7 +597,10 @@ connection.
 ## Automated Maintenance (Cron)
 
 These jobs are added to `/etc/crontab` during installation. Each runs under
-`flock` so overlapping runs are prevented.
+`flock` so overlapping runs are prevented. The maintenance scripts detect a
+non-terminal stdout (cron) and suppress their own output, so routine runs no
+longer grow root's local mailbox; important events still go to
+`/etc/xray/.quota.logs` and Telegram.
 
 | Schedule | Command | Purpose |
 | :--- | :--- | :--- |
@@ -867,9 +870,9 @@ Files are named `{username}.log`. Locking renames them to `{username}.locked`.
 
 | Service | Log |
 | :--- | :--- |
-| Xray WebSocket (WS) | `/var/log/xray/ws.log` |
+| Xray WebSocket (WS) | `/var/log/xray/ws.log` (truncated by `kill-ws` every 5 minutes) |
 | Xray HTTP Upgrade | `/var/log/xray/upgrade.log` |
-| Xray XHTTP | `/var/log/xray/xhttp.log` |
+| Xray XHTTP | `/var/log/xray/xhttp.log` (truncated by `kill-xhttp` every 5 minutes) |
 | Xray gRPC | `/var/log/xray/grpc.log` |
 
 ### Config Files
@@ -1084,8 +1087,8 @@ What it does:
   and the update changes the version, that detected live version is also
   recorded in `.install-commit` as the install baseline. The target remains
   pinned in `update.sh`; currently
-  `5556e2b327744656e04b352b6a64950dbeb8be00` (Fix 530 content; the updater
-  script itself also carries Fix 520–530). It fetches 107 files on full,
+  `7a56d8dda91f3f90a5fc65fef456b4d11f1b842a` (Fix 531/532 content; the updater
+  script itself also carries Fix 520–532). It fetches 107 files on full,
   95 on lite, including `quota-xhttp`, `kill-xhttp`, every `extend-*`, and the
   maintenance scripts that no longer carry a license gate; the updater
   restarts an active `quota-xhttp` after installing the new daemon. The four

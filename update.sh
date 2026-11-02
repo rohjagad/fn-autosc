@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# FN AutoSC updater: live marker -> 5556e2b
+# FN AutoSC updater: live marker -> 7a56d8d
 #
 # Applies the commits on top of b6d1a97 (1-minute evidence window,
 # Exp-Date-N/A binary fix, LOCKED IPs block, MULTILOGIN UNLOCKED
@@ -16,7 +16,8 @@
 # install so maintenance and quota daemons no longer depend on auth, backup
 # Telegram IP always populated with probe fallbacks and strict IPv4 validation,
 # main-menu licence identity restored without gating under a LICENSE heading,
-# account cards showing only the rotated domain)
+# account cards showing only the rotated domain, xHTTP access-log bounding, and
+# cron output suppression when stdout is not a terminal)
 # to a live install. The file set is a superset covering the earlier
 # ranges too, so older installs are brought fully up to date in one
 # run. Safe to run: files are backed up first, every download is
@@ -25,7 +26,7 @@
 # missing).
 #
 # Usage:
-#   bash update.sh                  # live marker -> 5556e2b (default)
+#   bash update.sh                  # live marker -> 7a56d8d (default)
 #   bash update.sh <commit> --force  # re-apply even if already recorded
 #
 # One-line remote run:
@@ -37,7 +38,7 @@ set -u
 # version is read from the live panel below, so this value only appears when
 # both markers are missing.
 FROM="6b967af9e0ebadc76a265132e49d62a27ad72235"
-TARGET="${1:-5556e2b327744656e04b352b6a64950dbeb8be00}"
+TARGET="${1:-7a56d8dda91f3f90a5fc65fef456b4d11f1b842a}"
 FORCE=0
 [ "${2:-}" = "--force" ] && FORCE=1
 
@@ -134,9 +135,11 @@ fi
 # Expected marker per file: proves the download is the fixed version.
 marker_for() {
     case "$1" in
-        xp) echo 'Fix 517' ;;
-        quota-xhttp | kill-xhttp) echo 'Found 524' ;;
-        limit-ip-ssh) echo 'ssh_auto_unlock' ;;
+        xp) echo 'Found 532' ;;
+        expire-ssh) echo 'Found 532' ;;
+        quota-xhttp) echo 'Found 524' ;;
+        kill-xhttp) echo 'Found 531' ;;
+        limit-ip-ssh) echo 'Found 532' ;;
         cek-login-ssh) echo 'WS/HAProxy mapping unavailable' ;;
         ssh-online) echo 'HAPROXY_TOL_US' ;;
         menu-ssh) echo 'haproxy -v' ;;
@@ -144,7 +147,9 @@ marker_for() {
         backup) echo 'Found 529' ;;
         restore-ftp | bmenu) echo 'Found 511' ;;
         format.sh) echo 'Press any key to return...' ;;
-        limit-ip-*) echo 'keep the original epoch' ;;
+        limit-ip-*) echo 'Found 532' ;;
+        auto-delete-*) echo 'Found 532' ;;
+        kill-ws | kill-http | kill-grpc) echo 'Found 532' ;;
         unlock-*-auto) echo 'invalid locked card for $user' ;;
         delete-ws) echo 'Delete WS Account' ;;
         delete-xhttp) echo 'Delete XHTTP Account' ;;

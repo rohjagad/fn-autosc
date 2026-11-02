@@ -3200,3 +3200,21 @@ Section 35's four-check rule applied to Fix 417:
 | **vs the source** | V23 cards had a single `Domain` row. Fix 521 expanded that to `Installer Domain` plus `Rotated Domain`; Fix 530 returns to one user-facing row, using the rotated domain that the account actually uses. |
 
 - **Live verification (November 2, 2026):** updater `efffd2a` (target `5556e2b`, Fix 530) moved all three VPS from `aa75243` to `5556e2b`. Installed card scripts report `Installer Domain` count 0 and `Rotated Domain` count 1; `dm-menu` still reports the installer domain; `menu` still renders `LICENSE` and both version lines; `backup` still carries `Found 529`. `systemctl --failed` is empty and Nginx, HAProxy, `quota-xhttp`, `xray@xhttp`, SSH, and Dropbear are active on all three. Pre-fix card logs retaining the old row: 1 rohserver6, 5 rohserver1, 0 rohserver3; no historical log or Telegram message was rewritten.
+
+## 291. Bound the xHTTP access log (Fix 531) — Four Checks (November 2, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | `kill-xhttp` still collects quota candidates, re-checks and mutates under the shared JSON lock, removes the JSON/card/quota/limit files in the Found 500 order, sends the same Telegram notices, and restarts `xray@xhttp` once per pass. The truncation is the final command, after all of those paths. |
+| **Over-strictness** | No new validation or deletion condition. A busy lock still skips the run; truncation still happens at the end, so a later run catches up. No account is removed because of the log bound. |
+| **Over-engineering** | One redirection line and two comments; no logrotate file, daemon, or dependency. It reuses the `kill-ws` policy. |
+| **vs the source** | The source never truncated `xhttp.log`; ours did not either until this fix. Divergence: bound it at the same 5-minute cadence as `ws.log`, because `limit-ip-xhttp` already has `statsonlineiplist` as primary evidence. |
+
+## 292. Suppress cron terminal output (Fix 532) — Four Checks (November 2, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Every cron script still runs the same account, quota, expiry, IP-limit, backup, and Telegram paths. Only stdout/stderr when not attached to a TTY is discarded. Interactive menu calls, including `bmenu` → `backup`, still see normal output and prompts. |
+| **Over-strictness** | The guard is `[ -t 1 ]` only; it does not inspect or change `TERM`, locale, input, or exit status. A script that fails still exits with its own status; only its diagnostic text is suppressed. |
+| **Over-engineering** | Two lines per cron script, no new daemon, state file, or dependency. `.quota.logs` and Telegram remain the audit channels. |
+| **vs the source** | The source let every cron run mail its full stdout/stderr, producing 82-115 MiB mailboxes and repeated `TERM environment variable not set.` lines. Divergence: keep interactive output, discard non-TTY output at the source. |

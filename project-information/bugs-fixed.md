@@ -3350,3 +3350,24 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Verified locally:** `grep` confirms no `Installer Domain` row remains in account cards (only `dm-menu` and the `limit-ip` menu retain it); `bash -n` passes for every changed script and `update.sh`; the updater marker harness and payload verification pass.
 - **Deployment target:** `update.sh` now defaults to `5556e2b327744656e04b352b6a64950dbeb8be00` (Fix 530); payload remains 107 full / 95 lite. Not deployed to any VPS.
 - **Deployed live (2026-11-02):** updater `efffd2a` (target `5556e2b327744656e04b352b6a64950dbeb8be00`) moved all three boxes from `aa75243` to `5556e2b`; all reported `UPDATE SUCCESS`. Installed `/usr/bin` card scripts have `Installer Domain` count 0 and `Rotated Domain` count 1; five sampled scripts match the local md5; `dm-menu` still shows the installer domain, `menu` still carries `LICENSE`/`Found 528`, and `backup` still carries `Found 529`. Backups: `/root/fn-update-backup-20261102-131151` (rohserver6), `-051240` (rohserver1), `-131345` (rohserver3). Historical logs with the old row: 1/5/0; not rewritten.
+
+### Fix 531 - Bound the xHTTP access log (Found 531)
+
+- **Fix 531 (Found 531):**
+  1. `full/kill-xhttp.sh` and `lite/kill-xhttp.sh` truncate `/var/log/xray/xhttp.log` at the end of every run, matching the existing `kill-ws` policy for `/var/log/xray/ws.log`.
+  2. The truncation runs after quota deletion, Telegram notification, and the single `xray@xhttp` restart, so the deletion path and its evidence window are unchanged.
+  3. `update.sh` marker-checks `kill-xhttp` with `Found 531`.
+- **Evidence:** live `/var/log/xray/xhttp.log` was 300-403 MiB on all three boxes (first line 19-Oct), with no xray entry in `/etc/logrotate.d`; `kill-xhttp` did not truncate it. `limit-ip-xhttp` reads the whole file per user every 5 minutes, so the file and the scan cost were growing together (~20-30 MiB/day).
+- **Safety:** `limit-ip-xhttp` already merges `xray api statsonlineiplist` with the last-minute log window, so idle sessions are covered by the map and the log is only fallback evidence. A 5-minute truncation keeps that window populated while bounding disk use, exactly as `kill-ws` does for WS.
+- **Verified locally:** `bash -n` passes for both `kill-xhttp` scripts; the marker is present; the truncation is the final command and runs on every path that reaches the end of the script.
+
+### Fix 532 - Keep cron output out of root's mailbox (Found 532)
+
+- **Fix 532 (Found 532):**
+  1. Every cron-run panel script (`xp`, `expire-ssh`, `limit-ip-*`, `auto-delete-*`, `kill-*`, and `backup`) now checks `[ -t 1 ]`; when stdout is not a terminal, it redirects stdout and stderr to `/dev/null` for that run.
+  2. Interactive use is unchanged: from a terminal the scripts still print and clear normally, including `backup` called from `bmenu`.
+  3. `update.sh` marker-checks `xp`, `expire-ssh`, `limit-ip-*`, `auto-delete-*`, and `kill-ws`/`kill-http`/`kill-grpc` with `Found 532`; `kill-xhttp` checks `Found 531` (it carries both markers).
+- **Evidence:** root mailboxes were 82-115 MiB and still growing; the dominant line was `TERM environment variable not set.` from `clear` in cron-run scripts. The first message dates from 19-Oct, so this predates Fix 530. Each cron message also carries mail headers, so silencing only `clear` would not stop the mailbox growth.
+- **Safety:** the guard only redirects output when stdout is not a TTY; it does not change any account, quota, expiry, JSON, or Telegram action. Important audit events remain in `/etc/xray/.quota.logs`; Telegram notifications are unchanged.
+- **Verified locally:** `bash -n` passes for every changed full/lite script; a non-TTY run with `TERM` unset produces no `TERM` output; `grep` confirms every targeted script carries `Found 532`. The new payload still has 107 full / 95 lite files.
+- **Deployment target:** `update.sh` now defaults to `7a56d8dda91f3f90a5fc65fef456b4d11f1b842a` (Fix 531/532); not yet deployed.
