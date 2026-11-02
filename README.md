@@ -504,6 +504,10 @@ Each account with a quota has two files:
 
 Usage is measured through the Xray stats API by the `quota-*` services
 (`quota-ws`, `quota-http`, `quota-xhttp`, `quota-grpc`), which run continuously.
+Their startup `clear` is terminal-only (`[ -t 1 ] && clear || true`), so a
+systemd restart does not write `TERM environment variable not set.` to the
+journal. `update.sh` restarts all four services after installing a new quota
+script.
 
 For xHTTP, the shared `/tmp/xray-json-xhttp.lock` covers only JSON/file
 mutation. Stats collection, usage-file updates, Telegram notices, and the
@@ -600,7 +604,9 @@ These jobs are added to `/etc/crontab` during installation. Each runs under
 `flock` so overlapping runs are prevented. The maintenance scripts detect a
 non-terminal stdout (cron) and suppress their own output, so routine runs no
 longer grow root's local mailbox; important events still go to
-`/etc/xray/.quota.logs` and Telegram.
+`/etc/xray/.quota.logs` and Telegram. The updater archives the accumulated
+pre-fix mailbox to `/root/fn-mail-backup-<date>.gz` and truncates it once; the
+archive is retained for audit.
 
 | Schedule | Command | Purpose |
 | :--- | :--- | :--- |
@@ -755,6 +761,12 @@ redirects it internally to the server on UDP `5300`.
 **Requirement:** you must delegate a nameserver subdomain (NS record) to this
 VPS, for example `slowdns.example.com`. Without it, `dnstt.service` runs but
 serves nothing useful.
+
+The installer asks for this name and stores it in `/etc/slowdns/nsdomain`; the
+unit's `ExecStart` uses the same value. On boxes installed before that wiring
+was consistent, `update.sh` syncs the unit to the saved file once (marker
+`.fix534-dnstt-synced`). This does not create DNS records: the delegated name
+must still resolve or delegate to the VPS at the DNS provider.
 
 Key management and the nameserver are configured from `menu-dnstt`. The server
 generates an X25519 keypair — the private key stays on the server, and the
@@ -1087,11 +1099,16 @@ What it does:
   and the update changes the version, that detected live version is also
   recorded in `.install-commit` as the install baseline. The target remains
   pinned in `update.sh`; currently
-  `7a56d8dda91f3f90a5fc65fef456b4d11f1b842a` (Fix 531/532 content; the updater
-  script itself also carries Fix 520–532). It fetches 107 files on full,
+  `0cf5dc1df15bf1817b9137e419cfb117cc44b685` (Fix 533 content; the updater
+  script itself also carries Fix 520–538). It fetches 107 files on full,
   95 on lite, including `quota-xhttp`, `kill-xhttp`, every `extend-*`, and the
   maintenance scripts that no longer carry a license gate; the updater
-  restarts an active `quota-xhttp` after installing the new daemon. The four
+  restarts every active `quota-*` service after installing the new daemons.
+  It also runs one-time, marker-guarded live-state migrations: sync
+  `dnstt.service` to `/etc/slowdns/nsdomain`, restore the `simpang32`
+  quota/IP limit, neutralize the published default Xray credentials, archive
+  and truncate the accumulated root mailbox, and remove the stale `rohcuan`
+  SSH limit. The four
   `change-limit-ip` tools and the full `limit-ip` tool ship as compiled
   binaries from `bin/<edition>/` and are checked against pinned md5
   fingerprints; shell files are syntax- and marker-checked. The account-card

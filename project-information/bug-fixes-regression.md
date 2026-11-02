@@ -3218,3 +3218,66 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | The guard is `[ -t 1 ]` only; it does not inspect or change `TERM`, locale, input, or exit status. A script that fails still exits with its own status; only its diagnostic text is suppressed. |
 | **Over-engineering** | Two lines per cron script, no new daemon, state file, or dependency. `.quota.logs` and Telegram remain the audit channels. |
 | **vs the source** | The source let every cron run mail its full stdout/stderr, producing 82-115 MiB mailboxes and repeated `TERM environment variable not set.` lines. Divergence: keep interactive output, discard non-TTY output at the source. |
+
+## 293. Quota startup output is terminal-only (Fix 533) — Four Checks (November 2, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | The quota accounting loop, stats calls, usage writes, deletion order, Telegram notices, and JSON lock are unchanged. Only the startup `clear` is skipped when stdout is not a TTY. The updater still installs the same four scripts and now restarts all four active services so the new file is actually running. |
+| **Over-strictness** | The test is `[ -t 1 ]` only; it does not inspect or change `TERM`, locale, input, or exit status. Interactive runs still clear normally, and the `|| true` keeps the command status at 0. |
+| **Over-engineering** | One guarded line plus one marker comment per script; no new file, daemon, or dependency. The restart loop reuses the existing systemd units. |
+| **vs the source** | The source and our earlier quota scripts called bare `clear`, so every systemd restart wrote `TERM environment variable not set.` to the journal. Divergence: preserve the interactive clear but suppress it under systemd. |
+
+## 294. HAProxy backend warning is removed (Fix 533) — Four Checks (November 2, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | The frontend `option tcplog` and `option logasap` remain, so `ssh-online` still gets the 777 session line. Only the ignored backend copy is removed. The existing logging-directive patch, backup, and validation path are reused. |
+| **Over-strictness** | The removal is scoped to `backend ssh-backend`; another backend or frontend is untouched. The config is validated with `haproxy -c` before reload, and the original is restored on failure. |
+| **Over-engineering** | One section-scoped awk removal and one presence helper; no new config file or service. |
+| **vs the source** | The source placed `option tcplog` in both the frontend and backend. HAProxy ignores it in a backend and warns on every check. Divergence: keep the valid frontend directive, drop the ignored one. |
+
+## 295. dnstt unit follows the saved nameserver (Fix 534) — Four Checks (November 2, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Only the domain token in `ExecStart` changes. The binary path, UDP port, key path, SSH target, unit dependencies, restart policy, and enabled state are unchanged. The migration is marker-guarded and only rewrites when the values differ. |
+| **Over-strictness** | The saved name must pass the same FQDN check used by the installer and `menu-dnstt`. An empty or malformed value skips the migration; a rewrite that does not verify restores the backup. It never invents DNS records. |
+| **Over-engineering** | One migration function, one marker, and one unit backup; no new daemon or dependency. `systemctl daemon-reload` is required because systemd caches units. |
+| **vs the source** | The current installer and `menu-dnstt` already write the unit from `/etc/slowdns/nsdomain`; the live units predated that wiring and drifted. Divergence: repair the legacy units once instead of changing the installer. |
+
+## 296. simpang32 quota is restored (Fix 535) — Four Checks (November 2, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Only the missing base quota and IP-limit files are created. The account's JSON entry, card, UUID, expiry, links, and existing `_usage` counter are untouched. No service restart is needed. |
+| **Over-strictness** | The migration runs only when the card exists, the account is still in `ws.json`, both target files are absent, and the parsed values are positive integers. It writes exactly the card's `100 GB` as `107374182400` bytes and `IP 2` as `2`. |
+| **Over-engineering** | One migration function and two marker/backup copies; no new daemon or dependency. The existing quota and IP-limit readers do the enforcement. |
+| **vs the source** | The source wrote these files at account creation. A legacy deletion removed the base files but left the usage counter and card. Divergence: restore the enforcement files from the card instead of recreating the account. |
+
+## 297. Published default credentials are neutralized (Fix 536) — Four Checks (November 2, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | The default client objects and their `#` insertion markers remain, so the add/trial scripts still have their anchors. Only the known credential values are replaced. The migration backs up all four JSONs and restarts Xray only after every file passes `xray run -test`. |
+| **Over-strictness** | The replacement list is the exact set published in the templates. If a value is absent, nothing is changed; if any file fails validation, all four files are restored and no service is restarted. |
+| **Over-engineering** | One migration function and one marker; it reuses the installer's existing `xray uuid` replacement policy. No template or insertion-path refactor. |
+| **vs the source** | New installs already randomize these values in `installer/xray.sh`; older boxes could retain the published values. Divergence: apply the same one-time replacement to existing JSON. Live boxes were already clean, so the migration was a no-op there. |
+
+## 298. Root mail is archived and truncated (Fix 537) — Four Checks (November 2, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | `: >` truncates the existing inode, preserving owner `mail:mail` and mode `0600`, so local delivery continues to work. The archive is written under `/root` and hardlinked or copied into the updater backup. No cron or MTA configuration changes. |
+| **Over-strictness** | Only a mailbox larger than 1 MiB is archived. The archive must pass `gzip -t` before the original is truncated. A failure leaves the mailbox untouched and does not write the marker, so the next run can retry. |
+| **Over-engineering** | One helper, one marker, and one compressed archive per box; no logrotate or new service. `/var/spool/mail/mail` is skipped when it is the same inode. |
+| **vs the source** | The source never cleaned the accumulated mbox. Fix 532 stopped new growth but intentionally left the old file. Divergence: keep an audit archive and reclaim the live mail path once. |
+
+## 299. Stale rohcuan SSH limit is removed (Fix 538) — Four Checks (November 2, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Only `/etc/xray/limit/ip/ssh/rohcuan` is removed. The Linux user, UID, home directory, shell, password, and any SSH keys are untouched. No service restart is needed. |
+| **Over-strictness** | The migration runs only when the limit file exists, the OS user still exists, and no panel card `/var/log/create/ssh/rohcuan.log` exists. A card or missing user causes a skip. |
+| **Over-engineering** | One small function and one marker; the removed file is copied to the updater backup first. |
+| **vs the source** | The source creates the limit file with the panel account and removes it on account deletion. This legacy file lost its card but survived. Divergence: remove the orphaned panel state only, not the OS account. |

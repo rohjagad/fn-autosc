@@ -3372,3 +3372,55 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Verified locally:** `bash -n` passes for every changed full/lite script; a non-TTY run with `TERM` unset produces no `TERM` output; `grep` confirms every targeted script carries `Found 532`. The new payload still has 107 full / 95 lite files.
 - **Deployment target:** `update.sh` now defaults to `7a56d8dda91f3f90a5fc65fef456b4d11f1b842a` (Fix 531/532); payload remains 107 full / 95 lite.
 - **Deployed live (2026-11-02):** updater `622fbd6` (target `7a56d8dda91f3f90a5fc65fef456b4d11f1b842a`) moved all three boxes from `5556e2b` to `7a56d8d`; all reported `UPDATE SUCCESS` and `.update-commit` matches. The 16 changed full scripts match the local sha256 (`lite` is not installed). `kill-xhttp` contains both `Found 531` and `Found 532`; `xp` and `limit-ip-xhttp` contain `Found 532`. The first post-deploy cron tick reduced `/var/log/xray/xhttp.log` from 403/300/300 MiB to 27/28/20 KiB on rohserver6/rohserver1/rohserver3. Root mail sizes stayed unchanged after the update (120,179,204 / 85,681,773 / 99,616,713 bytes), and no new cron message was delivered. `systemctl --failed` is empty and Nginx, HAProxy, all four Xray units, all four quota units, SSH, and Dropbear are active on all three. Backups: `/root/fn-update-backup-20261102-150844` (rohserver6), `-070932` (rohserver1), `-151112` (rohserver3). The only post-update `TERM` line is the pre-existing `quota-xhttp` startup message, not a cron-mail message; `quota-*` was not restarted by this fix.
+
+## Quota startup, HAProxy warning, dnstt sync, simpang32, default credentials, root mail, stale SSH limit (Fix 533-538)
+
+- **Payload commit:** `0cf5dc1df15bf1817b9137e419cfb117cc44b685`.
+- **Updater commit:** `5de3d54b671bc80c08e111afea8b38fd342bd856`.
+- **Deployment:** all three boxes moved from `7a56d8d` to `0cf5dc1` through `update.sh`; each reported `UPDATE SUCCESS` and `.update-commit` matches the payload commit. Backups: `/root/fn-update-backup-20261102-163613` (rohserver6), `-083727` (rohserver1), `-163827` (rohserver3).
+
+### Fix 533 - quota startup output and HAProxy backend warning
+
+- **Change:** the eight quota scripts (`full/` and `lite/` `quota-ws`, `quota-http`, `quota-grpc`, `quota-xhttp`) replace the bare `clear` with `[ -t 1 ] && clear || true` and carry `Found 533`. The updater marker-checks all four with `Found 533` and restarts every active `quota-*` service after the payload swap, not only `quota-xhttp`.
+- **HAProxy:** `patch_haproxy_logging()` now also detects and removes `option tcplog` from `backend ssh-backend`. `option tcplog` belongs in the `ssh-ssl` frontend; HAProxy ignores it in a backend and warned on every `haproxy -c`. The frontend directive is preserved. The config is backed up, validated with `haproxy -c`, and reloaded only if validation passes (restart only as a fallback).
+- **Verified live:** the four quota services were restarted after the update and `journalctl` has zero `TERM environment variable not set.` lines since the restart on all three. `haproxy -c` reports `Configuration file is valid`; the backend `option tcplog` count is 0 on all three while the frontend still has its TCP log directives. The four installed quota scripts match the local sha256 (`0336db1...`, `9fef60d...`, `d1e4ff3...`, `01f9c19...`).
+
+### Fix 534 - dnstt unit follows `/etc/slowdns/nsdomain`
+
+- **Change:** a one-time, marker-guarded migration (`.fix534-dnstt-synced`) reads `/etc/slowdns/nsdomain`, validates it as an FQDN, reads the domain token from the unit's `ExecStart`, and rewrites only that token when it differs. The old unit is saved to the updater backup and `/root/fn-dnstt-backup-<date>.service`; the migration runs `systemctl daemon-reload` and restarts `dnstt` only when it was active.
+- **Before/after:**
+
+  | Host | Unit before | `/etc/slowdns/nsdomain` | Unit after |
+  | :-- | :-- | :-- | :-- |
+  | rohserver6 | `ns.kainmurah.us.ci` | `ns.jalanlancar7.my.id` | `ns.jalanlancar7.my.id` |
+  | rohserver1 | `ns.mierebus.cc.cd` | `ns.lancarjaya1.my.id` | `ns.lancarjaya1.my.id` |
+  | rohserver3 | `ns.basrengkita.us.ci` | `ns.haribaik4.my.id` | `ns.haribaik4.my.id` |
+
+- **Verified live:** `systemctl show dnstt -p ExecStart` contains the saved nsdomain on all three and `dnstt` is active. The unit is now internally consistent; the migration does not create DNS records. Public DNS still has no `A`, `AAAA`, or `NS` records for the `ns.*` names, while the parent domains (`jalanlancar7.my.id`, `lancarjaya1.my.id`, `haribaik4.my.id`) resolve to the three VPS addresses. SlowDNS therefore still needs the operator to delegate or publish the chosen name at the DNS provider.
+
+### Fix 535 - restore `ws/simpang32` quota and IP limit
+
+- **Change:** rohserver6 only. The card `/var/log/create/xray/ws/simpang32.log` still says `Quota: 100 GB` and `Limit IP: 2`, but the base quota and IP-limit files were missing. The migration (`.fix535-simpang32`) validates the account in `ws.json`, parses both values, writes `107374182400` to `/etc/xray/quota/ws/simpang32` and `2` to `/etc/xray/limit/ip/xray/ws/simpang32`, and leaves the existing `_usage` file untouched.
+- **Verified live:** both files contain the expected numeric values; `simpang32_usage` is 459,069,462 bytes (below the 100 GB limit); `list-xray-ws` for `simpang32` reports `Limit IP: 2`, `Limit Quota: 100 GB`, and `Status Account XRAY: unlocked`. The card and usage files were copied to the updater backup before the write. No restart was needed; `quota-ws` and `limit-ip-ws` read the files on their next pass.
+
+### Fix 536 - neutralize published default credentials
+
+- **Change:** a one-time, marker-guarded migration (`.fix536-default-creds`) applies the same replacement the current installer already uses for new installs: every occurrence of `rerechan-store`, `cfbbaafc-8d52-450c-9fb0-145bc8221e6d`, `019e0bf3-dd56-11e9-aa37-5600024c1d6a`, `af7d5cf8-442d-4bb3-8a76-eb367178781d`, `diy2020`, or `nonescript-fn-project` in the four live JSON configs is replaced with a fresh `xray uuid`. All four files are backed up first, then tested with `xray run -test`; any failure restores all four and skips the Xray restart.
+- **Verified live:** none of the published values was present on any box: the current installer had already randomized them at install time. The migration therefore marked `.fix536-default-creds` without changing a file. `grep` over `/etc/xray/json` is clean and all four configs pass `xray run -test` on all three. The shipped default client objects remain in place because the add/trial scripts use their `#vless`/`#vmess`/`#trojan` markers as insertion anchors.
+
+### Fix 537 - archive and clear the accumulated root mailbox
+
+- **Change:** a one-time, marker-guarded migration (`.fix537-mail-cleared`) compresses `/var/mail/mail` to `/root/fn-mail-backup-<date>.gz`, verifies the archive with `gzip -t`, and truncates the original inode with `: >` so owner, group, and mode are preserved. `/var/spool/mail/mail` is skipped when it is the same inode (the live boxes symlink it to `../mail`).
+- **Verified live:** mailboxes were 120,179,204 / 85,681,773 / 99,616,713 bytes and are now 0 bytes with owner `mail:mail`, mode `0600`. Archives: `/root/fn-mail-backup-20261102-163651.gz` (2.5 MB), `-083812.gz` (1.8 MB), `-163846.gz` (2.2 MB); all pass `gzip -t`. The 16:40/08:40 cron tick ran all `limit-ip-*`, `kill-*`, `auto-delete-*`, and `expire-ssh` jobs and the mailbox mtime did not change, so no new mail was delivered.
+
+### Fix 538 - remove the stale `rohcuan` SSH limit
+
+- **Change:** rohserver1 only. The migration (`.fix538-rohcuan-limit`) confirms the OS user exists and `/var/log/create/ssh/rohcuan.log` does not, backs up the limit file, and removes only `/etc/xray/limit/ip/ssh/rohcuan`. It does not run `userdel` or touch the home directory, shell, or password.
+- **Verified live:** the limit file is absent; `getent passwd rohcuan` still returns `rohcuan:x:1000:1000:Debian:/home/rohcuan:/bin/bash`; there is no panel card. rohserver6 and rohserver3 had no such file and skipped the migration.
+
+### Health after the batch
+
+- `systemctl --failed` is empty on all three; Nginx, HAProxy, SSH, Dropbear, `xray@{ws,grpc,xhttp,upgrade}`, `quota-{ws,http,grpc,xhttp}`, and `dnstt` are active.
+- All four live JSON configs pass `xray run -test`; the published default values are absent.
+- The eight changed quota scripts match the local sha256 on the installed full boxes; `lite` is not installed on any live host.
+- Post-deploy cron tick: no new root mail, no new quota `TERM` line, and no new account deletion or lock error appeared.
