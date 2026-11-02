@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# FN AutoSC updater: live marker -> 0cf5dc1
+# FN AutoSC updater: live marker -> 24931ce
 #
 # Applies the commits on top of b6d1a97 (1-minute evidence window,
 # Exp-Date-N/A binary fix, LOCKED IPs block, MULTILOGIN UNLOCKED
@@ -19,8 +19,8 @@
 # account cards showing only the rotated domain, xHTTP access-log bounding,
 # cron output suppression when stdout is not a terminal, quota startup output
 # guarded for systemd, legacy dnstt/nsdomain synchronization, simpang32 quota
-# repair, published default-credential neutralization, root-mail archiving, and
-# stale SSH-limit cleanup)
+# repair, published default-credential neutralization, root-mail archiving,
+# stale SSH-limit cleanup, and removal of the template client anchors)
 # to a live install. The file set is a superset covering the earlier
 # ranges too, so older installs are brought fully up to date in one
 # run. Safe to run: files are backed up first, every download is
@@ -29,7 +29,7 @@
 # missing).
 #
 # Usage:
-#   bash update.sh                  # live marker -> 0cf5dc1 (default)
+#   bash update.sh                  # live marker -> 24931ce (default)
 #   bash update.sh <commit> --force  # re-apply even if already recorded
 #
 # One-line remote run:
@@ -41,7 +41,7 @@ set -u
 # version is read from the live panel below, so this value only appears when
 # both markers are missing.
 FROM="6b967af9e0ebadc76a265132e49d62a27ad72235"
-TARGET="${1:-0cf5dc1df15bf1817b9137e419cfb117cc44b685}"
+TARGET="${1:-24931ce37b27c9963600aeb2a29bbe198b697b6f}"
 FORCE=0
 [ "${2:-}" = "--force" ] && FORCE=1
 
@@ -120,7 +120,7 @@ menu-argo menu-bot
 quota-grpc quota-http quota-ws
 routing-grpc routing-http routing-ws routing-xhttp
 unlock-grpc unlock-http unlock-ws unlock-xhttp
-x-grpc x-http x-ws x-xhttp"
+x-grpc x-http x-ws x-xhttp xray-add-client"
 # format.sh lives in config/ and installs to /etc/funny, not /usr/bin.
 CONFIG_FILES="format.sh"
 # Found 514: /usr/bin/restore-ftp is the non-interactive website variant
@@ -141,6 +141,7 @@ marker_for() {
         xp) echo 'Found 532' ;;
         expire-ssh) echo 'Found 532' ;;
         quota-xhttp | quota-ws | quota-http | quota-grpc) echo 'Found 533' ;;
+        xray-add-client) echo 'Found 539' ;;
         kill-xhttp) echo 'Found 531' ;;
         limit-ip-ssh) echo 'Found 532' ;;
         cek-login-ssh) echo 'WS/HAProxy mapping unavailable' ;;
@@ -551,6 +552,88 @@ neutralize_default_credentials() {
     echo "Fix 536: published default Xray credentials replaced; Xray units restarted."
 }
 
+# Found 539: the old templates used a client object as the insertion anchor.
+# The account scripts now insert through /usr/bin/xray-add-client, so remove
+# those anchor objects from existing boxes.  The Python pass edits the text
+# directly because the JSON files intentionally contain # comment markers.
+remove_template_client_anchors() {
+    local marker="/etc/funny/.fix539-client-anchors"
+    local dir="/etc/xray/json"
+    local files="$dir/ws.json $dir/upgrade.json $dir/xhttp.json $dir/grpc.json"
+    local f
+    [ -f "$marker" ] && return 0
+    command -v xray >/dev/null 2>&1 || return 0
+    command -v python3 >/dev/null 2>&1 || return 0
+    for f in $files; do
+        [ -f "$f" ] || return 0
+    done
+    mkdir -p "$BACKUP/json" 2>/dev/null || return 0
+    for f in $files; do
+        cp -f "$f" "$BACKUP/json/$(basename "$f")" 2>/dev/null || true
+    done
+    python3 - $files <<'PY'
+import re
+import sys
+from pathlib import Path
+
+for name in sys.argv[1:]:
+    path = Path(name)
+    lines = path.read_text().splitlines(keepends=True)
+    removed = 0
+    while True:
+        idx = None
+        for i, line in enumerate(lines):
+            if line.strip() in ("#vless", "#vmess", "#trojan"):
+                idx = i
+                break
+        if idx is None:
+            break
+        start = None
+        for i in range(idx - 1, -1, -1):
+            if lines[i].strip() == "{":
+                start = i
+                break
+        end = None
+        for i in range(idx + 1, len(lines)):
+            if lines[i].strip() in ("}", "},"):
+                end = i
+                break
+        if start is None or end is None:
+            sys.exit(f"template anchor is not a complete object in {name}")
+        del lines[start:end + 1]
+        removed += 1
+    text = "".join(lines)
+    text = re.sub(r"},\n *\]", "}\n        ]", text)
+    path.write_text(text)
+    if removed:
+        print(f"Fix 539: removed {removed} template client anchors from {name}.")
+PY
+    if [ "$?" -ne 0 ]; then
+        for f in $files; do
+            cp -f "$BACKUP/json/$(basename "$f")" "$f" 2>/dev/null || true
+        done
+        echo "Fix 539: anchor removal failed; all four JSON files restored." >&2
+        return 0
+    fi
+    for f in $files; do
+        if ! xray run -test -config "$f" >/dev/null 2>&1; then
+            for f in $files; do
+                cp -f "$BACKUP/json/$(basename "$f")" "$f" 2>/dev/null || true
+            done
+            echo "Fix 539: Xray rejected $f after anchor removal; all four JSON files restored." >&2
+            return 0
+        fi
+    done
+    for f in ws upgrade xhttp grpc; do
+        if systemctl is-active --quiet "xray@$f" 2>/dev/null; then
+            systemctl restart "xray@$f" 2>/dev/null || true
+        fi
+    done
+    fix_log "fix539: removed template client anchors"
+    fix_marker .fix539-client-anchors
+    echo "Fix 539: template client anchors removed; Xray units restarted."
+}
+
 # Found 537: Fix 532 stopped new cron mail but left the accumulated mbox.
 # Compress it first, verify the archive, then truncate the same inode so the
 # owner/mode stay correct for the local MTA.
@@ -630,9 +713,10 @@ remove_stale_rohcuan_limit() {
 }
 
 # Run the state migrations before the service restarts below.  Xray must be
-# valid before it is restarted (Fix 536), while the quota files (Fix 535) are
-# read on the next pass and need no restart of their own.
+# valid before it is restarted (Fix 536/539), while the quota files (Fix 535)
+# are read on the next pass and need no restart of their own.
 neutralize_default_credentials
+remove_template_client_anchors
 repair_simpang32
 sync_dnstt_unit
 remove_stale_rohcuan_limit
