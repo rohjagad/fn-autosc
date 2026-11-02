@@ -1042,7 +1042,11 @@ Read these before exposing a server to the internet.
 ## Updating an Existing Install
 
 A server installed from an older commit can be brought up to date
-without reinstalling. Run as `root`:
+without reinstalling. **Every live update goes through `update.sh`.** Do not
+copy individual scripts to a live server or edit installed files in place:
+that leaves the code ahead of `.update-commit`, and the next updater run
+replaces the direct change. Commit the fix, point `TARGET` in `update.sh` at
+that commit, and run the updater. Run as `root`:
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/rohjagad/fn-autosc/main/update.sh)
@@ -1058,10 +1062,12 @@ What it does:
   and the update changes the version, that detected live version is also
   recorded in `.install-commit` as the install baseline. The target remains
   pinned in `update.sh`; currently
-  `2833d8d03dc9f1cd22e0b2a130a417c18877be6a` (Fix 523 content; the updater
-  script itself also carries Fix 520–523). It fetches 56 files on full,
-  47 on lite. The four `change-limit-ip` tools and the full `limit-ip` tool ship as
-  compiled binaries from `bin/<edition>/` and are checked against pinned md5
+  `2c2b3f73a52bd67a7c2dbf067ab1005fc3c31cd6` (Fix 524 content; the updater
+  script itself also carries Fix 520–524). It fetches 58 files on full,
+  49 on lite, including `quota-xhttp` and `kill-xhttp`; the updater
+  restarts an active `quota-xhttp` after installing the new daemon. The four
+  `change-limit-ip` tools and the full `limit-ip` tool ship as compiled
+  binaries from `bin/<edition>/` and are checked against pinned md5
   fingerprints; shell files are syntax- and marker-checked. The account-card
   formatter `/etc/funny/format.sh` is fetched from `config/`, and the web
   restore command `/usr/bin/restore-ftp` from `website/`, then refreshed too.

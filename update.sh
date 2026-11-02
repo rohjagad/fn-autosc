@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# FN AutoSC updater: 6b967af -> 2833d8d
+# FN AutoSC updater: live marker -> 2c2b3f7
 #
 # Applies the commits on top of b6d1a97 (1-minute evidence window,
 # Exp-Date-N/A binary fix, LOCKED IPs block, MULTILOGIN UNLOCKED
@@ -21,7 +21,7 @@
 # missing).
 #
 # Usage:
-#   bash update.sh                  # live marker -> 2833d8d (default)
+#   bash update.sh                  # live marker -> 2c2b3f7 (default)
 #   bash update.sh <commit> --force  # re-apply even if already recorded
 #
 # One-line remote run:
@@ -33,7 +33,7 @@ set -u
 # version is read from the live panel below, so this value only appears when
 # both markers are missing.
 FROM="6b967af9e0ebadc76a265132e49d62a27ad72235"
-TARGET="${1:-2833d8d03dc9f1cd22e0b2a130a417c18877be6a}"
+TARGET="${1:-2c2b3f73a52bd67a7c2dbf067ab1005fc3c31cd6}"
 FORCE=0
 [ "${2:-}" = "--force" ] && FORCE=1
 
@@ -96,7 +96,7 @@ if [ "$EDITION" = "full" ] && ! command -v python3 >/dev/null 2>&1; then
 fi
 
 # Deployed name (no .sh) -> repo source name.
-FILES="xp limit-ip-ws limit-ip-http limit-ip-xhttp limit-ip-grpc
+FILES="xp quota-xhttp kill-xhttp limit-ip-ws limit-ip-http limit-ip-xhttp limit-ip-grpc
 delete-ws delete-xhttp menu-system menu backup bmenu dm-menu
 add-trojan-grpc add-trojan-http add-trojan-ws add-trojan-xhttp add-vless-grpc add-vless-http add-vless-ws add-vless-xhttp add-vmess-grpc add-vmess-http add-vmess-ws add-vmess-xhttp trial-trojan-grpc trial-trojan-http trial-trojan-ws trial-trojan-xhttp trial-vless-grpc trial-vless-http trial-vless-ws trial-vless-xhttp trial-vmess-grpc trial-vmess-http trial-vmess-ws trial-vmess-xhttp
 unlock-ws-auto unlock-http-auto unlock-xhttp-auto unlock-grpc-auto"
@@ -118,6 +118,7 @@ fi
 marker_for() {
     case "$1" in
         xp) echo 'Fix 517' ;;
+        quota-xhttp | kill-xhttp) echo 'Found 524' ;;
         limit-ip-ssh) echo 'ssh_auto_unlock' ;;
         cek-login-ssh) echo 'WS/HAProxy mapping unavailable' ;;
         ssh-online) echo 'HAPROXY_TOL_US' ;;
@@ -345,6 +346,14 @@ for name in $CONFIG_FILES; do
 done
 rm -rf "$STAGE"
 remove_legacy_domain_files || true
+
+# Found 524: quota-xhttp is a long-running service.  Restart it after the
+# file swap so the new lock scope and idle-usage behavior are active
+# immediately; cron scripts (xp/limit-ip-xhttp/kill-xhttp) pick up on the
+# next tick without a restart.
+if systemctl is-active --quiet quota-xhttp 2>/dev/null; then
+    systemctl restart quota-xhttp 2>/dev/null || true
+fi
 
 # Banner wiring (installer/ssh.sh equivalent for existing boxes):
 # OpenSSH shows /etc/issue.net only when named; Dropbear only with -b.

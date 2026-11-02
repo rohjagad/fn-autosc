@@ -530,7 +530,7 @@ no Cloudflare-only header anywhere, zero `grpcRealIp` remnants in tree or test b
 ## 36. The Updater Starts From the Live Version Marker
 
 - **Component:** `update.sh`.
-- **Decision:** the starting version is read at runtime from `/etc/funny/.update-commit` (last applied update), then `/etc/funny/.install-commit` (fresh install). Empty and `Unknown` markers are skipped, and the documented `6b967af` live v1.23 value is only a fallback when neither marker is usable. The target stays pinned at the latest deployable commit (currently `2833d8d03dc9f1cd22e0b2a130a417c18877be6a`, Fix 523).
+- **Decision:** the starting version is read at runtime from `/etc/funny/.update-commit` (last applied update), then `/etc/funny/.install-commit` (fresh install). Empty and `Unknown` markers are skipped, and the documented `6b967af` live v1.23 value is only a fallback when neither marker is usable. The target stays pinned at the latest deployable commit (currently `2c2b3f73a52bd67a7c2dbf067ab1005fc3c31cd6`, Fix 524).
 - **Reason:** the full-file updater does not need a Git ancestry walk, but the header, startup line, and `UPDATE SUCCESS` message must report the actual live version. A hardcoded `5c48741` became stale once the live box moved to the v1.23 marker.
 - **Safety:** `FROM` is display/history only; it is never used to fetch files. A malformed marker cannot change which files are downloaded, verified, or installed, and the existing `Already at $TARGET` check still compares only `TARGET`.
 
@@ -568,3 +568,10 @@ no Cloudflare-only header anywhere, zero `grpcRealIp` remnants in tree or test b
 - **Decision:** when resolving a Dropbear child behind `ws:2080`, match the nearest `client:` line to the nearest `opened` line by absolute timestamp, within the existing 50 ms window. Do not assume `client:` always precedes `opened`.
 - **Reason:** live journald showed `opened` at `.599321` and `client: 140.213.65.123` at `.601549` for the same session (2.2 ms later). The old one-way check skipped the client line and left the session as `127.0.0.1`, so the menu warned and the limiter counted loopback as one IP.
 - **Safety:** the 50 ms window and nearest-timestamp choice keep the pair distinct from the next connection; HAProxy matching remains one-way (accept <= child) because HAProxy must connect to the backend before Dropbear starts.
+
+## 42. Every Live Update Goes Through the Updater
+
+- **Component:** `update.sh`, `README.md`, `project-information/`.
+- **Decision:** installed files change only through `update.sh`. A fix is committed, `TARGET` is advanced to that commit, and the updater downloads, verifies, backs up, and installs the whole payload. Copying scripts to a live box or editing installed files in place is not an update path.
+- **Reason:** a direct copy leaves `.update-commit` pointing at the old content, so the live box silently drifts and the next updater run reverts the copy. Fix 524 had to be installed by hand only because the updater target was deliberately held at `2833d8d`; that gap is now closed by adding `quota-xhttp` and `kill-xhttp` to the payload and advancing the target to `2c2b3f7`.
+- **Safety:** the updater verifies every download before touching the live files and aborts without changes on any mismatch. Break-glass recovery that cannot wait for an updater run is not an update; it must be followed by an updater run so the code and `.update-commit` converge again.
