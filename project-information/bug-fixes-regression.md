@@ -3198,3 +3198,5 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | No validation or gate changed. The rotated-domain row remains, and the empty-rotated-list creation guard is untouched. |
 | **Over-engineering** | Pure deletions: one card row and one unused read per script, no new file, helper, or dependency. |
 | **vs the source** | V23 cards had a single `Domain` row. Fix 521 expanded that to `Installer Domain` plus `Rotated Domain`; Fix 530 returns to one user-facing row, using the rotated domain that the account actually uses. |
+
+- **Live verification (November 2, 2026):** updater `efffd2a` (target `5556e2b`, Fix 530) moved all three VPS from `aa75243` to `5556e2b`. Installed card scripts report `Installer Domain` count 0 and `Rotated Domain` count 1; `dm-menu` still reports the installer domain; `menu` still renders `LICENSE` and both version lines; `backup` still carries `Found 529`. `systemctl --failed` is empty and Nginx, HAProxy, `quota-xhttp`, `xray@xhttp`, SSH, and Dropbear are active on all three. Pre-fix card logs retaining the old row: 1 rohserver6, 5 rohserver1, 0 rohserver3; no historical log or Telegram message was rewritten.

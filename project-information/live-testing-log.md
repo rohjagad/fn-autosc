@@ -412,3 +412,13 @@ Schedules observed live: `backup 0 0,6,12,18`, `xp 0,15,30,45`,
 - **Offline:** a fake `curl` that failed every request still rendered the `LICENSE` block from cache with `(cached)` values and `menu_rc=0` on all three.
 - **Health:** all 12 checked services per box stayed active, `systemctl --failed` was empty, and no new auth, lock, expiry, or unbound-variable errors appeared.
 - Result: the licence and version lines are now grouped under a labelled section instead of appearing as unlabelled text.
+
+## Account cards - rotated domain only - three VPS (2026-11-02)
+
+- **Change:** updater `efffd2a` (target `5556e2b327744656e04b352b6a64950dbeb8be00`, Fix 530) moved rohserver6, rohserver1, and rohserver3 from `aa75243` to `5556e2b`; all three reported `UPDATE SUCCESS` and now have `.update-commit=5556e2b327744656e04b352b6a64950dbeb8be00`. Each full payload fetched 107 files. Backups: `/root/fn-update-backup-20261102-131151` (rohserver6), `-051240` (rohserver1), `-131345` (rohserver3).
+- **Installed code:** every checked `/usr/bin` card script (`add-vmess-ws`, `add-vless-xhttp`, `add-trojan-grpc`, `trial-vmess-http`, `addssh`, `trial-ssh`, `menu-wg`, `xl2tp`, `menu-noobz`) reports `Installer Domain` count 0 and `Rotated Domain` count 1 on all three. Local and installed md5s match for the five sampled scripts. `dm-menu` still shows the installer domain (four rows); `menu` still carries `LICENSE`/`Found 528`; `backup` still carries `Found 529`.
+- **Card channels:** the hash-matched `add-vmess-ws` template rendered with dummy values omitted `Installer Domain` from both the plain Telegram/log text and the `format_display` TUI output, while keeping `Rotated Domain`.
+- **Menu regression check:** `TERM=xterm /usr/bin/menu </dev/null` on all three still rendered `LICENSE`, `Username`, `IPv4`, `Expired`, `Installed version : 6b967af`, and `Updated version : 5556e2b`.
+- **Health:** `systemctl --failed` is empty; Nginx, HAProxy, `quota-xhttp`, `xray@xhttp`, SSH, and Dropbear are active on all three; no new `quota-xhttp` error or unbound-variable lines appeared.
+- **Historical data:** pre-fix card logs that still contain the old row number 1 on rohserver6, 5 on rohserver1, and 0 on rohserver3 (67/64/54 total cards). New cards omit it; already-sent Telegram messages are unchanged. No historical log was rewritten.
+- Result: account cards now show the rotated domain as the single user-facing domain row, while the installer domain remains only in the Domain Menu and internal Nginx/certificate anchor.
