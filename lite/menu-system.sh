@@ -1,14 +1,18 @@
 #!/bin/bash
+# Found 525: license is enforced only for create/extend/install.
 
 
 [[ -e $(which curl) ]] && grep -q "1.1.1.1" /etc/resolv.conf || { 
     echo "nameserver 1.1.1.1" | cat - /etc/resolv.conf >> /etc/resolv.conf.tmp && mv /etc/resolv.conf.tmp /etc/resolv.conf
 }
 
+license_gate() {
     # Auth sources race: same izin.txt on Pages + GitHub (synced), first valid reply wins; no primary/secondary.
-    PERMISSION_CFPAGES="https://fn-autosc-auth.pages.dev/izin.txt"
-    PERMISSION_GITHUB="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt"
+    local PERMISSION_CFPAGES="https://fn-autosc-auth.pages.dev/izin.txt"
+    local PERMISSION_GITHUB="https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt"
+    local LOCAL_IP
     LOCAL_IP=$(curl -4 -s --max-time 15 ifconfig.me) # Mendapatkan IP lokal
+    [ -n "$LOCAL_IP" ] || { echo "Could not determine your public IPv4."; return 1; }
 
     # Fungsi menghitung sisa waktu
     calculate_remaining_days() {
@@ -17,7 +21,7 @@
         expired_date=$(date -d "$1" +%s 2>/dev/null)
         if [ $? -ne 0 ]; then
             echo "Invalid expiration date."
-            exit 1
+            return 1
         fi
         echo $(( (expired_date - today) / 86400 ))
     }
@@ -26,11 +30,13 @@
     clear
     echo ""
     echo ""
-        # Fetch both auth sources at once; first complete valid reply wins (OR logic).
-    PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; exit 1; }
+    # Fetch both auth sources at once; first complete valid reply wins (OR logic).
+    local PERMISSION_TMP
+    PERMISSION_TMP=$(mktemp -d) || { echo "Failed to download permissions."; return 1; }
     (curl -s --max-time 12 "$PERMISSION_CFPAGES" -o "$PERMISSION_TMP/a" 2>/dev/null; touch "$PERMISSION_TMP/a.done") &
     (curl -s --max-time 12 "$PERMISSION_GITHUB" -o "$PERMISSION_TMP/b" 2>/dev/null; touch "$PERMISSION_TMP/b.done") &
-    PERMISSION_DATA=""; end=$((SECONDS+15))
+    local PERMISSION_DATA="" end
+    end=$((SECONDS+15))
     while [ $SECONDS -lt $end ]; do
         for f in "$PERMISSION_TMP/a" "$PERMISSION_TMP/b"; do
             if [ -f "$f.done" ] && grep -q "###" "$f" 2>/dev/null; then PERMISSION_DATA=$(cat "$f"); break 2; fi
@@ -41,13 +47,14 @@
     kill $(jobs -rp) 2>/dev/null
     wait 2>/dev/null
     rm -rf "$PERMISSION_TMP"
-    [ -z "$PERMISSION_DATA" ] && { echo "Failed to download permissions."; exit 1; }
+    [ -z "$PERMISSION_DATA" ] && { echo "Failed to download permissions."; return 1; }
 
     # Mencocokkan data berdasarkan IP lokal
+    local MATCH
     MATCH=$(echo "$PERMISSION_DATA" | grep "###" | grep -wF "$LOCAL_IP")
     if [ -z "$MATCH" ]; then
-        echo "Your IP is not in the database"
-        exit 1
+        echo "Your IP doesn’t have on database"
+        return 1
     fi
 
     # Ekstraksi data dari baris yang cocok
@@ -62,19 +69,26 @@
     if [ "$EXPIRED_DATE" = "lifetime" ]; then
         REMAINING_DAYS="lifetime"
     else
-        REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE") || { echo "Permission data invalid."; exit 1; }
+        REMAINING_DAYS=$(calculate_remaining_days "$EXPIRED_DATE") || { echo "Permission data invalid."; return 1; }
     fi
     if [ "$REMAINING_DAYS" != "lifetime" ] && [ "$REMAINING_DAYS" -lt 0 ]; then
-        echo "Authorization has expired."
-        exit 1
+        echo "Permission expired."
+        return 1
     fi
 
     # Output informasi izin
     output() {
         echo "Username: $USERNAME"
         echo "IPv4: $PERMISSION_IP"
-        if [ "$REMAINING_DAYS" = "lifetime" ]; then echo "Expired: lifetime"; else echo "Expired: $EXPIRED_DATE ($REMAINING_DAYS days)"; fi
+        if [ "$REMAINING_DAYS" = "lifetime" ]; then echo "Expired: lifetime"; else echo "Expired: $EXPIRED_DATE ( $REMAINING_DAYS Days )"; fi
     }
+
+    output
+    clear
+    return 0
+}
+
+
 
 clear
 echo ""
@@ -199,6 +213,7 @@ echo ""
     # Cloudflare, the licence gate then sees an unlisted IP and the whole
     # panel locks out (Found 168). Only "lifetime" entries may use WARP
     # (is-decision.md 28). $EXPIRED_DATE comes from the gate above.
+    license_gate || return
     if [ "$EXPIRED_DATE" != "lifetime" ]; then
         clear
         echo ""
@@ -294,6 +309,7 @@ enable() {
     # Cloudflare, the licence gate then sees an unlisted IP and the whole
     # panel locks out (Found 168). Only "lifetime" entries may use WARP
     # (is-decision.md 28). $EXPIRED_DATE comes from the gate above.
+    license_gate || return
     if [ "$EXPIRED_DATE" != "lifetime" ]; then
         clear
         echo ""
@@ -335,6 +351,7 @@ disable() {
 restart() {
     # Same guard as install()/enable(): restarting would start an inactive
     # wgcf and move egress, breaking a date license the same way.
+    license_gate || return
     if [ "$EXPIRED_DATE" != "lifetime" ]; then
         clear
         echo ""
@@ -421,6 +438,7 @@ token() {
 }
 
 add() {
+    license_gate || return
     clear
     echo ""
     echo ""

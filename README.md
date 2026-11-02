@@ -62,9 +62,16 @@ For example:
 ### client-01 203.0.113.195 2027-12-31
 ```
 
-If the IP is not listed, or the expiry date has passed, every script exits
-immediately. The check runs again on every menu command, so authorization is
-continuously enforced — not just at install time.
+The gate runs only for installation, new account creation, and extending an
+account. That covers `install.sh`/`installer/*`, the `add-*`/`trial-*`/`addssh`
+commands, the WireGuard/L2TP/NoobzVPN create actions, Cloudflare WARP account
+creation, and the `extend-*`/auxiliary extend actions.
+
+Everything else — menus, deletes, quota, IP limits, auto-delete, expiry,
+routing, backup/restore, and service management — runs without contacting the
+authorization sources. If both sources are unreachable, only create/extend/
+install stop; running services and maintenance keep working. If the IP is not
+listed or the expiry date has passed, those gated actions fail closed.
 
 ### Install Command
 
@@ -1034,8 +1041,10 @@ Read these before exposing a server to the internet.
   that used to be listed here are both gone: install notifications use the
   operator's own `/etc/funny/` credentials, and the email and Google Drive
   backup paths have been removed.)
-- **Authorization is remote and IP-based.** If GitHub is unreachable, or the
-  IP is not listed, scripts fail closed and exit.
+- **Authorization is remote and IP-based, but only gates create/extend/install.**
+  If both authorization sources are unreachable, those actions fail closed;
+  menus, quotas, IP limits, expiry, routing, backup/restore, and service
+  management continue to run.
 
 ---
 
@@ -1063,8 +1072,9 @@ What it does:
   recorded in `.install-commit` as the install baseline. The target remains
   pinned in `update.sh`; currently
   `2c2b3f73a52bd67a7c2dbf067ab1005fc3c31cd6` (Fix 524 content; the updater
-  script itself also carries Fix 520–524). It fetches 58 files on full,
-  49 on lite, including `quota-xhttp` and `kill-xhttp`; the updater
+  script itself also carries Fix 520–525). It fetches 107 files on full,
+  95 on lite, including `quota-xhttp`, `kill-xhttp`, every `extend-*`, and the
+  maintenance scripts that no longer carry a license gate; the updater
   restarts an active `quota-xhttp` after installing the new daemon. The four
   `change-limit-ip` tools and the full `limit-ip` tool ship as compiled
   binaries from `bin/<edition>/` and are checked against pinned md5
