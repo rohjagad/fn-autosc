@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# FN AutoSC updater: live marker -> 7a56d8d
+# FN AutoSC updater: live marker -> 0cf5dc1
 #
 # Applies the commits on top of b6d1a97 (1-minute evidence window,
 # Exp-Date-N/A binary fix, LOCKED IPs block, MULTILOGIN UNLOCKED
@@ -16,8 +16,11 @@
 # install so maintenance and quota daemons no longer depend on auth, backup
 # Telegram IP always populated with probe fallbacks and strict IPv4 validation,
 # main-menu licence identity restored without gating under a LICENSE heading,
-# account cards showing only the rotated domain, xHTTP access-log bounding, and
-# cron output suppression when stdout is not a terminal)
+# account cards showing only the rotated domain, xHTTP access-log bounding,
+# cron output suppression when stdout is not a terminal, quota startup output
+# guarded for systemd, legacy dnstt/nsdomain synchronization, simpang32 quota
+# repair, published default-credential neutralization, root-mail archiving, and
+# stale SSH-limit cleanup)
 # to a live install. The file set is a superset covering the earlier
 # ranges too, so older installs are brought fully up to date in one
 # run. Safe to run: files are backed up first, every download is
@@ -26,7 +29,7 @@
 # missing).
 #
 # Usage:
-#   bash update.sh                  # live marker -> 7a56d8d (default)
+#   bash update.sh                  # live marker -> 0cf5dc1 (default)
 #   bash update.sh <commit> --force  # re-apply even if already recorded
 #
 # One-line remote run:
@@ -38,7 +41,7 @@ set -u
 # version is read from the live panel below, so this value only appears when
 # both markers are missing.
 FROM="6b967af9e0ebadc76a265132e49d62a27ad72235"
-TARGET="${1:-7a56d8dda91f3f90a5fc65fef456b4d11f1b842a}"
+TARGET="${1:-0cf5dc1df15bf1817b9137e419cfb117cc44b685}"
 FORCE=0
 [ "${2:-}" = "--force" ] && FORCE=1
 
@@ -137,7 +140,7 @@ marker_for() {
     case "$1" in
         xp) echo 'Found 532' ;;
         expire-ssh) echo 'Found 532' ;;
-        quota-xhttp) echo 'Found 524' ;;
+        quota-xhttp | quota-ws | quota-http | quota-grpc) echo 'Found 533' ;;
         kill-xhttp) echo 'Found 531' ;;
         limit-ip-ssh) echo 'Found 532' ;;
         cek-login-ssh) echo 'WS/HAProxy mapping unavailable' ;;
@@ -372,13 +375,269 @@ done
 rm -rf "$STAGE"
 remove_legacy_domain_files || true
 
-# Found 524: quota-xhttp is a long-running service.  Restart it after the
-# file swap so the new lock scope and idle-usage behavior are active
-# immediately; cron scripts (xp/limit-ip-xhttp/kill-xhttp) pick up on the
-# next tick without a restart.
-if systemctl is-active --quiet quota-xhttp 2>/dev/null; then
-    systemctl restart quota-xhttp 2>/dev/null || true
-fi
+# ---------------------------------------------------------------------------
+# Fix 533-538: one-time live-state migrations.
+#
+# The payload only contains scripts.  The state below lives outside the
+# repository (systemd units, quota files, JSON configs, mailboxes, SSH limit
+# files), so it has to be migrated once on each existing box.  Every function
+# is best-effort: a missing optional file or a failed parse must never roll
+# back an otherwise successful payload install.
+# ---------------------------------------------------------------------------
+fix_marker() {
+    mkdir -p /etc/funny 2>/dev/null || true
+    : > "/etc/funny/$1" 2>/dev/null || true
+    chmod 600 "/etc/funny/$1" 2>/dev/null || true
+}
+
+fix_log() {
+    echo "$(date '+%F %T') $*" >> /etc/xray/.quota.logs 2>/dev/null || true
+}
+
+# Found 533: the quota daemons are long-running.  Installing a new script is
+# not enough; the old process keeps the old file in memory until it restarts.
+restart_quota_services() {
+    local svc
+    for svc in quota-ws quota-http quota-grpc quota-xhttp; do
+        if systemctl is-active --quiet "$svc" 2>/dev/null; then
+            systemctl restart "$svc" 2>/dev/null || true
+        fi
+    done
+    echo "Quota services restarted with the Fix 533 startup guard."
+}
+
+# Found 534: older installs wrote dnstt.service with a nameserver that no
+# longer matches /etc/slowdns/nsdomain.  The unit is the value the server
+# actually uses; make it follow the saved file.
+sync_dnstt_unit() {
+    local marker="/etc/funny/.fix534-dnstt-synced"
+    local unit="/etc/systemd/system/dnstt.service"
+    local nsfile="/etc/slowdns/nsdomain"
+    local nsd="" cur="" newcur="" backup=""
+    [ -f "$marker" ] && return 0
+    [ -f "$unit" ] || return 0
+    [ -s "$nsfile" ] || return 0
+    nsd=$(tr -d '[:space:]' < "$nsfile" 2>/dev/null)
+    [ -n "$nsd" ] || return 0
+    if ! [[ "$nsd" =~ ^([[:alnum:]]([[:alnum:]-]{0,61}[[:alnum:]])?\.)+[[:alpha:]]{2,63}$ ]]; then
+        echo "Fix 534: /etc/slowdns/nsdomain is not a valid hostname; dnstt unit left unchanged." >&2
+        return 0
+    fi
+    cur=$(sed -nE 's/.*-privkey-file[[:space:]]+[^[:space:]]+[[:space:]]+([^[:space:]]+).*/\1/p' "$unit" 2>/dev/null | head -n 1)
+    if [ "$cur" = "$nsd" ]; then
+        fix_marker .fix534-dnstt-synced
+        return 0
+    fi
+    mkdir -p "$BACKUP" 2>/dev/null || true
+    backup="/root/fn-dnstt-backup-$(date +%Y%m%d-%H%M%S).service"
+    cp -f "$unit" "$BACKUP/dnstt.service" 2>/dev/null || true
+    cp -f "$unit" "$backup" 2>/dev/null || true
+    sed -i -E "s|^([[:space:]]*ExecStart=.*-privkey-file[[:space:]]+[^[:space:]]+[[:space:]]+)[^[:space:]]+|\\1${nsd}|" "$unit" 2>/dev/null || {
+        echo "Fix 534: could not rewrite dnstt.service; unit left unchanged." >&2
+        return 0
+    }
+    newcur=$(sed -nE 's/.*-privkey-file[[:space:]]+[^[:space:]]+[[:space:]]+([^[:space:]]+).*/\1/p' "$unit" 2>/dev/null | head -n 1)
+    if [ "$newcur" != "$nsd" ]; then
+        cp -f "$BACKUP/dnstt.service" "$unit" 2>/dev/null || true
+        echo "Fix 534: dnstt.service rewrite did not verify; original restored." >&2
+        return 0
+    fi
+    systemctl daemon-reload 2>/dev/null || true
+    if systemctl is-active --quiet dnstt 2>/dev/null; then
+        systemctl restart dnstt 2>/dev/null || true
+    fi
+    fix_log "fix534: dnstt nameserver ${cur:-unknown} -> ${nsd}"
+    fix_marker .fix534-dnstt-synced
+    echo "Fix 534: dnstt nameserver synchronized to ${nsd}."
+}
+
+# Found 535: a legacy account lost its base quota and IP-limit files while the
+# usage counter and the card survived.  Restore only when both files are
+# absent and the card still describes 100 GB / IP 2.
+repair_simpang32() {
+    local marker="/etc/funny/.fix535-simpang32"
+    local card="/var/log/create/xray/ws/simpang32.log"
+    local q="/etc/xray/quota/ws/simpang32"
+    local l="/etc/xray/limit/ip/xray/ws/simpang32"
+    local usage="/etc/xray/quota/ws/simpang32_usage"
+    local qgb="" ip="" qbytes=""
+    [ -f "$marker" ] && return 0
+    [ -f "$card" ] || return 0
+    [ -f /etc/xray/json/ws.json ] || return 0
+    grep -q '^### simpang32 ' /etc/xray/json/ws.json 2>/dev/null || return 0
+    if [ -e "$q" ] || [ -e "$l" ]; then
+        echo "Fix 535: simpang32 already has quota/IP-limit state; leaving it unchanged."
+        fix_marker .fix535-simpang32
+        return 0
+    fi
+    qgb=$(sed -nE 's/^[[:space:]]*Quota[[:space:]]*:[[:space:]]*([0-9]+)[[:space:]]*GB[[:space:]]*$/\1/p' "$card" 2>/dev/null | tail -n 1)
+    ip=$(sed -nE 's/^[[:space:]]*Limit IP[[:space:]]*:[[:space:]]*([0-9]+)[[:space:]]*$/\1/p' "$card" 2>/dev/null | tail -n 1)
+    if ! [[ "$qgb" =~ ^[1-9][0-9]*$ ]] || ! [[ "$ip" =~ ^[1-9][0-9]*$ ]]; then
+        echo "Fix 535: could not parse simpang32 card; quota/IP limit left unchanged." >&2
+        return 0
+    fi
+    qbytes=$((qgb * 1073741824))
+    mkdir -p "$(dirname "$q")" "$(dirname "$l")" 2>/dev/null || return 0
+    mkdir -p "$BACKUP" 2>/dev/null || true
+    cp -f "$card" "$BACKUP/simpang32-card.log" 2>/dev/null || true
+    [ -f "$usage" ] && cp -f "$usage" "$BACKUP/simpang32_usage" 2>/dev/null || true
+    if ! printf '%s\n' "$qbytes" > "$q" 2>/dev/null; then
+        echo "Fix 535: could not write simpang32 quota file." >&2
+        return 0
+    fi
+    if ! printf '%s\n' "$ip" > "$l" 2>/dev/null; then
+        rm -f "$q" 2>/dev/null || true
+        echo "Fix 535: could not write simpang32 IP-limit file." >&2
+        return 0
+    fi
+    chmod 644 "$q" "$l" 2>/dev/null || true
+    fix_log "fix535: restored simpang32 quota=${qbytes} limit=${ip}"
+    fix_marker .fix535-simpang32
+    echo "Fix 535: restored simpang32 quota ${qgb} GB / IP ${ip}."
+}
+
+# Found 536: the public templates shipped known default UUID/password values.
+# The installer already randomizes them on a fresh install; this one-time
+# migration protects boxes installed before that code.  The default client
+# objects stay in place because the add/trial scripts use them as anchors.
+neutralize_default_credentials() {
+    local marker="/etc/funny/.fix536-default-creds"
+    local dir="/etc/xray/json"
+    local files="$dir/ws.json $dir/upgrade.json $dir/xhttp.json $dir/grpc.json"
+    local defs="rerechan-store cfbbaafc-8d52-450c-9fb0-145bc8221e6d 019e0bf3-dd56-11e9-aa37-5600024c1d6a af7d5cf8-442d-4bb3-8a76-eb367178781d diy2020 nonescript-fn-project"
+    local f def rep svc found=0
+    [ -f "$marker" ] && return 0
+    command -v xray >/dev/null 2>&1 || return 0
+    for f in $files; do
+        [ -f "$f" ] || return 0
+    done
+    for def in $defs; do
+        if grep -qF "$def" $files 2>/dev/null; then
+            found=1
+            break
+        fi
+    done
+    if [ "$found" -eq 0 ]; then
+        fix_marker .fix536-default-creds
+        echo "Fix 536: published default credentials already absent."
+        return 0
+    fi
+    mkdir -p "$BACKUP/json" 2>/dev/null || return 0
+    for f in $files; do
+        cp -f "$f" "$BACKUP/json/$(basename "$f")" 2>/dev/null || true
+    done
+    for def in $defs; do
+        grep -qF "$def" $files 2>/dev/null || continue
+        rep=$(xray uuid 2>/dev/null) || continue
+        [ -n "$rep" ] || continue
+        sed -i "s|${def}|${rep}|g" $files 2>/dev/null || true
+    done
+    for f in $files; do
+        if ! xray run -test -config "$f" >/dev/null 2>&1; then
+            for def in $files; do
+                cp -f "$BACKUP/json/$(basename "$def")" "$def" 2>/dev/null || true
+            done
+            echo "Fix 536: Xray rejected $f after credential replacement; all four JSON files restored." >&2
+            return 0
+        fi
+    done
+    for svc in ws upgrade xhttp grpc; do
+        if systemctl is-active --quiet "xray@$svc" 2>/dev/null; then
+            systemctl restart "xray@$svc" 2>/dev/null || true
+        fi
+    done
+    fix_log "fix536: replaced published default Xray credentials"
+    fix_marker .fix536-default-creds
+    echo "Fix 536: published default Xray credentials replaced; Xray units restarted."
+}
+
+# Found 537: Fix 532 stopped new cron mail but left the accumulated mbox.
+# Compress it first, verify the archive, then truncate the same inode so the
+# owner/mode stay correct for the local MTA.
+_archive_and_truncate_mailbox() {
+    local box="$1" tag="$2" stamp="$3"
+    local size="" archive="" tmp=""
+    [ -f "$box" ] || return 0
+    size=$(stat -c %s "$box" 2>/dev/null) || return 0
+    [[ "$size" =~ ^[0-9]+$ ]] || return 0
+    [ "$size" -gt 1048576 ] || return 0
+    archive="/root/fn-mail-backup-${tag}${stamp}.gz"
+    tmp="${archive}.tmp"
+    if ! gzip -c "$box" > "$tmp" 2>/dev/null; then
+        rm -f "$tmp" 2>/dev/null || true
+        echo "Fix 537: could not archive $box; mailbox left unchanged." >&2
+        return 1
+    fi
+    if ! gzip -t "$tmp" >/dev/null 2>&1; then
+        rm -f "$tmp" 2>/dev/null || true
+        echo "Fix 537: archive verification failed for $box; mailbox left unchanged." >&2
+        return 1
+    fi
+    if ! mv -f "$tmp" "$archive" 2>/dev/null; then
+        rm -f "$tmp" 2>/dev/null || true
+        return 1
+    fi
+    chmod 600 "$archive" 2>/dev/null || true
+    mkdir -p "$BACKUP" 2>/dev/null || true
+    ln "$archive" "$BACKUP/$(basename "$archive")" 2>/dev/null || \
+        cp -f "$archive" "$BACKUP/$(basename "$archive")" 2>/dev/null || true
+    if ! : > "$box" 2>/dev/null; then
+        echo "Fix 537: could not truncate $box; archive kept at $archive." >&2
+        return 1
+    fi
+    fix_log "fix537: archived ${size} bytes from ${box} to ${archive}"
+    echo "Fix 537: archived ${size} bytes from ${box} to ${archive}; mailbox truncated."
+    return 0
+}
+
+cleanup_root_mail() {
+    local marker="/etc/funny/.fix537-mail-cleared"
+    local stamp="" rc=0
+    [ -f "$marker" ] && return 0
+    stamp=$(date +%Y%m%d-%H%M%S)
+    _archive_and_truncate_mailbox "/var/mail/mail" "" "$stamp" || rc=1
+    if [ -f /var/spool/mail/mail ] && ! [ /var/spool/mail/mail -ef /var/mail/mail ]; then
+        _archive_and_truncate_mailbox "/var/spool/mail/mail" "spool-" "$stamp" || rc=1
+    fi
+    [ "$rc" -eq 0 ] && fix_marker .fix537-mail-cleared
+}
+
+# Found 538: a legacy panel limit file can outlive its account card.  Remove
+# only the limit file; the Linux user and its home directory are untouched.
+remove_stale_rohcuan_limit() {
+    local marker="/etc/funny/.fix538-rohcuan-limit"
+    local limit="/etc/xray/limit/ip/ssh/rohcuan"
+    local card="/var/log/create/ssh/rohcuan.log"
+    [ -f "$marker" ] && return 0
+    [ -f "$limit" ] || return 0
+    if [ -f "$card" ]; then
+        fix_marker .fix538-rohcuan-limit
+        return 0
+    fi
+    getent passwd rohcuan >/dev/null 2>&1 || {
+        fix_marker .fix538-rohcuan-limit
+        return 0
+    }
+    mkdir -p "$BACKUP" 2>/dev/null || true
+    cp -f "$limit" "$BACKUP/rohcuan-limit" 2>/dev/null || true
+    if ! rm -f "$limit" 2>/dev/null; then
+        echo "Fix 538: could not remove $limit; file left unchanged." >&2
+        return 0
+    fi
+    fix_log "fix538: removed stale rohcuan SSH IP limit"
+    fix_marker .fix538-rohcuan-limit
+    echo "Fix 538: removed stale rohcuan SSH IP limit (OS user untouched)."
+}
+
+# Run the state migrations before the service restarts below.  Xray must be
+# valid before it is restarted (Fix 536), while the quota files (Fix 535) are
+# read on the next pass and need no restart of their own.
+neutralize_default_credentials
+repair_simpang32
+sync_dnstt_unit
+remove_stale_rohcuan_limit
+cleanup_root_mail
+restart_quota_services
 
 # Banner wiring (installer/ssh.sh equivalent for existing boxes):
 # OpenSSH shows /etc/issue.net only when named; Dropbear only with -b.
@@ -429,11 +688,27 @@ patch_haproxy_logging() {
             END { exit(found ? 0 : 1) }
         ' "$conf"
     }
-    local need_log=0 need_asap=0 need_global=0
+    # Found 533: `option tcplog` is valid in a frontend/listen section, but
+    # HAProxy ignores it in a backend and warns on every `haproxy -c`.  The
+    # ssh-backend already inherits TCP logging from the ssh-ssl frontend.
+    _haproxy_backend_has_tcplog() {
+        awk '
+            BEGIN { in_be = 0; found = 0 }
+            /^[[:space:]]*backend[[:space:]]+ssh-backend([[:space:]]|$)/ {
+                in_be = 1
+                next
+            }
+            in_be && /^[^[:space:]#]/ { in_be = 0 }
+            in_be && /^[[:space:]]*option[[:space:]]+tcplog[[:space:]]*$/ { found = 1 }
+            END { exit(found ? 0 : 1) }
+        ' "$conf"
+    }
+    local need_log=0 need_asap=0 need_global=0 need_tcplog=0
     _haproxy_global_has_log || need_log=1
     _haproxy_sshssl_has '^[[:space:]]*option[[:space:]]+logasap[[:space:]]*$' || need_asap=1
     _haproxy_sshssl_has '^[[:space:]]*log[[:space:]]+global[[:space:]]*$' || need_global=1
-    [ "${need_log}${need_asap}${need_global}" = "000" ] && return 0
+    if _haproxy_backend_has_tcplog; then need_tcplog=1; fi
+    [ "${need_log}${need_asap}${need_global}${need_tcplog}" = "0000" ] && return 0
     cp -f "$conf" "$BACKUP/haproxy.cfg" || return 0
 
     if [ "$need_log" -eq 1 ]; then
@@ -493,11 +768,27 @@ patch_haproxy_logging() {
         mv "$conf.fn-new" "$conf"
     fi
 
+    if [ "$need_tcplog" -eq 1 ]; then
+        awk '
+            BEGIN { in_be = 0 }
+            /^[[:space:]]*backend[[:space:]]+ssh-backend([[:space:]]|$)/ {
+                in_be = 1
+                print
+                next
+            }
+            in_be && /^[^[:space:]#]/ { in_be = 0 }
+            in_be && /^[[:space:]]*option[[:space:]]+tcplog[[:space:]]*$/ { next }
+            { print }
+        ' "$conf" > "$conf.fn-new" || { rm -f "$conf.fn-new"; return 0; }
+        mv "$conf.fn-new" "$conf"
+    fi
+
     if ! _haproxy_global_has_log || \
         ! _haproxy_sshssl_has '^[[:space:]]*option[[:space:]]+logasap[[:space:]]*$' || \
-        ! _haproxy_sshssl_has '^[[:space:]]*log[[:space:]]+global[[:space:]]*$'; then
+        ! _haproxy_sshssl_has '^[[:space:]]*log[[:space:]]+global[[:space:]]*$' || \
+        _haproxy_backend_has_tcplog; then
         cp -f "$BACKUP/haproxy.cfg" "$conf"
-        echo "HAProxy logging directives could not be placed; 777 mapping not enabled." >&2
+        echo "HAProxy logging/cleanup directives could not be placed; config restored." >&2
         return 0
     fi
     if command -v haproxy >/dev/null 2>&1 && ! haproxy -c -f "$conf" >/dev/null 2>&1; then
@@ -506,7 +797,7 @@ patch_haproxy_logging() {
         return 0
     fi
     if systemctl is-active --quiet haproxy 2>/dev/null; then
-        systemctl restart haproxy 2>/dev/null || true
+        systemctl reload haproxy 2>/dev/null || systemctl restart haproxy 2>/dev/null || true
     fi
     echo "HAProxy 777 logging enabled (client IP evidence for ssh-online)."
 }
