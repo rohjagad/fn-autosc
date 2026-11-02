@@ -13,11 +13,33 @@ echo ""
     echo "nameserver 1.1.1.1" | cat - /etc/resolv.conf >> /etc/resolv.conf.tmp && mv /etc/resolv.conf.tmp /etc/resolv.conf
 }
 
+# Found 526: never leave the backup IP blank. Probe several sources, accept only
+# a valid IPv4, and fall back to the address recorded at install time.
+get_public_ipv4() {
+    local url ip
+    for url in https://ifconfig.me https://ipv4.icanhazip.com https://api.ipify.org https://ipinfo.io/ip; do
+        ip=$(curl -4 -fsSL --max-time 8 "$url" 2>/dev/null) || continue
+        ip=$(printf '%s' "$ip" | tr -d '[:space:]')
+        if printf '%s\n' "$ip" | awk -F. 'NF==4 && $1<=255 && $2<=255 && $3<=255 && $4<=255 {ok=1} END{exit !ok}'; then
+            printf '%s\n' "$ip"
+            return 0
+        fi
+    done
+    if [ -r /etc/.ip ]; then
+        ip=$(tr -d '[:space:]' < /etc/.ip 2>/dev/null)
+        if printf '%s\n' "$ip" | awk -F. 'NF==4 && $1<=255 && $2<=255 && $3<=255 && $4<=255 {ok=1} END{exit !ok}'; then
+            printf '%s\n' "$ip"
+            return 0
+        fi
+    fi
+    return 1
+}
+
 # Inisialisasi variabel
 date=$(date)
 installer_domain=$(cat /etc/xray/installer-domain)
 cpt="$date / $installer_domain"
-MYIP=$(curl -4 -s ifconfig.me)
+MYIP=$(get_public_ipv4) || MYIP="unknown"
 isp=$(cat /root/.isp 2>/dev/null)
 region=$(cat /root/.region 2>/dev/null)
 

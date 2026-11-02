@@ -645,7 +645,9 @@ The staged tree is zipped to `/root/backup.zip`.
 ### Where It Goes
 
 - **`backup`** — sends the archive to **Telegram as a document attachment**,
-  captioned with the auth username, server IP and date. Runs on the adjustable auto-backup interval (menu-bot option 3, 1-24h).
+  captioned with the server IP and date. The IP is probed from several public
+  services, validated as IPv4, and falls back to `/etc/.ip` if all probes fail.
+  Runs on the adjustable auto-backup interval (menu-bot option 3, 1-24h).
 - **Telegram is the only delivery channel.** There is no file-host upload and
   therefore no expiring public link, no Google Drive variant, and no email
   notification. The Google Drive and email paths were removed, and the
