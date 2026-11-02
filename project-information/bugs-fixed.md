@@ -3348,3 +3348,4 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
   4. `update.sh` marker-checks `menu-wg`, `xl2tp`, and `menu-noobz` with `Rotated Domain`; `dm-menu` still checks `Installer Domain`.
 - **Reason:** operator request. The installer domain is not used by the account's links, so the rotated domain alone is the useful value.
 - **Verified locally:** `grep` confirms no `Installer Domain` row remains in account cards (only `dm-menu` and the `limit-ip` menu retain it); `bash -n` passes for every changed script and `update.sh`; the updater marker harness and payload verification pass.
+- **Deployment target:** `update.sh` now defaults to `5556e2b327744656e04b352b6a64950dbeb8be00` (Fix 530); payload remains 107 full / 95 lite. Not deployed to any VPS.
