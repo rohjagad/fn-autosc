@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# FN AutoSC updater: live marker -> a726c4a
+# FN AutoSC updater: live marker -> cc1bf90
 #
 # Applies the commits on top of b6d1a97 (1-minute evidence window,
 # Exp-Date-N/A binary fix, LOCKED IPs block, MULTILOGIN UNLOCKED
@@ -13,7 +13,8 @@
 # auto-unlock, slow-auth/IPv6 counts, scoped SSH expiry without a
 # global daemon restart, installer-domain/rotated-domain separation
 # with per-domain account counts, licence gate scoped to create/extend/
-# install so maintenance and quota daemons no longer depend on auth)
+# install so maintenance and quota daemons no longer depend on auth, backup
+# Telegram IP always populated with probe fallbacks)
 # to a live install. The file set is a superset covering the earlier
 # ranges too, so older installs are brought fully up to date in one
 # run. Safe to run: files are backed up first, every download is
@@ -22,7 +23,7 @@
 # missing).
 #
 # Usage:
-#   bash update.sh                  # live marker -> a726c4a (default)
+#   bash update.sh                  # live marker -> cc1bf90 (default)
 #   bash update.sh <commit> --force  # re-apply even if already recorded
 #
 # One-line remote run:
@@ -34,7 +35,7 @@ set -u
 # version is read from the live panel below, so this value only appears when
 # both markers are missing.
 FROM="6b967af9e0ebadc76a265132e49d62a27ad72235"
-TARGET="${1:-a726c4a5bb89e5bf82cacefd6c3e77843c88943a}"
+TARGET="${1:-cc1bf90cf94f7e431ddb0ff87bbc888fa186dbb3}"
 FORCE=0
 [ "${2:-}" = "--force" ] && FORCE=1
 
@@ -138,7 +139,8 @@ marker_for() {
         ssh-online) echo 'HAPROXY_TOL_US' ;;
         menu-ssh) echo 'haproxy -v' ;;
         cek-xray-ws) echo 'Found 508: keep the access log' ;;
-        backup | restore-ftp | bmenu) echo 'Found 511' ;;
+        backup) echo 'Found 526' ;;
+        restore-ftp | bmenu) echo 'Found 511' ;;
         format.sh) echo 'Press any key to return...' ;;
         limit-ip-*) echo 'keep the original epoch' ;;
         unlock-*-auto) echo 'invalid locked card for $user' ;;
