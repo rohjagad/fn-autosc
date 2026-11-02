@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# FN AutoSC updater: live marker -> 42af316
+# FN AutoSC updater: live marker -> ac4555d
 #
 # Applies the commits on top of b6d1a97 (1-minute evidence window,
 # Exp-Date-N/A binary fix, LOCKED IPs block, MULTILOGIN UNLOCKED
@@ -20,8 +20,8 @@
 # cron output suppression when stdout is not a terminal, quota startup output
 # guarded for systemd, legacy dnstt/nsdomain synchronization, simpang32 quota
 # repair, published default-credential neutralization, root-mail archiving,
-# stale SSH-limit cleanup, removal of the template client anchors, and
-# panel-account-only SSH IP limiting)
+# stale SSH-limit cleanup, removal of the template client anchors,
+# panel-account-only SSH IP limiting, and complete domain-deletion cleanup)
 # to a live install. The file set is a superset covering the earlier
 # ranges too, so older installs are brought fully up to date in one
 # run. Safe to run: files are backed up first, every download is
@@ -30,7 +30,7 @@
 # missing).
 #
 # Usage:
-#   bash update.sh                  # live marker -> 42af316 (default)
+#   bash update.sh                  # live marker -> ac4555d (default)
 #   bash update.sh <commit> --force  # re-apply even if already recorded
 #
 # One-line remote run:
@@ -42,7 +42,7 @@ set -u
 # version is read from the live panel below, so this value only appears when
 # both markers are missing.
 FROM="6b967af9e0ebadc76a265132e49d62a27ad72235"
-TARGET="${1:-42af316784c87cf6fc8af3638b5fe02ef83caddd}"
+TARGET="${1:-ac4555d5bdff28be02374b4c82c456049cb601b2}"
 FORCE=0
 [ "${2:-}" = "--force" ] && FORCE=1
 
@@ -160,7 +160,7 @@ marker_for() {
         delete-xhttp) echo 'Delete XHTTP Account' ;;
         menu-system) echo 'Banner /etc/issue.net' ;;
         menu) echo 'Found 528' ;;
-        dm-menu) echo 'Installer Domain' ;;
+        dm-menu) echo 'Found 541' ;;
         menu-wg | xl2tp | menu-noobz) echo 'Rotated Domain' ;;
         add-* | trial-*) echo 'Rotated Domain' ;;
         addssh | trial-ssh) echo 'Rotated Domain' ;;
@@ -714,11 +714,101 @@ remove_stale_rohcuan_limit() {
     echo "Fix 540: removed recreated rohcuan SSH IP limit (OS user untouched)."
 }
 
+# Found 541: deleting a rotated domain now removes its certificate and
+# ACME/Certbot state.  Existing boxes can still carry SAN names that were
+# removed from the list earlier, so rebuild the self-signed certificate from
+# the current installer+rotated set once.  Reload only; never restart.
+cleanup_domain_cert_remnants() {
+    local marker="/etc/funny/.fix541-domain-cleanup"
+    local cert="/etc/xray/xray.crt"
+    local key="/etc/xray/xray.key"
+    local installer names san d extras subj iss
+    [ -f "$marker" ] && return 0
+    [ -s "$cert" ] && [ -s "$key" ] || return 0
+    command -v openssl >/dev/null 2>&1 || return 0
+    command -v nginx >/dev/null 2>&1 || return 0
+    installer=$(tr -d '[:space:]' < /etc/xray/installer-domain 2>/dev/null || true)
+    names=$(
+        {
+            [ -n "$installer" ] && printf '%s\n' "$installer"
+            [ -s /etc/xray/rotated-domains ] && cat /etc/xray/rotated-domains
+        } | sed 's/[[:space:]]//g' | awk 'NF && !seen[$0]++ {printf "%s ", $0}'
+    )
+    names=${names% }
+    [ -n "$names" ] || return 0
+    subj=$(openssl x509 -in "$cert" -noout -subject 2>/dev/null | sed 's/^subject=//')
+    iss=$(openssl x509 -in "$cert" -noout -issuer 2>/dev/null | sed 's/^issuer=//')
+    if [ -z "$subj" ] || [ "$subj" != "$iss" ]; then
+        fix_log "fix541: CA-issued certificate left unchanged"
+        fix_marker .fix541-domain-cleanup
+        return 0
+    fi
+    extras=""
+    for d in $(openssl x509 -in "$cert" -noout -ext subjectAltName 2>/dev/null \
+        | tr ',' '\n' | sed -n 's/.*DNS://p' | sed 's/[[:space:]]//g'); do
+        case " $names " in
+            *" $d "*) ;;
+            *) extras="$extras $d" ;;
+        esac
+    done
+    extras=${extras# }
+    if [ -z "$extras" ]; then
+        fix_log "fix541: certificate SAN already clean"
+        fix_marker .fix541-domain-cleanup
+        return 0
+    fi
+    mkdir -p "$BACKUP/domain-cleanup" 2>/dev/null || return 0
+    cp -f "$cert" "$BACKUP/domain-cleanup/xray.crt" 2>/dev/null || true
+    cp -f "$key" "$BACKUP/domain-cleanup/xray.key" 2>/dev/null || true
+    [ -f /etc/haproxy/funny.pem ] && cp -f /etc/haproxy/funny.pem "$BACKUP/domain-cleanup/funny.pem" 2>/dev/null || true
+    san=""
+    for d in $names; do san="$san,DNS:$d"; done
+    san="${san#,}"
+    if ! openssl req -new -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -days 365 -nodes -x509 \
+        -subj "/CN=${installer:-${names%% *}}" -addext "subjectAltName=$san" \
+        -keyout /etc/xray/.fix541.key.tmp -out /etc/xray/.fix541.crt.tmp >/dev/null 2>&1; then
+        rm -f /etc/xray/.fix541.key.tmp /etc/xray/.fix541.crt.tmp 2>/dev/null || true
+        echo "Fix 541: certificate generation failed; files left unchanged." >&2
+        return 0
+    fi
+    mv -f /etc/xray/.fix541.crt.tmp "$cert"
+    mv -f /etc/xray/.fix541.key.tmp "$key"
+    chmod 644 "$cert" 2>/dev/null || true
+    chmod 600 "$key" 2>/dev/null || true
+    if [ -f /etc/haproxy/haproxy.cfg ]; then
+        cat "$cert" "$key" > /etc/haproxy/.funny.pem.tmp 2>/dev/null \
+            && mv -f /etc/haproxy/.funny.pem.tmp /etc/haproxy/funny.pem 2>/dev/null || true
+        chmod 600 /etc/haproxy/funny.pem 2>/dev/null || true
+    fi
+    if ! nginx -t >/dev/null 2>&1; then
+        cp -f "$BACKUP/domain-cleanup/xray.crt" "$cert" 2>/dev/null || true
+        cp -f "$BACKUP/domain-cleanup/xray.key" "$key" 2>/dev/null || true
+        if [ -f "$BACKUP/domain-cleanup/funny.pem" ]; then
+            cp -f "$BACKUP/domain-cleanup/funny.pem" /etc/haproxy/funny.pem 2>/dev/null || true
+        fi
+        echo "Fix 541: nginx rejected the rebuilt certificate; files restored." >&2
+        return 0
+    fi
+    for d in $extras; do
+        [[ "$d" =~ ^([[:alnum:]]([[:alnum:]-]{0,61}[[:alnum:]])?\.)+[[:alpha:]]{2,63}$ ]] || continue
+        rm -rf "/etc/letsencrypt/live/$d" "/etc/letsencrypt/archive/$d" "/etc/letsencrypt/renewal/$d.conf" 2>/dev/null || true
+        rm -rf "/root/.acme.sh/$d" "/root/.acme.sh/${d}_ecc" 2>/dev/null || true
+    done
+    systemctl reload nginx 2>/dev/null || true
+    if [ -f /etc/haproxy/haproxy.cfg ] && command -v haproxy >/dev/null 2>&1 && systemctl is-active --quiet haproxy 2>/dev/null; then
+        haproxy -c -f /etc/haproxy/haproxy.cfg >/dev/null 2>&1 && systemctl reload haproxy 2>/dev/null || true
+    fi
+    fix_log "fix541: removed stale certificate SAN entries: $extras"
+    fix_marker .fix541-domain-cleanup
+    echo "Fix 541: removed stale certificate SAN entries: $extras"
+}
+
 # Run the state migrations before the service restarts below.  Xray must be
 # valid before it is restarted (Fix 536/539), while the quota files (Fix 535)
 # are read on the next pass and need no restart of their own.
 neutralize_default_credentials
 remove_template_client_anchors
+cleanup_domain_cert_remnants
 repair_simpang32
 sync_dnstt_unit
 remove_stale_rohcuan_limit
