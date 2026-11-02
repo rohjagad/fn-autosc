@@ -223,8 +223,9 @@ exec 9>&-
 
 ##----- Auto Remove Xray XHTTP
 xhttp_expired=0
+xhttp_notices=()
 exec 9>/tmp/xray-json-xhttp.lock
-if flock -w 30 9; then
+if flock -w 10 9; then
 data=( `cat /etc/xray/json/xhttp.json | grep '^###' | cut -d ' ' -f 2 | sort | uniq`);
 now=`date +"%Y-%m-%d"`
 for user in "${data[@]}"
@@ -253,6 +254,27 @@ sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/xhttp.json
         rm -f /var/log/create/xray/xhttp/${user}.log
         rm -f /etc/xray/quota/xhttp/$user /etc/xray/quota/xhttp/${user}_usage
         rm -f /etc/xray/limit/ip/xray/xhttp/$user
+        # Found 524: notify after unlocking; a slow Telegram call must not
+        # keep the shared JSON lock (xp/kill-xhttp/limit-ip-xhttp wait on it).
+        xhttp_notices+=("$user|$proto|$exp")
+xhttp_expired=1
+fi
+done
+if [[ $xhttp_expired -eq 1 ]]; then
+    if xray run -test -config /etc/xray/json/xhttp.json >/dev/null 2>&1; then
+        :
+    else
+        xhttp_expired=0
+    fi
+fi
+flock -u 9
+else
+    echo "xp: /etc/xray/json/xhttp.json busy, skipping this section"
+fi
+exec 9>&-
+if [ ${#xhttp_notices[@]} -gt 0 ]; then
+    for _notice in "${xhttp_notices[@]}"; do
+        IFS='|' read -r user proto exp <<< "$_notice"
 TEKS="
 --------------------
 <b>EXPIRED ACCOUNT</b>
@@ -268,20 +290,12 @@ KEY=$(cat /etc/funny/.keybot 2>/dev/null)
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 curl -s --max-time $TIME --data-urlencode "chat_id=$CHATID" --data-urlencode "parse_mode=html" --data-urlencode "text=$TEKS" $URL
-xhttp_expired=1
+    done
 fi
-done
 if [[ $xhttp_expired -eq 1 ]]; then
-    if xray run -test -config /etc/xray/json/xhttp.json >/dev/null 2>&1; then
-        systemctl daemon-reload
-        systemctl restart xray@xhttp
-    fi
+    timeout 60 systemctl daemon-reload
+    timeout 60 systemctl restart xray@xhttp
 fi
-flock -u 9
-else
-    echo "xp: /etc/xray/json/xhttp.json busy, skipping this section"
-fi
-exec 9>&-
 
 ##----- Auto Remove Xray grpc HTTP
 grpc_expired=0

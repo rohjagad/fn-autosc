@@ -491,6 +491,12 @@ Each account with a quota has two files:
 Usage is measured through the Xray stats API by the `quota-*` services
 (`quota-ws`, `quota-http`, `quota-xhttp`, `quota-grpc`), which run continuously.
 
+For xHTTP, the shared `/tmp/xray-json-xhttp.lock` covers only JSON/file
+mutation. Stats collection, usage-file updates, Telegram notices, and the
+service restart happen outside it, so a stalled stats call cannot make `xp`,
+`kill-xhttp`, or `limit-ip-xhttp` report `busy`. An idle account with a quota
+file gets a zero `_usage` file; the next real counters replace it.
+
 When usage reaches the limit, `kill-*` removes the account and notifies
 Telegram. If an account is killed for a missing quota file, the same path
 applies.
@@ -539,7 +545,9 @@ not mistaken for several devices. Direct Dropbear/OpenSSH connections expose
 the client IP directly. SSH-over-WebSocket/CDN
 connections reach Dropbear from `127.0.0.1`, so the `ssh-online` helper pairs
 each Dropbear child connection with the matching `ws` log entry (`client:
-<ip>` and `opened :2080 >>>> 127.0.0.1:109`) by timestamp. `cek-login-ssh`
+<ip>` and `opened :2080 >>>> 127.0.0.1:109`) by timestamp; the two lines may
+arrive in either order, so the resolver uses the nearest absolute match.
+`cek-login-ssh`
 uses the same helper, so the menu's `IP / limit` column cannot disagree with
 the limiter. It counts unique active IPs, not historical login events; a
 session that cannot be mapped is shown as `127.0.0.1` with a warning and

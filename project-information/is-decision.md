@@ -554,3 +554,17 @@ no Cloudflare-only header anywhere, zero `grpcRealIp` remnants in tree or test b
 - **Decision:** a fresh install records the current `main` SHA from the GitHub API `/repos/rohjagad/fn-autosc/commits/main`, with `git ls-remote` as a fallback. The main menu shows the first seven characters of `.install-commit` and `.update-commit`; if a marker is missing or invalid it shows `not recorded` / `not updated` instead of `Unknown`. When the install marker is invalid and an update actually changes the version (`FROM` differs from `TARGET`), `update.sh` records the detected live version in `.install-commit` as the baseline.
 - **Reason:** the old API URL omitted `/repos`, returned 404 on every fresh install, and wrote `Unknown`; the menu then echoed `Unknown` for both markers, making a healthy fresh install look broken. A missing update marker also means “never updated”, not “unknown”.
 - **Safety:** API and git failures are non-fatal and still write a marker (`Unknown`) so installation continues; the menu degrades to `not recorded`. Backfill only runs when the install marker is missing/invalid, only uses a 40-character hex `FROM`, and only when `FROM` differs from `TARGET`. It records the last live version as a baseline; a same-target rerun does not overwrite the marker. A valid install marker is never changed.
+
+## 40. The xHTTP JSON Lock Covers Mutation, Not Network I/O
+
+- **Component:** `full/quota-xhttp.sh`, `full/kill-xhttp.sh`, `full/limit-ip-xhttp.sh`, `full/xp.sh` and their lite copies.
+- **Decision:** `/tmp/xray-json-xhttp.lock` is held only while re-checking and mutating `xhttp.json`, moving/removing account files, or running the fast `xray run -test`. Xray API calls, Telegram `curl`, and `systemctl restart` happen outside the lock. `quota-xhttp` also writes `_usage` files outside the lock because that daemon is their only writer.
+- **Reason:** a slow stats call, Telegram timeout, or service restart held the shared lock long enough for `xp`, `kill-xhttp`, and `limit-ip-xhttp` to report `xhttp.json busy, skipping`. The Xray API is the fragile part; it must not serialize unrelated maintenance.
+- **Safety:** every candidate is re-checked inside the lock, so two jobs cannot delete the same account twice. `limit-ip-xhttp` keeps its stable-IP state until a deletion succeeds; a busy lock retries next run. Notifications run after the mutation, preserving the Found 500 rule that file state is consistent before a blocking Telegram call.
+
+## 41. The WS Client/Open Pair May Arrive in Either Order
+
+- **Component:** `full/ssh-online.sh`.
+- **Decision:** when resolving a Dropbear child behind `ws:2080`, match the nearest `client:` line to the nearest `opened` line by absolute timestamp, within the existing 50 ms window. Do not assume `client:` always precedes `opened`.
+- **Reason:** live journald showed `opened` at `.599321` and `client: 140.213.65.123` at `.601549` for the same session (2.2 ms later). The old one-way check skipped the client line and left the session as `127.0.0.1`, so the menu warned and the limiter counted loopback as one IP.
+- **Safety:** the 50 ms window and nearest-timestamp choice keep the pair distinct from the next connection; HAProxy matching remains one-way (accept <= child) because HAProxy must connect to the backend before Dropbear starts.

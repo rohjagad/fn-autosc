@@ -127,16 +127,63 @@ function check_quota() {
         quota_limit=$(cat "$quota_file")
         usage=$(cat "$usage_file")
         if ! [[ "$usage" =~ ^[0-9]+$ && "$quota_limit" =~ ^[0-9]+$ ]]; then
-            continue
+            return
         fi
 
         if [[ $usage -ge $quota_limit ]]; then
+            candidates+=("$user|$quota_limit|$usage")
+        fi
+    fi
+}
+
+function process_quota() {
+    users=$(grep '^###' /etc/xray/json/xhttp.json | cut -d ' ' -f 2 | sort | uniq)
+
+    for user in $users; do
+        check_quota "$user"
+    done
+}
+
+# Found 524: collect candidates outside the shared JSON lock.  Re-check and
+# mutate only inside the lock, then notify/restart outside it.
+candidates=()
+process_quota
+need_restart=0
+declare -a notify_users=() notify_limits=() notify_usages=()
+
+if [ ${#candidates[@]} -gt 0 ]; then
+    exec 9>/tmp/xray-json-xhttp.lock
+    if flock -w 10 9; then
+        for item in "${candidates[@]}"; do
+            IFS='|' read -r user quota_limit usage <<< "$item"
+            quota_file="/etc/xray/quota/xhttp/${user}"
+            usage_file="/etc/xray/quota/xhttp/${user}_usage"
+
+            # quota-xhttp may have removed the account while we collected.
+            [ -f "$quota_file" ] && [ -f "$usage_file" ] || continue
+            quota_limit=$(cat "$quota_file")
+            usage=$(cat "$usage_file")
+            [[ "$usage" =~ ^[0-9]+$ && "$quota_limit" =~ ^[0-9]+$ ]] || continue
+            [[ $usage -ge $quota_limit ]] || continue
+
             exp=$(grep -w "^### $user" "/etc/xray/json/xhttp.json" | cut -d ' ' -f 3 | sort | uniq | head -n 1)
-            if [[ -n "$exp" ]]; then
-                sed -i "/^### $user $exp/ {N;d}" /etc/xray/json/xhttp.json
-                sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/xhttp.json
-                need_restart=1
+            if [[ -z "$exp" ]]; then
+                # A multilogin lock removes the JSON entry temporarily.
+                # Keep quota/limit/usage files so auto-unlock restores a
+                # complete account; only clean files for a real deletion.
+                if [ -f "/var/log/create/xray/xhttp/${user}.locked" ] || [ -f "/etc/xray/autounlock/xhttp/${user}" ]; then
+                    continue
+                fi
+                # Already removed: clean orphan files, no duplicate notice.
+                rm -f "$quota_file" "$usage_file"
+                rm -f "/var/log/create/xray/xhttp/${user}.log"
+                rm -f "/etc/xray/limit/ip/xray/xhttp/${user}"
+                continue
             fi
+
+            sed -i "/^### $user $exp/ {N;d}" /etc/xray/json/xhttp.json
+            sed -i -z 's/},\n *\]/}\n        ]/g' /etc/xray/json/xhttp.json
+            need_restart=1
 
             readable_limit=$(human_readable "$quota_limit")
             readable_usage=$(human_readable "$usage")
@@ -151,36 +198,33 @@ function check_quota() {
 
             # Found 500: finish ALL file removals BEFORE the blocking
             # Telegram call (same race as limit-ip-* vs auto-delete-*).
-            rm -rf "$quota_file"
-            rm -rf "$usage_file"
-            rm -fr /var/log/create/xray/xhttp/${user}.log
+            rm -f "$quota_file"
+            rm -f "$usage_file"
+            rm -f "/var/log/create/xray/xhttp/${user}.log"
             rm -f "/etc/xray/limit/ip/xray/xhttp/${user}"
 
-            send_log "$user" "$readable_limit" "$readable_usage"
+            notify_users+=("$user")
+            notify_limits+=("$readable_limit")
+            notify_usages+=("$readable_usage")
+        done
+        # One restart per run, not per deleted user (Found 329 class).
+        if [ "$need_restart" -eq 1 ]; then
+            if ! xray run -test -config /etc/xray/json/xhttp.json >/dev/null 2>&1; then
+                need_restart=0
+            fi
         fi
+        flock -u 9
+    else
+        echo "kill-xhttp: /etc/xray/json/xhttp.json busy, skipping this run"
     fi
-}
-
-function process_quota() {
-    users=$(grep '^###' /etc/xray/json/xhttp.json | cut -d ' ' -f 2 | sort | uniq)
-
-    for user in $users; do
-        check_quota "$user"
-    done
-}
-
-exec 9>/tmp/xray-json-xhttp.lock
-if flock -w 30 9; then
-process_quota
-# One restart per run, not per deleted user (Found 329 class).
-if [ -n "$need_restart" ]; then
-    if xray run -test -config /etc/xray/json/xhttp.json >/dev/null 2>&1; then
-        systemctl daemon-reload
-        systemctl restart xray@xhttp
-    fi
+    exec 9>&-
 fi
-flock -u 9
-else
-    echo "kill-xhttp: /etc/xray/json/xhttp.json busy, skipping this run"
+
+# Found 524: notifications and restart never run while holding the lock.
+for i in "${!notify_users[@]}"; do
+    send_log "${notify_users[$i]}" "${notify_limits[$i]}" "${notify_usages[$i]}"
+done
+if [ "$need_restart" -eq 1 ]; then
+    timeout 60 systemctl daemon-reload
+    timeout 60 systemctl restart xray@xhttp
 fi
-exec 9>&-

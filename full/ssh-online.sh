@@ -259,12 +259,12 @@ def ws_ip_for(child_ts):
     best = None
     best_delta = None
     for ct, ip in clients:
-        # The ws proxy logs "client:" before it logs "opened"; a client line
-        # after the opened line belongs to the next connection.  Do not use it
-        # just because it happens to be closer in time.
-        if ct > ot:
-            continue
-        delta = ot - ct
+        # Found 524: the ws proxy usually logs "client:" just before
+        # "opened", but live journald order can be reversed (observed
+        # 2.2 ms after).  The old one-way check then left the session at
+        # 127.0.0.1.  Match the nearest client line on either side within
+        # the pair window; the next connection's lines are farther away.
+        delta = abs(ot - ct)
         if delta > CLIENT_TOL_US:
             continue
         if best_delta is None or delta < best_delta:
