@@ -152,7 +152,6 @@ schedule_user_expiration() {
 }
 
 # Baca konfigurasi
-installer_domain=$(read_file "/etc/xray/installer-domain")
 # Rotated domains are independent; the installer domain may be deleted from this list.
 rotated_domains=()
 if [ -s /etc/xray/rotated-domains ]; then
@@ -226,7 +225,6 @@ message=$(cat <<EOF
 -------------------
 🟢 SSH ACCOUNT 🟢
 -------------------
-Installer Domain : $installer_domain
 Rotated Domain   : $rotated_domain
 ISP        : $isp
 Region     : $region

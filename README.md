@@ -398,11 +398,12 @@ entry is removed, Xray, SSH, and WireGuard account creation stops with a notice
 asking for a rotated domain instead of dividing by zero or silently using the
 installer domain.
 
-Every account card names the two values explicitly:
+An account card names only the value the account actually uses:
 
-- `Installer Domain :` — the domain the panel was installed with.
 - `Rotated Domain :` — the domain used by that account's links.
 
+The installer domain remains an internal Nginx and certificate anchor and is
+not repeated on account cards; the Domain Menu still shows it separately.
 L2TP and NoobzVPN have no per-account links, so their cards list the rotation
 list as `Rotated Domains :`. The Domain Menu list reports per-domain account
 counts for each protocol, marks the installer entry when it is in the rotated
@@ -766,8 +767,8 @@ IPs are allocated from `10.66.66.2` to `10.66.66.254` — 253 clients maximum.
 Configs are written to `/var/www/html/wireguard-<user>.conf` for download.
 The client endpoint rotates over the rotated domain list (round-robin via
 `/etc/xray/.rotated-domainseq`), same as Xray links; if the list is empty,
-creation stops with the same notice. The card shows both `Installer Domain` and
-the assigned `Rotated Domain`.
+creation stops with the same notice. The card shows the assigned
+`Rotated Domain`.
 
 Also includes a Cloudflare WARP helper (peer persisted in `wg0.conf` with
 keepalive, IPv4 endpoint resolved at setup).

@@ -3338,3 +3338,13 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
   3. `update.sh` marker-checks `backup` with `Found 529`.
 - **Evidence:** Fix 526's inline check `NF==4 && $1<=255 && ...` used awk numeric comparison, so a body such as `1.2.3.-4` was accepted as an IPv4 address and could reach the Telegram caption. Decision 44 requires a validated dotted-quad.
 - **Verified locally:** a 16-case harness checked `is_ipv4` with valid addresses, `255.255.255.255`, `0.0.0.0`, negative and alphabetic octets, >255 octets, too few/many octets, and an empty string; then exercised `get_public_ipv4` with a valid live reply, a malformed live reply falling back to `/etc/.ip`, all probes failing with a valid cache, all probes failing with malformed caches, and no cache. All passed. `bash -n` passes for both backup scripts and `update.sh`; the updater marker harness and payload verification pass.
+
+### Fix 530 - Account cards show only the rotated domain (operator request)
+
+- **Fix 530:**
+  1. Removed the `Installer Domain : $installer_domain` row from the Xray add/trial cards, SSH add/trial cards, WireGuard card, L2TP card, and NoobzVPN card in both editions (53 scripts total).
+  2. Removed the now-unused `installer_domain` reads from those scripts. The installer domain file remains mandatory for Nginx and certificates, and the Domain Menu still displays it.
+  3. Xray/SSH/NoobzVPN Telegram messages and `/var/log/create/...` card logs use the same templates as the TUI, so the row disappears from both channels. Existing card logs keep the old row until the account is recreated.
+  4. `update.sh` marker-checks `menu-wg`, `xl2tp`, and `menu-noobz` with `Rotated Domain`; `dm-menu` still checks `Installer Domain`.
+- **Reason:** operator request. The installer domain is not used by the account's links, so the rotated domain alone is the useful value.
+- **Verified locally:** `grep` confirms no `Installer Domain` row remains in account cards (only `dm-menu` and the `limit-ip` menu retain it); `bash -n` passes for every changed script and `update.sh`; the updater marker harness and payload verification pass.

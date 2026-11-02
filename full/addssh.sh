@@ -126,7 +126,6 @@ create_ssh_user() {
 main() {
     clear_screen
 
-    local installer_domain=$(read_file "/etc/xray/installer-domain")
 # Rotated domains are independent; the installer domain may be deleted from this list.
 rotated_domains=()
 if [ -s /etc/xray/rotated-domains ]; then
@@ -208,7 +207,6 @@ echo $((rotated_domain_seq+1)) > /etc/xray/.rotated-domainseq
 -------------------
 🟢 SSH ACCOUNT 🟢
 -------------------
-Installer Domain : $installer_domain
 Rotated Domain   : $rotated_domain
 ISP        : $isp
 Region     : $region

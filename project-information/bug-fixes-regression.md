@@ -3189,3 +3189,12 @@ Section 35's four-check rule applied to Fix 417:
 | **vs the source** | V23 had no validation. Fix 526 validated octet ranges numerically but accepted `1.2.3.-4`; Fix 529 closes that gap and matches Decision 44's dotted-quad wording. |
 
 - **Audit result (November 2, 2026):** one runtime regression was found and fixed: Fix 526's inline IPv4 check accepted a negative octet such as `1.2.3.-4`; Fix 529 replaces it with a strict dotted-quad validator. No other runtime regression was found in Fixes 525-529 against the original V23/1.20 scripts or the recorded decisions. Documentation drift was also corrected: Decision 44 still named `Found 526`, Decision 45 still named `Found 527`, README said the updater carried Fix 520-527, and the regression log lacked sections for Fixes 525-529. The WARP install/enable/restart gate remains an intentional Decision-28 exception, not a regression.
+
+## 290. Account cards omit the installer domain (Fix 530) — Four Checks (November 2, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Only the display row and its now-unused read were removed. Account-link hosts, rotation order, the sequence counter, certificate selection, authorization gates, Telegram delivery, and the `/var/log/create/...` write path are unchanged. The Domain Menu and `limit-ip` menu still show the installer domain; existing card logs keep the old row until recreated. |
+| **Over-strictness** | No validation or gate changed. The rotated-domain row remains, and the empty-rotated-list creation guard is untouched. |
+| **Over-engineering** | Pure deletions: one card row and one unused read per script, no new file, helper, or dependency. |
+| **vs the source** | V23 cards had a single `Domain` row. Fix 521 expanded that to `Installer Domain` plus `Rotated Domain`; Fix 530 returns to one user-facing row, using the rotated domain that the account actually uses. |

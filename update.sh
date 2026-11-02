@@ -149,7 +149,8 @@ marker_for() {
         delete-xhttp) echo 'Delete XHTTP Account' ;;
         menu-system) echo 'Banner /etc/issue.net' ;;
         menu) echo 'Found 528' ;;
-        dm-menu | menu-wg | xl2tp | menu-noobz) echo 'Installer Domain' ;;
+        dm-menu) echo 'Installer Domain' ;;
+        menu-wg | xl2tp | menu-noobz) echo 'Rotated Domain' ;;
         add-* | trial-*) echo 'Rotated Domain' ;;
         addssh | trial-ssh) echo 'Rotated Domain' ;;
         *) echo 'Found 525' ;;

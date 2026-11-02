@@ -80,7 +80,6 @@
 clear
 echo ""
 echo ""
-installer_domain=$(cat /etc/xray/installer-domain)
 # Rotated domains are independent; the installer domain may be deleted from this list.
 rotated_domains=()
 if [ -s /etc/xray/rotated-domains ]; then
@@ -163,7 +162,6 @@ TEKS="
 -----------------------
 
 Remarks  : $user
-Installer Domain : $installer_domain
 Rotated Domain   : $rotated_domain
 ISP      : $isp
 Region   : $region

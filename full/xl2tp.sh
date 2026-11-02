@@ -89,7 +89,6 @@ license_gate() {
 }
 
 
-installer_domain=$(cat /etc/xray/installer-domain)
 
 clear
 echo ""
@@ -127,7 +126,6 @@ rainbow_sep() {
 
 separator=$(rainbow_sep '-----------------------------------')
 blue_sep="${blue}-----------------------------------${NC}"
-installer_domain=$(cat /etc/xray/installer-domain)
 
 
 
@@ -200,7 +198,6 @@ cat <<EOF
 ${separator}
 L2TP/IPSEC XAuth PSK VPN
 ${separator}
-Installer Domain : $installer_domain
 Rotated Domains  : $_rotated_domain_list
 IPsec PSK  : $PSK
 Username   : $VPN_USER

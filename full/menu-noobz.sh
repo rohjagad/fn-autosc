@@ -127,7 +127,6 @@ rainbow_sep() {
 separator=$(rainbow_sep '-----------------------------------')
 blue_sep="${blue}-----------------------------------${NC}"
 
-installer_domain=$(cat /etc/xray/installer-domain)
 
 clear
 echo ""
@@ -207,7 +206,6 @@ TEKS="
 ----------------------------
 NoobzVPN Account
 ----------------------------
-Installer Domain : $installer_domain
 Rotated Domains  : $_rotated_domain_list
 Username        : $user
 Password        : $pass

@@ -94,7 +94,6 @@ clear
 echo ""
 echo ""
 # information
-installer_domain=$(cat /etc/xray/installer-domain)
 source /etc/wireguard/params
 CLOUDFLAREKEY="bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=";
 
@@ -274,7 +273,6 @@ AllowedIPs = ${client_ipv4}/32" >> /etc/wireguard/wg0.conf
 	echo ""
 	echo -e "WireGuard User Information"
 	echo -e "${separator}"
-	echo -e " Installer Domain : $installer_domain"
 	echo -e " Rotated Domain   : $_wg_rotated_domain"
 	echo -e " Username\t: $user"
 	echo -e " Expired Date\t: $expired"
