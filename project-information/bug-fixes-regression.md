@@ -3142,3 +3142,50 @@ Section 35's four-check rule applied to Fix 417:
 | **vs the source** | The source held the xHTTP lock across every Xray stats call, every Telegram send, and the service restart. One stalled API call made all four jobs report busy, and the old `limit-ip-xhttp` reset the stable-set epoch before a successful deletion. Divergence: collect outside, mutate inside, notify/restart after; keep the gate until deletion succeeds. The ws resolver also now accepts the live `opened`-then-`client:` order rather than assuming the reverse. |
 
 - Additional harness: a pending multilogin lock (JSON entry removed, `.locked` card and auto-unlock due file present) is skipped by `quota-xhttp` and `kill-xhttp`; the quota, usage, and IP-limit files remain for auto-unlock, and no duplicate Telegram notice is sent.
+
+## 285. Licence gate scope (Fix 525) — Four Checks (November 2, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | The create/extend/install paths still gate before mutation: all 34 full and 29 lite auth-fetch files are `add-*`/`trial-*`/`extend-*`/`addssh`, the mixed menus (`menu-wg`, `xl2tp`, `menu-noobz`, `menu-system`), or the installer. No maintenance script fetches auth. Quota, expiry, IP limits, deletes, routing, backup, and the main menu still run. The only retained exception is WARP install/enable/restart, which keeps the Decision-28 date guard; WARP disable/status/token are ungated. |
+| **Over-strictness** | Auth is required only immediately before a create/extend mutation. Mixed menus gate only their create/extend/WARP actions; delete/list/status/service actions remain usable offline. `trial-ssh` is deliberately included because it creates an account. |
+| **Over-engineering** | No new daemon, state file, or dependency. The existing race block is extracted into `license_gate()` only where a mixed menu needs it; the other scripts simply lose the top-level block. |
+| **vs the source** | V23 and 1.20 placed the gate at the top of every affected script, including backup, quota, menus, and deletes. Divergence: the gate now follows Decision 43 (install/create/extend) instead of whole-script scope, while the Decision-28 WARP date guard is preserved. |
+
+## 286. Backup Telegram IP (Fix 526) — Four Checks (November 2, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | The archive contents, `/etc/funny/backup.log` append, Telegram document send, and cleanup are unchanged. Only `MYIP` resolution changed. Valid live probes and `/etc/.ip` still produce the same address. |
+| **Over-strictness** | A transient or malformed probe reply is skipped; the next of the four sources is tried, then `/etc/.ip`, then `unknown`. A valid address is never rejected because another source failed. |
+| **Over-engineering** | One helper, four bounded read-only probes, no new file or daemon. The existing message template and send path are untouched. |
+| **vs the source** | V23 used a single unbounded `curl -s ifconfig.me` and interpolated the result directly, so a failed probe left a blank field. Divergence: bounded probes, validation, and a cached fallback. |
+
+## 287. Main-menu licence identity (Fix 527) — Four Checks (November 2, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | The main menu still renders the SSH/domain/IP/uptime/ISP/stats/service/traffic blocks and both version markers. The new licence lines are display-only and are added above the version lines; the menu options and `read` path are unchanged. The menu opens with rc 0 when both sources fail. |
+| **Over-strictness** | The read is bounded at four seconds and never gates. A cache is accepted only when its IP matches the live IPv4 or `/etc/.ip`. A reachable list without the IP shows `unlicensed`; a double outage shows cached values or `unavailable` / `not checked`. |
+| **Over-engineering** | One display helper block, one `/var/lib/fn-autosc/license-info` cache file, no daemon and no new dependency. The existing `/etc/.ip` and version-marker helpers are reused. |
+| **vs the source** | V23 printed the same three fields from the gate, but the gate ran at script entry and exited on failure. Divergence: the fields are restored as a display-only section with a cached fallback; the gate remains only in the create/extend/install paths. |
+
+## 288. LICENSE heading (Fix 528) — Four Checks (November 2, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | The heading adds one template line above the existing five-line block. The `output()`/`rerechan` content, version markers, cache behavior, and menu flow are unchanged. Full and lite both define `purple` before the template. |
+| **Over-strictness** | No input, gate, or failure behavior changed; the heading is unconditional. |
+| **Over-engineering** | One template line per edition. No new function, file, or dependency. |
+| **vs the source** | V23 had no section heading; this is an operator-requested cosmetic grouping that matches the existing `TOTAL ACCOUNTS` / `MENU` style. |
+
+## 289. Strict backup IPv4 validation (Fix 529) — Four Checks (November 2, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Valid probe replies and `/etc/.ip` fallback return the same addresses as Fix 526. Only malformed replies are skipped; the archive, log, caption, and send path are unchanged. |
+| **Over-strictness** | Accepts any four-octet address with each octet in 0-255; rejects negative, alphabetic, over-255, and wrong-count values. A malformed probe does not abort the helper; it tries the next source, then the fallback. |
+| **Over-engineering** | One small `is_ipv4()` awk helper; no new dependency or file. |
+| **vs the source** | V23 had no validation. Fix 526 validated octet ranges numerically but accepted `1.2.3.-4`; Fix 529 closes that gap and matches Decision 44's dotted-quad wording. |
+
+- **Audit result (November 2, 2026):** one runtime regression was found and fixed: Fix 526's inline IPv4 check accepted a negative octet such as `1.2.3.-4`; Fix 529 replaces it with a strict dotted-quad validator. No other runtime regression was found in Fixes 525-529 against the original V23/1.20 scripts or the recorded decisions. Documentation drift was also corrected: Decision 44 still named `Found 526`, Decision 45 still named `Found 527`, README said the updater carried Fix 520-527, and the regression log lacked sections for Fixes 525-529. The WARP install/enable/restart gate remains an intentional Decision-28 exception, not a regression.
