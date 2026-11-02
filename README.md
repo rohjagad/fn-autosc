@@ -214,12 +214,12 @@ Every menu is a command. Type it in the terminal to open it.
 ### Main Menu — `menu`
 
 The dashboard. Shows the SSH version, domain, IP, uptime, ISP/region, account
-counts per protocol, service status, recent traffic, the licence username /
-VPS IPv4 / expiry, and the installed / updated panel commits (from
-`update.sh`). The licence values are refreshed from both auth sources when the
-menu opens; if both are unreachable, the last successful match is shown as
-`(cached)` and the menu still opens. The licence lines are display-only and
-never gate the menu.
+counts per protocol, service status, recent traffic, a `LICENSE` section with
+the licence username / VPS IPv4 / expiry, and the installed / updated panel
+commits (from `update.sh`). The licence values are refreshed from both auth
+sources when the menu opens; if both are unreachable, the last successful
+match is shown as `(cached)` and the menu still opens. The licence lines are
+display-only and never gate the menu.
 
 | Option | Opens |
 | :---: | :--- |

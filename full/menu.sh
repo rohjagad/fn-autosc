@@ -348,6 +348,7 @@ loadbalance="${green}ON${NC}"
 else
 loadbalance="${red}OFF${NC}"
 fi
+# Found 528: group the licence identity under a LICENSE heading.
 rechan=$(output)
 separator=$(rainbow_sep '-----------------------------------')
 blue_sep="${blue}-----------------------------------${NC}"
@@ -381,6 +382,7 @@ ${green}5${NC}. Backup Menu    ${green}10${NC}. System Menu
 ${blue_sep}
 Today: ${red}$ttoday${NC} Yesterday: ${red}$tyest${NC} This month: ${red}$tmon${NC}
 ${separator}
+${purple}LICENSE${NC}
 ${rechan}
 ${separator}
 

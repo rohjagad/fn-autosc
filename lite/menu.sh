@@ -241,6 +241,7 @@ echo ""
 echo ""
 menu-x() {
 
+# Found 528: group the licence identity under a LICENSE heading.
 rerechan=$(output)
 
 # Status Service
@@ -294,6 +295,7 @@ ${green}4${NC}. XHTTP    ${green}8${NC}. Telegram Bot
 ${blue_sep}
 Today: ${red}$ttoday${NC} Yesterday: ${red}$tyest${NC} This month: ${red}$tmon${NC}
 ${separator}
+${purple}LICENSE${NC}
 $rerechan
 ${separator}
 
