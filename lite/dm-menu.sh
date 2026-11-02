@@ -1,5 +1,7 @@
 #!/bin/bash
 # Found 525: license is enforced only for create/extend/install.
+# Found 541: deleting a rotated domain also removes its certificate and ACME
+# state; services are reloaded, never restarted, so existing sessions stay up.
 
 
 [[ -e $(which curl) ]] && grep -q "1.1.1.1" /etc/resolv.conf || {
@@ -237,6 +239,8 @@ PYEOF2
 
 gen_selfsigned_all() {
     # Self-signed covering the rotation set (auto on rotated-domain add).
+    # Argument "graceful" reloads services instead of restarting them (Fix 541).
+    local mode="${1:-restart}"
     local installer_domain all san seen d
     installer_domain=$(read_installer_domain)
     [ -z "$installer_domain" ] && installer_domain=$(all_rotated_domains | head -1)
@@ -263,9 +267,18 @@ gen_selfsigned_all() {
     cat /etc/xray/xray.crt /etc/xray/xray.key > /etc/haproxy/.funny.pem.tmp 2>/dev/null \
         && mv -f /etc/haproxy/.funny.pem.tmp /etc/haproxy/funny.pem 2>/dev/null
     chmod 600 /etc/haproxy/funny.pem 2>/dev/null || true
-    systemctl reload nginx 2>/dev/null || systemctl restart nginx 2>/dev/null || true
-    systemctl restart haproxy 2>/dev/null || true
-    systemctl restart noobzvpns 2>/dev/null || true
+    if [ "$mode" = "graceful" ]; then
+        # Found 541: a reload keeps established sessions up.  Do not restart
+        # noobzvpns here; it has no reload and a restart would drop clients.
+        nginx -t >/dev/null 2>&1 && systemctl reload nginx 2>/dev/null || true
+        if [ -f /etc/haproxy/haproxy.cfg ] && command -v haproxy >/dev/null 2>&1 && systemctl is-active --quiet haproxy 2>/dev/null; then
+            haproxy -c -f /etc/haproxy/haproxy.cfg >/dev/null 2>&1 && systemctl reload haproxy 2>/dev/null || true
+        fi
+    else
+        systemctl reload nginx 2>/dev/null || systemctl restart nginx 2>/dev/null || true
+        systemctl restart haproxy 2>/dev/null || true
+        systemctl restart noobzvpns 2>/dev/null || true
+    fi
     echo "Self-signed installed for: $(echo "$san" | sed 's/DNS://g; s/,/, /g')"
 }
 
@@ -309,6 +322,71 @@ rotated_domain_add() {
     echo ""
 }
 
+cert_is_selfsigned() {
+    [ -s /etc/xray/xray.crt ] || return 1
+    local subj iss
+    subj=$(openssl x509 -in /etc/xray/xray.crt -noout -subject 2>/dev/null | sed 's/^subject=//')
+    iss=$(openssl x509 -in /etc/xray/xray.crt -noout -issuer 2>/dev/null | sed 's/^issuer=//')
+    [ -n "$subj" ] && [ "$subj" = "$iss" ]
+}
+
+domain_remove_cert_state() {
+    # Found 541: remove only this domain's ACME/Certbot state.  The live
+    # certificate copy is replaced separately, after the domain list is gone.
+    local d="$1"
+    [ -n "$d" ] || return 0
+    [[ "$d" =~ ^([[:alnum:]]([[:alnum:]-]{0,61}[[:alnum:]])?\.)+[[:alpha:]]{2,63}$ ]] || return 0
+    rm -rf "/etc/letsencrypt/live/$d" "/etc/letsencrypt/archive/$d" "/etc/letsencrypt/renewal/$d.conf" 2>/dev/null || true
+    rm -rf "/root/.acme.sh/$d" "/root/.acme.sh/${d}_ecc" 2>/dev/null || true
+}
+
+domain_reassign_cards() {
+    # Found 541: a deleted domain must not survive in account cards.  Rewrite
+    # only the exact hostname, keeping every UUID/password/expiry unchanged,
+    # so reissued cards point at a domain that is still served.
+    local old="$1" new="$2" n
+    [ -n "$old" ] && [ -n "$new" ] && [ "$old" != "$new" ] || return 0
+    n=$(grep -RFl -- "$old" /var/log/create 2>/dev/null | wc -l)
+    [ "${n:-0}" -gt 0 ] || return 0
+    python3 - "$old" "$new" <<'PY553'
+import base64, pathlib, re, sys
+old, new = sys.argv[1:3]
+pattern = re.compile(r'(?<![A-Za-z0-9.-])' + re.escape(old) + r'(?![A-Za-z0-9.-])')
+
+def fix_vmess(match):
+    raw = match.group(1)
+    try:
+        data = base64.b64decode(raw + '=' * (-len(raw) % 4), validate=False)
+        text = data.decode('utf-8')
+    except Exception:
+        try:
+            data = base64.urlsafe_b64decode(raw + '=' * (-len(raw) % 4))
+            text = data.decode('utf-8')
+        except Exception:
+            return match.group(0)
+    fixed = pattern.sub(new, text)
+    if fixed == text:
+        return match.group(0)
+    return 'vmess://' + base64.b64encode(fixed.encode('utf-8')).decode('ascii')
+
+for path in pathlib.Path('/var/log/create').rglob('*'):
+    if not path.is_file():
+        continue
+    try:
+        text = path.read_text(errors='ignore')
+    except OSError:
+        continue
+    updated = pattern.sub(new, text)
+    updated = re.sub(r'vmess://([A-Za-z0-9+/=_-]+)', fix_vmess, updated)
+    if updated != text:
+        try:
+            path.write_text(updated)
+        except OSError:
+            pass
+PY553
+    echo "Reassigned $n account card(s) from $old to $new."
+}
+
 rotated_domain_remove() {
     clear
     echo ""
@@ -336,11 +414,39 @@ rotated_domain_remove() {
     [ -z "$target" ] && return
     grep -vxF "$target" /etc/xray/rotated-domains > /etc/xray/rotated-domains.tmp || true
     mv /etc/xray/rotated-domains.tmp /etc/xray/rotated-domains
-    rotated_domains_sync_nginx
-    if [ "$target" = "$(read_installer_domain)" ]; then
+    rotated_domains_sync_nginx || true
+
+    # Found 541: remove every trace of the domain, but use reloads only so
+    # established sessions are not dropped.  The default Nginx 443 server
+    # remains, so arbitrary SNI + allowInsecure keeps working.
+    local installer_domain refs
+    installer_domain=$(read_installer_domain)
+    if [ "$target" = "$installer_domain" ]; then
         echo "Removed $target from the rotated list; the installer domain itself is unchanged."
     else
         echo "Removed $target."
+        domain_remove_cert_state "$target"
+        if cert_is_selfsigned; then
+            if gen_selfsigned_all graceful; then
+                echo "Certificate SAN updated: $target removed."
+            else
+                echo "Warning: certificate update failed; $target may remain in the SAN."
+            fi
+        else
+            echo "Warning: the active certificate is CA-issued and still contains $target."
+            echo "Reissue it from the certificate menu to remove that name."
+        fi
+    fi
+    refs=$(grep -RFl -- "$target" /var/log/create 2>/dev/null | wc -l)
+    if [ "${refs:-0}" -gt 0 ] && [ "$target" != "$installer_domain" ]; then
+        local replacement
+        replacement=$(all_rotated_domains | head -1)
+        [ -z "$replacement" ] && replacement="$installer_domain"
+        if [ -n "$replacement" ] && [ "$replacement" != "$target" ]; then
+            domain_reassign_cards "$target" "$replacement"
+        else
+            echo "Warning: $refs account card(s) still mention $target and no replacement domain is available."
+        fi
     fi
     if [ ! -s /etc/xray/rotated-domains ]; then
         echo "Rotated list is now empty. Xray/SSH/WireGuard account creation will stop until a domain is added."
