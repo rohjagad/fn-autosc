@@ -139,7 +139,8 @@ exp=`date -d "$masaaktif days" +"%d-%b-%Y"`
 uuid=$(xray uuid)
 
 # Menambahkan Akun di Database
-sed -i '/#trojan$/{n;s/}/},\n### '"$user $exp"'\n{"password": "'""$uuid""'","email": "'""$user""'","level": 0}/}' /etc/xray/json/ws.json
+# Found 539: insert through the shared helper; no template anchor object.
+xray-add-client /etc/xray/json/ws.json trojan "$user" "$exp" "$uuid" || { echo "trial-trojan-ws: failed to insert $user into the JSON config." >&2; exit 1; }
 # /trws stays the default and keeps working, but links never use it; rotation below is color-based only.
 opaths=("/blue" "/navy" "/azure")
 cseq=$(cat /etc/xray/.colorseq 2>/dev/null || echo 0)

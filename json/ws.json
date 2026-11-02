@@ -20,11 +20,6 @@
       "settings": {
         "decryption": "none",
         "clients": [
-          {
-            "id": "cfbbaafc-8d52-450c-9fb0-145bc8221e6d",
-            "level": 0
-#vless
-          }
         ]
       },
       "streamSettings": {
@@ -40,12 +35,6 @@
       "protocol": "vmess",
       "settings": {
         "clients": [
-          {
-            "id": "cfbbaafc-8d52-450c-9fb0-145bc8221e6d",
-            "alterId": 0,
-            "level": 0
-#vmess
-          }
         ]
       },
       "streamSettings": {
@@ -62,11 +51,6 @@
       "settings": {
         "decryption": "none",
         "clients": [
-          {
-            "password": "rerechan-store",
-            "level": 0
-#trojan
-          }
         ],
         "udp": true
       },

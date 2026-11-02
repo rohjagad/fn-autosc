@@ -146,21 +146,24 @@ ${separator}"
 if [ -n "$exp2" ] && grep -qxF "### $name $exp2" /etc/xray/json/xhttp.json 2>/dev/null; then
     echo "Account '$name' already present in config - skipping re-add."
 elif [ "$protokol2" == "VMESS" ]; then
-    sed -i '/#vmess$/{n;s/}/},\n### '"$name $exp2"'\n{"id": "'""$uuid""'","alterid": 0,"email": "'""$name""'","level": 0}/}' /etc/xray/json/xhttp.json
+# Found 539: insert through the shared helper; no template anchor object.
+xray-add-client /etc/xray/json/xhttp.json vmess "$name" "$exp2" "$uuid" || { echo "unlock-xhttp: failed to insert $name into the JSON config." >&2; exit 1; }
 elif [ "$protokol2" == "VLESS" ]; then
-    sed -i '/#vless$/{n;s/}/},\n### '"$name $exp2"'\n{"id": "'""$uuid""'","email": "'""$name""'","level": 0}/}' /etc/xray/json/xhttp.json
+# Found 539: insert through the shared helper; no template anchor object.
+xray-add-client /etc/xray/json/xhttp.json vless "$name" "$exp2" "$uuid" || { echo "unlock-xhttp: failed to insert $name into the JSON config." >&2; exit 1; }
 elif [ "$protokol2" == "TROJAN" ]; then
-    sed -i '/#trojan$/{n;s/}/},\n### '"$name $exp2"'\n{"password": "'""$uuid""'","email": "'""$name""'","level": 0}/}' /etc/xray/json/xhttp.json
+# Found 539: insert through the shared helper; no template anchor object.
+xray-add-client /etc/xray/json/xhttp.json trojan "$name" "$exp2" "$uuid" || { echo "unlock-xhttp: failed to insert $name into the JSON config." >&2; exit 1; }
 else
     echo "Protokol tidak dikenal"
 fi
 
 # Found 497 guard (same class as unlock-*-auto): the re-add above is a
-# silent no-op when the JSON section anchor is missing. Never move .locked
+# silent no-op when the JSON client insertion fails. Never move .locked
 # to .log without a JSON entry - auto-delete-* would wipe the account
 # ("Log Cleanup") instead of unlocking it. Fail LOUD, keep the lock.
 if ! grep -qxF "### $name $exp2" /etc/xray/json/xhttp.json 2>/dev/null; then
-    echo "unlock-xhttp: FAILED to restore $name - JSON section anchor missing, lock kept. Repair anchors, then retry." >&2
+    echo "unlock-xhttp: FAILED to restore $name - JSON client insertion failed, lock kept. Check the JSON config, then retry." >&2
     exit 1
 fi
 if xray run -test -config /etc/xray/json/xhttp.json >/dev/null 2>&1; then

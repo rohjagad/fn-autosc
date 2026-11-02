@@ -139,7 +139,8 @@ exp=`date -d "$masaaktif days" +"%d-%b-%Y"`
 uuid=$(xray uuid)
 
 # Menambahkan akun pada json
-sed -i '/#vless$/{n;s/}/},\n### '"$user $exp"'\n{"id": "'""$uuid""'","email": "'""$user""'","level": 0}/}' /etc/xray/json/grpc.json
+# Found 539: insert through the shared helper; no template anchor object.
+xray-add-client /etc/xray/json/grpc.json vless "$user" "$exp" "$uuid" || { echo "trial-vless-grpc: failed to insert $user into the JSON config." >&2; exit 1; }
 # vlgr stays the default and keeps working, but links never use it; rotation below is color-based only.
 opaths=("white" "ivory" "snow")
 cseq=$(cat /etc/xray/.colorseq 2>/dev/null || echo 0)

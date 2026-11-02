@@ -216,7 +216,8 @@ fi
 exp=`date -d "$masaaktif days" +"%d-%b-%Y"`
 
 # Menambahkan akun pada json
-sed -i '/#vmess$/{n;s/}/},\n### '"$user $exp"'\n{"id": "'""$uuid""'","alterid": 0,"email": "'""$user""'","level": 0}/}' /etc/xray/json/xhttp.json
+# Found 539: insert through the shared helper; no template anchor object.
+xray-add-client /etc/xray/json/xhttp.json vmess "$user" "$exp" "$uuid" || { echo "add-vmess-xhttp: failed to insert $user into the JSON config." >&2; exit 1; }
 # /vmxh stays the default and keeps working, but links never use it; rotation below is color-based only.
 opaths=("/purple" "/violet" "/indigo")
 cseq=$(cat /etc/xray/.colorseq 2>/dev/null || echo 0)

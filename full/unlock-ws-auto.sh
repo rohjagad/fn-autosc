@@ -31,23 +31,26 @@ if [ -z "$XRAY_BATCH" ]; then
     flock -w 30 9 || exit 0
 fi
 if [ "$protokol2" == "VMESS" ]; then
-    sed -i '/#vmess$/{n;s/}/},\n### '"$user $exp2"'\n{"id": "'""$uuid""'","alterid": 0,"email": "'""$user""'","level": 0}/}' /etc/xray/json/ws.json
+# Found 539: insert through the shared helper; no template anchor object.
+xray-add-client /etc/xray/json/ws.json vmess "$user" "$exp2" "$uuid" || { echo "unlock-ws-auto: failed to insert $user into the JSON config." >&2; exit 1; }
 elif [ "$protokol2" == "VLESS" ]; then
-    sed -i '/#vless$/{n;s/}/},\n### '"$user $exp2"'\n{"id": "'""$uuid""'","email": "'""$user""'","level": 0}/}' /etc/xray/json/ws.json
+# Found 539: insert through the shared helper; no template anchor object.
+xray-add-client /etc/xray/json/ws.json vless "$user" "$exp2" "$uuid" || { echo "unlock-ws-auto: failed to insert $user into the JSON config." >&2; exit 1; }
 elif [ "$protokol2" == "TROJAN" ]; then
-    sed -i '/#trojan$/{n;s/}/},\n### '"$user $exp2"'\n{"password": "'""$uuid""'","email": "'""$user""'","level": 0}/}' /etc/xray/json/ws.json
+# Found 539: insert through the shared helper; no template anchor object.
+xray-add-client /etc/xray/json/ws.json trojan "$user" "$exp2" "$uuid" || { echo "unlock-ws-auto: failed to insert $user into the JSON config." >&2; exit 1; }
 else
     echo "unlock-ws-auto: unknown protocol for $user; lock kept" >&2
     exit 1
 fi
-# Found 497 guard: the re-add above is a silent no-op when the section
-# anchor (#vmess/#vless/#trojan) is missing from the JSON. Moving .locked
+# Found 497 guard: the re-add above can fail when the JSON clients array
+# is missing from the config. Moving .locked
 # to .log without a JSON entry hands the account to auto-delete-*, which
 # wipes card + quota + limit files ("Log Cleanup") - a locked account would
 # be silently DELETED instead of unlocked. Verify the entry landed; if not,
-# keep the lock and fail LOUD so the operator repairs the anchors first.
+# keep the lock and fail LOUD so the operator repairs the JSON config first.
 if ! grep -qxF "### $user $exp2" /etc/xray/json/ws.json 2>/dev/null; then
-    echo "unlock-ws-auto: FAILED to restore $user - JSON section anchor missing, lock kept. Repair anchors, then unlock manually." >&2
+    echo "unlock-ws-auto: FAILED to restore $user - JSON client insertion failed, lock kept. Check the JSON config, then unlock manually." >&2
     exit 1
 fi
 # Multilogin auto-unlock notice (timer-expired locks only; the manual

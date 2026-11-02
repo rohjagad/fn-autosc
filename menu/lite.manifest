@@ -99,3 +99,4 @@ script	x-http
 script	x-ws
 script	x-xhttp
 script	xp
+script	xray-add-client

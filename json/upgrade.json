@@ -19,11 +19,6 @@
       "protocol": "vmess",
       "settings": {
         "clients": [
-          {
-            "id": "nonescript-fn-project",
-            "level": 0
-#vmess
-          }
         ],
         "decryption": "none"
       },
@@ -48,11 +43,6 @@
       "protocol": "trojan",
       "settings": {
         "clients": [
-          {
-            "password": "nonescript-fn-project",
-            "level": 0
-#trojan
-          }
         ],
         "decryption": "none"
       },
@@ -77,11 +67,6 @@
       "protocol": "vless",
       "settings": {
         "clients": [
-          {
-            "id": "nonescript-fn-project",
-            "level": 0
-#vless
-          }
         ],
         "decryption": "none"
       },

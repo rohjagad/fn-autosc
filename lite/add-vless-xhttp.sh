@@ -214,7 +214,8 @@ fi
 exp=`date -d "$masaaktif days" +"%d-%b-%Y"`
 
 # Menambahkan akun pada json
-sed -i '/#vless$/{n;s/}/},\n### '"$user $exp"'\n{"id": "'""$uuid""'","email": "'""$user""'","level": 0}/}' /etc/xray/json/xhttp.json
+# Found 539: insert through the shared helper; no template anchor object.
+xray-add-client /etc/xray/json/xhttp.json vless "$user" "$exp" "$uuid" || { echo "add-vless-xhttp: failed to insert $user into the JSON config." >&2; exit 1; }
 # /vlxh stays the default and keeps working, but links never use it; rotation below is color-based only.
 opaths=("/cyan" "/teal" "/turquoise")
 cseq=$(cat /etc/xray/.colorseq 2>/dev/null || echo 0)

@@ -135,14 +135,11 @@ chmod 644 upgrade.json
 chmod 644 xhttp.json
 chmod 644 grpc.json
 
-# Every template ships publicly-known default credentials and the repository is
-# public, while the account scripts only ADD clients - the shipped defaults stay
-# active on every install. Replace all of them with per-install random values so
-# no committed credential can be used against a fresh host.
-#   ws.json      rerechan-store (vmess x3, trojan), cfbbaafc-... (vless, vmess)
-#   grpc.json    cfbbaafc-...                        (vless, vmess, trojan)
-#   xhttp.json   019e0bf3-... , af7d5cf8-... , diy2020
-#   upgrade.json nonescript-fn-project               (vmess, vless, trojan)
+# Older templates shipped publicly-known default credentials and the repository
+# is public. The current templates start with empty clients arrays and the
+# account scripts insert through /usr/bin/xray-add-client, but keep this
+# replacement as a safety net for a mirror or cache that still serves an older
+# template.
 for def in "rerechan-store" \
            "cfbbaafc-8d52-450c-9fb0-145bc8221e6d" \
            "019e0bf3-dd56-11e9-aa37-5600024c1d6a" \

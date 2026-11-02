@@ -19,12 +19,6 @@
       "protocol": "vmess",
       "settings": {
         "clients": [
-          {
-            "id": "019e0bf3-dd56-11e9-aa37-5600024c1d6a",
-            "email": "2019@gmail.com",
-            "level": 0
-#vmess
-          }
         ]
       },
       "streamSettings": {
@@ -48,12 +42,6 @@
       "protocol": "vless",
       "settings": {
         "clients": [
-          {
-            "id": "af7d5cf8-442d-4bb3-8a76-eb367178781d",
-            "email": "2023@gmail.com",
-            "level": 0
-#vless
-          }
         ],
         "decryption": "none"
       },
@@ -78,12 +66,6 @@
       "protocol": "trojan",
       "settings": {
         "clients": [
-          {
-            "password":"diy2020",
-            "email": "2020@gmail.com",
-            "level": 0
-#trojan
-          }
         ]
       },
       "streamSettings": {
