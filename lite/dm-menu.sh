@@ -2,6 +2,8 @@
 # Found 525: license is enforced only for create/extend/install.
 # Found 541: deleting a rotated domain also removes its certificate and ACME
 # state; services are reloaded, never restarted, so existing sessions stay up.
+# Found 542: reassigned account cards are spread across the remaining domains
+# by current count, keeping the rotation balanced.
 
 
 [[ -e $(which curl) ]] && grep -q "1.1.1.1" /etc/resolv.conf || {
@@ -341,50 +343,72 @@ domain_remove_cert_state() {
 }
 
 domain_reassign_cards() {
-    # Found 541: a deleted domain must not survive in account cards.  Rewrite
+    # Found 542: a deleted domain must not survive in account cards.  Rewrite
     # only the exact hostname, keeping every UUID/password/expiry unchanged,
-    # so reissued cards point at a domain that is still served.
-    local old="$1" new="$2" n
-    [ -n "$old" ] && [ -n "$new" ] && [ "$old" != "$new" ] || return 0
-    n=$(grep -RFl -- "$old" /var/log/create 2>/dev/null | wc -l)
-    [ "${n:-0}" -gt 0 ] || return 0
-    python3 - "$old" "$new" <<'PY553'
+    # and spread the cards over the remaining domains by current count so the
+    # distribution stays balanced.  Base64 vmess:// payloads are decoded too.
+    local old="$1"
+    shift
+    local -a candidates=("$@")
+    [ -n "$old" ] && [ ${#candidates[@]} -gt 0 ] || return 0
+    python3 - "$old" "${candidates[@]}" <<'PY542'
 import base64, pathlib, re, sys
-old, new = sys.argv[1:3]
+old = sys.argv[1]
+candidates = sys.argv[2:]
 pattern = re.compile(r'(?<![A-Za-z0-9.-])' + re.escape(old) + r'(?![A-Za-z0-9.-])')
+root = pathlib.Path('/var/log/create')
+files = sorted(p for p in root.rglob('*') if p.is_file() and p.suffix in ('.log', '.locked'))
+counts = {d: 0 for d in candidates}
 
-def fix_vmess(match):
-    raw = match.group(1)
-    try:
-        data = base64.b64decode(raw + '=' * (-len(raw) % 4), validate=False)
-        text = data.decode('utf-8')
-    except Exception:
+def replace_vmess(text, new):
+    def repl(match):
+        raw = match.group(1)
         try:
-            data = base64.urlsafe_b64decode(raw + '=' * (-len(raw) % 4))
-            text = data.decode('utf-8')
+            data = base64.b64decode(raw + '=' * (-len(raw) % 4), validate=False)
+            decoded = data.decode('utf-8')
         except Exception:
+            try:
+                data = base64.urlsafe_b64decode(raw + '=' * (-len(raw) % 4))
+                decoded = data.decode('utf-8')
+            except Exception:
+                return match.group(0)
+        fixed = pattern.sub(new, decoded)
+        if fixed == decoded:
             return match.group(0)
-    fixed = pattern.sub(new, text)
-    if fixed == text:
-        return match.group(0)
-    return 'vmess://' + base64.b64encode(fixed.encode('utf-8')).decode('ascii')
+        return 'vmess://' + base64.b64encode(fixed.encode('utf-8')).decode('ascii')
+    return re.sub(r'vmess://([A-Za-z0-9+/=_-]+)', repl, text)
 
-for path in pathlib.Path('/var/log/create').rglob('*'):
-    if not path.is_file():
-        continue
+for path in files:
     try:
         text = path.read_text(errors='ignore')
     except OSError:
         continue
-    updated = pattern.sub(new, text)
-    updated = re.sub(r'vmess://([A-Za-z0-9+/=_-]+)', fix_vmess, updated)
-    if updated != text:
-        try:
-            path.write_text(updated)
-        except OSError:
-            pass
-PY553
-    echo "Reassigned $n account card(s) from $old to $new."
+    match = re.search(r'^[ \t]*Rotated Domain[ \t]*:[ \t]*(\S+)', text, re.M)
+    if match and match.group(1) in counts:
+        counts[match.group(1)] += 1
+
+moved = 0
+for path in files:
+    try:
+        text = path.read_text(errors='ignore')
+    except OSError:
+        continue
+    dest = min(candidates, key=lambda d: (counts[d], candidates.index(d)))
+    updated = pattern.sub(dest, text)
+    updated = replace_vmess(updated, dest)
+    if updated == text:
+        continue
+    try:
+        path.write_text(updated)
+    except OSError:
+        continue
+    counts[dest] += 1
+    moved += 1
+
+if moved:
+    summary = ', '.join(f'{d}={counts[d]}' for d in candidates)
+    print(f'Reassigned {moved} account card(s): {summary}.')
+PY542
 }
 
 rotated_domain_remove() {
@@ -439,11 +463,18 @@ rotated_domain_remove() {
     fi
     refs=$(grep -RFl -- "$target" /var/log/create 2>/dev/null | wc -l)
     if [ "${refs:-0}" -gt 0 ] && [ "$target" != "$installer_domain" ]; then
-        local replacement
-        replacement=$(all_rotated_domains | head -1)
-        [ -z "$replacement" ] && replacement="$installer_domain"
-        if [ -n "$replacement" ] && [ "$replacement" != "$target" ]; then
-            domain_reassign_cards "$target" "$replacement"
+        local -a replacements=()
+        local d
+        while IFS= read -r d; do
+            [ -n "$d" ] || continue
+            [ "$d" = "$target" ] && continue
+            replacements+=("$d")
+        done < <(all_rotated_domains)
+        if [ ${#replacements[@]} -eq 0 ] && [ -n "$installer_domain" ] && [ "$installer_domain" != "$target" ]; then
+            replacements+=("$installer_domain")
+        fi
+        if [ ${#replacements[@]} -gt 0 ]; then
+            domain_reassign_cards "$target" "${replacements[@]}"
         else
             echo "Warning: $refs account card(s) still mention $target and no replacement domain is available."
         fi
