@@ -3329,3 +3329,12 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
   3. `update.sh` marker-checks `menu` with `Found 528`; README and Decision 46 record the layout.
 - **Verified locally:** `bash -n` passes for both menus and `update.sh`; the template places the heading immediately above the block in both editions; the updater marker harness passes at 100 full / 89 lite scripts.
 - **Verified live (2026-11-02):** updater `b505a19` (target `aa75243`) moved all three boxes from `d2d61da` to `aa75243`; each reported `UPDATE SUCCESS`, `.update-commit` matches, and the installed `/usr/bin/menu` carries `Found 528`. The rendered menu showed `LICENSE` above the five lines on rohserver6, rohserver1, and rohserver3. A fake `curl` failing every request still rendered the same block from cache with `(cached)` values and returned 0 on all three. All 12 checked services stayed active and `systemctl --failed` was empty. Backups: `/root/fn-update-backup-20261102-121208` (rohserver6), `-041208` (rohserver1), `-121208` (rohserver3).
+
+### Fix 529 - Strict backup IPv4 validation (follow-up to Fix 526)
+
+- **Fix 529 (follow-up to Fix 526):**
+  1. `full/backup.sh` and `lite/backup.sh` add `is_ipv4()`: exactly four octets, each containing only digits and each at most 255.
+  2. `get_public_ipv4()` uses `is_ipv4()` for every live probe and for the `/etc/.ip` fallback. A malformed probe reply is skipped; the next probe or the fallback is still tried.
+  3. `update.sh` marker-checks `backup` with `Found 529`.
+- **Evidence:** Fix 526's inline check `NF==4 && $1<=255 && ...` used awk numeric comparison, so a body such as `1.2.3.-4` was accepted as an IPv4 address and could reach the Telegram caption. Decision 44 requires a validated dotted-quad.
+- **Verified locally:** a 16-case harness checked `is_ipv4` with valid addresses, `255.255.255.255`, `0.0.0.0`, negative and alphabetic octets, >255 octets, too few/many octets, and an empty string; then exercised `get_public_ipv4` with a valid live reply, a malformed live reply falling back to `/etc/.ip`, all probes failing with a valid cache, all probes failing with malformed caches, and no cache. All passed. `bash -n` passes for both backup scripts and `update.sh`; the updater marker harness and payload verification pass.

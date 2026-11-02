@@ -15,19 +15,32 @@ echo ""
 
 # Found 526: never leave the backup IP blank. Probe several sources, accept only
 # a valid IPv4, and fall back to the address recorded at install time.
+# Found 529: make that validation strict - every octet must be digits and <=255.
+is_ipv4() {
+    printf '%s\n' "$1" | awk -F. '
+        NF != 4 { exit 1 }
+        {
+            for (i = 1; i <= 4; i++) {
+                if ($i !~ /^[0-9]+$/ || $i > 255) exit 1
+            }
+            exit 0
+        }
+    '
+}
+
 get_public_ipv4() {
     local url ip
     for url in https://ifconfig.me https://ipv4.icanhazip.com https://api.ipify.org https://ipinfo.io/ip; do
         ip=$(curl -4 -fsSL --max-time 8 "$url" 2>/dev/null) || continue
         ip=$(printf '%s' "$ip" | tr -d '[:space:]')
-        if printf '%s\n' "$ip" | awk -F. 'NF==4 && $1<=255 && $2<=255 && $3<=255 && $4<=255 {ok=1} END{exit !ok}'; then
+        if is_ipv4 "$ip"; then
             printf '%s\n' "$ip"
             return 0
         fi
     done
     if [ -r /etc/.ip ]; then
         ip=$(tr -d '[:space:]' < /etc/.ip 2>/dev/null)
-        if printf '%s\n' "$ip" | awk -F. 'NF==4 && $1<=255 && $2<=255 && $3<=255 && $4<=255 {ok=1} END{exit !ok}'; then
+        if is_ipv4 "$ip"; then
             printf '%s\n' "$ip"
             return 0
         fi

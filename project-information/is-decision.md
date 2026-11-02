@@ -614,3 +614,11 @@ no Cloudflare-only header anywhere, zero `grpcRealIp` remnants in tree or test b
 - **Safety:** display-only. No auth, cache, gate, or mutation behavior changed. `update.sh` marker-checks `menu` with `Found 528`.
 - **Verified locally:** `bash -n` passes for both menus and `update.sh`; the rendered template places `${purple}LICENSE${NC}` immediately above the licence/version block in both editions; the updater marker harness passes at 100 full / 89 lite scripts.
 - **Verified live (2026-11-02):** updater `b505a19` (target `aa75243d5230512f24c7ea84eeef0211eebc64f2`) moved all three boxes from `d2d61da` to `aa75243`; each reported `UPDATE SUCCESS` and `.update-commit` matches. The rendered menu showed `LICENSE` immediately above `Username`, `IPv4`, `Expired`, `Installed version`, and `Updated version` on all three. With a fake `curl` failing every request, the same block rendered from cache with `(cached)` values and returned 0. All 12 checked services stayed active and `systemctl --failed` was empty. Backups: `/root/fn-update-backup-20261102-121208` (rohserver6), `-041208` (rohserver1), `-121208` (rohserver3).
+
+## 47. Backup IPv4 Validation Rejects Non-Numeric Octets
+
+- **Component:** `full/backup.sh`, `lite/backup.sh`, `update.sh`.
+- **Decision:** the backup IP helper accepts only four octets that are entirely digits and each at most 255. `get_public_ipv4()` applies that check to every probe reply and to the `/etc/.ip` fallback; malformed replies are skipped and the next source is tried.
+- **Reason:** Fix 526 used `awk -F. 'NF==4 && $1<=255 && ...'`, which accepted a body such as `1.2.3.-4` because awk compared `-4` numerically. That contradicted Decision 44's requirement for a validated dotted-quad and could put a malformed value into the Telegram caption.
+- **Safety:** valid IPv4 addresses behave exactly as before; the four bounded probes and `/etc/.ip` fallback are unchanged. A malformed probe now costs one skipped source, not a display failure. `update.sh` marker-checks `backup` with `Found 529`.
+- **Verified locally:** a 16-case harness covered valid, boundary, negative, alphabetic, over-255, wrong-octet-count, empty, live-probe, fallback, and cache cases; all passed. `bash -n` passes for both backup scripts and `update.sh`; the updater marker harness and payload verification pass.
