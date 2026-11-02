@@ -1082,8 +1082,8 @@ What it does:
   and the update changes the version, that detected live version is also
   recorded in `.install-commit` as the install baseline. The target remains
   pinned in `update.sh`; currently
-  `aa75243d5230512f24c7ea84eeef0211eebc64f2` (Fix 528 content; the updater
-  script itself also carries Fix 520–527). It fetches 107 files on full,
+  `0cfa0d7455c856f88a9fc72e2ea8180fd2717f36` (Fix 529 content; the updater
+  script itself also carries Fix 520–529). It fetches 107 files on full,
   95 on lite, including `quota-xhttp`, `kill-xhttp`, every `extend-*`, and the
   maintenance scripts that no longer carry a license gate; the updater
   restarts an active `quota-xhttp` after installing the new daemon. The four

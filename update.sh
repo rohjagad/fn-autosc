@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# FN AutoSC updater: live marker -> aa75243
+# FN AutoSC updater: live marker -> 0cfa0d7
 #
 # Applies the commits on top of b6d1a97 (1-minute evidence window,
 # Exp-Date-N/A binary fix, LOCKED IPs block, MULTILOGIN UNLOCKED
@@ -14,8 +14,8 @@
 # global daemon restart, installer-domain/rotated-domain separation
 # with per-domain account counts, licence gate scoped to create/extend/
 # install so maintenance and quota daemons no longer depend on auth, backup
-# Telegram IP always populated with probe fallbacks, main-menu licence identity
-# restored without gating under a LICENSE heading)
+# Telegram IP always populated with probe fallbacks and strict IPv4 validation,
+# main-menu licence identity restored without gating under a LICENSE heading)
 # to a live install. The file set is a superset covering the earlier
 # ranges too, so older installs are brought fully up to date in one
 # run. Safe to run: files are backed up first, every download is
@@ -24,7 +24,7 @@
 # missing).
 #
 # Usage:
-#   bash update.sh                  # live marker -> aa75243 (default)
+#   bash update.sh                  # live marker -> 0cfa0d7 (default)
 #   bash update.sh <commit> --force  # re-apply even if already recorded
 #
 # One-line remote run:
@@ -36,7 +36,7 @@ set -u
 # version is read from the live panel below, so this value only appears when
 # both markers are missing.
 FROM="6b967af9e0ebadc76a265132e49d62a27ad72235"
-TARGET="${1:-aa75243d5230512f24c7ea84eeef0211eebc64f2}"
+TARGET="${1:-0cfa0d7455c856f88a9fc72e2ea8180fd2717f36}"
 FORCE=0
 [ "${2:-}" = "--force" ] && FORCE=1
 
