@@ -1,6 +1,7 @@
 #!/bin/bash
 # Found 525: license is enforced only for create/extend/install.
 # Found 532: cron has no terminal; suppress output so the root mailbox stays quiet.
+# Found 540: enroll only panel accounts (SSH card present), not every OS user.
 if [ ! -t 1 ]; then exec >/dev/null 2>&1; fi
 
 [[ -e $(which curl) ]] && grep -q "1.1.1.1" /etc/resolv.conf || { 
@@ -183,15 +184,19 @@ fi
 clear
 echo ""
 echo ""
-# Bug 64: field 3 of /etc/passwd is the UID, field 4 is the GID. The old
-# pattern discarded the UID and enrolled every account whose GID >= 1000
-# (system accounts such as sync/_apt/sshd) while exempting real users whose
-# primary group is below 1000. Match the Go tools (uid >= 1000, uid < 65534).
-username=$(while IFS=: read -r username _ uid _ _ _ _; do
-    if [[ $uid -ge 1000 && $uid -lt 65534 && $username != "nobody" && $username != "root" ]]; then
-        echo "$username"
-    fi
-done < /etc/passwd)
+# Found 540: enroll only panel accounts, not every human OS user. The old
+# UID-based list created a default limit file for any UID >= 1000, so a
+# non-panel user such as rohcuan got the file back on the next tick after
+# Fix 538 removed it. A panel account is a user with a card (or a locked
+# card); orphan limit files are removed by the Bug 64 cleanup below.
+username=$(for card in /var/log/create/ssh/*.log /var/log/create/ssh/*.locked; do
+    [ -e "$card" ] || continue
+    name=$(basename "$card")
+    name=${name%.log}
+    name=${name%.locked}
+    [[ "$name" =~ ^[a-z0-9_]+$ ]] || continue
+    getent passwd "$name" >/dev/null 2>&1 && echo "$name"
+done | sort -u)
 
 # Membuat direktori jika belum ada
 if [ ! -d "/etc/xray/limit/ip/ssh" ]; then
