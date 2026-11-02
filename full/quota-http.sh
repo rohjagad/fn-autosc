@@ -5,7 +5,8 @@
     echo "nameserver 1.1.1.1" | cat - /etc/resolv.conf >> /etc/resolv.conf.tmp && mv /etc/resolv.conf.tmp /etc/resolv.conf
 }
 
-clear
+# Found 533: systemd services have no TTY; skip clear and keep the journal clean.
+[ -t 1 ] && clear || true
 echo ""
 echo ""
 # Fungsi untuk mengirim log ke Telegram
