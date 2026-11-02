@@ -40,7 +40,7 @@ VM-3 ──┘                      ▲
 
 Check these three on every screen you open:
 
-1. **Wording:** simple words a junior IT understands. No typo. Same term everywhere (e.g. do not mix `Expired` / `Kadaluarsa` on one screen). Units shown (`GB`, `days`, `IP`). Domain rule: no `Primary`/`Default`/`Extra` anywhere user-visible; account cards show `Domains` (plural, full set), single-domain inventory screens show `Domain` (singular) — grep every wording change against all variants (`primary`, `default`, `extra`, `utama`, singular vs plural).
+1. **Wording:** simple words a junior IT understands. No typo. Same term everywhere (e.g. do not mix `Expired` / `Kadaluarsa` on one screen). Units shown (`GB`, `days`, `IP`). Domain rule: no `Primary`/`Default`/`Extra` anywhere user-visible; account cards show `Rotated Domain` (or `Rotated Domains` for L2TP/NoobzVPN), single-domain inventory screens show `Domain` (singular) — grep every wording change against all variants (`primary`, `default`, `extra`, `utama`, singular vs plural).
 2. **Navigation:** every number works. `0` goes back to parent, never drops to shell. Wrong number re-shows the menu. Empty `Enter` is rejected with a clear message, no crash. `Ctrl+D` (EOF) exits cleanly (`exit 0`).
 3. **Layout tidiness:** header centered, separator lines same length, `Label : value` colons aligned, no wrapped/truncated lines at 80 cols, colors reset at end, account card stays on screen (pause) before clear. Title/bottom separators rainbow `---` 35, inner dividers blue `---` 35, exactly 2 blank lines after each `clear`, picker lists green-numbered (`01.`) with `Total Accounts` and number-or-name input. Cards/notices: bare uppercase titles, `Protocol :` + `Transport:` rows, `DD-Mon-YYYY` dates, `XRAY` spelling, green-double titles / blue-single links in Telegram, titles centered on card width in TUI with left payload. SSH online table: `Username Login Type`, no pipes, equal gaps, `n / limit`, `Dropbear`/`Openssh`.
 
@@ -136,14 +136,14 @@ Each phase below lists: **Goal**, **K** (client traffic), **S** (menu walk), **P
 
 - **Goal:** each tunnel connects (or fails only for documented reason).
 - **K:** WG: `wg-quick up`, ping `10.66.66.1`; create 2 WG accounts sequentially and confirm endpoints + config URLs rotate domains (same `.domainseq` as xray). WARP: after setup, exactly one `### WARP` block survives restart with keepalive + IPv4 endpoint. Noobz on 8080/8443 with payload auth (full login needs the official client — proven partial: ports open, unauthenticated use refused). SlowDNS via UDP 53 (needs public NS delegation; lab filters TXT, so remote is unprovable here — VPS-loopback tunnel PROVEN 2026-10-10: dnstt-client → `:5300`, same session id on client + server journal). L2TP: control-plane only — no `/dev/ppp` on box or cloud kernel and no IPsec, so no data path can exist here (not a panel defect). OpenVPN TCP 1194 + UDP 2200 full logins PROVEN 2026-10-10 via KVM (tun IPs, ping, SSH-auth through tunnel; shared-cert + PAM password).
-- **S:** `menu-wg`, `menu-noobz`, `menu-dnstt` → create `livetest_*` via TUI; card per tunnel complete and pause-readable. WG card shows `Domains` list; SlowDNS info shows port `53` (user-facing), never `5300`.
+- **S:** `menu-wg`, `menu-noobz`, `menu-dnstt` → create `livetest_*` via TUI; card per tunnel complete and pause-readable. WG card shows the assigned `Rotated Domain`; SlowDNS info shows port `53` (user-facing), never `5300`.
 - **PASS:** WG + Noobz + OpenVPN live; SlowDNS/L2TP judged per known-limitation note, not as fail.
 
 ### Fase 8: Create cycle + duplicate guard
 
 - **Goal:** accounts created cleanly, doubles refused.
 - **K:** none extra (accounts from F4–F7 reused).
-- **S:** in each `add-*` screen: try empty name (rejected), bad chars (rejected, no shell eval), existing name (duplicate message), `0` for limit/quota/days (`0 not allowed`, Decision 4). Verify JSON has `"level": 0`. Rotation: sequential creates spread across canonical + colors (`/etc/xray/.colorseq` advances; decode links to confirm), and across domains when extras exist (`/etc/xray/.domainseq`; cards show `Domains` list only, never a `Domain` line; WG endpoints rotate the same way — prove with 2 accounts).
+- **S:** in each `add-*` screen: try empty name (rejected), bad chars (rejected, no shell eval), existing name (duplicate message), `0` for limit/quota/days (`0 not allowed`, Decision 4). Verify JSON has `"level": 0`. Rotation: sequential creates spread across canonical + colors (`/etc/xray/.colorseq` advances; decode links to confirm), and across domains when extras exist (`/etc/xray/.domainseq`; cards show `Rotated Domain` only, never an `Installer Domain` line; WG endpoints rotate the same way — prove with 2 accounts).
 - **PASS:** all rejections clean, JSON valid.
 
 ### Fase 9: IP-limit + lock/unlock
@@ -183,9 +183,9 @@ Each phase below lists: **Goal**, **K** (client traffic), **S** (menu walk), **P
 
 ### Fase 14: Domain list, rotation, and cert safety
 
-- **Rotation semantics (operator rule):** rotation is link-text insertion ONLY — the rotated domain is substituted into link hosts on the card; no connection/server-side change (all domains terminate on the same VPS/nginx). There is NO default domain: the installer domain is the primary entry, extras round-robin via `/etc/xray/.domainseq` with no implicit default. All account cards (TUI, Telegram, `.log`) show `Domains :` (full list) only, never a `Domain :` line.
+- **Rotation semantics (operator rule):** rotation is link-text insertion ONLY — the rotated domain is substituted into link hosts on the card; no connection/server-side change (all domains terminate on the same VPS/nginx). There is NO default domain: the installer domain is the Nginx/certificate anchor and is not implicitly added; the rotated list round-robins via `/etc/xray/.rotated-domainseq` with no implicit default. All account cards (TUI, Telegram, `.log`) show `Rotated Domain :` (or `Rotated Domains :` for L2TP/NoobzVPN), never an `Installer Domain :` line.
 - **Goal:** extra domains add cleanly, rotation spreads, TLS never bricks.
-- **K:** add nip.io-style or operator test domains pointing here (proven set: primary + 2 extras); `openssl s_client` shows each in SANs after the auto self-sign; decode N sequential links to prove round-robin across ALL domains with no stickiness; remove extras one by one; LE cert restored byte-identical after (back up `/etc/xray/xray.crt/.key` before, restore + reload after).
+- **K:** add nip.io-style or operator test domains pointing here (proven set: installer + 2 rotated extras); `openssl s_client` shows each in SANs after the auto self-sign; decode N sequential links to prove round-robin across ALL domains with no stickiness; remove extras one by one; LE cert restored byte-identical after (back up `/etc/xray/xray.crt/.key` before, restore + reload after).
 - **S:** `dm-menu`: options 1–6 present; `bad domain` rejected, files unchanged; add validates + dedupes; list shows one shared-framed card per domain with matching protocol counts; remove empties the file and restores single `server_name` (no `.tmp` leftovers). Options 4–6 pick a domain first — cancel paths verified clean (no issuance); ONE real Acme issuance (option 4, IPv4) executed 2026-10-10 on the test box and SUCCEEDED (LE 90-day cert, public chain verifies, traffic checksum match) — repeat sparingly (LE rate limits), always from a cancel-safe state.
 - **PASS:** add/remove/list round-trip clean; cancel paths write nothing; cert identical after restore; nginx -t clean throughout.
 
@@ -236,7 +236,7 @@ Each phase below lists: **Goal**, **K** (client traffic), **S** (menu walk), **P
 
 - **Goal:** template = installed = card; tools tell the truth.
 - **K:** new account link UUID/password == JSON; deleted == gone everywhere.
-- **S:** `cek-xray-*`, `list-ssh`, `cek-login-ssh` vs raw state (`grep '^###'`, `chage`, `passwd -S`): no fake `UNLOCKED`/`No Expiry`/`0/0`; `cek-login-ssh` prints the 3-column `Username Login Type` table (counts match log lines, `n / limit`, capitalized type); missing-binary simulation errors explicitly (then restore binary). Drift matrix: 36 color locations present with canonical-matching status; rotated link paths + domains decode valid; `server_name` lists primary + extras with no placeholder.
+- **S:** `cek-xray-*`, `list-ssh`, `cek-login-ssh` vs raw state (`grep '^###'`, `chage`, `passwd -S`): no fake `UNLOCKED`/`No Expiry`/`0/0`; `cek-login-ssh` prints the 3-column `Username Login Type` table (counts match log lines, `n / limit`, capitalized type); missing-binary simulation errors explicitly (then restore binary). Drift matrix: 36 color locations present with canonical-matching status; rotated link paths + domains decode valid; `server_name` lists installer + rotated domains with no placeholder.
 - **PASS:** 1:1 ports/paths, no placeholder `server_name`, no false success.
 
 ---
