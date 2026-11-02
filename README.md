@@ -67,9 +67,11 @@ account. That covers `install.sh`/`installer/*`, the `add-*`/`trial-*`/`addssh`
 commands, the WireGuard/L2TP/NoobzVPN create actions, Cloudflare WARP account
 creation, and the `extend-*`/auxiliary extend actions.
 
-Everything else — menus, deletes, quota, IP limits, auto-delete, expiry,
-routing, backup/restore, and service management — runs without contacting the
-authorization sources. If both sources are unreachable, only create/extend/
+Everything else — deletes, quota, IP limits, auto-delete, expiry, routing,
+backup/restore, and service management — runs without requiring authorization.
+The main menu reads the list only to display the licence username, VPS IP, and
+expiry; it never blocks and falls back to the last cached match when both
+sources are unreachable. If both sources are unreachable, only create/extend/
 install stop; running services and maintenance keep working. If the IP is not
 listed or the expiry date has passed, those gated actions fail closed.
 
@@ -212,8 +214,12 @@ Every menu is a command. Type it in the terminal to open it.
 ### Main Menu — `menu`
 
 The dashboard. Shows the SSH version, domain, IP, uptime, ISP/region, account
-counts per protocol, service status, recent traffic, and the installed /
-updated panel commits (from `update.sh`).
+counts per protocol, service status, recent traffic, the licence username /
+VPS IPv4 / expiry, and the installed / updated panel commits (from
+`update.sh`). The licence values are refreshed from both auth sources when the
+menu opens; if both are unreachable, the last successful match is shown as
+`(cached)` and the menu still opens. The licence lines are display-only and
+never gate the menu.
 
 | Option | Opens |
 | :---: | :--- |
@@ -882,6 +888,7 @@ Files are named `{username}.log`. Locking renames them to `{username}.locked`.
 | Version | `/etc/funny/version` |
 | Install commit | `/etc/funny/.install-commit` (written by the installer) |
 | Update commit | `/etc/funny/.update-commit` (written by `update.sh`) |
+| Licence cache | `/var/lib/fn-autosc/license-info` (main-menu display fallback only) |
 
 The three version markers above are not archived; restore keeps the running
 copies so an old backup cannot make the menu display an older panel version.
@@ -894,7 +901,9 @@ so `Installed version` is populated immediately. `Updated version` shows
 markers display `not recorded` / `not updated`, never `Unknown`; when the
 install marker is missing or invalid and an update actually changes the
 version, `update.sh` records the detected live version as the baseline. A
-same-target rerun leaves the marker alone.
+same-target rerun leaves the marker alone. The licence identity lines above
+the version lines are display-only: a stale cache or an unreachable source
+changes only those three lines, never menu access.
 
 ### Quota & IP Limit Files
 

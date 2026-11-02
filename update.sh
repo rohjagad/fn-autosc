@@ -147,7 +147,7 @@ marker_for() {
         delete-ws) echo 'Delete WS Account' ;;
         delete-xhttp) echo 'Delete XHTTP Account' ;;
         menu-system) echo 'Banner /etc/issue.net' ;;
-        menu) echo 'Installed version' ;;
+        menu) echo 'Found 527' ;;
         dm-menu | menu-wg | xl2tp | menu-noobz) echo 'Installer Domain' ;;
         add-* | trial-*) echo 'Rotated Domain' ;;
         addssh | trial-ssh) echo 'Rotated Domain' ;;

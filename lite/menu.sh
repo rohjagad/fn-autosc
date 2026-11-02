@@ -16,7 +16,107 @@ version_label() {
     esac
 }
 
+# Found 527: show the licence identity without gating the menu. The two auth
+# sources are raced briefly; if both are unreachable the last good match is
+# shown as cached and the menu still opens.
+license_cache_file="/var/lib/fn-autosc/license-info"
+
+license_payload_ok() {
+    awk 'NF >= 4 && $1 == "###" { ok = 1 } END { exit !ok }' "$1" 2>/dev/null
+}
+
+license_refresh() {
+    local tmp data="" end p1 p2 running
+    tmp=$(mktemp -d) || return 1
+    curl -4 -fsSL --max-time 3 "https://fn-autosc-auth.pages.dev/izin.txt" -o "$tmp/pages" 2>/dev/null & p1=$!
+    curl -4 -fsSL --max-time 3 "https://raw.githubusercontent.com/rohjagad/fn-autosc-auth/main/izin.txt" -o "$tmp/github" 2>/dev/null & p2=$!
+    end=$((SECONDS+4))
+    while [ $SECONDS -lt $end ]; do
+        for f in "$tmp/pages" "$tmp/github"; do
+            if license_payload_ok "$f"; then data=$(cat "$f"); break 2; fi
+        done
+        running=$(jobs -pr)
+        if ! printf '%s\n' "$running" | grep -qx "$p1" && ! printf '%s\n' "$running" | grep -qx "$p2"; then break; fi
+        sleep 1
+    done
+    kill "$p1" "$p2" 2>/dev/null
+    wait "$p1" "$p2" 2>/dev/null
+    rm -rf "$tmp"
+    [ -n "$data" ] || return 1
+    printf '%s\n' "$data"
+}
+
+license_expiry_label() {
+    local expiry="$1" expired_epoch today
+    if [ "$expiry" = "lifetime" ]; then
+        printf 'lifetime'
+        return 0
+    fi
+    today=$(date +%s)
+    if expired_epoch=$(date -d "$expiry" +%s 2>/dev/null); then
+        printf '%s (%d days)' "$expiry" $(( (expired_epoch - today) / 86400 ))
+    else
+        printf '%s' "$expiry"
+    fi
+}
+
+license_match_for_ip() {
+    local data="$1" ip="$2"
+    [ -n "$ip" ] || return 1
+    printf '%s\n' "$data" | grep "###" | grep -wF "$ip" | head -n 1
+}
+
+license_display() {
+    local data="" match="" cached="" cache_tmp="" ip="" install_ip="" cache_ip="" expiry=""
+    ip=$(printf '%s\n' "${ip_display:-}" | grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}' | head -n 1)
+    [ -n "$ip" ] || ip=$(tr -d '[:space:]' < /etc/.ip 2>/dev/null)
+    install_ip=$(tr -d '[:space:]' < /etc/.ip 2>/dev/null)
+
+    if data=$(license_refresh); then
+        match=$(license_match_for_ip "$data" "$ip")
+        if [ -z "$match" ] && [ -n "$install_ip" ] && [ "$install_ip" != "$ip" ]; then
+            match=$(license_match_for_ip "$data" "$install_ip")
+        fi
+        if [ -n "$match" ]; then
+            mkdir -p "$(dirname "$license_cache_file")" 2>/dev/null
+            cache_tmp="${license_cache_file}.$$"
+            if printf '%s\n' "$match" > "$cache_tmp" 2>/dev/null; then
+                chmod 600 "$cache_tmp" 2>/dev/null
+                mv -f "$cache_tmp" "$license_cache_file" 2>/dev/null || rm -f "$cache_tmp" 2>/dev/null
+            fi
+            expiry=$(printf '%s\n' "$match" | awk '{print $4}')
+            echo "Username          : $(printf '%s\n' "$match" | awk '{print $2}')"
+            echo "IPv4              : $(printf '%s\n' "$match" | awk '{print $3}')"
+            echo "Expired           : $(license_expiry_label "$expiry")"
+            return 0
+        fi
+        rm -f "$license_cache_file" 2>/dev/null
+        echo "Username          : unlicensed"
+        echo "IPv4              : ${ip:-${install_ip:-unknown}}"
+        echo "Expired           : none"
+        return 0
+    fi
+
+    cached=$(head -n 1 "$license_cache_file" 2>/dev/null)
+    case "$cached" in
+        "### "*)
+            cache_ip=$(printf '%s\n' "$cached" | awk '{print $3}')
+            expiry=$(printf '%s\n' "$cached" | awk '{print $4}')
+            if [ -n "$cache_ip" ] && [ -n "$expiry" ] && { [ "$cache_ip" = "$ip" ] || { [ -n "$install_ip" ] && [ "$cache_ip" = "$install_ip" ]; }; }; then
+                echo "Username          : $(printf '%s\n' "$cached" | awk '{print $2}') (cached)"
+                echo "IPv4              : $cache_ip (cached)"
+                echo "Expired           : $(license_expiry_label "$expiry") (cached)"
+                return 0
+            fi
+            ;;
+    esac
+    echo "Username          : unavailable"
+    echo "IPv4              : ${ip:-${install_ip:-unavailable}}"
+    echo "Expired           : not checked"
+}
+
 output() {
+    license_display
     _installed=$(version_label /etc/funny/.install-commit "not recorded")
     _updated=$(version_label /etc/funny/.update-commit "not updated")
     echo "Installed version : $_installed"
