@@ -404,3 +404,11 @@ Schedules observed live: `backup 0 0,6,12,18`, `xp 0,15,30,45`,
 - **Accuracy note:** the earlier Fix 525 live test recorded `menu` running with zero auth calls. Fix 527 intentionally supersedes that for `menu` only: it now performs a bounded, display-only auth read when the menu opens. `menu-system` and the maintenance/quota commands remain zero-auth.
 - **Health:** all 12 checked services per box (`quota-*`, `xray@*`, Nginx, HAProxy, SSH, Dropbear) stayed active, `systemctl --failed` was empty, and no new auth, lock, expiry, or unbound-variable errors appeared.
 - Result: the main menu again shows the licence username, VPS IPv4, and script expiry, and still opens from cache when both auth sources are unreachable.
+
+## LICENSE heading - three VPS (2026-11-02)
+
+- **Change:** updater `b505a19` (target `aa75243d5230512f24c7ea84eeef0211eebc64f2`, Fix 528) moved rohserver6, rohserver1, and rohserver3 from `d2d61da` to `aa75243`; all three reported `UPDATE SUCCESS` and now have `.update-commit=aa75243d5230512f24c7ea84eeef0211eebc64f2`. Backups: `/root/fn-update-backup-20261102-121208` (rohserver6), `-041208` (rohserver1), `-121208` (rohserver3).
+- **Rendered menu:** all three showed `LICENSE` immediately above the same five lines: `Username`, `IPv4`, `Expired`, `Installed version`, `Updated version`. The heading uses the same purple style as `TOTAL ACCOUNTS` and `MENU`.
+- **Offline:** a fake `curl` that failed every request still rendered the `LICENSE` block from cache with `(cached)` values and `menu_rc=0` on all three.
+- **Health:** all 12 checked services per box stayed active, `systemctl --failed` was empty, and no new auth, lock, expiry, or unbound-variable errors appeared.
+- Result: the licence and version lines are now grouped under a labelled section instead of appearing as unlabelled text.
