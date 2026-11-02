@@ -3299,3 +3299,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | An account needs both a card (`.log` or `.locked`) and an OS user to be enrolled. A plain OS user without a card is ignored, which is intentional; an orphan limit file is still removed by the existing Bug 64 cleanup. The fix does not delete users or modify cards, quotas, or JSON. |
 | **Over-engineering** | The UID loop is replaced by a card loop and a `getent passwd` existence check; no new file, service, or dependency. The existing cleanup and enforcement code is reused unchanged. |
 | **vs the source** | The source enrolled every UID >= 1000, so `rohcuan` got a default limit file back on the next tick after Fix 538 removed it. Divergence: enroll only panel accounts, which is what the limiter has always been meant to manage. |
+
+## 302. Deleting a rotated domain removes all remnants without dropping sessions (Fix 541) — Four Checks (November 2, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Existing accounts, UUIDs/passwords, expiries, quotas, and JSON entries are untouched. The installer domain is never removed from Nginx or the certificate when option 2 removes a duplicate entry. Account cards are rewritten only for the exact deleted hostname, including base64 `vmess://` payloads, so reissued cards point at a live domain. Established sessions survive because only `nginx`/`haproxy` reloads are used and NoobzVPN is not restarted. |
+| **Over-strictness** | The domain must match the existing DNS-hostname pattern before any `rm` path is built. Only a self-signed certificate is regenerated; a CA-issued certificate is left byte-identical with a warning. A failed `nginx -t` restores the saved certificate, key, and HAProxy PEM and leaves the migration marker absent for retry. Missing ACME/Certbot directories are no-ops. |
+| **Over-engineering** | Two helper functions (`cert_is_selfsigned`, `domain_remove_cert_state`), one card rewriter, and one optional `graceful` argument on the existing certificate generator. No new daemon, state file, or dependency; `openssl` and `python3` are already required by the panel. |
+| **vs the source** | The source removed only the rotated-list entry and Nginx name; the old SAN, ACME/Certbot state, and card links survived. Divergence: delete the actual domain artifacts and reassign cards, while keeping the Nginx default 443 server so arbitrary SNI + `allowInsecure=yes` still works. |

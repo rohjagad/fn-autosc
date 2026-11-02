@@ -741,11 +741,22 @@ key and is mode `0600`.
 The installer domain is written once by the installer to
 `/etc/xray/installer-domain` and is never rewritten by the menu. On a fresh
 install it is also seeded into `/etc/xray/rotated-domains`; option 2 can remove
-it from that list. Adding or removing a rotated domain only updates
-`/etc/xray/rotated-domains`, rebuilds the Nginx `server_name`, backs up the old
-value, and reinstalls the certificate atomically in the same step. If the
-rotated list becomes empty, account creation for Xray, SSH, and WireGuard stops
-with a notice until option 1 adds a domain.
+it from that list.
+
+Adding a rotated domain updates the list, rebuilds the Nginx `server_name`,
+and installs a self-signed multi-SAN certificate. Removing one also drops the
+name from the active certificate SAN, deletes its ACME/Certbot state, and
+rewrites account cards that still mention it to the first remaining domain
+(UUID/password/expiry unchanged, including base64 `vmess://` payloads). A
+CA-issued certificate is never replaced by a self-signed one during deletion;
+the menu warns and asks for a reissue instead.
+
+Removal uses `nginx`/`haproxy` reloads and never restarts NoobzVPN, so
+established sessions stay up. The default 443 Nginx server remains, so
+arbitrary SNI with `allowInsecure=yes` still reaches Xray; users who use the
+deleted hostname as their address must switch to a live domain. If the rotated
+list becomes empty, account creation for Xray, SSH, and WireGuard stops with a
+notice until option 1 adds a domain.
 
 ### Renewing After Certificate Expiry
 
@@ -1044,6 +1055,11 @@ Binaries are built with `-ldflags='-s -w'` for a small footprint.
   its account list from the SSH cards instead of every UID ≥ 1000, so a plain
   OS account such as `rohcuan` no longer gets a default IP-limit file
   recreated every 5 minutes.
+- **Deleted domains left certificate and ACME remnants** — removing a rotated
+  domain now drops it from the certificate SAN, Nginx `server_name`, and
+  ACME/Certbot state, reassigns account cards to a live domain, and reloads
+  services without restarting them. Arbitrary SNI with `allowInsecure=yes`
+  still works through the default Nginx server.
 
 ---
 
@@ -1120,8 +1136,8 @@ What it does:
   and the update changes the version, that detected live version is also
   recorded in `.install-commit` as the install baseline. The target remains
   pinned in `update.sh`; currently
-  `42af316784c87cf6fc8af3638b5fe02ef83caddd` (Fix 539/540 content; the updater
-  script itself also carries Fix 520–540). It fetches 108 files on full,
+  `ac4555d5bdff28be02374b4c82c456049cb601b2` (Fix 541 content; the updater
+  script itself also carries Fix 520–541). It fetches 108 files on full,
   96 on lite, including `quota-xhttp`, `kill-xhttp`, every `extend-*`,
   `xray-add-client`, and the maintenance scripts that no longer carry a
   license gate; the updater restarts every active `quota-*` service after
@@ -1130,11 +1146,12 @@ What it does:
   restore the `simpang32` quota/IP limit, neutralize the published default
   Xray credentials, archive and truncate the accumulated root mailbox,
   remove the template client anchors after validating all four Xray configs,
-  and remove the stale `rohcuan` SSH limit (the limiter now enrolls panel
-  accounts only). The four `change-limit-ip` tools and the full `limit-ip`
-  tool ship as compiled binaries from `bin/<edition>/` and are checked
-  against pinned md5
-  fingerprints; shell files are syntax- and marker-checked. The account-card
+  remove stale certificate SAN entries left by earlier domain deletions
+  (reload only), and remove the stale `rohcuan` SSH limit (the limiter now
+  enrolls panel accounts only). The four `change-limit-ip` tools and the
+  full `limit-ip` tool ship as compiled binaries from `bin/<edition>/` and
+  are checked against pinned md5 fingerprints; shell files are syntax- and
+  marker-checked. The account-card
   formatter `/etc/funny/format.sh` is fetched from `config/`, and the web
   restore command `/usr/bin/restore-ftp` from `website/`, then refreshed too.
   The payload manifest and `installer/payload.sh` are installer-only; the

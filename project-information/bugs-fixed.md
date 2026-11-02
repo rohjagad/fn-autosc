@@ -3451,3 +3451,21 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - `systemctl --failed` is empty on all three; Nginx, HAProxy, SSH, Dropbear, `xray@{ws,grpc,xhttp,upgrade}`, `quota-{ws,http,grpc,xhttp}`, and `dnstt` are active.
 - All four live JSON configs pass `xray run -test`; the anchor markers are gone and the account counts match the pre-migration backups.
 - The `rohcuan` limit file stays removed and the OS user remains. No new JSON, lock, expiry, or unbound-variable error appeared after the updates.
+
+## Domain deletion cleanup (Fix 541)
+
+- **Payload commit:** `ac4555d5bdff28be02374b4c82c456049cb601b2`.
+- **Updater commit:** `d02276a5f2f80cde463a8e5577bf839997f3683f`.
+- **Deployment:** updater `d02276a` (target `ac4555d`) moved all three boxes from `42af316` to `ac4555d`; each reported `UPDATE SUCCESS` and `.update-commit` matches. Backups: `/root/fn-update-backup-20261102-180010` (rohserver6), `-100118` (rohserver1), `-180118` (rohserver3). Each full run fetched 108 files.
+- **Change:** `full/dm-menu.sh` and `lite/dm-menu.sh` option 2 now removes the selected rotated domain completely:
+  - deletes the exact entry from `/etc/xray/rotated-domains`;
+  - rebuilds the Nginx `server_name` from the installer domain plus the remaining rotated domains;
+  - removes the name from the active self-signed certificate SAN and regenerates `/etc/xray/xray.crt`/`xray.key` plus `/etc/haproxy/funny.pem`;
+  - deletes its `/etc/letsencrypt/live|archive|<domain>` state, `renewal/<domain>.conf`, and `/root/.acme.sh/<domain>`/`<domain>_ecc`;
+  - rewrites account cards under `/var/log/create` that still mention the domain to the first remaining rotated domain, including base64 `vmess://` payloads, leaving UUID/password/expiry untouched;
+  - uses `nginx`/`haproxy` reloads only and never restarts NoobzVPN, so established sessions stay up.
+- **CA-issued certificates:** deletion never replaces a CA-issued certificate with a self-signed one. It removes the domain from the list and ACME/Certbot state, warns that the active certificate still contains the name, and asks the operator to reissue from the certificate menu.
+- **Updater migration:** `.fix541-domain-cleanup` rebuilds the self-signed SAN from the current installer + rotated set once, removes stale ACME/Certbot state for names that are no longer configured, and reloads Nginx/HAProxy. It backs up the old certificate, key, and HAProxy PEM; if `nginx -t` fails it restores all three and leaves the marker absent for a retry. It never restarts Xray, Nginx, HAProxy, NoobzVPN, or any quota service.
+- **Verified locally:** a sandbox deletion removed the list entry, Nginx name, certificate SAN, ACME/Certbot state, and both plain and base64 `vmess://` card references; the certificate kept the installer and remaining domain and HAProxy PEM matched. Only `systemctl reload nginx` and `systemctl reload haproxy` were called; there was no restart. A CA-issued certificate was left byte-identical with a warning. A forced `nginx -t` failure restored the original certificate and did not remove ACME/Certbot state.
+- **Verified live:** the migration removed the stale `jualbatik.us.ci` SAN from rohserver6 and `garamkristal.cc.cd` from rohserver1; rohserver3 had no stale names. All three certificates now contain exactly the installer + rotated names, HAProxy PEM fingerprints match `xray.crt`, and `nginx -t` passes. An `openssl s_client` handshake with `live.iflix.com` and with `deleted-test.invalid` reached the default 443 server and returned the current self-signed certificate (`Verify return code: 18`), confirming that arbitrary SNI + `allowInsecure=yes` still works. `systemctl --failed` is empty and Nginx, HAProxy, SSH, Dropbear, all four Xray units, all four quota units, `dnstt`, and `noobzvpns` are active.
+- **Remaining remnant:** `/etc/xray/.quota.logs` keeps one audit line naming the removed SAN entry. It is an intentional record, not a configuration reference.
