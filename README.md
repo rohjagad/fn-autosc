@@ -746,8 +746,10 @@ it from that list.
 Adding a rotated domain updates the list, rebuilds the Nginx `server_name`,
 and installs a self-signed multi-SAN certificate. Removing one also drops the
 name from the active certificate SAN, deletes its ACME/Certbot state, and
-rewrites account cards that still mention it to the first remaining domain
-(UUID/password/expiry unchanged, including base64 `vmess://` payloads). A
+rewrites account cards that still mention it to the remaining domains. Cards
+are spread by current count, so the rotation stays balanced instead of
+piling onto one domain. UUID/password/expiry are unchanged, including base64
+`vmess://` payloads. A
 CA-issued certificate is never replaced by a self-signed one during deletion;
 the menu warns and asks for a reissue instead.
 
@@ -1057,9 +1059,12 @@ Binaries are built with `-ldflags='-s -w'` for a small footprint.
   recreated every 5 minutes.
 - **Deleted domains left certificate and ACME remnants** — removing a rotated
   domain now drops it from the certificate SAN, Nginx `server_name`, and
-  ACME/Certbot state, reassigns account cards to a live domain, and reloads
+  ACME/Certbot state, reassigns account cards to live domains, and reloads
   services without restarting them. Arbitrary SNI with `allowInsecure=yes`
   still works through the default Nginx server.
+- **Reassigned cards could pile onto one domain** — after a domain deletion,
+  cards are distributed to the least-used remaining domains by current card
+  count instead of all going to the first one, keeping the rotation balanced.
 
 ---
 
@@ -1136,8 +1141,8 @@ What it does:
   and the update changes the version, that detected live version is also
   recorded in `.install-commit` as the install baseline. The target remains
   pinned in `update.sh`; currently
-  `ac4555d5bdff28be02374b4c82c456049cb601b2` (Fix 541 content; the updater
-  script itself also carries Fix 520–541). It fetches 108 files on full,
+  `64226365c68774828e3d85ab51bf0b995c134593` (Fix 542 content; the updater
+  script itself also carries Fix 520–542). It fetches 108 files on full,
   96 on lite, including `quota-xhttp`, `kill-xhttp`, every `extend-*`,
   `xray-add-client`, and the maintenance scripts that no longer carry a
   license gate; the updater restarts every active `quota-*` service after

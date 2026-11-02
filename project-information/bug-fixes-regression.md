@@ -3308,3 +3308,12 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | The domain must match the existing DNS-hostname pattern before any `rm` path is built. Only a self-signed certificate is regenerated; a CA-issued certificate is left byte-identical with a warning. A failed `nginx -t` restores the saved certificate, key, and HAProxy PEM and leaves the migration marker absent for retry. Missing ACME/Certbot directories are no-ops. |
 | **Over-engineering** | Two helper functions (`cert_is_selfsigned`, `domain_remove_cert_state`), one card rewriter, and one optional `graceful` argument on the existing certificate generator. No new daemon, state file, or dependency; `openssl` and `python3` are already required by the panel. |
 | **vs the source** | The source removed only the rotated-list entry and Nginx name; the old SAN, ACME/Certbot state, and card links survived. Divergence: delete the actual domain artifacts and reassign cards, while keeping the Nginx default 443 server so arbitrary SNI + `allowInsecure=yes` still works. |
+
+## 303. Reassigned cards are spread across the remaining domains (Fix 542) — Four Checks (November 2, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | Only `.log` and `.locked` cards that mention the deleted hostname are rewritten. UUIDs, passwords, expiries, quotas, JSON entries, and unaffected cards keep their content. The `Rotated Domain` line and all plain/base64 links in a migrated card use the same assigned domain, so one card never points at two hosts. Existing cards are not rebalanced when no domain is deleted. |
+| **Over-strictness** | The assignment only considers the remaining rotated domains, falling back to the installer domain only when the rotated list is empty. Each migrated file is counted once, and the least-used domain is chosen after every assignment, so the final totals differ by at most one where the counts allow. If no replacement exists, the function leaves the cards and prints a warning. |
+| **Over-engineering** | The existing Python card rewriter gains a count pass and a `min()` choice; no new file, service, or dependency. The shell call passes the same candidate list it already built for the single-domain version. |
+| **vs the source** | Fix 541 sent every card to the first remaining domain, which could overload one name after a large deletion. Divergence: count the current cards and assign to the least-used domain, preserving the rotation's balance. |
