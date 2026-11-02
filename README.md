@@ -1071,7 +1071,7 @@ What it does:
   and the update changes the version, that detected live version is also
   recorded in `.install-commit` as the install baseline. The target remains
   pinned in `update.sh`; currently
-  `2c2b3f73a52bd67a7c2dbf067ab1005fc3c31cd6` (Fix 524 content; the updater
+  `a726c4a5bb89e5bf82cacefd6c3e77843c88943a` (Fix 525 content; the updater
   script itself also carries Fix 520–525). It fetches 107 files on full,
   95 on lite, including `quota-xhttp`, `kill-xhttp`, every `extend-*`, and the
   maintenance scripts that no longer carry a license gate; the updater

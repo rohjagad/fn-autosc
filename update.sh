@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# FN AutoSC updater: live marker -> 2c2b3f7
+# FN AutoSC updater: live marker -> a726c4a
 #
 # Applies the commits on top of b6d1a97 (1-minute evidence window,
 # Exp-Date-N/A binary fix, LOCKED IPs block, MULTILOGIN UNLOCKED
@@ -12,7 +12,8 @@
 # 777 HAProxy mapping with section-scoped logging checks, retry-safe
 # auto-unlock, slow-auth/IPv6 counts, scoped SSH expiry without a
 # global daemon restart, installer-domain/rotated-domain separation
-# with per-domain account counts)
+# with per-domain account counts, licence gate scoped to create/extend/
+# install so maintenance and quota daemons no longer depend on auth)
 # to a live install. The file set is a superset covering the earlier
 # ranges too, so older installs are brought fully up to date in one
 # run. Safe to run: files are backed up first, every download is
@@ -21,7 +22,7 @@
 # missing).
 #
 # Usage:
-#   bash update.sh                  # live marker -> 2c2b3f7 (default)
+#   bash update.sh                  # live marker -> a726c4a (default)
 #   bash update.sh <commit> --force  # re-apply even if already recorded
 #
 # One-line remote run:
@@ -33,7 +34,7 @@ set -u
 # version is read from the live panel below, so this value only appears when
 # both markers are missing.
 FROM="6b967af9e0ebadc76a265132e49d62a27ad72235"
-TARGET="${1:-2c2b3f73a52bd67a7c2dbf067ab1005fc3c31cd6}"
+TARGET="${1:-a726c4a5bb89e5bf82cacefd6c3e77843c88943a}"
 FORCE=0
 [ "${2:-}" = "--force" ] && FORCE=1
 
@@ -99,16 +100,29 @@ fi
 FILES="xp quota-xhttp kill-xhttp limit-ip-ws limit-ip-http limit-ip-xhttp limit-ip-grpc
 delete-ws delete-xhttp menu-system menu backup bmenu dm-menu
 add-trojan-grpc add-trojan-http add-trojan-ws add-trojan-xhttp add-vless-grpc add-vless-http add-vless-ws add-vless-xhttp add-vmess-grpc add-vmess-http add-vmess-ws add-vmess-xhttp trial-trojan-grpc trial-trojan-http trial-trojan-ws trial-trojan-xhttp trial-vless-grpc trial-vless-http trial-vless-ws trial-vless-xhttp trial-vmess-grpc trial-vmess-http trial-vmess-ws trial-vmess-xhttp
-unlock-ws-auto unlock-http-auto unlock-xhttp-auto unlock-grpc-auto"
+unlock-ws-auto unlock-http-auto unlock-xhttp-auto unlock-grpc-auto
+auto-delete-grpc auto-delete-http auto-delete-ws auto-delete-xhttp
+change-id-grpc change-id-http change-id-ws change-id-xhttp
+change-quota-grpc change-quota-http change-quota-ws change-quota-xhttp
+delete-grpc delete-http
+extend-grpc extend-http extend-ws extend-xhttp
+kill-grpc kill-http kill-ws
+list-xray-grpc list-xray-http list-xray-ws list-xray-xhttp
+locked-xray-grpc locked-xray-http locked-xray-ws locked-xray-xhttp
+menu-argo menu-bot
+quota-grpc quota-http quota-ws
+routing-grpc routing-http routing-ws routing-xhttp
+unlock-grpc unlock-http unlock-ws unlock-xhttp
+x-grpc x-http x-ws x-xhttp"
 # format.sh lives in config/ and installs to /etc/funny, not /usr/bin.
 CONFIG_FILES="format.sh"
 # Found 514: /usr/bin/restore-ftp is the non-interactive website variant
 # installed by website/install.sh (it reads /var/www/uploads/*.zip).  The
-# full/lite restore-ftp.sh files carry the license gate and TUI prompts and
-# must not overwrite it on a live box.
+# full/lite restore-ftp.sh files carry interactive TUI prompts and must not
+# overwrite it on a live box.
 WEB_FILES="restore-ftp"
 if [ "$EDITION" = "full" ]; then
-    FILES="$FILES addssh trial-ssh menu-wg xl2tp menu-noobz limit-ip-ssh cek-login-ssh ssh-online menu-ssh"
+    FILES="$FILES addssh trial-ssh menu-wg xl2tp menu-noobz limit-ip-ssh cek-login-ssh ssh-online menu-ssh expire-ssh menu-dnstt menu-x"
 else
     # Lite only: this viewer used to truncate ws.log at the end (Found 508).
     FILES="$FILES cek-xray-ws"
@@ -135,6 +149,7 @@ marker_for() {
         dm-menu | menu-wg | xl2tp | menu-noobz) echo 'Installer Domain' ;;
         add-* | trial-*) echo 'Rotated Domain' ;;
         addssh | trial-ssh) echo 'Rotated Domain' ;;
+        *) echo 'Found 525' ;;
     esac
 }
 
