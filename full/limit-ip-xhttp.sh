@@ -1,5 +1,7 @@
 #!/bin/bash
 # Found 525: license is enforced only for create/extend/install.
+# Found 532: cron has no terminal; suppress output so the root mailbox stays quiet.
+if [ ! -t 1 ]; then exec >/dev/null 2>&1; fi
 
 [[ -e $(which curl) ]] && grep -q "1.1.1.1" /etc/resolv.conf || { 
     echo "nameserver 1.1.1.1" | cat - /etc/resolv.conf >> /etc/resolv.conf.tmp && mv /etc/resolv.conf.tmp /etc/resolv.conf

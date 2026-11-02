@@ -1,5 +1,10 @@
 #!/bin/bash
 # Found 525: license is enforced only for create/extend/install.
+# Found 532: cron has no terminal; suppress output so the root mailbox stays quiet.
+if [ ! -t 1 ]; then exec >/dev/null 2>&1; fi
+# Found 531: bound the xHTTP access log. limit-ip-xhttp reads only the
+# recent window and statsonlineiplist covers idle sessions, so a 5-minute
+# truncation is safe and stops unbounded growth.
 
 [[ -e $(which curl) ]] && grep -q "1.1.1.1" /etc/resolv.conf || { 
     echo "nameserver 1.1.1.1" | cat - /etc/resolv.conf >> /etc/resolv.conf.tmp && mv /etc/resolv.conf.tmp /etc/resolv.conf
@@ -156,3 +161,6 @@ if [ "$need_restart" -eq 1 ]; then
     timeout 60 systemctl daemon-reload
     timeout 60 systemctl restart xray@xhttp
 fi
+
+# Found 531: keep /var/log/xray/xhttp.log bounded like ws.log.
+> /var/log/xray/xhttp.log
