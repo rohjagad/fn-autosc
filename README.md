@@ -556,7 +556,10 @@ after at least 15 minutes (15–20 min on the 5-minute cron), never earlier.
 
 SSH accounts store their maximum concurrent client IPs in
 `/etc/xray/limit/ip/ssh/<username>`. `limit-ip-ssh` runs every 5 minutes and
-counts unique **active** client IPs per account. As with the Xray limiters, an
+counts unique **active** client IPs per account. Only panel accounts are
+enrolled: the limiter builds its list from the SSH cards
+(`/var/log/create/ssh/*.log` and `*.locked`), so a plain OS user without a
+card never receives a limit file. As with the Xray limiters, an
 over-limit set must be seen on two consecutive runs (at least 4 minutes apart)
 before the account is locked, so one CGNAT device that rotates addresses is
 not mistaken for several devices. Direct Dropbear/OpenSSH connections expose
@@ -932,6 +935,14 @@ changes only those three lines, never menu access.
 
 Where `<protocol>` is `ws`, `http`, `xhttp`, or `grpc`.
 
+### Account Helper
+
+`/usr/bin/xray-add-client <json> <vless|vmess|trojan> <user> <expiry> <id>`
+inserts one client into the matching inbound and writes the
+`### <user> <expiry>` card marker. The templates start with empty `clients`
+arrays, so no default credential is shipped; create, trial, and unlock all
+use this helper. It requires `python3`.
+
 ---
 
 ## Go Binaries
@@ -1023,6 +1034,16 @@ Binaries are built with `-ldflags='-s -w'` for a small footprint.
   to their real client IPs.
 - **IPv6 brackets counted twice** — normalized in the Xray limiters and the
   SSH helper.
+- **Default Xray clients were also the insertion anchors** — the four
+  templates no longer ship a usable default client object. Create, trial, and
+  unlock insert through `/usr/bin/xray-add-client`, which keeps the
+  `### <user> <expiry>` card marker and produces a valid clients array. A
+  one-time updater migration removes the old objects from live boxes after
+  all four configs pass `xray run -test`.
+- **SSH IP limiter enrolled non-panel OS users** — `limit-ip-ssh` now builds
+  its account list from the SSH cards instead of every UID ≥ 1000, so a plain
+  OS account such as `rohcuan` no longer gets a default IP-limit file
+  recreated every 5 minutes.
 
 ---
 
@@ -1099,18 +1120,20 @@ What it does:
   and the update changes the version, that detected live version is also
   recorded in `.install-commit` as the install baseline. The target remains
   pinned in `update.sh`; currently
-  `0cf5dc1df15bf1817b9137e419cfb117cc44b685` (Fix 533 content; the updater
-  script itself also carries Fix 520–538). It fetches 107 files on full,
-  95 on lite, including `quota-xhttp`, `kill-xhttp`, every `extend-*`, and the
-  maintenance scripts that no longer carry a license gate; the updater
-  restarts every active `quota-*` service after installing the new daemons.
-  It also runs one-time, marker-guarded live-state migrations: sync
-  `dnstt.service` to `/etc/slowdns/nsdomain`, restore the `simpang32`
-  quota/IP limit, neutralize the published default Xray credentials, archive
-  and truncate the accumulated root mailbox, and remove the stale `rohcuan`
-  SSH limit. The four
-  `change-limit-ip` tools and the full `limit-ip` tool ship as compiled
-  binaries from `bin/<edition>/` and are checked against pinned md5
+  `42af316784c87cf6fc8af3638b5fe02ef83caddd` (Fix 539/540 content; the updater
+  script itself also carries Fix 520–540). It fetches 108 files on full,
+  96 on lite, including `quota-xhttp`, `kill-xhttp`, every `extend-*`,
+  `xray-add-client`, and the maintenance scripts that no longer carry a
+  license gate; the updater restarts every active `quota-*` service after
+  installing the new daemons. It also runs one-time, marker-guarded
+  live-state migrations: sync `dnstt.service` to `/etc/slowdns/nsdomain`,
+  restore the `simpang32` quota/IP limit, neutralize the published default
+  Xray credentials, archive and truncate the accumulated root mailbox,
+  remove the template client anchors after validating all four Xray configs,
+  and remove the stale `rohcuan` SSH limit (the limiter now enrolls panel
+  accounts only). The four `change-limit-ip` tools and the full `limit-ip`
+  tool ship as compiled binaries from `bin/<edition>/` and are checked
+  against pinned md5
   fingerprints; shell files are syntax- and marker-checked. The account-card
   formatter `/etc/funny/format.sh` is fetched from `config/`, and the web
   restore command `/usr/bin/restore-ftp` from `website/`, then refreshed too.

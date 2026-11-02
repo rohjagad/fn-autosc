@@ -3424,3 +3424,30 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - All four live JSON configs pass `xray run -test`; the published default values are absent.
 - The eight changed quota scripts match the local sha256 on the installed full boxes; `lite` is not installed on any live host.
 - Post-deploy cron tick: no new root mail, no new quota `TERM` line, and no new account deletion or lock error appeared.
+
+## Xray client insertion and panel-only SSH limits (Fix 539-540)
+
+- **Fix 539 payload:** `24931ce37b27c9963600aeb2a29bbe198b697b6f`; updater `255298eed6ecb62970899b00729babad546204a1`.
+- **Fix 540 payload:** `42af316784c87cf6fc8af3638b5fe02ef83caddd`; updater `5d123973f4a194ab5255d5083b5033320e0fd1f8`.
+- **Deployment:** all three boxes ended at `42af316` through `update.sh`; each run reported `UPDATE SUCCESS` and `.update-commit` matches. rohserver6 and rohserver1 moved `0cf5dc1 -> 24931ce -> 42af316` in two runs; rohserver3 moved `0cf5dc1 -> 42af316` in one combined run, which also applied Fix 539 there for the first time. Backups: Fix 539 `/root/fn-update-backup-20261102-170422` (rohserver6), `-090606` (rohserver1); Fix 540 `-171211` (rohserver6), `-091006` (rohserver1); rohserver3 combined `-171211`. Each full updater run fetched 108 files.
+
+### Fix 539 - replace template client anchors with a shared insertion helper
+
+- **Change:** `json/ws.json`, `json/upgrade.json`, `json/xhttp.json`, and `json/grpc.json` now ship empty `clients` arrays instead of a default client object plus a `#vless`/`#vmess`/`#trojan` anchor line. `full/xray-add-client.sh` and `lite/xray-add-client.sh` add one client at a time: they locate the inbound by protocol, find its `clients` array, place a `### <user> <expiry>` card marker and the client object immediately before the closing `]`, and add a comma to the previous last client. The helper validates the protocol, username, expiry, and id/password before writing. All 64 add/trial/unlock scripts in both editions now call `xray-add-client`; the unlock failure messages no longer mention an anchor.
+- **Update path:** both manifests carry `script<TAB>xray-add-client`, and `update.sh` installs it as `/usr/bin/xray-add-client` with the `Found 539` marker. A one-time migration (`.fix539-client-anchors`) backs up all four live JSONs, removes each complete object containing an anchor marker, fixes the trailing comma, and runs `xray run -test` on every file. Any failure restores all four files and skips the Xray restart; only active `xray@*` units are restarted on success.
+- **Verified live:** each pre-migration backup contained 12 anchor markers (3 per file), and each live `/etc/xray/json` now contains 0. Account counts are unchanged: rohserver6 `25 ws / 29 xhttp`, rohserver1 `31 / 22`, rohserver3 `18 / 21`; `upgrade` and `grpc` remain empty on all three. All four configs pass `xray run -test` on every box.
+- **Insertion checks:** the installed helper was exercised against live copies of the post-migration configs on rohserver6 and rohserver3: vless, vmess, and trojan in `ws`, vless in `upgrade`, vmess in `xhttp`, and trojan in `grpc`. Every insertion kept the config valid and produced the expected `### <user> 01-Jan-2027` marker. The existing delete path (remove the marker and client, then strip the trailing comma) was also tested on the live `ws.json` copy and remained valid after two sequential insertions.
+- **Payload:** `tools/verify-payload.sh` checks 120 full and 102 lite manifest entries; the updater fetches 108 full / 96 lite files. `bash -n` passes for every changed script. `installer/xray.sh` keeps the old credential-replacement loop only as a safety net for an older cached template.
+
+### Fix 540 - the SSH IP limiter enrolls panel accounts only
+
+- **Change:** `full/limit-ip-ssh.sh` now builds its username list from the SSH cards (`/var/log/create/ssh/*.log` and `*.locked`) and requires a matching OS user. It no longer enrolls every UID >= 1000, which had recreated `/etc/xray/limit/ip/ssh/rohcuan` on the next 5-minute tick after Fix 538 removed it. Orphan limit files are still removed by the existing Bug 64 cleanup. The script carries `Found 540`, and `update.sh` checks that marker.
+- **Update path:** the Fix 538 migration was renamed to `.fix540-rohcuan-limit` and removes the recreated file once more; it never deletes the OS user. Hosts without the file skip it, so the marker is absent there.
+- **Verified live:** on rohserver1 the file was removed while `getent passwd rohcuan` still returns the OS account. The limit-file set now matches the card set exactly, and the file stayed absent after the post-deploy cron tick. rohserver6 and rohserver3 had no `rohcuan` file and skipped the migration.
+- **Side effect checked:** `simpang32` on rohserver6 still has `107374182400` bytes and IP limit `2`; its usage had grown to 530,869,817 bytes and remains below the quota.
+
+### Health after the batch
+
+- `systemctl --failed` is empty on all three; Nginx, HAProxy, SSH, Dropbear, `xray@{ws,grpc,xhttp,upgrade}`, `quota-{ws,http,grpc,xhttp}`, and `dnstt` are active.
+- All four live JSON configs pass `xray run -test`; the anchor markers are gone and the account counts match the pre-migration backups.
+- The `rohcuan` limit file stays removed and the OS user remains. No new JSON, lock, expiry, or unbound-variable error appeared after the updates.

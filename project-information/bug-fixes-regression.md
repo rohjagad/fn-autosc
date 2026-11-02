@@ -3281,3 +3281,21 @@ Section 35's four-check rule applied to Fix 417:
 | **Over-strictness** | The migration runs only when the limit file exists, the OS user still exists, and no panel card `/var/log/create/ssh/rohcuan.log` exists. A card or missing user causes a skip. |
 | **Over-engineering** | One small function and one marker; the removed file is copied to the updater backup first. |
 | **vs the source** | The source creates the limit file with the panel account and removes it on account deletion. This legacy file lost its card but survived. Divergence: remove the orphaned panel state only, not the OS account. |
+
+## 300. Xray clients are inserted without template anchors (Fix 539) — Four Checks (November 2, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | The account scripts still create exactly one client and one `### <user> <expiry>` card marker. The helper inserts before the existing clients-array close, adds the comma to the previous last client, and leaves every other inbound and client untouched. Live counts before and after the migration match: 25/29, 31/22, and 18/21 (`ws`/`xhttp`); `upgrade` and `grpc` stay empty. Create, trial, unlock, delete, quota, and expiry paths keep their existing card format and JSON fields. |
+| **Over-strictness** | The helper accepts only `vless`, `vmess`, or `trojan`, a username matching `^[a-z0-9_]+$`, an expiry matching `^[A-Za-z0-9_-]+$`, and an id/password matching `^[A-Za-z0-9_.-]+$`; it refuses a missing file or inbound before writing. The migration removes only complete objects that contain a `#vless`/`#vmess`/`#trojan` line; an incomplete object aborts without touching the file. All four configs must pass `xray run -test`, otherwise all four are restored. |
+| **Over-engineering** | One small bash wrapper plus an embedded Python edit per edition, installed once as `/usr/bin/xray-add-client`; no daemon, state file, or new dependency. `python3` is already required by the updater and the installer. The templates become simpler (empty arrays), and the 64 call sites are one line each. |
+| **vs the source** | The source shipped a public default client and used its `#` marker as the insert anchor, so the default stayed active on every install. Fix 536 only randomized the credentials; the object and the anchor dependency remained. Divergence: ship no client at all and insert deterministically through one helper, then remove the legacy objects once through the updater. |
+
+## 301. SSH IP limits enroll panel accounts only (Fix 540) — Four Checks (November 2, 2026)
+
+| Check | Result |
+| :-- | :-- |
+| **Regression** | The limiter still counts unique active client IPs through `ssh-online`, keeps the two-run stable-set gate, locks with `passwd -l`, kills only that account's processes, and runs the 15-minute unlock sweeper. Only the list of accounts it considers changed. Every carded account keeps its existing limit file; the limit-file set now matches the card set exactly on all three boxes. |
+| **Over-strictness** | An account needs both a card (`.log` or `.locked`) and an OS user to be enrolled. A plain OS user without a card is ignored, which is intentional; an orphan limit file is still removed by the existing Bug 64 cleanup. The fix does not delete users or modify cards, quotas, or JSON. |
+| **Over-engineering** | The UID loop is replaced by a card loop and a `getent passwd` existence check; no new file, service, or dependency. The existing cleanup and enforcement code is reused unchanged. |
+| **vs the source** | The source enrolled every UID >= 1000, so `rohcuan` got a default limit file back on the next tick after Fix 538 removed it. Divergence: enroll only panel accounts, which is what the limiter has always been meant to manage. |
