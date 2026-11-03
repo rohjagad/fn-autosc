@@ -788,6 +788,18 @@ Key management and the nameserver are configured from `menu-dnstt`. The server
 generates an X25519 keypair — the private key stays on the server, and the
 public key (`/etc/slowdns/server.pub`) is embedded into client configurations.
 
+HTTP Custom's SlowDNS plugin sends **QTYPE NULL** when its Type setting is
+`NULL`. Upstream dnstt only answered `TXT`, so those clients received
+`NXDOMAIN` and reported `SSH: Error: SocketException` before authentication.
+Since Fix 543 the server accepts both `NULL` and `TXT`; NULL answers carry raw
+RDATA, and TXT answers keep the original length-prefixed encoding. The
+installer pins dnstt to a known commit and applies
+`installer/dnstt-null.patch` before building. `update.sh` rebuilds an existing
+binary once (marker `.fix543-dnstt-null`), verifies a local NULL query returns
+`NOERROR`, and restores the previous binary if the build or service check
+fails. The rebuild restarts only `dnstt`; keys, nameserver, and firewall rules
+are preserved.
+
 ### WireGuard — `menu-wg`
 
 Interface `wg0`, UDP `51820`, subnet `10.66.66.0/24`, server address
@@ -1141,22 +1153,23 @@ What it does:
   and the update changes the version, that detected live version is also
   recorded in `.install-commit` as the install baseline. The target remains
   pinned in `update.sh`; currently
-  `64226365c68774828e3d85ab51bf0b995c134593` (Fix 542 content; the updater
-  script itself also carries Fix 520–542). It fetches 108 files on full,
+  `5f378ba4e1b66a71cdafe658be3b35dbad86e1a7` (Fix 543 content; the updater
+  script itself also carries Fix 520–543). It fetches 108 files on full,
   96 on lite, including `quota-xhttp`, `kill-xhttp`, every `extend-*`,
   `xray-add-client`, and the maintenance scripts that no longer carry a
   license gate; the updater restarts every active `quota-*` service after
   installing the new daemons. It also runs one-time, marker-guarded
   live-state migrations: sync `dnstt.service` to `/etc/slowdns/nsdomain`,
-  restore the `simpang32` quota/IP limit, neutralize the published default
-  Xray credentials, archive and truncate the accumulated root mailbox,
-  remove the template client anchors after validating all four Xray configs,
-  remove stale certificate SAN entries left by earlier domain deletions
-  (reload only), and remove the stale `rohcuan` SSH limit (the limiter now
-  enrolls panel accounts only). The four `change-limit-ip` tools and the
-  full `limit-ip` tool ship as compiled binaries from `bin/<edition>/` and
-  are checked against pinned md5 fingerprints; shell files are syntax- and
-  marker-checked. The account-card
+  rebuild the installed dnstt binary from the pinned source with NULL-query
+  support (restarting only `dnstt`), restore the `simpang32` quota/IP limit,
+  neutralize the published default Xray credentials, archive and truncate
+  the accumulated root mailbox, remove the template client anchors after
+  validating all four Xray configs, remove stale certificate SAN entries
+  left by earlier domain deletions (reload only), and remove the stale
+  `rohcuan` SSH limit (the limiter now enrolls panel accounts only). The
+  four `change-limit-ip` tools and the full `limit-ip` tool ship as compiled
+  binaries from `bin/<edition>/` and are checked against pinned md5
+  fingerprints; shell files are syntax- and marker-checked. The account-card
   formatter `/etc/funny/format.sh` is fetched from `config/`, and the web
   restore command `/usr/bin/restore-ftp` from `website/`, then refreshed too.
   The payload manifest and `installer/payload.sh` are installer-only; the
