@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# FN AutoSC updater: live marker -> 6422636
+# FN AutoSC updater: live marker -> 5f378ba
 #
 # Applies the commits on top of b6d1a97 (1-minute evidence window,
 # Exp-Date-N/A binary fix, LOCKED IPs block, MULTILOGIN UNLOCKED
@@ -21,8 +21,9 @@
 # guarded for systemd, legacy dnstt/nsdomain synchronization, simpang32 quota
 # repair, published default-credential neutralization, root-mail archiving,
 # stale SSH-limit cleanup, removal of the template client anchors,
-# panel-account-only SSH IP limiting, and complete domain-deletion cleanup
-# with balanced card reassignment)
+# panel-account-only SSH IP limiting, complete domain-deletion cleanup
+# with balanced card reassignment, and NULL-query support for HTTP Custom's
+# SlowDNS client)
 # to a live install. The file set is a superset covering the earlier
 # ranges too, so older installs are brought fully up to date in one
 # run. Safe to run: files are backed up first, every download is
@@ -31,7 +32,7 @@
 # missing).
 #
 # Usage:
-#   bash update.sh                  # live marker -> 6422636 (default)
+#   bash update.sh                  # live marker -> 5f378ba (default)
 #   bash update.sh <commit> --force  # re-apply even if already recorded
 #
 # One-line remote run:
@@ -43,7 +44,7 @@ set -u
 # version is read from the live panel below, so this value only appears when
 # both markers are missing.
 FROM="6b967af9e0ebadc76a265132e49d62a27ad72235"
-TARGET="${1:-64226365c68774828e3d85ab51bf0b995c134593}"
+TARGET="${1:-5f378ba4e1b66a71cdafe658be3b35dbad86e1a7}"
 FORCE=0
 [ "${2:-}" = "--force" ] && FORCE=1
 
@@ -379,7 +380,7 @@ rm -rf "$STAGE"
 remove_legacy_domain_files || true
 
 # ---------------------------------------------------------------------------
-# Fix 533-538: one-time live-state migrations.
+# Fix 533-543: one-time live-state migrations.
 #
 # The payload only contains scripts.  The state below lives outside the
 # repository (systemd units, quota files, JSON configs, mailboxes, SSH limit
@@ -452,6 +453,117 @@ sync_dnstt_unit() {
     fix_log "fix534: dnstt nameserver ${cur:-unknown} -> ${nsd}"
     fix_marker .fix534-dnstt-synced
     echo "Fix 534: dnstt nameserver synchronized to ${nsd}."
+}
+
+# Found 543: dnstt only answers QTYPE TXT.  HTTP Custom's SlowDNS client sends
+# QTYPE NULL when its Type setting is NULL, so the server returned NXDOMAIN and
+# the app reported SocketException before SSH authentication.  Rebuild the
+# installed server from the pinned dnstt source with NULL-query support.
+install_dnstt_null_support() {
+    local marker="/etc/funny/.fix543-dnstt-null"
+    local bin="/etc/slowdns/dns-server"
+    local unit="/etc/systemd/system/dnstt.service"
+    local nsfile="/etc/slowdns/nsdomain"
+    local nsd="" src="" out="" probe=""
+    [ -f "$marker" ] && return 0
+    [ -x "$bin" ] || return 0
+    [ -f "$unit" ] || return 0
+    [ -s "$nsfile" ] || return 0
+    systemctl is-active --quiet dnstt 2>/dev/null || return 0
+    nsd=$(tr -d '[:space:]' < "$nsfile" 2>/dev/null)
+    [ -n "$nsd" ] || return 0
+    probe="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.${nsd}"
+    if [ -x /usr/local/go/bin/go ]; then
+        PATH="/usr/local/go/bin:$PATH"
+        export PATH
+    fi
+    command -v go >/dev/null 2>&1 || {
+        echo "Fix 543: Go is missing; dnstt left unchanged." >&2
+        return 0
+    }
+    command -v git >/dev/null 2>&1 || {
+        echo "Fix 543: git is missing; dnstt left unchanged." >&2
+        return 0
+    }
+
+    # A box installed after this fix already has the patched binary; its
+    # installer writes the marker.  This probe also catches a manual rebuild.
+    if command -v dig >/dev/null 2>&1; then
+        out=$(dig @127.0.0.1 -p 5300 -t TYPE10 +time=2 +tries=1 "$probe" 2>/dev/null || true)
+        if printf '%s\n' "$out" | grep -q "status: NOERROR"; then
+            fix_marker .fix543-dnstt-null
+            echo "Fix 543: dnstt already accepts NULL queries."
+            return 0
+        fi
+    fi
+
+    src=$(mktemp -d) || return 0
+    if ! fetch "https://raw.githubusercontent.com/rohjagad/fn-autosc/${TARGET}/installer/dnstt-null.patch" "$src/dnstt-null.patch" 120; then
+        rm -rf "$src"
+        echo "Fix 543: could not download the dnstt NULL patch; dnstt left unchanged." >&2
+        return 0
+    fi
+    if ! git clone -q https://github.com/rohjagad/dnstt.git "$src/dnstt" >/dev/null 2>&1; then
+        rm -rf "$src"
+        echo "Fix 543: could not clone dnstt; dnstt left unchanged." >&2
+        return 0
+    fi
+    if ! git -C "$src/dnstt" checkout -q 17aa1fed864cd5493e3d09a14df1b8b5cc1df123 >/dev/null 2>&1; then
+        rm -rf "$src"
+        echo "Fix 543: could not check out the pinned dnstt source; dnstt left unchanged." >&2
+        return 0
+    fi
+    if ! git -C "$src/dnstt" apply "$src/dnstt-null.patch" >/dev/null 2>&1; then
+        rm -rf "$src"
+        echo "Fix 543: dnstt NULL patch did not apply; dnstt left unchanged." >&2
+        return 0
+    fi
+    if ! ( cd "$src/dnstt/dnstt-server" && go build -o "$src/dns-server" . ) >"$src/build.log" 2>&1; then
+        echo "Fix 543: dnstt build failed; dnstt left unchanged." >&2
+        tail -n 5 "$src/build.log" >&2 2>/dev/null || true
+        rm -rf "$src"
+        return 0
+    fi
+    if [ ! -x "$src/dns-server" ]; then
+        rm -rf "$src"
+        echo "Fix 543: dnstt build produced no binary; dnstt left unchanged." >&2
+        return 0
+    fi
+    mkdir -p "$BACKUP" 2>/dev/null || true
+    if ! cp -f "$bin" "$BACKUP/dns-server" 2>/dev/null; then
+        rm -rf "$src"
+        echo "Fix 543: could not back up the current dnstt binary; dnstt left unchanged." >&2
+        return 0
+    fi
+    if ! install -m 0755 "$src/dns-server" "$bin" 2>/dev/null; then
+        cp -f "$BACKUP/dns-server" "$bin" 2>/dev/null || true
+        rm -rf "$src"
+        echo "Fix 543: could not install the rebuilt dnstt binary; previous binary restored." >&2
+        return 0
+    fi
+    systemctl restart dnstt >/dev/null 2>&1 || true
+    sleep 1
+    if ! systemctl is-active --quiet dnstt 2>/dev/null; then
+        cp -f "$BACKUP/dns-server" "$bin" 2>/dev/null || true
+        systemctl restart dnstt >/dev/null 2>&1 || true
+        rm -rf "$src"
+        echo "Fix 543: rebuilt dnstt did not start; previous binary restored." >&2
+        return 0
+    fi
+    if command -v dig >/dev/null 2>&1; then
+        out=$(dig @127.0.0.1 -p 5300 -t TYPE10 +time=3 +tries=1 "$probe" 2>/dev/null || true)
+        if ! printf '%s\n' "$out" | grep -q "status: NOERROR"; then
+            cp -f "$BACKUP/dns-server" "$bin" 2>/dev/null || true
+            systemctl restart dnstt >/dev/null 2>&1 || true
+            rm -rf "$src"
+            echo "Fix 543: rebuilt dnstt did not answer NULL; previous binary restored." >&2
+            return 0
+        fi
+    fi
+    rm -rf "$src"
+    fix_log "fix543: dnstt rebuilt with NULL QTYPE support"
+    fix_marker .fix543-dnstt-null
+    echo "Fix 543: dnstt rebuilt with NULL QTYPE support."
 }
 
 # Found 535: a legacy account lost its base quota and IP-limit files while the
@@ -812,6 +924,7 @@ remove_template_client_anchors
 cleanup_domain_cert_remnants
 repair_simpang32
 sync_dnstt_unit
+install_dnstt_null_support
 remove_stale_rohcuan_limit
 cleanup_root_mail
 restart_quota_services
