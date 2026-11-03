@@ -1,0 +1,277 @@
+diff --git a/dns/dns.go b/dns/dns.go
+index 45b75ee..1718060 100644
+--- a/dns/dns.go
++++ b/dns/dns.go
+@@ -47,6 +47,18 @@ var (
+ const (
+ 	// https://tools.ietf.org/html/rfc1035#section-3.2.2
+ 	RRTypeTXT = 16
++	// https://tools.ietf.org/html/rfc1035#section-3.3.10
++	// HTTP Custom's SlowDNS client sends QTYPE NULL when its Type setting
++	// is NULL.
++	RRTypeNULL = 10
++	// https://tools.ietf.org/html/rfc1035#section-3.3.11
++	RRTypeNS = 2
++	// https://tools.ietf.org/html/rfc1035#section-3.3.1
++	RRTypeCNAME = 5
++	// https://tools.ietf.org/html/rfc1035#section-3.3.9
++	RRTypeMX = 15
++	// https://tools.ietf.org/html/rfc2782
++	RRTypeSRV = 33
+ 	// https://tools.ietf.org/html/rfc6891#section-6.1.1
+ 	RRTypeOPT = 41
+ 
+diff --git a/dnstt-server/main.go b/dnstt-server/main.go
+index ef669e6..90cde94 100644
+--- a/dnstt-server/main.go
++++ b/dnstt-server/main.go
+@@ -291,7 +291,7 @@ func acceptStreams(conn *kcp.UDPSession, privkey []byte, upstream string) error
+ 
+ // acceptSessions listens for incoming KCP connections and passes them to
+ // acceptStreams.
+-func acceptSessions(ln *kcp.Listener, privkey []byte, mtu int, upstream string) error {
++func acceptSessions(ln *kcp.Listener, privkey []byte, mtu int, upstream string, types *clientRecordTypes) error {
+ 	for {
+ 		conn, err := ln.AcceptKCP()
+ 		if err != nil {
+@@ -312,7 +312,17 @@ func acceptSessions(ln *kcp.Listener, privkey []byte, mtu int, upstream string)
+ 			1, // nc=1 => congestion window off
+ 		)
+ 		conn.SetWindowSize(turbotunnel.QueueSize/2, turbotunnel.QueueSize/2)
+-		if rc := conn.SetMtu(mtu); !rc {
++		clientMTU := mtu
++		if clientID, ok := conn.RemoteAddr().(turbotunnel.ClientID); ok {
++			if qtype, ok := types.get(clientID); ok {
++				clientMTU = maxEncodedPayloadForType(qtype, mtu+2) - 2
++				if clientMTU < 80 {
++					clientMTU = 80
++				}
++			}
++		}
++		log.Printf("session %08x mtu %d", conn.GetConv(), clientMTU)
++		if rc := conn.SetMtu(clientMTU); !rc {
+ 			panic(rc)
+ 		}
+ 		go func() {
+@@ -460,14 +470,16 @@ func responseFor(query *dns.Message, domain dns.Name) (*dns.Message, []byte) {
+ 		return resp, nil
+ 	}
+ 
+-	if question.Type != dns.RRTypeTXT {
+-		// We only support QTYPE == TXT.
++	if question.Type != dns.RRTypeTXT && question.Type != dns.RRTypeNULL &&
++		question.Type != dns.RRTypeNS && question.Type != dns.RRTypeCNAME &&
++		question.Type != dns.RRTypeMX && question.Type != dns.RRTypeSRV {
++		// We support QTYPE == TXT, NULL, NS, CNAME, MX, and SRV.
+ 		resp.Flags |= dns.RcodeNameError
+ 		// No log message here; it's common for recursive resolvers to
+ 		// send NS or A queries when the client only asked for a TXT. I
+ 		// suspect this is related to QNAME minimization, but I'm not
+ 		// sure. https://tools.ietf.org/html/rfc7816
+-		// log.Printf("NXDOMAIN: QTYPE %d != TXT", question.Type)
++		// log.Printf("NXDOMAIN: QTYPE %d != TXT/NULL", question.Type)
+ 		return resp, nil
+ 	}
+ 
+@@ -635,11 +647,39 @@ func (m *FallbackManager) forwardReplies(proxyConn net.PacketConn, clientAddr ne
+ 	}
+ }
+ 
++// clientRecordTypes remembers the QTYPE each client used.  The QTYPE is
++// needed when a KCP session is accepted to choose an MTU that fits in a
++// name-based answer (CNAME/NS/MX/SRV), while keeping the larger MTU for
++// TXT/NULL clients.
++type clientRecordTypes struct {
++	cache *ttlcache.Cache[turbotunnel.ClientID, uint16]
++}
++
++func newClientRecordTypes() *clientRecordTypes {
++	cache := ttlcache.New(
++		ttlcache.WithTTL[turbotunnel.ClientID, uint16](10 * time.Minute),
++	)
++	go cache.Start()
++	return &clientRecordTypes{cache: cache}
++}
++
++func (c *clientRecordTypes) set(id turbotunnel.ClientID, qtype uint16) {
++	c.cache.Set(id, qtype, ttlcache.DefaultTTL)
++}
++
++func (c *clientRecordTypes) get(id turbotunnel.ClientID) (uint16, bool) {
++	item := c.cache.Get(id)
++	if item == nil {
++		return 0, false
++	}
++	return item.Value(), true
++}
++
+ // recvLoop repeatedly calls dnsConn.ReadFrom, extracts the packets contained in
+ // the incoming DNS queries, and puts them on ttConn's incoming queue. Whenever
+ // a query calls for a response, constructs a partial response and passes it to
+ // sendLoop over ch. Invalid DNS packets are passed to the FallbackManager.
+-func recvLoop(domain dns.Name, dnsConn net.PacketConn, ttConn *turbotunnel.QueuePacketConn, ch chan<- *record, fallbackMgr *FallbackManager) error {
++func recvLoop(domain dns.Name, dnsConn net.PacketConn, ttConn *turbotunnel.QueuePacketConn, ch chan<- *record, fallbackMgr *FallbackManager, types *clientRecordTypes) error {
+ 	for {
+ 		var buf [4096]byte
+ 		n, addr, err := dnsConn.ReadFrom(buf[:])
+@@ -669,6 +709,12 @@ func recvLoop(domain dns.Name, dnsConn net.PacketConn, ttConn *turbotunnel.Queue
+ 		n = copy(clientID[:], payload)
+ 		payload = payload[n:]
+ 		if n == len(clientID) {
++			// Remember the QTYPE for this client before feeding
++			// its first packet to KCP, so acceptSessions can pick
++			// the matching MTU.
++			if len(query.Question) == 1 {
++				types.set(clientID, query.Question[0].Type)
++			}
+ 			// Discard padding and pull out the packets contained in
+ 			// the payload.
+ 			r := bytes.NewReader(payload)
+@@ -697,6 +743,91 @@ func recvLoop(domain dns.Name, dnsConn net.PacketConn, ttConn *turbotunnel.Queue
+ 	}
+ }
+ 
++// nameBasedPrefix returns the fixed RDATA fields that precede the target name
++// for MX and SRV. CNAME and NS have no prefix.
++func nameBasedPrefix(qtype uint16) []byte {
++	switch qtype {
++	case dns.RRTypeMX:
++		return []byte{0, 0}
++	case dns.RRTypeSRV:
++		return []byte{0, 0, 0, 0, 0, 0}
++	}
++	return nil
++}
++
++func isNameBasedRecordType(qtype uint16) bool {
++	switch qtype {
++	case dns.RRTypeCNAME, dns.RRTypeNS, dns.RRTypeMX, dns.RRTypeSRV:
++		return true
++	}
++	return false
++}
++
++// encodePayloadAsName encodes downstream data as a DNS name. The payload is
++// base32-encoded into 63-octet labels, with no tunnel-domain suffix. This is
++// the format HTTP Custom's slowdns client expects for CNAME/NS/MX/SRV answers;
++// its dns.decodeCNAMEPayload base32-decodes every label in the RDATA name. An
++// empty payload is the root name.
++func encodePayloadAsName(payload []byte, qtype uint16) ([]byte, error) {
++	prefix := nameBasedPrefix(qtype)
++	var buf bytes.Buffer
++	buf.Write(prefix)
++	if len(payload) == 0 {
++		buf.WriteByte(0)
++		return buf.Bytes(), nil
++	}
++
++	encoded := make([]byte, base32Encoding.EncodedLen(len(payload)))
++	base32Encoding.Encode(encoded, payload)
++	encoded = bytes.ToLower(encoded)
++
++	total := 1 // terminating zero label
++	for len(encoded) > 63 {
++		if total+1+63 > 255 {
++			return nil, fmt.Errorf("encoded payload does not fit in a DNS name")
++		}
++		buf.WriteByte(63)
++		buf.Write(encoded[:63])
++		encoded = encoded[63:]
++		total += 1 + 63
++	}
++	if len(encoded) > 0 {
++		if total+1+len(encoded) > 255 {
++			return nil, fmt.Errorf("encoded payload does not fit in a DNS name")
++		}
++		buf.WriteByte(byte(len(encoded)))
++		buf.Write(encoded)
++		total += 1 + len(encoded)
++	}
++	buf.WriteByte(0)
++	return buf.Bytes(), nil
++}
++
++// computeMaxEncodedPayloadNameBased returns the largest raw payload that fits
++// in a CNAME/NS/MX/SRV RDATA name. MX/SRV fixed fields are outside the name,
++// so all four types share the same capacity.
++func computeMaxEncodedPayloadNameBased() int {
++	// A name is at most 255 octets: label length bytes, label data, and
++	// the terminating zero label. Four labels of at most 63 octets leave
++	// room for 250 base32 characters. Base32 lengths are multiples of 8,
++	// so 248 characters (31 groups) is the largest usable length, which
++	// decodes to 155 bytes.
++	const maxEncoded = 248
++	return maxEncoded * 5 / 8
++}
++
++// maxEncodedPayloadForType returns the downstream payload budget for a query
++// type.  Name-based records have a smaller capacity than TXT/NULL, so sessions
++// using them need a smaller KCP MTU.
++func maxEncodedPayloadForType(qtype uint16, maxEncodedPayload int) int {
++	if isNameBasedRecordType(qtype) {
++		if nameCap := computeMaxEncodedPayloadNameBased(); nameCap < maxEncodedPayload {
++			return nameCap
++		}
++	}
++	return maxEncodedPayload
++}
++
+ // sendLoop repeatedly receives records from ch. Those that represent an error
+ // response, it sends on the network immediately. Those that represent a
+ // response capable of carrying data, it packs full of as many packets as will
+@@ -732,7 +863,7 @@ func sendLoop(dnsConn net.PacketConn, ttConn *turbotunnel.QueuePacketConn, ch <-
+ 			}
+ 
+ 			var payload bytes.Buffer
+-			limit := maxEncodedPayload
++			limit := maxEncodedPayloadForType(rec.Resp.Question[0].Type, maxEncodedPayload)
+ 			// We loop and bundle as many packets from OutgoingQueue
+ 			// into the response as will fit. Any packet that would
+ 			// overflow the capacity of the DNS response, we stash
+@@ -794,7 +925,25 @@ func sendLoop(dnsConn net.PacketConn, ttConn *turbotunnel.QueuePacketConn, ch <-
+ 			}
+ 			timer.Stop()
+ 
+-			rec.Resp.Answer[0].Data = dns.EncodeRDataTXT(payload.Bytes())
++			qtype := rec.Resp.Question[0].Type
++			switch {
++			case qtype == dns.RRTypeNULL:
++				// NULL RDATA is raw bytes; unlike TXT, it has no
++				// <character-string> length prefixes.
++				rec.Resp.Answer[0].Data = payload.Bytes()
++			case isNameBasedRecordType(qtype):
++				data, err := encodePayloadAsName(payload.Bytes(), qtype)
++				if err != nil {
++					log.Printf("encodePayloadAsName(qtype=%d): %v", qtype, err)
++					// Send an empty name rather than a malformed one.
++					empty, _ := encodePayloadAsName(nil, qtype)
++					rec.Resp.Answer[0].Data = empty
++				} else {
++					rec.Resp.Answer[0].Data = data
++				}
++			default:
++				rec.Resp.Answer[0].Data = dns.EncodeRDataTXT(payload.Bytes())
++			}
+ 		}
+ 
+ 		buf, err := rec.Resp.WireFormat()
+@@ -945,8 +1094,9 @@ func run(privkey []byte, domain dns.Name, upstream string, dnsConn net.PacketCon
+ 		return fmt.Errorf("opening KCP listener: %v", err)
+ 	}
+ 	defer ln.Close()
++	types := newClientRecordTypes()
+ 	go func() {
+-		err := acceptSessions(ln, privkey, mtu, upstream)
++		err := acceptSessions(ln, privkey, mtu, upstream, types)
+ 		if err != nil {
+ 			log.Printf("acceptSessions: %v", err)
+ 		}
+@@ -971,7 +1121,7 @@ func run(privkey []byte, domain dns.Name, upstream string, dnsConn net.PacketCon
+ 		}
+ 	}()
+ 
+-	return recvLoop(domain, dnsConn, ttConn, ch, fallbackMgr)
++	return recvLoop(domain, dnsConn, ttConn, ch, fallbackMgr, types)
+ }
+ 
+ func main() {

@@ -119,21 +119,21 @@ install_slowdns() {
     echo "Failed to check out the pinned dnstt source."
     return 1
   }
-  # Found 543: HTTP Custom's SlowDNS client sends QTYPE NULL when its Type
-  # setting is NULL.  dnstt upstream only answers TXT, so apply the pinned
-  # NULL-query patch before building.
+  # Found 543/544: HTTP Custom's SlowDNS Type setting can send QTYPE NULL,
+  # CNAME, NS, MX, or SRV instead of TXT.  Upstream dnstt only answers TXT, so
+  # apply the pinned multi-type patch before building.
   curl -fsSL --max-time 60 \
-    "https://raw.githubusercontent.com/rohjagad/fn-autosc/main/installer/dnstt-null.patch" \
-    -o /root/dnstt-null.patch || {
-    echo "Failed to download the dnstt NULL patch."
+    "https://raw.githubusercontent.com/rohjagad/fn-autosc/main/installer/dnstt-multi.patch" \
+    -o /root/dnstt-multi.patch || {
+    echo "Failed to download the dnstt multi-type patch."
     return 1
   }
-  git -C /root/dnstt apply /root/dnstt-null.patch || {
-    echo "Failed to apply the dnstt NULL patch."
-    rm -f /root/dnstt-null.patch
+  git -C /root/dnstt apply /root/dnstt-multi.patch || {
+    echo "Failed to apply the dnstt multi-type patch."
+    rm -f /root/dnstt-multi.patch
     return 1
   }
-  rm -f /root/dnstt-null.patch
+  rm -f /root/dnstt-multi.patch
   cd /root/dnstt/dnstt-server
   rm -fr go.sum
   go mod tidy || {
@@ -207,6 +207,8 @@ END
     mkdir -p /etc/funny
     : > /etc/funny/.fix543-dnstt-null
     chmod 600 /etc/funny/.fix543-dnstt-null 2>/dev/null || true
+    : > /etc/funny/.fix544-dnstt-multi
+    chmod 600 /etc/funny/.fix544-dnstt-multi 2>/dev/null || true
   fi
 
   sed -i 's/#AllowTcpForwarding yes/AllowTcpForwarding yes/g' /etc/ssh/sshd_config
