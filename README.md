@@ -1194,7 +1194,11 @@ What it does:
   the accumulated root mailbox, remove the template client anchors after
   validating all four Xray configs, remove stale certificate SAN entries
   left by earlier domain deletions (reload only), and remove the stale
-  `rohcuan` SSH limit (the limiter now enrolls panel accounts only). The
+  `rohcuan` SSH limit (the limiter now enrolls panel accounts only). On
+  SlowDNS hosts, every run also removes exact duplicate
+  `nameserver`/`domain`/`search` lines from a static `/etc/resolv.conf`
+  (backup under `/root/fn-update-backup/`); symlinks and active resolver
+  managers are skipped. The
   four `change-limit-ip` tools and the full `limit-ip` tool ship as compiled
   binaries from `bin/<edition>/` and are checked against pinned md5
   fingerprints; shell files are syntax- and marker-checked. The account-card

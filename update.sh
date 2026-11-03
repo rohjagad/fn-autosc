@@ -29,7 +29,9 @@
 # run. Safe to run: files are backed up first, every download is
 # verified before it replaces anything, and cron/menu scripts need no
 # restart (only ssh/dropbear restart, and only if banner wiring was
-# missing).
+# missing). On SlowDNS hosts it also removes exact duplicate
+# nameserver/domain/search lines from a static /etc/resolv.conf, keeping
+# a backup under /root/fn-update-backup/.
 #
 # Usage:
 #   bash update.sh                  # live marker -> f6cb3b1 (default)
@@ -81,6 +83,40 @@ fetch() {
         wget -q --timeout="$_timeout" --tries=3 -O "$2" "$1"
     fi
 }
+
+# Housekeeping: remove exact duplicate nameserver/domain/search lines left in a
+# static /etc/resolv.conf by repeated provisioning.  Only runs on SlowDNS
+# hosts, skips symlinks and active resolver managers, and backs up first.
+tidy_resolv_conf() {
+    local f="/etc/resolv.conf" tmp="" bak="" svc=""
+    [ -s /etc/slowdns/nsdomain ] || return 0
+    [ -f "$f" ] && [ ! -L "$f" ] || return 0
+    for svc in systemd-resolved resolvconf NetworkManager; do
+        systemctl is-active --quiet "$svc" 2>/dev/null && return 0
+    done
+    tmp=$(mktemp) || return 0
+    awk '
+        /^[[:space:]]*(nameserver|domain|search)[[:space:]]/ {
+            if (seen[$0]++) next
+        }
+        { print }
+    ' "$f" > "$tmp" 2>/dev/null || { rm -f "$tmp"; return 0; }
+    if cmp -s "$f" "$tmp"; then
+        rm -f "$tmp"
+        return 0
+    fi
+    mkdir -p /root/fn-update-backup 2>/dev/null || { rm -f "$tmp"; return 0; }
+    bak="/root/fn-update-backup/resolv.conf.$(date +%Y%m%d-%H%M%S)"
+    cp -p "$f" "$bak" 2>/dev/null || { rm -f "$tmp"; return 0; }
+    if ! cat "$tmp" > "$f" 2>/dev/null; then
+        cat "$bak" > "$f" 2>/dev/null || true
+        rm -f "$tmp"
+        return 0
+    fi
+    rm -f "$tmp"
+    echo "resolv.conf: removed duplicate resolver directive lines (backup: $bak)."
+}
+tidy_resolv_conf
 
 # Skip when this exact target is already recorded (unless --force).
 if [ "$FORCE" -eq 0 ] && [ -f /etc/funny/.update-commit ] && \

@@ -1,8 +1,14 @@
 #!/bin/bash
 
-[[ -e $(which curl) ]] && grep -q "1.1.1.1" /etc/resolv.conf || { 
-    echo "nameserver 1.1.1.1" | cat - /etc/resolv.conf >> /etc/resolv.conf.tmp && mv /etc/resolv.conf.tmp /etc/resolv.conf
-}
+# Add the fallback resolver once.  The old test also appended when curl was
+# missing even if 1.1.1.1 was already present, leaving duplicate lines on
+# repeated installs.  Only touch a static file, never a resolver-managed
+# symlink.
+if [ -f /etc/resolv.conf ] && [ ! -L /etc/resolv.conf ] && \
+   ! grep -qx 'nameserver 1\.1\.1\.1' /etc/resolv.conf 2>/dev/null; then
+    printf 'nameserver 1.1.1.1\n' | cat - /etc/resolv.conf > /etc/resolv.conf.tmp && \
+        mv /etc/resolv.conf.tmp /etc/resolv.conf
+fi
 
 
     # Auth sources race: same izin.txt on Pages + GitHub (synced), first valid reply wins; no primary/secondary.
