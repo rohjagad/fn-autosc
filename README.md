@@ -788,17 +788,35 @@ Key management and the nameserver are configured from `menu-dnstt`. The server
 generates an X25519 keypair — the private key stays on the server, and the
 public key (`/etc/slowdns/server.pub`) is embedded into client configurations.
 
-HTTP Custom's SlowDNS plugin sends **QTYPE NULL** when its Type setting is
-`NULL`. Upstream dnstt only answered `TXT`, so those clients received
+HTTP Custom's SlowDNS Type dropdown offers `TXT`, `NULL`, `CNAME`, `NS`, `MX`,
+and `SRV`. Upstream dnstt only answered `TXT`, so the other settings received
 `NXDOMAIN` and reported `SSH: Error: SocketException` before authentication.
-Since Fix 543 the server accepts both `NULL` and `TXT`; NULL answers carry raw
-RDATA, and TXT answers keep the original length-prefixed encoding. The
-installer pins dnstt to a known commit and applies
-`installer/dnstt-null.patch` before building. `update.sh` rebuilds an existing
-binary once (marker `.fix543-dnstt-null`), verifies a local NULL query returns
-`NOERROR`, and restores the previous binary if the build or service check
-fails. The rebuild restarts only `dnstt`; keys, nameserver, and firewall rules
-are preserved.
+Fix 543 added `NULL`; Fix 544 adds the four name-based types:
+
+| Type | QTYPE | Answer RDATA |
+| :-- | :-- | :-- |
+| TXT | 16 | length-prefixed strings (unchanged) |
+| NULL | 10 | raw bytes (Fix 543) |
+| CNAME | 5 | base32 payload labels |
+| NS | 2 | base32 payload labels |
+| MX | 15 | `0` preference + base32 payload labels |
+| SRV | 33 | `0 0 0` priority/weight/port + base32 payload labels |
+
+The name-based payload has no tunnel-domain suffix: HTTP Custom's
+`dns.decodeCNAMEPayload` base32-decodes every label in the RDATA name, and an
+empty payload is the root name (`.`). A DNS name is limited to 255 octets, so
+the server gives those sessions a 153-byte KCP MTU (155-byte payload budget);
+TXT and NULL keep the normal MTU. The QTYPE is remembered from each client's
+first query and applied when its KCP session is accepted.
+
+The installer pins dnstt to a known commit and applies
+`installer/dnstt-multi.patch` before building. `update.sh` rebuilds an existing
+binary once (markers `.fix543-dnstt-null` and `.fix544-dnstt-multi`),
+pre-flights the new build on a local port, then verifies local `TXT`, `NULL`,
+`CNAME`, `NS`, `MX`, and `SRV` probes return `NOERROR` with an answer. It
+restores the previous binary if the build, pre-flight, service start, or live
+probe fails. The rebuild restarts only `dnstt`; keys, nameserver, and firewall
+rules are preserved.
 
 ### WireGuard — `menu-wg`
 
@@ -1153,15 +1171,16 @@ What it does:
   and the update changes the version, that detected live version is also
   recorded in `.install-commit` as the install baseline. The target remains
   pinned in `update.sh`; currently
-  `5f378ba4e1b66a71cdafe658be3b35dbad86e1a7` (Fix 543 content; the updater
-  script itself also carries Fix 520–543). It fetches 108 files on full,
+  `f6cb3b1ab5b30e4b8b6100309fdb657adad82d5d` (Fix 544 content; the updater
+  script itself also carries Fix 520–544). It fetches 108 files on full,
   96 on lite, including `quota-xhttp`, `kill-xhttp`, every `extend-*`,
   `xray-add-client`, and the maintenance scripts that no longer carry a
   license gate; the updater restarts every active `quota-*` service after
   installing the new daemons. It also runs one-time, marker-guarded
   live-state migrations: sync `dnstt.service` to `/etc/slowdns/nsdomain`,
   rebuild the installed dnstt binary from the pinned source with NULL-query
-  support (restarting only `dnstt`), restore the `simpang32` quota/IP limit,
+  and CNAME/NS/MX/SRV support (restarting only `dnstt`), restore the
+  `simpang32` quota/IP limit,
   neutralize the published default Xray credentials, archive and truncate
   the accumulated root mailbox, remove the template client anchors after
   validating all four Xray configs, remove stale certificate SAN entries

@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# FN AutoSC updater: live marker -> 5f378ba
+# FN AutoSC updater: live marker -> f6cb3b1
 #
 # Applies the commits on top of b6d1a97 (1-minute evidence window,
 # Exp-Date-N/A binary fix, LOCKED IPs block, MULTILOGIN UNLOCKED
@@ -22,8 +22,8 @@
 # repair, published default-credential neutralization, root-mail archiving,
 # stale SSH-limit cleanup, removal of the template client anchors,
 # panel-account-only SSH IP limiting, complete domain-deletion cleanup
-# with balanced card reassignment, and NULL-query support for HTTP Custom's
-# SlowDNS client)
+# with balanced card reassignment, NULL-query support, and CNAME/NS/MX/SRV
+# support for HTTP Custom's SlowDNS Type dropdown)
 # to a live install. The file set is a superset covering the earlier
 # ranges too, so older installs are brought fully up to date in one
 # run. Safe to run: files are backed up first, every download is
@@ -32,7 +32,7 @@
 # missing).
 #
 # Usage:
-#   bash update.sh                  # live marker -> 5f378ba (default)
+#   bash update.sh                  # live marker -> f6cb3b1 (default)
 #   bash update.sh <commit> --force  # re-apply even if already recorded
 #
 # One-line remote run:
@@ -44,7 +44,7 @@ set -u
 # version is read from the live panel below, so this value only appears when
 # both markers are missing.
 FROM="6b967af9e0ebadc76a265132e49d62a27ad72235"
-TARGET="${1:-5f378ba4e1b66a71cdafe658be3b35dbad86e1a7}"
+TARGET="${1:-f6cb3b1ab5b30e4b8b6100309fdb657adad82d5d}"
 FORCE=0
 [ "${2:-}" = "--force" ] && FORCE=1
 
@@ -566,6 +566,159 @@ install_dnstt_null_support() {
     echo "Fix 543: dnstt rebuilt with NULL QTYPE support."
 }
 
+# Found 544: HTTP Custom's SlowDNS Type dropdown also offers CNAME, NS, MX, and
+# SRV.  The Fix 543 binary answers TXT/NULL only, so rebuild once with the
+# multi-type patch.  Name-based answers carry the downstream payload as base32
+# labels, which are shorter than TXT RDATA; the patched server lowers the KCP
+# MTU for those sessions while leaving TXT/NULL at the existing MTU.
+install_dnstt_multi_support() {
+    local marker="/etc/funny/.fix544-dnstt-multi"
+    local bin="/etc/slowdns/dns-server"
+    local unit="/etc/systemd/system/dnstt.service"
+    local nsfile="/etc/slowdns/nsdomain"
+    local nsd="" src="" out="" qtype="" probe="" missing="" prepid=""
+    [ -f "$marker" ] && return 0
+    [ -x "$bin" ] || return 0
+    [ -f "$unit" ] || return 0
+    [ -s "$nsfile" ] || return 0
+    systemctl is-active --quiet dnstt 2>/dev/null || return 0
+    nsd=$(tr -d '[:space:]' < "$nsfile" 2>/dev/null)
+    [ -n "$nsd" ] || return 0
+    probe="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.${nsd}"
+    command -v dig >/dev/null 2>&1 || {
+        echo "Fix 544: dig is missing; dnstt left unchanged." >&2
+        return 0
+    }
+    if [ -x /usr/local/go/bin/go ]; then
+        PATH="/usr/local/go/bin:$PATH"
+        export PATH
+    fi
+    command -v go >/dev/null 2>&1 || {
+        echo "Fix 544: Go is missing; dnstt left unchanged." >&2
+        return 0
+    }
+    command -v git >/dev/null 2>&1 || {
+        echo "Fix 544: git is missing; dnstt left unchanged." >&2
+        return 0
+    }
+
+    # A box installed after this fix already has the patched binary; its
+    # installer writes the marker.  These probes also catch a manual rebuild.
+    # Require an answer section, not just NOERROR: a server that accepts the
+    # QTYPE but returns no answer would not carry tunnel data.
+    missing=""
+    for qtype in 2 5 10 15 16 33; do
+        out=$(dig @127.0.0.1 -p 5300 -t "TYPE${qtype}" +time=2 +tries=1 "$probe" 2>/dev/null || true)
+        if ! printf '%s\n' "$out" | grep -q "status: NOERROR" || \
+           ! printf '%s\n' "$out" | grep -q "ANSWER SECTION:"; then
+            missing="${missing} ${qtype}"
+        fi
+    done
+    if [ -z "$missing" ]; then
+        fix_marker .fix544-dnstt-multi
+        echo "Fix 544: dnstt already accepts TXT, NULL, CNAME, NS, MX, and SRV."
+        return 0
+    fi
+
+    src=$(mktemp -d) || return 0
+    if ! fetch "https://raw.githubusercontent.com/rohjagad/fn-autosc/${TARGET}/installer/dnstt-multi.patch" "$src/dnstt-multi.patch" 120; then
+        rm -rf "$src"
+        echo "Fix 544: could not download the dnstt multi-type patch; dnstt left unchanged." >&2
+        return 0
+    fi
+    if ! git clone -q https://github.com/rohjagad/dnstt.git "$src/dnstt" >/dev/null 2>&1; then
+        rm -rf "$src"
+        echo "Fix 544: could not clone dnstt; dnstt left unchanged." >&2
+        return 0
+    fi
+    if ! git -C "$src/dnstt" checkout -q 17aa1fed864cd5493e3d09a14df1b8b5cc1df123 >/dev/null 2>&1; then
+        rm -rf "$src"
+        echo "Fix 544: could not check out the pinned dnstt source; dnstt left unchanged." >&2
+        return 0
+    fi
+    if ! git -C "$src/dnstt" apply "$src/dnstt-multi.patch" >/dev/null 2>&1; then
+        rm -rf "$src"
+        echo "Fix 544: dnstt multi-type patch did not apply; dnstt left unchanged." >&2
+        return 0
+    fi
+    if ! ( cd "$src/dnstt/dnstt-server" && go build -o "$src/dns-server" . ) >"$src/build.log" 2>&1; then
+        echo "Fix 544: dnstt build failed; dnstt left unchanged." >&2
+        tail -n 5 "$src/build.log" >&2 2>/dev/null || true
+        rm -rf "$src"
+        return 0
+    fi
+    if [ ! -x "$src/dns-server" ]; then
+        rm -rf "$src"
+        echo "Fix 544: dnstt build produced no binary; dnstt left unchanged." >&2
+        return 0
+    fi
+
+    # Pre-flight the rebuilt binary on an unused local port before touching
+    # the live one.  The probe never opens a tunnel; it only checks that every
+    # QTYPE is accepted and answered.
+    "$src/dns-server" -udp 127.0.0.1:15353 -privkey-file /etc/slowdns/server.key "$nsd" 127.0.0.1:22 >"$src/preflight.log" 2>&1 &
+    prepid=$!
+    sleep 1
+    missing=""
+    for qtype in 2 5 10 15 16 33; do
+        out=$(dig @127.0.0.1 -p 15353 -t "TYPE${qtype}" +time=2 +tries=1 "$probe" 2>/dev/null || true)
+        if ! printf '%s\n' "$out" | grep -q "status: NOERROR" || \
+           ! printf '%s\n' "$out" | grep -q "ANSWER SECTION:"; then
+            missing="${missing} ${qtype}"
+        fi
+    done
+    kill "$prepid" 2>/dev/null || true
+    wait "$prepid" 2>/dev/null || true
+    prepid=""
+    if [ -n "$missing" ]; then
+        echo "Fix 544: rebuilt dnstt failed the pre-flight probe ($missing); dnstt left unchanged." >&2
+        tail -n 5 "$src/preflight.log" >&2 2>/dev/null || true
+        rm -rf "$src"
+        return 0
+    fi
+
+    mkdir -p "$BACKUP" 2>/dev/null || true
+    if ! cp -f "$bin" "$BACKUP/dns-server" 2>/dev/null; then
+        rm -rf "$src"
+        echo "Fix 544: could not back up the current dnstt binary; dnstt left unchanged." >&2
+        return 0
+    fi
+    if ! install -m 0755 "$src/dns-server" "$bin" 2>/dev/null; then
+        cp -f "$BACKUP/dns-server" "$bin" 2>/dev/null || true
+        rm -rf "$src"
+        echo "Fix 544: could not install the rebuilt dnstt binary; previous binary restored." >&2
+        return 0
+    fi
+    systemctl restart dnstt >/dev/null 2>&1 || true
+    sleep 1
+    if ! systemctl is-active --quiet dnstt 2>/dev/null; then
+        cp -f "$BACKUP/dns-server" "$bin" 2>/dev/null || true
+        systemctl restart dnstt >/dev/null 2>&1 || true
+        rm -rf "$src"
+        echo "Fix 544: rebuilt dnstt did not start; previous binary restored." >&2
+        return 0
+    fi
+    missing=""
+    for qtype in 2 5 10 15 16 33; do
+        out=$(dig @127.0.0.1 -p 5300 -t "TYPE${qtype}" +time=3 +tries=1 "$probe" 2>/dev/null || true)
+        if ! printf '%s\n' "$out" | grep -q "status: NOERROR" || \
+           ! printf '%s\n' "$out" | grep -q "ANSWER SECTION:"; then
+            missing="${missing} ${qtype}"
+        fi
+    done
+    if [ -n "$missing" ]; then
+        cp -f "$BACKUP/dns-server" "$bin" 2>/dev/null || true
+        systemctl restart dnstt >/dev/null 2>&1 || true
+        rm -rf "$src"
+        echo "Fix 544: rebuilt dnstt failed the live probe ($missing); previous binary restored." >&2
+        return 0
+    fi
+    rm -rf "$src"
+    fix_log "fix544: dnstt rebuilt with CNAME/NS/MX/SRV support"
+    fix_marker .fix544-dnstt-multi
+    echo "Fix 544: dnstt rebuilt with CNAME/NS/MX/SRV support."
+}
+
 # Found 535: a legacy account lost its base quota and IP-limit files while the
 # usage counter and the card survived.  Restore only when both files are
 # absent and the card still describes 100 GB / IP 2.
@@ -925,6 +1078,7 @@ cleanup_domain_cert_remnants
 repair_simpang32
 sync_dnstt_unit
 install_dnstt_null_support
+install_dnstt_multi_support
 remove_stale_rohcuan_limit
 cleanup_root_mail
 restart_quota_services
