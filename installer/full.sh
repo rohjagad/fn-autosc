@@ -209,7 +209,10 @@ rm -f /root/vpn.sh
 # Installasi SlowDNS
 wget --no-check-certificate ${hosting}/installer/slowdns.sh >> /dev/null 2>&1
 chmod +x slowdns.sh
-./slowdns.sh
+./slowdns.sh || {
+    echo "SlowDNS installation failed."
+    exit 1
+}
 cd
 rm -f /root/slowdns.sh
 

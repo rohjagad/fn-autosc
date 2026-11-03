@@ -1,0 +1,52 @@
+diff --git a/dns/dns.go b/dns/dns.go
+index 45b75ee..4f24472 100644
+--- a/dns/dns.go
++++ b/dns/dns.go
+@@ -47,6 +47,10 @@ var (
+ const (
+ 	// https://tools.ietf.org/html/rfc1035#section-3.2.2
+ 	RRTypeTXT = 16
++	// https://tools.ietf.org/html/rfc1035#section-3.3.10
++	// HTTP Custom's SlowDNS client sends QTYPE NULL when its Type setting
++	// is NULL.
++	RRTypeNULL = 10
+ 	// https://tools.ietf.org/html/rfc6891#section-6.1.1
+ 	RRTypeOPT = 41
+ 
+diff --git a/dnstt-server/main.go b/dnstt-server/main.go
+index ef669e6..ffd9f43 100644
+--- a/dnstt-server/main.go
++++ b/dnstt-server/main.go
+@@ -460,14 +460,14 @@ func responseFor(query *dns.Message, domain dns.Name) (*dns.Message, []byte) {
+ 		return resp, nil
+ 	}
+ 
+-	if question.Type != dns.RRTypeTXT {
+-		// We only support QTYPE == TXT.
++	if question.Type != dns.RRTypeTXT && question.Type != dns.RRTypeNULL {
++		// We support QTYPE == TXT and QTYPE == NULL.
+ 		resp.Flags |= dns.RcodeNameError
+ 		// No log message here; it's common for recursive resolvers to
+ 		// send NS or A queries when the client only asked for a TXT. I
+ 		// suspect this is related to QNAME minimization, but I'm not
+ 		// sure. https://tools.ietf.org/html/rfc7816
+-		// log.Printf("NXDOMAIN: QTYPE %d != TXT", question.Type)
++		// log.Printf("NXDOMAIN: QTYPE %d != TXT/NULL", question.Type)
+ 		return resp, nil
+ 	}
+ 
+@@ -794,7 +794,13 @@ func sendLoop(dnsConn net.PacketConn, ttConn *turbotunnel.QueuePacketConn, ch <-
+ 			}
+ 			timer.Stop()
+ 
+-			rec.Resp.Answer[0].Data = dns.EncodeRDataTXT(payload.Bytes())
++			if rec.Resp.Question[0].Type == dns.RRTypeNULL {
++				// NULL RDATA is raw bytes; unlike TXT, it has no
++				// <character-string> length prefixes.
++				rec.Resp.Answer[0].Data = payload.Bytes()
++			} else {
++				rec.Resp.Answer[0].Data = dns.EncodeRDataTXT(payload.Bytes())
++			}
+ 		}
+ 
+ 		buf, err := rec.Resp.WireFormat()

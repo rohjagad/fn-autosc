@@ -111,11 +111,39 @@ install_slowdns() {
     saved_pubkey=$(cat /etc/slowdns/server.pub)
   fi
   rm -rf /etc/slowdns /root/dnstt
-  git clone --depth 1 https://github.com/rohjagad/dnstt.git /root/dnstt
+  git clone https://github.com/rohjagad/dnstt.git /root/dnstt || {
+    echo "Failed to download the dnstt source."
+    return 1
+  }
+  git -C /root/dnstt checkout -q 17aa1fed864cd5493e3d09a14df1b8b5cc1df123 || {
+    echo "Failed to check out the pinned dnstt source."
+    return 1
+  }
+  # Found 543: HTTP Custom's SlowDNS client sends QTYPE NULL when its Type
+  # setting is NULL.  dnstt upstream only answers TXT, so apply the pinned
+  # NULL-query patch before building.
+  curl -fsSL --max-time 60 \
+    "https://raw.githubusercontent.com/rohjagad/fn-autosc/main/installer/dnstt-null.patch" \
+    -o /root/dnstt-null.patch || {
+    echo "Failed to download the dnstt NULL patch."
+    return 1
+  }
+  git -C /root/dnstt apply /root/dnstt-null.patch || {
+    echo "Failed to apply the dnstt NULL patch."
+    rm -f /root/dnstt-null.patch
+    return 1
+  }
+  rm -f /root/dnstt-null.patch
   cd /root/dnstt/dnstt-server
   rm -fr go.sum
-  go mod tidy
-  go build
+  go mod tidy || {
+    echo "dnstt go mod tidy failed."
+    return 1
+  }
+  go build || {
+    echo "dnstt build failed."
+    return 1
+  }
   mkdir -p /etc/slowdns/
   # Restore nsdomain if it was saved
   if [[ -n "$saved_nsdomain" ]]; then
@@ -175,6 +203,11 @@ END
   systemctl daemon-reload
   systemctl enable dnstt
   systemctl start dnstt
+  if systemctl is-active --quiet dnstt 2>/dev/null; then
+    mkdir -p /etc/funny
+    : > /etc/funny/.fix543-dnstt-null
+    chmod 600 /etc/funny/.fix543-dnstt-null 2>/dev/null || true
+  fi
 
   sed -i 's/#AllowTcpForwarding yes/AllowTcpForwarding yes/g' /etc/ssh/sshd_config
   systemctl restart ssh
@@ -243,7 +276,10 @@ FIXTMR
   systemctl enable --now slowdns-fixnet.timer
 }
 
-install_slowdns
+install_slowdns || {
+  echo "SlowDNS installation failed."
+  exit 1
+}
 install_firewall
 
 rm -rf /root/slowdns.sh
