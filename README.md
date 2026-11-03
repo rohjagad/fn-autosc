@@ -807,7 +807,10 @@ The name-based payload has no tunnel-domain suffix: HTTP Custom's
 empty payload is the root name (`.`). A DNS name is limited to 255 octets, so
 the server gives those sessions a 153-byte KCP MTU (155-byte payload budget);
 TXT and NULL keep the normal MTU. The QTYPE is remembered from each client's
-first query and applied when its KCP session is accepted.
+first query and applied when its KCP session is accepted. A post-deployment
+audit found TXT, NULL, A, AAAA, and malformed-query responses byte-identical to
+the previous Fix 543 binary; only the four new types differ (`NOERROR` with an
+answer instead of `NXDOMAIN`).
 
 The installer pins dnstt to a known commit and applies
 `installer/dnstt-multi.patch` before building. `update.sh` rebuilds an existing
@@ -817,6 +820,12 @@ pre-flights the new build on a local port, then verifies local `TXT`, `NULL`,
 restores the previous binary if the build, pre-flight, service start, or live
 probe fails. The rebuild restarts only `dnstt`; keys, nameserver, and firewall
 rules are preserved.
+
+For a box older than Fix 543, the updater runs the Fix 543 migration first
+(applying `installer/dnstt-null.patch`), then the Fix 544 migration, which
+rebuilds from a fresh checkout with the superset `installer/dnstt-multi.patch`.
+`installer/dnstt-null.patch` is therefore the historical first step;
+`installer/dnstt-multi.patch` is what current installs use.
 
 ### WireGuard — `menu-wg`
 
