@@ -550,9 +550,9 @@ This is deliberately not extra IP headroom. The limit file still means the
 maximum number of simultaneous client IPs. A single CGNAT device that
 rotates addresses does not accumulate multiple eligible addresses at once,
 so it stays at one counted IP; two real devices that stay connected remain
-two counted IPs and lock after the 5-minute confirmation. The lock notice lists
-the eligible IPs, or `IP evidence unavailable` when the stats map is empty
-instead of showing `IPs (0)`. Per-user state lives in
+two counted IPs and lock after the 5-minute confirmation. The lock notice
+lists the eligible IPs; if the stats map is empty, no lock is attempted, so
+there is no `IPs (0)` notice. Per-user state lives in
 `/var/lib/fn-autosc/limit-ip/<protocol>/<username>` (version 2: over-limit
 start, below-limit start, last sample, and first-seen time per IP) and is
 removed when the account is under the limit, locked, or gone. Locked cards
