@@ -1199,7 +1199,7 @@ What it does:
   and the update changes the version, that detected live version is also
   recorded in `.install-commit` as the install baseline. The target remains
   pinned in `update.sh`; currently
-  `f6cb3b1ab5b30e4b8b6100309fdb657adad82d5d` (Fix 544 content; the updater
+  `7e00565b9a05424f55c31ea9efd4c7927fd26307` (Fix 545 content; the updater
   script itself also carries Fix 520–545). It fetches 109 files on full,
   97 on lite, including `quota-xhttp`, `kill-xhttp`, every `extend-*`,
   `xray-add-client`, the shared `limit-ip-common` sampler, and the
