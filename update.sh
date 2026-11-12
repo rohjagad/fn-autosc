@@ -410,7 +410,20 @@ if ! migrate_domain_layout; then
     exit 1
 fi
 mkdir -p "$BACKUP"
+# Fix 545: the four wrappers exec the shared limiter.  Install it first and
+# abort before replacing any wrapper if that install fails; the old wrappers
+# are self-contained, so a failed update must not leave them pointing at a
+# missing or truncated /usr/bin/limit-ip-common.
+if [ -e "${STAGE}/limit-ip-common" ]; then
+    [ -e /usr/bin/limit-ip-common ] && cp -f /usr/bin/limit-ip-common "${BACKUP}/limit-ip-common"
+    if ! install -m 0755 "${STAGE}/limit-ip-common" /usr/bin/limit-ip-common; then
+        echo "FAILED to install /usr/bin/limit-ip-common - wrappers not replaced."
+        rm -rf "$STAGE"
+        exit 1
+    fi
+fi
 for name in $FILES; do
+    [ "$name" = "limit-ip-common" ] && continue
     [ -e "/usr/bin/${name}" ] && cp -f "/usr/bin/${name}" "${BACKUP}/${name}"
     install -m 0755 "${STAGE}/${name}" "/usr/bin/${name}"
 done

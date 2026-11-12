@@ -45,6 +45,7 @@ exec 8>"/tmp/limit-ip-${TRANSPORT}.run.lock"
 flock -n 8 || exit 0
 
 need_restart=0
+_restart_attempted=0
 declare -A _st_first=()
 mkdir -p "$STATE_DIR" 2>/dev/null || true
 
@@ -87,7 +88,7 @@ _state_load() {
             over) [[ "${a:-}" =~ ^[0-9]+$ ]] && _st_over=$a ;;
             below) [[ "${a:-}" =~ ^[0-9]+$ ]] && _st_below=$a ;;
             last) [[ "${a:-}" =~ ^[0-9]+$ ]] && _st_last=$a ;;
-            ip) [ -n "${a:-}" ] && [ -n "${b:-}" ] && _st_first["$a"]=$b ;;
+            ip) [ -n "${a:-}" ] && [[ "${b:-}" =~ ^[1-9][0-9]*$ ]] && _st_first["$a"]=$b ;;
         esac
     done < "$1"
 }
@@ -173,6 +174,13 @@ _sample_once() {
         if [ "${_st_last:-0}" -gt 0 ] && [ $((now - _st_last)) -gt "$GAP_RESET" ]; then
             over=0
             below=0
+        fi
+        # An offline account with no active timer needs no state file.  This
+        # keeps the 15-second sampling pass from rewriting empty state for
+        # every idle account.
+        if [ -z "$iplist" ] && [ "$over" -eq 0 ] && [ "$below" -eq 0 ]; then
+            rm -f "$state"
+            continue
         fi
         first=()
         for ip in "${!_st_first[@]}"; do first["$ip"]=${_st_first["$ip"]}; done
@@ -272,11 +280,20 @@ _auto_unlock() {
 }
 
 _restart_if_needed() {
+    local force="${1:-0}"
     [ "${need_restart:-0}" -eq 1 ] || return 0
-    if timeout 30 xray run -test -config "$JSON" >/dev/null 2>&1; then
-        timeout 60 systemctl restart "xray@${SERVICE}" >>/dev/null 2>&1 || true
+    # The first lock restarts immediately so it is enforced now.  Any further
+    # locks in the same 270-second pass are batched into one final restart at
+    # the end of the run, keeping the old "no restart storm" guarantee.
+    if [ "${_restart_attempted:-0}" -eq 1 ] && [ "$force" -ne 1 ]; then
+        return 0
     fi
-    need_restart=0
+    _restart_attempted=1
+    if timeout 30 xray run -test -config "$JSON" >/dev/null 2>&1; then
+        if systemctl restart "xray@${SERVICE}" >>/dev/null 2>&1; then
+            need_restart=0
+        fi
+    fi
 }
 
 _cleanup_state() {
@@ -294,7 +311,7 @@ _cleanup_state() {
 if ! timeout 10 xray api statsonline --server="127.0.0.1:${STATS_PORT}" -email probe 2>&1 | grep -q "not found"; then
     echo "IP limit check skipped: online statistics unavailable on 127.0.0.1:${STATS_PORT}"
     _auto_unlock
-    _restart_if_needed
+    _restart_if_needed 1
     exit 0
 fi
 
@@ -312,5 +329,5 @@ while :; do
 done
 
 _auto_unlock
-_restart_if_needed
+_restart_if_needed 1
 _cleanup_state

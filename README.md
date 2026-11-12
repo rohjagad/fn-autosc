@@ -555,9 +555,11 @@ lists the eligible IPs; if the stats map is empty, no lock is attempted, so
 there is no `IPs (0)` notice. Per-user state lives in
 `/var/lib/fn-autosc/limit-ip/<protocol>/<username>` (version 2: over-limit
 start, below-limit start, last sample, and first-seen time per IP) and is
-removed when the account is under the limit, locked, or gone. Locked cards
-auto-unlock after at least 15 minutes (15–20 min on the 5-minute cron), never
-earlier.
+removed when the account is under the limit, locked, or gone. To avoid a
+restart storm, the first lock in a sampling pass restarts Xray immediately;
+any further locks in the same pass are batched into one final restart. Locked
+cards auto-unlock after at least 15 minutes (15–20 min on the 5-minute cron),
+never earlier.
 
 > CDN note (measured live, Oct 2026): behind Cloudflare the limiter counts
 > real client IPs on all four transports (nginx forwards the address chain;

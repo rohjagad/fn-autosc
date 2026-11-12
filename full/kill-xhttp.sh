@@ -2,8 +2,8 @@
 # Found 525: license is enforced only for create/extend/install.
 # Found 532: cron has no terminal; suppress output so the root mailbox stays quiet.
 if [ ! -t 1 ]; then exec >/dev/null 2>&1; fi
-# Found 531: bound the xHTTP access log. limit-ip-xhttp reads only the
-# recent window and statsonlineiplist covers idle sessions, so a 5-minute
+# Found 531: bound the xHTTP access log.  Fix 545's limit-ip-xhttp reads
+# only statsonlineiplist, so the log is diagnostic evidence; a 5-minute
 # truncation is safe and stops unbounded growth.
 
 [[ -e $(which curl) ]] && grep -q "1.1.1.1" /etc/resolv.conf || { 
