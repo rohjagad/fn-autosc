@@ -531,7 +531,7 @@ The four Xray transports share `/usr/bin/limit-ip-common`; the
 `limit-ip-{ws,http,xhttp,grpc}` commands are thin wrappers that set the
 transport's JSON, stats port, card directory, and auto-unlock directory.
 The cron entries still start every 5 minutes, but each run samples for
-270 seconds at 15-second intervals, so the limiter sees the live per-IP map
+270 seconds at 30-second intervals, so the limiter sees the live per-IP map
 almost continuously. It counts only **simultaneous** IPs from
 `xray api statsonlineiplist`; the access log is no longer merged into the
 count, so an address that has just disconnected cannot keep looking like an
@@ -630,7 +630,7 @@ longer grow root's local mailbox; important events still go to
 pre-fix mailbox to `/root/fn-mail-backup-<date>.gz` and truncates it once; the
 archive is retained for audit. The four Xray `limit-ip-*` jobs keep the
 `*/5` schedule but run a 270-second sampling pass internally, with one
-`statsonlineiplist` sample every 15 seconds.
+`statsonlineiplist` sample every 30 seconds.
 
 | Schedule | Command | Purpose |
 | :--- | :--- | :--- |

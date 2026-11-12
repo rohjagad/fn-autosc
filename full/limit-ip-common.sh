@@ -5,7 +5,7 @@
 #   CARD_DIR, AUTO_DIR, STATE_DIR, UNLOCK_BIN
 #
 # Policy:
-#   - sample every LIMIT_SAMPLE_INTERVAL seconds (default 15) for
+#   - sample every LIMIT_SAMPLE_INTERVAL seconds (default 30) for
 #     LIMIT_RUN_SECONDS (default 270)
 #   - an IP must be continuously present for LIMIT_ELIGIBILITY seconds
 #     (default 60) before it counts
@@ -27,7 +27,7 @@ if [ ! -t 1 ] && [ "${LIMIT_VERBOSE:-0}" != "1" ]; then exec >/dev/null 2>&1; fi
   "${STATS_PORT:?}" "${JSON_LOCK:?}" "${CARD_DIR:?}" "${AUTO_DIR:?}" \
   "${STATE_DIR:?}" "${UNLOCK_BIN:?}"
 
-SAMPLE_INTERVAL="${LIMIT_SAMPLE_INTERVAL:-15}"
+SAMPLE_INTERVAL="${LIMIT_SAMPLE_INTERVAL:-30}"
 RUN_SECONDS="${LIMIT_RUN_SECONDS:-270}"
 ELIGIBILITY="${LIMIT_ELIGIBILITY:-60}"
 CONFIRM="${LIMIT_CONFIRM:-300}"
@@ -176,7 +176,7 @@ _sample_once() {
             below=0
         fi
         # An offline account with no active timer needs no state file.  This
-        # keeps the 15-second sampling pass from rewriting empty state for
+        # keeps the 30-second sampling pass from rewriting empty state for
         # every idle account.
         if [ -z "$iplist" ] && [ "$over" -eq 0 ] && [ "$below" -eq 0 ]; then
             rm -f "$state"

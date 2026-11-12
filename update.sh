@@ -38,7 +38,7 @@
 # counts only simultaneous eligible IPs (60-second first-seen grace), locks
 # after 5 minutes of continuous over-limit, and clears the timer only after
 # 90 seconds at or below the limit.  The 5-minute cron still starts each
-# sampler; the sampler itself takes 15-second samples for 270 seconds.
+# sampler; the sampler itself takes 30-second samples for 270 seconds.
 #
 # Verified against the three live full-edition hosts:
 #   sg1.rohcuan.dpdns.org  (64.120.94.62)

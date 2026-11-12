@@ -3514,7 +3514,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 - **Change:** the four Xray limiters no longer carry four copies of the counting logic. Each transport wrapper sets its JSON path, stats port, JSON lock, card directory, auto-unlock directory, state directory, and unlock binary, then `exec`s `/usr/bin/limit-ip-common`. The shared sampler:
   - reads only `xray api statsonlineiplist`; the transport access log is no longer merged into the count, so a disconnected or replaced address stops counting immediately;
   - gives a newly seen IP a 60-second continuous-presence grace before it becomes eligible;
-  - samples every 15 seconds for 270 seconds per 5-minute cron tick;
+  - samples every 30 seconds for 270 seconds per 5-minute cron tick;
   - locks only after 300 seconds (5 minutes) of continuous over-limit;
   - clears the over-limit timer only after 90 seconds at or below the limit;
   - clears the timer after any monitoring gap longer than 120 seconds, because missing samples are not evidence of a continuous over-limit set;
