@@ -3509,7 +3509,7 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 ## CGNAT-aware simultaneous-IP limiting (Fix 545)
 
 - **Payload commit:** `7e00565b9a05424f55c31ea9efd4c7927fd26307` (the commit that carries `limit-ip-common`; recorded in `.update-commit` after deployment).
-- **Updater commit:** pending (the commit that pins `TARGET` at the payload above).
+- **Updater commit:** `2458cdd6b82dae3e10624c0eb020146cf18618cb` (pins `TARGET` at the payload above).
 - **Component:** `full/limit-ip-common.sh`, `lite/limit-ip-common.sh`, the four `limit-ip-{ws,http,xhttp,grpc}.sh` wrappers in both editions, `menu/{full,lite}.manifest`, `update.sh`, `README.md`, and `project-information/`.
 - **Change:** the four Xray limiters no longer carry four copies of the counting logic. Each transport wrapper sets its JSON path, stats port, JSON lock, card directory, auto-unlock directory, state directory, and unlock binary, then `exec`s `/usr/bin/limit-ip-common`. The shared sampler:
   - reads only `xray api statsonlineiplist`; the transport access log is no longer merged into the count, so a disconnected or replaced address stops counting immediately;
