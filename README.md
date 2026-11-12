@@ -527,20 +527,37 @@ Each account with an IP limit has one file:
 /etc/xray/limit/ip/xray/<protocol>/<username>   # max concurrent IPs
 ```
 
-The `limit-ip-*` jobs run every 5 minutes. For each limited account they merge
-the per-IP online map from `xray api statsonlineiplist` with the distinct
-source IPs in the transport's access log over the last minute, and lock only
-when the same over-limit IP set is seen on two consecutive runs (at least
-4 minutes apart). The confirmation window keeps a single CGNAT device that
-rotates addresses from looking like several devices; a real multi-device set
-stays stable and locks on the second run. The lock notice lists the measured
-IPs, or says `IP evidence unavailable` when both sources are empty instead of
-showing `IPs (0)`. Per-user confirmation state lives in
-`/var/lib/fn-autosc/limit-ip/<protocol>/<username>` and is removed when the
-account is under the limit or gone. The access log is only a fallback:
-`kill-ws` truncates `ws.log` and `kill-xhttp` truncates `xhttp.log` every
-5 minutes, so the limiter never relies on it alone. Locked cards auto-unlock
-after at least 15 minutes (15–20 min on the 5-minute cron), never earlier.
+The four Xray transports share `/usr/bin/limit-ip-common`; the
+`limit-ip-{ws,http,xhttp,grpc}` commands are thin wrappers that set the
+transport's JSON, stats port, card directory, and auto-unlock directory.
+The cron entries still start every 5 minutes, but each run samples for
+270 seconds at 15-second intervals, so the limiter sees the live per-IP map
+almost continuously. It counts only **simultaneous** IPs from
+`xray api statsonlineiplist`; the access log is no longer merged into the
+count, so an address that has just disconnected cannot keep looking like an
+extra login.
+
+A newly seen IP must stay present for **60 seconds** before it becomes
+eligible to count. The account locks only after the eligible count stays
+above the limit for **5 minutes** continuously. Once the count is at or below
+the limit, the over-limit timer is cleared only after **90 seconds** below
+the limit, so a brief handover dip does not immediately re-arm a lock. A
+monitoring gap longer than **120 seconds** (a skipped or overlong run) also
+clears the timer: the limiter never treats missing evidence as a continuous
+over-limit set.
+
+This is deliberately not extra IP headroom. The limit file still means the
+maximum number of simultaneous client IPs. A single CGNAT device that
+rotates addresses does not accumulate multiple eligible addresses at once,
+so it stays at one counted IP; two real devices that stay connected remain
+two counted IPs and lock after the 5-minute confirmation. The lock notice lists
+the eligible IPs, or `IP evidence unavailable` when the stats map is empty
+instead of showing `IPs (0)`. Per-user state lives in
+`/var/lib/fn-autosc/limit-ip/<protocol>/<username>` (version 2: over-limit
+start, below-limit start, last sample, and first-seen time per IP) and is
+removed when the account is under the limit, locked, or gone. Locked cards
+auto-unlock after at least 15 minutes (15–20 min on the 5-minute cron), never
+earlier.
 
 > CDN note (measured live, Oct 2026): behind Cloudflare the limiter counts
 > real client IPs on all four transports (nginx forwards the address chain;
@@ -609,7 +626,9 @@ non-terminal stdout (cron) and suppress their own output, so routine runs no
 longer grow root's local mailbox; important events still go to
 `/etc/xray/.quota.logs` and Telegram. The updater archives the accumulated
 pre-fix mailbox to `/root/fn-mail-backup-<date>.gz` and truncates it once; the
-archive is retained for audit.
+archive is retained for audit. The four Xray `limit-ip-*` jobs keep the
+`*/5` schedule but run a 270-second sampling pass internally, with one
+`statsonlineiplist` sample every 15 seconds.
 
 | Schedule | Command | Purpose |
 | :--- | :--- | :--- |
@@ -1181,12 +1200,16 @@ What it does:
   recorded in `.install-commit` as the install baseline. The target remains
   pinned in `update.sh`; currently
   `f6cb3b1ab5b30e4b8b6100309fdb657adad82d5d` (Fix 544 content; the updater
-  script itself also carries Fix 520–544). It fetches 108 files on full,
-  96 on lite, including `quota-xhttp`, `kill-xhttp`, every `extend-*`,
-  `xray-add-client`, and the maintenance scripts that no longer carry a
-  license gate; the updater restarts every active `quota-*` service after
-  installing the new daemons. It also runs one-time, marker-guarded
-  live-state migrations: sync `dnstt.service` to `/etc/slowdns/nsdomain`,
+  script itself also carries Fix 520–545). It fetches 109 files on full,
+  97 on lite, including `quota-xhttp`, `kill-xhttp`, every `extend-*`,
+  `xray-add-client`, the shared `limit-ip-common` sampler, and the
+  maintenance scripts that no longer carry a license gate; the updater
+  restarts every active `quota-*` service after installing the new daemons.
+  The same updater is used on `sg1.rohcuan.dpdns.org`,
+  `id1.rohcuan.dpdns.org`, and `id2.rohcuan.dpdns.org`; it detects the
+  edition and live version on each host instead of assuming a hostname.
+  It also runs one-time, marker-guarded live-state migrations: sync
+  `dnstt.service` to `/etc/slowdns/nsdomain`,
   rebuild the installed dnstt binary from the pinned source with NULL-query
   and CNAME/NS/MX/SRV support (restarting only `dnstt`), restore the
   `simpang32` quota/IP limit,
@@ -1194,7 +1217,9 @@ What it does:
   the accumulated root mailbox, remove the template client anchors after
   validating all four Xray configs, remove stale certificate SAN entries
   left by earlier domain deletions (reload only), and remove the stale
-  `rohcuan` SSH limit (the limiter now enrolls panel accounts only). On
+  `rohcuan` SSH limit (the limiter now enrolls panel accounts only). The
+  four Xray IP limiters are replaced by the shared simultaneous-IP sampler;
+  existing limit files and cron entries are unchanged. On
   SlowDNS hosts, every run also removes exact duplicate
   `nameserver`/`domain`/`search` lines from a static `/etc/resolv.conf`
   (backup under `/root/fn-update-backup/`); symlinks and active resolver

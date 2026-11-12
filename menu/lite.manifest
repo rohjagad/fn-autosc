@@ -45,6 +45,7 @@ script	kill-grpc
 script	kill-http
 script	kill-ws
 script	kill-xhttp
+script	limit-ip-common
 script	limit-ip-grpc
 script	limit-ip-http
 script	limit-ip-ws

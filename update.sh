@@ -5,7 +5,7 @@
 # Applies the commits on top of b6d1a97 (1-minute evidence window,
 # Exp-Date-N/A binary fix, LOCKED IPs block, MULTILOGIN UNLOCKED
 # notices, working SSH banner wiring + default, xp lock-in-flight +
-# empty-expiry guard, IP evidence map + CGNAT stable-set gate, Xray
+# empty-expiry guard, simultaneous-IP sampling + CGNAT eligibility grace, Xray
 # auto-unlock at least 15 minutes, restore version-marker/formatter
 # guard, SSH active-IP limit/display with real WS/CDN client IPs,
 # per-file payload instead of the menu zip, payload web restore-ftp,
@@ -22,8 +22,9 @@
 # repair, published default-credential neutralization, root-mail archiving,
 # stale SSH-limit cleanup, removal of the template client anchors,
 # panel-account-only SSH IP limiting, complete domain-deletion cleanup
-# with balanced card reassignment, NULL-query support, and CNAME/NS/MX/SRV
-# support for HTTP Custom's SlowDNS Type dropdown)
+# with balanced card reassignment, NULL-query support, CNAME/NS/MX/SRV
+# support for HTTP Custom's SlowDNS Type dropdown, and the shared
+# CGNAT-aware Xray IP limiter)
 # to a live install. The file set is a superset covering the earlier
 # ranges too, so older installs are brought fully up to date in one
 # run. Safe to run: files are backed up first, every download is
@@ -32,6 +33,19 @@
 # missing). On SlowDNS hosts it also removes exact duplicate
 # nameserver/domain/search lines from a static /etc/resolv.conf, keeping
 # a backup under /root/fn-update-backup/.
+#
+# Fix 545: the four Xray limiters now share /usr/bin/limit-ip-common.  It
+# counts only simultaneous eligible IPs (60-second first-seen grace), locks
+# after 5 minutes of continuous over-limit, and clears the timer only after
+# 90 seconds at or below the limit.  The 5-minute cron still starts each
+# sampler; the sampler itself takes 15-second samples for 270 seconds.
+#
+# Verified against the three live full-edition hosts:
+#   sg1.rohcuan.dpdns.org  (64.120.94.62)
+#   id1.rohcuan.dpdns.org  (103.210.69.33)
+#   id2.rohcuan.dpdns.org  (157.10.253.95)
+# The updater is host-agnostic; it reads the live edition and version markers,
+# so the same file is used on all three.
 #
 # Usage:
 #   bash update.sh                  # live marker -> f6cb3b1 (default)
@@ -143,7 +157,7 @@ if [ "$EDITION" = "full" ] && ! command -v python3 >/dev/null 2>&1; then
 fi
 
 # Deployed name (no .sh) -> repo source name.
-FILES="xp quota-xhttp kill-xhttp limit-ip-ws limit-ip-http limit-ip-xhttp limit-ip-grpc
+FILES="xp quota-xhttp kill-xhttp limit-ip-common limit-ip-ws limit-ip-http limit-ip-xhttp limit-ip-grpc
 delete-ws delete-xhttp menu-system menu backup bmenu dm-menu
 add-trojan-grpc add-trojan-http add-trojan-ws add-trojan-xhttp add-vless-grpc add-vless-http add-vless-ws add-vless-xhttp add-vmess-grpc add-vmess-http add-vmess-ws add-vmess-xhttp trial-trojan-grpc trial-trojan-http trial-trojan-ws trial-trojan-xhttp trial-vless-grpc trial-vless-http trial-vless-ws trial-vless-xhttp trial-vmess-grpc trial-vmess-http trial-vmess-ws trial-vmess-xhttp
 unlock-ws-auto unlock-http-auto unlock-xhttp-auto unlock-grpc-auto
@@ -190,6 +204,7 @@ marker_for() {
         backup) echo 'Found 529' ;;
         restore-ftp | bmenu) echo 'Found 511' ;;
         format.sh) echo 'Press any key to return...' ;;
+        limit-ip-common | limit-ip-ws | limit-ip-http | limit-ip-xhttp | limit-ip-grpc) echo 'Found 545' ;;
         limit-ip-*) echo 'Found 532' ;;
         auto-delete-*) echo 'Found 532' ;;
         kill-ws | kill-http | kill-grpc) echo 'Found 532' ;;

@@ -126,5 +126,6 @@ for user in "${users[@]}"; do
     echo -e "${separator}"
 done
 
-# Found 508: keep the access log. limit-ip-ws uses it as fallback evidence
-# when statsonlineiplist is empty; truncating here made "IPs (0)" common.
+# Found 508: keep the access log for diagnostics. Fix 545's limiter reads only
+# statsonlineiplist, but truncating here still destroys useful connection
+# evidence and made the old "IPs (0)" notice common.
