@@ -67,7 +67,7 @@ set -u
 # version is read from the live panel below, so this value only appears when
 # both markers are missing.
 FROM="6b967af9e0ebadc76a265132e49d62a27ad72235"
-TARGET="${1:-5c09bffa4022b619dd60a042f89f9b3c2de3e60f}"
+TARGET="${1:-e7ce29b14c56639a88a8145555dc27f0ec2edbdd}"
 FORCE=0
 [ "${2:-}" = "--force" ] && FORCE=1
 
