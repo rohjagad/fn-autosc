@@ -50,6 +50,7 @@ script	limit-ip-grpc
 script	limit-ip-http
 script	limit-ip-ws
 script	limit-ip-xhttp
+script	log-caps
 script	list-xray-grpc
 script	list-xray-http
 script	list-xray-ws

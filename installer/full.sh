@@ -172,6 +172,13 @@ cd /root
 wget --no-check-certificate -O /etc/funny/format.sh ${hosting}/config/format.sh >> /dev/null 2>&1
 chmod +x /etc/funny/format.sh
 
+# Fix 546: apply the system-log retention caps on fresh installs too.
+if [ -x /usr/bin/log-caps ]; then
+    /usr/bin/log-caps || echo "Warning: log caps were not fully applied." >&2
+else
+    echo "Warning: /usr/bin/log-caps is missing; log caps not applied." >&2
+fi
+
 # Installasi SSH WebSocket
 wget --no-check-certificate ${hosting}/installer/ssh.sh >> /dev/null 2>&1
 chmod +x ssh.sh

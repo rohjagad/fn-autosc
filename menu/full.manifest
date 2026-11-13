@@ -57,6 +57,7 @@ script	limit-ip-http
 script	limit-ip-ssh
 script	limit-ip-ws
 script	limit-ip-xhttp
+script	log-caps
 bin	list-ssh
 script	list-xray-grpc
 script	list-xray-http

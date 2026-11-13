@@ -622,7 +622,7 @@ connection.
 
 Xray keeps `"loglevel": "info"` on all four transports; the access logs
 remain at `/var/log/xray/<transport>.log`. To keep the 20 GB disks safe,
-`update.sh` caps the system logs:
+`/usr/bin/log-caps` caps the system logs:
 
 - `/etc/logrotate.d/rsyslog`: `daily`, `rotate 7`, `maxsize 1G`,
   `compress`, `delaycompress`. This keeps 7 days and roughly 2.5–3 GB in
@@ -632,11 +632,13 @@ remain at `/var/log/xray/<transport>.log`. To keep the 20 GB disks safe,
   searchable per-unit history; the syslog archives cover the longer
   history).
 
-The migration edits the existing rsyslog stanza in place because a second
-stanza for `/var/log/syslog` is a duplicate log entry. It validates with
-`logrotate -d`, restores the previous file if the policy is rejected, and
-forces one rotation when the policy changes. It is idempotent and does not
-change the Xray log level, access logs, or the other services.
+`/usr/bin/log-caps` is installed by the payload, so both fresh installers
+run it during setup; `update.sh` also invokes the same file on existing
+hosts. The helper edits the existing rsyslog stanza in place because a
+second stanza for `/var/log/syslog` is a duplicate log entry. It validates
+with `logrotate -d`, restores the previous file if the policy is rejected,
+and forces one rotation when the policy changes. It is idempotent and does
+not change the Xray log level, access logs, or the other services.
 
 ---
 
@@ -1222,11 +1224,12 @@ What it does:
   recorded in `.install-commit` as the install baseline. The target remains
   pinned in `update.sh`; currently
   `5c09bffa4022b619dd60a042f89f9b3c2de3e60f` (Fix 545–546 content; the updater
-  script itself also carries Fix 520–546). It fetches 109 files on full,
-  97 on lite, including `quota-xhttp`, `kill-xhttp`, every `extend-*`,
-  `xray-add-client`, the shared `limit-ip-common` sampler, and the
-  maintenance scripts that no longer carry a license gate; the updater
-  restarts every active `quota-*` service after installing the new daemons.
+  script itself also carries Fix 520–546). It fetches 110 files on full,
+  98 on lite, including `quota-xhttp`, `kill-xhttp`, every `extend-*`,
+  `xray-add-client`, the shared `limit-ip-common` sampler and `log-caps`
+  helper, and the maintenance scripts that no longer carry a license gate;
+  the updater restarts every active `quota-*` service after installing the
+  new daemons.
   The same updater is used on `sg1.rohcuan.dpdns.org`,
   `id1.rohcuan.dpdns.org`, and `id2.rohcuan.dpdns.org`; it detects the
   edition and live version on each host instead of assuming a hostname.
@@ -1263,10 +1266,10 @@ What it does:
   `777` front-end (full edition), and records the commit in
   `/etc/funny/.update-commit` (re-running is a no-op unless `--force`
   is passed).
-- Caps log growth without changing Xray's `info` level: rsyslog becomes
-  `daily`/`rotate 7`/`maxsize 1G`, journald is capped at 2G with 100M
-  files, and one rotation is forced when the policy changes. See
-  "Log Retention" above.
+- Caps log growth without changing Xray's `info` level: the shared
+  `/usr/bin/log-caps` helper makes rsyslog `daily`/`rotate 7`/`maxsize 1G`
+  and caps journald at 2G with 100M files, and one rotation is forced when
+  the policy changes. See "Log Retention" above.
 - Cron/menu scripts need no restart. `ssh`/`dropbear` restart only when
   banner wiring was missing (SSH sessions survive; Dropbear clients
   reconnect); `haproxy` restarts only when the `777` logging patch was

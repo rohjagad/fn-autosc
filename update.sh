@@ -40,9 +40,10 @@
 # 90 seconds at or below the limit.  The 5-minute cron still starts each
 # sampler; the sampler itself takes 30-second samples for 270 seconds.
 #
-# Fix 546: Xray keeps logging at info.  rsyslog rotates daily and keeps
-# 7 generations with a 1G emergency size trigger, and journald is capped at
-# 2G with 100M files.  The rsyslog stanza is edited in place, validated with
+# Fix 546: Xray keeps logging at info.  /usr/bin/log-caps (installed by the
+# payload, so fresh installs run it too) makes rsyslog rotate daily and keep
+# 7 generations with a 1G emergency size trigger, and caps journald at 2G with
+# 100M files.  The rsyslog stanza is edited in place, validated with
 # logrotate -d, restored on failure, and one rotation is forced when the
 # policy changes.  The access logs and info-level debugging detail remain.
 #
@@ -163,7 +164,7 @@ if [ "$EDITION" = "full" ] && ! command -v python3 >/dev/null 2>&1; then
 fi
 
 # Deployed name (no .sh) -> repo source name.
-FILES="xp quota-xhttp kill-xhttp limit-ip-common limit-ip-ws limit-ip-http limit-ip-xhttp limit-ip-grpc
+FILES="xp quota-xhttp kill-xhttp limit-ip-common limit-ip-ws limit-ip-http limit-ip-xhttp limit-ip-grpc log-caps
 delete-ws delete-xhttp menu-system menu backup bmenu dm-menu
 add-trojan-grpc add-trojan-http add-trojan-ws add-trojan-xhttp add-vless-grpc add-vless-http add-vless-ws add-vless-xhttp add-vmess-grpc add-vmess-http add-vmess-ws add-vmess-xhttp trial-trojan-grpc trial-trojan-http trial-trojan-ws trial-trojan-xhttp trial-vless-grpc trial-vless-http trial-vless-ws trial-vless-xhttp trial-vmess-grpc trial-vmess-http trial-vmess-ws trial-vmess-xhttp
 unlock-ws-auto unlock-http-auto unlock-xhttp-auto unlock-grpc-auto
@@ -211,6 +212,7 @@ marker_for() {
         restore-ftp | bmenu) echo 'Found 511' ;;
         format.sh) echo 'Press any key to return...' ;;
         limit-ip-common | limit-ip-ws | limit-ip-http | limit-ip-xhttp | limit-ip-grpc) echo 'Found 545' ;;
+        log-caps) echo 'Found 546' ;;
         limit-ip-*) echo 'Found 532' ;;
         auto-delete-*) echo 'Found 532' ;;
         kill-ws | kill-http | kill-grpc) echo 'Found 532' ;;
@@ -469,94 +471,15 @@ fix_log() {
 }
 
 # Fix 546: Xray keeps logging at info, but the host must not fill its disk.
-# rsyslog is changed in place (a second stanza for /var/log/syslog would make
-# logrotate report a duplicate entry) to daily rotation with 7 generations and
-# a 1G emergency size trigger.  journald gets a bounded drop-in.  The Xray
-# access logs and info-level detail stay enabled; only retention is capped.
+# /usr/bin/log-caps is installed by the payload (fresh installs run it too)
+# and owns the rsyslog/journald policy.  update.sh only invokes it, so there
+# is one implementation shared by install and update.
 apply_log_caps() {
-    local conf="/etc/logrotate.d/rsyslog"
-    local jconf="/etc/systemd/journald.conf.d/99-fn-autosc-log-cap.conf"
-    local tmp="" dry="" changed=0 jchanged=0 has_max=0
-
-    if [ -f "$conf" ] && command -v logrotate >/dev/null 2>&1 && \
-       tmp=$(mktemp) && dry=$(mktemp); then
-        grep -qE '^[[:space:]]*maxsize[[:space:]]+' "$conf" && has_max=1
-        if awk -v has_max="$has_max" '
-            /^[[:space:]]*weekly[[:space:]]*$/ { print "\tdaily"; next }
-            /^[[:space:]]*rotate[[:space:]]+[0-9]+[[:space:]]*$/ {
-                if (!saw_rotate) {
-                    print "\trotate 7"
-                    if (!has_max) print "\tmaxsize 1G"
-                    saw_rotate = 1
-                }
-                next
-            }
-            /^[[:space:]]*maxsize[[:space:]]+/ { print "\tmaxsize 1G"; next }
-            /^[[:space:]]*}[[:space:]]*$/ {
-                if (!saw_rotate) {
-                    print "\trotate 7"
-                    if (!has_max) print "\tmaxsize 1G"
-                    saw_rotate = 1
-                }
-                print
-                next
-            }
-            { print }
-            END {
-                if (!saw_rotate) {
-                    print "\trotate 7"
-                    if (!has_max) print "\tmaxsize 1G"
-                }
-            }
-        ' "$conf" > "$tmp"; then
-            if ! cmp -s "$conf" "$tmp"; then
-                cp -p "$conf" "$BACKUP/rsyslog.logrotate" 2>/dev/null || true
-                if cat "$tmp" > "$conf"; then
-                    changed=1
-                else
-                    cp -p "$BACKUP/rsyslog.logrotate" "$conf" 2>/dev/null || true
-                fi
-            fi
-        fi
-        if [ "$changed" -eq 1 ]; then
-            if ! logrotate -d "$conf" > "$dry" 2>&1 || grep -qiE '^[[:space:]]*error:' "$dry"; then
-                cp -p "$BACKUP/rsyslog.logrotate" "$conf" 2>/dev/null || true
-                echo "log caps: logrotate rejected the rsyslog policy; restored." >&2
-                changed=0
-            fi
-        fi
-        rm -f "$tmp" "$dry"
-        if [ "$changed" -eq 1 ]; then
-            if logrotate -f "$conf" >/dev/null 2>&1; then
-                echo "log caps: rsyslog is daily/rotate 7/maxsize 1G (one rotation forced)."
-            else
-                echo "log caps: rsyslog policy installed; forced rotation failed, next daily run applies." >&2
-            fi
-        fi
+    if [ -x /usr/bin/log-caps ]; then
+        BACKUP="$BACKUP" /usr/bin/log-caps || true
+    else
+        echo "log caps: /usr/bin/log-caps missing; skipped." >&2
     fi
-
-    if command -v systemctl >/dev/null 2>&1 && command -v journalctl >/dev/null 2>&1 && \
-       mkdir -p /etc/systemd/journald.conf.d 2>/dev/null; then
-        if [ ! -f "$jconf" ] || \
-           ! grep -qx 'SystemMaxUse=2G' "$jconf" 2>/dev/null || \
-           ! grep -qx 'SystemMaxFileSize=100M' "$jconf" 2>/dev/null; then
-            [ -f "$jconf" ] && cp -p "$jconf" "$BACKUP/journald-log-cap.conf" 2>/dev/null || true
-            if printf '%s\n' '[Journal]' 'SystemMaxUse=2G' 'SystemMaxFileSize=100M' > "$jconf"; then
-                chmod 644 "$jconf" 2>/dev/null || true
-                jchanged=1
-            fi
-        fi
-    fi
-    if [ "$jchanged" -eq 1 ]; then
-        if systemctl restart systemd-journald >/dev/null 2>&1; then
-            journalctl --vacuum-size=2G >/dev/null 2>&1 || true
-            echo "log caps: journald capped at 2G (100M files)."
-        else
-            echo "log caps: journald drop-in installed; restart failed, applies on next boot." >&2
-        fi
-    fi
-
-    fix_marker .fix546-log-caps
 }
 
 # Found 533: the quota daemons are long-running.  Installing a new script is
