@@ -618,6 +618,26 @@ connection.
 | `quota-*` | ws/http/xhttp/grpc | Service that measures and stores usage |
 | `xp` | all + SSH | Remove accounts past their expiry date |
 
+### Log Retention
+
+Xray keeps `"loglevel": "info"` on all four transports; the access logs
+remain at `/var/log/xray/<transport>.log`. To keep the 20 GB disks safe,
+`update.sh` caps the system logs:
+
+- `/etc/logrotate.d/rsyslog`: `daily`, `rotate 7`, `maxsize 1G`,
+  `compress`, `delaycompress`. This keeps 7 days and roughly 2.5–3 GB in
+  steady state at the measured 0.7–1.0 GB/day.
+- journald: `/etc/systemd/journald.conf.d/99-fn-autosc-log-cap.conf` sets
+  `SystemMaxUse=2G` and `SystemMaxFileSize=100M` (about one day of
+  searchable per-unit history; the syslog archives cover the longer
+  history).
+
+The migration edits the existing rsyslog stanza in place because a second
+stanza for `/var/log/syslog` is a duplicate log entry. It validates with
+`logrotate -d`, restores the previous file if the policy is rejected, and
+forces one rotation when the policy changes. It is idempotent and does not
+change the Xray log level, access logs, or the other services.
+
 ---
 
 ## Automated Maintenance (Cron)
@@ -1243,6 +1263,10 @@ What it does:
   `777` front-end (full edition), and records the commit in
   `/etc/funny/.update-commit` (re-running is a no-op unless `--force`
   is passed).
+- Caps log growth without changing Xray's `info` level: rsyslog becomes
+  `daily`/`rotate 7`/`maxsize 1G`, journald is capped at 2G with 100M
+  files, and one rotation is forced when the policy changes. See
+  "Log Retention" above.
 - Cron/menu scripts need no restart. `ssh`/`dropbear` restart only when
   banner wiring was missing (SSH sessions survive; Dropbear clients
   reconnect); `haproxy` restarts only when the `777` logging patch was

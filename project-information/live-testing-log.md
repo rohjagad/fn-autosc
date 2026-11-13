@@ -542,3 +542,12 @@ Schedules observed live: `backup 0 0,6,12,18`, `xp 0,15,30,45`,
 - **Verification:** rsyslog, nginx, haproxy, ssh, dropbear, cron, all four `xray@` units, all four `quota-*` units, and dnstt are active; 0 failed units; both syslogs are still receiving entries.
 - **sg1:** left untouched; it has 79 GB free and no pressure.
 - **Follow-up:** the 4–5 GB/week syslog growth is driven by Xray info-level logging. The logrotate policy was not changed; if the growth returns, consider a size-capped rotation rule or lowering the Xray log level separately.
+
+## Fix 546 preparation - bounded log retention (2026-11-13)
+
+- **Scope:** keep Xray's `"loglevel": "info"` on all four transports and cap retention instead. No live file was changed during preparation.
+- **Measured growth after the cleanup:** id1 syslog ~0.7 GB/day and journal ~2.0 GB/day; id2 syslog ~1.0 GB/day and journal ~2.8 GB/day. Xray lines were 85–93% of syslog, dominated by `ws` and `xhttp`. Before the cleanup, id1 had 5.1 GB + 5.5 GB syslogs, `/var/log` at 14 GB, and 943 MB free (96%); id2 had 4.0 GB + 4.3 GB syslogs and `/var/log` at 11 GB.
+- **Policy:** `/etc/logrotate.d/rsyslog` becomes `daily` / `rotate 7` / `maxsize 1G`, keeping the existing compression and postrotate reload; journald gets `SystemMaxUse=2G` and `SystemMaxFileSize=100M`. Expected steady state is ~2.5–3 GB of syslog plus 2 GB of journal, leaving more than 10 GB free on the 20 GB hosts.
+- **Delivery:** one idempotent function in `update.sh`, marker `.fix546-log-caps`. It edits the existing rsyslog stanza in place, backs it up, validates with `logrotate -d`, restores on rejection, and forces one rotation only when the policy changes; the journald drop-in is rewritten only when its values differ.
+- **Local verification:** a bubblewrap harness with fake `logrotate`, `systemctl`, and `journalctl` passed six cases (normal transform, idempotent rerun, normalization of an existing capped config, rollback on `logrotate -d` rejection, policy retention on a failed forced rotation, and drop-in retention on a failed journald restart). `bash -n update.sh` passes.
+- **Deployment:** see the live section below after the updater run.
