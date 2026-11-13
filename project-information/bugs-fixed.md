@@ -3534,6 +3534,8 @@ A second complete reinstallation from bare disk was performed to guarantee end-t
 
 - **Initial update-only payload commit:** `5c09bffa4022b619dd60a042f89f9b3c2de3e60f`.
 - **Initial updater commit:** `ac31271ec3fa3b9754f83a0d26d927baf8e32e2e` (pins the initial payload).
+- **Fresh-install payload commit:** `e7ce29b14c56639a88a8145555dc27f0ec2edbdd` (adds `full/log-caps.sh` and `lite/log-caps.sh` to both manifests and runs the helper from both installers).
+- **Fresh-install updater commit:** `3b462e740095e1931e4571600e6caac9727ba9bd` (pins the payload above and invokes the same helper).
 - **Component:** `full/log-caps.sh`, `lite/log-caps.sh`, `menu/full.manifest`, `menu/lite.manifest`, `installer/full.sh`, `installer/lite.sh`, `update.sh`, `README.md`, `project-information/`.
 - **Change:** Xray keeps `"loglevel": "info"` on all four transports and keeps writing the existing `/var/log/xray/<transport>.log` access logs. The retention policy now lives in the payload helper `/usr/bin/log-caps`:
   - it edits `/etc/logrotate.d/rsyslog` in place to `daily` / `rotate 7` / `maxsize 1G` while keeping `compress`, `delaycompress`, `missingok`, `notifempty`, and `sharedscripts`;
