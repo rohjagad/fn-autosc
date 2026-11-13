@@ -894,6 +894,10 @@ Client subnet `192.168.42.0/24`.
 Accounts are stored in `/etc/funny/.l2tp`, with credentials mirrored into
 `/etc/ppp/chap-secrets` and `/etc/ipsec.d/passwd`.
 
+> PPTP is not provided. The L2TP installer no longer installs `pptpd`;
+> `update.sh` stops, disables, and masks any leftover `pptpd` service on
+> existing hosts, so TCP `1723` is closed.
+
 > The IPsec pre-shared key is generated randomly per install and stored mode
 > `0600`; it is shown in the account card.
 
