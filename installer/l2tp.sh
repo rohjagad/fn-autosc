@@ -138,7 +138,7 @@ DEBIAN_FRONTEND=noninteractive apt install openssl iptables iptables-persistent 
 apt-get -y install libnss3-dev libnspr4-dev pkg-config \
   libpam0g-dev libcap-ng-dev libcap-ng-utils libselinux1-dev \
   libcurl4-nss-dev flex bison gcc make libnss3-tools \
-  libevent-dev ppp xl2tpd pptpd
+  libevent-dev ppp xl2tpd
 fi
 if [[ ${OS} == "centos" ]]; then
 bigecho "Compiling and installing Libreswan..."
@@ -308,35 +308,10 @@ fi
 
 true  # no default account: xl2tp.sh appends the real ones
 
-# Create PPTP config
-cat >/etc/pptpd.conf <<END
-option /etc/ppp/options.pptpd
-logwtmp
-localip 192.168.41.1
-remoteip 192.168.41.10-100
-END
-cat >/etc/ppp/options.pptpd <<END
-name pptpd
-refuse-pap
-refuse-chap
-refuse-mschap
-require-mschap-v2
-require-mppe-128
-ms-dns 8.8.8.8
-ms-dns 8.8.4.4
-proxyarp
-lock
-nobsdcomp 
-novj
-novjccomp
-nologfd
-END
-
 bigecho "Updating IPTables rules..."
 service fail2ban stop >/dev/null 2>&1
 iptables -t nat -I POSTROUTING -s 192.168.43.0/24 -o $NET_IFACE -j MASQUERADE
 iptables -t nat -I POSTROUTING -s 192.168.42.0/24 -o $NET_IFACE -j MASQUERADE
-iptables -t nat -I POSTROUTING -s 192.168.41.0/24 -o $NET_IFACE -j MASQUERADE
 if [[ ${OS} == "centos" ]]; then
 service iptables save
 iptables-restore < /etc/sysconfig/iptables 
@@ -350,7 +325,6 @@ fi
 bigecho "Enabling services on boot..."
 systemctl enable xl2tpd
 systemctl enable ipsec
-systemctl enable pptpd
 
 for svc in fail2ban ipsec xl2tpd; do
   update-rc.d "$svc" enable >/dev/null 2>&1
@@ -366,6 +340,5 @@ service fail2ban restart 2>/dev/null
 service ipsec restart 2>/dev/null
 service xl2tpd restart 2>/dev/null
 touch /etc/funny/.l2tp
-touch /etc/funny/.pptp
 rm -f /root/ipsec.sh
 rm -f /root/l2tp.sh

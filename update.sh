@@ -20,7 +20,8 @@
 # cron output suppression when stdout is not a terminal, quota startup output
 # guarded for systemd, legacy dnstt/nsdomain synchronization, simpang32 quota
 # repair, published default-credential neutralization, root-mail archiving,
-# stale SSH-limit cleanup, removal of the template client anchors,
+# stale SSH-limit cleanup, removal of the unused PPTP daemon,
+# removal of the template client anchors,
 # panel-account-only SSH IP limiting, complete domain-deletion cleanup
 # with balanced card reassignment, NULL-query support, CNAME/NS/MX/SRV
 # support for HTTP Custom's SlowDNS Type dropdown, the shared
@@ -452,7 +453,7 @@ rm -rf "$STAGE"
 remove_legacy_domain_files || true
 
 # ---------------------------------------------------------------------------
-# Recent one-time live-state migrations (Fix 533-546).
+# Recent one-time live-state migrations (Fix 533-547).
 #
 # The payload only contains scripts.  The state below lives outside the
 # repository (systemd units, quota files, JSON configs, mailboxes, SSH limit
@@ -1069,6 +1070,34 @@ remove_stale_rohcuan_limit() {
     echo "Fix 540: removed recreated rohcuan SSH IP limit (OS user untouched)."
 }
 
+# Found 547: the panel has no PPTP menu and no PPTP accounts, but the L2TP
+# installer left pptpd enabled on TCP 1723.  Scanners connect, pppd fails
+# (no /dev/ppp on some hosts, no matching chap-secret on others), and the
+# failures fill the journal.  Stop, disable, and mask the unused service.
+# The package and configs stay in place so the change is reversible; fresh
+# installers no longer install pptpd.
+remove_unused_pptpd() {
+    local marker="/etc/funny/.fix547-pptpd-disabled"
+    local listening=0
+    if command -v systemctl >/dev/null 2>&1 && systemctl cat pptpd.service >/dev/null 2>&1; then
+        systemctl disable --now pptpd.service >/dev/null 2>&1 || true
+        systemctl mask pptpd.service >/dev/null 2>&1 || true
+    fi
+    rm -f /etc/funny/.pptp 2>/dev/null || true
+    if command -v ss >/dev/null 2>&1 && ss -lntp 2>/dev/null | grep -q ':1723[[:space:]]'; then
+        listening=1
+    fi
+    if [ "$listening" -eq 1 ]; then
+        echo "Fix 547: pptpd is disabled but TCP 1723 is still listening; check for a manual pptpd process." >&2
+        return 0
+    fi
+    if [ ! -f "$marker" ]; then
+        fix_log "fix547: stopped, disabled, and masked unused pptpd"
+        fix_marker .fix547-pptpd-disabled
+        echo "Fix 547: unused PPTP service disabled and masked (TCP 1723 closed)."
+    fi
+}
+
 # Found 541: deleting a rotated domain now removes its certificate and
 # ACME/Certbot state.  Existing boxes can still carry SAN names that were
 # removed from the list earlier, so rebuild the self-signed certificate from
@@ -1169,6 +1198,7 @@ sync_dnstt_unit
 install_dnstt_null_support
 install_dnstt_multi_support
 remove_stale_rohcuan_limit
+remove_unused_pptpd
 cleanup_root_mail
 apply_log_caps
 restart_quota_services

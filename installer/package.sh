@@ -49,7 +49,6 @@ touch /var/log/xray/http.log
 touch /var/log/xray/grpc.log
 touch /etc/xray/.quota.logs
 touch /etc/funny/.l2tp
-touch /etc/funny/.pptp
 touch /etc/funny/.noob
 
 # Installasi Ulang untuk menghindari package tidak terinstall
@@ -111,7 +110,7 @@ systemctl enable vnstat
 rm -f /root/vnstat-2.6.tar.gz >/dev/null 2>&1
 rm -rf /root/vnstat-2.6 >/dev/null 2>&1
 
-apt install -y libnss3-dev libnspr4-dev pkg-config libpam0g-dev libcap-ng-dev libcap-ng-utils libselinux1-dev libcurl4-nss-dev flex bison make libnss3-tools libevent-dev xl2tpd pptpd
+apt install -y libnss3-dev libnspr4-dev pkg-config libpam0g-dev libcap-ng-dev libcap-ng-utils libselinux1-dev libcurl4-nss-dev flex bison make libnss3-tools libevent-dev xl2tpd
 
 # Fail2ban: Debian ships no jail, and the default backend expects
 # /var/log/auth.log which a minimal install does not create until the first
