@@ -896,7 +896,8 @@ Accounts are stored in `/etc/funny/.l2tp`, with credentials mirrored into
 
 > PPTP is not provided. The L2TP installer no longer installs `pptpd`;
 > `update.sh` stops, disables, and masks any leftover `pptpd` service on
-> existing hosts, so TCP `1723` is closed.
+> existing hosts, so TCP `1723` is closed. The package is left installed for
+> reversibility; purging it is an optional follow-up.
 
 > The IPsec pre-shared key is generated randomly per install and stored mode
 > `0600`; it is shown in the account card.
@@ -1151,6 +1152,11 @@ Binaries are built with `-ldflags='-s -w'` for a small footprint.
 - **Reassigned cards could pile onto one domain** — after a domain deletion,
   cards are distributed to the least-used remaining domains by current card
   count instead of all going to the first one, keeping the rotation balanced.
+- **Unused PPTP server was exposed on TCP `1723`** — the L2TP installer
+  installed and enabled `pptpd` even though the panel has no PPTP menu and no
+  PPTP accounts. Fresh installs no longer install or configure it; the
+  updater stops, disables, and masks any leftover unit so `1723` is closed,
+  while leaving the package and L2TP/IPsec state untouched.
 
 ---
 
@@ -1162,6 +1168,13 @@ Binaries are built with `-ldflags='-s -w'` for a small footprint.
    transport may not work through HTTP/2 reverse proxies.
 3. **UDP Request SNAT** — the broad `10.0.0.0/8` SNAT rule can overlap client
    private subnets and may need manual exclusion.
+4. **Xray 25.3.6 `OnlineMap` race** — the pinned core can crash one transport
+   with `fatal error: concurrent map read and map write` in
+   `app/stats.(*OnlineMap).AddIP`. It was observed on sg1 and id1 but not
+   id2, and systemd restarts the affected unit within a few seconds. Upstream
+   Xray replaces `OnlineMap` with a mutex-protected refcount implementation,
+   so an Xray upgrade is the fix. The version pin is a compatibility decision
+   (decision 1), so the upgrade is tracked separately from panel fixes.
 
 Formerly listed here and since fixed: the stale `raw.githubusercontent.com`
 hosts entry; the hardcoded Telegram bot token (the install notification now
@@ -1227,9 +1240,10 @@ What it does:
   and the update changes the version, that detected live version is also
   recorded in `.install-commit` as the install baseline. The target remains
   pinned in `update.sh`; currently
-  `e7ce29b14c56639a88a8145555dc27f0ec2edbdd` (Fix 545–546 content, with the
-  log-cap helper in both payloads so fresh installs do not need an update; the
-  updater script itself also carries Fix 520–546). It fetches 110 files on full,
+  `b2942b7ebb00ca2dbe3fc2993226c196dc70fc0b` (Fix 545–547 content, with the
+  log-cap helper in both payloads so fresh installs do not need an update and
+  no PPTP path in either installer; the updater script itself also carries
+  Fix 520–547). It fetches 110 files on full,
   98 on lite, including `quota-xhttp`, `kill-xhttp`, every `extend-*`,
   `xray-add-client`, the shared `limit-ip-common` sampler and `log-caps`
   helper, and the maintenance scripts that no longer carry a license gate;
@@ -1238,7 +1252,7 @@ What it does:
   The same updater is used on `sg1.rohcuan.dpdns.org`,
   `id1.rohcuan.dpdns.org`, and `id2.rohcuan.dpdns.org`; it detects the
   edition and live version on each host instead of assuming a hostname.
-  It also runs one-time, marker-guarded live-state migrations: sync
+  It also runs marker-guarded live-state migrations: sync
   `dnstt.service` to `/etc/slowdns/nsdomain`,
   rebuild the installed dnstt binary from the pinned source with NULL-query
   and CNAME/NS/MX/SRV support (restarting only `dnstt`), restore the
@@ -1246,8 +1260,11 @@ What it does:
   neutralize the published default Xray credentials, archive and truncate
   the accumulated root mailbox, remove the template client anchors after
   validating all four Xray configs, remove stale certificate SAN entries
-  left by earlier domain deletions (reload only), and remove the stale
-  `rohcuan` SSH limit (the limiter now enrolls panel accounts only). The
+  left by earlier domain deletions (reload only), remove the stale
+  `rohcuan` SSH limit (the limiter now enrolls panel accounts only), and stop,
+  disable, and mask the unused `pptpd` service left by older L2TP installs
+  (the package stays installed for reversibility; the unit is re-checked on
+  every run). The
   four Xray IP limiters are replaced by the shared simultaneous-IP sampler;
   existing limit files and cron entries are unchanged. On
   SlowDNS hosts, every run also removes exact duplicate
