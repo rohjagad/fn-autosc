@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# FN AutoSC updater: live marker -> 5c09bff
+# FN AutoSC updater: live marker -> e7ce29b
 #
 # Applies the commits on top of b6d1a97 (1-minute evidence window,
 # Exp-Date-N/A binary fix, LOCKED IPs block, MULTILOGIN UNLOCKED
@@ -55,7 +55,7 @@
 # so the same file is used on all three.
 #
 # Usage:
-#   bash update.sh                  # live marker -> 5c09bff (default)
+#   bash update.sh                  # live marker -> e7ce29b (default)
 #   bash update.sh <commit> --force  # re-apply even if already recorded
 #
 # One-line remote run:
@@ -452,13 +452,18 @@ rm -rf "$STAGE"
 remove_legacy_domain_files || true
 
 # ---------------------------------------------------------------------------
-# Fix 533-543: one-time live-state migrations.
+# Recent one-time live-state migrations (Fix 533-546).
 #
 # The payload only contains scripts.  The state below lives outside the
 # repository (systemd units, quota files, JSON configs, mailboxes, SSH limit
 # files), so it has to be migrated once on each existing box.  Every function
 # is best-effort: a missing optional file or a failed parse must never roll
 # back an otherwise successful payload install.
+#
+# Rule: a behavior fix belongs in the payload or a fresh installer.  A
+# function here must only repair state that a fresh install cannot have; if it
+# changes behavior, mirror that behavior in the install path as well so a
+# fresh install never depends on update.sh.
 # ---------------------------------------------------------------------------
 fix_marker() {
     mkdir -p /etc/funny 2>/dev/null || true
