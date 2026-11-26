@@ -605,18 +605,20 @@ slowdns_add_udp53_bypass() {
 }
 
 slowdns_remove_redirect() {
-    local rule=""
+    local rule="" rules=""
     # The old installer added the redirect once per default-route lookup, and
     # the interface can differ under policy routing.  Remove every matching
     # rule, not just the current default interface.
+    rules=$(iptables -t nat -S PREROUTING 2>/dev/null) || return 1
     while IFS= read -r rule; do
         [ -n "$rule" ] || continue
         iptables -t nat -D PREROUTING $rule 2>/dev/null || break
-    done < <(iptables -t nat -S PREROUTING 2>/dev/null | \
+    done < <(printf '%s\n' "$rules" | \
         sed -n 's/^-A PREROUTING //p' | \
         grep -- '--dport 53 .*REDIRECT --to-ports 5300')
     while iptables -D INPUT -p udp --dport 5300 -j ACCEPT 2>/dev/null; do :; done
-    ! iptables -t nat -S PREROUTING 2>/dev/null | grep -q -- '--dport 53 .*REDIRECT --to-ports 5300'
+    rules=$(iptables -t nat -S PREROUTING 2>/dev/null) || return 1
+    ! printf '%s\n' "$rules" | grep -q -- '--dport 53 .*REDIRECT --to-ports 5300'
 }
 
 slowdns_rollback() {
