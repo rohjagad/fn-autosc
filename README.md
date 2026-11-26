@@ -855,7 +855,8 @@ EDNS0 by default; old clients or resolvers that strip EDNS0 will fail.
 **Menu:** `menu-slowdns` manages `slowdns.service`, updates `SLOWDNS_DOMAIN` in
 `/etc/slowdns/slowdns.env` when the nameserver changes, renews keys, restarts
 the service, and shows the public key. A failed restart is reported, and a
-failed key renewal restores the previous key pair.
+failed key renewal restores the previous key pair. Backup/restore and the
+System info screen also use `slowdns`/UDP 53.
 
 **Updating:** `update.sh` refreshes the `menu-slowdns` payload; it does not
 touch the running service or the key pair.
@@ -1236,10 +1237,10 @@ What it does:
   recorded in `.install-commit` as the install baseline. The target remains
   pinned in `update.sh`; currently
   `0296e220e5da5a397f7d134e9e87eb8c3ec7f901` (Fix 551, with the ePro-only SlowDNS
-  menu, hardened installer/menu failure handling, the last dnstt references
-  removed from backup/restore and system info, and the log-cap helper in both
-  payloads so fresh installs do not need an update and no PPTP path in either
-  installer). It fetches 110 files
+  menu, hardened installer/menu failure handling, the last legacy server
+  references removed from backup/restore and system info, and the log-cap
+  helper in both payloads so fresh installs do not need an update and no PPTP
+  path in either installer). It fetches 110 files
   on full and 98 on lite, including `quota-xhttp`, `kill-xhttp`, every
   `extend-*`, `xray-add-client`, the shared `limit-ip-common` sampler and
   `log-caps` helper, and the maintenance scripts that no longer carry a

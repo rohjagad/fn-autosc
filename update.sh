@@ -56,8 +56,9 @@
 # service when a reinstall fails before anything was stopped, and menu-slowdns
 # reports a failed restart or key renewal instead of printing success.
 #
-# Fix 551: removes the last dnstt/5300 references from backup/restore and the
-# system info screen; those paths now restart slowdns and show UDP 53 only.
+# Fix 551: removes the last legacy server/port references from backup/restore
+# and the system info screen; those paths now restart slowdns and show UDP 53
+# only.
 #
 # Verified against the three live full-edition hosts:
 #   sg1.rohcuan.dpdns.org  (64.120.94.62)
