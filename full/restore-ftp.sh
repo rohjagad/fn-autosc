@@ -190,7 +190,7 @@ chown root:www-data /etc/funny/.restore.key 2>/dev/null || true
 systemctl restart haproxy 2>/dev/null || true
 systemctl restart cron
 systemctl restart wg-quick@wg0 2>/dev/null || true
-systemctl restart dnstt 2>/dev/null || true
+systemctl restart slowdns 2>/dev/null || true
 systemctl restart noobzvpns 2>/dev/null || true
 systemctl restart xl2tpd 2>/dev/null || true
 systemctl restart ipsec 2>/dev/null || true

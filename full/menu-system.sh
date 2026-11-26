@@ -199,7 +199,7 @@ systemctl restart haproxy 2>/dev/null || true
 systemctl restart openvpn 2>/dev/null || true
 systemctl restart wg-quick@wg0 2>/dev/null || true
 systemctl restart noobzvpns 2>/dev/null || true
-systemctl restart dnstt 2>/dev/null || true
+systemctl restart slowdns 2>/dev/null || true
 systemctl restart udp-custom 2>/dev/null || true
 systemctl restart udp-request 2>/dev/null || true
 systemctl restart xl2tpd 2>/dev/null || true
@@ -696,7 +696,7 @@ ${separator}
 SSH WEBSOCKET: 80, 443, 2080
 SSH DROPBEAR : 109, 111
 SSH OPENSSH  : 22
-SSH SLOWDNS  : 53, 5300
+SSH SLOWDNS  : 53
 
 XTLS:
 - WEBSOCKET

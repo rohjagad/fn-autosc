@@ -84,8 +84,8 @@ hosting="https://raw.githubusercontent.com/rohjagad/fn-autosc/main"
 #
 # sshd listens ONLY on the ports named by active Port directives, and Debian
 # ships the default as a commented "#Port 22". Appending "Port 3303" alone
-# therefore *closes* 22 - but the SSH cards, the README's port table and dnstt's
-# forward target (127.0.0.1:22, the SlowDNS SSH-over-DNS backend) all assume 22
+# therefore *closes* 22 - but the SSH cards, the README's port table and the
+# SlowDNS forward target (127.0.0.1:22, the SSH-over-DNS backend) all assume 22
 # keeps listening. Whether it did depended on the base image (a netboot image
 # leaves #Port 22 commented, an older cloud image left it active), which is not
 # something the panel can rely on. Make both explicit and idempotent.
