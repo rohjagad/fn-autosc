@@ -857,7 +857,7 @@ EDNS0 by default; old clients or resolvers that strip EDNS0 will fail.
 redirect and `slowdns-fixnet` timer, installs the ePro binary and
 `slowdns.service`, and verifies that the service is active and the
 `server.key`/`server.pub` hashes are unchanged before deleting the old unit.
-A failed download, checksum, or install restarts the old `dnstt` service. The
+A failed download, checksum, or install restarts the previous service. The
 old `installer/dnstt-null.patch` and `installer/dnstt-multi.patch` build path
 is gone.
 
@@ -1244,10 +1244,10 @@ What it does:
   `cec77a796ad6cafecfc4bf5808de32795e8cb2c0` (Fix 548, with the ePro SlowDNS
   migration and the log-cap helper in both payloads so fresh installs do not
   need an update and no PPTP path in either installer). It fetches 110 files
-  on full,
-  98 on lite, including `quota-xhttp`, `kill-xhttp`, every `extend-*`,
-  `xray-add-client`, the shared `limit-ip-common` sampler and `log-caps`
-  helper, and the maintenance scripts that no longer carry a license gate;
+  on full and 98 on lite, including `quota-xhttp`, `kill-xhttp`, every
+  `extend-*`, `xray-add-client`, the shared `limit-ip-common` sampler and
+  `log-caps` helper, and the maintenance scripts that no longer carry a
+  license gate;
   the updater restarts every active `quota-*` service after installing the
   new daemons.
   The same updater is used on `sg1.rohcuan.dpdns.org`,
