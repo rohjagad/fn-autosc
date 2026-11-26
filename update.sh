@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# FN AutoSC updater: live marker -> 70ed3a7
+# FN AutoSC updater: live marker -> 0296e22
 #
 # Applies the commits on top of b6d1a97 (1-minute evidence window,
 # Exp-Date-N/A binary fix, LOCKED IPs block, MULTILOGIN UNLOCKED
@@ -56,6 +56,9 @@
 # service when a reinstall fails before anything was stopped, and menu-slowdns
 # reports a failed restart or key renewal instead of printing success.
 #
+# Fix 551: removes the last dnstt/5300 references from backup/restore and the
+# system info screen; those paths now restart slowdns and show UDP 53 only.
+#
 # Verified against the three live full-edition hosts:
 #   sg1.rohcuan.dpdns.org  (64.120.94.62)
 #   id1.rohcuan.dpdns.org  (103.210.69.33)
@@ -64,7 +67,7 @@
 # so the same file is used on all three.
 #
 # Usage:
-#   bash update.sh                  # live marker -> 70ed3a7 (default)
+#   bash update.sh                  # live marker -> 0296e22 (default)
 #   bash update.sh <commit> --force  # re-apply even if already recorded
 #
 # One-line remote run:
@@ -76,7 +79,7 @@ set -u
 # version is read from the live panel below, so this value only appears when
 # both markers are missing.
 FROM="6b967af9e0ebadc76a265132e49d62a27ad72235"
-TARGET="${1:-70ed3a7d374f0c23019a0ea8735490716c9fe30d}"
+TARGET="${1:-0296e220e5da5a397f7d134e9e87eb8c3ec7f901}"
 FORCE=0
 [ "${2:-}" = "--force" ] && FORCE=1
 
