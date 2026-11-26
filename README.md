@@ -843,11 +843,10 @@ install generates `/etc/slowdns/server.key` and `server.pub`; the updater keeps
 the existing pair, so the public key embedded in client configurations does not
 change. Key management and the nameserver are configured from `menu-dnstt`.
 
-**HTTP Custom 8.1.x:** the server supports the `auto`, `TXT`, `NULL`, `ST`,
-`FT`, `RX`, and `VX` modes, multiple `sessions`, custom `qname_limit` and
-`edns_limit`, and `auto_calibrate`. The ePro package starts with all six DNS
-QTYPEs enabled (TXT, NULL, CNAME, NS, MX, SRV) and runs with `-diagnostics` so
-the client's path probes and calibration work.
+**HTTP Custom 8.1.x:** the server's `auto` record type answers all six DNS
+QTYPEs (TXT, NULL, CNAME, NS, MX, SRV), supports multiple `sessions`, custom
+`qname_limit` and `edns_limit`, and `auto_calibrate`. It runs with
+`-diagnostics` so the client's bounded DNS path probes work.
 
 **EDNS0 is required.** The ePro server rejects a plain 512-byte query with
 `FORMERR` and expects an EDNS0 payload of at least 1232 bytes. HTTP Custom sends
@@ -1242,7 +1241,7 @@ What it does:
   and the update changes the version, that detected live version is also
   recorded in `.install-commit` as the install baseline. The target remains
   pinned in `update.sh`; currently
-  `0f316529e689835c12bc5066aa74fa564674fa94` (Fix 548, with the ePro SlowDNS
+  `006a552b81f5ff616b808a548c9cb016d33cc127` (Fix 548, with the ePro SlowDNS
   migration and the log-cap helper in both payloads so fresh installs do not
   need an update and no PPTP path in either installer). It fetches 110 files
   on full,

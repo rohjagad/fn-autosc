@@ -3,9 +3,13 @@
 # A dnstt fallback keeps the menu usable if the one-time migration has not
 # run yet; update.sh replaces it with slowdns.service.
 
-[[ -e $(which curl) ]] && grep -q "1.1.1.1" /etc/resolv.conf || { 
-    echo "nameserver 1.1.1.1" | cat - /etc/resolv.conf >> /etc/resolv.conf.tmp && mv /etc/resolv.conf.tmp /etc/resolv.conf
-}
+# Add the fallback resolver once, and only to a static file.  Never touch a
+# resolver-managed symlink, and never add a duplicate line on repeated runs.
+if [ -f /etc/resolv.conf ] && [ ! -L /etc/resolv.conf ] && \
+   ! grep -qx 'nameserver 1\.1\.1\.1' /etc/resolv.conf 2>/dev/null; then
+    printf 'nameserver 1.1.1.1\n' | cat - /etc/resolv.conf > /etc/resolv.conf.tmp && \
+        mv /etc/resolv.conf.tmp /etc/resolv.conf
+fi
 
 clear
 echo ""
@@ -179,7 +183,14 @@ ${separator}"
             echo ""
             systemctl stop "$SERVICE.service"
             chmod +x "$BIN" 2>/dev/null || true
-            "$BIN" -gen-key -privkey-file /etc/slowdns/server.key -pubkey-file /etc/slowdns/server.pub
+            if ! "$BIN" -gen-key -privkey-file /etc/slowdns/server.key -pubkey-file /etc/slowdns/server.pub; then
+                echo "Key generation failed; restarting the service with the existing key."
+                systemctl daemon-reload
+                systemctl start "$SERVICE.service"
+                read -n 1 -s -r -p "Press any key to return..." || true
+                mna89
+                return
+            fi
             chmod 600 /etc/slowdns/server.key 2>/dev/null || true
             chmod 644 /etc/slowdns/server.pub 2>/dev/null || true
             systemctl daemon-reload

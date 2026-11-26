@@ -253,12 +253,16 @@ add_firewall_rule() {
 }
 
 remove_legacy_redirect() {
-    local iface=""
-    iface=$(ip -4 route show default 2>/dev/null | awk '{print $5; exit}')
-    if [ -n "$iface" ]; then
-        while iptables -t nat -D PREROUTING -i "$iface" -p udp --dport 53 -j REDIRECT --to-ports 5300 2>/dev/null; do :; done
-    fi
-    while iptables -t nat -D PREROUTING -p udp --dport 53 -j REDIRECT --to-ports 5300 2>/dev/null; do :; done
+    local rule=""
+    # The old installer added the redirect once per default-route lookup, and
+    # the interface can differ under policy routing.  Remove every matching
+    # rule, not just the current default interface.
+    while IFS= read -r rule; do
+        [ -n "$rule" ] || continue
+        iptables -t nat -D PREROUTING $rule 2>/dev/null || break
+    done < <(iptables -t nat -S PREROUTING 2>/dev/null | \
+        sed -n 's/^-A PREROUTING //p' | \
+        grep -- '--dport 53 .*REDIRECT --to-ports 5300')
     while iptables -D INPUT -p udp --dport 5300 -j ACCEPT 2>/dev/null; do :; done
     if iptables -t nat -S PREROUTING 2>/dev/null | grep -q -- '--dport 53 .*REDIRECT --to-ports 5300'; then
         return 1

@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# FN AutoSC updater: live marker -> 0f31652
+# FN AutoSC updater: live marker -> 006a552
 #
 # Applies the commits on top of b6d1a97 (1-minute evidence window,
 # Exp-Date-N/A binary fix, LOCKED IPs block, MULTILOGIN UNLOCKED
@@ -18,7 +18,7 @@
 # main-menu licence identity restored without gating under a LICENSE heading,
 # account cards showing only the rotated domain, xHTTP access-log bounding,
 # cron output suppression when stdout is not a terminal, quota startup output
-# guarded for systemd, ePro SlowDNS migration, simpang32 quota
+# guarded for systemd, simpang32 quota
 # repair, published default-credential neutralization, root-mail archiving,
 # stale SSH-limit cleanup, removal of the unused PPTP daemon,
 # removal of the template client anchors,
@@ -53,8 +53,6 @@
 # service moves from UDP 5300 + iptables redirect to a direct UDP 53 listener,
 # and the old dnstt unit/redirect/timer are removed only after the new service
 # verifies.  A failed download, checksum, or install restarts the old service.
-# After committing this change, point TARGET at the new commit so the new
-# menu-dnstt payload is fetched.
 #
 # Verified against the three live full-edition hosts:
 #   sg1.rohcuan.dpdns.org  (64.120.94.62)
@@ -64,7 +62,7 @@
 # so the same file is used on all three.
 #
 # Usage:
-#   bash update.sh                  # live marker -> 0f31652 (default)
+#   bash update.sh                  # live marker -> 006a552 (default)
 #   bash update.sh <commit> --force  # re-apply even if already recorded
 #
 # One-line remote run:
@@ -76,7 +74,7 @@ set -u
 # version is read from the live panel below, so this value only appears when
 # both markers are missing.
 FROM="6b967af9e0ebadc76a265132e49d62a27ad72235"
-TARGET="${1:-0f316529e689835c12bc5066aa74fa564674fa94}"
+TARGET="${1:-006a552b81f5ff616b808a548c9cb016d33cc127}"
 FORCE=0
 [ "${2:-}" = "--force" ] && FORCE=1
 
@@ -606,6 +604,21 @@ slowdns_add_udp53_bypass() {
     "$f" >/dev/null 2>&1 || true
 }
 
+slowdns_remove_redirect() {
+    local rule=""
+    # The old installer added the redirect once per default-route lookup, and
+    # the interface can differ under policy routing.  Remove every matching
+    # rule, not just the current default interface.
+    while IFS= read -r rule; do
+        [ -n "$rule" ] || continue
+        iptables -t nat -D PREROUTING $rule 2>/dev/null || break
+    done < <(iptables -t nat -S PREROUTING 2>/dev/null | \
+        sed -n 's/^-A PREROUTING //p' | \
+        grep -- '--dport 53 .*REDIRECT --to-ports 5300')
+    while iptables -D INPUT -p udp --dport 5300 -j ACCEPT 2>/dev/null; do :; done
+    ! iptables -t nat -S PREROUTING 2>/dev/null | grep -q -- '--dport 53 .*REDIRECT --to-ports 5300'
+}
+
 slowdns_rollback() {
     local old_service="$1" dir="/etc/slowdns"
     # Stop the new unit even when an old ePro unit is being restored, so its
@@ -652,7 +665,7 @@ install_epro_slowdns() {
     local fixsvc="/etc/systemd/system/slowdns-fixnet.service"
     local fixtimer="/etc/systemd/system/slowdns-fixnet.timer"
     local fixscript="/usr/local/bin/slowdns-fixnet.sh"
-    local tmp="" nsd="" arch="" keyhash="" pubhash="" iface="" log="" old_service=""
+    local tmp="" nsd="" arch="" keyhash="" pubhash="" log="" old_service=""
     [ -f "$marker" ] && return 0
     [ -d "$dir" ] || return 0
     if [ -f "$newunit" ] && [ -x "$dir/slowdns" ] && [ -f "$dir/slowdns.env" ] && \
@@ -737,13 +750,7 @@ install_epro_slowdns() {
     # unit is already backed up above and rollback restores it on failure.
     rm -f "$newunit"
     systemctl daemon-reload 2>/dev/null || true
-    iface=$(ip -4 route show default 2>/dev/null | awk '{print $5; exit}')
-    if [ -n "$iface" ]; then
-        while iptables -t nat -D PREROUTING -i "$iface" -p udp --dport 53 -j REDIRECT --to-ports 5300 2>/dev/null; do :; done
-    fi
-    while iptables -t nat -D PREROUTING -p udp --dport 53 -j REDIRECT --to-ports 5300 2>/dev/null; do :; done
-    while iptables -D INPUT -p udp --dport 5300 -j ACCEPT 2>/dev/null; do :; done
-    if iptables -t nat -S PREROUTING 2>/dev/null | grep -q -- '--dport 53 .*REDIRECT --to-ports 5300'; then
+    if ! slowdns_remove_redirect; then
         rm -rf "$tmp"
         slowdns_rollback "$old_service"
         echo "Fix 548: could not remove the old 53 -> 5300 redirect; $old_service restored." >&2
