@@ -136,7 +136,7 @@ Each phase below lists: **Goal**, **K** (client traffic), **S** (menu walk), **P
 
 - **Goal:** each tunnel connects (or fails only for documented reason).
 - **K:** WG: `wg-quick up`, ping `10.66.66.1`; create 2 WG accounts sequentially and confirm endpoints + config URLs rotate domains (same `.domainseq` as xray). WARP: after setup, exactly one `### WARP` block survives restart with keepalive + IPv4 endpoint. Noobz on 8080/8443 with payload auth (full login needs the official client — proven partial: ports open, unauthenticated use refused). SlowDNS via UDP 53 (needs public NS delegation; lab filters TXT, so remote is unprovable here — VPS-loopback tunnel PROVEN 2026-10-10 with dnstt and again 2026-11-26 with ePro on `:53`, where a legacy client received the SSH banner). L2TP: control-plane only — no `/dev/ppp` on box or cloud kernel and no IPsec, so no data path can exist here (not a panel defect). OpenVPN TCP 1194 + UDP 2200 full logins PROVEN 2026-10-10 via KVM (tun IPs, ping, SSH-auth through tunnel; shared-cert + PAM password).
-- **S:** `menu-wg`, `menu-noobz`, `menu-slowdns` → create `livetest_*` via TUI; card per tunnel complete and pause-readable. WG card shows the assigned `Rotated Domain`; SlowDNS info shows port `53` (user-facing), never `5300`.
+- **S:** `menu-wg`, `menu-noobz`, `menu-slowdns` → create `livetest_*` via TUI; card per tunnel complete and pause-readable. WG card shows the assigned `Rotated Domain`; SlowDNS info shows port `53` (user-facing).
 - **PASS:** WG + Noobz + OpenVPN live; SlowDNS/L2TP judged per known-limitation note, not as fail.
 
 ### Fase 8: Create cycle + duplicate guard
