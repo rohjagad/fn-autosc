@@ -18,14 +18,14 @@
 # main-menu licence identity restored without gating under a LICENSE heading,
 # account cards showing only the rotated domain, xHTTP access-log bounding,
 # cron output suppression when stdout is not a terminal, quota startup output
-# guarded for systemd, legacy dnstt/nsdomain synchronization, simpang32 quota
+# guarded for systemd, ePro SlowDNS migration, simpang32 quota
 # repair, published default-credential neutralization, root-mail archiving,
 # stale SSH-limit cleanup, removal of the unused PPTP daemon,
 # removal of the template client anchors,
 # panel-account-only SSH IP limiting, complete domain-deletion cleanup
-# with balanced card reassignment, NULL-query support, CNAME/NS/MX/SRV
-# support for HTTP Custom's SlowDNS Type dropdown, the shared
-# CGNAT-aware Xray IP limiter, and bounded system-log retention)
+# with balanced card reassignment, ePro's official SlowDNS server (HTTP
+# Custom 8.1.x ST/FT, sessions, QNAME/EDNS limits, auto-calibration), the
+# shared CGNAT-aware Xray IP limiter, and bounded system-log retention)
 # to a live install. The file set is a superset covering the earlier
 # ranges too, so older installs are brought fully up to date in one
 # run. Safe to run: files are backed up first, every download is
@@ -47,6 +47,14 @@
 # 100M files.  The rsyslog stanza is edited in place, validated with
 # logrotate -d, restored on failure, and one rotation is forced when the
 # policy changes.  The access logs and info-level debugging detail remain.
+#
+# Fix 548: replaces the self-built dnstt server with ePro's official SlowDNS
+# package.  The existing server.key/server.pub and nsdomain are reused, the
+# service moves from UDP 5300 + iptables redirect to a direct UDP 53 listener,
+# and the old dnstt unit/redirect/timer are removed only after the new service
+# verifies.  A failed download, checksum, or install restarts the old service.
+# After committing this change, point TARGET at the new commit so the new
+# menu-dnstt payload is fetched.
 #
 # Verified against the three live full-edition hosts:
 #   sg1.rohcuan.dpdns.org  (64.120.94.62)
@@ -222,6 +230,7 @@ marker_for() {
         delete-xhttp) echo 'Delete XHTTP Account' ;;
         menu-system) echo 'Banner /etc/issue.net' ;;
         menu) echo 'Found 528' ;;
+        menu-dnstt) echo 'Found 548' ;;
         dm-menu) echo 'Found 542' ;;
         menu-wg | xl2tp | menu-noobz) echo 'Rotated Domain' ;;
         add-* | trial-*) echo 'Rotated Domain' ;;
@@ -453,7 +462,7 @@ rm -rf "$STAGE"
 remove_legacy_domain_files || true
 
 # ---------------------------------------------------------------------------
-# Recent one-time live-state migrations (Fix 533-547).
+# Recent one-time live-state migrations (Fix 533-548).
 #
 # The payload only contains scripts.  The state below lives outside the
 # repository (systemd units, quota files, JSON configs, mailboxes, SSH limit
@@ -500,313 +509,311 @@ restart_quota_services() {
     echo "Quota services restarted with the Fix 533 startup guard."
 }
 
-# Found 534: older installs wrote dnstt.service with a nameserver that no
-# longer matches /etc/slowdns/nsdomain.  The unit is the value the server
-# actually uses; make it follow the saved file.
-sync_dnstt_unit() {
-    local marker="/etc/funny/.fix534-dnstt-synced"
-    local unit="/etc/systemd/system/dnstt.service"
-    local nsfile="/etc/slowdns/nsdomain"
-    local nsd="" cur="" newcur="" backup=""
-    [ -f "$marker" ] && return 0
-    [ -f "$unit" ] || return 0
-    [ -s "$nsfile" ] || return 0
-    nsd=$(tr -d '[:space:]' < "$nsfile" 2>/dev/null)
-    [ -n "$nsd" ] || return 0
-    if ! [[ "$nsd" =~ ^([[:alnum:]]([[:alnum:]-]{0,61}[[:alnum:]])?\.)+[[:alpha:]]{2,63}$ ]]; then
-        echo "Fix 534: /etc/slowdns/nsdomain is not a valid hostname; dnstt unit left unchanged." >&2
+# Found 548: ePro's official SlowDNS server replaces the self-built dnstt
+# binary.  The vendor package is the server side of HTTP Custom's SlowDNS v2
+# line (ST/FT, sessions, QNAME/EDNS limits, auto-calibration) and is
+# key-compatible with dnstt, so the existing server.key/server.pub stay in
+# place and clients keep the same public key.
+SLOWDNS_EPRO_RELEASE="v1.23"
+SLOWDNS_EPRO_URL="https://github.com/rohjagad/fn-autosc-miscellaneous/releases/download/${SLOWDNS_EPRO_RELEASE}/slowdns-linux-amd64.tar.gz"
+SLOWDNS_EPRO_SHA256="6aa42455cd142953270a342e3c24c9c946fdc4ef3cad1e5c02f27711ffc6ad41"
+SLOWDNS_UDP_ADDR=""
+SLOWDNS_DIRECT_BINDINGS=""
+
+slowdns_port53_listening() {
+    ss -H -lun 2>/dev/null | awk '{print $4}' | grep -Eq '(^|:|\])53$'
+}
+
+slowdns_primary_ip() {
+    local ip=""
+    ip=$(ip -4 route get 1.1.1.1 2>/dev/null | awk '{for(i=1;i<=NF;i++) if($i=="src"){print $(i+1); exit}}')
+    [ -n "$ip" ] && { echo "$ip"; return 0; }
+    ip=$(ip -6 route get 2606:4700:4700::1111 2>/dev/null | awk '{for(i=1;i<=NF;i++) if($i=="src"){print $(i+1); exit}}')
+    [ -n "$ip" ] && { echo "$ip"; return 0; }
+    ip=$(ip -o -4 addr show scope global 2>/dev/null | awk 'NR==1{split($4,a,"/"); print a[1]}')
+    [ -n "$ip" ] && { echo "$ip"; return 0; }
+    ip=$(ip -o -6 addr show scope global 2>/dev/null | awk 'NR==1{split($4,a,"/"); print a[1]}')
+    [ -n "$ip" ] && echo "$ip"
+}
+
+slowdns_iface_for_ip() {
+    ip -o addr show 2>/dev/null | awk -v ip="$1" '
+        {
+            addr=$4; sub(/\/.*/, "", addr); iface=$2; sub(/@.*/, "", iface)
+            if (addr == ip) { print iface; exit }
+        }'
+}
+
+slowdns_bindings_all() {
+    {
+        ip -o -4 addr show scope global 2>/dev/null
+        ip -o -6 addr show scope global 2>/dev/null
+    } | awk '{
+        addr=$4; sub(/\/.*/, "", addr); iface=$2; sub(/@.*/, "", iface)
+        if (addr != "" && iface != "") print addr "," iface
+    }' | sort -u | paste -sd' ' -
+}
+
+slowdns_choose_listener() {
+    local ip="" iface=""
+    SLOWDNS_UDP_ADDR=""
+    SLOWDNS_DIRECT_BINDINGS=""
+    if ! slowdns_port53_listening; then
+        SLOWDNS_UDP_ADDR=":53"
+        SLOWDNS_DIRECT_BINDINGS=$(slowdns_bindings_all)
         return 0
     fi
-    cur=$(sed -nE 's/.*-privkey-file[[:space:]]+[^[:space:]]+[[:space:]]+([^[:space:]]+).*/\1/p' "$unit" 2>/dev/null | head -n 1)
-    if [ "$cur" = "$nsd" ]; then
-        fix_marker .fix534-dnstt-synced
-        return 0
+    ip=$(slowdns_primary_ip)
+    [ -n "$ip" ] || return 1
+    case "$ip" in
+        *:*) SLOWDNS_UDP_ADDR="[$ip]:53" ;;
+        *) SLOWDNS_UDP_ADDR="$ip:53" ;;
+    esac
+    iface=$(slowdns_iface_for_ip "$ip")
+    [ -n "$iface" ] && SLOWDNS_DIRECT_BINDINGS="$ip,$iface"
+    return 0
+}
+
+slowdns_write_env() {
+    local dir="$1" domain="$2"
+    cat > "$dir/slowdns.env" <<EOF
+SLOWDNS_BINARY="slowdns"
+SLOWDNS_UDP_ADDR="$SLOWDNS_UDP_ADDR"
+SLOWDNS_PRIVKEY_FILE="$dir/server.key"
+SLOWDNS_DOMAIN="$domain"
+SLOWDNS_UPSTREAM_ADDR="127.0.0.1:22"
+SLOWDNS_EXTRA_ARGS="-diagnostics"
+SLOWDNS_DIRECT_IPV4=""
+SLOWDNS_DIRECT_INTERFACE=""
+SLOWDNS_DIRECT_BINDINGS="$SLOWDNS_DIRECT_BINDINGS"
+EOF
+    chmod 600 "$dir/slowdns.env"
+}
+
+slowdns_add_udp53_bypass() {
+    local f="/usr/local/bin/udp-request-fixnet.sh" list=""
+    [ -f "$f" ] || return 0
+    list=$(sed -n 's/^[[:space:]]*for p in \(.*\); do$/\1/p' "$f" 2>/dev/null | head -n 1)
+    if [ -n "$list" ]; then
+        case " $list " in
+            *" 53 "*) ;;
+            *) sed -i -E 's/^([[:space:]]*)for p in (.*); do$/\1for p in 53 \2; do/' "$f" 2>/dev/null || true ;;
+        esac
+    elif ! grep -qE 'dport[[:space:]]+53([^0-9]|$)' "$f" 2>/dev/null; then
+        sed -i '/^[[:space:]]*exit 0[[:space:]]*$/i while iptables -t nat -D PREROUTING -p udp --dport 53 -j RETURN 2>/dev/null; do :; done\niptables -t nat -I PREROUTING 1 -p udp --dport 53 -j RETURN' "$f" 2>/dev/null || true
     fi
-    mkdir -p "$BACKUP" 2>/dev/null || true
-    backup="/root/fn-dnstt-backup-$(date +%Y%m%d-%H%M%S).service"
-    cp -f "$unit" "$BACKUP/dnstt.service" 2>/dev/null || true
-    cp -f "$unit" "$backup" 2>/dev/null || true
-    sed -i -E "s|^([[:space:]]*ExecStart=.*-privkey-file[[:space:]]+[^[:space:]]+[[:space:]]+)[^[:space:]]+|\\1${nsd}|" "$unit" 2>/dev/null || {
-        echo "Fix 534: could not rewrite dnstt.service; unit left unchanged." >&2
-        return 0
-    }
-    newcur=$(sed -nE 's/.*-privkey-file[[:space:]]+[^[:space:]]+[[:space:]]+([^[:space:]]+).*/\1/p' "$unit" 2>/dev/null | head -n 1)
-    if [ "$newcur" != "$nsd" ]; then
-        cp -f "$BACKUP/dnstt.service" "$unit" 2>/dev/null || true
-        echo "Fix 534: dnstt.service rewrite did not verify; original restored." >&2
-        return 0
+    systemctl restart udp-request-fixnet.timer 2>/dev/null || true
+    "$f" >/dev/null 2>&1 || true
+}
+
+slowdns_rollback() {
+    local old_service="$1" dir="/etc/slowdns"
+    if [ "$old_service" != "slowdns" ]; then
+        systemctl stop slowdns.service 2>/dev/null || true
+        systemctl disable slowdns.service 2>/dev/null || true
+        rm -f /etc/systemd/system/slowdns.service
     fi
+    case "$old_service" in
+        slowdns)
+            [ -f "$BACKUP/slowdns.bin" ] && install -m 0755 "$BACKUP/slowdns.bin" "$dir/slowdns" 2>/dev/null || true
+            [ -f "$BACKUP/slowdns-install.sh" ] && install -m 0755 "$BACKUP/slowdns-install.sh" "$dir/install.sh" 2>/dev/null || true
+            [ -f "$BACKUP/slowdns.env" ] && cp -f "$BACKUP/slowdns.env" "$dir/slowdns.env" 2>/dev/null || true
+            [ -f "$BACKUP/slowdns.service" ] && cp -f "$BACKUP/slowdns.service" /etc/systemd/system/slowdns.service 2>/dev/null || true
+            systemctl daemon-reload 2>/dev/null || true
+            systemctl start slowdns.service 2>/dev/null || true
+            ;;
+        dnstt)
+            [ -f "$BACKUP/dns-server" ] && install -m 0755 "$BACKUP/dns-server" "$dir/dns-server" 2>/dev/null || true
+            [ -f "$BACKUP/dnstt.service" ] && cp -f "$BACKUP/dnstt.service" /etc/systemd/system/dnstt.service 2>/dev/null || true
+            [ -f "$BACKUP/slowdns-fixnet.sh" ] && install -m 0755 "$BACKUP/slowdns-fixnet.sh" /usr/local/bin/slowdns-fixnet.sh 2>/dev/null || true
+            [ -f "$BACKUP/slowdns-fixnet.service" ] && cp -f "$BACKUP/slowdns-fixnet.service" /etc/systemd/system/slowdns-fixnet.service 2>/dev/null || true
+            [ -f "$BACKUP/slowdns-fixnet.timer" ] && cp -f "$BACKUP/slowdns-fixnet.timer" /etc/systemd/system/slowdns-fixnet.timer 2>/dev/null || true
+            systemctl daemon-reload 2>/dev/null || true
+            systemctl enable dnstt 2>/dev/null || true
+            systemctl start dnstt 2>/dev/null || true
+            [ -x /usr/local/bin/slowdns-fixnet.sh ] && /usr/local/bin/slowdns-fixnet.sh 2>/dev/null || true
+            systemctl enable --now slowdns-fixnet.timer 2>/dev/null || true
+            ;;
+    esac
     systemctl daemon-reload 2>/dev/null || true
-    if systemctl is-active --quiet dnstt 2>/dev/null; then
-        systemctl restart dnstt 2>/dev/null || true
-    fi
-    fix_log "fix534: dnstt nameserver ${cur:-unknown} -> ${nsd}"
-    fix_marker .fix534-dnstt-synced
-    echo "Fix 534: dnstt nameserver synchronized to ${nsd}."
 }
 
-# Found 543: dnstt only answers QTYPE TXT.  HTTP Custom's SlowDNS client sends
-# QTYPE NULL when its Type setting is NULL, so the server returned NXDOMAIN and
-# the app reported SocketException before SSH authentication.  Rebuild the
-# installed server from the pinned dnstt source with NULL-query support.
-install_dnstt_null_support() {
-    local marker="/etc/funny/.fix543-dnstt-null"
-    local bin="/etc/slowdns/dns-server"
-    local unit="/etc/systemd/system/dnstt.service"
-    local nsfile="/etc/slowdns/nsdomain"
-    local nsd="" src="" out="" probe=""
+install_epro_slowdns() {
+    local marker="/etc/funny/.fix548-slowdns-epro"
+    local dir="/etc/slowdns"
+    local oldunit="/etc/systemd/system/dnstt.service"
+    local newunit="/etc/systemd/system/slowdns.service"
+    local nsfile="$dir/nsdomain"
+    local key="$dir/server.key"
+    local pub="$dir/server.pub"
+    local oldbin="$dir/dns-server"
+    local fixsvc="/etc/systemd/system/slowdns-fixnet.service"
+    local fixtimer="/etc/systemd/system/slowdns-fixnet.timer"
+    local fixscript="/usr/local/bin/slowdns-fixnet.sh"
+    local tmp="" nsd="" arch="" keyhash="" pubhash="" iface="" log="" old_service=""
     [ -f "$marker" ] && return 0
-    [ -x "$bin" ] || return 0
-    [ -f "$unit" ] || return 0
-    [ -s "$nsfile" ] || return 0
-    systemctl is-active --quiet dnstt 2>/dev/null || return 0
-    nsd=$(tr -d '[:space:]' < "$nsfile" 2>/dev/null)
-    [ -n "$nsd" ] || return 0
-    probe="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.${nsd}"
-    if [ -x /usr/local/go/bin/go ]; then
-        PATH="/usr/local/go/bin:$PATH"
-        export PATH
+    [ -d "$dir" ] || return 0
+    if [ -f "$newunit" ] && [ -x "$dir/slowdns" ] && [ -f "$dir/slowdns.env" ] && \
+       systemctl is-active --quiet slowdns.service 2>/dev/null; then
+        fix_marker .fix548-slowdns-epro
+        return 0
     fi
-    command -v go >/dev/null 2>&1 || {
-        echo "Fix 543: Go is missing; dnstt left unchanged." >&2
-        return 0
-    }
-    command -v git >/dev/null 2>&1 || {
-        echo "Fix 543: git is missing; dnstt left unchanged." >&2
-        return 0
-    }
-
-    # A box installed after this fix already has the patched binary; its
-    # installer writes the marker.  This probe also catches a manual rebuild.
-    if command -v dig >/dev/null 2>&1; then
-        out=$(dig @127.0.0.1 -p 5300 -t TYPE10 +time=2 +tries=1 "$probe" 2>/dev/null || true)
-        if printf '%s\n' "$out" | grep -q "status: NOERROR"; then
-            fix_marker .fix543-dnstt-null
-            echo "Fix 543: dnstt already accepts NULL queries."
+    [ -f "$oldunit" ] || [ -x "$oldbin" ] || return 0
+    arch=$(uname -m)
+    case "$arch" in
+        x86_64|amd64) ;;
+        *)
+            echo "Fix 548: ePro SlowDNS is amd64-only; $arch host keeps dnstt." >&2
             return 0
-        fi
-    fi
-
-    src=$(mktemp -d) || return 0
-    if ! fetch "https://raw.githubusercontent.com/rohjagad/fn-autosc/${TARGET}/installer/dnstt-null.patch" "$src/dnstt-null.patch" 120; then
-        rm -rf "$src"
-        echo "Fix 543: could not download the dnstt NULL patch; dnstt left unchanged." >&2
+            ;;
+    esac
+    if ! command -v ss >/dev/null 2>&1 || ! command -v iptables >/dev/null 2>&1; then
+        echo "Fix 548: ss/iptables are missing; SlowDNS left unchanged." >&2
         return 0
     fi
-    if ! git clone -q https://github.com/rohjagad/dnstt.git "$src/dnstt" >/dev/null 2>&1; then
-        rm -rf "$src"
-        echo "Fix 543: could not clone dnstt; dnstt left unchanged." >&2
+    if systemctl is-active --quiet slowdns.service 2>/dev/null; then
+        old_service="slowdns"
+    elif systemctl is-active --quiet dnstt 2>/dev/null; then
+        old_service="dnstt"
+    else
+        # Do not touch an installed-but-stopped SlowDNS.  A later update will
+        # migrate it once the operator starts it.
         return 0
     fi
-    if ! git -C "$src/dnstt" checkout -q 17aa1fed864cd5493e3d09a14df1b8b5cc1df123 >/dev/null 2>&1; then
-        rm -rf "$src"
-        echo "Fix 543: could not check out the pinned dnstt source; dnstt left unchanged." >&2
-        return 0
-    fi
-    if ! git -C "$src/dnstt" apply "$src/dnstt-null.patch" >/dev/null 2>&1; then
-        rm -rf "$src"
-        echo "Fix 543: dnstt NULL patch did not apply; dnstt left unchanged." >&2
-        return 0
-    fi
-    if ! ( cd "$src/dnstt/dnstt-server" && go build -o "$src/dns-server" . ) >"$src/build.log" 2>&1; then
-        echo "Fix 543: dnstt build failed; dnstt left unchanged." >&2
-        tail -n 5 "$src/build.log" >&2 2>/dev/null || true
-        rm -rf "$src"
-        return 0
-    fi
-    if [ ! -x "$src/dns-server" ]; then
-        rm -rf "$src"
-        echo "Fix 543: dnstt build produced no binary; dnstt left unchanged." >&2
-        return 0
-    fi
-    mkdir -p "$BACKUP" 2>/dev/null || true
-    if ! cp -f "$bin" "$BACKUP/dns-server" 2>/dev/null; then
-        rm -rf "$src"
-        echo "Fix 543: could not back up the current dnstt binary; dnstt left unchanged." >&2
-        return 0
-    fi
-    if ! install -m 0755 "$src/dns-server" "$bin" 2>/dev/null; then
-        cp -f "$BACKUP/dns-server" "$bin" 2>/dev/null || true
-        rm -rf "$src"
-        echo "Fix 543: could not install the rebuilt dnstt binary; previous binary restored." >&2
-        return 0
-    fi
-    systemctl restart dnstt >/dev/null 2>&1 || true
-    sleep 1
-    if ! systemctl is-active --quiet dnstt 2>/dev/null; then
-        cp -f "$BACKUP/dns-server" "$bin" 2>/dev/null || true
-        systemctl restart dnstt >/dev/null 2>&1 || true
-        rm -rf "$src"
-        echo "Fix 543: rebuilt dnstt did not start; previous binary restored." >&2
-        return 0
-    fi
-    if command -v dig >/dev/null 2>&1; then
-        out=$(dig @127.0.0.1 -p 5300 -t TYPE10 +time=3 +tries=1 "$probe" 2>/dev/null || true)
-        if ! printf '%s\n' "$out" | grep -q "status: NOERROR"; then
-            cp -f "$BACKUP/dns-server" "$bin" 2>/dev/null || true
-            systemctl restart dnstt >/dev/null 2>&1 || true
-            rm -rf "$src"
-            echo "Fix 543: rebuilt dnstt did not answer NULL; previous binary restored." >&2
-            return 0
-        fi
-    fi
-    rm -rf "$src"
-    fix_log "fix543: dnstt rebuilt with NULL QTYPE support"
-    fix_marker .fix543-dnstt-null
-    echo "Fix 543: dnstt rebuilt with NULL QTYPE support."
-}
-
-# Found 544: HTTP Custom's SlowDNS Type dropdown also offers CNAME, NS, MX, and
-# SRV.  The Fix 543 binary answers TXT/NULL only, so rebuild once with the
-# multi-type patch.  Name-based answers carry the downstream payload as base32
-# labels, which are shorter than TXT RDATA; the patched server lowers the KCP
-# MTU for those sessions while leaving TXT/NULL at the existing MTU.
-install_dnstt_multi_support() {
-    local marker="/etc/funny/.fix544-dnstt-multi"
-    local bin="/etc/slowdns/dns-server"
-    local unit="/etc/systemd/system/dnstt.service"
-    local nsfile="/etc/slowdns/nsdomain"
-    local nsd="" src="" out="" qtype="" probe="" missing="" prepid=""
-    [ -f "$marker" ] && return 0
-    [ -x "$bin" ] || return 0
-    [ -f "$unit" ] || return 0
-    [ -s "$nsfile" ] || return 0
-    systemctl is-active --quiet dnstt 2>/dev/null || return 0
+    [ -s "$nsfile" ] || { echo "Fix 548: /etc/slowdns/nsdomain is missing; $old_service left unchanged." >&2; return 0; }
     nsd=$(tr -d '[:space:]' < "$nsfile" 2>/dev/null)
-    [ -n "$nsd" ] || return 0
-    probe="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.${nsd}"
-    command -v dig >/dev/null 2>&1 || {
-        echo "Fix 544: dig is missing; dnstt left unchanged." >&2
+    if ! [[ "$nsd" =~ ^([[:alnum:]]([[:alnum:]-]{0,61}[[:alnum:]])?\.)+[[:alpha:]]{2,63}$ ]]; then
+        echo "Fix 548: /etc/slowdns/nsdomain is not a valid hostname; $old_service left unchanged." >&2
         return 0
-    }
-    if [ -x /usr/local/go/bin/go ]; then
-        PATH="/usr/local/go/bin:$PATH"
-        export PATH
     fi
-    command -v go >/dev/null 2>&1 || {
-        echo "Fix 544: Go is missing; dnstt left unchanged." >&2
-        return 0
-    }
-    command -v git >/dev/null 2>&1 || {
-        echo "Fix 544: git is missing; dnstt left unchanged." >&2
-        return 0
-    }
+    [ -s "$key" ] || { echo "Fix 548: /etc/slowdns/server.key is missing; $old_service left unchanged." >&2; return 0; }
+    [ -s "$pub" ] || { echo "Fix 548: /etc/slowdns/server.pub is missing; $old_service left unchanged." >&2; return 0; }
+    chmod 600 "$key" 2>/dev/null || true
+    chmod 644 "$pub" 2>/dev/null || true
+    keyhash=$(sha256sum "$key" | awk '{print $1}')
+    pubhash=$(sha256sum "$pub" | awk '{print $1}')
 
-    # A box installed after this fix already has the patched binary; its
-    # installer writes the marker.  These probes also catch a manual rebuild.
-    # Require an answer section, not just NOERROR: a server that accepts the
-    # QTYPE but returns no answer would not carry tunnel data.
-    missing=""
-    for qtype in 2 5 10 15 16 33; do
-        out=$(dig @127.0.0.1 -p 5300 -t "TYPE${qtype}" +time=2 +tries=1 "$probe" 2>/dev/null || true)
-        if ! printf '%s\n' "$out" | grep -q "status: NOERROR" || \
-           ! printf '%s\n' "$out" | grep -q "ANSWER SECTION:"; then
-            missing="${missing} ${qtype}"
-        fi
-    done
-    if [ -z "$missing" ]; then
-        fix_marker .fix544-dnstt-multi
-        echo "Fix 544: dnstt already accepts TXT, NULL, CNAME, NS, MX, and SRV."
+    tmp=$(mktemp -d) || return 0
+    if ! fetch "$SLOWDNS_EPRO_URL" "$tmp/slowdns-linux-amd64.tar.gz" 600; then
+        rm -rf "$tmp"
+        echo "Fix 548: could not download the ePro SlowDNS package; $old_service left unchanged." >&2
         return 0
     fi
-
-    src=$(mktemp -d) || return 0
-    if ! fetch "https://raw.githubusercontent.com/rohjagad/fn-autosc/${TARGET}/installer/dnstt-multi.patch" "$src/dnstt-multi.patch" 120; then
-        rm -rf "$src"
-        echo "Fix 544: could not download the dnstt multi-type patch; dnstt left unchanged." >&2
+    if [ "$(sha256sum "$tmp/slowdns-linux-amd64.tar.gz" | awk '{print $1}')" != "$SLOWDNS_EPRO_SHA256" ]; then
+        rm -rf "$tmp"
+        echo "Fix 548: ePro SlowDNS package checksum mismatch; $old_service left unchanged." >&2
         return 0
     fi
-    if ! git clone -q https://github.com/rohjagad/dnstt.git "$src/dnstt" >/dev/null 2>&1; then
-        rm -rf "$src"
-        echo "Fix 544: could not clone dnstt; dnstt left unchanged." >&2
-        return 0
-    fi
-    if ! git -C "$src/dnstt" checkout -q 17aa1fed864cd5493e3d09a14df1b8b5cc1df123 >/dev/null 2>&1; then
-        rm -rf "$src"
-        echo "Fix 544: could not check out the pinned dnstt source; dnstt left unchanged." >&2
-        return 0
-    fi
-    if ! git -C "$src/dnstt" apply "$src/dnstt-multi.patch" >/dev/null 2>&1; then
-        rm -rf "$src"
-        echo "Fix 544: dnstt multi-type patch did not apply; dnstt left unchanged." >&2
-        return 0
-    fi
-    if ! ( cd "$src/dnstt/dnstt-server" && go build -o "$src/dns-server" . ) >"$src/build.log" 2>&1; then
-        echo "Fix 544: dnstt build failed; dnstt left unchanged." >&2
-        tail -n 5 "$src/build.log" >&2 2>/dev/null || true
-        rm -rf "$src"
-        return 0
-    fi
-    if [ ! -x "$src/dns-server" ]; then
-        rm -rf "$src"
-        echo "Fix 544: dnstt build produced no binary; dnstt left unchanged." >&2
-        return 0
-    fi
-
-    # Pre-flight the rebuilt binary on an unused local port before touching
-    # the live one.  The probe never opens a tunnel; it only checks that every
-    # QTYPE is accepted and answered.
-    "$src/dns-server" -udp 127.0.0.1:15353 -privkey-file /etc/slowdns/server.key "$nsd" 127.0.0.1:22 >"$src/preflight.log" 2>&1 &
-    prepid=$!
-    sleep 1
-    missing=""
-    for qtype in 2 5 10 15 16 33; do
-        out=$(dig @127.0.0.1 -p 15353 -t "TYPE${qtype}" +time=2 +tries=1 "$probe" 2>/dev/null || true)
-        if ! printf '%s\n' "$out" | grep -q "status: NOERROR" || \
-           ! printf '%s\n' "$out" | grep -q "ANSWER SECTION:"; then
-            missing="${missing} ${qtype}"
-        fi
-    done
-    kill "$prepid" 2>/dev/null || true
-    wait "$prepid" 2>/dev/null || true
-    prepid=""
-    if [ -n "$missing" ]; then
-        echo "Fix 544: rebuilt dnstt failed the pre-flight probe ($missing); dnstt left unchanged." >&2
-        tail -n 5 "$src/preflight.log" >&2 2>/dev/null || true
-        rm -rf "$src"
+    if ! tar -xzf "$tmp/slowdns-linux-amd64.tar.gz" -C "$tmp" 2>/dev/null || \
+       [ ! -x "$tmp/slowdns" ] || [ ! -f "$tmp/install.sh" ]; then
+        rm -rf "$tmp"
+        echo "Fix 548: ePro SlowDNS package is incomplete; $old_service left unchanged." >&2
         return 0
     fi
 
     mkdir -p "$BACKUP" 2>/dev/null || true
-    if ! cp -f "$bin" "$BACKUP/dns-server" 2>/dev/null; then
-        rm -rf "$src"
-        echo "Fix 544: could not back up the current dnstt binary; dnstt left unchanged." >&2
+    [ -f "$oldunit" ] && cp -f "$oldunit" "$BACKUP/dnstt.service" 2>/dev/null || true
+    [ -x "$oldbin" ] && cp -f "$oldbin" "$BACKUP/dns-server" 2>/dev/null || true
+    [ -x "$dir/slowdns" ] && cp -f "$dir/slowdns" "$BACKUP/slowdns.bin" 2>/dev/null || true
+    [ -f "$dir/install.sh" ] && cp -f "$dir/install.sh" "$BACKUP/slowdns-install.sh" 2>/dev/null || true
+    [ -f "$dir/slowdns.env" ] && cp -f "$dir/slowdns.env" "$BACKUP/slowdns.env" 2>/dev/null || true
+    [ -f "$newunit" ] && cp -f "$newunit" "$BACKUP/slowdns.service" 2>/dev/null || true
+    [ -f "$fixsvc" ] && cp -f "$fixsvc" "$BACKUP/slowdns-fixnet.service" 2>/dev/null || true
+    [ -f "$fixtimer" ] && cp -f "$fixtimer" "$BACKUP/slowdns-fixnet.timer" 2>/dev/null || true
+    [ -f "$fixscript" ] && cp -f "$fixscript" "$BACKUP/slowdns-fixnet.sh" 2>/dev/null || true
+    [ -f /usr/local/bin/udp-request-fixnet.sh ] && cp -f /usr/local/bin/udp-request-fixnet.sh "$BACKUP/udp-request-fixnet.sh" 2>/dev/null || true
+
+    systemctl stop dnstt 2>/dev/null || true
+    systemctl disable dnstt 2>/dev/null || true
+    systemctl stop slowdns-fixnet.timer 2>/dev/null || true
+    systemctl disable slowdns-fixnet.timer 2>/dev/null || true
+    systemctl stop slowdns-fixnet.service 2>/dev/null || true
+    systemctl stop slowdns.service 2>/dev/null || true
+    pkill -x dns-server 2>/dev/null || true
+    pkill -x slowdns 2>/dev/null || true
+    # The ePro installer refuses to reuse a unit it did not create.  The old
+    # unit is already backed up above and rollback restores it on failure.
+    rm -f "$newunit"
+    systemctl daemon-reload 2>/dev/null || true
+    iface=$(ip -4 route show default 2>/dev/null | awk '{print $5; exit}')
+    if [ -n "$iface" ]; then
+        while iptables -t nat -D PREROUTING -i "$iface" -p udp --dport 53 -j REDIRECT --to-ports 5300 2>/dev/null; do :; done
+    fi
+    while iptables -t nat -D PREROUTING -p udp --dport 53 -j REDIRECT --to-ports 5300 2>/dev/null; do :; done
+    while iptables -D INPUT -p udp --dport 5300 -j ACCEPT 2>/dev/null; do :; done
+    if iptables -t nat -S PREROUTING 2>/dev/null | grep -q -- '--dport 53 .*REDIRECT --to-ports 5300'; then
+        rm -rf "$tmp"
+        slowdns_rollback "$old_service"
+        echo "Fix 548: could not remove the old 53 -> 5300 redirect; $old_service restored." >&2
         return 0
     fi
-    if ! install -m 0755 "$src/dns-server" "$bin" 2>/dev/null; then
-        cp -f "$BACKUP/dns-server" "$bin" 2>/dev/null || true
-        rm -rf "$src"
-        echo "Fix 544: could not install the rebuilt dnstt binary; previous binary restored." >&2
+
+    if ! install -m 0755 "$tmp/slowdns" "$dir/slowdns" 2>/dev/null; then
+        rm -rf "$tmp"
+        slowdns_rollback "$old_service"
+        echo "Fix 548: could not install the ePro binary; $old_service restored." >&2
         return 0
     fi
-    systemctl restart dnstt >/dev/null 2>&1 || true
-    sleep 1
-    if ! systemctl is-active --quiet dnstt 2>/dev/null; then
-        cp -f "$BACKUP/dns-server" "$bin" 2>/dev/null || true
-        systemctl restart dnstt >/dev/null 2>&1 || true
-        rm -rf "$src"
-        echo "Fix 544: rebuilt dnstt did not start; previous binary restored." >&2
+    install -m 0755 "$tmp/install.sh" "$dir/install.sh" 2>/dev/null || true
+    install -m 0644 "$tmp/README.md" "$dir/README.epro.md" 2>/dev/null || true
+    chmod 0755 "$dir" 2>/dev/null || true
+
+    if ! slowdns_choose_listener; then
+        rm -rf "$tmp"
+        slowdns_rollback "$old_service"
+        echo "Fix 548: could not choose a UDP 53 listener; $old_service restored." >&2
         return 0
     fi
-    missing=""
-    for qtype in 2 5 10 15 16 33; do
-        out=$(dig @127.0.0.1 -p 5300 -t "TYPE${qtype}" +time=3 +tries=1 "$probe" 2>/dev/null || true)
-        if ! printf '%s\n' "$out" | grep -q "status: NOERROR" || \
-           ! printf '%s\n' "$out" | grep -q "ANSWER SECTION:"; then
-            missing="${missing} ${qtype}"
+    slowdns_write_env "$dir" "$nsd" || {
+        rm -rf "$tmp"
+        slowdns_rollback "$old_service"
+        echo "Fix 548: could not write slowdns.env; $old_service restored." >&2
+        return 0
+    }
+
+    log="$tmp/install.log"
+    if ! "$dir/install.sh" install >"$log" 2>&1; then
+        if [ -n "$SLOWDNS_DIRECT_BINDINGS" ]; then
+            echo "Fix 548: NOTRACK setup failed; retrying without it." >&2
+            systemctl stop slowdns.service 2>/dev/null || true
+            systemctl disable slowdns.service 2>/dev/null || true
+            rm -f "$newunit"
+            systemctl daemon-reload 2>/dev/null || true
+            SLOWDNS_DIRECT_BINDINGS=""
+            slowdns_write_env "$dir" "$nsd"
+            "$dir/install.sh" install >>"$log" 2>&1 || true
         fi
-    done
-    if [ -n "$missing" ]; then
-        cp -f "$BACKUP/dns-server" "$bin" 2>/dev/null || true
-        systemctl restart dnstt >/dev/null 2>&1 || true
-        rm -rf "$src"
-        echo "Fix 544: rebuilt dnstt failed the live probe ($missing); previous binary restored." >&2
+    fi
+    if ! systemctl is-active --quiet slowdns.service 2>/dev/null; then
+        tail -n 20 "$log" >&2 2>/dev/null || true
+        rm -rf "$tmp"
+        slowdns_rollback "$old_service"
+        echo "Fix 548: the ePro service did not start; $old_service restored." >&2
         return 0
     fi
-    rm -rf "$src"
-    fix_log "fix544: dnstt rebuilt with CNAME/NS/MX/SRV support"
-    fix_marker .fix544-dnstt-multi
-    echo "Fix 544: dnstt rebuilt with CNAME/NS/MX/SRV support."
+    if [ "$(sha256sum "$key" | awk '{print $1}')" != "$keyhash" ] || \
+       [ "$(sha256sum "$pub" | awk '{print $1}')" != "$pubhash" ]; then
+        rm -rf "$tmp"
+        slowdns_rollback "$old_service"
+        echo "Fix 548: the key pair changed unexpectedly; $old_service restored." >&2
+        return 0
+    fi
+
+    rm -f "$oldunit" "$oldbin" "$fixsvc" "$fixtimer" "$fixscript"
+    systemctl daemon-reload 2>/dev/null || true
+    iptables -C INPUT -p udp --dport 53 -j ACCEPT 2>/dev/null || \
+        iptables -I INPUT -p udp --dport 53 -j ACCEPT 2>/dev/null || true
+    ip6tables -C INPUT -p udp --dport 53 -j ACCEPT 2>/dev/null || \
+        ip6tables -I INPUT -p udp --dport 53 -j ACCEPT 2>/dev/null || true
+    if command -v netfilter-persistent >/dev/null 2>&1; then
+        netfilter-persistent save >/dev/null 2>&1 || true
+    fi
+    slowdns_add_udp53_bypass
+
+    rm -rf "$tmp"
+    fix_log "fix548: migrated dnstt to ePro SlowDNS (keys preserved)"
+    fix_marker .fix548-slowdns-epro
+    echo "Fix 548: migrated to ePro SlowDNS; UDP 53 is direct and the existing public key was kept."
 }
 
 # Found 535: a legacy account lost its base quota and IP-limit files while the
@@ -1194,9 +1201,7 @@ neutralize_default_credentials
 remove_template_client_anchors
 cleanup_domain_cert_remnants
 repair_simpang32
-sync_dnstt_unit
-install_dnstt_null_support
-install_dnstt_multi_support
+install_epro_slowdns
 remove_stale_rohcuan_limit
 remove_unused_pptpd
 cleanup_root_mail

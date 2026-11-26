@@ -149,16 +149,16 @@ systemctl start udp-request
 #  1. SNAT lebar (POSTROUTING) yang mengenai alamat host sendiri;
 #  2. capture UDP wildcard (PREROUTING dpts:1:8988 dan dpts:8990:65535
 #     -> 8989, lalu dpts:1:65535 -> 36711) yang menelan handshake layanan UDP
-#     milik panel sendiri: WireGuard 51820, OpenVPN UDP 2200, IPsec/IKE
-#     500/4500 dan L2TP 1701. iptables first-match, dan diverifikasi live -
-#     handshake klien WireGuard mendarat di rule capture, tunnel tidak pernah
-#     naik; begitu RETURN dipasang di atasnya, tunnel langsung jalan (ping ke
-#     10.66.66.1 dan egress lewat VPS).
+#     milik panel sendiri: SlowDNS 53, WireGuard 51820, OpenVPN UDP 2200,
+#     IPsec/IKE 500/4500 dan L2TP 1701. iptables first-match, dan diverifikasi
+#     live - handshake klien WireGuard mendarat di rule capture, tunnel tidak
+#     pernah naik; begitu RETURN dipasang di atasnya, tunnel langsung jalan
+#     (ping ke 10.66.66.1 dan egress lewat VPS).
 cat > /usr/local/bin/udp-request-fixnet.sh <<-FIXSH
 #!/bin/bash
 ip_nat="$ip_nat"
 [ -n "\$ip_nat" ] && { iptables -t nat -D POSTROUTING -s "\$ip_nat" -j RETURN 2>/dev/null; iptables -t nat -I POSTROUTING 1 -s "\$ip_nat" -j RETURN; }
-for p in 51820 2200 500 4500 1701; do
+for p in 53 51820 2200 500 4500 1701; do
     while iptables -t nat -D PREROUTING -p udp --dport "\$p" -j RETURN 2>/dev/null; do :; done
     iptables -t nat -I PREROUTING 1 -p udp --dport "\$p" -j RETURN
 done
@@ -190,6 +190,7 @@ WantedBy=timers.target
 FIXTMR
 systemctl daemon-reload
 systemctl enable --now udp-request-fixnet.timer
+/usr/local/bin/udp-request-fixnet.sh >/dev/null 2>&1 || true
 
 # Delete File Dump
 rm -f /root/request.sh
