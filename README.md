@@ -1234,8 +1234,8 @@ What it does:
   and the update changes the version, that detected live version is also
   recorded in `.install-commit` as the install baseline. The target remains
   pinned in `update.sh`; currently
-  `4e72db16cd63d72f13f8b47b7e35b8efb2f0a3af` (Fix 549, with the ePro-only SlowDNS
-  menu and the log-cap helper in both payloads so fresh installs do not
+  `70ed3a7d374f0c23019a0ea8735490716c9fe30d` (Fix 550, with the ePro-only SlowDNS
+  menu, hardened installer/menu failure handling, and the log-cap helper in both payloads so fresh installs do not
   need an update and no PPTP path in either installer). It fetches 110 files
   on full and 98 on lite, including `quota-xhttp`, `kill-xhttp`, every
   `extend-*`, `xray-add-client`, the shared `limit-ip-common` sampler and
