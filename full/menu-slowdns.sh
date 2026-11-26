@@ -1,5 +1,5 @@
 #!/bin/bash
-# Found 549: manage the ePro official SlowDNS service (slowdns.service).
+# Found 550: manage the ePro official SlowDNS service (slowdns.service).
 
 # Add the fallback resolver once, and only to a static file.  Never touch a
 # resolver-managed symlink, and never add a duplicate line on repeated runs.
@@ -111,6 +111,12 @@ ${separator}"
                 mna89
                 return
             fi
+            if [ ! -f "$ENV" ]; then
+                echo "slowdns.env is missing; reinstall SlowDNS."
+                read -n 1 -s -r -p "Press any key to return..." || true
+                mna89
+                return
+            fi
             clear
             echo ""
             echo ""
@@ -120,7 +126,12 @@ ${separator}"
             else
                 echo "SLOWDNS_DOMAIN=\"$nsdomen\"" >> "$ENV"
             fi
-            systemctl restart slowdns.service
+            if ! systemctl restart slowdns.service; then
+                echo "Failed to restart slowdns.service; check 'systemctl status slowdns'."
+                read -n 1 -s -r -p "Press any key to return..." || true
+                mna89
+                return
+            fi
             clear
             echo ""
             echo ""
@@ -137,12 +148,18 @@ ${separator}"
             clear
             echo ""
             echo ""
+            local key_bak="/etc/slowdns/server.key.bak" pub_bak="/etc/slowdns/server.pub.bak"
+            cp -f /etc/slowdns/server.key "$key_bak" 2>/dev/null || true
+            cp -f /etc/slowdns/server.pub "$pub_bak" 2>/dev/null || true
             systemctl stop "slowdns.service"
             chmod +x "$BIN" 2>/dev/null || true
             if ! "$BIN" -gen-key -privkey-file /etc/slowdns/server.key -pubkey-file /etc/slowdns/server.pub; then
+                [ -f "$key_bak" ] && cp -f "$key_bak" /etc/slowdns/server.key 2>/dev/null || true
+                [ -f "$pub_bak" ] && cp -f "$pub_bak" /etc/slowdns/server.pub 2>/dev/null || true
                 echo "Key generation failed; restarting the service with the existing key."
                 systemctl daemon-reload
                 systemctl start "slowdns.service"
+                rm -f "$key_bak" "$pub_bak"
                 read -n 1 -s -r -p "Press any key to return..." || true
                 mna89
                 return
@@ -150,7 +167,17 @@ ${separator}"
             chmod 600 /etc/slowdns/server.key 2>/dev/null || true
             chmod 644 /etc/slowdns/server.pub 2>/dev/null || true
             systemctl daemon-reload
-            systemctl start "slowdns.service"
+            if ! systemctl start "slowdns.service"; then
+                [ -f "$key_bak" ] && cp -f "$key_bak" /etc/slowdns/server.key 2>/dev/null || true
+                [ -f "$pub_bak" ] && cp -f "$pub_bak" /etc/slowdns/server.pub 2>/dev/null || true
+                systemctl start "slowdns.service" 2>/dev/null || true
+                echo "slowdns.service failed to start; the previous key pair was restored."
+                rm -f "$key_bak" "$pub_bak"
+                read -n 1 -s -r -p "Press any key to return..." || true
+                mna89
+                return
+            fi
+            rm -f "$key_bak" "$pub_bak"
             clear
             echo ""
             echo ""
@@ -167,7 +194,12 @@ ${separator}"
             echo ""
             echo ""
             systemctl daemon-reload
-            systemctl restart "slowdns.service"
+            if ! systemctl restart "slowdns.service"; then
+                echo "Failed to restart slowdns.service; check 'systemctl status slowdns'."
+                read -n 1 -s -r -p "Press any key to return..." || true
+                mna89
+                return
+            fi
             clear
             echo ""
             echo ""

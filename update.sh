@@ -52,6 +52,10 @@
 # only installs the current ePro menu; existing ePro installs keep their
 # service and keys.
 #
+# Fix 550: hardens that path.  The installer no longer removes a running
+# service when a reinstall fails before anything was stopped, and menu-slowdns
+# reports a failed restart or key renewal instead of printing success.
+#
 # Verified against the three live full-edition hosts:
 #   sg1.rohcuan.dpdns.org  (64.120.94.62)
 #   id1.rohcuan.dpdns.org  (103.210.69.33)
@@ -226,7 +230,7 @@ marker_for() {
         delete-xhttp) echo 'Delete XHTTP Account' ;;
         menu-system) echo 'Banner /etc/issue.net' ;;
         menu) echo 'Found 528' ;;
-        menu-slowdns) echo 'Found 549' ;;
+        menu-slowdns) echo 'Found 550' ;;
         dm-menu) echo 'Found 542' ;;
         menu-wg | xl2tp | menu-noobz) echo 'Rotated Domain' ;;
         add-* | trial-*) echo 'Rotated Domain' ;;

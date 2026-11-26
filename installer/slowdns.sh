@@ -100,9 +100,11 @@ clear
 echo ""
 echo ""
 
-# Found 549: ePro's official SlowDNS server is the only server.  The vendor
+# Found 550: ePro's official SlowDNS server is the only server.  The vendor
 # tarball is uploaded to the miscellaneous release; the SHA-256 pin makes a
-# wrong or truncated download fail closed.  The package is amd64-only.
+# wrong or truncated download fail closed.  The package is amd64-only.  A
+# failed reinstall leaves a running service untouched until the old unit is
+# actually stopped and backed up.
 SLOWDNS_EPRO_RELEASE="v1.23"
 SLOWDNS_EPRO_URL="https://github.com/rohjagad/fn-autosc-miscellaneous/releases/download/${SLOWDNS_EPRO_RELEASE}/slowdns-linux-amd64.tar.gz"
 SLOWDNS_EPRO_SHA256="6aa42455cd142953270a342e3c24c9c946fdc4ef3cad1e5c02f27711ffc6ad41"
@@ -113,6 +115,7 @@ SLOWDNS_DIRECT_BINDINGS=""
 SLOWDNS_DOMAIN=""
 SLOWDNS_OLD_SERVICE=""
 SLOWDNS_BACKUP=""
+SLOWDNS_CHANGED=0
 
 say() { echo "SlowDNS: $*"; }
 fail() { echo "SlowDNS: $*" >&2; return 1; }
@@ -272,6 +275,9 @@ add_udp53_bypass() {
 
 rollback_slowdns() {
     local old_service="$1" dir="$SLOWDNS_DIR" b="$SLOWDNS_BACKUP"
+    # Nothing was stopped or replaced yet (for example, the download failed):
+    # leave the running service exactly as it was.
+    [ "$SLOWDNS_CHANGED" -eq 1 ] || return 0
     # Stop the new unit even when an old ePro unit is being restored, so its
     # ExecStopPost removes any NOTRACK rules it added.
     systemctl stop slowdns.service 2>/dev/null || true
@@ -332,12 +338,17 @@ install_slowdns() {
     fi
     SLOWDNS_BACKUP="/root/fn-slowdns-backup-$(date +%Y%m%d-%H%M%S)"
     mkdir -p "$SLOWDNS_BACKUP" 2>/dev/null || SLOWDNS_BACKUP=""
+    if [ -n "$SLOWDNS_OLD_SERVICE" ] && [ -z "$SLOWDNS_BACKUP" ]; then
+        fail "cannot create a rollback backup; leaving the running service untouched"
+        return 1
+    fi
     if [ -n "$SLOWDNS_BACKUP" ]; then
         [ -x "$SLOWDNS_DIR/slowdns" ] && cp -f "$SLOWDNS_DIR/slowdns" "$SLOWDNS_BACKUP/slowdns" 2>/dev/null || true
         [ -f "$SLOWDNS_DIR/install.sh" ] && cp -f "$SLOWDNS_DIR/install.sh" "$SLOWDNS_BACKUP/install.sh" 2>/dev/null || true
         [ -f "$SLOWDNS_DIR/slowdns.env" ] && cp -f "$SLOWDNS_DIR/slowdns.env" "$SLOWDNS_BACKUP/slowdns.env" 2>/dev/null || true
         [ -f /etc/systemd/system/slowdns.service ] && cp -f /etc/systemd/system/slowdns.service "$SLOWDNS_BACKUP/slowdns.service" 2>/dev/null || true
     fi
+    SLOWDNS_CHANGED=1
     systemctl stop slowdns.service 2>/dev/null || true
     pkill -x slowdns 2>/dev/null || true
     rm -f /etc/systemd/system/slowdns.service
