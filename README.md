@@ -831,7 +831,9 @@ name must still resolve or delegate to the VPS at the DNS provider.
 The installer verifies the checksum, extracts `slowdns`, `install.sh`, and the
 vendor README into `/etc/slowdns`, then runs the vendor installer. The package
 is **amd64-only**: a fresh arm64 install skips SlowDNS, and an update on arm64
-leaves the existing dnstt service in place.
+leaves the existing dnstt service in place. The vendor binary is UPX-packed, so
+the pinned SHA-256 is the integrity control; review ePro's redistribution terms
+before mirroring the package.
 
 If `systemd-resolved` already owns `127.0.0.53:53`, the installer binds the
 VPS's primary public IP instead of the wildcard, so the service starts without
