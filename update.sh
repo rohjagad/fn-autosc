@@ -669,7 +669,8 @@ install_epro_slowdns() {
     [ -f "$marker" ] && return 0
     [ -d "$dir" ] || return 0
     if [ -f "$newunit" ] && [ -x "$dir/slowdns" ] && [ -f "$dir/slowdns.env" ] && \
-       systemctl is-active --quiet slowdns.service 2>/dev/null; then
+       systemctl is-active --quiet slowdns.service 2>/dev/null && \
+       [ ! -f "$oldunit" ] && [ ! -x "$oldbin" ]; then
         fix_marker .fix548-slowdns-epro
         return 0
     fi

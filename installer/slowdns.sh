@@ -420,6 +420,9 @@ install_slowdns() {
 
     rm -f "$oldunit" "$fixsvc" "$fixtimer" "$fixscript" "$SLOWDNS_DIR/dns-server"
     systemctl daemon-reload 2>/dev/null || true
+    mkdir -p /etc/funny
+    : > /etc/funny/.fix548-slowdns-epro
+    chmod 600 /etc/funny/.fix548-slowdns-epro 2>/dev/null || true
 
     if grep -q '^#AllowTcpForwarding yes' /etc/ssh/sshd_config 2>/dev/null; then
         sed -i 's/^#AllowTcpForwarding yes/AllowTcpForwarding yes/' /etc/ssh/sshd_config
