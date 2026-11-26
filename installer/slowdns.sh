@@ -287,8 +287,10 @@ add_udp53_bypass() {
 
 rollback_slowdns() {
     local old_service="$1" dir="$SLOWDNS_DIR" b="$SLOWDNS_BACKUP"
+    # Stop the new unit even when an old ePro unit is being restored, so its
+    # ExecStopPost removes any NOTRACK rules it added.
+    systemctl stop slowdns.service 2>/dev/null || true
     if [ "$old_service" != "slowdns" ]; then
-        systemctl stop slowdns.service 2>/dev/null || true
         systemctl disable slowdns.service 2>/dev/null || true
         rm -f /etc/systemd/system/slowdns.service
     fi
