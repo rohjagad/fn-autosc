@@ -857,9 +857,10 @@ EDNS0 by default; old clients or resolvers that strip EDNS0 will fail.
 redirect and `slowdns-fixnet` timer, installs the ePro binary and
 `slowdns.service`, and verifies that the service is active and the
 `server.key`/`server.pub` hashes are unchanged before deleting the old unit.
-A failed download, checksum, or install restarts the previous service. The
-old `installer/dnstt-null.patch` and `installer/dnstt-multi.patch` build path
-is gone.
+A failed download, checksum, or install restarts the previous service. An
+installed-but-stopped SlowDNS service is left untouched; start it and rerun
+`update.sh` to migrate it. The old `installer/dnstt-null.patch` and
+`installer/dnstt-multi.patch` build path is gone.
 
 **Menu:** `menu-dnstt` manages `slowdns.service` and updates
 `SLOWDNS_DOMAIN` in `/etc/slowdns/slowdns.env` when the nameserver changes. It
