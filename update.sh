@@ -23,9 +23,9 @@
 # stale SSH-limit cleanup, removal of the unused PPTP daemon,
 # removal of the template client anchors,
 # panel-account-only SSH IP limiting, complete domain-deletion cleanup
-# with balanced card reassignment, ePro's official SlowDNS server (HTTP
-# Custom 8.1.x ST/FT, sessions, QNAME/EDNS limits, auto-calibration), the
-# shared CGNAT-aware Xray IP limiter, and bounded system-log retention)
+# with balanced card reassignment, ePro-only SlowDNS (menu-slowdns, direct
+# UDP 53, HTTP Custom 8.1.x ST/FT, sessions, QNAME/EDNS limits), the shared
+# CGNAT-aware Xray IP limiter, and bounded system-log retention)
 # to a live install. The file set is a superset covering the earlier
 # ranges too, so older installs are brought fully up to date in one
 # run. Safe to run: files are backed up first, every download is
@@ -48,11 +48,9 @@
 # logrotate -d, restored on failure, and one rotation is forced when the
 # policy changes.  The access logs and info-level debugging detail remain.
 #
-# Fix 548: replaces the self-built dnstt server with ePro's official SlowDNS
-# package.  The existing server.key/server.pub and nsdomain are reused, the
-# service moves from UDP 5300 + iptables redirect to a direct UDP 53 listener,
-# and the old dnstt unit/redirect/timer are removed only after the new service
-# verifies.  A failed download, checksum, or install restarts the old service.
+# Fix 549: SlowDNS is ePro-only.  The menu is now menu-slowdns and update.sh
+# only installs the current ePro menu; existing ePro installs keep their
+# service and keys.
 #
 # Verified against the three live full-edition hosts:
 #   sg1.rohcuan.dpdns.org  (64.120.94.62)
@@ -196,7 +194,7 @@ CONFIG_FILES="format.sh"
 # overwrite it on a live box.
 WEB_FILES="restore-ftp"
 if [ "$EDITION" = "full" ]; then
-    FILES="$FILES addssh trial-ssh menu-wg xl2tp menu-noobz limit-ip-ssh cek-login-ssh ssh-online menu-ssh expire-ssh menu-dnstt menu-x"
+    FILES="$FILES addssh trial-ssh menu-wg xl2tp menu-noobz limit-ip-ssh cek-login-ssh ssh-online menu-ssh expire-ssh menu-slowdns menu-x"
 else
     # Lite only: this viewer used to truncate ws.log at the end (Found 508).
     FILES="$FILES cek-xray-ws"
@@ -228,7 +226,7 @@ marker_for() {
         delete-xhttp) echo 'Delete XHTTP Account' ;;
         menu-system) echo 'Banner /etc/issue.net' ;;
         menu) echo 'Found 528' ;;
-        menu-dnstt) echo 'Found 548' ;;
+        menu-slowdns) echo 'Found 549' ;;
         dm-menu) echo 'Found 542' ;;
         menu-wg | xl2tp | menu-noobz) echo 'Rotated Domain' ;;
         add-* | trial-*) echo 'Rotated Domain' ;;
@@ -505,327 +503,6 @@ restart_quota_services() {
         fi
     done
     echo "Quota services restarted with the Fix 533 startup guard."
-}
-
-# Found 548: ePro's official SlowDNS server replaces the self-built dnstt
-# binary.  The vendor package is the server side of HTTP Custom's SlowDNS v2
-# line (ST/FT, sessions, QNAME/EDNS limits, auto-calibration) and is
-# key-compatible with dnstt, so the existing server.key/server.pub stay in
-# place and clients keep the same public key.
-SLOWDNS_EPRO_RELEASE="v1.23"
-SLOWDNS_EPRO_URL="https://github.com/rohjagad/fn-autosc-miscellaneous/releases/download/${SLOWDNS_EPRO_RELEASE}/slowdns-linux-amd64.tar.gz"
-SLOWDNS_EPRO_SHA256="6aa42455cd142953270a342e3c24c9c946fdc4ef3cad1e5c02f27711ffc6ad41"
-SLOWDNS_UDP_ADDR=""
-SLOWDNS_DIRECT_BINDINGS=""
-
-slowdns_port53_listening() {
-    ss -H -lun 2>/dev/null | awk '{print $4}' | grep -Eq '(^|:|\])53$'
-}
-
-slowdns_primary_ip() {
-    local ip=""
-    ip=$(ip -4 route get 1.1.1.1 2>/dev/null | awk '{for(i=1;i<=NF;i++) if($i=="src"){print $(i+1); exit}}')
-    [ -n "$ip" ] && { echo "$ip"; return 0; }
-    ip=$(ip -6 route get 2606:4700:4700::1111 2>/dev/null | awk '{for(i=1;i<=NF;i++) if($i=="src"){print $(i+1); exit}}')
-    [ -n "$ip" ] && { echo "$ip"; return 0; }
-    ip=$(ip -o -4 addr show scope global 2>/dev/null | awk 'NR==1{split($4,a,"/"); print a[1]}')
-    [ -n "$ip" ] && { echo "$ip"; return 0; }
-    ip=$(ip -o -6 addr show scope global 2>/dev/null | awk 'NR==1{split($4,a,"/"); print a[1]}')
-    [ -n "$ip" ] && echo "$ip"
-}
-
-slowdns_iface_for_ip() {
-    ip -o addr show 2>/dev/null | awk -v ip="$1" '
-        {
-            addr=$4; sub(/\/.*/, "", addr); iface=$2; sub(/@.*/, "", iface)
-            if (addr == ip) { print iface; exit }
-        }'
-}
-
-slowdns_bindings_all() {
-    {
-        ip -o -4 addr show scope global 2>/dev/null
-        ip -o -6 addr show scope global 2>/dev/null
-    } | awk '{
-        addr=$4; sub(/\/.*/, "", addr); iface=$2; sub(/@.*/, "", iface)
-        if (addr != "" && iface != "") print addr "," iface
-    }' | sort -u | paste -sd' ' -
-}
-
-slowdns_choose_listener() {
-    local ip="" iface=""
-    SLOWDNS_UDP_ADDR=""
-    SLOWDNS_DIRECT_BINDINGS=""
-    if ! slowdns_port53_listening; then
-        SLOWDNS_UDP_ADDR=":53"
-        SLOWDNS_DIRECT_BINDINGS=$(slowdns_bindings_all)
-        return 0
-    fi
-    ip=$(slowdns_primary_ip)
-    [ -n "$ip" ] || return 1
-    case "$ip" in
-        *:*) SLOWDNS_UDP_ADDR="[$ip]:53" ;;
-        *) SLOWDNS_UDP_ADDR="$ip:53" ;;
-    esac
-    iface=$(slowdns_iface_for_ip "$ip")
-    [ -n "$iface" ] && SLOWDNS_DIRECT_BINDINGS="$ip,$iface"
-    return 0
-}
-
-slowdns_write_env() {
-    local dir="$1" domain="$2"
-    cat > "$dir/slowdns.env" <<EOF
-SLOWDNS_BINARY="slowdns"
-SLOWDNS_UDP_ADDR="$SLOWDNS_UDP_ADDR"
-SLOWDNS_PRIVKEY_FILE="$dir/server.key"
-SLOWDNS_DOMAIN="$domain"
-SLOWDNS_UPSTREAM_ADDR="127.0.0.1:22"
-SLOWDNS_EXTRA_ARGS="-diagnostics"
-SLOWDNS_DIRECT_IPV4=""
-SLOWDNS_DIRECT_INTERFACE=""
-SLOWDNS_DIRECT_BINDINGS="$SLOWDNS_DIRECT_BINDINGS"
-EOF
-    chmod 600 "$dir/slowdns.env"
-}
-
-slowdns_add_udp53_bypass() {
-    local f="/usr/local/bin/udp-request-fixnet.sh" list=""
-    [ -f "$f" ] || return 0
-    list=$(sed -n 's/^[[:space:]]*for p in \(.*\); do$/\1/p' "$f" 2>/dev/null | head -n 1)
-    if [ -n "$list" ]; then
-        case " $list " in
-            *" 53 "*) ;;
-            *) sed -i -E 's/^([[:space:]]*)for p in (.*); do$/\1for p in 53 \2; do/' "$f" 2>/dev/null || true ;;
-        esac
-    elif ! grep -qE 'dport[[:space:]]+53([^0-9]|$)' "$f" 2>/dev/null; then
-        sed -i '/^[[:space:]]*exit 0[[:space:]]*$/i while iptables -t nat -D PREROUTING -p udp --dport 53 -j RETURN 2>/dev/null; do :; done\niptables -t nat -I PREROUTING 1 -p udp --dport 53 -j RETURN' "$f" 2>/dev/null || true
-    fi
-    systemctl restart udp-request-fixnet.timer 2>/dev/null || true
-    "$f" >/dev/null 2>&1 || true
-}
-
-slowdns_remove_redirect() {
-    local rule="" rules=""
-    # The old installer added the redirect once per default-route lookup, and
-    # the interface can differ under policy routing.  Remove every matching
-    # rule, not just the current default interface.
-    rules=$(iptables -t nat -S PREROUTING 2>/dev/null) || return 1
-    while IFS= read -r rule; do
-        [ -n "$rule" ] || continue
-        iptables -t nat -D PREROUTING $rule 2>/dev/null || break
-    done < <(printf '%s\n' "$rules" | \
-        sed -n 's/^-A PREROUTING //p' | \
-        grep -- '--dport 53 .*REDIRECT --to-ports 5300')
-    while iptables -D INPUT -p udp --dport 5300 -j ACCEPT 2>/dev/null; do :; done
-    rules=$(iptables -t nat -S PREROUTING 2>/dev/null) || return 1
-    ! printf '%s\n' "$rules" | grep -q -- '--dport 53 .*REDIRECT --to-ports 5300'
-}
-
-slowdns_rollback() {
-    local old_service="$1" dir="/etc/slowdns"
-    # Stop the new unit even when an old ePro unit is being restored, so its
-    # ExecStopPost removes any NOTRACK rules it added.
-    systemctl stop slowdns.service 2>/dev/null || true
-    if [ "$old_service" != "slowdns" ]; then
-        systemctl disable slowdns.service 2>/dev/null || true
-        rm -f /etc/systemd/system/slowdns.service
-    fi
-    case "$old_service" in
-        slowdns)
-            [ -f "$BACKUP/slowdns.bin" ] && install -m 0755 "$BACKUP/slowdns.bin" "$dir/slowdns" 2>/dev/null || true
-            [ -f "$BACKUP/slowdns-install.sh" ] && install -m 0755 "$BACKUP/slowdns-install.sh" "$dir/install.sh" 2>/dev/null || true
-            [ -f "$BACKUP/slowdns.env" ] && cp -f "$BACKUP/slowdns.env" "$dir/slowdns.env" 2>/dev/null || true
-            [ -f "$BACKUP/slowdns.service" ] && cp -f "$BACKUP/slowdns.service" /etc/systemd/system/slowdns.service 2>/dev/null || true
-            systemctl daemon-reload 2>/dev/null || true
-            systemctl start slowdns.service 2>/dev/null || true
-            ;;
-        dnstt)
-            [ -f "$BACKUP/dns-server" ] && install -m 0755 "$BACKUP/dns-server" "$dir/dns-server" 2>/dev/null || true
-            [ -f "$BACKUP/dnstt.service" ] && cp -f "$BACKUP/dnstt.service" /etc/systemd/system/dnstt.service 2>/dev/null || true
-            [ -f "$BACKUP/slowdns-fixnet.sh" ] && install -m 0755 "$BACKUP/slowdns-fixnet.sh" /usr/local/bin/slowdns-fixnet.sh 2>/dev/null || true
-            [ -f "$BACKUP/slowdns-fixnet.service" ] && cp -f "$BACKUP/slowdns-fixnet.service" /etc/systemd/system/slowdns-fixnet.service 2>/dev/null || true
-            [ -f "$BACKUP/slowdns-fixnet.timer" ] && cp -f "$BACKUP/slowdns-fixnet.timer" /etc/systemd/system/slowdns-fixnet.timer 2>/dev/null || true
-            systemctl daemon-reload 2>/dev/null || true
-            systemctl enable dnstt 2>/dev/null || true
-            systemctl start dnstt 2>/dev/null || true
-            [ -x /usr/local/bin/slowdns-fixnet.sh ] && /usr/local/bin/slowdns-fixnet.sh 2>/dev/null || true
-            systemctl enable --now slowdns-fixnet.timer 2>/dev/null || true
-            ;;
-    esac
-    systemctl daemon-reload 2>/dev/null || true
-}
-
-install_epro_slowdns() {
-    local marker="/etc/funny/.fix548-slowdns-epro"
-    local dir="/etc/slowdns"
-    local oldunit="/etc/systemd/system/dnstt.service"
-    local newunit="/etc/systemd/system/slowdns.service"
-    local nsfile="$dir/nsdomain"
-    local key="$dir/server.key"
-    local pub="$dir/server.pub"
-    local oldbin="$dir/dns-server"
-    local fixsvc="/etc/systemd/system/slowdns-fixnet.service"
-    local fixtimer="/etc/systemd/system/slowdns-fixnet.timer"
-    local fixscript="/usr/local/bin/slowdns-fixnet.sh"
-    local tmp="" nsd="" arch="" keyhash="" pubhash="" log="" old_service=""
-    [ -f "$marker" ] && return 0
-    [ -d "$dir" ] || return 0
-    if [ -f "$newunit" ] && [ -x "$dir/slowdns" ] && [ -f "$dir/slowdns.env" ] && \
-       systemctl is-active --quiet slowdns.service 2>/dev/null && \
-       [ ! -f "$oldunit" ] && [ ! -x "$oldbin" ]; then
-        fix_marker .fix548-slowdns-epro
-        return 0
-    fi
-    [ -f "$oldunit" ] || [ -x "$oldbin" ] || return 0
-    arch=$(uname -m)
-    case "$arch" in
-        x86_64|amd64) ;;
-        *)
-            echo "Fix 548: ePro SlowDNS is amd64-only; $arch host keeps dnstt." >&2
-            return 0
-            ;;
-    esac
-    if ! command -v ss >/dev/null 2>&1 || ! command -v iptables >/dev/null 2>&1; then
-        echo "Fix 548: ss/iptables are missing; SlowDNS left unchanged." >&2
-        return 0
-    fi
-    if systemctl is-active --quiet slowdns.service 2>/dev/null; then
-        old_service="slowdns"
-    elif systemctl is-active --quiet dnstt 2>/dev/null; then
-        old_service="dnstt"
-    else
-        # Do not touch an installed-but-stopped SlowDNS.  A later update will
-        # migrate it once the operator starts it.
-        return 0
-    fi
-    [ -s "$nsfile" ] || { echo "Fix 548: /etc/slowdns/nsdomain is missing; $old_service left unchanged." >&2; return 0; }
-    nsd=$(tr -d '[:space:]' < "$nsfile" 2>/dev/null)
-    if ! [[ "$nsd" =~ ^([[:alnum:]]([[:alnum:]-]{0,61}[[:alnum:]])?\.)+[[:alpha:]]{2,63}$ ]]; then
-        echo "Fix 548: /etc/slowdns/nsdomain is not a valid hostname; $old_service left unchanged." >&2
-        return 0
-    fi
-    [ -s "$key" ] || { echo "Fix 548: /etc/slowdns/server.key is missing; $old_service left unchanged." >&2; return 0; }
-    [ -s "$pub" ] || { echo "Fix 548: /etc/slowdns/server.pub is missing; $old_service left unchanged." >&2; return 0; }
-    chmod 600 "$key" 2>/dev/null || true
-    chmod 644 "$pub" 2>/dev/null || true
-    keyhash=$(sha256sum "$key" | awk '{print $1}')
-    pubhash=$(sha256sum "$pub" | awk '{print $1}')
-
-    tmp=$(mktemp -d) || return 0
-    if ! fetch "$SLOWDNS_EPRO_URL" "$tmp/slowdns-linux-amd64.tar.gz" 600; then
-        rm -rf "$tmp"
-        echo "Fix 548: could not download the ePro SlowDNS package; $old_service left unchanged." >&2
-        return 0
-    fi
-    if [ "$(sha256sum "$tmp/slowdns-linux-amd64.tar.gz" | awk '{print $1}')" != "$SLOWDNS_EPRO_SHA256" ]; then
-        rm -rf "$tmp"
-        echo "Fix 548: ePro SlowDNS package checksum mismatch; $old_service left unchanged." >&2
-        return 0
-    fi
-    if ! tar -xzf "$tmp/slowdns-linux-amd64.tar.gz" -C "$tmp" 2>/dev/null || \
-       [ ! -x "$tmp/slowdns" ] || [ ! -f "$tmp/install.sh" ]; then
-        rm -rf "$tmp"
-        echo "Fix 548: ePro SlowDNS package is incomplete; $old_service left unchanged." >&2
-        return 0
-    fi
-
-    mkdir -p "$BACKUP" 2>/dev/null || true
-    [ -f "$oldunit" ] && cp -f "$oldunit" "$BACKUP/dnstt.service" 2>/dev/null || true
-    [ -x "$oldbin" ] && cp -f "$oldbin" "$BACKUP/dns-server" 2>/dev/null || true
-    [ -x "$dir/slowdns" ] && cp -f "$dir/slowdns" "$BACKUP/slowdns.bin" 2>/dev/null || true
-    [ -f "$dir/install.sh" ] && cp -f "$dir/install.sh" "$BACKUP/slowdns-install.sh" 2>/dev/null || true
-    [ -f "$dir/slowdns.env" ] && cp -f "$dir/slowdns.env" "$BACKUP/slowdns.env" 2>/dev/null || true
-    [ -f "$newunit" ] && cp -f "$newunit" "$BACKUP/slowdns.service" 2>/dev/null || true
-    [ -f "$fixsvc" ] && cp -f "$fixsvc" "$BACKUP/slowdns-fixnet.service" 2>/dev/null || true
-    [ -f "$fixtimer" ] && cp -f "$fixtimer" "$BACKUP/slowdns-fixnet.timer" 2>/dev/null || true
-    [ -f "$fixscript" ] && cp -f "$fixscript" "$BACKUP/slowdns-fixnet.sh" 2>/dev/null || true
-    [ -f /usr/local/bin/udp-request-fixnet.sh ] && cp -f /usr/local/bin/udp-request-fixnet.sh "$BACKUP/udp-request-fixnet.sh" 2>/dev/null || true
-
-    systemctl stop dnstt 2>/dev/null || true
-    systemctl disable dnstt 2>/dev/null || true
-    systemctl stop slowdns-fixnet.timer 2>/dev/null || true
-    systemctl disable slowdns-fixnet.timer 2>/dev/null || true
-    systemctl stop slowdns-fixnet.service 2>/dev/null || true
-    systemctl stop slowdns.service 2>/dev/null || true
-    pkill -x dns-server 2>/dev/null || true
-    pkill -x slowdns 2>/dev/null || true
-    # The ePro installer refuses to reuse a unit it did not create.  The old
-    # unit is already backed up above and rollback restores it on failure.
-    rm -f "$newunit"
-    systemctl daemon-reload 2>/dev/null || true
-    if ! slowdns_remove_redirect; then
-        rm -rf "$tmp"
-        slowdns_rollback "$old_service"
-        echo "Fix 548: could not remove the old 53 -> 5300 redirect; $old_service restored." >&2
-        return 0
-    fi
-
-    if ! install -m 0755 "$tmp/slowdns" "$dir/slowdns" 2>/dev/null; then
-        rm -rf "$tmp"
-        slowdns_rollback "$old_service"
-        echo "Fix 548: could not install the ePro binary; $old_service restored." >&2
-        return 0
-    fi
-    install -m 0755 "$tmp/install.sh" "$dir/install.sh" 2>/dev/null || true
-    install -m 0644 "$tmp/README.md" "$dir/README.epro.md" 2>/dev/null || true
-    chmod 0755 "$dir" 2>/dev/null || true
-
-    if ! slowdns_choose_listener; then
-        rm -rf "$tmp"
-        slowdns_rollback "$old_service"
-        echo "Fix 548: could not choose a UDP 53 listener; $old_service restored." >&2
-        return 0
-    fi
-    slowdns_write_env "$dir" "$nsd" || {
-        rm -rf "$tmp"
-        slowdns_rollback "$old_service"
-        echo "Fix 548: could not write slowdns.env; $old_service restored." >&2
-        return 0
-    }
-
-    log="$tmp/install.log"
-    if ! "$dir/install.sh" install >"$log" 2>&1; then
-        if [ -n "$SLOWDNS_DIRECT_BINDINGS" ]; then
-            echo "Fix 548: NOTRACK setup failed; retrying without it." >&2
-            systemctl stop slowdns.service 2>/dev/null || true
-            systemctl disable slowdns.service 2>/dev/null || true
-            rm -f "$newunit"
-            systemctl daemon-reload 2>/dev/null || true
-            SLOWDNS_DIRECT_BINDINGS=""
-            slowdns_write_env "$dir" "$nsd"
-            "$dir/install.sh" install >>"$log" 2>&1 || true
-        fi
-    fi
-    if ! systemctl is-active --quiet slowdns.service 2>/dev/null; then
-        tail -n 20 "$log" >&2 2>/dev/null || true
-        rm -rf "$tmp"
-        slowdns_rollback "$old_service"
-        echo "Fix 548: the ePro service did not start; $old_service restored." >&2
-        return 0
-    fi
-    if [ "$(sha256sum "$key" | awk '{print $1}')" != "$keyhash" ] || \
-       [ "$(sha256sum "$pub" | awk '{print $1}')" != "$pubhash" ]; then
-        rm -rf "$tmp"
-        slowdns_rollback "$old_service"
-        echo "Fix 548: the key pair changed unexpectedly; $old_service restored." >&2
-        return 0
-    fi
-
-    rm -f "$oldunit" "$oldbin" "$fixsvc" "$fixtimer" "$fixscript"
-    systemctl daemon-reload 2>/dev/null || true
-    iptables -C INPUT -p udp --dport 53 -j ACCEPT 2>/dev/null || \
-        iptables -I INPUT -p udp --dport 53 -j ACCEPT 2>/dev/null || true
-    ip6tables -C INPUT -p udp --dport 53 -j ACCEPT 2>/dev/null || \
-        ip6tables -I INPUT -p udp --dport 53 -j ACCEPT 2>/dev/null || true
-    if command -v netfilter-persistent >/dev/null 2>&1; then
-        netfilter-persistent save >/dev/null 2>&1 || true
-    fi
-    slowdns_add_udp53_bypass
-
-    rm -rf "$tmp"
-    fix_log "fix548: migrated dnstt to ePro SlowDNS (keys preserved)"
-    fix_marker .fix548-slowdns-epro
-    echo "Fix 548: migrated to ePro SlowDNS; UDP 53 is direct and the existing public key was kept."
 }
 
 # Found 535: a legacy account lost its base quota and IP-limit files while the
@@ -1213,7 +890,6 @@ neutralize_default_credentials
 remove_template_client_anchors
 cleanup_domain_cert_remnants
 repair_simpang32
-install_epro_slowdns
 remove_stale_rohcuan_limit
 remove_unused_pptpd
 cleanup_root_mail

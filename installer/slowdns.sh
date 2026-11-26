@@ -100,10 +100,9 @@ clear
 echo ""
 echo ""
 
-# Found 548: use ePro's official SlowDNS server instead of building dnstt from
-# source.  The vendor tarball is uploaded to the miscellaneous release; the
-# SHA-256 pin makes a wrong or truncated download fail closed.  The package is
-# amd64-only.
+# Found 549: ePro's official SlowDNS server is the only server.  The vendor
+# tarball is uploaded to the miscellaneous release; the SHA-256 pin makes a
+# wrong or truncated download fail closed.  The package is amd64-only.
 SLOWDNS_EPRO_RELEASE="v1.23"
 SLOWDNS_EPRO_URL="https://github.com/rohjagad/fn-autosc-miscellaneous/releases/download/${SLOWDNS_EPRO_RELEASE}/slowdns-linux-amd64.tar.gz"
 SLOWDNS_EPRO_SHA256="6aa42455cd142953270a342e3c24c9c946fdc4ef3cad1e5c02f27711ffc6ad41"
@@ -252,23 +251,6 @@ add_firewall_rule() {
     fi
 }
 
-remove_legacy_redirect() {
-    local rule="" rules=""
-    # The old installer added the redirect once per default-route lookup, and
-    # the interface can differ under policy routing.  Remove every matching
-    # rule, not just the current default interface.
-    rules=$(iptables -t nat -S PREROUTING 2>/dev/null) || return 1
-    while IFS= read -r rule; do
-        [ -n "$rule" ] || continue
-        iptables -t nat -D PREROUTING $rule 2>/dev/null || break
-    done < <(printf '%s\n' "$rules" | \
-        sed -n 's/^-A PREROUTING //p' | \
-        grep -- '--dport 53 .*REDIRECT --to-ports 5300')
-    while iptables -D INPUT -p udp --dport 5300 -j ACCEPT 2>/dev/null; do :; done
-    rules=$(iptables -t nat -S PREROUTING 2>/dev/null) || return 1
-    ! printf '%s\n' "$rules" | grep -q -- '--dport 53 .*REDIRECT --to-ports 5300'
-}
-
 # udp-request inserts wildcard UDP captures at the top of nat PREROUTING when
 # it starts.  The panel's request installer already exempts its own UDP
 # services; add 53 there so a direct SlowDNS listener is not swallowed.
@@ -306,29 +288,12 @@ rollback_slowdns() {
             systemctl daemon-reload 2>/dev/null || true
             systemctl start slowdns.service 2>/dev/null || true
             ;;
-        dnstt)
-            [ -f "$b/dns-server" ] && install -m 0755 "$b/dns-server" "$dir/dns-server" 2>/dev/null || true
-            [ -f "$b/dnstt.service" ] && cp -f "$b/dnstt.service" /etc/systemd/system/dnstt.service 2>/dev/null || true
-            [ -f "$b/slowdns-fixnet.sh" ] && install -m 0755 "$b/slowdns-fixnet.sh" /usr/local/bin/slowdns-fixnet.sh 2>/dev/null || true
-            [ -f "$b/slowdns-fixnet.service" ] && cp -f "$b/slowdns-fixnet.service" /etc/systemd/system/slowdns-fixnet.service 2>/dev/null || true
-            [ -f "$b/slowdns-fixnet.timer" ] && cp -f "$b/slowdns-fixnet.timer" /etc/systemd/system/slowdns-fixnet.timer 2>/dev/null || true
-            systemctl daemon-reload 2>/dev/null || true
-            systemctl enable dnstt 2>/dev/null || true
-            systemctl start dnstt 2>/dev/null || true
-            [ -x /usr/local/bin/slowdns-fixnet.sh ] && /usr/local/bin/slowdns-fixnet.sh 2>/dev/null || true
-            systemctl enable slowdns-fixnet.timer 2>/dev/null || true
-            systemctl start slowdns-fixnet.timer 2>/dev/null || true
-            ;;
     esac
     systemctl daemon-reload 2>/dev/null || true
 }
 
 install_slowdns() {
     local key="$SLOWDNS_DIR/server.key" pub="$SLOWDNS_DIR/server.pub"
-    local oldunit="/etc/systemd/system/dnstt.service"
-    local fixsvc="/etc/systemd/system/slowdns-fixnet.service"
-    local fixtimer="/etc/systemd/system/slowdns-fixnet.timer"
-    local fixscript="/usr/local/bin/slowdns-fixnet.sh"
     local old_key_hash="" old_pub_hash=""
 
     case "$(uname -m)" in
@@ -364,8 +329,6 @@ install_slowdns() {
 
     if systemctl is-active --quiet slowdns.service 2>/dev/null; then
         SLOWDNS_OLD_SERVICE="slowdns"
-    elif systemctl is-active --quiet dnstt 2>/dev/null; then
-        SLOWDNS_OLD_SERVICE="dnstt"
     fi
     SLOWDNS_BACKUP="/root/fn-slowdns-backup-$(date +%Y%m%d-%H%M%S)"
     mkdir -p "$SLOWDNS_BACKUP" 2>/dev/null || SLOWDNS_BACKUP=""
@@ -374,23 +337,11 @@ install_slowdns() {
         [ -f "$SLOWDNS_DIR/install.sh" ] && cp -f "$SLOWDNS_DIR/install.sh" "$SLOWDNS_BACKUP/install.sh" 2>/dev/null || true
         [ -f "$SLOWDNS_DIR/slowdns.env" ] && cp -f "$SLOWDNS_DIR/slowdns.env" "$SLOWDNS_BACKUP/slowdns.env" 2>/dev/null || true
         [ -f /etc/systemd/system/slowdns.service ] && cp -f /etc/systemd/system/slowdns.service "$SLOWDNS_BACKUP/slowdns.service" 2>/dev/null || true
-        [ -x "$SLOWDNS_DIR/dns-server" ] && cp -f "$SLOWDNS_DIR/dns-server" "$SLOWDNS_BACKUP/dns-server" 2>/dev/null || true
-        [ -f "$oldunit" ] && cp -f "$oldunit" "$SLOWDNS_BACKUP/dnstt.service" 2>/dev/null || true
-        [ -f "$fixsvc" ] && cp -f "$fixsvc" "$SLOWDNS_BACKUP/slowdns-fixnet.service" 2>/dev/null || true
-        [ -f "$fixtimer" ] && cp -f "$fixtimer" "$SLOWDNS_BACKUP/slowdns-fixnet.timer" 2>/dev/null || true
-        [ -f "$fixscript" ] && cp -f "$fixscript" "$SLOWDNS_BACKUP/slowdns-fixnet.sh" 2>/dev/null || true
     fi
-    systemctl stop dnstt 2>/dev/null || true
-    systemctl disable dnstt 2>/dev/null || true
-    systemctl stop slowdns-fixnet.timer 2>/dev/null || true
-    systemctl disable slowdns-fixnet.timer 2>/dev/null || true
-    systemctl stop slowdns-fixnet.service 2>/dev/null || true
     systemctl stop slowdns.service 2>/dev/null || true
-    pkill -x dns-server 2>/dev/null || true
     pkill -x slowdns 2>/dev/null || true
     rm -f /etc/systemd/system/slowdns.service
     systemctl daemon-reload 2>/dev/null || true
-    remove_legacy_redirect || { fail "could not remove the old 53 -> 5300 redirect"; return 1; }
 
     install -m 0755 "$SLOWDNS_TMP/slowdns" "$SLOWDNS_DIR/slowdns" || { fail "cannot install slowdns"; return 1; }
     install -m 0755 "$SLOWDNS_TMP/install.sh" "$SLOWDNS_DIR/install.sh" || { fail "cannot install install.sh"; return 1; }
@@ -417,11 +368,7 @@ install_slowdns() {
     add_firewall_rule
     add_udp53_bypass
 
-    rm -f "$oldunit" "$fixsvc" "$fixtimer" "$fixscript" "$SLOWDNS_DIR/dns-server"
     systemctl daemon-reload 2>/dev/null || true
-    mkdir -p /etc/funny
-    : > /etc/funny/.fix548-slowdns-epro
-    chmod 600 /etc/funny/.fix548-slowdns-epro 2>/dev/null || true
 
     if grep -q '^#AllowTcpForwarding yes' /etc/ssh/sshd_config 2>/dev/null; then
         sed -i 's/^#AllowTcpForwarding yes/AllowTcpForwarding yes/' /etc/ssh/sshd_config

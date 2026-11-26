@@ -75,7 +75,7 @@ bin	log-database-xray-xhttp
 script	menu
 script	menu-argo
 script	menu-bot
-script	menu-dnstt
+script	menu-slowdns
 script	menu-noobz
 script	menu-ssh
 script	menu-system

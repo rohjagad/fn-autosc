@@ -226,7 +226,7 @@ display-only and never gate the menu.
 | 1 | SSH Menu (`menu-ssh`) |
 | 2 | XTLS Menu (`menu-x`) |
 | 3 | Domain Menu (`dm-menu`) |
-| 4 | SlowDNS Menu (`menu-dnstt`) |
+| 4 | SlowDNS Menu (`menu-slowdns`) |
 | 5 | Backup Menu (`bmenu`) |
 | 6 | Telegram Bot (`menu-bot`) |
 | 7 | L2TP Menu (`xl2tp`) |
@@ -262,7 +262,7 @@ change quota, and lock.
 | `dm-menu` | Add/remove/list domains, renew certificates, self-signed cert |
 | `bmenu` | Backup and restore |
 | `menu-bot` | Telegram notifications and terminal bot |
-| `menu-dnstt` | SlowDNS nameserver and keys |
+| `menu-slowdns` | SlowDNS nameserver and keys |
 | `menu-wg` | WireGuard accounts and configs |
 | `xl2tp` | L2TP / IPsec accounts |
 | `menu-noobz` | NoobzVPN accounts |
@@ -814,13 +814,12 @@ Open `dm-menu`, pick the domain first, then choose option 4 (acme.sh) or 5
 
 ### SlowDNS (ePro)
 
-Tunnels SSH over DNS. The server is ePro's official `slowdns` binary, the
-server side of HTTP Custom's SlowDNS v2 line. It listens directly on UDP `53`;
-the old `53 -> 5300` iptables redirect is no longer used.
+Tunnels SSH over DNS with ePro's official `slowdns` binary, the server side of
+HTTP Custom's SlowDNS v2 line. It listens directly on UDP `53`.
 
-**Requirement:** you must delegate a nameserver subdomain (NS record) to this
-VPS, for example `slowdns.example.com`. Without it, `slowdns.service` runs but
-serves nothing useful. The installer asks for this name and stores it in
+**Requirement:** delegate a nameserver subdomain (NS record) to this VPS, for
+example `slowdns.example.com`. Without it, `slowdns.service` runs but serves
+nothing useful. The installer asks for this name and stores it in
 `/etc/slowdns/nsdomain`; the service reads it from
 `/etc/slowdns/slowdns.env`. This does not create DNS records: the delegated
 name must still resolve or delegate to the VPS at the DNS provider.
@@ -830,20 +829,19 @@ name must still resolve or delegate to the VPS at the DNS provider.
 `6aa42455cd142953270a342e3c24c9c946fdc4ef3cad1e5c02f27711ffc6ad41`.
 The installer verifies the checksum, extracts `slowdns`, `install.sh`, and the
 vendor README into `/etc/slowdns`, then runs the vendor installer. The package
-is **amd64-only**: a fresh arm64 install skips SlowDNS, and an update on arm64
-leaves the existing dnstt service in place. The vendor binary is UPX-packed, so
-the pinned SHA-256 is the integrity control; review ePro's redistribution terms
-before mirroring the package.
+is **amd64-only**: a fresh arm64 install skips SlowDNS. The vendor binary is
+UPX-packed, so the pinned SHA-256 is the integrity control; review ePro's
+redistribution terms before mirroring the package.
 
 If `systemd-resolved` already owns `127.0.0.53:53`, the installer binds the
 VPS's primary public IP instead of the wildcard, so the service starts without
 stopping the system resolver. Additional public IPs on the same host are not
 served automatically; free UDP 53 and rerun if you need the wildcard listener.
 
-**Keys:** the ePro binary uses the same X25519 key format as dnstt. A fresh
-install generates `/etc/slowdns/server.key` and `server.pub`; the updater keeps
-the existing pair, so the public key embedded in client configurations does not
-change. Key management and the nameserver are configured from `menu-dnstt`.
+**Keys:** the server uses an X25519 keypair. A fresh install generates
+`/etc/slowdns/server.key` and `server.pub`; the public key is embedded in client
+configurations. Key management and the nameserver are configured from
+`menu-slowdns`.
 
 **HTTP Custom 8.1.x:** the server's `auto` record type answers all six DNS
 QTYPEs (TXT, NULL, CNAME, NS, MX, SRV), supports multiple `sessions`, custom
@@ -854,20 +852,12 @@ QTYPEs (TXT, NULL, CNAME, NS, MX, SRV), supports multiple `sessions`, custom
 `FORMERR` and expects an EDNS0 payload of at least 1232 bytes. HTTP Custom sends
 EDNS0 by default; old clients or resolvers that strip EDNS0 will fail.
 
-**Updating:** `update.sh` migrates an existing dnstt install once (marker
-`.fix548-slowdns-epro`). It stops `dnstt`, removes the old `53 -> 5300`
-redirect and `slowdns-fixnet` timer, installs the ePro binary and
-`slowdns.service`, and verifies that the service is active and the
-`server.key`/`server.pub` hashes are unchanged before deleting the old unit.
-A failed download, checksum, or install restarts the previous service. An
-installed-but-stopped SlowDNS service is left untouched; start it and rerun
-`update.sh` to migrate it. The old `installer/dnstt-null.patch` and
-`installer/dnstt-multi.patch` build path is gone.
+**Menu:** `menu-slowdns` manages `slowdns.service`, updates `SLOWDNS_DOMAIN` in
+`/etc/slowdns/slowdns.env` when the nameserver changes, renews keys, restarts
+the service, and shows the public key.
 
-**Menu:** `menu-dnstt` manages `slowdns.service` and updates
-`SLOWDNS_DOMAIN` in `/etc/slowdns/slowdns.env` when the nameserver changes. It
-still detects a legacy `dnstt.service` if the one-time migration has not run,
-so the menu remains usable during the transition.
+**Updating:** `update.sh` refreshes the `menu-slowdns` payload; it does not
+touch the running service or the key pair.
 
 **Note:** ePro labels this package for HTTP Custom 8.0.10.914. It is the
 official server for the same SlowDNS line, but test `ST`, `FT`, `sessions`, and
@@ -1167,7 +1157,7 @@ Binaries are built with `-ldflags='-s -w'` for a small footprint.
 
 1. **SlowDNS needs manual setup** — `slowdns.service` has no useful
    nameserver until a delegated domain is configured. The installer asks for
-   it; `menu-dnstt` can change it later.
+   it; `menu-slowdns` can change it later.
 2. **XHTTP and HTTP/2** — some clients expecting plain HTTP/1.1 chunked
    transport may not work through HTTP/2 reverse proxies.
 3. **UDP Request SNAT** — the broad `10.0.0.0/8` SNAT rule can overlap client
@@ -1256,11 +1246,9 @@ What it does:
   The same updater is used on `sg1.rohcuan.dpdns.org`,
   `id1.rohcuan.dpdns.org`, and `id2.rohcuan.dpdns.org`; it detects the
   edition and live version on each host instead of assuming a hostname.
-  It also runs marker-guarded live-state migrations: migrate an active
-  `dnstt` install to ePro's official `slowdns` binary (preserving
-  `server.key`/`server.pub` and `nsdomain`, moving to a direct UDP 53
-  listener, and restoring `dnstt` if the package or service fails), restore
-  the `simpang32` quota/IP limit,
+  SlowDNS is ePro-only; the updater refreshes `menu-slowdns` but does not
+  touch the running service or its keys. It also runs marker-guarded
+  live-state migrations: restore the `simpang32` quota/IP limit,
   neutralize the published default Xray credentials, archive and truncate
   the accumulated root mailbox, remove the template client anchors after
   validating all four Xray configs, remove stale certificate SAN entries

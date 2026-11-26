@@ -108,7 +108,7 @@ while true; do
         continue
     fi
 
-    # Cek format FQDN (sama seperti dm-menu/menu-dnstt/menu-argo)
+    # Cek format FQDN (sama seperti dm-menu/menu-slowdns/menu-argo)
     if ! [[ "$installer_domain" =~ ^([[:alnum:]]([[:alnum:]-]{0,61}[[:alnum:]])?\.)+[[:alpha:]]{2,63}$ ]]; then
         echo "Installer domain harus berupa hostname DNS yang valid. Silakan coba lagi."
         continue
