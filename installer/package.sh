@@ -68,8 +68,10 @@ sleep 2
 
 apt update -y
 apt dist-upgrade -y
-apt-get remove --purge ufw firewalld -y 
-apt-get remove --purge exim4 -y 
+apt-get remove --purge ufw firewalld -y
+# The exim4 metapackage only pulls the daemon in; purge the daemon packages
+# explicitly so a fresh install does not leave an unused MTA and its timer.
+apt-get remove --purge exim4 exim4-base exim4-config exim4-daemon-light bsd-mailx -y
 apt install htop -y
 
 
