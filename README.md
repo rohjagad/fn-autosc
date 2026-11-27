@@ -865,19 +865,17 @@ the service, and shows the public key. A failed restart is reported, and a
 failed key renewal restores the previous key pair. Backup/restore and the
 System info screen also use `slowdns`/UDP 53.
 
-**Updating:** `update.sh` refreshes the `menu-slowdns` payload and, when
-`slowdns.service` is active, upgrades the server from the pinned
-`v8.1.5.942` release. It verifies the tarball and binary hashes, then runs the
-vendor installer with the existing `slowdns.env`, `server.key`, `server.pub`,
-and `nsdomain`. A failed upgrade restores the previous binary and leaves
-`.update-commit` at the old value so the next run retries. A stopped SlowDNS
-service is left untouched until it is started and the updater is rerun; the
-menu payload is still refreshed.
+**Updating:** `update.sh` refreshes the `menu-slowdns` payload; it does not
+replace, restart, or otherwise touch the running service, key pair, or
+`slowdns.env`. The package version is selected by `installer/slowdns.sh`,
+which downloads `v8.1.5.942` and verifies the tarball and binary hashes; use it
+for fresh installs or an intentional reinstall. The three live hosts were
+moved to the new package on 27-Nov-2026.
 
 **Note:** `v8.1.5.942` is HC-only and changes the client requirement: every
 user must update HTTP Custom to 8.1.5.942 (build 934 and older are rejected).
-Roll out one host first and keep release `v1.23` available for rollback. The
-public key and nameserver do not change.
+Keep release `v1.23` available for rollback; the public key and nameserver do
+not change.
 
 ### WireGuard — `menu-wg`
 
@@ -1267,12 +1265,11 @@ What it does:
   edition and live version on each host instead of assuming a hostname.
   Live changes are always delivered through `update.sh`; do not copy payload
   files or edit services by hand on a live host.
-  SlowDNS is ePro-only; the updater refreshes `menu-slowdns` and upgrades an
-  active `slowdns.service` from the pinned `v8.1.5.942` package, preserving
-  the key pair, `nsdomain`, and `slowdns.env`. A failed upgrade restores the
-  previous binary and does not advance `.update-commit`; a stopped service is
-  skipped until it is started and the updater is rerun. It also runs
-  marker-guarded
+  SlowDNS is ePro-only; the updater refreshes `menu-slowdns` but does not
+  replace, restart, or otherwise touch the running service, key pair, or
+  `slowdns.env`. The package version is selected by `installer/slowdns.sh`,
+  which pins `v8.1.5.942`; use it for fresh installs or an intentional
+  reinstall. It also runs marker-guarded
   live-state migrations: restore the `simpang32` quota/IP limit,
   neutralize the published default Xray credentials, archive and truncate
   the accumulated root mailbox, remove the template client anchors after
