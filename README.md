@@ -1248,8 +1248,8 @@ What it does:
   and the update changes the version, that detected live version is also
   recorded in `.install-commit` as the install baseline. The target remains
   pinned in `update.sh`; currently
-  `7ed572133af2e872f679a5250756521eaf080070` (Fix 552, with the ePro-only
-  SlowDNS menu, the HC-only 8.1.5.942 server upgrade, hardened
+  `1588e9f5fcc0ad7af167f5d4c59974d82e868cd0` (Fix 552, with the ePro-only
+  SlowDNS menu, the HC-only 8.1.5.942 installer pin, hardened
   installer/menu failure handling, the last legacy server references removed
   from backup/restore and system info, and the log-cap helper in both payloads
   so fresh installs do not need an update and no PPTP path in either
