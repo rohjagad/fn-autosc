@@ -1265,6 +1265,8 @@ What it does:
   The same updater is used on `sg1.rohcuan.dpdns.org`,
   `id1.rohcuan.dpdns.org`, and `id2.rohcuan.dpdns.org`; it detects the
   edition and live version on each host instead of assuming a hostname.
+  Live changes are always delivered through `update.sh`; do not copy payload
+  files or edit services by hand on a live host.
   SlowDNS is ePro-only; the updater refreshes `menu-slowdns` and upgrades an
   active `slowdns.service` from the pinned `v8.1.5.942` package, preserving
   the key pair, `nsdomain`, and `slowdns.env`. A failed upgrade restores the
