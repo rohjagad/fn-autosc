@@ -3388,3 +3388,15 @@ Section 35's four-check rule applied to Fix 417:
 - **Fix 549 update:** the migration/rollback and stopped-service handling described above are gone. `update.sh` no longer inspects or changes SlowDNS; it only refreshes `menu-slowdns`. The remaining requirement changes are EDNS0 >= 1232, amd64-only, and the primary-IP bind when UDP 53 is occupied. Existing ePro installs keep their service, key pair, and `nsdomain`; the old `menu-dnstt`, markers, and rollback copies were removed from all three hosts.
 - **Fix 550 hardening:** no behavior change on a healthy install. A failed reinstall now leaves a running service untouched unless the old unit was actually stopped and backed up, and a failed menu restart or key renewal reports the failure; key renewal restores the previous pair if the new one cannot start.
 - **Fix 551 cleanup:** backup/restore now restarts `slowdns` instead of the removed `dnstt` unit (the old call was a silent no-op on migrated hosts), and the System info screen shows UDP `53` only. No behavior change on a healthy install.
+
+## 19. SlowDNS 8.1.5.942 Requires an Updated HTTP Custom (Fix 552)
+
+- **Files:** `installer/slowdns.sh`, `update.sh`, `README.md`.
+- **Change:** the ePro SlowDNS package moves from the 8.0.10.914 build (`v1.23`, tarball SHA-256 `6aa42455...`) to the HC-only 8.1.5.942 build (`v8.1.5.942`, tarball `a0799f9a3cfb9b5a7633af4d8c38dede50e89f0c33e2f5ad42b8c3ad1ae97895`, binary `4a455c89e219cc7d045beaf425f3870a023056bbe593aeb9be55f2f2948f98b7`).
+- **Intended behavior changes:**
+  1. **Client requirement.** HTTP Custom 8.1.5.942 or newer is required; build 934 and older clients are rejected by the new server. Existing profiles, keys, and nameservers remain usable after the app update.
+  2. **Record types.** The default `-record-type auto` covers TXT, NULL, ST, FT, RX, and VX. A manual `-record-type` in `slowdns.env` is preserved by the vendor installer, so operators who pinned one type must set `auto` (or a new number) before reinstalling.
+  3. **Updater behavior.** `update.sh` now upgrades an active `slowdns.service` instead of only refreshing `menu-slowdns`. A stopped service is skipped until it is started and the updater is rerun.
+- **Preserved:** `server.key`, `server.pub`, `nsdomain`, `slowdns.env`, the public key embedded in client configs, the UDP 53 listener, the upstream address, the vendor unit, and the `-diagnostics` flag.
+- **Mitigation:** both the tarball and binary hashes fail closed. The updater backs up the binary/installer/README/unit, restores the previous binary and restarts it on any failure, and leaves `.update-commit` unchanged so the next run retries. Release `v1.23` remains published for rollback, and the upgrade only touches an active ePro service.
+- **Verification:** the release asset re-download matched both pins; the new binary answered a local TXT probe with the documented EDNS0 `FORMERR`; a 12-case harness covered success, vendor failure, checksum mismatch, and already-installed. The real vendor `install.sh` is byte-identical to the one exercised end-to-end in Fix 548/550. Live deployment is pending.

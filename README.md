@@ -1250,11 +1250,12 @@ What it does:
   and the update changes the version, that detected live version is also
   recorded in `.install-commit` as the install baseline. The target remains
   pinned in `update.sh`; currently
-  `0296e220e5da5a397f7d134e9e87eb8c3ec7f901` (Fix 551, with the ePro-only SlowDNS
-  menu, hardened installer/menu failure handling, the last legacy server
-  references removed from backup/restore and system info, and the log-cap
-  helper in both payloads so fresh installs do not need an update and no PPTP
-  path in either installer). It fetches 110 files
+  `7ed572133af2e872f679a5250756521eaf080070` (Fix 552, with the ePro-only
+  SlowDNS menu, the HC-only 8.1.5.942 server upgrade, hardened
+  installer/menu failure handling, the last legacy server references removed
+  from backup/restore and system info, and the log-cap helper in both payloads
+  so fresh installs do not need an update and no PPTP path in either
+  installer). It fetches 110 files
   on full and 98 on lite, including `quota-xhttp`, `kill-xhttp`, every
   `extend-*`, `xray-add-client`, the shared `limit-ip-common` sampler and
   `log-caps` helper, and the maintenance scripts that no longer carry a
@@ -1264,8 +1265,12 @@ What it does:
   The same updater is used on `sg1.rohcuan.dpdns.org`,
   `id1.rohcuan.dpdns.org`, and `id2.rohcuan.dpdns.org`; it detects the
   edition and live version on each host instead of assuming a hostname.
-  SlowDNS is ePro-only; the updater refreshes `menu-slowdns` but does not
-  touch the running service or its keys. It also runs marker-guarded
+  SlowDNS is ePro-only; the updater refreshes `menu-slowdns` and upgrades an
+  active `slowdns.service` from the pinned `v8.1.5.942` package, preserving
+  the key pair, `nsdomain`, and `slowdns.env`. A failed upgrade restores the
+  previous binary and does not advance `.update-commit`; a stopped service is
+  skipped until it is started and the updater is rerun. It also runs
+  marker-guarded
   live-state migrations: restore the `simpang32` quota/IP limit,
   neutralize the published default Xray credentials, archive and truncate
   the accumulated root mailbox, remove the template client anchors after
