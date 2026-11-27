@@ -1248,8 +1248,8 @@ What it does:
   and the update changes the version, that detected live version is also
   recorded in `.install-commit` as the install baseline. The target remains
   pinned in `update.sh`; currently
-  `6c7ad69401e6f7b441f4343401ee05d94bae69b7` (the `1588e9f` Fix 552 payload
-  plus the docs-only marker sync, with the ePro-only
+  `5232d69d2c870042fa0407ee8c475fc1413f7d57` (the `1588e9f` Fix 552 payload
+  plus the installer-only Fix 554 cleanup and marker sync, with the ePro-only
   SlowDNS menu, the HC-only 8.1.5.942 installer pin, hardened
   installer/menu failure handling, the last legacy server references removed
   from backup/restore and system info, and the log-cap helper in both payloads
