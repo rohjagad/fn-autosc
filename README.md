@@ -1248,7 +1248,8 @@ What it does:
   and the update changes the version, that detected live version is also
   recorded in `.install-commit` as the install baseline. The target remains
   pinned in `update.sh`; currently
-  `1588e9f5fcc0ad7af167f5d4c59974d82e868cd0` (Fix 552, with the ePro-only
+  `6c7ad69401e6f7b441f4343401ee05d94bae69b7` (the `1588e9f` Fix 552 payload
+  plus the docs-only marker sync, with the ePro-only
   SlowDNS menu, the HC-only 8.1.5.942 installer pin, hardened
   installer/menu failure handling, the last legacy server references removed
   from backup/restore and system info, and the log-cap helper in both payloads
@@ -1259,7 +1260,11 @@ What it does:
   `log-caps` helper, and the maintenance scripts that no longer carry a
   license gate;
   the updater restarts every active `quota-*` service after installing the
-  new daemons.
+  new daemons. A re-run whose target is already recorded exits without
+  changes; use `bash update.sh <commit> --force` to re-apply the same tree.
+  `.update-commit` records the deployed tree, so a docs-only commit can be
+  used as the target to sync the live marker without changing payload
+  behavior.
   The same updater is used on `sg1.rohcuan.dpdns.org`,
   `id1.rohcuan.dpdns.org`, and `id2.rohcuan.dpdns.org`; it detects the
   edition and live version on each host instead of assuming a hostname.
