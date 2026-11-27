@@ -54,6 +54,14 @@ if [ -z "${STY:-}" ] && [ -z "${TMUX:-}" ] && [ -t 0 ] && [ -t 1 ] && [ "${FN_NO
 fi
 # -------------------------------------------------------------------------
 
+# The screen/tmux child runs the re-fetched /root/fn-install.sh copy. Remove
+# it on any exit, including authorization failures; the hosted URL remains the
+# canonical entry point. Do not set this in the parent, which exits as soon as
+# screen/tmux starts and could delete the file before the child opens it.
+if { [ -n "${STY:-}" ] || [ -n "${TMUX:-}" ]; } && [ "$0" = "/root/fn-install.sh" ]; then
+    trap 'rm -f /root/fn-install.sh' EXIT
+fi
+
 if grep -q "bullseye" /etc/os-release 2>/dev/null; then
     if ! grep -qs "deb.debian.org/debian.*bullseye" /etc/apt/sources.list /etc/apt/sources.list.d/* 2>/dev/null; then
         echo "deb http://deb.debian.org/debian bullseye main contrib non-free" >> /etc/apt/sources.list
@@ -202,3 +210,8 @@ request
 }
 
 rere
+
+# Fallback cleanup for a direct/non-session run of the re-fetched copy.
+if [ "$0" = "/root/fn-install.sh" ]; then
+    rm -f /root/fn-install.sh
+fi

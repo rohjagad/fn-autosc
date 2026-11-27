@@ -342,3 +342,7 @@ service xl2tpd restart 2>/dev/null
 touch /etc/funny/.l2tp
 rm -f /root/ipsec.sh
 rm -f /root/l2tp.sh
+
+# /opt/src is only a build workspace for the CentOS libreswan source; remove
+# it when empty so a Debian install leaves no stray directory behind.
+rmdir /opt/src 2>/dev/null || true

@@ -86,8 +86,19 @@ echo ""
 # Menginstall Core
 xver="25.3.6"
 bash -c "$(curl -L --max-time 60 https://raw.githubusercontent.com/rohjagad/Xray-install/main/install-release.sh)" @ install -u www-data --version $xver
+
+# The upstream installer starts a generic xray.service with its own
+# /usr/local/etc/xray/config.json. The panel runs xray@<transport> with
+# /etc/xray/json/<transport>.json, so stop and remove the generic unit and
+# its default config; otherwise the process survives as a not-found unit.
+systemctl stop xray.service 2>/dev/null || true
+systemctl disable xray.service 2>/dev/null || true
+pkill -f '/usr/local/bin/xray run -config /usr/local/etc/xray/config.json' 2>/dev/null || true
 rm -fr /etc/systemd/system/xray.service
 rm -fr /etc/systemd/system/xray.service.d
+rm -f /usr/local/etc/xray/config.json
+rmdir /usr/local/etc/xray 2>/dev/null || true
+systemctl daemon-reload
 rm -fr /etc/systemd/system/xray@.service
 rm -fr /etc/systemd/system/xray@.service.d
 cat> /etc/systemd/system/xray@.service << MLBB
