@@ -537,7 +537,7 @@ no Cloudflare-only header anywhere, zero `grpcRealIp` remnants in tree or test b
 ## 36. The Updater Starts From the Live Version Marker
 
 - **Component:** `update.sh`.
-- **Decision:** the starting version is read at runtime from `/etc/funny/.update-commit` (last applied update), then `/etc/funny/.install-commit` (fresh install). Empty and `Unknown` markers are skipped, and the documented `6b967af` live v1.23 value is only a fallback when neither marker is usable. The target stays pinned at the latest deployable commit (currently `5556e2b327744656e04b352b6a64950dbeb8be00`, Fix 530).
+- **Decision:** the starting version is read at runtime from `/etc/funny/.update-commit` (last applied update), then `/etc/funny/.install-commit` (fresh install). Empty and `Unknown` markers are skipped, and the documented `6b967af` live v1.23 value is only a fallback when neither marker is usable. The target stays pinned at the latest deployable commit (currently `5232d69d2c870042fa0407ee8c475fc1413f7d57`, the installer-only Fix 554 marker sync).
 - **Reason:** the full-file updater does not need a Git ancestry walk, but the header, startup line, and `UPDATE SUCCESS` message must report the actual live version. A hardcoded `5c48741` became stale once the live box moved to the v1.23 marker.
 - **Safety:** `FROM` is display/history only; it is never used to fetch files. A malformed marker cannot change which files are downloaded, verified, or installed, and the existing `Already at $TARGET` check still compares only `TARGET`.
 
@@ -761,6 +761,6 @@ no Cloudflare-only header anywhere, zero `grpcRealIp` remnants in tree or test b
 
 - **Component:** `update.sh`, `README.md`.
 - **Decision:** every live payload change is delivered by running the pinned `update.sh`. SlowDNS package selection is code in `installer/slowdns.sh`; a fresh install or intentional reinstall applies it. The installer, release assets, and manual file copies are not a substitute for `update.sh` on a live payload.
-- **Marker sync:** a docs-only commit may be used as `TARGET` to move `.update-commit` to the latest tree; the payload bytes are unchanged and the run still goes through `update.sh`. This was done on 27-Nov-2026 (`3099b81`, target `6c7ad69`) after the Fix 552 payload.
+- **Marker sync:** a docs-only or installer-only commit may be used as `TARGET` to move `.update-commit` to the latest tree; the runtime payload bytes are unchanged and the run still goes through `update.sh`. This was done on 27-Nov-2026 (`3099b81`, target `6c7ad69`) after the Fix 552 payload, and again with updater `5f57138` (target `5232d69`) after the installer-only Fix 554 cleanup.
 - **Reason:** the updater downloads every payload file from the pinned commit, verifies syntax, fix markers, and binary fingerprints, backs up replaced files, and records `.update-commit`. A manual copy bypasses those checks and makes the live version marker inaccurate.
 - **Safety:** do not hand-edit `/usr/bin`, `/etc/funny`, or `/etc/slowdns` on a live host. A rollback restores from `/root/fn-update-backup-*`, and the next payload delivery still goes through `update.sh`.
