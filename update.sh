@@ -60,6 +60,15 @@
 # and the system info screen; those paths now restart slowdns and show UDP 53
 # only.
 #
+# Fix 552: ePro released the HC-only 8.1.5.942 SlowDNS server.  update.sh now
+# upgrades an active SlowDNS install from the pinned fn-autosc-miscellaneous
+# release, verifies the tarball and binary hashes, and runs the vendor
+# installer with the existing slowdns.env, server.key, server.pub, and
+# nsdomain.  A failed upgrade restores the previous binary and leaves
+# .update-commit unchanged so the next run retries.  HTTP Custom build 934 and
+# older must update the app to 8.1.5.942 before connecting; the new server
+# deliberately rejects the old client handshake.
+#
 # Verified against the three live full-edition hosts:
 #   sg1.rohcuan.dpdns.org  (64.120.94.62)
 #   id1.rohcuan.dpdns.org  (103.210.69.33)
@@ -802,6 +811,96 @@ remove_unused_pptpd() {
     fi
 }
 
+# Fix 552: ePro's HC-only 8.1.5.942 server replaces the 8.0.10.914 build.
+# Only an active ePro service is upgraded; the vendor installer reuses
+# slowdns.env, server.key, server.pub, and nsdomain.  The tarball and binary
+# are pinned, and a failed install restores the previous binary and restarts
+# it before the updater advances .update-commit.  Older HTTP Custom builds
+# (934 and below) stop working against the new package by design; the
+# operator must update the app to 8.1.5.942 before reconnecting.
+SLOWDNS_PKG_RELEASE="v8.1.5.942"
+SLOWDNS_PKG_URL="https://github.com/rohjagad/fn-autosc-miscellaneous/releases/download/${SLOWDNS_PKG_RELEASE}/slowdns-linux-amd64.tar.gz"
+SLOWDNS_PKG_SHA256="a0799f9a3cfb9b5a7633af4d8c38dede50e89f0c33e2f5ad42b8c3ad1ae97895"
+SLOWDNS_PKG_BIN_SHA256="4a455c89e219cc7d045beaf425f3870a023056bbe593aeb9be55f2f2948f98b7"
+
+_restore_slowdns_binary() {
+    local dir="/etc/slowdns" bkp="$BACKUP/slowdns"
+    [ -f "$bkp/slowdns" ] && install -m 0755 "$bkp/slowdns" "$dir/slowdns" 2>/dev/null || true
+    [ -f "$bkp/install.sh" ] && install -m 0755 "$bkp/install.sh" "$dir/install.sh" 2>/dev/null || true
+    [ -f "$bkp/README.epro.md" ] && install -m 0644 "$bkp/README.epro.md" "$dir/README.epro.md" 2>/dev/null || true
+    [ -f "$bkp/slowdns.service" ] && cp -f "$bkp/slowdns.service" /etc/systemd/system/slowdns.service 2>/dev/null || true
+    systemctl daemon-reload 2>/dev/null || true
+    systemctl restart slowdns.service 2>/dev/null || true
+}
+
+upgrade_slowdns_package() {
+    local dir="/etc/slowdns"
+    local bin="$dir/slowdns" envf="$dir/slowdns.env"
+    local tmp="" archive="" log="" cur=""
+    local bkp="$BACKUP/slowdns"
+    [ -x "$bin" ] || return 0
+    [ -s "$envf" ] || return 0
+    if ! systemctl is-active --quiet slowdns.service 2>/dev/null; then
+        echo "SlowDNS: service is not active; package upgrade skipped (start it and rerun)."
+        return 0
+    fi
+    cur=$(sha256sum "$bin" 2>/dev/null | awk '{print $1}')
+    if [ "$cur" = "$SLOWDNS_PKG_BIN_SHA256" ]; then
+        echo "SlowDNS: HC $SLOWDNS_PKG_RELEASE package already installed."
+        fix_marker .fix552-slowdns-815 2>/dev/null || true
+        return 0
+    fi
+    tmp=$(mktemp -d) || { echo "SlowDNS: cannot create a temporary directory." >&2; return 1; }
+    archive="$tmp/slowdns-linux-amd64.tar.gz"
+    log="$tmp/install.log"
+    if ! fetch "$SLOWDNS_PKG_URL" "$archive" 600; then
+        echo "SlowDNS: could not download $SLOWDNS_PKG_URL; old binary kept." >&2
+        rm -rf "$tmp"; return 1
+    fi
+    if [ "$(sha256sum "$archive" | awk '{print $1}')" != "$SLOWDNS_PKG_SHA256" ]; then
+        echo "SlowDNS: package checksum mismatch; old binary kept." >&2
+        rm -rf "$tmp"; return 1
+    fi
+    if ! tar -xzf "$archive" -C "$tmp" 2>/dev/null; then
+        echo "SlowDNS: cannot extract the package; old binary kept." >&2
+        rm -rf "$tmp"; return 1
+    fi
+    if [ ! -x "$tmp/slowdns" ] || [ ! -f "$tmp/install.sh" ] || \
+       [ "$(sha256sum "$tmp/slowdns" | awk '{print $1}')" != "$SLOWDNS_PKG_BIN_SHA256" ]; then
+        echo "SlowDNS: package contents do not match the pin; old binary kept." >&2
+        rm -rf "$tmp"; return 1
+    fi
+    mkdir -p "$bkp" || { echo "SlowDNS: cannot create the rollback backup." >&2; rm -rf "$tmp"; return 1; }
+    cp -f "$bin" "$bkp/slowdns" || { echo "SlowDNS: cannot back up the current binary." >&2; rm -rf "$tmp"; return 1; }
+    [ -f "$dir/install.sh" ] && cp -f "$dir/install.sh" "$bkp/install.sh" 2>/dev/null || true
+    [ -f "$dir/README.epro.md" ] && cp -f "$dir/README.epro.md" "$bkp/README.epro.md" 2>/dev/null || true
+    [ -f /etc/systemd/system/slowdns.service ] && cp -f /etc/systemd/system/slowdns.service "$bkp/slowdns.service" 2>/dev/null || true
+    if ! install -m 0755 "$tmp/slowdns" "$bin" || ! install -m 0755 "$tmp/install.sh" "$dir/install.sh"; then
+        echo "SlowDNS: cannot install the new package; restoring the previous binary." >&2
+        _restore_slowdns_binary
+        rm -rf "$tmp"; return 1
+    fi
+    [ -f "$tmp/README.md" ] && install -m 0644 "$tmp/README.md" "$dir/README.epro.md" 2>/dev/null || true
+    if ! "$dir/install.sh" install >"$log" 2>&1; then
+        tail -n 20 "$log" >&2 2>/dev/null || true
+        echo "SlowDNS: vendor installer failed; restoring the previous binary." >&2
+        _restore_slowdns_binary
+        rm -rf "$tmp"; return 1
+    fi
+    if ! systemctl is-active --quiet slowdns.service 2>/dev/null || \
+       [ "$(sha256sum "$bin" 2>/dev/null | awk '{print $1}')" != "$SLOWDNS_PKG_BIN_SHA256" ]; then
+        echo "SlowDNS: new service did not verify; restoring the previous binary." >&2
+        _restore_slowdns_binary
+        rm -rf "$tmp"; return 1
+    fi
+    fix_log "fix552: upgraded SlowDNS to HC $SLOWDNS_PKG_RELEASE (binary $SLOWDNS_PKG_BIN_SHA256)"
+    fix_marker .fix552-slowdns-815 2>/dev/null || true
+    echo "SlowDNS: upgraded to the HC $SLOWDNS_PKG_RELEASE package; keys and nsdomain preserved."
+    echo "SlowDNS: HTTP Custom build 934 and older must update to 8.1.5.942 before connecting."
+    rm -rf "$tmp"
+    return 0
+}
+
 # Found 541: deleting a rotated domain now removes its certificate and
 # ACME/Certbot state.  Existing boxes can still carry SAN names that were
 # removed from the list earlier, so rebuild the self-signed certificate from
@@ -1067,6 +1166,14 @@ patch_haproxy_logging() {
     echo "HAProxy 777 logging enabled (client IP evidence for ssh-online)."
 }
 patch_haproxy_logging
+
+# Fix 552: upgrade the SlowDNS server package before the version marker is
+# advanced.  A failure restores the old binary and leaves .update-commit
+# unchanged so the next run retries.
+if ! upgrade_slowdns_package; then
+    echo "SlowDNS package upgrade failed; payload files are installed but .update-commit was not advanced." >&2
+    exit 1
+fi
 
 # Found 523: fresh installs before the fix wrote "Unknown" to .install-commit
 # because the GitHub API endpoint was wrong. FROM is the best known live

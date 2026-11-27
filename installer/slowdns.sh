@@ -105,9 +105,15 @@ echo ""
 # wrong or truncated download fail closed.  The package is amd64-only.  A
 # failed reinstall leaves a running service untouched until the old unit is
 # actually stopped and backed up.
-SLOWDNS_EPRO_RELEASE="v1.23"
+#
+# Fix 552: v8.1.5.942 is ePro's HC-only build and the matching server for
+# HTTP Custom 8.1.5.942.  Build 934 and older clients must update the app
+# before connecting.  The vendor install.sh and the saved keys/nsdomain are
+# reused, so an in-place update keeps the same public key and nameserver.
+SLOWDNS_EPRO_RELEASE="v8.1.5.942"
 SLOWDNS_EPRO_URL="https://github.com/rohjagad/fn-autosc-miscellaneous/releases/download/${SLOWDNS_EPRO_RELEASE}/slowdns-linux-amd64.tar.gz"
-SLOWDNS_EPRO_SHA256="6aa42455cd142953270a342e3c24c9c946fdc4ef3cad1e5c02f27711ffc6ad41"
+SLOWDNS_EPRO_SHA256="a0799f9a3cfb9b5a7633af4d8c38dede50e89f0c33e2f5ad42b8c3ad1ae97895"
+SLOWDNS_EPRO_BIN_SHA256="4a455c89e219cc7d045beaf425f3870a023056bbe593aeb9be55f2f2948f98b7"
 SLOWDNS_DIR="/etc/slowdns"
 SLOWDNS_TMP=""
 SLOWDNS_UDP_ADDR=""
@@ -148,6 +154,9 @@ download_epro_package() {
     tar -xzf "$archive" -C "$SLOWDNS_TMP" 2>/dev/null || { fail "cannot extract the package"; return 1; }
     [ -x "$SLOWDNS_TMP/slowdns" ] || { fail "package has no slowdns binary"; return 1; }
     [ -f "$SLOWDNS_TMP/install.sh" ] || { fail "package has no install.sh"; return 1; }
+    if [ "$(sha256sum "$SLOWDNS_TMP/slowdns" | awk '{print $1}')" != "$SLOWDNS_EPRO_BIN_SHA256" ]; then
+        fail "package binary checksum mismatch"; return 1
+    fi
     return 0
 }
 
@@ -386,7 +395,8 @@ install_slowdns() {
         systemctl restart ssh 2>/dev/null || systemctl restart sshd 2>/dev/null || true
     fi
 
-    say "installed; service is active on UDP 53."
+    say "installed; service is active on UDP 53 (HC 8.1.5.942 build)."
+    say "HTTP Custom build 934 and older must update the app before connecting."
     echo "Nameserver : $SLOWDNS_DOMAIN"
     echo "Public key : $(cat "$pub" 2>/dev/null)"
     echo "Service    : systemctl status slowdns"

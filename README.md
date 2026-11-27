@@ -825,13 +825,16 @@ nothing useful. The installer asks for this name and stores it in
 name must still resolve or delegate to the VPS at the DNS provider.
 
 **Package:** `slowdns-linux-amd64.tar.gz` from the
-`rohjagad/fn-autosc-miscellaneous` release (tag `v1.23`), pinned to SHA-256
-`6aa42455cd142953270a342e3c24c9c946fdc4ef3cad1e5c02f27711ffc6ad41`.
-The installer verifies the checksum, extracts `slowdns`, `install.sh`, and the
-vendor README into `/etc/slowdns`, then runs the vendor installer. The package
-is **amd64-only**: a fresh arm64 install skips SlowDNS. The vendor binary is
-UPX-packed, so the pinned SHA-256 is the integrity control; review ePro's
-redistribution terms before mirroring the package.
+`rohjagad/fn-autosc-miscellaneous` release (tag `v8.1.5.942`), pinned to
+tarball SHA-256
+`a0799f9a3cfb9b5a7633af4d8c38dede50e89f0c33e2f5ad42b8c3ad1ae97895`
+and binary SHA-256
+`4a455c89e219cc7d045beaf425f3870a023056bbe593aeb9be55f2f2948f98b7`.
+The installer verifies both checksums, extracts `slowdns`, `install.sh`, and
+the vendor README into `/etc/slowdns`, then runs the vendor installer. The
+package is **amd64-only**: a fresh arm64 install skips SlowDNS. The vendor
+binary is UPX-packed, so the pinned SHA-256 is the integrity control; review
+ePro's redistribution terms before mirroring the package.
 
 If `systemd-resolved` already owns `127.0.0.53:53`, the installer binds the
 VPS's primary public IP instead of the wildcard, so the service starts without
@@ -843,10 +846,14 @@ served automatically; free UDP 53 and rerun if you need the wildcard listener.
 configurations. Key management and the nameserver are configured from
 `menu-slowdns`.
 
-**HTTP Custom 8.1.x:** the server's `auto` record type answers all six DNS
-QTYPEs (TXT, NULL, CNAME, NS, MX, SRV), supports multiple `sessions`, custom
-`qname_limit` and `edns_limit`, and `auto_calibrate`. It runs with
-`-diagnostics` so the client's bounded DNS path probes work.
+**HTTP Custom 8.1.5.942:** this is ePro's **HC-only** build and the matching
+server for that client. It requires HTTP Custom 8.1.5.942 or newer; build 934
+and older must update the app before connecting, because the old handshake is
+no longer served. Existing profiles, keys, and configs remain usable. The
+server's `auto` record type tries TXT, NULL, ST, FT, RX, and VX; it supports
+multiple `sessions`, custom `qname_limit` and `edns_limit`, and
+`auto_calibrate`. It runs with `-diagnostics` so the client's bounded DNS path
+probes work.
 
 **EDNS0 is required.** The ePro server rejects a plain 512-byte query with
 `FORMERR` and expects an EDNS0 payload of at least 1232 bytes. HTTP Custom sends
@@ -858,12 +865,19 @@ the service, and shows the public key. A failed restart is reported, and a
 failed key renewal restores the previous key pair. Backup/restore and the
 System info screen also use `slowdns`/UDP 53.
 
-**Updating:** `update.sh` refreshes the `menu-slowdns` payload; it does not
-touch the running service or the key pair.
+**Updating:** `update.sh` refreshes the `menu-slowdns` payload and, when
+`slowdns.service` is active, upgrades the server from the pinned
+`v8.1.5.942` release. It verifies the tarball and binary hashes, then runs the
+vendor installer with the existing `slowdns.env`, `server.key`, `server.pub`,
+and `nsdomain`. A failed upgrade restores the previous binary and leaves
+`.update-commit` at the old value so the next run retries. A stopped SlowDNS
+service is left untouched until it is started and the updater is rerun; the
+menu payload is still refreshed.
 
-**Note:** ePro labels this package for HTTP Custom 8.0.10.914. It is the
-official server for the same SlowDNS line, but test `ST`, `FT`, `sessions`, and
-custom limits with HTTP Custom 8.1.5 on a staging VPS before rolling it out.
+**Note:** `v8.1.5.942` is HC-only and changes the client requirement: every
+user must update HTTP Custom to 8.1.5.942 (build 934 and older are rejected).
+Roll out one host first and keep release `v1.23` available for rollback. The
+public key and nameserver do not change.
 
 ### WireGuard — `menu-wg`
 
