@@ -3394,7 +3394,7 @@ Section 35's four-check rule applied to Fix 417:
 - **Files:** `installer/slowdns.sh`, `update.sh`, `README.md`.
 - **Change:** the ePro SlowDNS package moves from the 8.0.10.914 build (`v1.23`, tarball SHA-256 `6aa42455...`) to the HC-only 8.1.5.942 build (`v8.1.5.942`, tarball `a0799f9a3cfb9b5a7633af4d8c38dede50e89f0c33e2f5ad42b8c3ad1ae97895`, binary `4a455c89e219cc7d045beaf425f3870a023056bbe593aeb9be55f2f2948f98b7`).
 - **Intended behavior changes:**
-  1. **Client requirement.** HTTP Custom 8.1.5.942 or newer is required; build 934 and older clients are rejected by the new server. Existing profiles, keys, and nameservers remain usable after the app update.
+  1. **Client requirement.** HTTP Custom 8.1.5.942 is required; build 934 and older clients are rejected by the new server. Existing profiles, keys, and nameservers remain usable after the app update.
   2. **Record types.** The default `-record-type auto` covers TXT, NULL, ST, FT, RX, and VX. A manual `-record-type` in `slowdns.env` is preserved by the vendor installer, so operators who pinned one type must set `auto` (or a new number) before reinstalling.
   3. **Updater behavior.** `update.sh` now upgrades an active `slowdns.service` instead of only refreshing `menu-slowdns`. A stopped service is skipped until it is started and the updater is rerun.
 - **Preserved:** `server.key`, `server.pub`, `nsdomain`, `slowdns.env`, the public key embedded in client configs, the UDP 53 listener, the upstream address, the vendor unit, and the `-diagnostics` flag.

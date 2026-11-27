@@ -847,7 +847,7 @@ configurations. Key management and the nameserver are configured from
 `menu-slowdns`.
 
 **HTTP Custom 8.1.5.942:** this is ePro's **HC-only** build and the matching
-server for that client. It requires HTTP Custom 8.1.5.942 or newer; build 934
+server for that client. It requires HTTP Custom 8.1.5.942; build 934
 and older must update the app before connecting, because the old handshake is
 no longer served. Existing profiles, keys, and configs remain usable. The
 server's `auto` record type tries TXT, NULL, ST, FT, RX, and VX; it supports
